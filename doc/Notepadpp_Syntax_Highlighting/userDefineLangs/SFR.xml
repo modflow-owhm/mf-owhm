@@ -1,0 +1,64 @@
+<NotepadPlus>
+    <UserLang name="SFR" ext="sfr sfr2 SFR.txt" udlVersion="2.1">
+        <Settings>
+            <Global caseIgnored="yes" allowFoldOfComments="no" foldCompact="no" forcePureLC="0" decimalSeparator="0" />
+            <Prefix Keywords1="no" Keywords2="no" Keywords3="no" Keywords4="no" Keywords5="no" Keywords6="no" Keywords7="no" Keywords8="no" />
+        </Settings>
+        <KeywordLists>
+            <Keywords name="Comments">00# 01 02 03 04</Keywords>
+            <Keywords name="Numbers, prefix1"></Keywords>
+            <Keywords name="Numbers, prefix2"></Keywords>
+            <Keywords name="Numbers, extras1"></Keywords>
+            <Keywords name="Numbers, extras2"></Keywords>
+            <Keywords name="Numbers, suffix1">.</Keywords>
+            <Keywords name="Numbers, suffix2"></Keywords>
+            <Keywords name="Numbers, range">D+ D- D E+ E- E</Keywords>
+            <Keywords name="Operators1">[ ] { } ,</Keywords>
+            <Keywords name="Operators2"></Keywords>
+            <Keywords name="Folders in code1, open"></Keywords>
+            <Keywords name="Folders in code1, middle"></Keywords>
+            <Keywords name="Folders in code1, close"></Keywords>
+            <Keywords name="Folders in code2, open">BEGIN&#x000D;&#x000A;&quot;BEGIN OPTION&quot;&#x000D;&#x000A;&quot;BEGIN OPTIONS&quot;&#x000D;&#x000A;&#x000D;&#x000A;&quot;BEGIN LINEFEED&quot;&#x000D;&#x000A;&#x000D;&#x000A;&quot;BEGIN BUDGET_GROUP&quot;&#x000D;&#x000A;&quot;BEGIN BUDGET_GROUPS&quot;&#x000D;&#x000A;&#x000D;&#x000A;&quot;BEGIN TIME_SERIES&quot; &#x000D;&#x000A;&quot;BEGIN TIME_SERIES_INPUT&quot;&#x000D;&#x000A;&quot;BEGIN TIME&quot;&#x000D;&#x000A;&quot;BEGIN TIME SERIES&quot;&#x000D;&#x000A;&quot;BEGIN TIME SERIES INPUT&quot;</Keywords>
+            <Keywords name="Folders in code2, middle"></Keywords>
+            <Keywords name="Folders in code2, close">&#x000D;&#x000A;END&#x000D;&#x000A;&quot;END OPTION&quot;&#x000D;&#x000A;&quot;END OPTIONS&quot;&#x000D;&#x000A;&#x000D;&#x000A;&quot;END LINEFEED&quot;&#x000D;&#x000A;&#x000D;&#x000A;&quot;END BUDGET_GROUP&quot;&#x000D;&#x000A;&quot;END BUDGET_GROUPS&quot;&#x000D;&#x000A;&#x000D;&#x000A;&quot;END TIME_SERIES&quot; &#x000D;&#x000A;&quot;END TIME_SERIES_INPUT&quot;&#x000D;&#x000A;&quot;END TIME&quot;&#x000D;&#x000A;&quot;END TIME SERIES&quot;&#x000D;&#x000A;&quot;END TIME SERIES INPUT&quot;</Keywords>
+            <Keywords name="Folders in comment, open"></Keywords>
+            <Keywords name="Folders in comment, middle"></Keywords>
+            <Keywords name="Folders in comment, close"></Keywords>
+            <Keywords name="Keywords1"></Keywords>
+            <Keywords name="Keywords2">BLOCK_INCLUDE&#x000D;&#x000A;(FREE)&#x000D;&#x000A;</Keywords>
+            <Keywords name="Keywords3">PARAMETER&#x000D;&#x000A;INSTANCES &#x000D;&#x000A;CBC&#x000D;&#x000A;&#x000D;&#x000A;TABFILE&#x000D;&#x000A;&#x000D;&#x000A;NO_PRINT&#x000D;&#x000A;NOPRINT&#x000D;&#x000A;&#x000D;&#x000A;PRINT_GW_FLOW_RESIDUAL&#x000D;&#x000A;PRINT_SEGMENT_GW_FLOW_RESIDUAL&#x000D;&#x000A;&#x000D;&#x000A;HEAD_RELAXATION&#x000D;&#x000A;HEAD_PREDICTOR_FACTOR&#x000D;&#x000A;&#x000D;&#x000A;NO_BUDGET_RECALCULATE_FLOW&#x000D;&#x000A;BUDGET_RECALCULATE_FLOW&#x000D;&#x000A;&#x000D;&#x000A;FIX_STREAM_BOTTOM&#x000D;&#x000A;&#x000D;&#x000A;AUTOMATIC_NEGATIVE_ITMP&#x000D;&#x000A;&#x000D;&#x000A;NO_REACH_LAYER_CHANGE&#x000D;&#x000A;REACH_LAYER_CHANGE_DEEPER&#x000D;&#x000A;&#x000D;&#x000A;REACHINPUT&#x000D;&#x000A;REACH_INPUT&#x000D;&#x000A;TRANSROUTE&#x000D;&#x000A;LOSSFACTOR&#x000D;&#x000A;IFACE&#x000D;&#x000A;TABFILES&#x000D;&#x000A;&#x000D;&#x000A;AUXILIARY&#x000D;&#x000A;AUX&#x000D;&#x000A;&#x000D;&#x000A;TABPRINT&#x000D;&#x000A;DBFILE&#x000D;&#x000A;&#x000D;&#x000A;MAX_STAGE&#x000D;&#x000A;MAX_FLOW</Keywords>
+            <Keywords name="Keywords4">OPEN/CLOSE&#x000D;&#x000A;DATAUNIT&#x000D;&#x000A;DATAFILE&#x000D;&#x000A;INTERNAL&#x000D;&#x000A;EXTERNAL&#x000D;&#x000A;STATIC&#x000D;&#x000A;TRANSIENT&#x000D;&#x000A;ARRAY&#x000D;&#x000A;LIST&#x000D;&#x000A;CONSTANT&#x000D;&#x000A;&#x000D;&#x000A;INT&#x000D;&#x000A;FLOAT&#x000D;&#x000A;CHAR&#x000D;&#x000A;IF&#x000D;&#x000A;LAI&#x000D;&#x000A;ULOAD&#x000D;&#x000A;&#x000D;&#x000A;SF&#x000D;&#x000A;BUFFER&#x000D;&#x000A;SPLIT&#x000D;&#x000A;&#x000D;&#x000A;SFAC&#x000D;&#x000A;&apos;SFAC AREA&apos;&#x000D;&#x000A;&apos;SFAC CAPACITY&apos;&#x000D;&#x000A;&apos;SFAC STORAGE&apos;&#x000D;&#x000A;&apos;SFAC ELEVATION&apos;&#x000D;&#x000A;&apos;SFAC DISCHARGE&apos;&#x000D;&#x000A;&#x000D;&#x000A;INPUT&#x000D;&#x000A;&#x000D;&#x000A;DATE&#x000D;&#x000A;STRESS_PERIOD&#x000D;&#x000A;TIME_STEP&#x000D;&#x000A;ITERATION&#x000D;&#x000A;&#x000D;&#x000A;DIM&#x000D;&#x000A;DIMENSION&#x000D;&#x000A;&#x000D;&#x000A;COMPACT&#x000D;&#x000A;&#x000D;&#x000A;FUNCTION&#x000D;&#x000A;EXPRESSION&#x000D;&#x000A;&#x000D;&#x000A;CHD&#x000D;&#x000A;DRT&#x000D;&#x000A;DRN&#x000D;&#x000A;ETS&#x000D;&#x000A;EVT&#x000D;&#x000A;GHB&#x000D;&#x000A;Q&#x000D;&#x000A;RCH &#x000D;&#x000A;RIV &#x000D;&#x000A;SFR&#x000D;&#x000A;STR&#x000D;&#x000A;&#x000D;&#x000A;SRNB&#x000D;&#x000A;NDHC&#x000D;&#x000A;SFE&#x000D;&#x000A;SFV&#x000D;&#x000A;COME&#x000D;&#x000A;COMV &#x000D;&#x000A;DSTR&#x000D;&#x000A;DHC&#x000D;&#x000A;DCME&#x000D;&#x000A;DCMV&#x000D;&#x000A;SDZ&#x000D;&#x000A;&#x000D;&#x000A;REALTIME&#x000D;&#x000A;SIMTIME&#x000D;&#x000A;IGNORE_TIME&#x000D;&#x000A;STEP_FUNCTION&#x000D;&#x000A;SPBASIS&#x000D;&#x000A;TABEQN</Keywords>
+            <Keywords name="Keywords5">GENERIC_OUTPUT&#x000D;&#x000A;GENERIC_INPUT&#x000D;&#x000A;GENERIC_OUTPUT_OptKey&#x000D;&#x000A;GENERIC_INPUT_OptKey&#x000D;&#x000A;OUT_DIR&#x000D;&#x000A;NTERM &#x000D;&#x000A;OUTER_START&#x000D;&#x000A;ISEG &#x000D;&#x000A;Option&#x000D;&#x000A;FeedFile&#x000D;&#x000A;NUMTAB&#x000D;&#x000A;MAXROW&#x000D;&#x000A;FACTOR&#x000D;&#x000A;RELAX&#x000D;&#x000A;</Keywords>
+            <Keywords name="Keywords6"></Keywords>
+            <Keywords name="Keywords7">&quot;Scott Boyce&quot;&#x000D;&#x000A;Scott</Keywords>
+            <Keywords name="Keywords8"></Keywords>
+            <Keywords name="Delimiters">00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21 22 23</Keywords>
+        </KeywordLists>
+        <Styles>
+            <WordsStyle name="DEFAULT" fgColor="000000" bgColor="FFFFFF" fontName="Consolas" fontStyle="0" fontSize="11" nesting="0" />
+            <WordsStyle name="COMMENTS" fgColor="000000" bgColor="FFFFFF" fontName="" fontStyle="0" fontSize="11" nesting="0" />
+            <WordsStyle name="LINE COMMENTS" fgColor="808080" bgColor="FFFFFF" fontName="Courier New" fontStyle="0" fontSize="11" nesting="0" />
+            <WordsStyle name="NUMBERS" fgColor="000000" bgColor="FFFFFF" fontName="Consolas" fontStyle="1" fontSize="11" nesting="0" />
+            <WordsStyle name="KEYWORDS1" fgColor="008000" bgColor="FFFFFF" fontName="Verdana" fontStyle="1" fontSize="10" nesting="0" />
+            <WordsStyle name="KEYWORDS2" fgColor="FF0000" bgColor="FFFFFF" fontName="Consolas" fontStyle="1" fontSize="11" nesting="0" />
+            <WordsStyle name="KEYWORDS3" fgColor="0000FF" bgColor="FFFFFF" fontName="Consolas" fontStyle="1" fontSize="11" nesting="0" />
+            <WordsStyle name="KEYWORDS4" fgColor="000000" bgColor="FFFFFF" fontName="Consolas" fontStyle="1" fontSize="11" nesting="0" />
+            <WordsStyle name="KEYWORDS5" fgColor="000000" bgColor="FFFFFF" fontName="Consolas" fontStyle="2" fontSize="11" nesting="0" />
+            <WordsStyle name="KEYWORDS6" fgColor="000000" bgColor="FFFFFF" fontName="" fontStyle="0" fontSize="11" nesting="0" />
+            <WordsStyle name="KEYWORDS7" fgColor="400080" bgColor="FFFFFF" fontName="Verdana" fontStyle="1" fontSize="10" nesting="0" />
+            <WordsStyle name="KEYWORDS8" fgColor="008000" bgColor="FFFFFF" fontName="Verdana" fontStyle="1" fontSize="10" nesting="0" />
+            <WordsStyle name="OPERATORS" fgColor="000000" bgColor="FFFFFF" fontName="Consolas" fontStyle="0" fontSize="11" nesting="0" />
+            <WordsStyle name="FOLDER IN CODE1" fgColor="008000" bgColor="FFFFFF" fontName="Verdana" fontStyle="1" fontSize="10" nesting="0" />
+            <WordsStyle name="FOLDER IN CODE2" fgColor="008000" bgColor="FFFFFF" fontName="Verdana" fontStyle="1" fontSize="10" nesting="0" />
+            <WordsStyle name="FOLDER IN COMMENT" fgColor="000000" bgColor="FFFFFF" fontName="" fontStyle="0" fontSize="11" nesting="0" />
+            <WordsStyle name="DELIMITERS1" fgColor="000000" bgColor="FFFFFF" fontName="Consolas" fontStyle="1" fontSize="11" nesting="0" />
+            <WordsStyle name="DELIMITERS2" fgColor="000000" bgColor="FFFFFF" fontName="" fontStyle="0" fontSize="11" nesting="0" />
+            <WordsStyle name="DELIMITERS3" fgColor="000000" bgColor="FFFFFF" fontName="" fontStyle="0" nesting="0" />
+            <WordsStyle name="DELIMITERS4" fgColor="000000" bgColor="FFFFFF" fontName="" fontStyle="0" nesting="0" />
+            <WordsStyle name="DELIMITERS5" fgColor="000000" bgColor="FFFFFF" fontName="" fontStyle="0" nesting="0" />
+            <WordsStyle name="DELIMITERS6" fgColor="000000" bgColor="FFFFFF" fontName="" fontStyle="0" nesting="0" />
+            <WordsStyle name="DELIMITERS7" fgColor="000000" bgColor="FFFFFF" fontName="" fontStyle="0" nesting="0" />
+            <WordsStyle name="DELIMITERS8" fgColor="000000" bgColor="FFFFFF" fontName="" fontStyle="0" nesting="0" />
+        </Styles>
+    </UserLang>
+</NotepadPlus>

@@ -1,0 +1,32 @@
+{
+	"folders": [
+		{
+			"path": "../.."
+		}
+	],
+	"settings": {
+		"breadcrumbs.enabled": true,
+		"workbench.activityBar.visible": true,
+		"workbench.sideBar.location": "left",
+		"files.associations": {
+			"*.fortls": "json",
+			"*.code-workspace": "json"
+		},
+		"fortran.symbols": [
+			"function",
+			"subroutine"
+		],
+		"fortran.provideCompletion": false,
+		"fortran.provideSymbols": false,
+		"fortran.provideHover": false,
+		"fortran.preferredCase": "uppercase",
+		"fortran.includePaths": [
+			"obj"
+		],
+		"fortran.linterExtraArgs": [
+			"-Wall -Jobj"
+		],
+		"explorer.confirmDelete": false,
+		"window.zoomLevel": 0
+	}
+}

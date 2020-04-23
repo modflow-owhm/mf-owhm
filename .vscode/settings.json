@@ -1,0 +1,81 @@
+{
+    "ProgramName.Debug":   "mf-owhm-debug",
+    "ProgramName.Release": "mf-owhm",
+    "ProgramName.Ext":     ".exe",
+
+    "ProgramName.Dir":     "bin",
+    "ProgramSRC.Dir":      "src",
+    "ProgramOBJ.Dir":      "obj",
+    
+    "terminal.integrated.shell.windows": "C:\\Windows\\System32\\cmd.exe",
+
+    "editor.fontLigatures": true,
+    "editor.mouseWheelZoom": true,
+    "editor.minimap.enabled": false,
+    "editor.multiCursorModifier": "ctrlCmd",
+
+    "diffEditor.ignoreTrimWhitespace": false,
+
+    "breadcrumbs.enabled": true,
+
+    "workbench.activityBar.visible": true,
+    "workbench.sideBar.location": "left",
+
+    "files.associations": {
+        "*.fortls": "json",
+        "*.code-workspace": "json"
+    },
+
+    "files.exclude": {
+        "**/ide": true,
+        "**.mod": true,
+        "**.o": true
+    },
+
+    "[fortran]": {
+        "editor.acceptSuggestionOnEnter": "off"
+    },
+
+    "[FortranFreeForm]": {
+        "editor.acceptSuggestionOnEnter": "off"
+    },
+
+    "[fortran_fixed-form]": {
+        "editor.rulers": [
+            6,
+            73
+        ],
+        "editor.acceptSuggestionOnEnter": "off"
+    },
+
+    "fortran.symbols": [ "function", "subroutine"],
+    "fortran.provideCompletion": false,
+    "fortran.provideSymbols": false,
+    "fortran.provideHover": false,
+    "fortran.preferredCase": "uppercase",
+    "fortran.includePaths": ["obj"],
+    "fortran.linterExtraArgs": ["-Wall -Jobj"],
+    
+    "explorer.confirmDelete": false,
+
+    "window.zoomLevel": 0,
+
+    "fortran-ls.variableHover": true,
+    "fortran-ls.maxLineLength": 2048,
+    "fortran-ls.maxCommentLineLength": 2048,
+    //"fortran-ls.executablePath": "C:\\Anaconda3\\Scripts\\fortls",
+
+    //"code-runner.saveFileBeforeRun": true,
+    //"code-runner.saveAllFilesBeforeRun": true,
+    //"code-runner.ignoreSelection": true,
+    //"code-runner.clearPreviousOutput": true,
+    //"code-runner.runInTerminal": true,
+    //"code-runner.respectShebang": false,
+    //"code-runner.executorMapByFileExtension": {
+    //    ".f90": "fortran",
+    //    ".f": "fortran",
+    //    ".fpp": "fortran",
+    //    ".py": "python"
+    //},
+
+}

@@ -1,0 +1,11 @@
+---
+title: MF-OWHM - Changelog.md and CHANGELOG_Features.md
+subtitle: from https://code.usgs.gov/modflow/mf-owhm
+author: Scott E. Boyce <seboye@usgs.gov>
+abstract: |
+     
+  `Changelog.md` and `CHANGELOG_Features.md` files from the [MODFLOW-OWHM code repository](https://code.usgs.gov/modflow/mf-owhm)
+  converted to pdf using [pandoc](https://pandoc.org/) and [LuaLaTex](http://www.luatex.org/) pdf-engine 
+  and package management with [MiKTeX](https://miktex.org/).
+lang: en-US
+...

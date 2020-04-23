@@ -1,0 +1,147 @@
+[
+  {
+    "version": "2.0.0",
+    "status": "Production",
+
+    "date": {
+      "metadataLastUpdated": "2020-04-23"
+    },
+
+    "downloadURL":   "https://code.usgs.gov/modflow/mf-owhm/-/archive/2.0.0/mf-owhm-2.0.0.zip",
+    "disclaimerURL": "https://code.usgs.gov/modflow/mf-owhm/-/raw/2.0.0/DISCLAIMER.md",
+
+    "contact": {
+      "name": "Scott E. Boyce",
+      "email": "seboyce@usgs.gov",
+      "URL": "https://www.usgs.gov/staff-profiles/scott-boyce"
+    },
+
+    "repositoryURL": "https://code.usgs.gov/modflow/mf-owhm.git",
+    "vcs": "git",
+
+    "permissions": {
+      "usageType": "openSource",
+      "licenses": [
+        {
+          "name": "Apache License, Version 2.0",
+          "URL":  "https://code.usgs.gov/modflow/mf-owhm/-/raw/2.0.0/LICENSE.md"
+        }
+      ]
+    },
+
+    "name": "MODFLOW One-Water Hydrologic Flow Model (MF-OWHM) Conjunctive Use and Integrated Hydrologic Flow Modeling Software",
+    
+    "description":  "MODFLOW based Conjunctive Use and Integrated Hydrologic Modeling Software. Simulates groundwater flow, surface water flow, and land use in a supply and demand framework.",
+    
+    "organization": "U.S. Geological Survey",
+    "homepageURL":  "https://www.usgs.gov/software/modflow-one-water-hydrologic-flow-model-conjunctive-use-simulation-software-mf-owhm",
+    
+    "laborHours": 99999,
+
+    "tags": [
+      "MF",
+      "MODFLOW",
+      "CONJUNCTIVE USE",
+      "INTEGRATED HYDROLOGIC MODEL",
+      "GROUNDWATER",
+      "LAND USE",
+      "MF2005",
+      "MODFLOW-2005",
+      "MODFLOW 2005",
+      "MODFLOW-FMP",
+      "MODFLOW FMP",
+      "MODFLOW-NWT",
+      "MODFLOW NWT",
+      "MODFLOW-CFP",
+      "MODFLOW CFP",
+      "MODFLOW 6",
+      "MODFLOW6",
+      "MF6",
+      "MODFLOW-LGR",
+      "MODFLOW LGR",
+      "FARM PROCESS",
+      "USGS",
+      "CAWSC",
+      "Sustainable Groundwater Management Act",
+      "SGMA",
+      "AG",
+      "BCF",
+      "BFH",
+      "CFP",
+      "CHD",
+      "CHOB",
+      "COC",
+      "CRCH",
+      "DE4",
+      "DIS",
+      "DRN",
+      "DROB",
+      "DRT",
+      "DRTOB",
+      "ETS",
+      "EVT",
+      "FHB",
+      "FMP",
+      "GAGE",
+      "GBOB",
+      "GHB",
+      "GMG",
+      "GWM",
+      "HFB",
+      "HUF",
+      "HYD",
+      "IBS",
+      "KDEP",
+      "LAK",
+      "LMT",
+      "LPF",
+      "LVDA",
+      "MNW1",
+      "MNW2",
+      "MNWI",
+      "MULT",
+      "NWT",
+      "OC",
+      "PCG",
+      "PCGN",
+      "PVAL",
+      "RCH",
+      "RES",
+      "RIP",
+      "RIV",
+      "RVOB",
+      "SFR",
+      "SIP",
+      "SLANG",
+      "SSUB",
+      "STR",
+      "SUB",
+      "SWI",
+      "SWO",
+      "SWR",
+      "SWT",
+      "UPW",
+      "UZF",
+      "WEL",
+      "WEL1",
+      "ZONE"
+    ],
+
+    "languages": [
+      "English",
+      "FORTRAN",
+      "FORTRAN77",
+      "FORTRAN90",
+      "FORTRAN95",
+      "FORTRAN2003",
+      "FORTRAN2008",
+      "FORTRAN2018",
+      "C",
+      "ANSI C",
+      "batch",
+      "bash",
+      "shell"
+    ]
+
+  }
+]

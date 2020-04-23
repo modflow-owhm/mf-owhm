@@ -1,0 +1,117 @@
+// Makefile
+// ${workspaceFolder} the path of the folder opened in VS Code
+// ${file} the current opened file
+// ${fileBasename} the current opened file's basename
+// ${fileDirname} the current opened file's dirname
+// ${fileExtname} the current opened file's extension
+// ${cwd} the task runner's current working directory on startup
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Debug gfortran",
+            "type": "shell",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "command": "make compile",
+            "args": [
+                "CONFIG=debug",
+                "F90=gfortran",
+                "CC=gcc",
+                "src_dir=${config:ProgramSRC.Dir}",
+                "int_dir=${config:ProgramOBJ.Dir}/vscode_gfortran_debug",
+                "bin_out=${config:ProgramName.Dir}/${config:ProgramName.Debug}${config:ProgramName.Ext}"
+            ],
+            "presentation": {
+                "reveal": "always",
+                "clear": true,
+                "focus": true,
+                "panel": "shared"
+            },
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Clean OBJ Folder",
+            "type": "shell",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "command": "make cleanOBJ",
+            "args": [],
+            "presentation": {
+                "reveal": "always",
+                "clear": true,
+                "focus": true,
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Reset",
+            "type": "shell",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "command": "make reset",
+            "args": [],
+            "presentation": {
+                "reveal": "always",
+                "clear": true,
+                "focus": true,
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Debug Rebuild gfortran",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "Clean OBJ Folder",
+                "Debug gfortran "
+            ]
+        },
+        {
+            "label": "Release gfortran",
+            "type": "shell",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "command": "make",
+            "args": [
+                "CONFIG=release",
+                "F90=gfortran",
+                "CC=gcc",
+                "src_dir=${config:ProgramSRC.Dir}",
+                "int_dir=${config:ProgramOBJ.Dir}/vscode_gfortran_release",
+                "bin_out=${config:ProgramName.Dir}/${config:ProgramName.Release}${config:ProgramName.Ext}"
+            ],
+            "presentation": {
+                "reveal": "always",
+                "clear": true,
+                "focus": true,
+                "panel": "shared"
+            },
+        },
+    ]
+}
+
+// "command": "(cd ${workspaceFolder} && make)",
+// "args": [
+//     "PROG=${workspaceFolder}/${config:ProgramName.Dir}/${config:ProgramName.Debug}${config:ProgramName.Ext}",
+//     "OPTCFG=debug",
+//     "F90=gfortran",
+//     "CC=gcc",
+//     "STATIC=yes",
+//     "DBLE=yes",
+//     "USEGMG=no",
+//     "bin=${workspaceFolder}/${config:ProgramName.Dir}",
+//     "src_dir=${workspaceFolder}/${config:ProgramSRC.Dir}",
+//     "int=${workspaceFolder}/${config:ProgramOBJ.Dir}/vscode_gfortran_debug",
+// ],

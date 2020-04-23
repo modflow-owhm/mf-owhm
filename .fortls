@@ -1,0 +1,38 @@
+{
+  "source_dirs": [
+    "src",
+    "src/cfp",
+    "src/fmp",
+    "src/gmg_c",
+    "src/modflow_base",
+    "src/nwt",
+    "src/slang",
+    "src/swo",
+    "src/utility_lib",
+    "obj"
+  ],
+
+  "excl_paths": [
+    "bin", 
+    "download", 
+    "doxygen", 
+    "icon", 
+    "img", 
+    "lib", 
+    "ide" 
+  ],
+
+  "excl_suffixes": [
+    ".u2d", 
+    ".vfproj", 
+    ".sln", 
+    ".txt", 
+    ".md", 
+    ".json", 
+    ".gitignore", 
+    ".gitattributes"
+  ],
+  
+  "lowercase_intrinsics": false,
+  "debug_log": false
+}
