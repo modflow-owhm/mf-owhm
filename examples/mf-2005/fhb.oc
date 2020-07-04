@@ -1,0 +1,30 @@
+# fhb
+# MODFLOW-2005 Example problem documented in: 
+#   Harbaugh, A.W., 2005, MODFLOW-2005, the U.S. Geological Survey modular ground-water model -- the Ground-Water Flow Process: U.S. Geological Survey Techniques and Methods 6-A16.
+#   Harbaugh, A.W., Banta, E.R., Hill, M.C. and McDonald, M.G., 2000, MODFLOW-2000, The U.S. Geological Survey Modular Ground-Water Model - User Guide to Modularization Concepts and the Ground-Water Flow Process: U.S Geological Survey Open-File Report 2000-92, 121 p., https://doi.org/10.3133/ofr200092
+#   Leake and Lilly, 1997, Documentation of computer program (FHB1) for assignment of transient specified-flow and specified-head boundaries in applications of the modular finite-diference ground-water flow model (MODFLOW): U.S Geological Survey Open-File Report 97-571       , 50 p., https://doi.org/10.3133/ofr97571
+# 
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+         9         9        41        41
+         0         1         0         1         # Time Step 1
+         0         0         1         0         # Layer 1
+        -2         1         0         1         # Time Step 2
+        -3         1         0         1         # Time Step 3 
+        -4         1         0         1         # Time Step 4 
+        -5         1         0         1         # Time Step 5 
+        -6         1         0         1         # Time Step 6 
+        -7         1         0         1         # Time Step 7 
+        -8         1         0         1         # Time Step 8
+        -9         1         0         1         # Time Step 9
+       -10         1         0         1         # Time Step 10
+       -11         1         0         1         # Time Step 11
+       -12         1         0         1         # Time Step 12
+       -13         1         0         1         # Time Step 13
+       -14         1         0         1         # Time Step 14
+       -15         1         0         1         # Time Step 15
+       -16         1         0         1         # Time Step 16
+       -17         1         0         1         # Time Step 17 
+       -18         1         0         1         # Time Step 18
+       -19         1         0         1         # Time Step 19
+        20         1         0         1         # Time Step 20
+         1         0         1         0

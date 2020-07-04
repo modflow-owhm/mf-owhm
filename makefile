@@ -8,7 +8,7 @@
 #
 #    Boyce, S.E., Hanson, R.T., Ferguson, I., Schmid, W., Henson, W., Reimann, T., Mehl, S.M., and Earll, M.M., 2020, One-Water Hydrologic Flow Model: A MODFLOW based conjunctive-use simulation software: U.S. Geological Survey Techniques and Methods 6–A60, 435 p., https://doi.org/10.3133/tm6A60
 #
-#    Boyce, S.E., 2020, MODFLOW One-Water Hydrologic Flow Model (MF-OWHM) Conjunctive Use and Integrated Hydrologic Flow Modeling Software, version 2.0.x: U.S. Geological Survey Software Release, https://doi.org/10.5066/P9P8I8GS
+#    Boyce, S.E., 2021, MODFLOW One-Water Hydrologic Flow Model (MF-OWHM) Conjunctive Use and Integrated Hydrologic Flow Modeling Software, version 2.0.1: U.S. Geological Survey Software Release, https://doi.org/10.5066/P9P8I8GS
 #
 # PROVIDED AS IS WITHOUT WARRANTY OR HELP.
 #
@@ -74,7 +74,7 @@ USEGMG := NO
 COMPILER := INTEL
 #
 # Define the Fortran Compiler
-#                    ===> For example: gfortran, gfortran-9, ifort
+#                    ===> For example: gfortran, gfortran-9, gfortran-10, ifort
 #                         ****Note that the version of your Fortran compiler may not support all of the Fortran Standards (viz 2003, 2008, 2015)
 F90 := ifort
 #
@@ -120,7 +120,8 @@ cfp_src_dir :=$(src_dir)/cfp
 fmp_src_dir :=$(src_dir)/fmp
 gmg_src_dir :=$(src_dir)/gmg_c
 mfb_src_dir :=$(src_dir)/modflow_base
-utl_src_dir :=$(src_dir)/utility_lib
+nwt_src_dir :=$(src_dir)/nwt
+bif_src_dir :=$(src_dir)/bif_lib
 #
 #src_slg := $(src)/slang
 #src_swo := $(src)/swo
@@ -142,7 +143,7 @@ int_dir ?=./obj/$(obj_dir)
 #
 VPATH := $(src_dir)     $(int_dir)     $(bin_dir)     \
          $(cfp_src_dir) $(fmp_src_dir) $(gmg_src_dir) \
-         $(mfb_src_dir) $(nwt_src_dir) $(utl_src_dir) \
+         $(mfb_src_dir) $(nwt_src_dir) $(bif_src_dir) \
          $(slg_src_dir) $(swo_src_dir)
 #
 #
@@ -175,109 +176,169 @@ ifeq ($(strip $(shell echo $(USEGMG) | tr a-z A-Z)), YES)
   GMG_f_file := gmg_dble.f
 else
   GMG_src    := 
-  GMG_f_file := 0_nogmg.f
+  GMG_f_file := 0_nogmg.f90
 endif
 #
 #############################################################################
 #
 # Define the Fortran source files.
 #
-util_src:= \
-           $(utl_src_dir)/generic_open_module.fpp   \
-           $(utl_src_dir)/all_util.f90
+bif_src:= \
+           $(bif_src_dir)/constants.f90                                      \
+           $(bif_src_dir)/alloc_interface.f90                                \
+           $(bif_src_dir)/array_data_types_instruction.f90                   \
+           $(bif_src_dir)/binary_heap_instruction.f90                        \
+           $(bif_src_dir)/calendar_functions.f90                             \
+           $(bif_src_dir)/cast_to_string_interface.f90                       \
+           $(bif_src_dir)/console_commander.f90                              \
+           $(bif_src_dir)/integer_array_builder.f90                          \
+           $(bif_src_dir)/integer_queue_instruction.f90                      \
+           $(bif_src_dir)/is_routine_interface.f90                           \
+           $(bif_src_dir)/linked_list_instruction.f90                        \
+           $(bif_src_dir)/log2_interface.f90                                 \
+           $(bif_src_dir)/name_id_interface.f90                              \
+           $(bif_src_dir)/num2str_interface.f90                              \
+           $(bif_src_dir)/parse_word_interface.f90                           \
+           $(bif_src_dir)/random_routines_interface.f90                      \
+           $(bif_src_dir)/relax_interface.f90                                \
+           $(bif_src_dir)/set_array_interface.f90                            \
+           $(bif_src_dir)/simple_timer_instruction.f90                       \
+           $(bif_src_dir)/sort_interface.f90                                 \
+           $(bif_src_dir)/xy_grid_coordinate_interface.f90                   \
+           $(bif_src_dir)/date_operator_instruction.f90                      \
+           $(bif_src_dir)/error_interface.f90                                \
+           $(bif_src_dir)/line_writer_interface.f90                          \
+           $(bif_src_dir)/path_interface.f90                                 \
+           $(bif_src_dir)/position_interface.f90                             \
+           $(bif_src_dir)/post_key_sub.f90                                   \
+           $(bif_src_dir)/util_interface.f90                                 \
+           $(bif_src_dir)/EquationParser.f90                                 \
+           $(bif_src_dir)/generic_open_interface.fpp                         \
+           $(bif_src_dir)/is_ascii_interface.f90                             \
+           $(bif_src_dir)/obs_group_interpolator.f90                         \
+           $(bif_src_dir)/warning_type_instruction.f90                       \
+           $(bif_src_dir)/adjacency_list_instruction_and_shortest_path.f90   \
+           $(bif_src_dir)/file_incrementer_interface.f90                     \
+           $(bif_src_dir)/file_io_interface.f90                              \
+           $(bif_src_dir)/string_routines.f90                                \
+           $(bif_src_dir)/cycling_text_file_interface.f90                    \
+           $(bif_src_dir)/generic_input_file_instruction.f90                 \
+           $(bif_src_dir)/generic_output_file_instruction.f90                \
+           $(bif_src_dir)/generic_block_reader_instruction.f90               \
+           $(bif_src_dir)/IXJ_instruction.f90                                \
+           $(bif_src_dir)/lookup_table_instruction.f90                       \
+           $(bif_src_dir)/time_series_file_instruction.f90                   \
+           $(bif_src_dir)/uload_and_sfac_interface.f90                       \
+           $(bif_src_dir)/transient_file_reader_instruction.f90              \
+           $(bif_src_dir)/list_array_input_interface.f90                     \
+           $(bif_src_dir)/sub_block_input_interface.f90
 #
 main_src:= \
-           $(mfb_src_dir)/globalmodule.f90           \
-           $(mfb_src_dir)/gwfBASmodule.f90           \
-           $(mfb_src_dir)/gwflgrmodule.f             \
-           $(mfb_src_dir)/lmt8_module.f              \
-           $(mfb_src_dir)/mach_mod.f90               \
-           $(mfb_src_dir)/mhc7.f                     \
-           $(mfb_src_dir)/modules.f90                \
-           $(mfb_src_dir)/ExpressionParser.f90       \
-           $(mfb_src_dir)/pak_prop_interface.f90     \
-           $(mfb_src_dir)/utility_pack_specific.f90  \
-           $(mfb_src_dir)/linefeed.f90               \
-           $(mfb_src_dir)/tabfilemodule.f            \
-           $(mfb_src_dir)/gwfsfrmodule.f90           \
-           $(mfb_src_dir)/gwflakmodule.f90           \
-           $(mfb_src_dir)/gwfuzfmodule.f90           \
-           $(mfb_src_dir)/sfr_name_to_seg.f90        \
-           $(mfb_src_dir)/utl7_sav_subroutines.f90   \
-           $(mfb_src_dir)/NWT1_module.f90            \
-           $(mfb_src_dir)/NWT1_gmres.f90             \
-           $(mfb_src_dir)/NWT1_ilupc_mod.f90         \
-           $(mfb_src_dir)/NWT1_xmdlib.f              \
-           $(mfb_src_dir)/NWT1_xmd.f                 \
-           $(mfb_src_dir)/gwf2upw1.f                 \
-           $(mfb_src_dir)/NWT1_solver.f              \
-           $(gmg_src_dir)/gmg7_c_interface.f90       \
-           $(gmg_src_dir)/$(GMG_f_file)              \
-           $(mfb_src_dir)/pcg7R.f                    \
-           $(mfb_src_dir)/pcgn_solve2.f90            \
-           $(mfb_src_dir)/pcgn2.f90                  \
-           $(mfb_src_dir)/sip7.f                     \
-           $(mfb_src_dir)/gwf2bas8.f                 \
-           $(mfb_src_dir)/gwf2bcf7.f                 \
-           $(mfb_src_dir)/gwf2chd7.f                 \
-           $(mfb_src_dir)/gwf2ibs7.f                 \
-           $(mfb_src_dir)/gwf2sub7_OWHM.f            \
-           $(mfb_src_dir)/gwf2swt7.f                 \
-           $(mfb_src_dir)/de47.f                     \
-           $(mfb_src_dir)/gwf2drn7_OWHM.f            \
-           $(mfb_src_dir)/gwf2ets7.f                 \
-           $(mfb_src_dir)/gwf2evt7.f                 \
-           $(mfb_src_dir)/gwf2fhb7.f                 \
-           $(mfb_src_dir)/gwf2gag7.f                 \
-           $(mfb_src_dir)/gwf2huf7.f                 \
-           $(mfb_src_dir)/hufutl7.f                  \
-           $(mfb_src_dir)/gwf2lpf7.f                 \
-           $(mfb_src_dir)/gwf2lak7.f                 \
-           $(mfb_src_dir)/gwf2mnw17.f                \
-           $(mfb_src_dir)/gwf2mnw27.f                \
-           $(mfb_src_dir)/gwf2mnw2i7.f               \
-           $(fmp_src_dir)/FMP_Block_Interface.f90    \
-           $(fmp_src_dir)/FMP_Well_Interface.f90     \
-           $(fmp_src_dir)/fmp_global.f90             \
-           $(mfb_src_dir)/parutl7.f                  \
-           $(mfb_src_dir)/gwf2rch7.f                 \
-           $(mfb_src_dir)/gwf2res7.f                 \
-           $(mfb_src_dir)/gwf2rip4.f90               \
-           $(mfb_src_dir)/gwf2riv7_OWHM.f            \
-           $(mfb_src_dir)/gwf2sfr7_OWHM.f            \
-           $(mfb_src_dir)/gwf2str7.f                 \
-           $(mfb_src_dir)/gwf2swi27.f                \
-           $(mfb_src_dir)/gwf2swr7.f                 \
-           $(mfb_src_dir)/gwf2swr7util.f             \
-           $(mfb_src_dir)/utl7.f                     \
-           $(mfb_src_dir)/gwf2uzf1.f                 \
-           $(mfb_src_dir)/gwf2bfh2.f                 \
-           $(mfb_src_dir)/gwf2drt7.f                 \
-           $(mfb_src_dir)/gwf2ghb7_OWHM.f            \
-           $(mfb_src_dir)/gwf2hfb7_OWHM.f            \
-           $(mfb_src_dir)/gwf2hydmod71.f             \
-           $(mfb_src_dir)/obs2bas7.f                 \
-           $(mfb_src_dir)/obs2chd7.f                 \
-           $(mfb_src_dir)/obs2drn7.f                 \
-           $(mfb_src_dir)/obs2drt.f                  \
-           $(mfb_src_dir)/obs2ghb7.f                 \
-           $(mfb_src_dir)/obs2riv7.f                 \
-           $(mfb_src_dir)/solver_rp.f                \
-           $(mfb_src_dir)/gwf2wel8_OWHM.f90          \
-           $(mfb_src_dir)/gwf2wel7.f                 \
-           $(mfb_src_dir)/gwf2lgr2.f                 \
-           $(mfb_src_dir)/lmt8_OWHM.f                \
-           $(fmp_src_dir)/FMP_MAIN.f90               \
-           $(cfp_src_dir)/cfp2ar.f                   \
-           $(cfp_src_dir)/cfp2bd.f                   \
-           $(cfp_src_dir)/cfp2fm.f                   \
-           $(cfp_src_dir)/cfp2oc.f                   \
-           $(cfp_src_dir)/cfp2rp.f                   \
-           $(cfp_src_dir)/cfp2utl.f                  \
-           $(cfp_src_dir)/cfp2_TM_utl.f              \
-           $(src)OWHM_Main.f90
+           $(mfb_src_dir)/global_module.f90        \
+           $(mfb_src_dir)/openspec_module.f        \
+           $(mfb_src_dir)/bas_module.f90           \
+           $(mfb_src_dir)/lgr_module.f             \
+           $(mfb_src_dir)/lmt_module.f             \
+           $(mfb_src_dir)/mach_module.f90          \
+           $(mfb_src_dir)/mhc_module.f             \
+           $(mfb_src_dir)/expression_parser.f90    \
+           $(mfb_src_dir)/pak_prop_interface.f90   \
+           $(mfb_src_dir)/util_pack_specific.f90   \
+           $(mfb_src_dir)/linefeed.f90             \
+           $(mfb_src_dir)/tabfile_module.f         \
+           $(mfb_src_dir)/budget_group.f90         \
+           $(mfb_src_dir)/mnw2_module.f90          \
+           $(mfb_src_dir)/sfr_module.f90           \
+           $(mfb_src_dir)/lak_module.f90           \
+           $(mfb_src_dir)/uzf_module.f90           \
+           $(mfb_src_dir)/sfr_name_to_seg.f90      \
+           $(mfb_src_dir)/util_sav_subroutines.f90 \
+           $(nwt_src_dir)/nwt_module.f90           \
+           $(nwt_src_dir)/upw_module.f90           \
+           $(nwt_src_dir)/gmres_modules.f90        \
+           $(nwt_src_dir)/ilupc_mod.f90            \
+           $(nwt_src_dir)/gmres.f90                \
+           $(nwt_src_dir)/xmd_lib.f                \
+           $(nwt_src_dir)/xmd.f                    \
+           $(nwt_src_dir)/upw.f                    \
+           $(nwt_src_dir)/nwt.f                    \
+           $(nwt_src_dir)/ag.f                     \
+           $(gmg_src_dir)/gmg_c_interface.f90      \
+           $(gmg_src_dir)/$(GMG_f_file)            \
+           $(mfb_src_dir)/pcg.f                    \
+           $(mfb_src_dir)/pcgn_solve.f90           \
+           $(mfb_src_dir)/pcgn.f90                 \
+           $(mfb_src_dir)/sip.f                    \
+           $(mfb_src_dir)/bas.f                    \
+           $(mfb_src_dir)/bcf.f                    \
+           $(mfb_src_dir)/chd.f                    \
+           $(mfb_src_dir)/ibs.f                    \
+           $(mfb_src_dir)/sub.f                    \
+           $(mfb_src_dir)/swt.f                    \
+           $(mfb_src_dir)/de4.f                    \
+           $(mfb_src_dir)/drn.f                    \
+           $(mfb_src_dir)/ets.f                    \
+           $(mfb_src_dir)/evt.f                    \
+           $(mfb_src_dir)/fhb.f                    \
+           $(mfb_src_dir)/gag.f                    \
+           $(mfb_src_dir)/huf.f                    \
+           $(mfb_src_dir)/huf_utl.f                \
+           $(mfb_src_dir)/lpf.f                    \
+           $(mfb_src_dir)/lak.f                    \
+           $(mfb_src_dir)/mnw1.f                   \
+           $(mfb_src_dir)/mnw2.f                   \
+           $(mfb_src_dir)/mnw2i.f                  \
+           $(fmp_src_dir)/fmp_dimension_data.f90   \
+           $(fmp_src_dir)/allotment_data.f90       \
+           $(fmp_src_dir)/options_data.f90         \
+           $(fmp_src_dir)/output_data.f90          \
+           $(fmp_src_dir)/surface_water_data.f90   \
+           $(fmp_src_dir)/wbs_data.f90             \
+           $(fmp_src_dir)/soil_data.f90            \
+           $(fmp_src_dir)/climate_data.f90         \
+           $(fmp_src_dir)/crop_data.f90            \
+           $(fmp_src_dir)/salinity_data.f90        \
+           $(fmp_src_dir)/well_data.f90            \
+           $(fmp_src_dir)/fmp_global.f90           \
+           $(mfb_src_dir)/parutl.f                 \
+           $(mfb_src_dir)/rch.f                    \
+           $(mfb_src_dir)/res.f                    \
+           $(mfb_src_dir)/rip.f90                  \
+           $(mfb_src_dir)/riv.f                    \
+           $(mfb_src_dir)/sfr.f                    \
+           $(mfb_src_dir)/str.f                    \
+           $(mfb_src_dir)/swi2.f                   \
+           $(mfb_src_dir)/swr.f                    \
+           $(mfb_src_dir)/swr_util.f               \
+           $(mfb_src_dir)/util.f                   \
+           $(mfb_src_dir)/uzf.f                    \
+           $(mfb_src_dir)/bfh2.f                   \
+           $(mfb_src_dir)/drt.f                    \
+           $(mfb_src_dir)/ghb.f                    \
+           $(mfb_src_dir)/hfb.f                    \
+           $(mfb_src_dir)/hydmod.f                 \
+           $(mfb_src_dir)/obs2bas.f                \
+           $(mfb_src_dir)/obs2chd.f                \
+           $(mfb_src_dir)/obs2drn.f                \
+           $(mfb_src_dir)/obs2drt.f                \
+           $(mfb_src_dir)/obs2ghb.f                \
+           $(mfb_src_dir)/obs2riv.f                \
+           $(mfb_src_dir)/solver_rp.f              \
+           $(mfb_src_dir)/wel8.f                   \
+           $(mfb_src_dir)/wel7.f                   \
+           $(mfb_src_dir)/lgr.f                    \
+           $(mfb_src_dir)/lmt.f                    \
+           $(fmp_src_dir)/fmp_main_driver.f90      \
+           $(cfp_src_dir)/cfp2ar.f                 \
+           $(cfp_src_dir)/cfp2bd.f                 \
+           $(cfp_src_dir)/cfp2fm.f                 \
+           $(cfp_src_dir)/cfp2oc.f                 \
+           $(cfp_src_dir)/cfp2rp.f                 \
+           $(cfp_src_dir)/cfp2utl.f                \
+           $(cfp_src_dir)/cfp2_TM_utl.f            \
+           $(src)main.f90
 #
-owhm_src := $(GMG_src) $(util_src) $(main_src)
+owhm_src := $(GMG_src) $(bif_src) $(main_src)
 #
 obj:=  $(patsubst               %.f90, %.o,   \
          $(patsubst             %.f,   %.o,   \
@@ -306,9 +367,9 @@ endif
 ########################################################################
 #
 # Check for if Windows and set resource file for icon  -> windres ./icon/owhm_icon_win.rc  ./icon/owhm_icon_win.res
-#
+#  
 #  --> windres and gfortran can have issues so skipping makefile icon generation
-#
+#  
 ###icon_rc  := ./icon/owhm_icon_win.rc
 ###icon_res := ./icon/owhm_icon_win.res
 ####
@@ -667,7 +728,7 @@ $(int_dir)/%.o : %.for
 #
 # #############################################################################
 #
-# Supress echoing of commands
+# Suppress echoing of commands
 .SILENT: startMSG CompFlags dashes completed print-%
 #
 #

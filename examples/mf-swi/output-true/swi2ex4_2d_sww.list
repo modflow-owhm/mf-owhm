@@ -1,0 +1,3429 @@
+
+      MMMMMMM                                       MM      MMM     MM
+    MMM     MMM    MM      M   MMMMMMMM             LM     DM M     ML     MM     MMMMMMMMM  MMMMMMMM  MMMMMMMM
+   MM         MM   MMM     M   MM                    MM    MM M     M     MMMM        M      M         MM     NM
+   MM         MM   MM M    M   MM                    MM    M  MM   MM    MM  MM       M      M         MM      M
+   MM         MM   MM  M   M   MMMMMMMM               MN  MM   M   MM   MM    MM      M      MMMMMMM   MMMMMMMMM
+   MM         MM   MM   M  M   MM         MMMMMMM     MM  M    MM MM    MMMMMMMM      M      M         MM   MM
+   MM         MM   MM    M M   MM                     LM MM    NM MM   MM      MM     M      M         MM    MM
+    MM       NM    MM     MM   MM                      M M      M M   MN        MM    M      M         MM     MM
+     MMMMMMMMN     MM      M   MMMMMMMM                7MM      7MM  MN          MM   M      MMMMMMMM  MM      MM
+
+
+ MODFLOW-OWHM v2.0.01  
+
+
+                        MODFLOW
+            ONE-WATER HYDROLOGIC-FLOW MODEL
+
+    U.S. GEOLOGICAL SURVEY MODULAR FINITE-DIFFERENCE 
+           CONJUNCTIVE USE SIMULATION PROGRAM
+
+                     Version 2.0
+
+ Release: 01          4/23/2020
+
+ Includes:
+          MODFLOW-2005 Version 1.12.0   02/03/2017
+          MODFLOW-FMP  Version 4.00.0   04/23/2017
+          MODFLOW-SWR  Version 1.04.0   09/15/2016
+          MODFLOW-SWI  Version 2.00.0   07/22/2013
+          MODFLOW-LGR  Version 2.00.0   09/19/2013
+          MODFLOW-NWT  Version 1.2.0    03/01/2020
+          MODFLOW-CFP  Version 1.09.57  09/12/2017
+
+
+ OneWater Simulation Initiated at  
+
+
+ LIST FILE: ./output/swi2ex4_2d_sww.list
+      UNIT: 2
+
+OPENING DATA FILES [DATA AND DATA(BINARY)]
+
+OPENED DATA FILE ON UNIT     55 WITH FILENAME OF: ./output/swi2ex4_2d_sww.zta
+OPENED DATA FILE ON UNIT     56 WITH FILENAME OF: ./output/swi2ex4_2d_sww.swb
+OPENED DATA FILE ON UNIT     51 WITH FILENAME OF: ./output/swi2ex4_2d_sww.hds
+OPENED DATA FILE ON UNIT     52 WITH FILENAME OF: ./output/swi2ex4_2d_sww.ddn
+OPENED DATA FILE ON UNIT     53 WITH FILENAME OF: ./output/swi2ex4_2d_sww.cbc
+
+OPENING PACKAGES
+
+DIS  PACKAGE OPENED.
+BAS6 PACKAGE OPENED.
+GHB  PACKAGE OPENED.
+WEL  PACKAGE OPENED.
+LPF  PACKAGE OPENED.
+SWI  PACKAGE OPENED.
+PCG  PACKAGE OPENED.
+OC   PACKAGE OPENED.
+
+NOTIFICATION: A FILE UNIT NUMBER WAS FOUND FOR EITHER THE LIST FILE OR A PACAKGE.
+IT WILL BE USED EVEN THOUGH UNIT NUMBERS FOR THE LIST FILE AND PACKAGES ARE NOW OPTIONAL.
+[IT IS RECOMMENDED TO STILL USE A UNIT NUMBER FOR DATA and DATA(BINARY) ]
+
+
+ BAS -- BASIC PACKAGE, VERSION OWHM INPUT READ FROM UNIT    13
+ 
+MODFLOW was compiled using uniform precision (Precision => Number of meaningful digits in numbers)
+Precision of REAL and DOUBLE PRECISION variables: 15
+
+ DISCRETIZATION INPUT DATA READ FROM UNIT   11
+
+-- READING DIS PACKAGE INPUT --
+
+# swi2ex4_2d_sww
+# MODFLOW-SWI Example problem documented in:
+#   Bakker, M., Schaars, F., Hughes, J.D., Langevin, C.D., Dausman, A.M., 2013, Documentation of the seawater intrusion (SWI2) package for MODFLOW: U.S. Geological Survey Techniques and Methods 6-A46, 47 p.
+#
+#      -Comments are preceded by a # sign
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+# DIS
+
+
+*** DIS COORDINATE SYSTEM NOT SEPECIFIED ***
+DEFAULT VALUES APPLIED ARE 0° ROTATION
+WITH THE ORIGIN (0,0) LOCATED AT THE MODEL'S LOWER LEFT CORNER
+
+
+
+
+DIS COORDINATE SYSTEM SEPECIFIED WITH:
+GRID ROTATION OF 0.0°
+WITH THE ORIGIN LOCATED AT THE OUTER MOST CORNER OF MODEL CELL [61,1] WITH:
+X-COORDINATE:0.0
+Y-COORDINATE:0.0
+    2 LAYERS        61 ROWS        61 COLUMNS
+      3 STRESS PERIOD(S) IN SIMULATION
+ MODEL TIME UNIT IS DAYS
+ MODEL LENGTH UNIT IS METERS
+  Confining bed flag for each layer:
+   0   0
+
+                     DELR =   50.0000    
+
+                     DELC =   50.0000    
+
+ TOP ELEVATION OF LAYER 1 =  -10.0000    
+
+   MODEL LAYER BOTTOM EL. =  -30.0000     FOR LAYER   1
+
+   MODEL LAYER BOTTOM EL. =  -50.0000     FOR LAYER   2
+
+
+ STRESS PERIOD     LENGTH       TIME STEPS     MULTIPLIER FOR DELT    SS FLAG  (OPTIONAL TIME STEP LENGTH)
+ ---------------------------------------------------------------------------------------------------
+        1         73000.00       1000                  1.00000         SS
+        2         4380.000        120                  1.00000         SS
+        3         6570.000        180                  1.00000         SS
+
+ STEADY-STATE SIMULATION
+
+
+
+
+-- READING BAS PACKAGE INPUT --
+
+# swi2ex4_2d_sww
+# MODFLOW-SWI Example problem documented in:
+#   Bakker, M., Schaars, F., Hughes, J.D., Langevin, C.D., Dausman, A.M., 2013, Documentation of the seawater intrusion (SWI2) package for MODFLOW: U.S. Geological Survey Techniques and Methods 6-A46, 47 p.
+#
+# Input modified for MODFLOW-OWHM by adding a BAS OPTIONS BLOCK with output options.
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+# Basic package
+
+
+ THE BAS PACKAGE NOW DEFAULTS TO FREE FORMAT.
+ USE OPTION "NOFREE" TO DISABLE FREE FORMAT.
+
+ NOW READING BAS OPTIONS
+
+ FOUND OPTION: NOCBC
+    NO CELL-BY-CELL FLOWS WILL BE WRITTEN.
+
+ FOUND OPTION: BUDGETDB
+ FOUND OPTION: CUMULATIVE_HEAD_CHANGE
+    THIS OPTION IS ONLY USEFUL FOR MODEL RESULT COMPARISON WITH DIFFERENT CODE COMPARISONS.
+
+ FOUND OPTION: PRINT_HEAD    SP    TS   FILE
+                              3   180   ./output/swi2ex4_2d_sww_Head.txt
+
+ THE MAX STORAGE FOR PROPERTIES DEFINED BY PARAMETERS IS: 
+ MAX STORAGE OF PARAMETERS (MXPAR)  IS       2000
+ MAX STORAGE OF INSTANCES  (MXINST) IS      50000
+ MAX STORAGE OF CLUSTERS   (MXCLST) IS    2000000
+
+
+           BOUNDARY ARRAY =              1 FOR LAYER   1
+
+           BOUNDARY ARRAY =              1 FOR LAYER   2
+
+ AQUIFER HEAD WILL BE SET TO -999.99 AT ALL NO-FLOW NODES (IBOUND=0).
+
+
+
+
+                       INITIAL HEAD FOR LAYER   1
+ READING ON UNIT   13 WITH FORMAT: (61G15.6)           
+
+
+
+                       INITIAL HEAD FOR LAYER   2
+ READING ON UNIT   13 WITH FORMAT: (61G15.6)           
+
+-- READING OC PACKAGE INPUT --
+
+# swi2ex4_2d_sww
+# MODFLOW-SWI Example problem documented in:
+#   Bakker, M., Schaars, F., Hughes, J.D., Langevin, C.D., Dausman, A.M., 2013, Documentation of the seawater intrusion (SWI2) package for MODFLOW: U.S. Geological Survey Techniques and Methods 6-A46, 47 p.
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+# OC
+
+
+ OUTPUT CONTROL IS SPECIFIED ONLY AT TIME STEPS FOR WHICH OUTPUT IS DESIRED
+ HEAD PRINT FORMAT CODE IS   0    DRAWDOWN PRINT FORMAT CODE IS   0
+ HEADS WILL BE SAVED ON UNIT   51    DRAWDOWNS WILL BE SAVED ON UNIT   52  WATER BUDGETs WILL BE SAVED ON UNIT 
+
+ LPF -- LAYER-PROPERTY FLOW PACKAGE, VERSION OWHM
+         INPUT READ FROM UNIT   15
+
+-- READING LPF PACKAGE INPUT --
+
+# swi2ex4_2d_sww
+# MODFLOW-SWI Example problem documented in:
+#   Bakker, M., Schaars, F., Hughes, J.D., Langevin, C.D., Dausman, A.M., 2013, Documentation of the seawater intrusion (SWI2) package for MODFLOW: U.S. Geological Survey Techniques and Methods 6-A46, 47 p.
+#
+#      -Comments are preceded by a # sign
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+# LPF
+
+ HEAD AT CELLS THAT CONVERT TO DRY= -1.00000E+30
+ No named parameters
+
+   LAYER FLAGS:
+ LAYER       LAYTYP        LAYAVG         CHANI        LAYVKA        LAYWET
+ ---------------------------------------------------------------------------
+    1             0             0     1.000E+00             0             0
+    2             0             0     1.000E+00             0             0
+
+   INTERPRETATION OF LAYER FLAGS:
+                        INTERBLOCK     HORIZONTAL    DATA IN
+         LAYER TYPE   TRANSMISSIVITY   ANISOTROPY   ARRAY VKA   WETTABILITY
+ LAYER      (LAYTYP)      (LAYAVG)       (CHANI)      (LAYVKA)      (LAYWET)
+ ---------------------------------------------------------------------------
+    1      CONFINED      HARMONIC     1.000E+00    VERTICAL K  NON-WETTABLE
+    2      CONFINED      HARMONIC     1.000E+00    VERTICAL K  NON-WETTABLE
+
+ WETTING CAPABILITY IS NOT ACTIVE IN ANY LAYER
+
+    HYD. COND. ALONG ROWS =   10.0000     FOR LAYER   1
+
+      VERTICAL HYD. COND. =  0.200000     FOR LAYER   1
+
+    HYD. COND. ALONG ROWS =   10.0000     FOR LAYER   2
+
+      VERTICAL HYD. COND. =  0.200000     FOR LAYER   2
+
+-- READING WEL PACKAGE INPUT --
+
+# swi2ex4_2d_sww
+# MODFLOW-SWI Example problem documented in:
+#   Bakker, M., Schaars, F., Hughes, J.D., Langevin, C.D., Dausman, A.M., 2013, Documentation of the seawater intrusion (SWI2) package for MODFLOW: U.S. Geological Survey Techniques and Methods 6-A46, 47 p.
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+# WEL
+
+
+WEL -- WELL PACKAGE, VERSION OWHM INPUT READ FROM UNIT 20
+
+ No named parameters
+
+ NO TABFILE SPECIFIED FOR PACKAGE WEL  
+
+
+ NO LINEFEEDS ARE SPECIFIED FOR PACKAGE WEL  
+
+
+MAXIMUM OF 1683 ACTIVE WELLS AT ONE TIME
+
+
+0 Well parameters
+
+ GHB -- GENERAL-HEAD BOUNDARY PACKAGE, VERSION OWHM
+         INPUT READ FROM UNIT   23
+
+-- READING GHB PACKAGE INPUT --
+
+# swi2ex4_2d_sww
+# MODFLOW-SWI Example problem documented in:
+#   Bakker, M., Schaars, F., Hughes, J.D., Langevin, C.D., Dausman, A.M., 2013, Documentation of the seawater intrusion (SWI2) package for MODFLOW: U.S. Geological Survey Techniques and Methods 6-A46, 47 p.
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+# GHB
+
+ No named parameters
+
+ NO TABFILE SPECIFIED FOR PACKAGE GHB  
+
+
+ NO LINEFEEDS ARE SPECIFIED FOR PACKAGE GHB  
+
+ MAXIMUM OF   2040 ACTIVE GHB CELLS AT ONE TIME
+
+
+     0 GHB parameters
+
+ PCG -- CONJUGATE-GRADIENT SOLUTION PACKAGE, VERSION OWHM
+
+-- READING PCG PACKAGE INPUT --
+
+# swi2ex4_2d_sww
+# MODFLOW-SWI Example problem documented in:
+#   Bakker, M., Schaars, F., Hughes, J.D., Langevin, C.D., Dausman, A.M., 2013, Documentation of the seawater intrusion (SWI2) package for MODFLOW: U.S. Geological Survey Techniques and Methods 6-A46, 47 p.
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+# PCG
+
+ MAXIMUM OF    100 CALLS OF SOLUTION ROUTINE
+ MAXIMUM OF     50 INTERNAL ITERATIONS PER CALL TO SOLUTION ROUTINE
+ MATRIX PRECONDITIONING TYPE :    1
+
+
+
+                                    SOLUTION BY THE CONJUGATE-GRADIENT METHOD
+                                   -------------------------------------------
+                    MAXIMUM NUMBER OF CALLS TO PCG ROUTINE =      100
+                        MAXIMUM ITERATIONS PER CALL TO PCG =       50
+                               MATRIX PRECONDITIONING TYPE =        1
+        RELAXATION FACTOR (ONLY USED WITH PRECOND. TYPE 1) =    0.10000E+01
+ PARAMETER OF POLYNOMIAL PRECOND. = 2 (2) OR IS CALCULATED :        0
+                         HEAD CHANGE CRITERION FOR CLOSURE =    0.10000E-05
+                     RESIDUAL CHANGE CRITERION FOR CLOSURE =    0.30000E-02
+            PCG HEAD AND RESIDUAL CHANGE PRINTOUT INTERVAL =      999
+     PRINTING FROM SOLVER IS LIMITED(1) OR SUPPRESSED (>1) =        3
+                            STEADY-STATE DAMPING PARAMETER =    0.10000E+01
+                               TRANSIENT DAMPING PARAMETER =    0.10000E+01
+
+-- READING SWI PACKAGE INPUT --
+
+# swi2ex4_2d_sww
+# MODFLOW-SWI Example problem documented in:
+#   Bakker, M., Schaars, F., Hughes, J.D., Langevin, C.D., Dausman, A.M., 2013, Documentation of the seawater intrusion (SWI2) package for MODFLOW: U.S. Geological Survey Techniques and Methods 6-A46, 47 p.
+#
+#      -Comments are preceded by a # sign
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+# Salt Water Intrusion (SWI2) package
+#--Dataset 1
+
+
+
+ SWI2 -- SWI PACKAGE, VERSION OWHM
+ --------------------------------------------------
+ SWI2 INPUT READ FROM UNIT 29
+
+
+
+
+ SWI2 DATASET 1
+ ----------------------------------------------------
+ NUMBER OF SURFACES (NSRF):                         1
+ TOTAL NUMBER OF ZONES:                             2
+ DENSITY DISTRIBUTION OPTION (ISTRAT):              1
+   VARIABLE DENSITY FLOW -- ISTRAT = 0
+   STRATIFIED FLOW       -- ISTRAT = 1
+ NUMBER OF SWI OBSERVATIONS (NOBS):                 0
+ ZETA OUTPUT FILE UNIT NUMBER (ISWIZT):            55
+ BUDGET OUTPUT FILE UNIT NUMBER (ISWICB):           0
+ OBSERVATION OUTPUT FILE UNIT NUMBER (ISWIOBS):     0
+ ----------------------------------------------------
+
+
+ SWI2 DATASET 2A
+ ----------------------------------------------------
+ SOLVER (NSOLVER):                                  1
+   SOLVER =                      DIRECT SOLVER (DE4)
+ SOLVER PRINTOUT INTERVAL (IPRSOL):               999
+ SOLVER OUTPUT FLAG (MUTSOL):                       3
+   0 = PRINTING EVERY ITERATION
+   1 = LIMITED (TOTAL NUMBER OF ITERATIONS)
+   2 = NO PRINTING
+   3 = ONLY IF CONVERGENCE FAILS
+ ----------------------------------------------------
+
+
+ SWI2 DATASET 3A
+ ----------------------------------------------------
+ MAXIMUM TOE SURFACE SLOPE (TOESLOPE):      0.500E-02
+ MAXIMUM TIP SURFACE SLOPE (TIPSLOPE):      0.500E-02
+ EXCESS SURFACE SLOPE FRACTION (ALPHA):     0.100    
+ MINIMUM ZONE THICKNESS FRACTION (BETA):    0.100    
+ ----------------------------------------------------
+
+
+
+                             NUZONE
+ READING ON UNIT   29 WITH FORMAT: (2G15.6)            
+
+
+
+                   ZETA SURFACE  1  FOR LAYER   1
+ READING ON UNIT   29 WITH FORMAT: (61G15.6)           
+
+
+
+                   ZETA SURFACE  1  FOR LAYER   2
+ READING ON UNIT   29 WITH FORMAT: (61G15.6)           
+
+                      SSZ =  0.200000     FOR LAYER   1
+
+                      SSZ =  0.200000     FOR LAYER   2
+
+
+
+                            IZONENR FOR LAYER   1
+ READING ON UNIT   29 WITH FORMAT: (61I10)             
+
+
+
+                            IZONENR FOR LAYER   2
+ READING ON UNIT   29 WITH FORMAT: (61I10)             
+
+
+########################################################################################################
+
+                           WARNING_MESSAGE
+
+         THE FOLLOWING COMMENTS WERE PASSED TO THE WARNING ROUTINE
+
+THE DESRIPTION OF THE WARNING IS:
+
+DIS PACKAGE: THE GROUND SURFACE ELEVATION WAS NOT SPECIFIED WITH THE KEYWORD "SURFACE_ELEVATION"
+
+BEFORE LOADING THE "TOP" ARRAY FOR LAYER 1
+NOR WAS IT DEFINED WITH ANOTHER PACKAGE   (e.g. FMPs GLOBAL DIMENSION KEYWORD "SURFACE_ELEVATION")
+
+OneWater WILL SET THE GROUND SURFACE ELEVATION (GSE)
+TO THE TOP ELEVATION OF THE UPPER MOST ACTIVE CELL OR THE DIS TOP OF LAY1.
+
+NOTE THAT SFR DOES USE GSE FOR ALL DIVERSION SEGMENTS
+   WHEN "IRDFLG" IS SET TO 2 or -2.
+
+########################################################################################################
+
+
+
+1
+                            STRESS PERIOD NO.      1, LENGTH =   73000.00    
+                            -----------------------------------------------
+
+                              NUMBER OF TIME STEPS =  1000
+
+                               MULTIPLIER FOR DELT =     1.000
+
+                            INITIAL TIME STEP SIZE =   73.00000    
+
+PARAMETERS HAVE BEEN USED IN PACKAGES
+
+THE CURRENT STORAGE FOR PARAMETERS IS: 
+No. PARAMETER=         0 WITH MAX STORAGE (MXPAR)  OF      2000
+No. CLUSTERS =         0 WITH MAX STORAGE (MXCLST) OF   2000000
+No. INSTANCES=         0 WITH MAX STORAGE (MXINST) OF     50000
+
+YOU CAN INCREASE/DECREASE STORAGE WITH BAS OPTION:
+MAXPARAM  MXPAR  MXCLST MXINST
+
+FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
+(NOTE THE THREE NUMBERS ARE A MINUMUM SIZE):
+   MAXPARAM          1         1         1
+
+   2040 GHB CELLS
+ 
+ SOLVING FOR HEAD 
+
+ OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP     1
+    PRINT BUDGET
+    SAVE HEAD FOR ALL LAYERS
+ SOLVING FOR ZETA FOR LAYER     1 ZONE     2
+
+     841 UPPER PART EQS.       840 LOWER PART EQS.    BAND WIDTH + 1 =     42
+ STRESS PERIOD=   1 TIMESTEP=    1 LAYER=   1 ZONE=   2 ACTIVE CELLS= 1681 NUMBER OF EQUATIONS=    1681
+ UBUDSV SAVING "      ZETASRF  1" ON UNIT 55 AT TIME STEP 1, STRESS PERIOD 1
+
+
+                      VOLUMETRIC SWI ZONE BUDGET FOR ENTIRE MODEL
+                     AT END OF TIME STEP    1 IN STRESS PERIOD   1
+                                      ZONE     1
+  -----------------------------------------------------------------------------------
+
+        CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+        ------------------                 ------------------------
+
+              IN:                                      IN:
+              ---                                      ---
+             BOUNDARIES =      122713.0000            BOUNDARIES =        1681.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =           0.0000           ZONE CHANGE =           0.0000
+       ZONE CHG TIP/TOE =        1025.0000      ZONE CHG TIP/TOE =          14.0411
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+               TOTAL IN =      123738.0000              TOTAL IN =        1695.0411
+
+             OUT:                                     OUT:
+             ----                                     ----
+             BOUNDARIES =           0.0000            BOUNDARIES =           0.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =      122713.0503           ZONE CHANGE =        1681.0007
+       ZONE CHG TIP/TOE =        1025.0000      ZONE CHG TIP/TOE =          14.0411
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+              TOTAL OUT =      123738.0503             TOTAL OUT =        1695.0418
+
+               IN - OUT =      -5.0278E-02              IN - OUT =      -6.8874E-04
+
+    PERCENT DISCREPANCY =          -0.00     PERCENT DISCREPANCY =          -0.00
+
+
+
+                      VOLUMETRIC SWI ZONE BUDGET FOR ENTIRE MODEL
+                     AT END OF TIME STEP    1 IN STRESS PERIOD   1
+                                      ZONE     2
+  -----------------------------------------------------------------------------------
+
+        CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+        ------------------                 ------------------------
+
+              IN:                                      IN:
+              ---                                      ---
+             BOUNDARIES =           0.0000            BOUNDARIES =           0.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =      122713.0503           ZONE CHANGE =        1681.0007
+       ZONE CHG TIP/TOE =        1025.0000      ZONE CHG TIP/TOE =          14.0411
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+               TOTAL IN =      123738.0503              TOTAL IN =        1695.0418
+
+             OUT:                                     OUT:
+             ----                                     ----
+             BOUNDARIES =      122712.9375            BOUNDARIES =        1680.9991
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =           0.0000           ZONE CHANGE =           0.0000
+       ZONE CHG TIP/TOE =        1025.0000      ZONE CHG TIP/TOE =          14.0411
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+              TOTAL OUT =      123737.9375             TOTAL OUT =        1695.0402
+
+               IN - OUT =           0.1128              IN - OUT =       1.5455E-03
+
+    PERCENT DISCREPANCY =           0.00     PERCENT DISCREPANCY =           0.00
+
+
+ HEAD WILL BE SAVED ON UNIT   51 AT END OF TIME STEP     1 IN STRESS PERIOD      1
+
+
+
+  -------------------------------------------------------------------------------------
+  VOLUMETRIC BUDGET FOR ENTIRE MODEL AT END OF TIME STEP    1 IN STRESS PERIOD      1
+  -------------------------------------------------------------------------------------
+
+     CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+     ------------------                 ------------------------
+
+           IN:                                      IN:
+           ---                                      ---
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+               WELLS =      122713.0000                 WELLS =        1681.0000
+     HEAD DEP BOUNDS =           0.0000       HEAD DEP BOUNDS =           0.0000
+          SWIADDTOCH =           0.0000            SWIADDTOCH =           0.0000
+
+            TOTAL IN =      122713.0000              TOTAL IN =        1681.0000
+
+          OUT:                                     OUT:
+          ----                                     ----
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+               WELLS =           0.0000                 WELLS =           0.0000
+     HEAD DEP BOUNDS =      122712.9375       HEAD DEP BOUNDS =        1680.9991
+          SWIADDTOCH =           0.0000            SWIADDTOCH =           0.0000
+
+           TOTAL OUT =      122712.9375             TOTAL OUT =        1680.9991
+
+            IN - OUT =       6.2544E-02              IN - OUT =       8.5676E-04
+
+ PERCENT DISCREPANCY =           0.00     PERCENT DISCREPANCY =           0.00
+
+
+          TIME SUMMARY AT END OF TIME STEP     1 IN STRESS PERIOD      1
+                    SECONDS     MINUTES      HOURS       DAYS        YEARS
+                    -----------------------------------------------------------
+   TIME STEP LENGTH 6.30720E+06 1.05120E+05  1752.0      73.000     0.19986    
+ STRESS PERIOD TIME 6.30720E+06 1.05120E+05  1752.0      73.000     0.19986    
+         TOTAL TIME 6.30720E+06 1.05120E+05  1752.0      73.000     0.19986    
+ 
+ 
+ SOLVING FOR HEAD 
+
+ OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP     2
+    PRINT BUDGET
+    SAVE HEAD FOR ALL LAYERS
+ SOLVING FOR ZETA FOR LAYER     1 ZONE     2
+
+     921 UPPER PART EQS.       924 LOWER PART EQS.    BAND WIDTH + 1 =     44
+ STRESS PERIOD=   1 TIMESTEP=    2 LAYER=   1 ZONE=   2 ACTIVE CELLS= 1845 NUMBER OF EQUATIONS=    1845
+ UBUDSV SAVING "      ZETASRF  1" ON UNIT 55 AT TIME STEP 2, STRESS PERIOD 1
+
+
+                      VOLUMETRIC SWI ZONE BUDGET FOR ENTIRE MODEL
+                     AT END OF TIME STEP    2 IN STRESS PERIOD   1
+                                      ZONE     1
+  -----------------------------------------------------------------------------------
+
+        CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+        ------------------                 ------------------------
+
+              IN:                                      IN:
+              ---                                      ---
+             BOUNDARIES =      245426.0000            BOUNDARIES =        1681.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =        1179.0386           ZONE CHANGE =          16.1512
+       ZONE CHG TIP/TOE =        1025.0000      ZONE CHG TIP/TOE =           0.0000
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+               TOTAL IN =      247630.0386              TOTAL IN =        1697.1512
+
+             OUT:                                     OUT:
+             ----                                     ----
+             BOUNDARIES =       38982.8444            BOUNDARIES =         534.0116
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =      226507.6620           ZONE CHANGE =        1421.8440
+       ZONE CHG TIP/TOE =        1025.0000      ZONE CHG TIP/TOE =           0.0000
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+              TOTAL OUT =      266515.5064             TOTAL OUT =        1955.8556
+
+               IN - OUT =      -18885.4678              IN - OUT =        -258.7043
+
+    PERCENT DISCREPANCY =          -7.35     PERCENT DISCREPANCY =         -14.16
+
+
+
+                      VOLUMETRIC SWI ZONE BUDGET FOR ENTIRE MODEL
+                     AT END OF TIME STEP    2 IN STRESS PERIOD   1
+                                      ZONE     2
+  -----------------------------------------------------------------------------------
+
+        CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+        ------------------                 ------------------------
+
+              IN:                                      IN:
+              ---                                      ---
+             BOUNDARIES =           0.0000            BOUNDARIES =           0.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =      226507.6620           ZONE CHANGE =        1421.8440
+       ZONE CHG TIP/TOE =       19910.5284      ZONE CHG TIP/TOE =         258.7059
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+               TOTAL IN =      246418.1904              TOTAL IN =        1680.5499
+
+             OUT:                                     OUT:
+             ----                                     ----
+             BOUNDARIES =      206443.0930            BOUNDARIES =        1146.9884
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =       20064.5670           ZONE CHANGE =         274.8571
+       ZONE CHG TIP/TOE =        1025.0000      ZONE CHG TIP/TOE =           0.0000
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+              TOTAL OUT =      227532.6601             TOTAL OUT =        1421.8455
+
+               IN - OUT =       18885.5304              IN - OUT =         258.7044
+
+    PERCENT DISCREPANCY =           7.97     PERCENT DISCREPANCY =          16.68
+
+
+ HEAD WILL BE SAVED ON UNIT   51 AT END OF TIME STEP     2 IN STRESS PERIOD      1
+
+
+
+  -------------------------------------------------------------------------------------
+  VOLUMETRIC BUDGET FOR ENTIRE MODEL AT END OF TIME STEP    2 IN STRESS PERIOD      1
+  -------------------------------------------------------------------------------------
+
+     CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+     ------------------                 ------------------------
+
+           IN:                                      IN:
+           ---                                      ---
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+               WELLS =      245426.0000                 WELLS =        1681.0000
+     HEAD DEP BOUNDS =           0.0000       HEAD DEP BOUNDS =           0.0000
+          SWIADDTOCH =           0.0000            SWIADDTOCH =           0.0000
+
+            TOTAL IN =      245426.0000              TOTAL IN =        1681.0000
+
+          OUT:                                     OUT:
+          ----                                     ----
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+               WELLS =           0.0000                 WELLS =           0.0000
+     HEAD DEP BOUNDS =      245425.9374       HEAD DEP BOUNDS =        1681.0000
+          SWIADDTOCH =           0.0000            SWIADDTOCH =           0.0000
+
+           TOTAL OUT =      245425.9374             TOTAL OUT =        1681.0000
+
+            IN - OUT =       6.2615E-02              IN - OUT =       9.8362E-07
+
+ PERCENT DISCREPANCY =           0.00     PERCENT DISCREPANCY =           0.00
+
+
+          TIME SUMMARY AT END OF TIME STEP     2 IN STRESS PERIOD      1
+                    SECONDS     MINUTES      HOURS       DAYS        YEARS
+                    -----------------------------------------------------------
+   TIME STEP LENGTH 6.30720E+06 1.05120E+05  1752.0      73.000     0.19986    
+ STRESS PERIOD TIME 1.26144E+07 2.10240E+05  3504.0      146.00     0.39973    
+         TOTAL TIME 1.26144E+07 2.10240E+05  3504.0      146.00     0.39973    
+ 
+ 
+ SOLVING FOR HEAD 
+
+ OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP     3
+    PRINT BUDGET
+    SAVE HEAD FOR ALL LAYERS
+ SOLVING FOR ZETA FOR LAYER     1 ZONE     2
+
+     841 UPPER PART EQS.       840 LOWER PART EQS.    BAND WIDTH + 1 =     42
+ STRESS PERIOD=   1 TIMESTEP=    3 LAYER=   1 ZONE=   2 ACTIVE CELLS= 1681 NUMBER OF EQUATIONS=    1681
+ UBUDSV SAVING "      ZETASRF  1" ON UNIT 55 AT TIME STEP 3, STRESS PERIOD 1
+
+
+                      VOLUMETRIC SWI ZONE BUDGET FOR ENTIRE MODEL
+                     AT END OF TIME STEP    3 IN STRESS PERIOD   1
+                                      ZONE     1
+  -----------------------------------------------------------------------------------
+
+        CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+        ------------------                 ------------------------
+
+              IN:                                      IN:
+              ---                                      ---
+             BOUNDARIES =      368139.0000            BOUNDARIES =        1681.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =        1179.0386           ZONE CHANGE =           0.0000
+       ZONE CHG TIP/TOE =        2050.0000      ZONE CHG TIP/TOE =          14.0411
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+               TOTAL IN =      371368.0386              TOTAL IN =        1695.0411
+
+             OUT:                                     OUT:
+             ----                                     ----
+             BOUNDARIES =       38982.8444            BOUNDARIES =           0.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =      349220.6757           ZONE CHANGE =        1681.0002
+       ZONE CHG TIP/TOE =        2050.0000      ZONE CHG TIP/TOE =          14.0411
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+              TOTAL OUT =      390253.5200             TOTAL OUT =        1695.0413
+
+               IN - OUT =      -18885.4815              IN - OUT =      -1.8760E-04
+
+    PERCENT DISCREPANCY =          -4.96     PERCENT DISCREPANCY =          -0.00
+
+
+
+                      VOLUMETRIC SWI ZONE BUDGET FOR ENTIRE MODEL
+                     AT END OF TIME STEP    3 IN STRESS PERIOD   1
+                                      ZONE     2
+  -----------------------------------------------------------------------------------
+
+        CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+        ------------------                 ------------------------
+
+              IN:                                      IN:
+              ---                                      ---
+             BOUNDARIES =           0.0000            BOUNDARIES =           0.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =      349220.6757           ZONE CHANGE =        1681.0002
+       ZONE CHG TIP/TOE =       20935.5284      ZONE CHG TIP/TOE =          14.0411
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+               TOTAL IN =      370156.2041              TOTAL IN =        1695.0413
+
+             OUT:                                     OUT:
+             ----                                     ----
+             BOUNDARIES =      329156.0930            BOUNDARIES =        1681.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =       20064.5670           ZONE CHANGE =           0.0000
+       ZONE CHG TIP/TOE =        2050.0000      ZONE CHG TIP/TOE =          14.0411
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+              TOTAL OUT =      351270.6601             TOTAL OUT =        1695.0411
+
+               IN - OUT =       18885.5441              IN - OUT =       1.8760E-04
+
+    PERCENT DISCREPANCY =           5.24     PERCENT DISCREPANCY =           0.00
+
+
+ HEAD WILL BE SAVED ON UNIT   51 AT END OF TIME STEP     3 IN STRESS PERIOD      1
+
+
+
+  -------------------------------------------------------------------------------------
+  VOLUMETRIC BUDGET FOR ENTIRE MODEL AT END OF TIME STEP    3 IN STRESS PERIOD      1
+  -------------------------------------------------------------------------------------
+
+     CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+     ------------------                 ------------------------
+
+           IN:                                      IN:
+           ---                                      ---
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+               WELLS =      368139.0000                 WELLS =        1681.0000
+     HEAD DEP BOUNDS =           0.0000       HEAD DEP BOUNDS =           0.0000
+          SWIADDTOCH =           0.0000            SWIADDTOCH =           0.0000
+
+            TOTAL IN =      368139.0000              TOTAL IN =        1681.0000
+
+          OUT:                                     OUT:
+          ----                                     ----
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+               WELLS =           0.0000                 WELLS =           0.0000
+     HEAD DEP BOUNDS =      368138.9374       HEAD DEP BOUNDS =        1681.0000
+          SWIADDTOCH =           0.0000            SWIADDTOCH =           0.0000
+
+           TOTAL OUT =      368138.9374             TOTAL OUT =        1681.0000
+
+            IN - OUT =       6.2616E-02              IN - OUT =       7.8558E-10
+
+ PERCENT DISCREPANCY =           0.00     PERCENT DISCREPANCY =           0.00
+
+
+          TIME SUMMARY AT END OF TIME STEP     3 IN STRESS PERIOD      1
+                    SECONDS     MINUTES      HOURS       DAYS        YEARS
+                    -----------------------------------------------------------
+   TIME STEP LENGTH 6.30720E+06 1.05120E+05  1752.0      73.000     0.19986    
+ STRESS PERIOD TIME 1.89216E+07 3.15360E+05  5256.0      219.00     0.59959    
+         TOTAL TIME 1.89216E+07 3.15360E+05  5256.0      219.00     0.59959    
+ 
+ 
+ SOLVING FOR HEAD 
+
+ OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP     4
+    PRINT BUDGET
+    SAVE HEAD FOR ALL LAYERS
+ SOLVING FOR ZETA FOR LAYER     1 ZONE     2
+
+     921 UPPER PART EQS.       924 LOWER PART EQS.    BAND WIDTH + 1 =     44
+ STRESS PERIOD=   1 TIMESTEP=    4 LAYER=   1 ZONE=   2 ACTIVE CELLS= 1845 NUMBER OF EQUATIONS=    1845
+ UBUDSV SAVING "      ZETASRF  1" ON UNIT 55 AT TIME STEP 4, STRESS PERIOD 1
+
+
+                      VOLUMETRIC SWI ZONE BUDGET FOR ENTIRE MODEL
+                     AT END OF TIME STEP    4 IN STRESS PERIOD   1
+                                      ZONE     1
+  -----------------------------------------------------------------------------------
+
+        CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+        ------------------                 ------------------------
+
+              IN:                                      IN:
+              ---                                      ---
+             BOUNDARIES =      490852.0000            BOUNDARIES =        1681.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =        2275.2367           ZONE CHANGE =          15.0164
+       ZONE CHG TIP/TOE =        2050.0000      ZONE CHG TIP/TOE =           0.0000
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+               TOTAL IN =      495177.2367              TOTAL IN =        1696.0164
+
+             OUT:                                     OUT:
+             ----                                     ----
+             BOUNDARIES =       77986.1928            BOUNDARIES =         534.2924
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =      452317.7654           ZONE CHANGE =        1412.2889
+       ZONE CHG TIP/TOE =        2050.0000      ZONE CHG TIP/TOE =           0.0000
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+              TOTAL OUT =      532353.9582             TOTAL OUT =        1946.5813
+
+               IN - OUT =      -37176.7214              IN - OUT =        -250.5649
+
+    PERCENT DISCREPANCY =          -7.24     PERCENT DISCREPANCY =         -13.76
+
+
+
+                      VOLUMETRIC SWI ZONE BUDGET FOR ENTIRE MODEL
+                     AT END OF TIME STEP    4 IN STRESS PERIOD   1
+                                      ZONE     2
+  -----------------------------------------------------------------------------------
+
+        CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+        ------------------                 ------------------------
+
+              IN:                                      IN:
+              ---                                      ---
+             BOUNDARIES =           0.0000            BOUNDARIES =           0.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =      452317.7654           ZONE CHANGE =        1412.2889
+       ZONE CHG TIP/TOE =       39226.8515      ZONE CHG TIP/TOE =         250.5661
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+               TOTAL IN =      491544.6169              TOTAL IN =        1662.8550
+
+             OUT:                                     OUT:
+             ----                                     ----
+             BOUNDARIES =      412865.7446            BOUNDARIES =        1146.7076
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =       39452.0882           ZONE CHANGE =         265.5825
+       ZONE CHG TIP/TOE =        2050.0000      ZONE CHG TIP/TOE =           0.0000
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+              TOTAL OUT =      454367.8328             TOTAL OUT =        1412.2900
+
+               IN - OUT =       37176.7840              IN - OUT =         250.5649
+
+    PERCENT DISCREPANCY =           7.86     PERCENT DISCREPANCY =          16.30
+
+
+ HEAD WILL BE SAVED ON UNIT   51 AT END OF TIME STEP     4 IN STRESS PERIOD      1
+
+
+
+  -------------------------------------------------------------------------------------
+  VOLUMETRIC BUDGET FOR ENTIRE MODEL AT END OF TIME STEP    4 IN STRESS PERIOD      1
+  -------------------------------------------------------------------------------------
+
+     CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+     ------------------                 ------------------------
+
+           IN:                                      IN:
+           ---                                      ---
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+               WELLS =      490852.0000                 WELLS =        1681.0000
+     HEAD DEP BOUNDS =           0.0000       HEAD DEP BOUNDS =           0.0000
+          SWIADDTOCH =           0.0000            SWIADDTOCH =           0.0000
+
+            TOTAL IN =      490852.0000              TOTAL IN =        1681.0000
+
+          OUT:                                     OUT:
+          ----                                     ----
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+               WELLS =           0.0000                 WELLS =           0.0000
+     HEAD DEP BOUNDS =      490851.9374       HEAD DEP BOUNDS =        1681.0000
+          SWIADDTOCH =           0.0000            SWIADDTOCH =           0.0000
+
+           TOTAL OUT =      490851.9374             TOTAL OUT =        1681.0000
+
+            IN - OUT =       6.2616E-02              IN - OUT =       9.0949E-13
+
+ PERCENT DISCREPANCY =           0.00     PERCENT DISCREPANCY =           0.00
+
+
+          TIME SUMMARY AT END OF TIME STEP     4 IN STRESS PERIOD      1
+                    SECONDS     MINUTES      HOURS       DAYS        YEARS
+                    -----------------------------------------------------------
+   TIME STEP LENGTH 6.30720E+06 1.05120E+05  1752.0      73.000     0.19986    
+ STRESS PERIOD TIME 2.52288E+07 4.20480E+05  7008.0      292.00     0.79945    
+         TOTAL TIME 2.52288E+07 4.20480E+05  7008.0      292.00     0.79945    
+ 
+ 
+ SOLVING FOR HEAD 
+
+ OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP     5
+    PRINT BUDGET
+    SAVE HEAD FOR ALL LAYERS
+ SOLVING FOR ZETA FOR LAYER     1 ZONE     2
+
+     841 UPPER PART EQS.       840 LOWER PART EQS.    BAND WIDTH + 1 =     42
+ STRESS PERIOD=   1 TIMESTEP=    5 LAYER=   1 ZONE=   2 ACTIVE CELLS= 1681 NUMBER OF EQUATIONS=    1681
+ UBUDSV SAVING "      ZETASRF  1" ON UNIT 55 AT TIME STEP 5, STRESS PERIOD 1
+
+
+                      VOLUMETRIC SWI ZONE BUDGET FOR ENTIRE MODEL
+                     AT END OF TIME STEP    5 IN STRESS PERIOD   1
+                                      ZONE     1
+  -----------------------------------------------------------------------------------
+
+        CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+        ------------------                 ------------------------
+
+              IN:                                      IN:
+              ---                                      ---
+             BOUNDARIES =      613565.0000            BOUNDARIES =        1681.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =        2275.2367           ZONE CHANGE =           0.0000
+       ZONE CHG TIP/TOE =        3075.0000      ZONE CHG TIP/TOE =          14.0411
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+               TOTAL IN =      618915.2367              TOTAL IN =        1695.0411
+
+             OUT:                                     OUT:
+             ----                                     ----
+             BOUNDARIES =       77986.1928            BOUNDARIES =           0.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =      575030.7532           ZONE CHANGE =        1680.9998
+       ZONE CHG TIP/TOE =        3075.0000      ZONE CHG TIP/TOE =          14.0411
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+              TOTAL OUT =      656091.9460             TOTAL OUT =        1695.0409
+
+               IN - OUT =      -37176.7092              IN - OUT =       1.6711E-04
+
+    PERCENT DISCREPANCY =          -5.83     PERCENT DISCREPANCY =           0.00
+
+
+
+                      VOLUMETRIC SWI ZONE BUDGET FOR ENTIRE MODEL
+                     AT END OF TIME STEP    5 IN STRESS PERIOD   1
+                                      ZONE     2
+  -----------------------------------------------------------------------------------
+
+        CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+        ------------------                 ------------------------
+
+              IN:                                      IN:
+              ---                                      ---
+             BOUNDARIES =           0.0000            BOUNDARIES =           0.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =      575030.7532           ZONE CHANGE =        1680.9998
+       ZONE CHG TIP/TOE =       40251.8515      ZONE CHG TIP/TOE =          14.0411
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+               TOTAL IN =      615282.6047              TOTAL IN =        1695.0409
+
+             OUT:                                     OUT:
+             ----                                     ----
+             BOUNDARIES =      535578.7446            BOUNDARIES =        1681.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =       39452.0882           ZONE CHANGE =           0.0000
+       ZONE CHG TIP/TOE =        3075.0000      ZONE CHG TIP/TOE =          14.0411
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+              TOTAL OUT =      578105.8328             TOTAL OUT =        1695.0411
+
+               IN - OUT =       37176.7718              IN - OUT =      -1.6711E-04
+
+    PERCENT DISCREPANCY =           6.23     PERCENT DISCREPANCY =          -0.00
+
+
+ HEAD WILL BE SAVED ON UNIT   51 AT END OF TIME STEP     5 IN STRESS PERIOD      1
+
+
+
+  -------------------------------------------------------------------------------------
+  VOLUMETRIC BUDGET FOR ENTIRE MODEL AT END OF TIME STEP    5 IN STRESS PERIOD      1
+  -------------------------------------------------------------------------------------
+
+     CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+     ------------------                 ------------------------
+
+           IN:                                      IN:
+           ---                                      ---
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+               WELLS =      613565.0000                 WELLS =        1681.0000
+     HEAD DEP BOUNDS =           0.0000       HEAD DEP BOUNDS =           0.0000
+          SWIADDTOCH =           0.0000            SWIADDTOCH =           0.0000
+
+            TOTAL IN =      613565.0000              TOTAL IN =        1681.0000
+
+          OUT:                                     OUT:
+          ----                                     ----
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+               WELLS =           0.0000                 WELLS =           0.0000
+     HEAD DEP BOUNDS =      613564.9374       HEAD DEP BOUNDS =        1681.0000
+          SWIADDTOCH =           0.0000            SWIADDTOCH =           0.0000
+
+           TOTAL OUT =      613564.9374             TOTAL OUT =        1681.0000
+
+            IN - OUT =       6.2616E-02              IN - OUT =      -2.2737E-12
+
+ PERCENT DISCREPANCY =           0.00     PERCENT DISCREPANCY =          -0.00
+
+
+          TIME SUMMARY AT END OF TIME STEP     5 IN STRESS PERIOD      1
+                    SECONDS     MINUTES      HOURS       DAYS        YEARS
+                    -----------------------------------------------------------
+   TIME STEP LENGTH 6.30720E+06 1.05120E+05  1752.0      73.000     0.19986    
+ STRESS PERIOD TIME 3.15360E+07 5.25600E+05  8760.0      365.00     0.99932    
+         TOTAL TIME 3.15360E+07 5.25600E+05  8760.0      365.00     0.99932    
+ 
+ 
+ SOLVING FOR HEAD 
+
+ OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP     6
+    PRINT BUDGET
+    SAVE HEAD FOR ALL LAYERS
+ SOLVING FOR ZETA FOR LAYER     1 ZONE     2
+
+     921 UPPER PART EQS.       924 LOWER PART EQS.    BAND WIDTH + 1 =     44
+ STRESS PERIOD=   1 TIMESTEP=    6 LAYER=   1 ZONE=   2 ACTIVE CELLS= 1845 NUMBER OF EQUATIONS=    1845
+ UBUDSV SAVING "      ZETASRF  1" ON UNIT 55 AT TIME STEP 6, STRESS PERIOD 1
+
+
+                      VOLUMETRIC SWI ZONE BUDGET FOR ENTIRE MODEL
+                     AT END OF TIME STEP    6 IN STRESS PERIOD   1
+                                      ZONE     1
+  -----------------------------------------------------------------------------------
+
+        CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+        ------------------                 ------------------------
+
+              IN:                                      IN:
+              ---                                      ---
+             BOUNDARIES =      736278.0000            BOUNDARIES =        1681.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =        3315.5386           ZONE CHANGE =          14.2507
+       ZONE CHG TIP/TOE =        3075.0000      ZONE CHG TIP/TOE =           0.0000
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+               TOTAL IN =      742668.5386              TOTAL IN =        1695.2507
+
+             OUT:                                     OUT:
+             ----                                     ----
+             BOUNDARIES =      117014.2444            BOUNDARIES =         534.6308
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =      677377.6998           ZONE CHANGE =        1402.0130
+       ZONE CHG TIP/TOE =        3075.0000      ZONE CHG TIP/TOE =           0.0000
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+              TOTAL OUT =      797466.9442             TOTAL OUT =        1936.6438
+
+               IN - OUT =      -54798.4056              IN - OUT =        -241.3931
+
+    PERCENT DISCREPANCY =          -7.12     PERCENT DISCREPANCY =         -13.29
+
+
+
+                      VOLUMETRIC SWI ZONE BUDGET FOR ENTIRE MODEL
+                     AT END OF TIME STEP    6 IN STRESS PERIOD   1
+                                      ZONE     2
+  -----------------------------------------------------------------------------------
+
+        CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+        ------------------                 ------------------------
+
+              IN:                                      IN:
+              ---                                      ---
+             BOUNDARIES =           0.0000            BOUNDARIES =           0.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =      677377.6998           ZONE CHANGE =        1402.0130
+       ZONE CHG TIP/TOE =       57873.6182      ZONE CHG TIP/TOE =         241.3941
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+               TOTAL IN =      735251.3180              TOTAL IN =        1643.4070
+
+             OUT:                                     OUT:
+             ----                                     ----
+             BOUNDARIES =      619263.6929            BOUNDARIES =        1146.3692
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =       58114.1568           ZONE CHANGE =         255.6448
+       ZONE CHG TIP/TOE =        3075.0000      ZONE CHG TIP/TOE =           0.0000
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+              TOTAL OUT =      680452.8498             TOTAL OUT =        1402.0139
+
+               IN - OUT =       54798.4682              IN - OUT =         241.3931
+
+    PERCENT DISCREPANCY =           7.74     PERCENT DISCREPANCY =          15.85
+
+
+ HEAD WILL BE SAVED ON UNIT   51 AT END OF TIME STEP     6 IN STRESS PERIOD      1
+
+
+
+  -------------------------------------------------------------------------------------
+  VOLUMETRIC BUDGET FOR ENTIRE MODEL AT END OF TIME STEP    6 IN STRESS PERIOD      1
+  -------------------------------------------------------------------------------------
+
+     CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+     ------------------                 ------------------------
+
+           IN:                                      IN:
+           ---                                      ---
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+               WELLS =      736278.0000                 WELLS =        1681.0000
+     HEAD DEP BOUNDS =           0.0000       HEAD DEP BOUNDS =           0.0000
+          SWIADDTOCH =           0.0000            SWIADDTOCH =           0.0000
+
+            TOTAL IN =      736278.0000              TOTAL IN =        1681.0000
+
+          OUT:                                     OUT:
+          ----                                     ----
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+               WELLS =           0.0000                 WELLS =           0.0000
+     HEAD DEP BOUNDS =      736277.9374       HEAD DEP BOUNDS =        1681.0000
+          SWIADDTOCH =           0.0000            SWIADDTOCH =           0.0000
+
+           TOTAL OUT =      736277.9374             TOTAL OUT =        1681.0000
+
+            IN - OUT =       6.2616E-02              IN - OUT =      -1.8190E-12
+
+ PERCENT DISCREPANCY =           0.00     PERCENT DISCREPANCY =          -0.00
+
+
+          TIME SUMMARY AT END OF TIME STEP     6 IN STRESS PERIOD      1
+                    SECONDS     MINUTES      HOURS       DAYS        YEARS
+                    -----------------------------------------------------------
+   TIME STEP LENGTH 6.30720E+06 1.05120E+05  1752.0      73.000     0.19986    
+ STRESS PERIOD TIME 3.78432E+07 6.30720E+05  10512.      438.00      1.1992    
+         TOTAL TIME 3.78432E+07 6.30720E+05  10512.      438.00      1.1992    
+ 
+ 
+ SOLVING FOR HEAD 
+
+ OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP     7
+    PRINT BUDGET
+    SAVE HEAD FOR ALL LAYERS
+ SOLVING FOR ZETA FOR LAYER     1 ZONE     2
+
+     841 UPPER PART EQS.       840 LOWER PART EQS.    BAND WIDTH + 1 =     42
+ STRESS PERIOD=   1 TIMESTEP=    7 LAYER=   1 ZONE=   2 ACTIVE CELLS= 1681 NUMBER OF EQUATIONS=    1681
+ UBUDSV SAVING "      ZETASRF  1" ON UNIT 55 AT TIME STEP 7, STRESS PERIOD 1
+
+
+                      VOLUMETRIC SWI ZONE BUDGET FOR ENTIRE MODEL
+                     AT END OF TIME STEP    7 IN STRESS PERIOD   1
+                                      ZONE     1
+  -----------------------------------------------------------------------------------
+
+        CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+        ------------------                 ------------------------
+
+              IN:                                      IN:
+              ---                                      ---
+             BOUNDARIES =      858991.0000            BOUNDARIES =        1681.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =        3315.5386           ZONE CHANGE =           0.0000
+       ZONE CHG TIP/TOE =        4100.0000      ZONE CHG TIP/TOE =          14.0411
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+               TOTAL IN =      866406.5386              TOTAL IN =        1695.0411
+
+             OUT:                                     OUT:
+             ----                                     ----
+             BOUNDARIES =      117014.2444            BOUNDARIES =           0.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =      800090.6911           ZONE CHANGE =        1680.9999
+       ZONE CHG TIP/TOE =        4100.0000      ZONE CHG TIP/TOE =          14.0411
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+              TOTAL OUT =      921204.9356             TOTAL OUT =        1695.0410
+
+               IN - OUT =      -54798.3970              IN - OUT =       1.1830E-04
+
+    PERCENT DISCREPANCY =          -6.13     PERCENT DISCREPANCY =           0.00
+
+
+
+                      VOLUMETRIC SWI ZONE BUDGET FOR ENTIRE MODEL
+                     AT END OF TIME STEP    7 IN STRESS PERIOD   1
+                                      ZONE     2
+  -----------------------------------------------------------------------------------
+
+        CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+        ------------------                 ------------------------
+
+              IN:                                      IN:
+              ---                                      ---
+             BOUNDARIES =           0.0000            BOUNDARIES =           0.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =      800090.6911           ZONE CHANGE =        1680.9999
+       ZONE CHG TIP/TOE =       58898.6182      ZONE CHG TIP/TOE =          14.0411
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+               TOTAL IN =      858989.3094              TOTAL IN =        1695.0410
+
+             OUT:                                     OUT:
+             ----                                     ----
+             BOUNDARIES =      741976.6929            BOUNDARIES =        1681.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =       58114.1568           ZONE CHANGE =           0.0000
+       ZONE CHG TIP/TOE =        4100.0000      ZONE CHG TIP/TOE =          14.0411
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+              TOTAL OUT =      804190.8498             TOTAL OUT =        1695.0411
+
+               IN - OUT =       54798.4596              IN - OUT =      -1.1830E-04
+
+    PERCENT DISCREPANCY =           6.59     PERCENT DISCREPANCY =          -0.00
+
+
+ HEAD WILL BE SAVED ON UNIT   51 AT END OF TIME STEP     7 IN STRESS PERIOD      1
+
+
+
+  -------------------------------------------------------------------------------------
+  VOLUMETRIC BUDGET FOR ENTIRE MODEL AT END OF TIME STEP    7 IN STRESS PERIOD      1
+  -------------------------------------------------------------------------------------
+
+     CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+     ------------------                 ------------------------
+
+           IN:                                      IN:
+           ---                                      ---
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+               WELLS =      858991.0000                 WELLS =        1681.0000
+     HEAD DEP BOUNDS =           0.0000       HEAD DEP BOUNDS =           0.0000
+          SWIADDTOCH =           0.0000            SWIADDTOCH =           0.0000
+
+            TOTAL IN =      858991.0000              TOTAL IN =        1681.0000
+
+          OUT:                                     OUT:
+          ----                                     ----
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+               WELLS =           0.0000                 WELLS =           0.0000
+     HEAD DEP BOUNDS =      858990.9374       HEAD DEP BOUNDS =        1681.0000
+          SWIADDTOCH =           0.0000            SWIADDTOCH =           0.0000
+
+           TOTAL OUT =      858990.9374             TOTAL OUT =        1681.0000
+
+            IN - OUT =       6.2616E-02              IN - OUT =      -2.5011E-12
+
+ PERCENT DISCREPANCY =           0.00     PERCENT DISCREPANCY =          -0.00
+
+
+          TIME SUMMARY AT END OF TIME STEP     7 IN STRESS PERIOD      1
+                    SECONDS     MINUTES      HOURS       DAYS        YEARS
+                    -----------------------------------------------------------
+   TIME STEP LENGTH 6.30720E+06 1.05120E+05  1752.0      73.000     0.19986    
+ STRESS PERIOD TIME 4.41504E+07 7.35840E+05  12264.      511.00      1.3990    
+         TOTAL TIME 4.41504E+07 7.35840E+05  12264.      511.00      1.3990    
+ 
+ 
+ SOLVING FOR HEAD 
+
+ OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP     8
+    PRINT BUDGET
+    SAVE HEAD FOR ALL LAYERS
+ SOLVING FOR ZETA FOR LAYER     1 ZONE     2
+
+     921 UPPER PART EQS.       924 LOWER PART EQS.    BAND WIDTH + 1 =     44
+ STRESS PERIOD=   1 TIMESTEP=    8 LAYER=   1 ZONE=   2 ACTIVE CELLS= 1845 NUMBER OF EQUATIONS=    1845
+ UBUDSV SAVING "      ZETASRF  1" ON UNIT 55 AT TIME STEP 8, STRESS PERIOD 1
+
+
+                      VOLUMETRIC SWI ZONE BUDGET FOR ENTIRE MODEL
+                     AT END OF TIME STEP    8 IN STRESS PERIOD   1
+                                      ZONE     1
+  -----------------------------------------------------------------------------------
+
+        CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+        ------------------                 ------------------------
+
+              IN:                                      IN:
+              ---                                      ---
+             BOUNDARIES =      981704.0000            BOUNDARIES =        1681.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =        4340.5386           ZONE CHANGE =          14.0411
+       ZONE CHG TIP/TOE =        4100.0000      ZONE CHG TIP/TOE =           0.0000
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+               TOTAL IN =      990144.5386              TOTAL IN =        1695.0411
+
+             OUT:                                     OUT:
+             ----                                     ----
+             BOUNDARIES =      156071.3059            BOUNDARIES =         535.0282
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =      901644.4732           ZONE CHANGE =        1391.1477
+       ZONE CHG TIP/TOE =        4100.0000      ZONE CHG TIP/TOE =           0.0000
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+              TOTAL OUT =     1061815.7791             TOTAL OUT =        1926.1759
+
+               IN - OUT =      -71671.2405              IN - OUT =        -231.1348
+
+    PERCENT DISCREPANCY =          -6.99     PERCENT DISCREPANCY =         -12.77
+
+
+
+                      VOLUMETRIC SWI ZONE BUDGET FOR ENTIRE MODEL
+                     AT END OF TIME STEP    8 IN STRESS PERIOD   1
+                                      ZONE     2
+  -----------------------------------------------------------------------------------
+
+        CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+        ------------------                 ------------------------
+
+              IN:                                      IN:
+              ---                                      ---
+             BOUNDARIES =           0.0000            BOUNDARIES =           0.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =      901644.4732           ZONE CHANGE =        1391.1477
+       ZONE CHG TIP/TOE =       75771.5106      ZONE CHG TIP/TOE =         231.1355
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+               TOTAL IN =      977415.9838              TOTAL IN =        1622.2832
+
+             OUT:                                     OUT:
+             ----                                     ----
+             BOUNDARIES =      825632.6315            BOUNDARIES =        1145.9718
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =       76012.0492           ZONE CHANGE =         245.1766
+       ZONE CHG TIP/TOE =        4100.0000      ZONE CHG TIP/TOE =           0.0000
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+              TOTAL OUT =      905744.6807             TOTAL OUT =        1391.1484
+
+               IN - OUT =       71671.3031              IN - OUT =         231.1348
+
+    PERCENT DISCREPANCY =           7.61     PERCENT DISCREPANCY =          15.34
+
+
+ HEAD WILL BE SAVED ON UNIT   51 AT END OF TIME STEP     8 IN STRESS PERIOD      1
+
+
+
+  -------------------------------------------------------------------------------------
+  VOLUMETRIC BUDGET FOR ENTIRE MODEL AT END OF TIME STEP    8 IN STRESS PERIOD      1
+  -------------------------------------------------------------------------------------
+
+     CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+     ------------------                 ------------------------
+
+           IN:                                      IN:
+           ---                                      ---
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+               WELLS =      981704.0000                 WELLS =        1681.0000
+     HEAD DEP BOUNDS =           0.0000       HEAD DEP BOUNDS =           0.0000
+          SWIADDTOCH =           0.0000            SWIADDTOCH =           0.0000
+
+            TOTAL IN =      981704.0000              TOTAL IN =        1681.0000
+
+          OUT:                                     OUT:
+          ----                                     ----
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+               WELLS =           0.0000                 WELLS =           0.0000
+     HEAD DEP BOUNDS =      981703.9374       HEAD DEP BOUNDS =        1681.0000
+          SWIADDTOCH =           0.0000            SWIADDTOCH =           0.0000
+
+           TOTAL OUT =      981703.9374             TOTAL OUT =        1681.0000
+
+            IN - OUT =       6.2616E-02              IN - OUT =       9.0949E-13
+
+ PERCENT DISCREPANCY =           0.00     PERCENT DISCREPANCY =           0.00
+
+
+          TIME SUMMARY AT END OF TIME STEP     8 IN STRESS PERIOD      1
+                    SECONDS     MINUTES      HOURS       DAYS        YEARS
+                    -----------------------------------------------------------
+   TIME STEP LENGTH 6.30720E+06 1.05120E+05  1752.0      73.000     0.19986    
+ STRESS PERIOD TIME 5.04576E+07 8.40960E+05  14016.      584.00      1.5989    
+         TOTAL TIME 5.04576E+07 8.40960E+05  14016.      584.00      1.5989    
+ 
+ 
+ SOLVING FOR HEAD 
+
+ OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP     9
+    PRINT BUDGET
+    SAVE HEAD FOR ALL LAYERS
+ SOLVING FOR ZETA FOR LAYER     1 ZONE     2
+
+     841 UPPER PART EQS.       840 LOWER PART EQS.    BAND WIDTH + 1 =     42
+ STRESS PERIOD=   1 TIMESTEP=    9 LAYER=   1 ZONE=   2 ACTIVE CELLS= 1681 NUMBER OF EQUATIONS=    1681
+ UBUDSV SAVING "      ZETASRF  1" ON UNIT 55 AT TIME STEP 9, STRESS PERIOD 1
+
+
+                      VOLUMETRIC SWI ZONE BUDGET FOR ENTIRE MODEL
+                     AT END OF TIME STEP    9 IN STRESS PERIOD   1
+                                      ZONE     1
+  -----------------------------------------------------------------------------------
+
+        CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+        ------------------                 ------------------------
+
+              IN:                                      IN:
+              ---                                      ---
+             BOUNDARIES =     1104417.0000            BOUNDARIES =        1681.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =        4340.5386           ZONE CHANGE =           0.0000
+       ZONE CHG TIP/TOE =        5125.0000      ZONE CHG TIP/TOE =          14.0411
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+               TOTAL IN =     1113882.5386              TOTAL IN =        1695.0411
+
+             OUT:                                     OUT:
+             ----                                     ----
+             BOUNDARIES =      156071.3059            BOUNDARIES =           0.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =     1024357.4560           ZONE CHANGE =        1680.9998
+       ZONE CHG TIP/TOE =        5125.0000      ZONE CHG TIP/TOE =          14.0411
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+              TOTAL OUT =     1185553.7620             TOTAL OUT =        1695.0409
+
+               IN - OUT =      -71671.2234              IN - OUT =       2.3455E-04
+
+    PERCENT DISCREPANCY =          -6.23     PERCENT DISCREPANCY =           0.00
+
+
+
+                      VOLUMETRIC SWI ZONE BUDGET FOR ENTIRE MODEL
+                     AT END OF TIME STEP    9 IN STRESS PERIOD   1
+                                      ZONE     2
+  -----------------------------------------------------------------------------------
+
+        CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+        ------------------                 ------------------------
+
+              IN:                                      IN:
+              ---                                      ---
+             BOUNDARIES =           0.0000            BOUNDARIES =           0.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =     1024357.4560           ZONE CHANGE =        1680.9998
+       ZONE CHG TIP/TOE =       76796.5106      ZONE CHG TIP/TOE =          14.0411
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+               TOTAL IN =     1101153.9667              TOTAL IN =        1695.0409
+
+             OUT:                                     OUT:
+             ----                                     ----
+             BOUNDARIES =      948345.6315            BOUNDARIES =        1681.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =       76012.0492           ZONE CHANGE =           0.0000
+       ZONE CHG TIP/TOE =        5125.0000      ZONE CHG TIP/TOE =          14.0411
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+              TOTAL OUT =     1029482.6807             TOTAL OUT =        1695.0411
+
+               IN - OUT =       71671.2860              IN - OUT =      -2.3455E-04
+
+    PERCENT DISCREPANCY =           6.73     PERCENT DISCREPANCY =          -0.00
+
+
+ HEAD WILL BE SAVED ON UNIT   51 AT END OF TIME STEP     9 IN STRESS PERIOD      1
+
+
+
+  -------------------------------------------------------------------------------------
+  VOLUMETRIC BUDGET FOR ENTIRE MODEL AT END OF TIME STEP    9 IN STRESS PERIOD      1
+  -------------------------------------------------------------------------------------
+
+     CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+     ------------------                 ------------------------
+
+           IN:                                      IN:
+           ---                                      ---
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+               WELLS =     1104417.0000                 WELLS =        1681.0000
+     HEAD DEP BOUNDS =           0.0000       HEAD DEP BOUNDS =           0.0000
+          SWIADDTOCH =           0.0000            SWIADDTOCH =           0.0000
+
+            TOTAL IN =     1104417.0000              TOTAL IN =        1681.0000
+
+          OUT:                                     OUT:
+          ----                                     ----
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+               WELLS =           0.0000                 WELLS =           0.0000
+     HEAD DEP BOUNDS =     1104416.9374       HEAD DEP BOUNDS =        1681.0000
+          SWIADDTOCH =           0.0000            SWIADDTOCH =           0.0000
+
+           TOTAL OUT =     1104416.9374             TOTAL OUT =        1681.0000
+
+            IN - OUT =       6.2616E-02              IN - OUT =       3.4106E-12
+
+ PERCENT DISCREPANCY =           0.00     PERCENT DISCREPANCY =           0.00
+
+
+          TIME SUMMARY AT END OF TIME STEP     9 IN STRESS PERIOD      1
+                    SECONDS     MINUTES      HOURS       DAYS        YEARS
+                    -----------------------------------------------------------
+   TIME STEP LENGTH 6.30720E+06 1.05120E+05  1752.0      73.000     0.19986    
+ STRESS PERIOD TIME 5.67648E+07 9.46080E+05  15768.      657.00      1.7988    
+         TOTAL TIME 5.67648E+07 9.46080E+05  15768.      657.00      1.7988    
+ 
+ 
+ SOLVING FOR HEAD 
+
+ OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    10
+    PRINT BUDGET
+    SAVE HEAD FOR ALL LAYERS
+ SOLVING FOR ZETA FOR LAYER     1 ZONE     2
+
+     921 UPPER PART EQS.       924 LOWER PART EQS.    BAND WIDTH + 1 =     44
+ STRESS PERIOD=   1 TIMESTEP=   10 LAYER=   1 ZONE=   2 ACTIVE CELLS= 1845 NUMBER OF EQUATIONS=    1845
+ UBUDSV SAVING "      ZETASRF  1" ON UNIT 55 AT TIME STEP 10, STRESS PERIOD 1
+
+
+                      VOLUMETRIC SWI ZONE BUDGET FOR ENTIRE MODEL
+                     AT END OF TIME STEP   10 IN STRESS PERIOD   1
+                                      ZONE     1
+  -----------------------------------------------------------------------------------
+
+        CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+        ------------------                 ------------------------
+
+              IN:                                      IN:
+              ---                                      ---
+             BOUNDARIES =     1227130.0000            BOUNDARIES =        1681.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =        5365.5386           ZONE CHANGE =          14.0411
+       ZONE CHG TIP/TOE =        5125.0000      ZONE CHG TIP/TOE =           0.0000
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+               TOTAL IN =     1237620.5386              TOTAL IN =        1695.0411
+
+             OUT:                                     OUT:
+             ----                                     ----
+             BOUNDARIES =      195161.7707            BOUNDARIES =         535.4858
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =     1125046.2248           ZONE CHANGE =        1379.2982
+       ZONE CHG TIP/TOE =        5125.0000      ZONE CHG TIP/TOE =           0.0000
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+              TOTAL OUT =     1325332.9955             TOTAL OUT =        1914.7840
+
+               IN - OUT =      -87712.4569              IN - OUT =        -219.7429
+
+    PERCENT DISCREPANCY =          -6.84     PERCENT DISCREPANCY =         -12.17
+
+
+
+                      VOLUMETRIC SWI ZONE BUDGET FOR ENTIRE MODEL
+                     AT END OF TIME STEP   10 IN STRESS PERIOD   1
+                                      ZONE     2
+  -----------------------------------------------------------------------------------
+
+        CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+        ------------------                 ------------------------
+
+              IN:                                      IN:
+              ---                                      ---
+             BOUNDARIES =           0.0000            BOUNDARIES =           0.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =     1125046.2248           ZONE CHANGE =        1379.2982
+       ZONE CHG TIP/TOE =       92837.7638      ZONE CHG TIP/TOE =         219.7432
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+               TOTAL IN =     1217883.9886              TOTAL IN =        1599.0414
+
+             OUT:                                     OUT:
+             ----                                     ----
+             BOUNDARIES =     1031968.1667            BOUNDARIES =        1145.5142
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =       93078.3024           ZONE CHANGE =         233.7843
+       ZONE CHG TIP/TOE =        5125.0000      ZONE CHG TIP/TOE =           0.0000
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+              TOTAL OUT =     1130171.4690             TOTAL OUT =        1379.2985
+
+               IN - OUT =       87712.5196              IN - OUT =         219.7429
+
+    PERCENT DISCREPANCY =           7.47     PERCENT DISCREPANCY =          14.76
+
+
+ HEAD WILL BE SAVED ON UNIT   51 AT END OF TIME STEP    10 IN STRESS PERIOD      1
+
+
+
+  -------------------------------------------------------------------------------------
+  VOLUMETRIC BUDGET FOR ENTIRE MODEL AT END OF TIME STEP   10 IN STRESS PERIOD      1
+  -------------------------------------------------------------------------------------
+
+     CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+     ------------------                 ------------------------
+
+           IN:                                      IN:
+           ---                                      ---
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+               WELLS =     1227130.0000                 WELLS =        1681.0000
+     HEAD DEP BOUNDS =           0.0000       HEAD DEP BOUNDS =           0.0000
+          SWIADDTOCH =           0.0000            SWIADDTOCH =           0.0000
+
+            TOTAL IN =     1227130.0000              TOTAL IN =        1681.0000
+
+          OUT:                                     OUT:
+          ----                                     ----
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+               WELLS =           0.0000                 WELLS =           0.0000
+     HEAD DEP BOUNDS =     1227129.9374       HEAD DEP BOUNDS =        1681.0000
+          SWIADDTOCH =           0.0000            SWIADDTOCH =           0.0000
+
+           TOTAL OUT =     1227129.9374             TOTAL OUT =        1681.0000
+
+            IN - OUT =       6.2616E-02              IN - OUT =      -1.8190E-12
+
+ PERCENT DISCREPANCY =           0.00     PERCENT DISCREPANCY =          -0.00
+
+
+          TIME SUMMARY AT END OF TIME STEP    10 IN STRESS PERIOD      1
+                    SECONDS     MINUTES      HOURS       DAYS        YEARS
+                    -----------------------------------------------------------
+   TIME STEP LENGTH 6.30720E+06 1.05120E+05  1752.0      73.000     0.19986    
+ STRESS PERIOD TIME 6.30720E+07 1.05120E+06  17520.      730.00      1.9986    
+         TOTAL TIME 6.30720E+07 1.05120E+06  17520.      730.00      1.9986    
+ 
+ 
+ 
+ SOLVING FOR HEAD 
+
+ OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP  1000
+    PRINT BUDGET
+    SAVE HEAD FOR ALL LAYERS
+ SOLVING FOR ZETA FOR LAYER     1 ZONE     2
+
+     606 UPPER PART EQS.       608 LOWER PART EQS.    BAND WIDTH + 1 =     27
+ STRESS PERIOD=   1 TIMESTEP= 1000 LAYER=   1 ZONE=   2 ACTIVE CELLS= 1214 NUMBER OF EQUATIONS=    1214
+ SOLVING FOR ZETA FOR LAYER     2 ZONE     2
+
+     629 UPPER PART EQS.       636 LOWER PART EQS.    BAND WIDTH + 1 =     36
+ STRESS PERIOD=   1 TIMESTEP= 1000 LAYER=   2 ZONE=   2 ACTIVE CELLS= 1265 NUMBER OF EQUATIONS=    1265
+ UBUDSV SAVING "      ZETASRF  1" ON UNIT 55 AT TIME STEP 1000, STRESS PERIOD 1
+
+
+                      VOLUMETRIC SWI ZONE BUDGET FOR ENTIRE MODEL
+                     AT END OF TIME STEP 1000 IN STRESS PERIOD   1
+                                      ZONE     1
+  -----------------------------------------------------------------------------------
+
+        CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+        ------------------                 ------------------------
+
+              IN:                                      IN:
+              ---                                      ---
+             BOUNDARIES =   122713000.0000            BOUNDARIES =        1681.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =      437244.7337           ZONE CHANGE =           3.4571
+       ZONE CHG TIP/TOE =      406434.2207      ZONE CHG TIP/TOE =           4.6270
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+               TOTAL IN =   123556678.9545              TOTAL IN =        1689.0841
+
+             OUT:                                     OUT:
+             ----                                     ----
+             BOUNDARIES =   105056836.6868            BOUNDARIES =        1673.7803
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =    18821250.6585           ZONE CHANGE =          10.7196
+       ZONE CHG TIP/TOE =      417077.8198      ZONE CHG TIP/TOE =           4.7983
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+              TOTAL OUT =   124295165.1652             TOTAL OUT =        1689.2982
+
+               IN - OUT =     -738486.2107              IN - OUT =          -0.2141
+
+    PERCENT DISCREPANCY =          -0.60     PERCENT DISCREPANCY =          -0.01
+
+
+
+                      VOLUMETRIC SWI ZONE BUDGET FOR ENTIRE MODEL
+                     AT END OF TIME STEP 1000 IN STRESS PERIOD   1
+                                      ZONE     2
+  -----------------------------------------------------------------------------------
+
+        CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+        ------------------                 ------------------------
+
+              IN:                                      IN:
+              ---                                      ---
+             BOUNDARIES =           0.0000            BOUNDARIES =           0.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =    18780474.6286           ZONE CHANGE =          10.3967
+       ZONE CHG TIP/TOE =     1155607.4863      ZONE CHG TIP/TOE =           4.8412
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+               TOTAL IN =    19936082.1149              TOTAL IN =          15.2379
+
+             OUT:                                     OUT:
+             ----                                     ----
+             BOUNDARIES =    17656163.2506            BOUNDARIES =           7.2197
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =     1175774.4002           ZONE CHANGE =           3.5000
+       ZONE CHG TIP/TOE =      365658.1908      ZONE CHG TIP/TOE =           4.3041
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+              TOTAL OUT =    19197595.8416             TOTAL OUT =          15.0238
+
+               IN - OUT =      738486.2733              IN - OUT =           0.2141
+
+    PERCENT DISCREPANCY =           3.77     PERCENT DISCREPANCY =           1.41
+
+
+ HEAD WILL BE SAVED ON UNIT   51 AT END OF TIME STEP  1000 IN STRESS PERIOD      1
+
+
+
+  -------------------------------------------------------------------------------------
+  VOLUMETRIC BUDGET FOR ENTIRE MODEL AT END OF TIME STEP 1000 IN STRESS PERIOD      1
+  -------------------------------------------------------------------------------------
+
+     CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+     ------------------                 ------------------------
+
+           IN:                                      IN:
+           ---                                      ---
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+               WELLS =   122713000.0000                 WELLS =        1681.0000
+     HEAD DEP BOUNDS =           0.0000       HEAD DEP BOUNDS =           0.0000
+          SWIADDTOCH =           0.0000            SWIADDTOCH =           0.0000
+
+            TOTAL IN =   122713000.0000              TOTAL IN =        1681.0000
+
+          OUT:                                     OUT:
+          ----                                     ----
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+               WELLS =           0.0000                 WELLS =           0.0000
+     HEAD DEP BOUNDS =   122712999.9374       HEAD DEP BOUNDS =        1681.0000
+          SWIADDTOCH =           0.0000            SWIADDTOCH =           0.0000
+
+           TOTAL OUT =   122712999.9374             TOTAL OUT =        1681.0000
+
+            IN - OUT =       6.2616E-02              IN - OUT =      -1.1369E-12
+
+ PERCENT DISCREPANCY =           0.00     PERCENT DISCREPANCY =          -0.00
+
+
+          TIME SUMMARY AT END OF TIME STEP  1000 IN STRESS PERIOD      1
+                    SECONDS     MINUTES      HOURS       DAYS        YEARS
+                    -----------------------------------------------------------
+   TIME STEP LENGTH 6.30720E+06 1.05120E+05  1752.0      73.000     0.19986    
+ STRESS PERIOD TIME 6.30720E+09 1.05120E+08 1.75200E+06  73000.      199.86    
+         TOTAL TIME 6.30720E+09 1.05120E+08 1.75200E+06  73000.      199.86    
+ 
+1
+                            STRESS PERIOD NO.      2, LENGTH =   4380.000    
+                            -----------------------------------------------
+
+                              NUMBER OF TIME STEPS =   120
+
+                               MULTIPLIER FOR DELT =     1.000
+
+                            INITIAL TIME STEP SIZE =   36.50000    
+
+1683 WELLS
+
+ REUSING NON-PARAMETER GHB CELLS FROM LAST STRESS PERIOD
+
+   2040 GHB CELLS
+
+READING PCG SOLVER STRESS PERIOD INFORMATION
+
+
+########################################################################################################################
+PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERIOD     2
+ REUSING PREVIOUSLY DEFINED CRITERIA FOR REMAINDER OF SIMULATION.
+########################################################################################################################
+ 
+ SOLVING FOR HEAD 
+
+ OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP     1
+    PRINT BUDGET
+    SAVE HEAD FOR ALL LAYERS
+ SOLVING FOR ZETA FOR LAYER     1 ZONE     2
+
+     620 UPPER PART EQS.       614 LOWER PART EQS.    BAND WIDTH + 1 =     29
+ STRESS PERIOD=   2 TIMESTEP=    1 LAYER=   1 ZONE=   2 ACTIVE CELLS= 1234 NUMBER OF EQUATIONS=    1234
+ SOLVING FOR ZETA FOR LAYER     2 ZONE     2
+
+     629 UPPER PART EQS.       634 LOWER PART EQS.    BAND WIDTH + 1 =     36
+ STRESS PERIOD=   2 TIMESTEP=    1 LAYER=   2 ZONE=   2 ACTIVE CELLS= 1263 NUMBER OF EQUATIONS=    1263
+ UBUDSV SAVING "      ZETASRF  1" ON UNIT 55 AT TIME STEP 1, STRESS PERIOD 2
+
+
+                      VOLUMETRIC SWI ZONE BUDGET FOR ENTIRE MODEL
+                     AT END OF TIME STEP    1 IN STRESS PERIOD   2
+                                      ZONE     1
+  -----------------------------------------------------------------------------------
+
+        CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+        ------------------                 ------------------------
+
+              IN:                                      IN:
+              ---                                      ---
+             BOUNDARIES =   122774320.0000            BOUNDARIES =        1680.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =      443664.2609           ZONE CHANGE =         175.8775
+       ZONE CHG TIP/TOE =      406685.6448      ZONE CHG TIP/TOE =           6.8883
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+               TOTAL IN =   123624669.9057              TOTAL IN =        1862.7658
+
+             OUT:                                     OUT:
+             ----                                     ----
+             BOUNDARIES =   105121126.4850            BOUNDARIES =        1761.3643
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =    18824700.6319           ZONE CHANGE =          94.5198
+       ZONE CHG TIP/TOE =      417329.2439      ZONE CHG TIP/TOE =           6.8883
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+              TOTAL OUT =   124363156.3608             TOTAL OUT =        1862.7725
+
+               IN - OUT =     -738486.4552              IN - OUT =      -6.6977E-03
+
+    PERCENT DISCREPANCY =          -0.60     PERCENT DISCREPANCY =          -0.00
+
+
+
+                      VOLUMETRIC SWI ZONE BUDGET FOR ENTIRE MODEL
+                     AT END OF TIME STEP    1 IN STRESS PERIOD   2
+                                      ZONE     2
+  -----------------------------------------------------------------------------------
+
+        CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+        ------------------                 ------------------------
+
+              IN:                                      IN:
+              ---                                      ---
+             BOUNDARIES =        2969.7035            BOUNDARIES =          81.3617
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =    18783924.2918           ZONE CHANGE =          94.5113
+       ZONE CHG TIP/TOE =     1155859.1019      ZONE CHG TIP/TOE =           6.8936
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+               TOTAL IN =    19942753.0971              TOTAL IN =         182.7666
+
+             OUT:                                     OUT:
+             ----                                     ----
+             BOUNDARIES =    17656163.2506            BOUNDARIES =           0.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =     1182194.1189           ZONE CHANGE =         175.8827
+       ZONE CHG TIP/TOE =      365909.3046      ZONE CHG TIP/TOE =           6.8798
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+              TOTAL OUT =    19204266.6741             TOTAL OUT =         182.7625
+
+               IN - OUT =      738486.4231              IN - OUT =       4.1030E-03
+
+    PERCENT DISCREPANCY =           3.77     PERCENT DISCREPANCY =           0.00
+
+
+ HEAD WILL BE SAVED ON UNIT   51 AT END OF TIME STEP     1 IN STRESS PERIOD      2
+
+
+
+  -------------------------------------------------------------------------------------
+  VOLUMETRIC BUDGET FOR ENTIRE MODEL AT END OF TIME STEP    1 IN STRESS PERIOD      2
+  -------------------------------------------------------------------------------------
+
+     CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+     ------------------                 ------------------------
+
+           IN:                                      IN:
+           ---                                      ---
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+               WELLS =   122774356.5000                 WELLS =        1681.0000
+     HEAD DEP BOUNDS =        2969.7035       HEAD DEP BOUNDS =          81.3617
+          SWIADDTOCH =           0.0000            SWIADDTOCH =           0.0000
+
+            TOTAL IN =   122777326.2035              TOTAL IN =        1762.3617
+
+          OUT:                                     OUT:
+          ----                                     ----
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+               WELLS =        9125.0000                 WELLS =         250.0000
+     HEAD DEP BOUNDS =   122768201.2356       HEAD DEP BOUNDS =        1512.3643
+          SWIADDTOCH =           0.0000            SWIADDTOCH =           0.0000
+
+           TOTAL OUT =   122777326.2356             TOTAL OUT =        1762.3643
+
+            IN - OUT =      -3.2091E-02              IN - OUT =      -2.5947E-03
+
+ PERCENT DISCREPANCY =          -0.00     PERCENT DISCREPANCY =          -0.00
+
+
+          TIME SUMMARY AT END OF TIME STEP     1 IN STRESS PERIOD      2
+                    SECONDS     MINUTES      HOURS       DAYS        YEARS
+                    -----------------------------------------------------------
+   TIME STEP LENGTH 3.15360E+06  52560.      876.00      36.500     9.99316E-02
+ STRESS PERIOD TIME 3.15360E+06  52560.      876.00      36.500     9.99316E-02
+         TOTAL TIME 6.31035E+09 1.05173E+08 1.75288E+06  73036.      199.96    
+ 
+ 
+ SOLVING FOR HEAD 
+
+ OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP     2
+    PRINT BUDGET
+    SAVE HEAD FOR ALL LAYERS
+ SOLVING FOR ZETA FOR LAYER     1 ZONE     2
+
+     626 UPPER PART EQS.       640 LOWER PART EQS.    BAND WIDTH + 1 =     37
+ STRESS PERIOD=   2 TIMESTEP=    2 LAYER=   1 ZONE=   2 ACTIVE CELLS= 1266 NUMBER OF EQUATIONS=    1266
+ SOLVING FOR ZETA FOR LAYER     2 ZONE     2
+
+     629 UPPER PART EQS.       634 LOWER PART EQS.    BAND WIDTH + 1 =     36
+ STRESS PERIOD=   2 TIMESTEP=    2 LAYER=   2 ZONE=   2 ACTIVE CELLS= 1263 NUMBER OF EQUATIONS=    1263
+ UBUDSV SAVING "      ZETASRF  1" ON UNIT 55 AT TIME STEP 2, STRESS PERIOD 2
+
+
+                      VOLUMETRIC SWI ZONE BUDGET FOR ENTIRE MODEL
+                     AT END OF TIME STEP    2 IN STRESS PERIOD   2
+                                      ZONE     1
+  -----------------------------------------------------------------------------------
+
+        CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+        ------------------                 ------------------------
+
+              IN:                                      IN:
+              ---                                      ---
+             BOUNDARIES =   122835640.0000            BOUNDARIES =        1680.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =      450014.1742           ZONE CHANGE =         173.9702
+       ZONE CHG TIP/TOE =      406761.0520      ZONE CHG TIP/TOE =           2.0660
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+               TOTAL IN =   123692415.2262              TOTAL IN =        1856.0362
+
+             OUT:                                     OUT:
+             ----                                     ----
+             BOUNDARIES =   105185507.7912            BOUNDARIES =        1763.8714
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =    18827990.0236           ZONE CHANGE =          90.1203
+       ZONE CHG TIP/TOE =      417404.6511      ZONE CHG TIP/TOE =           2.0660
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+              TOTAL OUT =   124430902.4659             TOTAL OUT =        1856.0577
+
+               IN - OUT =     -738487.2397              IN - OUT =      -2.1493E-02
+
+    PERCENT DISCREPANCY =          -0.60     PERCENT DISCREPANCY =          -0.00
+
+
+
+                      VOLUMETRIC SWI ZONE BUDGET FOR ENTIRE MODEL
+                     AT END OF TIME STEP    2 IN STRESS PERIOD   2
+                                      ZONE     2
+  -----------------------------------------------------------------------------------
+
+        CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+        ------------------                 ------------------------
+
+              IN:                                      IN:
+              ---                                      ---
+             BOUNDARIES =        6031.0096            BOUNDARIES =          83.8714
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =    18787213.2762           ZONE CHANGE =          90.1092
+       ZONE CHG TIP/TOE =     1155935.1765      ZONE CHG TIP/TOE =           2.0842
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+               TOTAL IN =    19949179.4623              TOTAL IN =         176.0648
+
+             OUT:                                     OUT:
+             ----                                     ----
+             BOUNDARIES =    17656163.2506            BOUNDARIES =           0.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =     1188544.6997           ZONE CHANGE =         173.9885
+       ZONE CHG TIP/TOE =      365984.3046      ZONE CHG TIP/TOE =           2.0548
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+              TOTAL OUT =    19210692.2549             TOTAL OUT =         176.0433
+
+               IN - OUT =      738487.2074              IN - OUT =       2.1489E-02
+
+    PERCENT DISCREPANCY =           3.77     PERCENT DISCREPANCY =           0.01
+
+
+ HEAD WILL BE SAVED ON UNIT   51 AT END OF TIME STEP     2 IN STRESS PERIOD      2
+
+
+
+  -------------------------------------------------------------------------------------
+  VOLUMETRIC BUDGET FOR ENTIRE MODEL AT END OF TIME STEP    2 IN STRESS PERIOD      2
+  -------------------------------------------------------------------------------------
+
+     CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+     ------------------                 ------------------------
+
+           IN:                                      IN:
+           ---                                      ---
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+               WELLS =   122835713.0000                 WELLS =        1681.0000
+     HEAD DEP BOUNDS =        6031.0096       HEAD DEP BOUNDS =          83.8714
+          SWIADDTOCH =           0.0000            SWIADDTOCH =           0.0000
+
+            TOTAL IN =   122841744.0096              TOTAL IN =        1764.8714
+
+          OUT:                                     OUT:
+          ----                                     ----
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+               WELLS =       18250.0000                 WELLS =         250.0000
+     HEAD DEP BOUNDS =   122823494.0418       HEAD DEP BOUNDS =        1514.8714
+          SWIADDTOCH =           0.0000            SWIADDTOCH =           0.0000
+
+           TOTAL OUT =   122841744.0418             TOTAL OUT =        1764.8714
+
+            IN - OUT =      -3.2244E-02              IN - OUT =      -4.1852E-06
+
+ PERCENT DISCREPANCY =          -0.00     PERCENT DISCREPANCY =          -0.00
+
+
+          TIME SUMMARY AT END OF TIME STEP     2 IN STRESS PERIOD      2
+                    SECONDS     MINUTES      HOURS       DAYS        YEARS
+                    -----------------------------------------------------------
+   TIME STEP LENGTH 3.15360E+06  52560.      876.00      36.500     9.99316E-02
+ STRESS PERIOD TIME 6.30720E+06 1.05120E+05  1752.0      73.000     0.19986    
+         TOTAL TIME 6.31351E+09 1.05225E+08 1.75375E+06  73073.      200.06    
+ 
+ 
+ SOLVING FOR HEAD 
+
+ OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP     3
+    PRINT BUDGET
+    SAVE HEAD FOR ALL LAYERS
+ SOLVING FOR ZETA FOR LAYER     1 ZONE     2
+
+     636 UPPER PART EQS.       638 LOWER PART EQS.    BAND WIDTH + 1 =     27
+ STRESS PERIOD=   2 TIMESTEP=    3 LAYER=   1 ZONE=   2 ACTIVE CELLS= 1274 NUMBER OF EQUATIONS=    1274
+ SOLVING FOR ZETA FOR LAYER     2 ZONE     2
+
+     627 UPPER PART EQS.       636 LOWER PART EQS.    BAND WIDTH + 1 =     36
+ STRESS PERIOD=   2 TIMESTEP=    3 LAYER=   2 ZONE=   2 ACTIVE CELLS= 1263 NUMBER OF EQUATIONS=    1263
+ UBUDSV SAVING "      ZETASRF  1" ON UNIT 55 AT TIME STEP 3, STRESS PERIOD 2
+
+
+                      VOLUMETRIC SWI ZONE BUDGET FOR ENTIRE MODEL
+                     AT END OF TIME STEP    3 IN STRESS PERIOD   2
+                                      ZONE     1
+  -----------------------------------------------------------------------------------
+
+        CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+        ------------------                 ------------------------
+
+              IN:                                      IN:
+              ---                                      ---
+             BOUNDARIES =   122896960.0000            BOUNDARIES =        1680.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =      456282.1075           ZONE CHANGE =         171.7242
+       ZONE CHG TIP/TOE =      406837.2819      ZONE CHG TIP/TOE =           2.0885
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+               TOTAL IN =   123760079.3894              TOTAL IN =        1853.8127
+
+             OUT:                                     OUT:
+             ----                                     ----
+             BOUNDARIES =   105249982.6251            BOUNDARIES =        1766.4338
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =    18831103.2367           ZONE CHANGE =          85.2935
+       ZONE CHG TIP/TOE =      417480.8810      ZONE CHG TIP/TOE =           2.0885
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+              TOTAL OUT =   124498566.7427             TOTAL OUT =        1853.8158
+
+               IN - OUT =     -738487.3533              IN - OUT =      -3.1133E-03
+
+    PERCENT DISCREPANCY =          -0.59     PERCENT DISCREPANCY =          -0.00
+
+
+
+                      VOLUMETRIC SWI ZONE BUDGET FOR ENTIRE MODEL
+                     AT END OF TIME STEP    3 IN STRESS PERIOD   2
+                                      ZONE     2
+  -----------------------------------------------------------------------------------
+
+        CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+        ------------------                 ------------------------
+
+              IN:                                      IN:
+              ---                                      ---
+             BOUNDARIES =        9185.8434            BOUNDARIES =          86.4338
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =    18790313.5281           ZONE CHANGE =          84.9384
+       ZONE CHG TIP/TOE =     1156011.4064      ZONE CHG TIP/TOE =           2.0885
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+               TOTAL IN =    19955510.7779              TOTAL IN =         173.4607
+
+             OUT:                                     OUT:
+             ----                                     ----
+             BOUNDARIES =    17656163.2506            BOUNDARIES =           0.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =     1194812.6330           ZONE CHANGE =         171.7242
+       ZONE CHG TIP/TOE =      366047.5733      ZONE CHG TIP/TOE =           1.7334
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+              TOTAL OUT =    19217023.4569             TOTAL OUT =         173.4576
+
+               IN - OUT =      738487.3211              IN - OUT =       3.1133E-03
+
+    PERCENT DISCREPANCY =           3.77     PERCENT DISCREPANCY =           0.00
+
+
+ HEAD WILL BE SAVED ON UNIT   51 AT END OF TIME STEP     3 IN STRESS PERIOD      2
+
+
+
+  -------------------------------------------------------------------------------------
+  VOLUMETRIC BUDGET FOR ENTIRE MODEL AT END OF TIME STEP    3 IN STRESS PERIOD      2
+  -------------------------------------------------------------------------------------
+
+     CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+     ------------------                 ------------------------
+
+           IN:                                      IN:
+           ---                                      ---
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+               WELLS =   122897069.5000                 WELLS =        1681.0000
+     HEAD DEP BOUNDS =        9185.8434       HEAD DEP BOUNDS =          86.4338
+          SWIADDTOCH =           0.0000            SWIADDTOCH =           0.0000
+
+            TOTAL IN =   122906255.3434              TOTAL IN =        1767.4338
+
+          OUT:                                     OUT:
+          ----                                     ----
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+               WELLS =       27375.0000                 WELLS =         250.0000
+     HEAD DEP BOUNDS =   122878880.3756       HEAD DEP BOUNDS =        1517.4338
+          SWIADDTOCH =           0.0000            SWIADDTOCH =           0.0000
+
+           TOTAL OUT =   122906255.3756             TOTAL OUT =        1767.4338
+
+            IN - OUT =      -3.2245E-02              IN - OUT =      -7.4938E-09
+
+ PERCENT DISCREPANCY =          -0.00     PERCENT DISCREPANCY =          -0.00
+
+
+          TIME SUMMARY AT END OF TIME STEP     3 IN STRESS PERIOD      2
+                    SECONDS     MINUTES      HOURS       DAYS        YEARS
+                    -----------------------------------------------------------
+   TIME STEP LENGTH 3.15360E+06  52560.      876.00      36.500     9.99316E-02
+ STRESS PERIOD TIME 9.46080E+06 1.57680E+05  2628.0      109.50     0.29979    
+         TOTAL TIME 6.31666E+09 1.05278E+08 1.75463E+06  73110.      200.16    
+ 
+ 
+ SOLVING FOR HEAD 
+
+ OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP     4
+    PRINT BUDGET
+    SAVE HEAD FOR ALL LAYERS
+ SOLVING FOR ZETA FOR LAYER     1 ZONE     2
+
+     630 UPPER PART EQS.       635 LOWER PART EQS.    BAND WIDTH + 1 =     31
+ STRESS PERIOD=   2 TIMESTEP=    4 LAYER=   1 ZONE=   2 ACTIVE CELLS= 1265 NUMBER OF EQUATIONS=    1265
+ SOLVING FOR ZETA FOR LAYER     2 ZONE     2
+
+     629 UPPER PART EQS.       636 LOWER PART EQS.    BAND WIDTH + 1 =     36
+ STRESS PERIOD=   2 TIMESTEP=    4 LAYER=   2 ZONE=   2 ACTIVE CELLS= 1265 NUMBER OF EQUATIONS=    1265
+ UBUDSV SAVING "      ZETASRF  1" ON UNIT 55 AT TIME STEP 4, STRESS PERIOD 2
+
+
+                      VOLUMETRIC SWI ZONE BUDGET FOR ENTIRE MODEL
+                     AT END OF TIME STEP    4 IN STRESS PERIOD   2
+                                      ZONE     1
+  -----------------------------------------------------------------------------------
+
+        CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+        ------------------                 ------------------------
+
+              IN:                                      IN:
+              ---                                      ---
+             BOUNDARIES =   122958280.0000            BOUNDARIES =        1680.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =      462435.0664           ZONE CHANGE =         168.5742
+       ZONE CHG TIP/TOE =      406972.6165      ZONE CHG TIP/TOE =           3.7078
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+               TOTAL IN =   123827687.6829              TOTAL IN =        1852.2820
+
+             OUT:                                     OUT:
+             ----                                     ----
+             BOUNDARIES =   105314544.6827            BOUNDARIES =        1768.8235
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =    18834014.2423           ZONE CHANGE =          79.7536
+       ZONE CHG TIP/TOE =      417616.2156      ZONE CHG TIP/TOE =           3.7078
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+              TOTAL OUT =   124566175.1406             TOTAL OUT =        1852.2849
+
+               IN - OUT =     -738487.4578              IN - OUT =      -2.8615E-03
+
+    PERCENT DISCREPANCY =          -0.59     PERCENT DISCREPANCY =          -0.00
+
+
+
+                      VOLUMETRIC SWI ZONE BUDGET FOR ENTIRE MODEL
+                     AT END OF TIME STEP    4 IN STRESS PERIOD   2
+                                      ZONE     2
+  -----------------------------------------------------------------------------------
+
+        CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+        ------------------                 ------------------------
+
+              IN:                                      IN:
+              ---                                      ---
+             BOUNDARIES =       12427.9011            BOUNDARIES =          88.8235
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =    18793208.5472           ZONE CHANGE =          79.3156
+       ZONE CHG TIP/TOE =     1156146.7410      ZONE CHG TIP/TOE =           3.7078
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+               TOTAL IN =    19961783.1893              TOTAL IN =         171.8469
+
+             OUT:                                     OUT:
+             ----                                     ----
+             BOUNDARIES =    17656163.2506            BOUNDARIES =           0.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =     1200965.5918           ZONE CHANGE =         168.5742
+       ZONE CHG TIP/TOE =      366166.9214      ZONE CHG TIP/TOE =           3.2698
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+              TOTAL OUT =    19223295.7638             TOTAL OUT =         171.8440
+
+               IN - OUT =      738487.4255              IN - OUT =       2.8615E-03
+
+    PERCENT DISCREPANCY =           3.77     PERCENT DISCREPANCY =           0.00
+
+
+ HEAD WILL BE SAVED ON UNIT   51 AT END OF TIME STEP     4 IN STRESS PERIOD      2
+
+
+
+  -------------------------------------------------------------------------------------
+  VOLUMETRIC BUDGET FOR ENTIRE MODEL AT END OF TIME STEP    4 IN STRESS PERIOD      2
+  -------------------------------------------------------------------------------------
+
+     CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+     ------------------                 ------------------------
+
+           IN:                                      IN:
+           ---                                      ---
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+               WELLS =   122958426.0000                 WELLS =        1681.0000
+     HEAD DEP BOUNDS =       12427.9011       HEAD DEP BOUNDS =          88.8235
+          SWIADDTOCH =           0.0000            SWIADDTOCH =           0.0000
+
+            TOTAL IN =   122970853.9011              TOTAL IN =        1769.8235
+
+          OUT:                                     OUT:
+          ----                                     ----
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+               WELLS =       36500.0000                 WELLS =         250.0000
+     HEAD DEP BOUNDS =   122934353.9333       HEAD DEP BOUNDS =        1519.8235
+          SWIADDTOCH =           0.0000            SWIADDTOCH =           0.0000
+
+           TOTAL OUT =   122970853.9333             TOTAL OUT =        1769.8235
+
+            IN - OUT =      -3.2245E-02              IN - OUT =      -1.4552E-11
+
+ PERCENT DISCREPANCY =          -0.00     PERCENT DISCREPANCY =          -0.00
+
+
+          TIME SUMMARY AT END OF TIME STEP     4 IN STRESS PERIOD      2
+                    SECONDS     MINUTES      HOURS       DAYS        YEARS
+                    -----------------------------------------------------------
+   TIME STEP LENGTH 3.15360E+06  52560.      876.00      36.500     9.99316E-02
+ STRESS PERIOD TIME 1.26144E+07 2.10240E+05  3504.0      146.00     0.39973    
+         TOTAL TIME 6.31981E+09 1.05330E+08 1.75550E+06  73146.      200.26    
+ 
+ 
+ SOLVING FOR HEAD 
+
+ OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP     5
+    PRINT BUDGET
+    SAVE HEAD FOR ALL LAYERS
+ SOLVING FOR ZETA FOR LAYER     1 ZONE     2
+
+     634 UPPER PART EQS.       624 LOWER PART EQS.    BAND WIDTH + 1 =     33
+ STRESS PERIOD=   2 TIMESTEP=    5 LAYER=   1 ZONE=   2 ACTIVE CELLS= 1258 NUMBER OF EQUATIONS=    1258
+ SOLVING FOR ZETA FOR LAYER     2 ZONE     2
+
+     629 UPPER PART EQS.       636 LOWER PART EQS.    BAND WIDTH + 1 =     36
+ STRESS PERIOD=   2 TIMESTEP=    5 LAYER=   2 ZONE=   2 ACTIVE CELLS= 1265 NUMBER OF EQUATIONS=    1265
+ UBUDSV SAVING "      ZETASRF  1" ON UNIT 55 AT TIME STEP 5, STRESS PERIOD 2
+
+
+                      VOLUMETRIC SWI ZONE BUDGET FOR ENTIRE MODEL
+                     AT END OF TIME STEP    5 IN STRESS PERIOD   2
+                                      ZONE     1
+  -----------------------------------------------------------------------------------
+
+        CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+        ------------------                 ------------------------
+
+              IN:                                      IN:
+              ---                                      ---
+             BOUNDARIES =   123019600.0000            BOUNDARIES =        1680.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =      468503.4708           ZONE CHANGE =         166.2577
+       ZONE CHG TIP/TOE =      407163.9700      ZONE CHG TIP/TOE =           5.2426
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+               TOTAL IN =   123895267.4408              TOTAL IN =        1851.5002
+
+             OUT:                                     OUT:
+             ----                                     ----
+             BOUNDARIES =   105379189.5578            BOUNDARIES =        1771.0925
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =    18836757.8648           ZONE CHANGE =          75.1677
+       ZONE CHG TIP/TOE =      417807.5691      ZONE CHG TIP/TOE =           5.2426
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+              TOTAL OUT =   124633754.9917             TOTAL OUT =        1851.5028
+
+               IN - OUT =     -738487.5508              IN - OUT =      -2.5488E-03
+
+    PERCENT DISCREPANCY =          -0.59     PERCENT DISCREPANCY =          -0.00
+
+
+
+                      VOLUMETRIC SWI ZONE BUDGET FOR ENTIRE MODEL
+                     AT END OF TIME STEP    5 IN STRESS PERIOD   2
+                                      ZONE     2
+  -----------------------------------------------------------------------------------
+
+        CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+        ------------------                 ------------------------
+
+              IN:                                      IN:
+              ---                                      ---
+             BOUNDARIES =       15752.7761            BOUNDARIES =          91.0925
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =    18795950.5164           ZONE CHANGE =          75.1224
+       ZONE CHG TIP/TOE =     1156338.0946      ZONE CHG TIP/TOE =           5.2426
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+               TOTAL IN =    19968041.3870              TOTAL IN =         171.4575
+
+             OUT:                                     OUT:
+             ----                                     ----
+             BOUNDARIES =    17656163.2506            BOUNDARIES =           0.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =     1207033.9963           ZONE CHANGE =         166.2577
+       ZONE CHG TIP/TOE =      366356.6217      ZONE CHG TIP/TOE =           5.1973
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+              TOTAL OUT =    19229553.8685             TOTAL OUT =         171.4549
+
+               IN - OUT =      738487.5186              IN - OUT =       2.5488E-03
+
+    PERCENT DISCREPANCY =           3.77     PERCENT DISCREPANCY =           0.00
+
+
+ HEAD WILL BE SAVED ON UNIT   51 AT END OF TIME STEP     5 IN STRESS PERIOD      2
+
+
+
+  -------------------------------------------------------------------------------------
+  VOLUMETRIC BUDGET FOR ENTIRE MODEL AT END OF TIME STEP    5 IN STRESS PERIOD      2
+  -------------------------------------------------------------------------------------
+
+     CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+     ------------------                 ------------------------
+
+           IN:                                      IN:
+           ---                                      ---
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+               WELLS =   123019782.5000                 WELLS =        1681.0000
+     HEAD DEP BOUNDS =       15752.7761       HEAD DEP BOUNDS =          91.0925
+          SWIADDTOCH =           0.0000            SWIADDTOCH =           0.0000
+
+            TOTAL IN =   123035535.2761              TOTAL IN =        1772.0925
+
+          OUT:                                     OUT:
+          ----                                     ----
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+               WELLS =       45625.0000                 WELLS =         250.0000
+     HEAD DEP BOUNDS =   122989910.3083       HEAD DEP BOUNDS =        1522.0925
+          SWIADDTOCH =           0.0000            SWIADDTOCH =           0.0000
+
+           TOTAL OUT =   123035535.3083             TOTAL OUT =        1772.0925
+
+            IN - OUT =      -3.2245E-02              IN - OUT =      -2.2737E-13
+
+ PERCENT DISCREPANCY =          -0.00     PERCENT DISCREPANCY =          -0.00
+
+
+          TIME SUMMARY AT END OF TIME STEP     5 IN STRESS PERIOD      2
+                    SECONDS     MINUTES      HOURS       DAYS        YEARS
+                    -----------------------------------------------------------
+   TIME STEP LENGTH 3.15360E+06  52560.      876.00      36.500     9.99316E-02
+ STRESS PERIOD TIME 1.57680E+07 2.62800E+05  4380.0      182.50     0.49966    
+         TOTAL TIME 6.32297E+09 1.05383E+08 1.75638E+06  73182.      200.36    
+ 
+ 
+ SOLVING FOR HEAD 
+
+ OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP     6
+    PRINT BUDGET
+    SAVE HEAD FOR ALL LAYERS
+ SOLVING FOR ZETA FOR LAYER     1 ZONE     2
+
+     638 UPPER PART EQS.       640 LOWER PART EQS.    BAND WIDTH + 1 =     27
+ STRESS PERIOD=   2 TIMESTEP=    6 LAYER=   1 ZONE=   2 ACTIVE CELLS= 1278 NUMBER OF EQUATIONS=    1278
+ SOLVING FOR ZETA FOR LAYER     2 ZONE     2
+
+     629 UPPER PART EQS.       636 LOWER PART EQS.    BAND WIDTH + 1 =     36
+ STRESS PERIOD=   2 TIMESTEP=    6 LAYER=   2 ZONE=   2 ACTIVE CELLS= 1265 NUMBER OF EQUATIONS=    1265
+ UBUDSV SAVING "      ZETASRF  1" ON UNIT 55 AT TIME STEP 6, STRESS PERIOD 2
+
+
+                      VOLUMETRIC SWI ZONE BUDGET FOR ENTIRE MODEL
+                     AT END OF TIME STEP    6 IN STRESS PERIOD   2
+                                      ZONE     1
+  -----------------------------------------------------------------------------------
+
+        CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+        ------------------                 ------------------------
+
+              IN:                                      IN:
+              ---                                      ---
+             BOUNDARIES =   123080920.0000            BOUNDARIES =        1680.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =      474543.6816           ZONE CHANGE =         165.4852
+       ZONE CHG TIP/TOE =      407251.5059      ZONE CHG TIP/TOE =           2.3982
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+               TOTAL IN =   123962715.1875              TOTAL IN =        1847.8835
+
+             OUT:                                     OUT:
+             ----                                     ----
+             BOUNDARIES =   105443911.9206            BOUNDARIES =        1773.2154
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =    18839395.7996           ZONE CHANGE =          72.2722
+       ZONE CHG TIP/TOE =      417895.1050      ZONE CHG TIP/TOE =           2.3982
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+              TOTAL OUT =   124701202.8252             TOTAL OUT =        1847.8859
+
+               IN - OUT =     -738487.6377              IN - OUT =      -2.3815E-03
+
+    PERCENT DISCREPANCY =          -0.59     PERCENT DISCREPANCY =          -0.00
+
+
+
+                      VOLUMETRIC SWI ZONE BUDGET FOR ENTIRE MODEL
+                     AT END OF TIME STEP    6 IN STRESS PERIOD   2
+                                      ZONE     2
+  -----------------------------------------------------------------------------------
+
+        CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+        ------------------                 ------------------------
+
+              IN:                                      IN:
+              ---                                      ---
+             BOUNDARIES =       19155.1390            BOUNDARIES =          93.2154
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =    18798588.4512           ZONE CHANGE =          72.2722
+       ZONE CHG TIP/TOE =     1156425.6304      ZONE CHG TIP/TOE =           2.3982
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+               TOTAL IN =    19974169.2206              TOTAL IN =         167.8859
+
+             OUT:                                     OUT:
+             ----                                     ----
+             BOUNDARIES =    17656163.2506            BOUNDARIES =           0.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =     1213074.2070           ZONE CHANGE =         165.4852
+       ZONE CHG TIP/TOE =      366444.1575      ZONE CHG TIP/TOE =           2.3982
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+              TOTAL OUT =    19235681.6151             TOTAL OUT =         167.8835
+
+               IN - OUT =      738487.6055              IN - OUT =       2.3815E-03
+
+    PERCENT DISCREPANCY =           3.77     PERCENT DISCREPANCY =           0.00
+
+
+ HEAD WILL BE SAVED ON UNIT   51 AT END OF TIME STEP     6 IN STRESS PERIOD      2
+
+
+
+  -------------------------------------------------------------------------------------
+  VOLUMETRIC BUDGET FOR ENTIRE MODEL AT END OF TIME STEP    6 IN STRESS PERIOD      2
+  -------------------------------------------------------------------------------------
+
+     CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+     ------------------                 ------------------------
+
+           IN:                                      IN:
+           ---                                      ---
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+               WELLS =   123081139.0000                 WELLS =        1681.0000
+     HEAD DEP BOUNDS =       19155.1390       HEAD DEP BOUNDS =          93.2154
+          SWIADDTOCH =           0.0000            SWIADDTOCH =           0.0000
+
+            TOTAL IN =   123100294.1390              TOTAL IN =        1774.2154
+
+          OUT:                                     OUT:
+          ----                                     ----
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+               WELLS =       54750.0000                 WELLS =         250.0000
+     HEAD DEP BOUNDS =   123045544.1712       HEAD DEP BOUNDS =        1524.2154
+          SWIADDTOCH =           0.0000            SWIADDTOCH =           0.0000
+
+           TOTAL OUT =   123100294.1712             TOTAL OUT =        1774.2154
+
+            IN - OUT =      -3.2245E-02              IN - OUT =       1.5916E-12
+
+ PERCENT DISCREPANCY =          -0.00     PERCENT DISCREPANCY =           0.00
+
+
+          TIME SUMMARY AT END OF TIME STEP     6 IN STRESS PERIOD      2
+                    SECONDS     MINUTES      HOURS       DAYS        YEARS
+                    -----------------------------------------------------------
+   TIME STEP LENGTH 3.15360E+06  52560.      876.00      36.500     9.99316E-02
+ STRESS PERIOD TIME 1.89216E+07 3.15360E+05  5256.0      219.00     0.59959    
+         TOTAL TIME 6.32612E+09 1.05435E+08 1.75726E+06  73219.      200.46    
+ 
+ 
+ SOLVING FOR HEAD 
+
+ OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP     7
+    PRINT BUDGET
+    SAVE HEAD FOR ALL LAYERS
+ SOLVING FOR ZETA FOR LAYER     1 ZONE     2
+
+     642 UPPER PART EQS.       648 LOWER PART EQS.    BAND WIDTH + 1 =     31
+ STRESS PERIOD=   2 TIMESTEP=    7 LAYER=   1 ZONE=   2 ACTIVE CELLS= 1290 NUMBER OF EQUATIONS=    1290
+ SOLVING FOR ZETA FOR LAYER     2 ZONE     2
+
+     629 UPPER PART EQS.       636 LOWER PART EQS.    BAND WIDTH + 1 =     36
+ STRESS PERIOD=   2 TIMESTEP=    7 LAYER=   2 ZONE=   2 ACTIVE CELLS= 1265 NUMBER OF EQUATIONS=    1265
+ UBUDSV SAVING "      ZETASRF  1" ON UNIT 55 AT TIME STEP 7, STRESS PERIOD 2
+
+
+                      VOLUMETRIC SWI ZONE BUDGET FOR ENTIRE MODEL
+                     AT END OF TIME STEP    7 IN STRESS PERIOD   2
+                                      ZONE     1
+  -----------------------------------------------------------------------------------
+
+        CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+        ------------------                 ------------------------
+
+              IN:                                      IN:
+              ---                                      ---
+             BOUNDARIES =   123142240.0000            BOUNDARIES =        1680.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =      480530.9321           ZONE CHANGE =         164.0343
+       ZONE CHG TIP/TOE =      407289.1467      ZONE CHG TIP/TOE =           1.0313
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+               TOTAL IN =   124030060.0788              TOTAL IN =        1845.0655
+
+             OUT:                                     OUT:
+             ----                                     ----
+             BOUNDARIES =   105508705.8109            BOUNDARIES =        1775.1751
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =    18841909.2556           ZONE CHANGE =          68.8618
+       ZONE CHG TIP/TOE =      417932.7458      ZONE CHG TIP/TOE =           1.0313
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+              TOTAL OUT =   124768547.8122             TOTAL OUT =        1845.0681
+
+               IN - OUT =     -738487.7334              IN - OUT =      -2.6217E-03
+
+    PERCENT DISCREPANCY =          -0.59     PERCENT DISCREPANCY =          -0.00
+
+
+
+                      VOLUMETRIC SWI ZONE BUDGET FOR ENTIRE MODEL
+                     AT END OF TIME STEP    7 IN STRESS PERIOD   2
+                                      ZONE     2
+  -----------------------------------------------------------------------------------
+
+        CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+        ------------------                 ------------------------
+
+              IN:                                      IN:
+              ---                                      ---
+             BOUNDARIES =       22629.0292            BOUNDARIES =          95.1751
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =    18801091.4099           ZONE CHANGE =          68.5742
+       ZONE CHG TIP/TOE =     1156463.2713      ZONE CHG TIP/TOE =           1.0313
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+               TOTAL IN =    19980183.7103              TOTAL IN =         164.7805
+
+             OUT:                                     OUT:
+             ----                                     ----
+             BOUNDARIES =    17656163.2506            BOUNDARIES =           0.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =     1219061.4575           ZONE CHANGE =         164.0343
+       ZONE CHG TIP/TOE =      366471.3011      ZONE CHG TIP/TOE =           0.7437
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+              TOTAL OUT =    19241696.0092             TOTAL OUT =         164.7779
+
+               IN - OUT =      738487.7012              IN - OUT =       2.6217E-03
+
+    PERCENT DISCREPANCY =           3.77     PERCENT DISCREPANCY =           0.00
+
+
+ HEAD WILL BE SAVED ON UNIT   51 AT END OF TIME STEP     7 IN STRESS PERIOD      2
+
+
+
+  -------------------------------------------------------------------------------------
+  VOLUMETRIC BUDGET FOR ENTIRE MODEL AT END OF TIME STEP    7 IN STRESS PERIOD      2
+  -------------------------------------------------------------------------------------
+
+     CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+     ------------------                 ------------------------
+
+           IN:                                      IN:
+           ---                                      ---
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+               WELLS =   123142495.5000                 WELLS =        1681.0000
+     HEAD DEP BOUNDS =       22629.0292       HEAD DEP BOUNDS =          95.1751
+          SWIADDTOCH =           0.0000            SWIADDTOCH =           0.0000
+
+            TOTAL IN =   123165124.5292              TOTAL IN =        1776.1751
+
+          OUT:                                     OUT:
+          ----                                     ----
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+               WELLS =       63875.0000                 WELLS =         250.0000
+     HEAD DEP BOUNDS =   123101249.5614       HEAD DEP BOUNDS =        1526.1751
+          SWIADDTOCH =           0.0000            SWIADDTOCH =           0.0000
+
+           TOTAL OUT =   123165124.5614             TOTAL OUT =        1776.1751
+
+            IN - OUT =      -3.2245E-02              IN - OUT =       6.8212E-13
+
+ PERCENT DISCREPANCY =          -0.00     PERCENT DISCREPANCY =           0.00
+
+
+          TIME SUMMARY AT END OF TIME STEP     7 IN STRESS PERIOD      2
+                    SECONDS     MINUTES      HOURS       DAYS        YEARS
+                    -----------------------------------------------------------
+   TIME STEP LENGTH 3.15360E+06  52560.      876.00      36.500     9.99316E-02
+ STRESS PERIOD TIME 2.20752E+07 3.67920E+05  6132.0      255.50     0.69952    
+         TOTAL TIME 6.32928E+09 1.05488E+08 1.75813E+06  73256.      200.56    
+ 
+ 
+ SOLVING FOR HEAD 
+
+ OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP     8
+    PRINT BUDGET
+    SAVE HEAD FOR ALL LAYERS
+ SOLVING FOR ZETA FOR LAYER     1 ZONE     2
+
+     634 UPPER PART EQS.       643 LOWER PART EQS.    BAND WIDTH + 1 =     33
+ STRESS PERIOD=   2 TIMESTEP=    8 LAYER=   1 ZONE=   2 ACTIVE CELLS= 1277 NUMBER OF EQUATIONS=    1277
+ SOLVING FOR ZETA FOR LAYER     2 ZONE     2
+
+     629 UPPER PART EQS.       636 LOWER PART EQS.    BAND WIDTH + 1 =     36
+ STRESS PERIOD=   2 TIMESTEP=    8 LAYER=   2 ZONE=   2 ACTIVE CELLS= 1265 NUMBER OF EQUATIONS=    1265
+ UBUDSV SAVING "      ZETASRF  1" ON UNIT 55 AT TIME STEP 8, STRESS PERIOD 2
+
+
+                      VOLUMETRIC SWI ZONE BUDGET FOR ENTIRE MODEL
+                     AT END OF TIME STEP    8 IN STRESS PERIOD   2
+                                      ZONE     1
+  -----------------------------------------------------------------------------------
+
+        CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+        ------------------                 ------------------------
+
+              IN:                                      IN:
+              ---                                      ---
+             BOUNDARIES =   123203560.0000            BOUNDARIES =        1680.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =      486435.7596           ZONE CHANGE =         161.7761
+       ZONE CHG TIP/TOE =      407405.7885      ZONE CHG TIP/TOE =           3.1957
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+               TOTAL IN =   124097401.5481              TOTAL IN =        1844.9718
+
+             OUT:                                     OUT:
+             ----                                     ----
+             BOUNDARIES =   105573569.8961            BOUNDARIES =        1777.0982
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =    18844270.2055           ZONE CHANGE =          64.6836
+       ZONE CHG TIP/TOE =      418049.3877      ZONE CHG TIP/TOE =           3.1957
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+              TOTAL OUT =   124835889.4892             TOTAL OUT =        1844.9775
+
+               IN - OUT =     -738487.9411              IN - OUT =      -5.6889E-03
+
+    PERCENT DISCREPANCY =          -0.59     PERCENT DISCREPANCY =          -0.00
+
+
+
+                      VOLUMETRIC SWI ZONE BUDGET FOR ENTIRE MODEL
+                     AT END OF TIME STEP    8 IN STRESS PERIOD   2
+                                      ZONE     2
+  -----------------------------------------------------------------------------------
+
+        CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+        ------------------                 ------------------------
+
+              IN:                                      IN:
+              ---                                      ---
+             BOUNDARIES =       26173.1144            BOUNDARIES =          97.0982
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =    18803443.0566           ZONE CHANGE =          64.4287
+       ZONE CHG TIP/TOE =     1156580.0207      ZONE CHG TIP/TOE =           3.1986
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+               TOTAL IN =    19986196.1916              TOTAL IN =         164.7255
+
+             OUT:                                     OUT:
+             ----                                     ----
+             BOUNDARIES =    17656163.2506            BOUNDARIES =           0.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =     1224966.3926           ZONE CHANGE =         161.7790
+       ZONE CHG TIP/TOE =      366578.6396      ZONE CHG TIP/TOE =           2.9408
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+              TOTAL OUT =    19247708.2828             TOTAL OUT =         164.7198
+
+               IN - OUT =      738487.9088              IN - OUT =       5.6889E-03
+
+    PERCENT DISCREPANCY =           3.76     PERCENT DISCREPANCY =           0.00
+
+
+ HEAD WILL BE SAVED ON UNIT   51 AT END OF TIME STEP     8 IN STRESS PERIOD      2
+
+
+
+  -------------------------------------------------------------------------------------
+  VOLUMETRIC BUDGET FOR ENTIRE MODEL AT END OF TIME STEP    8 IN STRESS PERIOD      2
+  -------------------------------------------------------------------------------------
+
+     CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+     ------------------                 ------------------------
+
+           IN:                                      IN:
+           ---                                      ---
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+               WELLS =   123203852.0000                 WELLS =        1681.0000
+     HEAD DEP BOUNDS =       26173.1144       HEAD DEP BOUNDS =          97.0982
+          SWIADDTOCH =           0.0000            SWIADDTOCH =           0.0000
+
+            TOTAL IN =   123230025.1144              TOTAL IN =        1778.0982
+
+          OUT:                                     OUT:
+          ----                                     ----
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+               WELLS =       73000.0000                 WELLS =         250.0000
+     HEAD DEP BOUNDS =   123157025.1466       HEAD DEP BOUNDS =        1528.0982
+          SWIADDTOCH =           0.0000            SWIADDTOCH =           0.0000
+
+           TOTAL OUT =   123230025.1466             TOTAL OUT =        1778.0982
+
+            IN - OUT =      -3.2245E-02              IN - OUT =      -2.2737E-13
+
+ PERCENT DISCREPANCY =          -0.00     PERCENT DISCREPANCY =          -0.00
+
+
+          TIME SUMMARY AT END OF TIME STEP     8 IN STRESS PERIOD      2
+                    SECONDS     MINUTES      HOURS       DAYS        YEARS
+                    -----------------------------------------------------------
+   TIME STEP LENGTH 3.15360E+06  52560.      876.00      36.500     9.99316E-02
+ STRESS PERIOD TIME 2.52288E+07 4.20480E+05  7008.0      292.00     0.79945    
+         TOTAL TIME 6.33243E+09 1.05540E+08 1.75901E+06  73292.      200.66    
+ 
+ 
+ SOLVING FOR HEAD 
+
+ OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP     9
+    PRINT BUDGET
+    SAVE HEAD FOR ALL LAYERS
+ SOLVING FOR ZETA FOR LAYER     1 ZONE     2
+
+     636 UPPER PART EQS.       644 LOWER PART EQS.    BAND WIDTH + 1 =     32
+ STRESS PERIOD=   2 TIMESTEP=    9 LAYER=   1 ZONE=   2 ACTIVE CELLS= 1280 NUMBER OF EQUATIONS=    1280
+ SOLVING FOR ZETA FOR LAYER     2 ZONE     2
+
+     629 UPPER PART EQS.       635 LOWER PART EQS.    BAND WIDTH + 1 =     36
+ STRESS PERIOD=   2 TIMESTEP=    9 LAYER=   2 ZONE=   2 ACTIVE CELLS= 1264 NUMBER OF EQUATIONS=    1264
+ UBUDSV SAVING "      ZETASRF  1" ON UNIT 55 AT TIME STEP 9, STRESS PERIOD 2
+
+
+                      VOLUMETRIC SWI ZONE BUDGET FOR ENTIRE MODEL
+                     AT END OF TIME STEP    9 IN STRESS PERIOD   2
+                                      ZONE     1
+  -----------------------------------------------------------------------------------
+
+        CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+        ------------------                 ------------------------
+
+              IN:                                      IN:
+              ---                                      ---
+             BOUNDARIES =   123264880.0000            BOUNDARIES =        1680.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =      492291.3256           ZONE CHANGE =         160.4265
+       ZONE CHG TIP/TOE =      407536.8742      ZONE CHG TIP/TOE =           3.5914
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+               TOTAL IN =   124164708.1999              TOTAL IN =        1844.0179
+
+             OUT:                                     OUT:
+             ----                                     ----
+             BOUNDARIES =   105638499.9216            BOUNDARIES =        1778.9048
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =    18846515.8293           ZONE CHANGE =          61.5239
+       ZONE CHG TIP/TOE =      418180.4733      ZONE CHG TIP/TOE =           3.5914
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+              TOTAL OUT =   124903196.2243             TOTAL OUT =        1844.0201
+
+               IN - OUT =     -738488.0245              IN - OUT =      -2.2847E-03
+
+    PERCENT DISCREPANCY =          -0.59     PERCENT DISCREPANCY =          -0.00
+
+
+
+                      VOLUMETRIC SWI ZONE BUDGET FOR ENTIRE MODEL
+                     AT END OF TIME STEP    9 IN STRESS PERIOD   2
+                                      ZONE     2
+  -----------------------------------------------------------------------------------
+
+        CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+        ------------------                 ------------------------
+
+              IN:                                      IN:
+              ---                                      ---
+             BOUNDARIES =       29783.1400            BOUNDARIES =          98.9048
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =    18805678.7995           ZONE CHANGE =          61.2532
+       ZONE CHG TIP/TOE =     1156711.1063      ZONE CHG TIP/TOE =           3.5914
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+               TOTAL IN =    19992173.0458              TOTAL IN =         163.7494
+
+             OUT:                                     OUT:
+             ----                                     ----
+             BOUNDARIES =    17656163.2506            BOUNDARIES =           0.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =     1230821.9587           ZONE CHANGE =         160.4265
+       ZONE CHG TIP/TOE =      366699.8443      ZONE CHG TIP/TOE =           3.3207
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+              TOTAL OUT =    19253685.0536             TOTAL OUT =         163.7471
+
+               IN - OUT =      738487.9922              IN - OUT =       2.2847E-03
+
+    PERCENT DISCREPANCY =           3.76     PERCENT DISCREPANCY =           0.00
+
+
+ HEAD WILL BE SAVED ON UNIT   51 AT END OF TIME STEP     9 IN STRESS PERIOD      2
+
+
+
+  -------------------------------------------------------------------------------------
+  VOLUMETRIC BUDGET FOR ENTIRE MODEL AT END OF TIME STEP    9 IN STRESS PERIOD      2
+  -------------------------------------------------------------------------------------
+
+     CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+     ------------------                 ------------------------
+
+           IN:                                      IN:
+           ---                                      ---
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+               WELLS =   123265208.5000                 WELLS =        1681.0000
+     HEAD DEP BOUNDS =       29783.1400       HEAD DEP BOUNDS =          98.9048
+          SWIADDTOCH =           0.0000            SWIADDTOCH =           0.0000
+
+            TOTAL IN =   123294991.6400              TOTAL IN =        1779.9048
+
+          OUT:                                     OUT:
+          ----                                     ----
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+               WELLS =       82125.0000                 WELLS =         250.0000
+     HEAD DEP BOUNDS =   123212866.6722       HEAD DEP BOUNDS =        1529.9048
+          SWIADDTOCH =           0.0000            SWIADDTOCH =           0.0000
+
+           TOTAL OUT =   123294991.6722             TOTAL OUT =        1779.9048
+
+            IN - OUT =      -3.2245E-02              IN - OUT =      -4.5475E-13
+
+ PERCENT DISCREPANCY =          -0.00     PERCENT DISCREPANCY =          -0.00
+
+
+          TIME SUMMARY AT END OF TIME STEP     9 IN STRESS PERIOD      2
+                    SECONDS     MINUTES      HOURS       DAYS        YEARS
+                    -----------------------------------------------------------
+   TIME STEP LENGTH 3.15360E+06  52560.      876.00      36.500     9.99316E-02
+ STRESS PERIOD TIME 2.83824E+07 4.73040E+05  7884.0      328.50     0.89938    
+         TOTAL TIME 6.33558E+09 1.05593E+08 1.75988E+06  73328.      200.76    
+ 
+ 
+ SOLVING FOR HEAD 
+
+ OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    10
+    PRINT BUDGET
+    SAVE HEAD FOR ALL LAYERS
+ SOLVING FOR ZETA FOR LAYER     1 ZONE     2
+
+     642 UPPER PART EQS.       638 LOWER PART EQS.    BAND WIDTH + 1 =     28
+ STRESS PERIOD=   2 TIMESTEP=   10 LAYER=   1 ZONE=   2 ACTIVE CELLS= 1280 NUMBER OF EQUATIONS=    1280
+ SOLVING FOR ZETA FOR LAYER     2 ZONE     2
+
+     629 UPPER PART EQS.       636 LOWER PART EQS.    BAND WIDTH + 1 =     36
+ STRESS PERIOD=   2 TIMESTEP=   10 LAYER=   2 ZONE=   2 ACTIVE CELLS= 1265 NUMBER OF EQUATIONS=    1265
+ UBUDSV SAVING "      ZETASRF  1" ON UNIT 55 AT TIME STEP 10, STRESS PERIOD 2
+
+
+                      VOLUMETRIC SWI ZONE BUDGET FOR ENTIRE MODEL
+                     AT END OF TIME STEP   10 IN STRESS PERIOD   2
+                                      ZONE     1
+  -----------------------------------------------------------------------------------
+
+        CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+        ------------------                 ------------------------
+
+              IN:                                      IN:
+              ---                                      ---
+             BOUNDARIES =   123326200.0000            BOUNDARIES =        1680.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =      498098.6601           ZONE CHANGE =         159.1051
+       ZONE CHG TIP/TOE =      407663.8481      ZONE CHG TIP/TOE =           3.4787
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+               TOTAL IN =   124231962.5082              TOTAL IN =        1842.5838
+
+             OUT:                                     OUT:
+             ----                                     ----
+             BOUNDARIES =   105703490.4758            BOUNDARIES =        1780.5631
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =    18848652.6818           ZONE CHANGE =          58.5439
+       ZONE CHG TIP/TOE =      418307.4472      ZONE CHG TIP/TOE =           3.4787
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+              TOTAL OUT =   124970450.6048             TOTAL OUT =        1842.5858
+
+               IN - OUT =     -738488.0966              IN - OUT =      -1.9765E-03
+
+    PERCENT DISCREPANCY =          -0.59     PERCENT DISCREPANCY =          -0.00
+
+
+
+                      VOLUMETRIC SWI ZONE BUDGET FOR ENTIRE MODEL
+                     AT END OF TIME STEP   10 IN STRESS PERIOD   2
+                                      ZONE     2
+  -----------------------------------------------------------------------------------
+
+        CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+        ------------------                 ------------------------
+
+              IN:                                      IN:
+              ---                                      ---
+             BOUNDARIES =       33453.6941            BOUNDARIES =         100.5631
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =    18807815.6519           ZONE CHANGE =          58.5439
+       ZONE CHG TIP/TOE =     1156838.0802      ZONE CHG TIP/TOE =           3.4787
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+               TOTAL IN =    19998107.4263              TOTAL IN =         162.5858
+
+             OUT:                                     OUT:
+             ----                                     ----
+             BOUNDARIES =    17656163.2506            BOUNDARIES =           0.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =     1236629.2931           ZONE CHANGE =         159.1051
+       ZONE CHG TIP/TOE =      366826.8182      ZONE CHG TIP/TOE =           3.4787
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+              TOTAL OUT =    19259619.3619             TOTAL OUT =         162.5838
+
+               IN - OUT =      738488.0644              IN - OUT =       1.9765E-03
+
+    PERCENT DISCREPANCY =           3.76     PERCENT DISCREPANCY =           0.00
+
+
+ HEAD WILL BE SAVED ON UNIT   51 AT END OF TIME STEP    10 IN STRESS PERIOD      2
+
+
+
+  -------------------------------------------------------------------------------------
+  VOLUMETRIC BUDGET FOR ENTIRE MODEL AT END OF TIME STEP   10 IN STRESS PERIOD      2
+  -------------------------------------------------------------------------------------
+
+     CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+     ------------------                 ------------------------
+
+           IN:                                      IN:
+           ---                                      ---
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+               WELLS =   123326565.0000                 WELLS =        1681.0000
+     HEAD DEP BOUNDS =       33453.6941       HEAD DEP BOUNDS =         100.5631
+          SWIADDTOCH =           0.0000            SWIADDTOCH =           0.0000
+
+            TOTAL IN =   123360018.6941              TOTAL IN =        1781.5631
+
+          OUT:                                     OUT:
+          ----                                     ----
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+               WELLS =       91250.0000                 WELLS =         250.0000
+     HEAD DEP BOUNDS =   123268768.7264       HEAD DEP BOUNDS =        1531.5631
+          SWIADDTOCH =           0.0000            SWIADDTOCH =           0.0000
+
+           TOTAL OUT =   123360018.7264             TOTAL OUT =        1781.5631
+
+            IN - OUT =      -3.2245E-02              IN - OUT =      -2.2737E-13
+
+ PERCENT DISCREPANCY =          -0.00     PERCENT DISCREPANCY =          -0.00
+
+
+          TIME SUMMARY AT END OF TIME STEP    10 IN STRESS PERIOD      2
+                    SECONDS     MINUTES      HOURS       DAYS        YEARS
+                    -----------------------------------------------------------
+   TIME STEP LENGTH 3.15360E+06  52560.      876.00      36.500     9.99316E-02
+ STRESS PERIOD TIME 3.15360E+07 5.25600E+05  8760.0      365.00     0.99932    
+         TOTAL TIME 6.33874E+09 1.05646E+08 1.76076E+06  73365.      200.86    
+ 
+ 
+ SOLVING FOR HEAD 
+
+ OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    11
+    SAVE HEAD FOR ALL LAYERS
+ SOLVING FOR ZETA FOR LAYER     1 ZONE     2
+
+     646 UPPER PART EQS.       650 LOWER PART EQS.    BAND WIDTH + 1 =     29
+ STRESS PERIOD=   2 TIMESTEP=   11 LAYER=   1 ZONE=   2 ACTIVE CELLS= 1296 NUMBER OF EQUATIONS=    1296
+ SOLVING FOR ZETA FOR LAYER     2 ZONE     2
+
+     629 UPPER PART EQS.       636 LOWER PART EQS.    BAND WIDTH + 1 =     36
+ STRESS PERIOD=   2 TIMESTEP=   11 LAYER=   2 ZONE=   2 ACTIVE CELLS= 1265 NUMBER OF EQUATIONS=    1265
+ UBUDSV SAVING "      ZETASRF  1" ON UNIT 55 AT TIME STEP 11, STRESS PERIOD 2
+
+ HEAD WILL BE SAVED ON UNIT   51 AT END OF TIME STEP    11 IN STRESS PERIOD      2
+ 
+ SOLVING FOR HEAD 
+
+ OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP   119
+    SAVE HEAD FOR ALL LAYERS
+ SOLVING FOR ZETA FOR LAYER     1 ZONE     2
+
+     700 UPPER PART EQS.       715 LOWER PART EQS.    BAND WIDTH + 1 =     36
+ STRESS PERIOD=   2 TIMESTEP=  119 LAYER=   1 ZONE=   2 ACTIVE CELLS= 1415 NUMBER OF EQUATIONS=    1415
+ SOLVING FOR ZETA FOR LAYER     2 ZONE     2
+
+     633 UPPER PART EQS.       642 LOWER PART EQS.    BAND WIDTH + 1 =     35
+ STRESS PERIOD=   2 TIMESTEP=  119 LAYER=   2 ZONE=   2 ACTIVE CELLS= 1275 NUMBER OF EQUATIONS=    1275
+ UBUDSV SAVING "      ZETASRF  1" ON UNIT 55 AT TIME STEP 119, STRESS PERIOD 2
+
+ HEAD WILL BE SAVED ON UNIT   51 AT END OF TIME STEP   119 IN STRESS PERIOD      2
+ 
+ SOLVING FOR HEAD 
+
+ OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP   120
+    PRINT BUDGET
+    SAVE HEAD FOR ALL LAYERS
+ SOLVING FOR ZETA FOR LAYER     1 ZONE     2
+
+     709 UPPER PART EQS.       715 LOWER PART EQS.    BAND WIDTH + 1 =     27
+ STRESS PERIOD=   2 TIMESTEP=  120 LAYER=   1 ZONE=   2 ACTIVE CELLS= 1424 NUMBER OF EQUATIONS=    1424
+ SOLVING FOR ZETA FOR LAYER     2 ZONE     2
+
+     633 UPPER PART EQS.       642 LOWER PART EQS.    BAND WIDTH + 1 =     35
+ STRESS PERIOD=   2 TIMESTEP=  120 LAYER=   2 ZONE=   2 ACTIVE CELLS= 1275 NUMBER OF EQUATIONS=    1275
+ UBUDSV SAVING "      ZETASRF  1" ON UNIT 55 AT TIME STEP 120, STRESS PERIOD 2
+
+
+                      VOLUMETRIC SWI ZONE BUDGET FOR ENTIRE MODEL
+                     AT END OF TIME STEP  120 IN STRESS PERIOD   2
+                                      ZONE     1
+  -----------------------------------------------------------------------------------
+
+        CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+        ------------------                 ------------------------
+
+              IN:                                      IN:
+              ---                                      ---
+             BOUNDARIES =   130071400.0000            BOUNDARIES =        1680.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =     1029904.9091           ZONE CHANGE =         117.4263
+       ZONE CHG TIP/TOE =      418757.9247      ZONE CHG TIP/TOE =           3.1879
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+               TOTAL IN =   131520062.8338              TOTAL IN =        1800.6142
+
+             OUT:                                     OUT:
+             ----                                     ----
+             BOUNDARIES =   112921236.1362            BOUNDARIES =        1792.4808
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =    18907916.4831           ZONE CHANGE =           4.9455
+       ZONE CHG TIP/TOE =      429916.6172      ZONE CHG TIP/TOE =           4.2153
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+              TOTAL OUT =   132259069.2365             TOTAL OUT =        1801.6416
+
+               IN - OUT =     -739006.4027              IN - OUT =          -1.0274
+
+    PERCENT DISCREPANCY =          -0.56     PERCENT DISCREPANCY =          -0.06
+
+
+
+                      VOLUMETRIC SWI ZONE BUDGET FOR ENTIRE MODEL
+                     AT END OF TIME STEP  120 IN STRESS PERIOD   2
+                                      ZONE     2
+  -----------------------------------------------------------------------------------
+
+        CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+        ------------------                 ------------------------
+
+              IN:                                      IN:
+              ---                                      ---
+             BOUNDARIES =      505999.3546            BOUNDARIES =         112.4808
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =    18866265.5168           ZONE CHANGE =           4.8740
+       ZONE CHG TIP/TOE =     1168447.2868      ZONE CHG TIP/TOE =           4.2153
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+               TOTAL IN =    20540712.1582              TOTAL IN =         121.5701
+
+             OUT:                                     OUT:
+             ----                                     ----
+             BOUNDARIES =    17656163.2506            BOUNDARIES =           0.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =     1768435.5787           ZONE CHANGE =         117.4263
+       ZONE CHG TIP/TOE =      377106.9584      ZONE CHG TIP/TOE =           3.1165
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+              TOTAL OUT =    19801705.7877             TOTAL OUT =         120.5427
+
+               IN - OUT =      739006.3705              IN - OUT =           1.0274
+
+    PERCENT DISCREPANCY =           3.66     PERCENT DISCREPANCY =           0.85
+
+
+ HEAD WILL BE SAVED ON UNIT   51 AT END OF TIME STEP   120 IN STRESS PERIOD      2
+
+
+
+  -------------------------------------------------------------------------------------
+  VOLUMETRIC BUDGET FOR ENTIRE MODEL AT END OF TIME STEP  120 IN STRESS PERIOD      2
+  -------------------------------------------------------------------------------------
+
+     CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+     ------------------                 ------------------------
+
+           IN:                                      IN:
+           ---                                      ---
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+               WELLS =   130075780.0000                 WELLS =        1681.0000
+     HEAD DEP BOUNDS =      505999.3546       HEAD DEP BOUNDS =         112.4808
+          SWIADDTOCH =           0.0000            SWIADDTOCH =           0.0000
+
+            TOTAL IN =   130581779.3546              TOTAL IN =        1793.4808
+
+          OUT:                                     OUT:
+          ----                                     ----
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+               WELLS =     1095000.0000                 WELLS =         250.0000
+     HEAD DEP BOUNDS =   129486779.3868       HEAD DEP BOUNDS =        1543.4808
+          SWIADDTOCH =           0.0000            SWIADDTOCH =           0.0000
+
+           TOTAL OUT =   130581779.3868             TOTAL OUT =        1793.4808
+
+            IN - OUT =      -3.2244E-02              IN - OUT =      -4.5475E-13
+
+ PERCENT DISCREPANCY =          -0.00     PERCENT DISCREPANCY =          -0.00
+
+
+          TIME SUMMARY AT END OF TIME STEP   120 IN STRESS PERIOD      2
+                    SECONDS     MINUTES      HOURS       DAYS        YEARS
+                    -----------------------------------------------------------
+   TIME STEP LENGTH 3.15360E+06  52560.      876.00      36.500     9.99316E-02
+ STRESS PERIOD TIME 3.78432E+08 6.30720E+06 1.05120E+05  4380.0      11.992    
+         TOTAL TIME 6.68563E+09 1.11427E+08 1.85712E+06  77380.      211.85    
+ 
+1
+                            STRESS PERIOD NO.      3, LENGTH =   6570.000    
+                            -----------------------------------------------
+
+                              NUMBER OF TIME STEPS =   180
+
+                               MULTIPLIER FOR DELT =     1.000
+
+                            INITIAL TIME STEP SIZE =   36.50000    
+
+ SOLVING FOR HEAD 
+
+ OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP   179
+    SAVE HEAD FOR ALL LAYERS
+ SOLVING FOR ZETA FOR LAYER     1 ZONE     2
+
+     727 UPPER PART EQS.       735 LOWER PART EQS.    BAND WIDTH + 1 =     30
+ STRESS PERIOD=   3 TIMESTEP=  179 LAYER=   1 ZONE=   2 ACTIVE CELLS= 1462 NUMBER OF EQUATIONS=    1462
+ SOLVING FOR ZETA FOR LAYER     2 ZONE     2
+
+     635 UPPER PART EQS.       636 LOWER PART EQS.    BAND WIDTH + 1 =     31
+ STRESS PERIOD=   3 TIMESTEP=  179 LAYER=   2 ZONE=   2 ACTIVE CELLS= 1271 NUMBER OF EQUATIONS=    1271
+ UBUDSV SAVING "      ZETASRF  1" ON UNIT 55 AT TIME STEP 179, STRESS PERIOD 3
+
+ HEAD WILL BE SAVED ON UNIT   51 AT END OF TIME STEP   179 IN STRESS PERIOD      3
+ 
+ SOLVING FOR HEAD 
+
+ OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP   180
+    PRINT BUDGET
+    SAVE HEAD FOR ALL LAYERS
+ SOLVING FOR ZETA FOR LAYER     1 ZONE     2
+
+     736 UPPER PART EQS.       743 LOWER PART EQS.    BAND WIDTH + 1 =     29
+ STRESS PERIOD=   3 TIMESTEP=  180 LAYER=   1 ZONE=   2 ACTIVE CELLS= 1479 NUMBER OF EQUATIONS=    1479
+ SOLVING FOR ZETA FOR LAYER     2 ZONE     2
+
+     635 UPPER PART EQS.       636 LOWER PART EQS.    BAND WIDTH + 1 =     31
+ STRESS PERIOD=   3 TIMESTEP=  180 LAYER=   2 ZONE=   2 ACTIVE CELLS= 1271 NUMBER OF EQUATIONS=    1271
+ UBUDSV SAVING "      ZETASRF  1" ON UNIT 55 AT TIME STEP 180, STRESS PERIOD 3
+
+
+                      VOLUMETRIC SWI ZONE BUDGET FOR ENTIRE MODEL
+                     AT END OF TIME STEP  180 IN STRESS PERIOD   3
+                                      ZONE     1
+  -----------------------------------------------------------------------------------
+
+        CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+        ------------------                 ------------------------
+
+              IN:                                      IN:
+              ---                                      ---
+             BOUNDARIES =   141109000.0000            BOUNDARIES =        1680.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =     1614774.0924           ZONE CHANGE =          73.8403
+       ZONE CHG TIP/TOE =      440009.9803      ZONE CHG TIP/TOE =           1.6904
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+               TOTAL IN =   143163784.0726              TOTAL IN =        1755.5308
+
+             OUT:                                     OUT:
+             ----                                     ----
+             BOUNDARIES =   124512940.9695            BOUNDARIES =        1749.8627
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =    18938679.9456           ZONE CHANGE =           3.9772
+       ZONE CHG TIP/TOE =      452370.7077      ZONE CHG TIP/TOE =           1.5883
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+              TOTAL OUT =   143903991.6228             TOTAL OUT =        1755.4282
+
+               IN - OUT =     -740207.5501              IN - OUT =           0.1025
+
+    PERCENT DISCREPANCY =          -0.52     PERCENT DISCREPANCY =           0.01
+
+
+
+                      VOLUMETRIC SWI ZONE BUDGET FOR ENTIRE MODEL
+                     AT END OF TIME STEP  180 IN STRESS PERIOD   3
+                                      ZONE     2
+  -----------------------------------------------------------------------------------
+
+        CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+        ------------------                 ------------------------
+
+              IN:                                      IN:
+              ---                                      ---
+             BOUNDARIES =     1224354.1073            BOUNDARIES =          94.8627
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =    18895123.5956           ZONE CHANGE =           3.7284
+       ZONE CHG TIP/TOE =     1190902.3907      ZONE CHG TIP/TOE =           1.5883
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+               TOTAL IN =    21310380.0935              TOTAL IN =         100.1795
+
+             OUT:                                     OUT:
+             ----                                     ----
+             BOUNDARIES =    17820413.2506            BOUNDARIES =          25.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =     2353305.7754           ZONE CHANGE =          73.8403
+       ZONE CHG TIP/TOE =      396453.6302      ZONE CHG TIP/TOE =           1.4416
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+              TOTAL OUT =    20570172.6562             TOTAL OUT =         100.2820
+
+               IN - OUT =      740207.4374              IN - OUT =          -0.1025
+
+    PERCENT DISCREPANCY =           3.53     PERCENT DISCREPANCY =          -0.10
+
+
+ HEAD WILL BE SAVED ON UNIT   51 AT END OF TIME STEP   180 IN STRESS PERIOD      3
+
+
+
+  -------------------------------------------------------------------------------------
+  VOLUMETRIC BUDGET FOR ENTIRE MODEL AT END OF TIME STEP  180 IN STRESS PERIOD      3
+  -------------------------------------------------------------------------------------
+
+     CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+     ------------------                 ------------------------
+
+           IN:                                      IN:
+           ---                                      ---
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+               WELLS =   141119950.0000                 WELLS =        1681.0000
+     HEAD DEP BOUNDS =     1224354.1073       HEAD DEP BOUNDS =          94.8627
+          SWIADDTOCH =           0.0000            SWIADDTOCH =           0.0000
+
+            TOTAL IN =   142344304.1073              TOTAL IN =        1775.8627
+
+          OUT:                                     OUT:
+          ----                                     ----
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+               WELLS =     2901750.0000                 WELLS =         275.0000
+     HEAD DEP BOUNDS =   139442554.2200       HEAD DEP BOUNDS =        1500.8627
+          SWIADDTOCH =           0.0000            SWIADDTOCH =           0.0000
+
+           TOTAL OUT =   142344304.2200             TOTAL OUT =        1775.8627
+
+            IN - OUT =          -0.1128              IN - OUT =       1.5916E-12
+
+ PERCENT DISCREPANCY =          -0.00     PERCENT DISCREPANCY =           0.00
+
+
+          TIME SUMMARY AT END OF TIME STEP   180 IN STRESS PERIOD      3
+                    SECONDS     MINUTES      HOURS       DAYS        YEARS
+                    -----------------------------------------------------------
+   TIME STEP LENGTH 3.15360E+06  52560.      876.00      36.500     9.99316E-02
+ STRESS PERIOD TIME 5.67648E+08 9.46080E+06 1.57680E+05  6570.0      17.988    
+         TOTAL TIME 7.25328E+09 1.20888E+08 2.01480E+06  83950.      229.84    
+ 
+
+ Final Remark:
+
+   The solver successfully met the user supplied convergence criteria, HCLOSE and RCLOSE, for all 1300 time steps.
+
+   Please check the "VOLUMETRIC BUDGET FOR ENTIRE MODEL" to ensure that mass rate balance errors are acceptable for all time steps.
+
+   The cumulative mass error for the entire simulation is 0.00 %
+
+
+
+
+ Simulation finished at  
+
+
+ Which had an elapsed run time of: 0 minutes, 0 seconds
+
+
+    OneWater Simulation Now Complete
+
+

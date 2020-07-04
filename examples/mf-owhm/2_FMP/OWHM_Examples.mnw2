@@ -1,0 +1,8 @@
+# Note that the one well is linked to FMP, 
+# which will enable the well automatically at stress period 6
+#
+1 9 1                     # (Part  1) MNWMAX IWL2CB MNWPRNT
+Well2 -1                  # (Part 2a) WELLID NNODES
+SKIN 0 0 1 0              # (Part 2b) LOSSTYPE PUMPLOC Qlimit PPFLAG PUMPCAP
+-1 -1 -1                  # (Part 2c) Rw Rskin Kskin
+60 10 2 3 0.1 0.2 1       # (Part 2d) Ztop Zbot ROW COL Rw Rskin Kskin

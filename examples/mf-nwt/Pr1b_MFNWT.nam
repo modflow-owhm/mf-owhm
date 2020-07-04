@@ -1,0 +1,14 @@
+# Pr1bMFNWT
+# MODFLOW-NWT Example problem documented in: 
+# Niswonger, R.G., Panday, Sorab, and Ibaraki, Motomu, 2011, MODFLOW-NWT, A Newton formulation for MODFLOW-2005: U.S. Geological Survey Techniques and Methods 6-A37, 44 p.
+# 
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+#
+LIST                  2 ./output/Pr1bMFNWT.LST
+DIS                   3 Pr1b.DIS
+BAS6                  4 Pr1b.BA6
+NWT                  23 Pr1b.NWT
+UPW                  33 Pr1b.UPW
+RCH                  34 Pr1b.RCH
+OC                   35 Pr1b.OC
+DATA(BINARY)         50 ./output/Pr1bMFNWT.BUD

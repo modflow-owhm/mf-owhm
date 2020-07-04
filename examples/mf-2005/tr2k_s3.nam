@@ -1,0 +1,22 @@
+# tr2k_s3
+# MODFLOW-2005 Example problem documented in: 
+#   Harbaugh, A.W., 2005, MODFLOW-2005, the U.S. Geological Survey modular ground-water model -- the Ground-Water Flow Process: U.S. Geological Survey Techniques and Methods 6-A16.
+#   Harbaugh, A.W., Banta, E.R., Hill, M.C. and McDonald, M.G., 2000, MODFLOW-2000, The U.S. Geological Survey Modular Ground-Water Model - User Guide to Modularization Concepts and the Ground-Water Flow Process: U.S Geological Survey Open-File Report 2000-92, 121 p., https://doi.org/10.3133/ofr200092
+#   Höffmann, J., Leake, S.A., Galloway, D.L., and Wilson, A.M., 2003, MODFLOW-2000 Ground-Water Model--User Guide to the Subsidence and Aquifer-System Compaction (SUB) Package: U.S. Geological Survey Open-File Report 03-233, 44 p.
+# 
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+#
+LIST                  2 ./output/tr2k_s3.lst
+BAS6                  1 tr2k_s3.ba6
+DIS                  10 tr2k_s3.dis
+BCF6                 11 tr2k_s3.bc6
+WEL                  12 tr2k_s3.wel
+SIP                  13 tr2k_s3.sip
+OC                   15 tr2k_s3.oc
+SUB                  19 tr2k_s3.sub
+#
+# Binary output files
+DATA(BINARY)         21 ./output/tr2k_s3.hed REPLACE
+DATA(BINARY)         22 ./output/tr2k_s3.ddn REPLACE
+DATA(BINARY)         41 ./output/tr2k_s3.sbs REPLACE
+DATA(BINARY)         42 ./output/tr2k_s3.cmp REPLACE

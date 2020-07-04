@@ -1,0 +1,19 @@
+# SWRSample03
+# MODFLOW-SWR Example problem documented in: 
+#    Hughes, J.D., Langevin, C.D., Chartier, K.L., and White, J.T., 2012, Documentation of the Surface-Water Routing (SWR1) Process for modeling surface-water flow with the U.S. Geological Survey Modular Ground-Water Model: U.S. Geological Survey Techniques and Methods 6-A40, 113 p.
+# 
+#      -Comments are preceded by a # sign
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+#
+## MODFLOW2000 Layer Property Flow (LPF) Package
+         0  -1.000000e+030         0
+  1
+  0
+  1.000000e+000
+ 0
+ 0
+         0     5.000(10e12.4)                   -1     # HYDRAULIC CONDUCTIVITY Layer   1
+         0     5.000(10e12.4)                   -1     # VERTICAL HYDRAULIC CONDUCTIVITY Layer   1
+         0     1.000(10e12.4)                   -1     # PRIMARY STORAGE Layer   1
+         0     0.200(10e12.4)                   -1     # Sy Layer   1

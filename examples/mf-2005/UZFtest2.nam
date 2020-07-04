@@ -1,0 +1,35 @@
+# UZFtest2
+# MODFLOW-2005 Example problem documented in: 
+#   Harbaugh, A.W., 2005, MODFLOW-2005, the U.S. Geological Survey modular ground-water model -- the Ground-Water Flow Process: U.S. Geological Survey Techniques and Methods 6-A16.
+#   Harbaugh, A.W., Banta, E.R., Hill, M.C. and McDonald, M.G., 2000, MODFLOW-2000, The U.S. Geological Survey Modular Ground-Water Model - User Guide to Modularization Concepts and the Ground-Water Flow Process: U.S Geological Survey Open-File Report 2000-92, 121 p., https://doi.org/10.3133/ofr200092
+#   Niswonger, R.G., Prudic, D.E., and Regan, R.S., 2006, Documentation of the Unsaturated-Zone Flow (UZF1) Package for modeling unsaturated flow between the land surface and the water table with MODFLOW-2005: U.S. Geological Techniques and Methods Book 6, Chapter A19, 62 p.
+# 
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+#
+LIST                  9 ./output/UZFtest2.lst
+BAS6                 75 UZFtest2.ba6
+LPF                   7 UZFtest2.lpf
+DIS                   8 UZFtest2.dis
+SIP                  13 UZFtest2.sip
+OC                   14 UZFtest2.oc
+SFR                  15 UZFtest2.sfr
+WEL                  16 UZFtest2.wel
+GHB                  17 UZFtest2.ghb
+UZF                  19 UZFtest2.uzf
+GAGE                 32 UZFtest2.gag
+DATA                 58 ./output/UZFtest2hd.out
+DATA(BINARY)         61 ./output/UZFtest2.uzfot
+DATA                 65 ./output/UZFtest2.uzf1
+DATA                 66 ./output/UZFtest2.uzf2 
+DATA                 67 ./output/UZFtest2.uzf3 
+DATA                 68 ./output/UZFtest2.uzf4 
+DATA                 81 ./output/UZFtest2.flw
+DATA                 83 ./output/UZFtest2.sg1
+DATA                 84 ./output/UZFtest2.sg2
+DATA                 85 ./output/UZFtest2.sg3
+DATA                 86 ./output/UZFtest2.sg4
+DATA                 87 ./output/UZFtest2.sg5
+DATA                 88 ./output/UZFtest2.sg6
+DATA                 89 ./output/UZFtest2.sg7
+DATA                 90 ./output/UZFtest2.sg8
+DATA                 91 ./output/UZFtest2dv.sg9

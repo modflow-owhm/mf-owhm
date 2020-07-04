@@ -1,0 +1,81 @@
+!
+! CODE DEVELOPED BY SCOTT E BOYCE 
+!                   CONTACT <seboyce@usgs.gov> or <Boyce@engineer.com>
+!
+!
+      MODULE OPENSPEC_LOADER_SUBROUTINE
+        !
+        CONTAINS
+        !
+        PURE SUBROUTINE LOAD_OPENSPEC(ACCESS_OUT,FORM_OUT,ACTION_OUT)
+        CHARACTER(*),               INTENT(INOUT):: ACCESS_OUT
+        CHARACTER(*),               INTENT(INOUT):: FORM_OUT
+        CHARACTER(*), DIMENSION(2), INTENT(INOUT):: ACTION_OUT
+        !
+        !!!!INCLUDE 'openspec.inc'  !Uncomment to use OPENSPEC inputs
+        !!!!
+        !!!!ACCESS_OUT= ACCESS
+        !!!!FORM_OUT  = FORM
+        !!!!ACTION_OUT= ACTION
+        !
+        ACCESS_OUT    = 'STREAM'        ! Comment if you want to use openspec.inc'
+        FORM_OUT      = 'UNFORMATTED'   !
+        ACTION_OUT(1) = 'READ'          !
+        ACTION_OUT(2) = 'READWRITE'     !
+        !
+      END SUBROUTINE
+      !
+      END MODULE
+      !
+      MODULE OPENSPEC
+        ! ALLOWS FOR IMPORT OF FILE OPTIONS THAT ARE COMPILER FRIENDLY.
+        ! THIS PROVIDES A MEANS OF ACCESSING INCLUDE "OPENSPEC.inc" FOR FREE FORMAT FILES (*.f90) VIA A GLOBAL VARIABLE.
+        !
+        IMPLICIT NONE
+        !
+        SAVE
+        !
+        CHARACTER(20),PROTECTED::              ACCESS = ' '  ! WHEN USING BINARY FORMAT THIS IS THE ACCESS ARGUMENT (eg 'STREAM')
+        CHARACTER(20),PROTECTED::              FORM   = ' '  ! WHEN USING BINARY FORMAT THIS IS THE FORM   ARGUMENT (eg 'UNFORMATTED')
+        CHARACTER(20),PROTECTED,DIMENSION(2):: ACTION = ' '  ! ACTION(1) = 'READ' and ACTION(2) = 'READWRITE'
+        !
+        CONTAINS
+        !
+        SUBROUTINE SET_OPENSPEC()
+        USE OPENSPEC_LOADER_SUBROUTINE
+        !
+        CALL LOAD_OPENSPEC(ACCESS,FORM,ACTION)
+        !
+        END SUBROUTINE
+        !
+      END MODULE
+!      
+!      
+!      
+!      
+!      MODULE OPENSPEC
+!      ! ALLOWS FOR IMPORT OF FILE OPTIONS THAT ARE COMPILER FRIENDLY.
+!      ! THIS PROVIDES A MEANS OF ACCESSING INCLUDE "OPENSPEC.inc" FOR FREE FORMAT FILES (*.f90) VIA A GLOBAL VARIABLE.
+!      !
+!      IMPLICIT NONE
+!      CHARACTER(20),PROTECTED::              ACCESS  ! WHEN USING BINARY FORMAT THIS IS THE ACCESS ARGUMENT (eg 'STREAM')
+!      CHARACTER(20),PROTECTED::              FORM    ! WHEN USING BINARY FORMAT THIS IS THE FORM   ARGUMENT (eg 'UNFORMATTED')
+!      CHARACTER(20),PROTECTED,DIMENSION(2):: ACTION  ! ACTION(1) = 'READ' and ACTION(2) = 'READWRITE'
+!      !
+!      CONTAINS
+!      !
+!      SUBROUTINE SET_OPENSPEC()
+!      USE OPENSPEC_LOADER_SUBROUTINE
+!      CHARACTER(20)::              LOAD_ACCESS
+!      CHARACTER(20)::              LOAD_FORM  
+!      CHARACTER(20),DIMENSION(2):: LOAD_ACTION
+!      !
+!      CALL LOAD_OPENSPEC(LOAD_ACCESS,LOAD_FORM,LOAD_ACTION)
+!      !
+!      ACCESS = LOAD_ACCESS
+!      FORM   = LOAD_FORM  
+!      ACTION = LOAD_ACTION
+!      !
+!      END SUBROUTINE
+!      !
+!      END MODULE

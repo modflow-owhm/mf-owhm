@@ -1,0 +1,5 @@
+#
+500  50  1.0 0.0001         # ITER_MO, ITER_MI, CLOSE_R, CLOSE_H
+0.97  1  0  0               # RELAX, IFILL, UNIT_PC, UNIT_TS
+1  0.99  0.01  0.05  10.    # ADAMP, DAMP, DAMP_LB, RATE_D, CHGLIMIT
+0  0.  0.  0.  0            # ACNVG, CNVG_LB, MCNVG, RATE_C, IPUNIT

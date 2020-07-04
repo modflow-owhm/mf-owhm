@@ -1,0 +1,47 @@
+#
+# Listing of all available Options for the SUB package
+# 
+# The Option block is placed at the start of the SUB package input.
+#
+BEGIN OPTIONS
+    #
+    #
+    # Declares that the SUB package includes parameters and how many parameters are going to be defined.
+    #   NSBP is the number subsidence parameters
+    #   IPRNTFLG is print flag for UPARARRSUB1 - set to 0 to disable printing
+    PARAMETER   NSBP   IPRNTFLG
+    #
+    # If SEPARATE_FLOWS is present than volumetric budgets will 
+    # print elastic and inelastic compaction flow separately.
+    # This also affects the Cell-By-Cell binary output (ZoneBudget.exe).
+    # If not present, then the two values are combined.
+    #      For example, if the BAS package specifies the option BUDGETDB and SEPARATE_FLOWS is not present then budget file has the following headers:
+    #         SUB_INST_IN, SUB_INST_OUT, SUB_DELAY_IN, SUB_DELAY_OUT
+    # 
+    #      If present, then the following headers are present
+    #         SUB_INST_EL_IN, SUB_INST_EL_OUT, SUB_INST_IE_IN, SUB_INST_IE_OUT, SUB_DELAY_EL_IN, SUB_DELAY_EL_OUT, SUB_DELAY_IE_IN, SUB_DELAY_IE_OUT
+    # 
+    #      where INST  is for instantaneous compaction
+    #            DELAY is for delayed compaction
+    #            EL    is for elastic 
+    #            IE    is for inelastic
+    #
+    #      Similarly the LIST volumetric budget has the following headers when SEPARATE_FLOWS is not present:
+    #         "INST. IB STORAGE"    "DELAY IB STORAGE"
+    # 
+    #      If present, then the following headers are present
+    #         "SUB INST    ELAS"    "SUB INST  INELAS"    "SUB DELAY   ELAS"    "SUB DELAY INELAS"
+    #
+    SEPARATE_FLOWS
+    #
+    # Advanced Options ------------------------------------------------------------------------------------------------------------------------------
+    #
+    # If present than the subsidence link to the DIS and LPF/UPW packages is enabled. 
+    #   This allow the SUB package to change the model grid's vertical elevation in response to aquifer compaction.
+    SUB_LINK    
+    #
+END OPTIONS
+
+# This feature has yet to be implemented
+    # Write to the directory, OUT_DIR, a set of files that contain the main SUB package properties
+    ##PRINT_PROPERTY              OUT_DIR              # ./subProperty/

@@ -1,0 +1,39 @@
+# swi2ex2_strat
+# MODFLOW-SWI Example problem documented in: 
+#   Bakker, M., Schaars, F., Hughes, J.D., Langevin, C.D., Dausman, A.M., 2013, Documentation of the seawater intrusion (SWI2) package for MODFLOW: U.S. Geological Survey Techniques and Methods 6-A46, 47 p.
+# 
+#      -Comments are preceded by a # sign
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+# DIS
+         1         1        60         1         4         2
+  0
+        0  5.000e+00           (5G13.0)         -1                # DELR(NCOL)
+        0  1.000e+00           (5G13.0)         -1                # DELC(NROW)
+        11         1           (5G13.0)         -1                # TOP OF SYSTEM
+            0            0            0            0            0
+            0            0            0            0            0
+            0            0            0            0            0
+            0            0            0            0            0
+            0            0            0            0            0
+            0            0            0            0            0
+            0            0            0            0            0
+            0            0            0            0            0
+            0            0            0            0            0
+            0            0            0            0            0
+            0            0            0            0            0
+            0            0            0            0            0
+        11         1           (5G13.0)         -1                # BOTTOM OF LAYER
+          -40          -40          -40          -40          -40
+          -40          -40          -40          -40          -40
+          -40          -40          -40          -40          -40
+          -40          -40          -40          -40          -40
+          -40          -40          -40          -40          -40
+          -40          -40          -40          -40          -40
+          -40          -40          -40          -40          -40
+          -40          -40          -40          -40          -40
+          -40          -40          -40          -40          -40
+          -40          -40          -40          -40          -40
+          -40          -40          -40          -40          -40
+          -40          -40          -40          -40          -40
+   2000.000000          1000  1.000000 SS

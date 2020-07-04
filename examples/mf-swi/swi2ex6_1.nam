@@ -1,0 +1,20 @@
+# swi2ex6_1
+# MODFLOW-SWI Example problem documented in: 
+#   Bakker, M., Schaars, F., Hughes, J.D., Langevin, C.D., Dausman, A.M., 2013, Documentation of the seawater intrusion (SWI2) package for MODFLOW: U.S. Geological Survey Techniques and Methods 6-A46, 47 p.
+# 
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+# SWI2 Example 6-1
+LIST  2 ./output/swi2ex6_1.list
+DIS  11 swi2ex6_1.dis 
+BAS6 13 swi2ex6_1.bas 
+WEL  20 swi2ex6_1.wel 
+GHB  23 swi2ex6_1.ghb 
+LPF  15 swi2ex6_1.lpf 
+SWI2 29 swi2ex6_1.swi 
+PCG  27 swi2ex6_1.pcg 
+OC   14 swi2ex6_1.oc 
+DATA(BINARY)  55 ./output/swi2ex6_1.zta WRITE
+DATA(BINARY)  56 ./output/swi2ex6_1.swb WRITE
+DATA(BINARY)  51 ./output/swi2ex6_1.hds WRITE
+DATA(BINARY)  52 ./output/swi2ex6_1.ddn WRITE
+DATA(BINARY)  53 ./output/swi2ex6_1.cbc WRITE

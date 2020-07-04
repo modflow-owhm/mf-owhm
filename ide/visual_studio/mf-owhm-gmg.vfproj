@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VisualStudioProject ProjectCreator="Intel Fortran" Keyword="Console Application" Version="11.0" ProjectIdGuid="{EA3EE8BC-18AA-47DA-8DCC-FC3553E70D29}">
+	<Platforms>
+		<Platform Name="Win32"/>
+		<Platform Name="x64"/></Platforms>
+	<Configurations>
+		<Configuration Name="Debug|Win32" OutputDirectory="$(SolutionDir)..\..\bin" IntermediateDirectory="$(SolutionDir)..\..\obj\vs_$(ProjectName)_$(Configuration)_$(Platform)" TargetName="$(ProjectName)_$(Configuration)_$(Platform)">
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" OpenMPConditionalCompilation="false" DisableSpecificDiagnostics="6717" WarnInterfaces="true" RealKIND="realKIND8" FloatingPointExceptionHandling="fpe0" FloatingPointModel="source" Traceback="true" BoundsCheck="true" StackFrameCheck="true" RuntimeLibrary="rtMultiThreadedDebug"/>
+				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" GenerateDebugInformation="true" SubSystem="subSystemConsole" StackReserveSize="10485760" StackCommitSize="10485760" AdditionalDependencies="$(SolutionDir)GMG_LIB\lib\GMG_$(Platform)_$(Configuration).lib"/>
+				<Tool Name="VFResourceCompilerTool"/>
+				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPostBuildEventTool"/>
+				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
+		<Configuration Name="Release|Win32" OutputDirectory="$(SolutionDir)..\..\bin" IntermediateDirectory="$(SolutionDir)..\..\obj\vs_$(ProjectName)_$(Configuration)_$(Platform)" TargetName="$(ProjectName)_$(Configuration)_$(Platform)">
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" OpenMPConditionalCompilation="false" DisableSpecificDiagnostics="6717" RealKIND="realKIND8" FloatingPointExceptionHandling="fpe0" FloatingPointModel="source"/>
+				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" SubSystem="subSystemConsole" StackReserveSize="10485760" StackCommitSize="10485760" AdditionalDependencies="$(SolutionDir)GMG_LIB\lib\GMG_$(Platform)_$(Configuration).lib"/>
+				<Tool Name="VFResourceCompilerTool"/>
+				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPostBuildEventTool"/>
+				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
+		<Configuration Name="Debug|x64" OutputDirectory="$(SolutionDir)..\..\bin" IntermediateDirectory="$(SolutionDir)..\..\obj\vs_$(ProjectName)_$(Configuration)_$(Platform)" TargetName="$(ProjectName)_$(Configuration)">
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" OpenMPConditionalCompilation="false" OmpOffloadConstructs="ompOffloadNo" ErrorLimit="10" DisableSpecificDiagnostics="6717" WarnDeclarations="true" WarnUnusedVariables="true" WarnIgnoreLOC="true" WarnUnalignedData="false" WarnUncalled="true" WarnInterfaces="true" RealKIND="realKIND8" FloatingPointExceptionHandling="fpe0" FloatingPointModel="source" FloatingPointStackCheck="true" Traceback="true" NullPointerCheck="true" BoundsCheck="true" ArrayShapeCheck="true" UninitializedVariablesCheck="true" DescriptorDataTypeCheck="true" StackFrameCheck="true" RuntimeLibrary="rtMultiThreadedDebug"/>
+				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" GenerateDebugInformation="true" ProgramDatabaseFile="$(IntDir)\$(TargetName).pdb" SubSystem="subSystemConsole" StackReserveSize="10485760" StackCommitSize="10485760" AdditionalDependencies="$(SolutionDir)..\..\lib\GMG_$(Platform)_$(Configuration).lib"/>
+				<Tool Name="VFResourceCompilerTool"/>
+				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPostBuildEventTool"/>
+				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
+		<Configuration Name="Release|x64" OutputDirectory="$(SolutionDir)..\..\bin" IntermediateDirectory="$(SolutionDir)..\..\obj\vs_$(ProjectName)_$(Configuration)_$(Platform)">
+				<Tool Name="VFFortranCompilerTool" AdditionalOptions="/assume:contiguous_pointer  /Qinline-factor:200" SuppressStartupBanner="true" DebugInformationFormat="debugLineInfoOnly" GenAlternateCodePaths="codeForAVX" OpenMPConditionalCompilation="false" OmpOffloadConstructs="ompOffloadNo" DisableSpecificDiagnostics="6717" RealKIND="realKIND8" FloatingPointExceptionHandling="fpe0" Traceback="true"/>
+				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" ProgramDatabaseFile="$(IntDir)\(TargetName).pdb" SubSystem="subSystemConsole" StackReserveSize="10485760" StackCommitSize="10485760" AdditionalDependencies="$(SolutionDir)..\..\lib\GMG_$(Platform)_$(Configuration).lib"/>
+				<Tool Name="VFResourceCompilerTool"/>
+				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPostBuildEventTool"/>
+				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
+		<Configuration Name="Fast_Debug|Win32" OutputDirectory="$(SolutionDir)..\..\bin" IntermediateDirectory="$(SolutionDir)..\..\obj\vs_$(ProjectName)_$(Configuration)_$(Platform)" TargetName="$(ProjectName)_$(Configuration)_$(Platform)">
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" OpenMPConditionalCompilation="false" DisableSpecificDiagnostics="6717" WarnInterfaces="true" RealKIND="realKIND8" FloatingPointExceptionHandling="fpe0" FloatingPointModel="source" Traceback="true" BoundsCheck="true" StackFrameCheck="true" RuntimeLibrary="rtMultiThreadedDebug"/>
+				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" GenerateDebugInformation="true" SubSystem="subSystemConsole" StackReserveSize="10485760" StackCommitSize="10485760" AdditionalDependencies="$(SolutionDir)GMG_LIB\lib\GMG_$(Platform)_$(Configuration).lib"/>
+				<Tool Name="VFResourceCompilerTool"/>
+				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPostBuildEventTool"/>
+				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
+		<Configuration Name="Fast_Debug|x64" OutputDirectory="$(SolutionDir)..\..\bin" IntermediateDirectory="$(SolutionDir)..\..\obj\vs_$(ProjectName)_$(Configuration)_$(Platform)" TargetName="$(ProjectName)_$(Configuration)">
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" OpenMPConditionalCompilation="false" OmpOffloadConstructs="ompOffloadNo" ErrorLimit="10" DisableSpecificDiagnostics="6717" RealKIND="realKIND8" FloatingPointExceptionHandling="fpe0" FloatingPointModel="source" Traceback="true" NullPointerCheck="true" BoundsCheck="true" UninitializedVariablesCheck="true" RuntimeLibrary="rtMultiThreadedDebug"/>
+				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" GenerateDebugInformation="true" ProgramDatabaseFile="$(IntDir)\$(TargetName).pdb" SubSystem="subSystemConsole" StackReserveSize="10485760" StackCommitSize="10485760" AdditionalDependencies="$(SolutionDir)..\..\lib\GMG_$(Platform)_$(Configuration).lib"/>
+				<Tool Name="VFResourceCompilerTool"/>
+				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPostBuildEventTool"/>
+				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration></Configurations>
+	<Files>
+		<Filter Name="bif_lib">
+		<File RelativePath="..\..\src\bif_lib\adjacency_list_instruction_and_shortest_path.f90"/>
+		<File RelativePath="..\..\src\bif_lib\alloc_interface.f90"/>
+		<File RelativePath="..\..\src\bif_lib\array_data_types_instruction.f90"/>
+		<File RelativePath="..\..\src\bif_lib\binary_heap_instruction.f90"/>
+		<File RelativePath="..\..\src\bif_lib\calendar_functions.f90"/>
+		<File RelativePath="..\..\src\bif_lib\cast_to_string_interface.f90"/>
+		<File RelativePath="..\..\src\bif_lib\console_commander.f90"/>
+		<File RelativePath="..\..\src\bif_lib\constants.f90"/>
+		<File RelativePath="..\..\src\bif_lib\cycling_text_file_interface.f90"/>
+		<File RelativePath="..\..\src\bif_lib\date_operator_instruction.f90"/>
+		<File RelativePath="..\..\src\bif_lib\EquationParser.f90"/>
+		<File RelativePath="..\..\src\bif_lib\error_interface.f90"/>
+		<File RelativePath="..\..\src\bif_lib\file_incrementer_interface.f90"/>
+		<File RelativePath="..\..\src\bif_lib\file_io_interface.f90"/>
+		<File RelativePath="..\..\src\bif_lib\generic_block_reader_instruction.f90"/>
+		<File RelativePath="..\..\src\bif_lib\generic_input_file_instruction.f90"/>
+		<File RelativePath="..\..\src\bif_lib\generic_open_interface.fpp"/>
+		<File RelativePath="..\..\src\bif_lib\generic_output_file_instruction.f90"/>
+		<File RelativePath="..\..\src\bif_lib\integer_array_builder.f90"/>
+		<File RelativePath="..\..\src\bif_lib\integer_queue_instruction.f90"/>
+		<File RelativePath="..\..\src\bif_lib\is_ascii_interface.f90"/>
+		<File RelativePath="..\..\src\bif_lib\is_routine_interface.f90"/>
+		<File RelativePath="..\..\src\bif_lib\IXJ_instruction.f90"/>
+		<File RelativePath="..\..\src\bif_lib\line_writer_interface.f90"/>
+		<File RelativePath="..\..\src\bif_lib\linked_list_instruction.f90"/>
+		<File RelativePath="..\..\src\bif_lib\list_array_input_interface.f90"/>
+		<File RelativePath="..\..\src\bif_lib\log2_interface.f90"/>
+		<File RelativePath="..\..\src\bif_lib\lookup_table_instruction.f90"/>
+		<File RelativePath="..\..\src\bif_lib\name_id_interface.f90"/>
+		<File RelativePath="..\..\src\bif_lib\num2str_interface.f90"/>
+		<File RelativePath="..\..\src\bif_lib\obs_group_interpolator.f90"/>
+		<File RelativePath="..\..\src\bif_lib\parse_word_interface.f90"/>
+		<File RelativePath="..\..\src\bif_lib\path_interface.f90"/>
+		<File RelativePath="..\..\src\bif_lib\position_interface.f90"/>
+		<File RelativePath="..\..\src\bif_lib\post_key_sub.f90"/>
+		<File RelativePath="..\..\src\bif_lib\random_routines_interface.f90"/>
+		<File RelativePath="..\..\src\bif_lib\relax_interface.f90"/>
+		<File RelativePath="..\..\src\bif_lib\set_array_interface.f90"/>
+		<File RelativePath="..\..\src\bif_lib\simple_timer_instruction.f90"/>
+		<File RelativePath="..\..\src\bif_lib\sort_interface.f90"/>
+		<File RelativePath="..\..\src\bif_lib\string_routines.f90"/>
+		<File RelativePath="..\..\src\bif_lib\sub_block_input_interface.f90"/>
+		<File RelativePath="..\..\src\bif_lib\time_series_file_instruction.f90"/>
+		<File RelativePath="..\..\src\bif_lib\transient_file_reader_instruction.f90"/>
+		<File RelativePath="..\..\src\bif_lib\uload_and_sfac_interface.f90"/>
+		<File RelativePath="..\..\src\bif_lib\util_interface.f90"/>
+		<File RelativePath="..\..\src\bif_lib\warning_type_instruction.f90"/>
+		<File RelativePath="..\..\src\bif_lib\xy_grid_coordinate_interface.f90"/></Filter>
+		<Filter Name="cfp">
+		<File RelativePath="..\..\src\cfp\cfp2_TM_utl.f"/>
+		<File RelativePath="..\..\src\cfp\cfp2ar.f"/>
+		<File RelativePath="..\..\src\cfp\cfp2bd.f"/>
+		<File RelativePath="..\..\src\cfp\cfp2fm.f"/>
+		<File RelativePath="..\..\src\cfp\cfp2oc.f"/>
+		<File RelativePath="..\..\src\cfp\cfp2rp.f"/>
+		<File RelativePath="..\..\src\cfp\cfp2utl.f"/></Filter>
+		<Filter Name="fmp">
+		<File RelativePath="..\..\src\fmp\allotment_data.f90"/>
+		<File RelativePath="..\..\src\fmp\climate_data.f90"/>
+		<File RelativePath="..\..\src\fmp\crop_data.f90"/>
+		<File RelativePath="..\..\src\fmp\fmp_dimension_data.f90"/>
+		<File RelativePath="..\..\src\fmp\fmp_global.f90"/>
+		<File RelativePath="..\..\src\fmp\fmp_main_driver.f90"/>
+		<File RelativePath="..\..\src\fmp\options_data.f90"/>
+		<File RelativePath="..\..\src\fmp\output_data.f90"/>
+		<File RelativePath="..\..\src\fmp\salinity_data.f90"/>
+		<File RelativePath="..\..\src\fmp\soil_data.f90"/>
+		<File RelativePath="..\..\src\fmp\surface_water_data.f90"/>
+		<File RelativePath="..\..\src\fmp\wbs_data.f90"/>
+		<File RelativePath="..\..\src\fmp\well_data.f90"/></Filter>
+		<Filter Name="gmg_c_interface">
+		<File RelativePath="..\..\src\gmg_c\gmg_c_interface.f90"/>
+		<File RelativePath="..\..\src\gmg_c\gmg_dble.f"/></Filter>
+		<Filter Name="modflow_base" Filter="f90;for;f;fpp;ftn;def;odl;idl">
+		<File RelativePath="..\..\src\modflow_base\bas.f"/>
+		<File RelativePath="..\..\src\modflow_base\bas_module.f90"/>
+		<File RelativePath="..\..\src\modflow_base\bcf.f"/>
+		<File RelativePath="..\..\src\modflow_base\bfh2.f"/>
+		<File RelativePath="..\..\src\modflow_base\budget_group.f90"/>
+		<File RelativePath="..\..\src\modflow_base\chd.f"/>
+		<File RelativePath="..\..\src\modflow_base\de4.f"/>
+		<File RelativePath="..\..\src\modflow_base\drn.f"/>
+		<File RelativePath="..\..\src\modflow_base\drt.f"/>
+		<File RelativePath="..\..\src\modflow_base\ets.f"/>
+		<File RelativePath="..\..\src\modflow_base\evt.f"/>
+		<File RelativePath="..\..\src\modflow_base\expression_parser.f90"/>
+		<File RelativePath="..\..\src\modflow_base\fhb.f"/>
+		<File RelativePath="..\..\src\modflow_base\gag.f"/>
+		<File RelativePath="..\..\src\modflow_base\ghb.f"/>
+		<File RelativePath="..\..\src\modflow_base\global_module.f90"/>
+		<File RelativePath="..\..\src\modflow_base\hfb.f"/>
+		<File RelativePath="..\..\src\modflow_base\huf.f"/>
+		<File RelativePath="..\..\src\modflow_base\huf_utl.f"/>
+		<File RelativePath="..\..\src\modflow_base\hydmod.f"/>
+		<File RelativePath="..\..\src\modflow_base\ibs.f"/>
+		<File RelativePath="..\..\src\modflow_base\lak.f"/>
+		<File RelativePath="..\..\src\modflow_base\lak_module.f90"/>
+		<File RelativePath="..\..\src\modflow_base\lgr.f"/>
+		<File RelativePath="..\..\src\modflow_base\lgr_module.f"/>
+		<File RelativePath="..\..\src\modflow_base\linefeed.f90"/>
+		<File RelativePath="..\..\src\modflow_base\lmt.f"/>
+		<File RelativePath="..\..\src\modflow_base\lmt_module.f"/>
+		<File RelativePath="..\..\src\modflow_base\lpf.f"/>
+		<File RelativePath="..\..\src\modflow_base\mach_module.f90"/>
+		<File RelativePath="..\..\src\modflow_base\mhc_module.f"/>
+		<File RelativePath="..\..\src\modflow_base\mnw1.f"/>
+		<File RelativePath="..\..\src\modflow_base\mnw2.f"/>
+		<File RelativePath="..\..\src\modflow_base\mnw2_module.f90"/>
+		<File RelativePath="..\..\src\modflow_base\mnw2i.f"/>
+		<File RelativePath="..\..\src\modflow_base\obs2bas.f"/>
+		<File RelativePath="..\..\src\modflow_base\obs2chd.f"/>
+		<File RelativePath="..\..\src\modflow_base\obs2drn.f"/>
+		<File RelativePath="..\..\src\modflow_base\obs2drt.f"/>
+		<File RelativePath="..\..\src\modflow_base\obs2ghb.f"/>
+		<File RelativePath="..\..\src\modflow_base\obs2riv.f"/>
+		<File RelativePath="..\..\src\modflow_base\openspec_module.f"/>
+		<File RelativePath="..\..\src\modflow_base\pak_prop_interface.f90"/>
+		<File RelativePath="..\..\src\modflow_base\parutl.f"/>
+		<File RelativePath="..\..\src\modflow_base\pcg.f"/>
+		<File RelativePath="..\..\src\modflow_base\pcgn.f90"/>
+		<File RelativePath="..\..\src\modflow_base\pcgn_solve.f90"/>
+		<File RelativePath="..\..\src\modflow_base\rch.f"/>
+		<File RelativePath="..\..\src\modflow_base\res.f"/>
+		<File RelativePath="..\..\src\modflow_base\rip.f90"/>
+		<File RelativePath="..\..\src\modflow_base\riv.f"/>
+		<File RelativePath="..\..\src\modflow_base\sfr.f"/>
+		<File RelativePath="..\..\src\modflow_base\sfr_module.f90"/>
+		<File RelativePath="..\..\src\modflow_base\sfr_name_to_seg.f90"/>
+		<File RelativePath="..\..\src\modflow_base\sip.f"/>
+		<File RelativePath="..\..\src\modflow_base\solver_rp.f"/>
+		<File RelativePath="..\..\src\modflow_base\str.f"/>
+		<File RelativePath="..\..\src\modflow_base\sub.f"/>
+		<File RelativePath="..\..\src\modflow_base\swi2.f"/>
+		<File RelativePath="..\..\src\modflow_base\swr.f"/>
+		<File RelativePath="..\..\src\modflow_base\swr_util.f"/>
+		<File RelativePath="..\..\src\modflow_base\swt.f"/>
+		<File RelativePath="..\..\src\modflow_base\tabfile_module.f"/>
+		<File RelativePath="..\..\src\modflow_base\util.f"/>
+		<File RelativePath="..\..\src\modflow_base\util_pack_specific.f90"/>
+		<File RelativePath="..\..\src\modflow_base\util_sav_subroutines.f90"/>
+		<File RelativePath="..\..\src\modflow_base\uzf.f"/>
+		<File RelativePath="..\..\src\modflow_base\uzf_module.f90"/>
+		<File RelativePath="..\..\src\modflow_base\wel7.f"/>
+		<File RelativePath="..\..\src\modflow_base\wel8.f90"/></Filter>
+		<Filter Name="nwt">
+		<File RelativePath="..\..\src\nwt\ag.f"/>
+		<File RelativePath="..\..\src\nwt\gmres.f90"/>
+		<File RelativePath="..\..\src\nwt\gmres_modules.f90"/>
+		<File RelativePath="..\..\src\nwt\ilupc_mod.f90"/>
+		<File RelativePath="..\..\src\nwt\nwt.f"/>
+		<File RelativePath="..\..\src\nwt\nwt_module.f90"/>
+		<File RelativePath="..\..\src\nwt\upw.f"/>
+		<File RelativePath="..\..\src\nwt\upw_module.f90"/>
+		<File RelativePath="..\..\src\nwt\xmd.f"/>
+		<File RelativePath="..\..\src\nwt\xmd_lib.f"/></Filter>
+		<Filter Name="z_icon">
+		<File RelativePath="..\..\icon\owhm_icon_win.rc"/></Filter>
+		<File RelativePath="..\..\src\main.f90"/>
+		<File RelativePath="..\..\makefile"/></Files>
+	<Globals/></VisualStudioProject>

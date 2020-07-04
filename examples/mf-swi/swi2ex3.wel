@@ -1,0 +1,13 @@
+# swi2ex3
+# MODFLOW-SWI Example problem documented in: 
+#   Bakker, M., Schaars, F., Hughes, J.D., Langevin, C.D., Dausman, A.M., 2013, Documentation of the seawater intrusion (SWI2) package for MODFLOW: U.S. Geological Survey Techniques and Methods 6-A46, 47 p.
+# 
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+# WEL
+         2         0
+         2         0
+        1         1       200  1.000000e-02
+        3         1       200  2.000000e-02
+         2         0
+        1         1       200  5.000000e-03
+        3         1       200  1.000000e-02

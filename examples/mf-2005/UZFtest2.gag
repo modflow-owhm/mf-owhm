@@ -1,0 +1,19 @@
+# UZFtest2
+# MODFLOW-2005 Example problem documented in: 
+#   Harbaugh, A.W., 2005, MODFLOW-2005, the U.S. Geological Survey modular ground-water model -- the Ground-Water Flow Process: U.S. Geological Survey Techniques and Methods 6-A16.
+#   Harbaugh, A.W., Banta, E.R., Hill, M.C. and McDonald, M.G., 2000, MODFLOW-2000, The U.S. Geological Survey Modular Ground-Water Model - User Guide to Modularization Concepts and the Ground-Water Flow Process: U.S Geological Survey Open-File Report 2000-92, 121 p., https://doi.org/10.3133/ofr200092
+#   Niswonger, R.G., Prudic, D.E., and Regan, R.S., 2006, Documentation of the Unsaturated-Zone Flow (UZF1) Package for modeling unsaturated flow between the land surface and the water table with MODFLOW-2005: U.S. Geological Techniques and Methods Book 6, Chapter A19, 62 p.
+# 
+#      -Comments are preceded by a # sign
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+9              # NUMGAGE (number of gaging stations)
+1   4   83 1   # Stream Segment & Reach; Output file for Gage 1; Output option
+2   3   84 1   # Stream Segment & Reach; Output file for Gage 2; Output option
+3   5   85 1   # Stream Segment & Reach; Output file for Gage 3; Output option
+4   3   86 1   # Stream Segment & Reach; Output file for Gage 4; Output option
+5   4   87 4   # Stream Segment & Reach; Output file for Gage 5; Output option
+6   5   88 4   # Stream Segment & Reach; Output file for Gage 6; Output option
+7   3   89 4   # Stream Segment & Reach; Output file for Gage 7; Output option
+8   6   90 4   # Stream Segment & Reach; Output file for Gage 8; Output option
+3   1   91 5   # Stream Segment & Reach; Output file for Gage 9; Output option

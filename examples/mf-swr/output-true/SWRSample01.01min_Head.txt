@@ -1,0 +1,2 @@
+SP TS  21  1  ITER 1  DELT 600.0  (NROW,NCOL,NLAY) = (1, 1, 1)   ERROR 0.0 %  FORMAT "(*(ES12.5, :, 1x))"     LAY 1
+         NaN

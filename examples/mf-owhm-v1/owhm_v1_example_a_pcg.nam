@@ -1,0 +1,53 @@
+LIST        7   ./output/owhm_v1_a_example.lst
+UPW         9   owhm_v1_example.lpf
+BAS         10  owhm_v1_example_a.bas
+DIS         11  owhm_v1_example.dis
+GHB         12  owhm_v1_example.ghb
+OC          15  owhm_v1_example.oc
+#FARM WELLS LINKED TO MNW2
+FMP         16  owhm_v1_example_a.fmp
+SFR         17  owhm_v1_example.sfr
+SWR         24  owhm_v1_example.swr
+MNW2        18  owhm_v1_example.mnw
+UZF         19  owhm_v1_example.uzf
+HYD         22  owhm_v1_example.hyd
+SUB         23  owhm_v1_example.sub
+# Solvers (NWT REQUIRES UPW, which has the same input as LPF)
+NWT         14  owhm_v1_example.nwt
+#FMP Datafiles
+###DATA        20  data_fmp/ofe.in       READ  BUFFER 16 # kilobyte file preload 
+###DATA        30  data_fmp/root.in      READ  BUFFER 16 # kilobyte  
+###DATA        40  data_fmp/kc.in        READ  BUFFER 16 # kilobyte  
+###DATA        50  data_fmp/fte.in       READ  BUFFER 16 # kilobyte  
+###DATA        60  data_fmp/ineffsw.in   READ  BUFFER 16 # kilobyte  
+###DATA        80  data_fmp/nrdfac.in    READ  BUFFER 16 # kilobyte  
+#SWR Datafiles
+#DATA       203  Data\SWR_DT.dat
+#
+DATA(BINARY)    70    ./output/owhm_v1_example_CBC.out           WRITE  BUFFER 32  # kilobyte file write buffer before writing to hard drive
+DATA(BINARY)    71    ./output/owhm_v1_example_HYD.sav           WRITE
+DATA            72    ./output/SWROUT/sfr.swr.out         WRITE
+DATA            69    ./output/Head_save.out              WRITE
+DATA(BINARY)    73    ./output/Sub_save.out               WRITE
+DATA            74    ./output/Sub_prop_save.out          WRITE
+DATA            75    ./output/Sub_CH_save.out            WRITE
+DATA(BINARY)    76    ./output/Sub_CPELLY_save.out        WRITE
+DATA            77    ./output/Sub_CPInELLY_save.out      WRITE
+DATA            78    ./output/Sub_CPELIBSys_save.out     WRITE
+DATA            79    ./output/Sub_CPInELIBSys_save.out   WRITE
+DATA            81    ./output/o_strm.txt                 WRITE
+#--swr                
+DATA(BINARY)    101   ./output/SWROUT/SWRSFRTest.rg.bin   WRITE
+DATA(BINARY)    102   ./output/SWROUT/SWRSFRTest.rstg.bin WRITE
+DATA(BINARY)    103   ./output/SWROUT/SWRSFRTest.rqaq.bin WRITE
+DATA            105   ./output/SWROUT/SWR.STR.csv         WRITE
+DATA            501   ./output/SWROUT/SWR.DT.dat          WRITE
+DATA            502   ./output/SWROUT/SWR.OBS.csv         WRITE
+#--uzf                
+DATA(BINARY)    61    ./output/f5and8bin.uzfot            WRITE   # Output file for recharge and ground-water discharge
+DATA            62    ./output/f5_r2c2.opt1               WRITE   # Output file for cell in row 2, col. 2 of farm 5 using IUZOPT=1
+DATA            63    ./output/f5_r3c3.opt2               WRITE   # Output file for cell in row 3, col. 3 of farm 5 using IUZOPT=2
+DATA            64    ./output/f5_r4c4.opt3               WRITE   # Output file for cell in row 4, col. 4 of farm 5 using IUZOPT=3
+DATA            65    ./output/f5_r5c4.opt2               WRITE   # Output file for cell in row 5, col. 4 of farm 5 using IUZOPT=2
+DATA            66    ./output/f8_r10c20.opt2             WRITE   # Output file for cell in row 10, col. 20 of farm 8 using IUZOPT=2
+DATA            67    ./output/f5and8.uzfot               WRITE   # Output file of times series of unsaturated-zone water budgets

@@ -1,0 +1,845 @@
+
+      MMMMMMM                                       MM      MMM     MM
+    MMM     MMM    MM      M   MMMMMMMM             LM     DM M     ML     MM     MMMMMMMMM  MMMMMMMM  MMMMMMMM
+   MM         MM   MMM     M   MM                    MM    MM M     M     MMMM        M      M         MM     NM
+   MM         MM   MM M    M   MM                    MM    M  MM   MM    MM  MM       M      M         MM      M
+   MM         MM   MM  M   M   MMMMMMMM               MN  MM   M   MM   MM    MM      M      MMMMMMM   MMMMMMMMM
+   MM         MM   MM   M  M   MM         MMMMMMM     MM  M    MM MM    MMMMMMMM      M      M         MM   MM
+   MM         MM   MM    M M   MM                     LM MM    NM MM   MM      MM     M      M         MM    MM
+    MM       NM    MM     MM   MM                      M M      M M   MN        MM    M      M         MM     MM
+     MMMMMMMMN     MM      M   MMMMMMMM                7MM      7MM  MN          MM   M      MMMMMMMM  MM      MM
+
+
+ MODFLOW-OWHM v2.0.01  
+
+
+                        MODFLOW
+            ONE-WATER HYDROLOGIC-FLOW MODEL
+
+    U.S. GEOLOGICAL SURVEY MODULAR FINITE-DIFFERENCE 
+           CONJUNCTIVE USE SIMULATION PROGRAM
+
+                     Version 2.0
+
+ Release: 01          4/23/2020
+
+ Includes:
+          MODFLOW-2005 Version 1.12.0   02/03/2017
+          MODFLOW-FMP  Version 4.00.0   04/23/2017
+          MODFLOW-SWR  Version 1.04.0   09/15/2016
+          MODFLOW-SWI  Version 2.00.0   07/22/2013
+          MODFLOW-LGR  Version 2.00.0   09/19/2013
+          MODFLOW-NWT  Version 1.2.0    03/01/2020
+          MODFLOW-CFP  Version 1.09.57  09/12/2017
+
+
+ OneWater Simulation Initiated at  
+
+
+ LIST FILE: ./output/swi2ex6_3_0.100.list
+      UNIT: 2
+
+OPENING DATA FILES [DATA AND DATA(BINARY)]
+
+OPENED DATA FILE ON UNIT     55 WITH FILENAME OF: ./output/swi2ex6_3_0.100.zta
+OPENED DATA FILE ON UNIT     56 WITH FILENAME OF: ./output/swi2ex6_3_0.100.swb
+OPENED DATA FILE ON UNIT     51 WITH FILENAME OF: ./output/swi2ex6_3_0.100.hds
+OPENED DATA FILE ON UNIT     52 WITH FILENAME OF: ./output/swi2ex6_3_0.100.ddn
+OPENED DATA FILE ON UNIT     53 WITH FILENAME OF: ./output/swi2ex6_3_0.100.cbc
+OPENED DATA FILE ON UNIT    500 WITH FILENAME OF: ./output/swi2ex6_3_0.100_VolumetricBudget.txt
+OPENED DATA FILE ON UNIT    510 WITH FILENAME OF: ./output/swi2ex6_3_0.100_Head.txt
+OPENED DATA FILE ON UNIT    520 WITH FILENAME OF: ./output/swi2ex6_3_0.100_CumHCHG.txt
+
+OPENING PACKAGES
+
+DIS  PACKAGE OPENED.
+BAS6 PACKAGE OPENED.
+WEL  PACKAGE OPENED.
+GHB  PACKAGE OPENED.
+LPF  PACKAGE OPENED.
+SWI  PACKAGE OPENED.
+PCG  PACKAGE OPENED.
+OC   PACKAGE OPENED.
+
+NOTIFICATION: A FILE UNIT NUMBER WAS FOUND FOR EITHER THE LIST FILE OR A PACAKGE.
+IT WILL BE USED EVEN THOUGH UNIT NUMBERS FOR THE LIST FILE AND PACKAGES ARE NOW OPTIONAL.
+[IT IS RECOMMENDED TO STILL USE A UNIT NUMBER FOR DATA and DATA(BINARY) ]
+
+
+ BAS -- BASIC PACKAGE, VERSION OWHM INPUT READ FROM UNIT    13
+ 
+MODFLOW was compiled using uniform precision (Precision => Number of meaningful digits in numbers)
+Precision of REAL and DOUBLE PRECISION variables: 15
+
+ DISCRETIZATION INPUT DATA READ FROM UNIT   11
+
+-- READING DIS PACKAGE INPUT --
+
+# swi2ex6_3
+# MODFLOW-SWI Example problem documented in:
+#   Bakker, M., Schaars, F., Hughes, J.D., Langevin, C.D., Dausman, A.M., 2013, Documentation of the seawater intrusion (SWI2) package for MODFLOW: U.S. Geological Survey Techniques and Methods 6-A46, 47 p.
+#
+#      -Comments are preceded by a # sign
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+# DIS
+
+
+*** DIS COORDINATE SYSTEM NOT SEPECIFIED ***
+DEFAULT VALUES APPLIED ARE 0° ROTATION
+WITH THE ORIGIN (0,0) LOCATED AT THE MODEL'S LOWER LEFT CORNER
+
+
+
+
+DIS COORDINATE SYSTEM SEPECIFIED WITH:
+GRID ROTATION OF 0.0°
+WITH THE ORIGIN LOCATED AT THE OUTER MOST CORNER OF MODEL CELL [1,1] WITH:
+X-COORDINATE:0.0
+Y-COORDINATE:0.0
+    3 LAYERS         1 ROWS       200 COLUMNS
+      1 STRESS PERIOD(S) IN SIMULATION
+ MODEL TIME UNIT IS DAYS
+ MODEL LENGTH UNIT IS METERS
+  Confining bed flag for each layer:
+   0   0   0
+         0  2.000e+01           (5G13.0)         -1               # DELR(NCOL)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
+
+                     DELR =   20.0000    
+         0  1.000e+00           (5G13.0)         -1               # DELC(NROW)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
+
+                     DELC =   1.00000    
+
+
+
+           TOP ELEVATION OF LAYER 1
+ READING ON UNIT   11 WITH FORMAT:            (5G13.0) 
+
+
+
+             MODEL LAYER BOTTOM EL. FOR LAYER   1
+ READING ON UNIT   11 WITH FORMAT:            (5G13.0) 
+
+
+
+             MODEL LAYER BOTTOM EL. FOR LAYER   2
+ READING ON UNIT   11 WITH FORMAT:            (5G13.0) 
+
+
+
+             MODEL LAYER BOTTOM EL. FOR LAYER   3
+ READING ON UNIT   11 WITH FORMAT:            (5G13.0) 
+
+
+ STRESS PERIOD     LENGTH       TIME STEPS     MULTIPLIER FOR DELT    SS FLAG  (OPTIONAL TIME STEP LENGTH)
+ ---------------------------------------------------------------------------------------------------
+        1         182500.0        500                  1.00000         SS
+
+ STEADY-STATE SIMULATION
+
+
+
+
+-- READING BAS PACKAGE INPUT --
+
+# swi2ex6_3
+# MODFLOW-SWI Example problem documented in:
+#   Bakker, M., Schaars, F., Hughes, J.D., Langevin, C.D., Dausman, A.M., 2013, Documentation of the seawater intrusion (SWI2) package for MODFLOW: U.S. Geological Survey Techniques and Methods 6-A46, 47 p.
+#
+# Input modified for MODFLOW-OWHM by adding a BAS OPTIONS BLOCK with output options.
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+# Basic package
+
+
+ THE BAS PACKAGE NOW DEFAULTS TO FREE FORMAT.
+ USE OPTION "NOFREE" TO DISABLE FREE FORMAT.
+
+ NOW READING BAS OPTIONS
+
+ FOUND OPTION: NOCBC
+    NO CELL-BY-CELL FLOWS WILL BE WRITTEN.
+
+ FOUND OPTION: BUDGETDB
+ FOUND OPTION: CUMULATIVE_HEAD_CHANGE
+    THIS OPTION IS ONLY USEFUL FOR MODEL RESULT COMPARISON WITH DIFFERENT CODE COMPARISONS.
+
+ FOUND OPTION: PRINT_HEAD    SP    TS   FILE
+                              1   500   EXTERNAL
+
+ THE MAX STORAGE FOR PROPERTIES DEFINED BY PARAMETERS IS: 
+ MAX STORAGE OF PARAMETERS (MXPAR)  IS       2000
+ MAX STORAGE OF INSTANCES  (MXINST) IS      50000
+ MAX STORAGE OF CLUSTERS   (MXCLST) IS    2000000
+
+
+
+
+                     BOUNDARY ARRAY FOR LAYER   1
+ READING ON UNIT   13 WITH FORMAT:               (5I4) 
+
+
+
+                     BOUNDARY ARRAY FOR LAYER   2
+ READING ON UNIT   13 WITH FORMAT:               (5I4) 
+
+
+
+                     BOUNDARY ARRAY FOR LAYER   3
+ READING ON UNIT   13 WITH FORMAT:               (5I4) 
+
+ AQUIFER HEAD WILL BE SET TO -999.99 AT ALL NO-FLOW NODES (IBOUND=0).
+
+
+
+
+                       INITIAL HEAD FOR LAYER   1
+ READING ON UNIT   13 WITH FORMAT:            (5G13.0) 
+
+
+
+                       INITIAL HEAD FOR LAYER   2
+ READING ON UNIT   13 WITH FORMAT:            (5G13.0) 
+
+
+
+                       INITIAL HEAD FOR LAYER   3
+ READING ON UNIT   13 WITH FORMAT:            (5G13.0) 
+
+-- READING OC PACKAGE INPUT --
+
+# swi2ex6_3
+# MODFLOW-SWI Example problem documented in:
+#   Bakker, M., Schaars, F., Hughes, J.D., Langevin, C.D., Dausman, A.M., 2013, Documentation of the seawater intrusion (SWI2) package for MODFLOW: U.S. Geological Survey Techniques and Methods 6-A46, 47 p.
+#
+#      -Comments are preceded by a # sign
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+# OC
+
+
+ OUTPUT CONTROL IS SPECIFIED EVERY TIME STEP
+ HEAD PRINT FORMAT CODE IS   0    DRAWDOWN PRINT FORMAT CODE IS   0
+ HEADS WILL BE SAVED ON UNIT   51    DRAWDOWNS WILL BE SAVED ON UNIT   52
+
+ LPF -- LAYER-PROPERTY FLOW PACKAGE, VERSION OWHM
+         INPUT READ FROM UNIT   15
+
+-- READING LPF PACKAGE INPUT --
+
+# swi2ex6_3_0.100
+# MODFLOW-SWI Example problem documented in:
+#   Bakker, M., Schaars, F., Hughes, J.D., Langevin, C.D., Dausman, A.M., 2013, Documentation of the seawater intrusion (SWI2) package for MODFLOW: U.S. Geological Survey Techniques and Methods 6-A46, 47 p.
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+# LPF
+
+ HEAD AT CELLS THAT CONVERT TO DRY= -1.00000E+30
+ No named parameters
+
+   LAYER FLAGS:
+ LAYER       LAYTYP        LAYAVG         CHANI        LAYVKA        LAYWET
+ ---------------------------------------------------------------------------
+    1             0             0     1.000E+00             0             0
+    2             0             0     1.000E+00             0             0
+    3             0             0     1.000E+00             0             0
+
+   INTERPRETATION OF LAYER FLAGS:
+                        INTERBLOCK     HORIZONTAL    DATA IN
+         LAYER TYPE   TRANSMISSIVITY   ANISOTROPY   ARRAY VKA   WETTABILITY
+ LAYER      (LAYTYP)      (LAYAVG)       (CHANI)      (LAYVKA)      (LAYWET)
+ ---------------------------------------------------------------------------
+    1      CONFINED      HARMONIC     1.000E+00    VERTICAL K  NON-WETTABLE
+    2      CONFINED      HARMONIC     1.000E+00    VERTICAL K  NON-WETTABLE
+    3      CONFINED      HARMONIC     1.000E+00    VERTICAL K  NON-WETTABLE
+
+ WETTING CAPABILITY IS NOT ACTIVE IN ANY LAYER
+
+
+
+              HYD. COND. ALONG ROWS FOR LAYER   1
+ READING ON UNIT   15 WITH FORMAT:          (200G13.0) 
+
+
+
+                VERTICAL HYD. COND. FOR LAYER   1
+ READING ON UNIT   15 WITH FORMAT:          (200G13.0) 
+
+
+
+              HYD. COND. ALONG ROWS FOR LAYER   2
+ READING ON UNIT   15 WITH FORMAT:          (200G13.0) 
+
+
+
+                VERTICAL HYD. COND. FOR LAYER   2
+ READING ON UNIT   15 WITH FORMAT:          (200G13.0) 
+
+
+
+              HYD. COND. ALONG ROWS FOR LAYER   3
+ READING ON UNIT   15 WITH FORMAT:          (200G13.0) 
+
+
+
+                VERTICAL HYD. COND. FOR LAYER   3
+ READING ON UNIT   15 WITH FORMAT:          (200G13.0) 
+
+-- READING WEL PACKAGE INPUT --
+
+# swi2ex6_3
+# MODFLOW-SWI Example problem documented in:
+#   Bakker, M., Schaars, F., Hughes, J.D., Langevin, C.D., Dausman, A.M., 2013, Documentation of the seawater intrusion (SWI2) package for MODFLOW: U.S. Geological Survey Techniques and Methods 6-A46, 47 p.
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+# WEL
+
+
+WEL -- WELL PACKAGE, VERSION OWHM INPUT READ FROM UNIT 20
+
+ No named parameters
+
+ NO TABFILE SPECIFIED FOR PACKAGE WEL  
+
+
+ NO LINEFEEDS ARE SPECIFIED FOR PACKAGE WEL  
+
+
+MAXIMUM OF 2 ACTIVE WELLS AT ONE TIME
+
+
+0 Well parameters
+
+ GHB -- GENERAL-HEAD BOUNDARY PACKAGE, VERSION OWHM
+         INPUT READ FROM UNIT   23
+
+-- READING GHB PACKAGE INPUT --
+
+# swi2ex6_3
+# MODFLOW-SWI Example problem documented in:
+#   Bakker, M., Schaars, F., Hughes, J.D., Langevin, C.D., Dausman, A.M., 2013, Documentation of the seawater intrusion (SWI2) package for MODFLOW: U.S. Geological Survey Techniques and Methods 6-A46, 47 p.
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+# GHB
+
+ No named parameters
+
+ NO TABFILE SPECIFIED FOR PACKAGE GHB  
+
+
+ NO LINEFEEDS ARE SPECIFIED FOR PACKAGE GHB  
+
+ MAXIMUM OF     30 ACTIVE GHB CELLS AT ONE TIME
+
+
+     0 GHB parameters
+
+ PCG -- CONJUGATE-GRADIENT SOLUTION PACKAGE, VERSION OWHM
+
+-- READING PCG PACKAGE INPUT --
+
+# swi2ex6_3
+# MODFLOW-SWI Example problem documented in:
+#   Bakker, M., Schaars, F., Hughes, J.D., Langevin, C.D., Dausman, A.M., 2013, Documentation of the seawater intrusion (SWI2) package for MODFLOW: U.S. Geological Survey Techniques and Methods 6-A46, 47 p.
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+# PCG
+
+ MAXIMUM OF     50 CALLS OF SOLUTION ROUTINE
+ MAXIMUM OF     30 INTERNAL ITERATIONS PER CALL TO SOLUTION ROUTINE
+ MATRIX PRECONDITIONING TYPE :    1
+
+
+
+                                    SOLUTION BY THE CONJUGATE-GRADIENT METHOD
+                                   -------------------------------------------
+                    MAXIMUM NUMBER OF CALLS TO PCG ROUTINE =       50
+                        MAXIMUM ITERATIONS PER CALL TO PCG =       30
+                               MATRIX PRECONDITIONING TYPE =        1
+        RELAXATION FACTOR (ONLY USED WITH PRECOND. TYPE 1) =    0.10000E+01
+ PARAMETER OF POLYNOMIAL PRECOND. = 2 (2) OR IS CALCULATED :        0
+                         HEAD CHANGE CRITERION FOR CLOSURE =    0.10000E-04
+                     RESIDUAL CHANGE CRITERION FOR CLOSURE =    0.10000E-04
+            PCG HEAD AND RESIDUAL CHANGE PRINTOUT INTERVAL =      999
+     PRINTING FROM SOLVER IS LIMITED(1) OR SUPPRESSED (>1) =        3
+                            STEADY-STATE DAMPING PARAMETER =    0.10000E+01
+                               TRANSIENT DAMPING PARAMETER =    0.10000E+01
+
+-- READING SWI PACKAGE INPUT --
+
+# swi2ex6_3
+# MODFLOW-SWI Example problem documented in:
+#   Bakker, M., Schaars, F., Hughes, J.D., Langevin, C.D., Dausman, A.M., 2013, Documentation of the seawater intrusion (SWI2) package for MODFLOW: U.S. Geological Survey Techniques and Methods 6-A46, 47 p.
+#
+#      -Comments are preceded by a # sign
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+# Salt Water Intrusion package
+#--Dataset 1
+
+
+
+ SWI2 -- SWI PACKAGE, VERSION OWHM
+ --------------------------------------------------
+ SWI2 INPUT READ FROM UNIT 29
+
+
+
+
+ SWI2 DATASET 1
+ ----------------------------------------------------
+ NUMBER OF SURFACES (NSRF):                         1
+ TOTAL NUMBER OF ZONES:                             2
+ DENSITY DISTRIBUTION OPTION (ISTRAT):              1
+   VARIABLE DENSITY FLOW -- ISTRAT = 0
+   STRATIFIED FLOW       -- ISTRAT = 1
+ NUMBER OF SWI OBSERVATIONS (NOBS):                 0
+ ZETA OUTPUT FILE UNIT NUMBER (ISWIZT):            55
+ BUDGET OUTPUT FILE UNIT NUMBER (ISWICB):           0
+ OBSERVATION OUTPUT FILE UNIT NUMBER (ISWIOBS):     0
+ ----------------------------------------------------
+
+
+ SWI2 DATASET 2A
+ ----------------------------------------------------
+ SOLVER (NSOLVER):                                  1
+   SOLVER =                      DIRECT SOLVER (DE4)
+ SOLVER PRINTOUT INTERVAL (IPRSOL):               999
+ SOLVER OUTPUT FLAG (MUTSOL):                       3
+   0 = PRINTING EVERY ITERATION
+   1 = LIMITED (TOTAL NUMBER OF ITERATIONS)
+   2 = NO PRINTING
+   3 = ONLY IF CONVERGENCE FAILS
+ ----------------------------------------------------
+
+
+ SWI2 DATASET 3A
+ ----------------------------------------------------
+ MAXIMUM TOE SURFACE SLOPE (TOESLOPE):      0.100E-01
+ MAXIMUM TIP SURFACE SLOPE (TIPSLOPE):      0.400E-01
+ EXCESS SURFACE SLOPE FRACTION (ALPHA):     0.100    
+ MINIMUM ZONE THICKNESS FRACTION (BETA):    0.100    
+ ----------------------------------------------------
+         29         1          (20G13.0)         -1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
+
+
+
+                             NUZONE
+ READING ON UNIT   29 WITH FORMAT:           (20G13.0) 
+
+
+
+                   ZETA SURFACE  1  FOR LAYER   1
+ READING ON UNIT   29 WITH FORMAT:          (200G13.0) 
+
+
+
+                   ZETA SURFACE  1  FOR LAYER   2
+ READING ON UNIT   29 WITH FORMAT:          (200G13.0) 
+
+
+
+                   ZETA SURFACE  1  FOR LAYER   3
+ READING ON UNIT   29 WITH FORMAT:          (200G13.0) 
+
+                      SSZ =  0.200000     FOR LAYER   1
+
+                      SSZ =  0.200000     FOR LAYER   2
+
+                      SSZ =  0.200000     FOR LAYER   3
+
+
+
+                            IZONENR FOR LAYER   1
+ READING ON UNIT   29 WITH FORMAT:            (200I13) 
+
+
+
+                            IZONENR FOR LAYER   2
+ READING ON UNIT   29 WITH FORMAT:            (200I13) 
+
+
+
+                            IZONENR FOR LAYER   3
+ READING ON UNIT   29 WITH FORMAT:            (200I13) 
+
+
+########################################################################################################
+
+                           WARNING_MESSAGE
+
+         THE FOLLOWING COMMENTS WERE PASSED TO THE WARNING ROUTINE
+
+THE DESRIPTION OF THE WARNING IS:
+
+DIS PACKAGE: THE GROUND SURFACE ELEVATION WAS NOT SPECIFIED WITH THE KEYWORD "SURFACE_ELEVATION"
+
+BEFORE LOADING THE "TOP" ARRAY FOR LAYER 1
+NOR WAS IT DEFINED WITH ANOTHER PACKAGE   (e.g. FMPs GLOBAL DIMENSION KEYWORD "SURFACE_ELEVATION")
+
+OneWater WILL SET THE GROUND SURFACE ELEVATION (GSE)
+TO THE TOP ELEVATION OF THE UPPER MOST ACTIVE CELL OR THE DIS TOP OF LAY1.
+
+NOTE THAT SFR DOES USE GSE FOR ALL DIVERSION SEGMENTS
+   WHEN "IRDFLG" IS SET TO 2 or -2.
+
+########################################################################################################
+
+
+
+1
+                            STRESS PERIOD NO.      1, LENGTH =   182500.0    
+                            -----------------------------------------------
+
+                              NUMBER OF TIME STEPS =   500
+
+                               MULTIPLIER FOR DELT =     1.000
+
+                            INITIAL TIME STEP SIZE =   365.0000    
+
+PARAMETERS HAVE BEEN USED IN PACKAGES
+
+THE CURRENT STORAGE FOR PARAMETERS IS: 
+No. PARAMETER=         0 WITH MAX STORAGE (MXPAR)  OF      2000
+No. CLUSTERS =         0 WITH MAX STORAGE (MXCLST) OF   2000000
+No. INSTANCES=         0 WITH MAX STORAGE (MXINST) OF     50000
+
+YOU CAN INCREASE/DECREASE STORAGE WITH BAS OPTION:
+MAXPARAM  MXPAR  MXCLST MXINST
+
+FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
+(NOTE THE THREE NUMBERS ARE A MINUMUM SIZE):
+   MAXPARAM          1         1         1
+
+
+ WEL PACKAGE STRESS PERIOD INFORMATION [BEFORE APPLICATION OF TABFILES]
+
+ WELL NO.  LAYER   ROW   COL   STRESS RATE         
+ --------------------------------------------------
+      1      1      1    200  0.10000000E-01
+      2      3      1    200  0.20000000E-01
+
+2 WELLS
+
+ GHB PACKAGE STRESS PERIOD INFORMATION [BEFORE APPLICATION OF TABFILES]
+
+ BOUND. NO. LAYER   ROW   COL     BHEAD      CONDUCTANCE         
+ ----------------------------------------------------------------
+      1      1      1      1   50.000000      0.40000000    
+      2      1      1      2   50.000000      0.40000000    
+      3      1      1      3   50.000000      0.40000000    
+      4      1      1      4   50.000000      0.40000000    
+      5      1      1      5   50.000000      0.40000000    
+      6      1      1      6   50.000000      0.40000000    
+      7      1      1      7   50.000000      0.40000000    
+      8      1      1      8   50.000000      0.40000000    
+      9      1      1      9   50.000000      0.40000000    
+     10      1      1     10   50.000000      0.40000000    
+     11      1      1     11   50.000000      0.40000000    
+     12      1      1     12   50.000000      0.40000000    
+     13      1      1     13   50.000000      0.40000000    
+     14      1      1     14   50.000000      0.40000000    
+     15      1      1     15   50.000000      0.40000000    
+     16      1      1     16   50.000000      0.40000000    
+     17      1      1     17   50.000000      0.40000000    
+     18      1      1     18   50.000000      0.40000000    
+     19      1      1     19   50.000000      0.40000000    
+     20      1      1     20   50.000000      0.40000000    
+     21      1      1     21   50.000000      0.40000000    
+     22      1      1     22   50.000000      0.40000000    
+     23      1      1     23   50.000000      0.40000000    
+     24      1      1     24   50.000000      0.40000000    
+     25      1      1     25   50.000000      0.40000000    
+     26      1      1     26   50.000000      0.40000000    
+     27      1      1     27   50.000000      0.40000000    
+     28      1      1     28   50.000000      0.40000000    
+     29      1      1     29   50.000000      0.40000000    
+     30      1      1     30   50.000000      0.40000000    
+
+     30 GHB CELLS
+ 
+ SOLVING FOR HEAD 
+
+ HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 0
+ CELL-BY-CELL FLOW TERM FLAG = 1
+
+ OUTPUT FLAGS FOR ALL LAYERS ARE THE SAME:
+   HEAD    DRAWDOWN  HEAD  DRAWDOWN
+ PRINTOUT  PRINTOUT  SAVE    SAVE
+ ----------------------------------
+     0         0       0       0
+ SOLVING FOR ZETA FOR LAYER     1 ZONE     2
+
+      10 UPPER PART EQS.        10 LOWER PART EQS.    BAND WIDTH + 1 =      2
+ STRESS PERIOD=   1 TIMESTEP=    1 LAYER=   1 ZONE=   2 ACTIVE CELLS=   20 NUMBER OF EQUATIONS=      20
+ SOLVING FOR ZETA FOR LAYER     3 ZONE     2
+ STRESS PERIOD=   1 TIMESTEP=    1 LAYER=   3 ZONE=   2 ACTIVE CELLS=   20 NUMBER OF EQUATIONS=      20
+ 
+ SOLVING FOR HEAD 
+
+ HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 0
+ CELL-BY-CELL FLOW TERM FLAG = 1
+
+ OUTPUT FLAGS FOR ALL LAYERS ARE THE SAME:
+   HEAD    DRAWDOWN  HEAD  DRAWDOWN
+ PRINTOUT  PRINTOUT  SAVE    SAVE
+ ----------------------------------
+     0         0       0       0
+ SOLVING FOR ZETA FOR LAYER     1 ZONE     2
+
+      11 UPPER PART EQS.        10 LOWER PART EQS.    BAND WIDTH + 1 =      2
+ STRESS PERIOD=   1 TIMESTEP=    2 LAYER=   1 ZONE=   2 ACTIVE CELLS=   21 NUMBER OF EQUATIONS=      21
+ SOLVING FOR ZETA FOR LAYER     2 ZONE     2
+
+       1 UPPER PART EQS.         1 LOWER PART EQS.    BAND WIDTH + 1 =      1
+ STRESS PERIOD=   1 TIMESTEP=    2 LAYER=   2 ZONE=   2 ACTIVE CELLS=    2 NUMBER OF EQUATIONS=       2
+ SOLVING FOR ZETA FOR LAYER     3 ZONE     2
+
+      11 UPPER PART EQS.        10 LOWER PART EQS.    BAND WIDTH + 1 =      2
+ STRESS PERIOD=   1 TIMESTEP=    2 LAYER=   3 ZONE=   2 ACTIVE CELLS=   21 NUMBER OF EQUATIONS=      21
+ 
+ SOLVING FOR HEAD 
+
+ HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 0
+ CELL-BY-CELL FLOW TERM FLAG = 1
+
+ OUTPUT FLAGS FOR ALL LAYERS ARE THE SAME:
+   HEAD    DRAWDOWN  HEAD  DRAWDOWN
+ PRINTOUT  PRINTOUT  SAVE    SAVE
+ ----------------------------------
+     0         0       0       0
+ SOLVING FOR ZETA FOR LAYER     1 ZONE     2
+ STRESS PERIOD=   1 TIMESTEP=    3 LAYER=   1 ZONE=   2 ACTIVE CELLS=   21 NUMBER OF EQUATIONS=      21
+ SOLVING FOR ZETA FOR LAYER     2 ZONE     2
+
+       1 UPPER PART EQS.         1 LOWER PART EQS.    BAND WIDTH + 1 =      1
+ STRESS PERIOD=   1 TIMESTEP=    3 LAYER=   2 ZONE=   2 ACTIVE CELLS=    2 NUMBER OF EQUATIONS=       2
+ SOLVING FOR ZETA FOR LAYER     3 ZONE     2
+
+      11 UPPER PART EQS.        11 LOWER PART EQS.    BAND WIDTH + 1 =      2
+ STRESS PERIOD=   1 TIMESTEP=    3 LAYER=   3 ZONE=   2 ACTIVE CELLS=   22 NUMBER OF EQUATIONS=      22
+ 
+ HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 0
+ CELL-BY-CELL FLOW TERM FLAG = 1
+
+ OUTPUT FLAGS FOR ALL LAYERS ARE THE SAME:
+   HEAD    DRAWDOWN  HEAD  DRAWDOWN
+ PRINTOUT  PRINTOUT  SAVE    SAVE
+ ----------------------------------
+     0         0       0       0
+ SOLVING FOR ZETA FOR LAYER     1 ZONE     2
+
+       8 UPPER PART EQS.         9 LOWER PART EQS.    BAND WIDTH + 1 =      2
+ STRESS PERIOD=   1 TIMESTEP=  497 LAYER=   1 ZONE=   2 ACTIVE CELLS=   17 NUMBER OF EQUATIONS=      17
+ SOLVING FOR ZETA FOR LAYER     2 ZONE     2
+
+       9 UPPER PART EQS.        10 LOWER PART EQS.    BAND WIDTH + 1 =      2
+ STRESS PERIOD=   1 TIMESTEP=  497 LAYER=   2 ZONE=   2 ACTIVE CELLS=   19 NUMBER OF EQUATIONS=      19
+ SOLVING FOR ZETA FOR LAYER     3 ZONE     2
+
+      26 UPPER PART EQS.        26 LOWER PART EQS.    BAND WIDTH + 1 =      2
+ STRESS PERIOD=   1 TIMESTEP=  497 LAYER=   3 ZONE=   2 ACTIVE CELLS=   52 NUMBER OF EQUATIONS=      52
+ 
+ SOLVING FOR HEAD 
+
+ HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 0
+ CELL-BY-CELL FLOW TERM FLAG = 1
+
+ OUTPUT FLAGS FOR ALL LAYERS ARE THE SAME:
+   HEAD    DRAWDOWN  HEAD  DRAWDOWN
+ PRINTOUT  PRINTOUT  SAVE    SAVE
+ ----------------------------------
+     0         0       0       0
+ SOLVING FOR ZETA FOR LAYER     1 ZONE     2
+
+       8 UPPER PART EQS.         9 LOWER PART EQS.    BAND WIDTH + 1 =      2
+ STRESS PERIOD=   1 TIMESTEP=  498 LAYER=   1 ZONE=   2 ACTIVE CELLS=   17 NUMBER OF EQUATIONS=      17
+ SOLVING FOR ZETA FOR LAYER     2 ZONE     2
+
+       9 UPPER PART EQS.        10 LOWER PART EQS.    BAND WIDTH + 1 =      2
+ STRESS PERIOD=   1 TIMESTEP=  498 LAYER=   2 ZONE=   2 ACTIVE CELLS=   19 NUMBER OF EQUATIONS=      19
+ SOLVING FOR ZETA FOR LAYER     3 ZONE     2
+
+      26 UPPER PART EQS.        26 LOWER PART EQS.    BAND WIDTH + 1 =      2
+ STRESS PERIOD=   1 TIMESTEP=  498 LAYER=   3 ZONE=   2 ACTIVE CELLS=   52 NUMBER OF EQUATIONS=      52
+ 
+ SOLVING FOR HEAD 
+
+ HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 0
+ CELL-BY-CELL FLOW TERM FLAG = 1
+
+ OUTPUT FLAGS FOR ALL LAYERS ARE THE SAME:
+   HEAD    DRAWDOWN  HEAD  DRAWDOWN
+ PRINTOUT  PRINTOUT  SAVE    SAVE
+ ----------------------------------
+     0         0       0       0
+ SOLVING FOR ZETA FOR LAYER     1 ZONE     2
+
+       8 UPPER PART EQS.         8 LOWER PART EQS.    BAND WIDTH + 1 =      2
+ STRESS PERIOD=   1 TIMESTEP=  499 LAYER=   1 ZONE=   2 ACTIVE CELLS=   16 NUMBER OF EQUATIONS=      16
+ SOLVING FOR ZETA FOR LAYER     2 ZONE     2
+
+       9 UPPER PART EQS.        10 LOWER PART EQS.    BAND WIDTH + 1 =      2
+ STRESS PERIOD=   1 TIMESTEP=  499 LAYER=   2 ZONE=   2 ACTIVE CELLS=   19 NUMBER OF EQUATIONS=      19
+ SOLVING FOR ZETA FOR LAYER     3 ZONE     2
+
+      26 UPPER PART EQS.        26 LOWER PART EQS.    BAND WIDTH + 1 =      2
+ STRESS PERIOD=   1 TIMESTEP=  499 LAYER=   3 ZONE=   2 ACTIVE CELLS=   52 NUMBER OF EQUATIONS=      52
+ 
+ SOLVING FOR HEAD 
+
+ HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 0
+ CELL-BY-CELL FLOW TERM FLAG = 1
+
+ OUTPUT FLAGS FOR ALL LAYERS ARE THE SAME:
+   HEAD    DRAWDOWN  HEAD  DRAWDOWN
+ PRINTOUT  PRINTOUT  SAVE    SAVE
+ ----------------------------------
+     0         0       1       0
+ SOLVING FOR ZETA FOR LAYER     1 ZONE     2
+
+       8 UPPER PART EQS.         9 LOWER PART EQS.    BAND WIDTH + 1 =      2
+ STRESS PERIOD=   1 TIMESTEP=  500 LAYER=   1 ZONE=   2 ACTIVE CELLS=   17 NUMBER OF EQUATIONS=      17
+ SOLVING FOR ZETA FOR LAYER     2 ZONE     2
+
+       9 UPPER PART EQS.        10 LOWER PART EQS.    BAND WIDTH + 1 =      2
+ STRESS PERIOD=   1 TIMESTEP=  500 LAYER=   2 ZONE=   2 ACTIVE CELLS=   19 NUMBER OF EQUATIONS=      19
+ SOLVING FOR ZETA FOR LAYER     3 ZONE     2
+
+      26 UPPER PART EQS.        26 LOWER PART EQS.    BAND WIDTH + 1 =      2
+ STRESS PERIOD=   1 TIMESTEP=  500 LAYER=   3 ZONE=   2 ACTIVE CELLS=   52 NUMBER OF EQUATIONS=      52
+ UBUDSV SAVING "      ZETASRF  1" ON UNIT 55 AT TIME STEP 500, STRESS PERIOD 1
+
+
+                      VOLUMETRIC SWI ZONE BUDGET FOR ENTIRE MODEL
+                     AT END OF TIME STEP  500 IN STRESS PERIOD   1
+                                      ZONE     1
+  -----------------------------------------------------------------------------------
+
+        CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+        ------------------                 ------------------------
+
+              IN:                                      IN:
+              ---                                      ---
+             BOUNDARIES =        5475.0000            BOUNDARIES =       3.0000E-02
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =        2652.6181           ZONE CHANGE =       5.3686E-03
+       ZONE CHG TIP/TOE =           8.8705      ZONE CHG TIP/TOE =           0.0000
+            ZONE MIXING =           0.9397           ZONE MIXING =           0.0000
+
+               TOTAL IN =        8137.4283              TOTAL IN =       3.5369E-02
+
+             OUT:                                     OUT:
+             ----                                     ----
+             BOUNDARIES =        7882.8363            BOUNDARIES =       3.5267E-02
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =         189.1947           ZONE CHANGE =       7.4151E-05
+       ZONE CHG TIP/TOE =           8.7000      ZONE CHG TIP/TOE =           0.0000
+            ZONE MIXING =          58.1727           ZONE MIXING =       3.0111E-05
+
+              TOTAL OUT =        8138.9036             TOTAL OUT =       3.5371E-02
+
+               IN - OUT =          -1.4754              IN - OUT =      -2.4493E-06
+
+    PERCENT DISCREPANCY =          -0.02     PERCENT DISCREPANCY =          -0.01
+
+
+
+                      VOLUMETRIC SWI ZONE BUDGET FOR ENTIRE MODEL
+                     AT END OF TIME STEP  500 IN STRESS PERIOD   1
+                                      ZONE     2
+  -----------------------------------------------------------------------------------
+
+        CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+        ------------------                 ------------------------
+
+              IN:                                      IN:
+              ---                                      ---
+             BOUNDARIES =        2458.5068            BOUNDARIES =       5.2668E-03
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =         188.1803           ZONE CHANGE =       7.4151E-05
+       ZONE CHG TIP/TOE =           9.7885      ZONE CHG TIP/TOE =           0.0000
+            ZONE MIXING =          58.1727           ZONE MIXING =       3.0111E-05
+
+               TOTAL IN =        2714.6483              TOTAL IN =       5.3710E-03
+
+             OUT:                                     OUT:
+             ----                                     ----
+             BOUNDARIES =          50.6706            BOUNDARIES =           0.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =        2653.7066           ZONE CHANGE =       5.3686E-03
+       ZONE CHG TIP/TOE =           7.8561      ZONE CHG TIP/TOE =           0.0000
+            ZONE MIXING =           0.9397           ZONE MIXING =           0.0000
+
+              TOTAL OUT =        2713.1730             TOTAL OUT =       5.3686E-03
+
+               IN - OUT =           1.4753              IN - OUT =       2.4493E-06
+
+    PERCENT DISCREPANCY =           0.05     PERCENT DISCREPANCY =           0.05
+
+
+ HEAD WILL BE SAVED ON UNIT   51 AT END OF TIME STEP   500 IN STRESS PERIOD      1
+
+
+
+  -------------------------------------------------------------------------------------
+  VOLUMETRIC BUDGET FOR ENTIRE MODEL AT END OF TIME STEP  500 IN STRESS PERIOD      1
+  -------------------------------------------------------------------------------------
+
+     CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+     ------------------                 ------------------------
+
+           IN:                                      IN:
+           ---                                      ---
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+               WELLS =        5475.0000                 WELLS =       3.0000E-02
+     HEAD DEP BOUNDS =        2458.5068       HEAD DEP BOUNDS =       5.2668E-03
+          SWIADDTOCH =           0.0000            SWIADDTOCH =           0.0000
+
+            TOTAL IN =        7933.5068              TOTAL IN =       3.5267E-02
+
+          OUT:                                     OUT:
+          ----                                     ----
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+               WELLS =           0.0000                 WELLS =           0.0000
+     HEAD DEP BOUNDS =        7933.5068       HEAD DEP BOUNDS =       3.5267E-02
+          SWIADDTOCH =           0.0000            SWIADDTOCH =           0.0000
+
+           TOTAL OUT =        7933.5068             TOTAL OUT =       3.5267E-02
+
+            IN - OUT =      -5.3137E-05              IN - OUT =       3.4389E-14
+
+ PERCENT DISCREPANCY =          -0.00     PERCENT DISCREPANCY =           0.00
+
+
+          TIME SUMMARY AT END OF TIME STEP   500 IN STRESS PERIOD      1
+                    SECONDS     MINUTES      HOURS       DAYS        YEARS
+                    -----------------------------------------------------------
+   TIME STEP LENGTH 3.15360E+07 5.25600E+05  8760.0      365.00     0.99932    
+ STRESS PERIOD TIME 1.57680E+10 2.62800E+08 4.38000E+06 1.82500E+05  499.66    
+         TOTAL TIME 1.57680E+10 2.62800E+08 4.38000E+06 1.82500E+05  499.66    
+ 
+
+ Final Remark:
+
+   The solver successfully met the user supplied convergence criteria, HCLOSE and RCLOSE, for all 500 time steps.
+
+   Please check the "VOLUMETRIC BUDGET FOR ENTIRE MODEL" to ensure that mass rate balance errors are acceptable for all time steps.
+
+   The cumulative mass error for the entire simulation is 0.00 %
+
+
+
+
+ Simulation finished at  
+
+
+ Which had an elapsed run time of: 0.0 seconds
+
+
+    OneWater Simulation Now Complete
+
+

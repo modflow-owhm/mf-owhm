@@ -1,0 +1,4 @@
+ "GAGE No.    9:  K,I,J Coord. =     1,    3,    5;  STREAM SEGMENT =     3;  REACH =     1 "
+ "STREAM SEGMENT     3 IS DIVERTED FROM SEGMENT     1 DIVERSION TYPE IS IPRIOR OF     0 "
+     "DATA: Time           Stage       Max.-Rate   Rate-Diverted   Upstream-Flow "
+     8.6400000E+04   1.0755455E+03   1.0000000E+01   1.0000000E+01   1.6522168E+01

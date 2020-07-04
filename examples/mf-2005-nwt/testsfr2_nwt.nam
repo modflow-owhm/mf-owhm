@@ -1,0 +1,23 @@
+# Name file for hypothetical test simulation
+# Test of SFR2 Package; revised 5/20/2006
+#
+# NOTE: Forward slashes (/) in pathnames may need to be converted
+#       to back slashes (/) in some computing environments
+#
+list            12  ./output/testsfr2.lst
+dis             13  testsfr2.dis
+ghb             15  testsfr2.ghb
+bas6            41  testsfr2.bs6
+upw             42  testsfr2.upw
+nwt             43  NWT.nwt
+oc              44  testsfr2.oc
+sfr             45  testsfr2.sfr
+gage            46  testsfr2.gag
+data            83  ./output/testsfr2.gg1
+data            84  ./output/testsfr2.gg2
+data            85  ./output/testsfr2.gg3
+data            86  ./output/testsfr2.gg4
+data            87  ./output/testsfr2.gg5
+data            88  ./output/testsfr2.gg6
+data            89  ./output/testsfr2.gg7
+data            90  ./output/testsfr2.gg8

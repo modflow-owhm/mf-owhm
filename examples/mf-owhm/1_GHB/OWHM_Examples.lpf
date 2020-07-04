@@ -1,0 +1,16 @@
+     9 -9999 0     # ILPFCB, HDRY, NPLPF
+     1     1       # LAYTYP
+     0     0       # LAYAVG
+    -1    -1       # CHANI
+     0     0       # LAYVKA
+     0     0       # LAYWET      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CONSTANT     1     # HK   Layer 1
+CONSTANT     1     # HANI Layer 1
+CONSTANT     0.1   # VKA  Layer 1
+CONSTANT     0.1   # SY   Layer 1
+CONSTANT     1E-5  # SS   Layer 1
+CONSTANT     0.5   # HK   Layer 2 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CONSTANT     1     # HANI Layer 2
+CONSTANT     0.05  # VKA  Layer 2
+CONSTANT     0.1   # SY   Layer 2
+CONSTANT     1E-5  # SS   Layer 2

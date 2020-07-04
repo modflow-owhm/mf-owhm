@@ -1,0 +1,654 @@
+
+      MMMMMMM                                       MM      MMM     MM
+    MMM     MMM    MM      M   MMMMMMMM             LM     DM M     ML     MM     MMMMMMMMM  MMMMMMMM  MMMMMMMM
+   MM         MM   MMM     M   MM                    MM    MM M     M     MMMM        M      M         MM     NM
+   MM         MM   MM M    M   MM                    MM    M  MM   MM    MM  MM       M      M         MM      M
+   MM         MM   MM  M   M   MMMMMMMM               MN  MM   M   MM   MM    MM      M      MMMMMMM   MMMMMMMMM
+   MM         MM   MM   M  M   MM         MMMMMMM     MM  M    MM MM    MMMMMMMM      M      M         MM   MM
+   MM         MM   MM    M M   MM                     LM MM    NM MM   MM      MM     M      M         MM    MM
+    MM       NM    MM     MM   MM                      M M      M M   MN        MM    M      M         MM     MM
+     MMMMMMMMN     MM      M   MMMMMMMM                7MM      7MM  MN          MM   M      MMMMMMMM  MM      MM
+
+
+ MODFLOW-OWHM v2.0.01  
+
+
+                        MODFLOW
+            ONE-WATER HYDROLOGIC-FLOW MODEL
+
+    U.S. GEOLOGICAL SURVEY MODULAR FINITE-DIFFERENCE 
+           CONJUNCTIVE USE SIMULATION PROGRAM
+
+                     Version 2.0
+
+ Release: 01          4/23/2020
+
+ Includes:
+          MODFLOW-2005 Version 1.12.0   02/03/2017
+          MODFLOW-FMP  Version 4.00.0   04/23/2017
+          MODFLOW-SWR  Version 1.04.0   09/15/2016
+          MODFLOW-SWI  Version 2.00.0   07/22/2013
+          MODFLOW-LGR  Version 2.00.0   09/19/2013
+          MODFLOW-NWT  Version 1.2.0    03/01/2020
+          MODFLOW-CFP  Version 1.09.57  09/12/2017
+
+
+ OneWater Simulation Initiated at 
+
+
+ LIST FILE: ./output/str.lst
+      UNIT: 7
+
+OPENING PACKAGES
+
+BAS6 PACKAGE OPENED.
+SIP  PACKAGE OPENED.
+OC   PACKAGE OPENED.
+STR  PACKAGE OPENED.
+BCF  PACKAGE OPENED.
+DIS  PACKAGE OPENED.
+
+NOTIFICATION: A FILE UNIT NUMBER WAS FOUND FOR EITHER THE LIST FILE OR A PACAKGE.
+IT WILL BE USED EVEN THOUGH UNIT NUMBERS FOR THE LIST FILE AND PACKAGES ARE NOW OPTIONAL.
+[IT IS RECOMMENDED TO STILL USE A UNIT NUMBER FOR DATA and DATA(BINARY) ]
+
+
+ BAS -- BASIC PACKAGE, VERSION OWHM INPUT READ FROM UNIT     8
+ 
+MODFLOW was compiled using uniform precision (Precision => Number of meaningful digits in numbers)
+Precision of REAL and DOUBLE PRECISION variables: 15
+
+ DISCRETIZATION INPUT DATA READ FROM UNIT   10
+
+-- READING DIS PACKAGE INPUT --
+
+# str
+# MODFLOW-2005 Example problem documented in:
+#   Harbaugh, A.W., 2005, MODFLOW-2005, the U.S. Geological Survey modular ground-water model -- the Ground-Water Flow Process: U.S. Geological Survey Techniques and Methods 6-A16.
+#   Harbaugh, A.W., Banta, E.R., Hill, M.C. and McDonald, M.G., 2000, MODFLOW-2000, The U.S. Geological Survey Modular Ground-Water Model - User Guide to Modularization Concepts and the Ground-Water Flow Process: U.S Geological Survey Open-File Report 2000-92, 121 p., https://doi.org/10.3133/ofr200092
+#   Prudic, D.E., 1989, Documentation of a computer program to simulate stream-aquifer relations using a modular, finite-difference, ground-water flow model: U.S Geological Survey Open-File Report 88-729, 113 p., https://doi.org/10.3133/ofr88729
+#
+#      -Comments are preceded by a # sign
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+*** DIS COORDINATE SYSTEM NOT SEPECIFIED ***
+DEFAULT VALUES APPLIED ARE 0° ROTATION
+WITH THE ORIGIN (0,0) LOCATED AT THE MODEL'S LOWER LEFT CORNER
+
+
+
+
+DIS COORDINATE SYSTEM SEPECIFIED WITH:
+GRID ROTATION OF 0.0°
+WITH THE ORIGIN LOCATED AT THE OUTER MOST CORNER OF MODEL CELL [6,1] WITH:
+X-COORDINATE:0.0
+Y-COORDINATE:0.0
+    1 LAYERS         6 ROWS         6 COLUMNS
+      1 STRESS PERIOD(S) IN SIMULATION
+ MODEL TIME UNIT IS SECONDS
+ MODEL LENGTH UNIT IS UNDEFINED
+  Confining bed flag for each layer:
+   0
+
+                     DELR =   1000.00    
+
+                     DELC =   1000.00    
+
+ TOP ELEVATION OF LAYER 1 =   600.000    
+
+   MODEL LAYER BOTTOM EL. =   0.00000     FOR LAYER   1
+
+
+ STRESS PERIOD     LENGTH       TIME STEPS     MULTIPLIER FOR DELT    SS FLAG  (OPTIONAL TIME STEP LENGTH)
+ ---------------------------------------------------------------------------------------------------
+        1         1296000.          3                  1.50000         SS
+
+ STEADY-STATE SIMULATION
+
+
+
+
+-- READING BAS PACKAGE INPUT --
+
+# str
+# MODFLOW-2005 Example problem documented in:
+#   Harbaugh, A.W., 2005, MODFLOW-2005, the U.S. Geological Survey modular ground-water model -- the Ground-Water Flow Process: U.S. Geological Survey Techniques and Methods 6-A16.
+#   Harbaugh, A.W., Banta, E.R., Hill, M.C. and McDonald, M.G., 2000, MODFLOW-2000, The U.S. Geological Survey Modular Ground-Water Model - User Guide to Modularization Concepts and the Ground-Water Flow Process: U.S Geological Survey Open-File Report 2000-92, 121 p., https://doi.org/10.3133/ofr200092
+#   Prudic, D.E., 1989, Documentation of a computer program to simulate stream-aquifer relations using a modular, finite-difference, ground-water flow model: U.S Geological Survey Open-File Report 88-729, 113 p., https://doi.org/10.3133/ofr88729
+#
+# Input modified for MODFLOW-OWHM by including the BAS options:
+#    NOFREE  BUDGETDB ./output/str_VolumetricBudget.txt  CUMULATIVE_HEAD_CHANGE ./output/str_CumHCHG.txt  PRINT_HEAD NPER ./output/str_Head.txt
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+#
+#EXAMPLE SIMULATION OF STREAM ROUTING PACKAGE -- STEADY STATE OCTOBER 21, 1987
+#-- STREAM STAGE IS CALCULATED
+
+
+ THE BAS PACKAGE NOW DEFAULTS TO FREE FORMAT.
+ USE OPTION "NOFREE" TO DISABLE FREE FORMAT.
+
+
+
+########################################################################################################
+
+                           WARNING_MESSAGE
+
+         THE FOLLOWING COMMENTS WERE PASSED TO THE WARNING ROUTINE
+
+THE WARNING IS BELIEVED TO HAVE ORIGINATED FROM THE FOLLOWING FILE:
+"examples\mf-2005\str.ba6"
+
+THE GUESSED LINE THAT THE WARNING OCCURED ON IS:
+"NOFREE  BUDGETDB ./output/str_VolumetricBudget.txt  CUMULATIVE_HEAD_CHANGE ./output/str_CumHCHG.txt  PRINT_HEAD NPER ./output/str_Head.txt"
+
+THE DESRIPTION OF THE WARNING IS:
+
+FOUND BAS PACKAGE OPTION KEYWORDS ALONG PACKAGE "OPTIONS LINE" (ie Data Set 1)
+
+The BAS package options should be within an "OPTIONS BLOCK" rather than along the first line of input.
+
+The BAS package will attempt to read the options line, but some advanced options may fail to load due to their complex input,
+For example the option "SHIFT_STRT" uses ULOAD to read NLAY shift values, which would crash under certain ULOAD keyword combinations.
+
+Also note that if any of the options specify a GENERIC_OUTPUT file, 
+then there may be additional warnings about a BAS OPTION not being a recognized GENERIC_OUTPUT post-keyword.
+These warnings can be ignored, since its a post-keyword warning pertaining to the GENERIC_OUTPUT file and 
+the BAS OPTION is still processed by the BAS package.
+
+It is recommended for new models to use "BEGIN OPTIONS" and then have one option per line and
+end the options block with the word "END" in place of single line of options.
+
+For example:
+
+BEGIN OPTIONS
+
+  START_DATE  4/23/1901
+  SHOWPROGRESS
+  NOCBC
+  BUDGETDB ./output/VolumetricBudget.txt
+  PAUSE
+
+END OPTIONS
+
+             - Note that "OPTIONS BLOCK" maybe empty or entirely not present,
+               nor is it required to specify an "OPTIONS LINE"
+
+             - DO NOT specify both an "OPTIONS BLOCK" and "OPTIONS LINE" at the same time.
+
+########################################################################################################
+
+
+
+ NOW READING BAS OPTIONS
+
+ FOUND OPTION: NOFREE
+     THE FREE FORMAT OPTION IS DISABLED (INPUT USES FIXED FORMATTED READ)
+
+ FOUND OPTION: BUDGETDB
+
+
+########################################################################################################
+
+                           WARNING_MESSAGE
+
+         THE FOLLOWING COMMENTS WERE PASSED TO THE WARNING ROUTINE
+
+THE WARNING IS BELIEVED TO HAVE ORIGINATED FROM THE FOLLOWING FILE:
+"examples\mf-2005\str.ba6"
+
+THE GUESSED LINE THAT THE WARNING OCCURED ON IS:
+"NOFREE  BUDGETDB ./output/str_VolumetricBudget.txt  CUMULATIVE_HEAD_CHANGE ./output/str_CumHCHG.txt  PRINT_HEAD NPER ./output/str_Head.txt"
+
+THE DESRIPTION OF THE WARNING IS:
+
+...CHECK_FOR_POST_KEY WARNINGS...
+ THE FOLLOWING MESSAGES WERE PASSED WHILE CHECKING FOR ANY ADDITIONAL KEYWORDS ON LOADED LINE.
+
+
+FAILED TO IDENTIFY THE FOLLOWING POST-KEYWORD: 
+
+"CUMULATIVE_HEAD_CHANGE"
+
+IT WILL BE IGNORED AND NO FURTHER KEYWORDS WILL BE CHECKED/INCLUDED TO THE RIGHT OF IT.
+TO SUPRESS THIS WARNING PLEASE PLACE A "#" SYMBOL TO THE LEFT OF THE WORD TO INDICATE EVERYTHING TO THE RIGHT OF THE # IS A COMMENT
+
+########################################################################################################
+
+
+
+ FOUND OPTION: CUMULATIVE_HEAD_CHANGE
+    THIS OPTION IS ONLY USEFUL FOR MODEL RESULT COMPARISON WITH DIFFERENT CODE COMPARISONS.
+
+
+
+########################################################################################################
+
+                           WARNING_MESSAGE
+
+         THE FOLLOWING COMMENTS WERE PASSED TO THE WARNING ROUTINE
+
+THE WARNING IS BELIEVED TO HAVE ORIGINATED FROM THE FOLLOWING FILE:
+"examples\mf-2005\str.ba6"
+
+THE GUESSED LINE THAT THE WARNING OCCURED ON IS:
+"NOFREE  BUDGETDB ./output/str_VolumetricBudget.txt  CUMULATIVE_HEAD_CHANGE ./output/str_CumHCHG.txt  PRINT_HEAD NPER ./output/str_Head.txt"
+
+THE DESRIPTION OF THE WARNING IS:
+
+...CHECK_FOR_POST_KEY WARNINGS...
+ THE FOLLOWING MESSAGES WERE PASSED WHILE CHECKING FOR ANY ADDITIONAL KEYWORDS ON LOADED LINE.
+
+
+FAILED TO IDENTIFY THE FOLLOWING POST-KEYWORD: 
+
+"PRINT_HEAD"
+
+IT WILL BE IGNORED AND NO FURTHER KEYWORDS WILL BE CHECKED/INCLUDED TO THE RIGHT OF IT.
+TO SUPRESS THIS WARNING PLEASE PLACE A "#" SYMBOL TO THE LEFT OF THE WORD TO INDICATE EVERYTHING TO THE RIGHT OF THE # IS A COMMENT
+
+########################################################################################################
+
+
+
+ FOUND OPTION: PRINT_HEAD    SP    TS   FILE
+                              1     3   ./output/str_Head.txt
+
+ THE MAX STORAGE FOR PROPERTIES DEFINED BY PARAMETERS IS: 
+ MAX STORAGE OF PARAMETERS (MXPAR)  IS       2000
+ MAX STORAGE OF INSTANCES  (MXINST) IS      50000
+ MAX STORAGE OF CLUSTERS   (MXCLST) IS    2000000
+
+
+           BOUNDARY ARRAY =              1 FOR LAYER   1
+
+ AQUIFER HEAD WILL BE SET TO 999.0 AT ALL NO-FLOW NODES (IBOUND=0).
+
+
+
+
+                       INITIAL HEAD FOR LAYER   1
+ READING ON UNIT    8 WITH FORMAT: (10F13.0)           
+
+            1           2           3           4           5           6
+ ........................................................................
+   1    480.0       480.0       480.0       480.0       480.0       480.0    
+   2    480.0       480.0       480.0       480.0       480.0       480.0    
+   3    480.0       480.0       480.0       480.0       480.0       480.0    
+   4    480.0       480.0       480.0       480.0       480.0       480.0    
+   5    480.0       480.0       480.0       480.0       480.0       480.0    
+   6    480.0       480.0       480.0       480.0       480.0       480.0    
+
+-- READING OC PACKAGE INPUT --
+
+# str
+# MODFLOW-2005 Example problem documented in:
+#   Harbaugh, A.W., 2005, MODFLOW-2005, the U.S. Geological Survey modular ground-water model -- the Ground-Water Flow Process: U.S. Geological Survey Techniques and Methods 6-A16.
+#   Harbaugh, A.W., Banta, E.R., Hill, M.C. and McDonald, M.G., 2000, MODFLOW-2000, The U.S. Geological Survey Modular Ground-Water Model - User Guide to Modularization Concepts and the Ground-Water Flow Process: U.S Geological Survey Open-File Report 2000-92, 121 p., https://doi.org/10.3133/ofr200092
+#   Prudic, D.E., 1989, Documentation of a computer program to simulate stream-aquifer relations using a modular, finite-difference, ground-water flow model: U.S Geological Survey Open-File Report 88-729, 113 p., https://doi.org/10.3133/ofr88729
+#
+#      -Comments are preceded by a # sign
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+ OUTPUT CONTROL IS SPECIFIED EVERY TIME STEP
+ HEAD PRINT FORMAT CODE IS   5    DRAWDOWN PRINT FORMAT CODE IS   5
+ HEADS WILL BE SAVED ON UNIT    0    DRAWDOWNS WILL BE SAVED ON UNIT    0
+
+ BCF -- BLOCK-CENTERED FLOW PACKAGE, VERSION 7, 5/2/2005
+         INPUT READ FROM UNIT  9
+
+-- READING BCF PACKAGE INPUT --
+
+# str
+# MODFLOW-2005 Example problem documented in:
+#   Harbaugh, A.W., 2005, MODFLOW-2005, the U.S. Geological Survey modular ground-water model -- the Ground-Water Flow Process: U.S. Geological Survey Techniques and Methods 6-A16.
+#   Harbaugh, A.W., Banta, E.R., Hill, M.C. and McDonald, M.G., 2000, MODFLOW-2000, The U.S. Geological Survey Modular Ground-Water Model - User Guide to Modularization Concepts and the Ground-Water Flow Process: U.S Geological Survey Open-File Report 2000-92, 121 p., https://doi.org/10.3133/ofr200092
+#   Prudic, D.E., 1989, Documentation of a computer program to simulate stream-aquifer relations using a modular, finite-difference, ground-water flow model: U.S Geological Survey Open-File Report 88-729, 113 p., https://doi.org/10.3133/ofr88729
+#
+#      -Comments are preceded by a # sign
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+ STEADY-STATE SIMULATION
+ HEAD AT CELLS THAT CONVERT TO DRY=  0.10000E+31
+ WETTING CAPABILITY IS NOT ACTIVE
+      LAYER  LAYER-TYPE CODE     INTERBLOCK T
+      --------------------------------------------
+         1            0          0 -- HARMONIC    
+
+ COLUMN TO ROW ANISOTROPY =   1.00000    
+
+     TRANSMIS. ALONG ROWS =  8.000000E-02 FOR LAYER   1
+
+ STR -- STREAM PACKAGE, VERSION OWHM INPUT READ FROM UNIT   15
+
+-- READING STR PACKAGE INPUT --
+
+# str
+# MODFLOW-2005 Example problem documented in:
+#   Harbaugh, A.W., 2005, MODFLOW-2005, the U.S. Geological Survey modular ground-water model -- the Ground-Water Flow Process: U.S. Geological Survey Techniques and Methods 6-A16.
+#   Harbaugh, A.W., Banta, E.R., Hill, M.C. and McDonald, M.G., 2000, MODFLOW-2000, The U.S. Geological Survey Modular Ground-Water Model - User Guide to Modularization Concepts and the Ground-Water Flow Process: U.S Geological Survey Open-File Report 2000-92, 121 p., https://doi.org/10.3133/ofr200092
+#   Prudic, D.E., 1989, Documentation of a computer program to simulate stream-aquifer relations using a modular, finite-difference, ground-water flow model: U.S Geological Survey Open-File Report 88-729, 113 p., https://doi.org/10.3133/ofr88729
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+ No named parameters
+ MAXIMUM OF     23 ACTIVE STREAM NODES AT ONE TIME
+ NUMBER OF STREAM SEGMENTS IS      7
+ NUMBER OF STREAM TRIBUTARIES IS      3
+ DIVERSIONS FROM STREAMS HAVE BEEN SPECIFIED
+ STREAM STAGES WILL BE CALCULATED USING A CONSTANT OF      1.48600E+00
+
+
+     0 Stream parameters
+
+ SIP -- STRONGLY-IMPLICIT PROCEDURE SOLUTION PACKAGE
+                    VERSION OWHM INPUT READ FROM UNIT   13
+
+-- READING SIP PACKAGE INPUT --
+
+# str
+# MODFLOW-2005 Example problem documented in:
+#   Harbaugh, A.W., 2005, MODFLOW-2005, the U.S. Geological Survey modular ground-water model -- the Ground-Water Flow Process: U.S. Geological Survey Techniques and Methods 6-A16.
+#   Harbaugh, A.W., Banta, E.R., Hill, M.C. and McDonald, M.G., 2000, MODFLOW-2000, The U.S. Geological Survey Modular Ground-Water Model - User Guide to Modularization Concepts and the Ground-Water Flow Process: U.S Geological Survey Open-File Report 2000-92, 121 p., https://doi.org/10.3133/ofr200092
+#   Prudic, D.E., 1989, Documentation of a computer program to simulate stream-aquifer relations using a modular, finite-difference, ground-water flow model: U.S Geological Survey Open-File Report 88-729, 113 p., https://doi.org/10.3133/ofr88729
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+ MAXIMUM OF 150 ITERATIONS ALLOWED FOR CLOSURE
+  5 ITERATION PARAMETERS
+
+          SOLUTION BY THE STRONGLY IMPLICIT PROCEDURE
+          -------------------------------------------
+ MAXIMUM ITERATIONS ALLOWED FOR CLOSURE =      150
+                 ACCELERATION PARAMETER =     1.0000    
+      HEAD CHANGE CRITERION FOR CLOSURE =    0.10000E-03
+      SIP HEAD CHANGE PRINTOUT INTERVAL =      999
+
+     CALCULATE ITERATION PARAMETERS FROM MODEL CALCULATED WSEED
+
+
+########################################################################################################
+
+                           WARNING_MESSAGE
+
+         THE FOLLOWING COMMENTS WERE PASSED TO THE WARNING ROUTINE
+
+THE DESRIPTION OF THE WARNING IS:
+
+DIS PACKAGE: THE GROUND SURFACE ELEVATION WAS NOT SPECIFIED WITH THE KEYWORD "SURFACE_ELEVATION"
+
+BEFORE LOADING THE "TOP" ARRAY FOR LAYER 1
+NOR WAS IT DEFINED WITH ANOTHER PACKAGE   (e.g. FMPs GLOBAL DIMENSION KEYWORD "SURFACE_ELEVATION")
+
+OneWater WILL SET THE GROUND SURFACE ELEVATION (GSE)
+TO THE TOP ELEVATION OF THE UPPER MOST ACTIVE CELL OR THE DIS TOP OF LAY1.
+
+NOTE THAT SFR DOES USE GSE FOR ALL DIVERSION SEGMENTS
+   WHEN "IRDFLG" IS SET TO 2 or -2.
+
+########################################################################################################
+
+
+
+1
+                            STRESS PERIOD NO.      1, LENGTH =   1296000.    
+                            -----------------------------------------------
+
+                              NUMBER OF TIME STEPS =     3
+
+                               MULTIPLIER FOR DELT =     1.500
+
+                            INITIAL TIME STEP SIZE =   272842.1    
+
+PARAMETERS HAVE BEEN USED IN PACKAGES
+
+THE CURRENT STORAGE FOR PARAMETERS IS: 
+No. PARAMETER=         0 WITH MAX STORAGE (MXPAR)  OF      2000
+No. CLUSTERS =         0 WITH MAX STORAGE (MXCLST) OF   2000000
+No. INSTANCES=         0 WITH MAX STORAGE (MXINST) OF     50000
+
+YOU CAN INCREASE/DECREASE STORAGE WITH BAS OPTION:
+MAXPARAM  MXPAR  MXCLST MXINST
+
+FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
+(NOTE THE THREE NUMBERS ARE A MINUMUM SIZE):
+   MAXPARAM          1         1         1
+
+
+    LAYER   ROW    COL    SEGMENT   REACH   STREAMFLOW      STREAM    STREAMBED     STREAMBED BOT  STREAMBED TOP
+                           NUMBER   NUMBER                   STAGE   CONDUCTANCE      ELEVATION      ELEVATION         
+ ----------------------------------------------------------------------------------------------------------------------
+       1      1      3        1        1         4.500       495.0      1.200            490.0        492.0    
+       1      2      3        1        2         0.000       490.0     0.6000            485.0        487.0    
+       1      2      3        2        1         1.500       487.0     0.2000            483.0        485.0    
+       1      3      3        2        2         0.000       486.0     0.4000            482.0        484.0    
+       1      4      3        2        3         0.000       484.0     0.4000            480.0        482.0    
+       1      5      3        2        4         0.000       480.0     0.2000            476.0        478.0    
+       1      2      3        3        1        -1.000       486.0     0.4000            481.0        483.0    
+       1      3      4        3        2         0.000       482.0      1.200            477.0        479.0    
+       1      4      4        3        3         0.000       478.0      1.200            473.0        475.0    
+       1      5      4        3        4         0.000       475.0     0.6000            470.0        472.0    
+       1      4      1        4        1        0.8000       492.0     0.4000            489.0        490.0    
+       1      4      2        4        2         0.000       488.0     0.3200            485.0        486.0    
+       1      5      2        4        3         0.000       483.0     0.3200            480.0        481.0    
+       1      5      3        4        4         0.000       480.0     0.2000            477.0        478.0    
+       1      5      3        5        1        -1.000       478.0     0.2000            475.0        476.0    
+       1      5      4        5        2         0.000       474.0     0.2000            471.0        472.0    
+       1      2      6        6        1         1.200       495.0     0.8000            491.0        493.0    
+       1      3      6        6        2         0.000       490.0     0.8000            486.0        488.0    
+       1      4      5        6        3         0.000       480.0     0.8000            476.0        478.0    
+       1      5      5        6        4         0.000       477.0     0.6000            473.0        475.0    
+       1      5      4        6        5         0.000       474.0     0.2000            470.0        472.0    
+       1      5      4        7        1        -1.000       472.0     0.6000            467.0        469.0    
+       1      6      4        7        2         0.000       469.0      1.200            464.0        466.0    
+
+     23 STREAM REACHES
+
+    LAYER   ROW    COL    SEGMENT   REACH        STREAM             STREAM          ROUGH
+                           NUMBER   NUMBER        WIDTH              SLOPE          COEF.
+   --------------------------------------------------------------------------------------------------------------
+       1      1      3        1        1          10.00           0.7000E-02      0.3000E-01
+       1      2      3        1        2          10.00           0.7000E-02      0.3000E-01
+       1      2      3        2        1          5.000           0.2000E-02      0.2200E-01
+       1      3      3        2        2          5.000           0.2000E-02      0.2200E-01
+       1      4      3        2        3          5.000           0.2000E-02      0.2200E-01
+       1      5      3        2        4          5.000           0.4000E-02      0.2200E-01
+       1      2      3        3        1          10.00           0.5000E-02      0.3000E-01
+       1      3      4        3        2          10.00           0.5000E-02      0.3000E-01
+       1      4      4        3        3          10.00           0.5000E-02      0.3000E-01
+       1      5      4        3        4          10.00           0.5000E-02      0.3000E-01
+       1      4      1        4        1          5.000           0.4000E-02      0.2200E-01
+       1      4      2        4        2          5.000           0.4000E-02      0.2200E-01
+       1      5      2        4        3          5.000           0.4000E-02      0.2200E-01
+       1      5      3        4        4          5.000           0.4000E-02      0.2200E-01
+       1      5      3        5        1          5.000           0.5000E-02      0.2200E-01
+       1      5      4        5        2          5.000           0.5000E-02      0.2200E-01
+       1      2      6        6        1          5.000           0.5000E-02      0.2200E-01
+       1      3      6        6        2          5.000           0.8000E-02      0.2200E-01
+       1      4      5        6        3          5.000           0.7000E-02      0.2200E-01
+       1      5      5        6        4          5.000           0.4000E-02      0.2200E-01
+       1      5      4        6        5          5.000           0.3000E-02      0.2200E-01
+       1      5      4        7        1          10.00           0.4000E-02      0.3000E-01
+       1      6      4        7        2          10.00           0.4000E-02      0.3000E-01
+
+                              MAXIMUM NUMBER OF TRIBUTARY STREAMS IS      3
+
+                     STREAM SEGMENT               TRIBUTARY STREAM SEGMENT NUMBERS
+                        1                        0    0    0
+                        2                        0    0    0
+                        3                        1    0    0
+                        4                        0    0    0
+                        5                        2    4    0
+                        6                        0    0    0
+                        7                        3    5    6
+
+          DIVERSION SEGMENT NUMBER          UPSTREAM SEGMENT NUMBER
+                        1                                0
+                        2                                1
+                        3                                0
+                        4                                0
+                        5                                0
+                        6                                0
+                        7                                0
+ 
+ SOLVING FOR HEAD 
+
+ AVERAGE SEED = 0.06853892
+ MINIMUM SEED = 0.06853892
+
+     5 ITERATION PARAMETERS CALCULATED FROM AVERAGE SEED:
+
+  0.000000E+00 0.488337E+00 0.738201E+00 0.866047E+00 0.931461E+00
+
+    20 ITERATIONS FOR TIME STEP   1 IN STRESS PERIOD    1
+
+ HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
+ CELL-BY-CELL FLOW TERM FLAG = 0
+
+ OUTPUT FLAGS FOR ALL LAYERS ARE THE SAME:
+   HEAD    DRAWDOWN  HEAD  DRAWDOWN
+ PRINTOUT  PRINTOUT  SAVE    SAVE
+ ----------------------------------
+     0         0       0       0
+ 
+ SOLVING FOR HEAD 
+     1 ITERATIONS FOR TIME STEP   2 IN STRESS PERIOD    1
+
+ HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
+ CELL-BY-CELL FLOW TERM FLAG = 0
+
+ OUTPUT FLAGS FOR ALL LAYERS ARE THE SAME:
+   HEAD    DRAWDOWN  HEAD  DRAWDOWN
+ PRINTOUT  PRINTOUT  SAVE    SAVE
+ ----------------------------------
+     0         0       0       0
+ 
+ SOLVING FOR HEAD 
+     1 ITERATIONS FOR TIME STEP   3 IN STRESS PERIOD    1
+
+ MAXIMUM HEAD CHANGE FOR EACH ITERATION:
+
+    HEAD CHANGE   HEAD CHANGE   HEAD CHANGE   HEAD CHANGE   HEAD CHANGE
+  LAYER,ROW,COL LAYER,ROW,COL LAYER,ROW,COL LAYER,ROW,COL LAYER,ROW,COL
+ ----------------------------------------------------------------------
+    -0.2023E-04
+  (  1,  3,  6)
+
+
+ HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 1
+ CELL-BY-CELL FLOW TERM FLAG = 1
+
+ OUTPUT FLAGS FOR ALL LAYERS ARE THE SAME:
+   HEAD    DRAWDOWN  HEAD  DRAWDOWN
+ PRINTOUT  PRINTOUT  SAVE    SAVE
+ ----------------------------------
+     1         0       0       0
+
+            LAYER      ROW     COLUMN     STREAM    REACH      FLOW INTO     FLOW INTO     FLOW OUT OF     HEAD IN
+                                          NUMBER    NUMBER    STREAM REACH    AQUIFER      STREAM REACH     STREAM
+
+
+               1         1         3         1         1      4.500000      0.9313262       3.568674         492.25
+               1         2         3         1         2      3.568674      0.8409688       1.227705         487.18
+               1         2         3         2         1      1.500000     -0.1047871       1.604787         485.26
+               1         3         3         2         2      1.604787      0.2215861       1.383201         484.25
+               1         4         3         2         3      1.383201      0.3573080       1.025893         482.22
+               1         5         3         2         4      1.025893      0.2207965      0.8050964         478.15
+               1         2         3         3         1      1.227705      -1.045448       2.273153         483.17
+               1         3         4         3         2      2.273153     -0.6631629       2.936316         479.21
+               1         4         4         3         3      2.936316     -0.6118459       3.548162         475.24
+               1         5         4         3         4      3.548162      0.4552124       3.092949         472.24
+               1         4         1         4         1     0.8000000      0.4458193      0.3541807         490.11
+               1         4         2         4         2     0.3541807      0.3385176      0.1566306E-01     486.06
+               1         5         2         4         3     0.1566306E-01  0.1566306E-01   0.000000         481.01
+               1         5         3         4         4      0.000000       0.000000       0.000000         478.00
+               1         5         3         5         1     0.8050964     -0.1815254      0.9866218         476.14
+               1         5         4         5         2     0.9866218      0.1314439      0.8551779         472.14
+               1         2         6         6         1      1.200000       1.012789      0.1872108         493.12
+               1         3         6         6         2     0.1872108      0.1872108       0.000000         488.03
+               1         4         5         6         3      0.000000     -0.5861627E-01  0.5861627E-01     478.02
+               1         5         5         6         4     0.5861627E-01  0.5861627E-01   0.000000         475.02
+               1         5         4         6         5      0.000000       0.000000       0.000000         472.00
+               1         5         4         7         1      3.948127      -1.301007       5.249134         469.32
+               1         6         4         7         2      5.249134      -1.250873       6.500007         466.37
+1
+              HEAD IN LAYER   1 AT END OF TIME STEP   3 IN STRESS PERIOD    1
+  ---------------------------------------------------------------------------
+
+           1       2       3       4       5       6
+ ...................................................
+   1  487.639 488.554 491.471 488.439 488.579 490.216
+   2  486.725 486.551 485.779 485.266 487.082 491.854
+   3  485.985 485.144 483.696 479.763 482.630 485.603
+   4  486.087 484.345 481.326 475.750 478.073 479.984
+   5  482.357 480.593 477.047 471.485 474.662 476.275
+   6  480.392 478.426 474.294 467.409 472.083 474.179
+
+
+
+  -------------------------------------------------------------------------------------
+  VOLUMETRIC BUDGET FOR ENTIRE MODEL AT END OF TIME STEP    3 IN STRESS PERIOD      1
+  -------------------------------------------------------------------------------------
+
+     CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+     ------------------                 ------------------------
+
+           IN:                                      IN:
+           ---                                      ---
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+      STREAM LEAKAGE =     6761567.3048        STREAM LEAKAGE =           5.2173
+
+            TOTAL IN =     6761567.3048              TOTAL IN =           5.2173
+
+          OUT:                                     OUT:
+          ----                                     ----
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+      STREAM LEAKAGE =     6761580.9825        STREAM LEAKAGE =           5.2173
+
+           TOTAL OUT =     6761580.9825             TOTAL OUT =           5.2173
+
+            IN - OUT =         -13.6776              IN - OUT =      -6.5393E-06
+
+ PERCENT DISCREPANCY =          -0.00     PERCENT DISCREPANCY =          -0.00
+
+
+          TIME SUMMARY AT END OF TIME STEP     3 IN STRESS PERIOD      1
+                    SECONDS     MINUTES      HOURS       DAYS        YEARS
+                    -----------------------------------------------------------
+   TIME STEP LENGTH 6.13895E+05  10232.      170.53      7.1053     1.94532E-02
+ STRESS PERIOD TIME 1.29600E+06  21600.      360.00      15.000     4.10678E-02
+         TOTAL TIME 1.29600E+06  21600.      360.00      15.000     4.10678E-02
+ 
+
+ Final Remark:
+
+   The solver successfully met the user supplied convergence criteria, HCLOSE and RCLOSE, for all 3 time steps.
+
+   Please check the "VOLUMETRIC BUDGET FOR ENTIRE MODEL" to ensure that mass rate balance errors are acceptable for all time steps.
+
+   The cumulative mass error for the entire simulation is 0.00 %
+
+
+
+
+ Simulation finished at  
+
+
+ Which had an elapsed run time of: 0.0 seconds
+
+
+    OneWater Simulation Now Complete
+
+

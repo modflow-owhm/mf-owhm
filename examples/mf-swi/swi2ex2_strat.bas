@@ -1,0 +1,41 @@
+# swi2ex2_strat
+# MODFLOW-SWI Example problem documented in: 
+#   Bakker, M., Schaars, F., Hughes, J.D., Langevin, C.D., Dausman, A.M., 2013, Documentation of the seawater intrusion (SWI2) package for MODFLOW: U.S. Geological Survey Techniques and Methods 6-A46, 47 p.
+# 
+# Input modified for MODFLOW-OWHM by adding a BAS OPTIONS BLOCK with output options.
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+# Basic package 
+BEGIN OPTIONS
+   NOCBC
+   BUDGETDB                ./output/swi2ex2_strat_VolumetricBudget.txt  
+   PRINT_HEAD   NPER       ./output/swi2ex2_strat_Head.txt
+   CUMULATIVE_HEAD_CHANGE  ./output/swi2ex2_strat_CumHCHG.txt  
+END OPTIONS
+        13         1              (5I4)         -1 # IBOUND Array for Layer
+  -1   1   1   1   1
+   1   1   1   1   1
+   1   1   1   1   1
+   1   1   1   1   1
+   1   1   1   1   1
+   1   1   1   1   1
+   1   1   1   1   1
+   1   1   1   1   1
+   1   1   1   1   1
+   1   1   1   1   1
+   1   1   1   1   1
+   1   1   1   1   1
+-999.990000
+        13         1           (5G13.0)         -1 # Starting Heads in Layer
+         0.05         0.05         0.05         0.05         0.05
+         0.05         0.05         0.05         0.05         0.05
+         0.05         0.05         0.05         0.05         0.05
+         0.05         0.05         0.05         0.05         0.05
+         0.05         0.05         0.05         0.05         0.05
+         0.05         0.05         0.05         0.05         0.05
+         0.05         0.05         0.05         0.05         0.05
+         0.05         0.05         0.05         0.05         0.05
+         0.05         0.05         0.05         0.05         0.05
+         0.05         0.05         0.05         0.05         0.05
+         0.05         0.05         0.05         0.05         0.05
+         0.05         0.05         0.05         0.05         0.05

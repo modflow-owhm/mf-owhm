@@ -1,0 +1,13 @@
+# swi2ex4sww
+# MODFLOW-NWT Example problem documented in: 
+# Niswonger, R.G., Panday, Sorab, and Ibaraki, Motomu, 2011, MODFLOW-NWT, A Newton formulation for MODFLOW-2005: U.S. Geological Survey Techniques and Methods 6-A37, 44 p.
+# 
+#      -Comments are preceded by a # sign
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+#
+# NWT Input File
+# SWI2 example problem 4 for MODFLOW-NWT
+#HEADTOL  FLUXTOL MAXITEROUT THICKFACT LINMETH IPRNWT IBOTAV OPTIONS DBDREDUCE DBDINCREASE DBDGAMMA MOMFACT BACKFLAG MAXBACKITER BACKTOL BACKREDUCE
+1.0E-5 0.05 100 1.0e-6  2  1 1 SIMPLE CONTINUE
+2 0 3 2 0 0.0 1 1.0E-6 1.0e-6  50              # XMD Settings

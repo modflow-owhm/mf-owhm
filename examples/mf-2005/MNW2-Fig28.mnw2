@@ -1,0 +1,30 @@
+# MNW2-Fig28
+# MODFLOW-2005 Example problem documented in:
+#   Harbaugh, A.W., 2005, MODFLOW-2005, the U.S. Geological Survey modular ground-water model -- the Ground-Water Flow Process: U.S. Geological Survey Techniques and Methods 6-A16.
+#   Harbaugh, A.W., Banta, E.R., Hill, M.C. and McDonald, M.G., 2000, MODFLOW-2000, The U.S. Geological Survey Modular Ground-Water Model - User Guide to Modularization Concepts and the Ground-Water Flow Process: U.S Geological Survey Open-File Report 2000-92, 121 p., https://doi.org/10.3133/ofr200092
+#   Konikow, L.F., Hornberger, G.Z., Halford, K.J., and Hanson, R.T., 2009, Revised multi-node well (MNW2) package for MODFLOW ground-water flow model: U.S. Geological Survey Techniques and Methods 6–A30, 67 p.
+#
+# Input modified for MODFLOW-OWHM by placing a # before input comments
+#  Added Options Block for additional output
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+BEGIN Options
+   PRINT_WELL_PUMPING    ./output/MNW2-Fig28_well_pumping.txt
+   PRINT_NODE_INFO       ./output/MNW2-Fig28_node_info.txt
+   PRINT_WELL_NODE_FLOW  ./output/MNW2-Fig28_well_node_flow.txt
+   PRINT_WELL_INOUT      ./output/MNW2-Fig28_well_inout.txt
+END OPTIONS
+ 1  -90  2                   # 1.  MNWMAX,IMNWCB,MNWPRNT
+Well-A  -1                   # 2a. WELLID,NNODES
+SKIN  0  1  0  0             # 2b. LOSSTYPE,PUMPLOC,QLIMIT,PPFLAG,PUMPCAP
+ 0.1333  1.79471628  12.5    # 2c. Rw,Rskin,Kskin
+-5. -65. 30 41               # 2d. ztop,zbotm,row,col
+-7.5  -1 0.10 0.15           # 2f. hlim, QCUT, Qfrcmn, Qfrcmx
+1                            # 3.  ITMP (SP1; one well)
+Well-A 0.0                   # 4.  WELLID, Qdes(0.0 for initial steady-state SP)
+1                            # 3.  ITMP (SP2; one well)
+Well-A -10000.0              # 4.  WELLID, Qdes
+1                            # 3.  ITMP (SP3; one well)
+Well-A -10000.0              # 4.  WELLID, Qdes
+
+

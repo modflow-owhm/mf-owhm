@@ -1,0 +1,16 @@
+# SWRSample05
+# MODFLOW-SWR Example problem documented in: 
+#    Hughes, J.D., Langevin, C.D., Chartier, K.L., and White, J.T., 2012, Documentation of the Surface-Water Routing (SWR1) Process for modeling surface-water flow with the U.S. Geological Survey Modular Ground-Water Model: U.S. Geological Survey Techniques and Methods 6-A40, 113 p.
+# 
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+#
+# IRREGULAR CROSS-SECTION FOR REACH 17
+#       XB       ELEVB
+5.0000E-01  3.0000E+00
+9      6.0000E-01
+15.6   3.0000E-01
+21.15  2.0000E-01
+26.4   3.0000E-01
+36.15  4.0000E-01
+43.05  1.5240E+00
+48     3.0480E+00

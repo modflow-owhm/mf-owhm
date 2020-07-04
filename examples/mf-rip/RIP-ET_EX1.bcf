@@ -1,0 +1,13 @@
+# RIP-ET_EX1
+# MODFLOW-RIP Example problem documented in: 
+#   Maddock, T., III, Baird, K.J., Hanson, R.T., Schmid, Wolfgang, and Ajami, H., 2012, RIP-ET: A riparian evapotranspiration package for MODFLOW-2005: U.S. Geological Survey Techniques and Methods 6-A39, 76 p.
+# 
+#      -Comments are preceded by a # sign
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+-1 1.0E+30 0 0.0 0 0
+1
+CONSTANT 1.0000000  # TRPY
+CONSTANT 0.01       # Specific yield
+CONSTANT 0.001050   # Hydraulic conductivity

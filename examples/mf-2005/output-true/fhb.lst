@@ -1,0 +1,880 @@
+
+      MMMMMMM                                       MM      MMM     MM
+    MMM     MMM    MM      M   MMMMMMMM             LM     DM M     ML     MM     MMMMMMMMM  MMMMMMMM  MMMMMMMM
+   MM         MM   MMM     M   MM                    MM    MM M     M     MMMM        M      M         MM     NM
+   MM         MM   MM M    M   MM                    MM    M  MM   MM    MM  MM       M      M         MM      M
+   MM         MM   MM  M   M   MMMMMMMM               MN  MM   M   MM   MM    MM      M      MMMMMMM   MMMMMMMMM
+   MM         MM   MM   M  M   MM         MMMMMMM     MM  M    MM MM    MMMMMMMM      M      M         MM   MM
+   MM         MM   MM    M M   MM                     LM MM    NM MM   MM      MM     M      M         MM    MM
+    MM       NM    MM     MM   MM                      M M      M M   MN        MM    M      M         MM     MM
+     MMMMMMMMN     MM      M   MMMMMMMM                7MM      7MM  MN          MM   M      MMMMMMMM  MM      MM
+
+
+ MODFLOW-OWHM v2.0.01  
+
+
+                        MODFLOW
+            ONE-WATER HYDROLOGIC-FLOW MODEL
+
+    U.S. GEOLOGICAL SURVEY MODULAR FINITE-DIFFERENCE 
+           CONJUNCTIVE USE SIMULATION PROGRAM
+
+                     Version 2.0
+
+ Release: 01          4/23/2020
+
+ Includes:
+          MODFLOW-2005 Version 1.12.0   02/03/2017
+          MODFLOW-FMP  Version 4.00.0   04/23/2017
+          MODFLOW-SWR  Version 1.04.0   09/15/2016
+          MODFLOW-SWI  Version 2.00.0   07/22/2013
+          MODFLOW-LGR  Version 2.00.0   09/19/2013
+          MODFLOW-NWT  Version 1.2.0    03/01/2020
+          MODFLOW-CFP  Version 1.09.57  09/12/2017
+
+
+ OneWater Simulation Initiated at 
+
+
+ LIST FILE: ./output/fhb.lst
+      UNIT: 7
+
+OPENING DATA FILES [DATA AND DATA(BINARY)]
+
+OPENED DATA FILE ON UNIT     41 WITH FILENAME OF: ./output/fhb.hds
+OPENED DATA FILE ON UNIT     44 WITH FILENAME OF: ./output/fhb.cbc
+
+OPENING PACKAGES
+
+BAS6 PACKAGE OPENED.
+DIS  PACKAGE OPENED.
+BCF  PACKAGE OPENED.
+SIP  PACKAGE OPENED.
+OC   PACKAGE OPENED.
+FHB  PACKAGE OPENED.
+
+NOTIFICATION: A FILE UNIT NUMBER WAS FOUND FOR EITHER THE LIST FILE OR A PACAKGE.
+IT WILL BE USED EVEN THOUGH UNIT NUMBERS FOR THE LIST FILE AND PACKAGES ARE NOW OPTIONAL.
+[IT IS RECOMMENDED TO STILL USE A UNIT NUMBER FOR DATA and DATA(BINARY) ]
+
+
+ BAS -- BASIC PACKAGE, VERSION OWHM INPUT READ FROM UNIT     8
+ 
+MODFLOW was compiled using uniform precision (Precision => Number of meaningful digits in numbers)
+Precision of REAL and DOUBLE PRECISION variables: 15
+
+ DISCRETIZATION INPUT DATA READ FROM UNIT   10
+
+-- READING DIS PACKAGE INPUT --
+
+# fhb
+# MODFLOW-2005 Example problem documented in:
+#   Harbaugh, A.W., 2005, MODFLOW-2005, the U.S. Geological Survey modular ground-water model -- the Ground-Water Flow Process: U.S. Geological Survey Techniques and Methods 6-A16.
+#   Harbaugh, A.W., Banta, E.R., Hill, M.C. and McDonald, M.G., 2000, MODFLOW-2000, The U.S. Geological Survey Modular Ground-Water Model - User Guide to Modularization Concepts and the Ground-Water Flow Process: U.S Geological Survey Open-File Report 2000-92, 121 p., https://doi.org/10.3133/ofr200092
+#   Leake and Lilly, 1997, Documentation of computer program (FHB1) for assignment of transient specified-flow and specified-head boundaries in applications of the modular finite-diference ground-water flow model (MODFLOW): U.S Geological Survey Open-File Report 97-571       , 50 p., https://doi.org/10.3133/ofr97571
+#
+#      -Comments are preceded by a # sign
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+*** DIS COORDINATE SYSTEM NOT SEPECIFIED ***
+DEFAULT VALUES APPLIED ARE 0° ROTATION
+WITH THE ORIGIN (0,0) LOCATED AT THE MODEL'S LOWER LEFT CORNER
+
+
+
+
+DIS COORDINATE SYSTEM SEPECIFIED WITH:
+GRID ROTATION OF 0.0°
+WITH THE ORIGIN LOCATED AT THE OUTER MOST CORNER OF MODEL CELL [3,1] WITH:
+X-COORDINATE:0.0
+Y-COORDINATE:0.0
+    1 LAYERS         3 ROWS        10 COLUMNS
+      3 STRESS PERIOD(S) IN SIMULATION
+ MODEL TIME UNIT IS DAYS
+ MODEL LENGTH UNIT IS UNDEFINED
+  Confining bed flag for each layer:
+   0
+
+                     DELR =   1000.00    
+
+                     DELC =   1000.00    
+
+ TOP ELEVATION OF LAYER 1 =   50.0000    
+
+   MODEL LAYER BOTTOM EL. =  -200.000     FOR LAYER   1
+
+
+ STRESS PERIOD     LENGTH       TIME STEPS     MULTIPLIER FOR DELT    SS FLAG  (OPTIONAL TIME STEP LENGTH)
+ ---------------------------------------------------------------------------------------------------
+        1         400.0000         10                  1.00000         TR
+        2         200.0000          4                  1.00000         TR
+        3         400.0000          6                  1.10000         TR
+
+ TRANSIENT SIMULATION
+
+
+
+
+-- READING BAS PACKAGE INPUT --
+
+# fhb
+# MODFLOW-2005 Example problem documented in:
+#   Harbaugh, A.W., 2005, MODFLOW-2005, the U.S. Geological Survey modular ground-water model -- the Ground-Water Flow Process: U.S. Geological Survey Techniques and Methods 6-A16.
+#   Harbaugh, A.W., Banta, E.R., Hill, M.C. and McDonald, M.G., 2000, MODFLOW-2000, The U.S. Geological Survey Modular Ground-Water Model - User Guide to Modularization Concepts and the Ground-Water Flow Process: U.S Geological Survey Open-File Report 2000-92, 121 p., https://doi.org/10.3133/ofr200092
+#   Leake and Lilly, 1997, Documentation of computer program (FHB1) for assignment of transient specified-flow and specified-head boundaries in applications of the modular finite-diference ground-water flow model (MODFLOW): U.S Geological Survey Open-File Report 97-571       , 50 p., https://doi.org/10.3133/ofr97571
+#
+# Input modified for MODFLOW-OWHM by including the BAS options:
+#    NOFREE  BUDGETDB ./output/fhb_VolumetricBudget.txt  CUMULATIVE_HEAD_CHANGE ./output/fhb_CumHCHG.txt  PRINT_HEAD NPER ./output/fhb_Head.txt
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+#
+#Example problem for Flow and Head Boundary Package, Version 1  (FHB1)
+#From USGS Open-File Report 97-571
+
+
+ THE BAS PACKAGE NOW DEFAULTS TO FREE FORMAT.
+ USE OPTION "NOFREE" TO DISABLE FREE FORMAT.
+
+
+
+########################################################################################################
+
+                           WARNING_MESSAGE
+
+         THE FOLLOWING COMMENTS WERE PASSED TO THE WARNING ROUTINE
+
+THE WARNING IS BELIEVED TO HAVE ORIGINATED FROM THE FOLLOWING FILE:
+"examples\mf-2005\fhb.ba6"
+
+THE GUESSED LINE THAT THE WARNING OCCURED ON IS:
+"NOFREE  BUDGETDB ./output/fhb_VolumetricBudget.txt  CUMULATIVE_HEAD_CHANGE ./output/fhb_CumHCHG.txt  PRINT_HEAD NPER ./output/fhb_Head.txt"
+
+THE DESRIPTION OF THE WARNING IS:
+
+FOUND BAS PACKAGE OPTION KEYWORDS ALONG PACKAGE "OPTIONS LINE" (ie Data Set 1)
+
+The BAS package options should be within an "OPTIONS BLOCK" rather than along the first line of input.
+
+The BAS package will attempt to read the options line, but some advanced options may fail to load due to their complex input,
+For example the option "SHIFT_STRT" uses ULOAD to read NLAY shift values, which would crash under certain ULOAD keyword combinations.
+
+Also note that if any of the options specify a GENERIC_OUTPUT file, 
+then there may be additional warnings about a BAS OPTION not being a recognized GENERIC_OUTPUT post-keyword.
+These warnings can be ignored, since its a post-keyword warning pertaining to the GENERIC_OUTPUT file and 
+the BAS OPTION is still processed by the BAS package.
+
+It is recommended for new models to use "BEGIN OPTIONS" and then have one option per line and
+end the options block with the word "END" in place of single line of options.
+
+For example:
+
+BEGIN OPTIONS
+
+  START_DATE  4/23/1901
+  SHOWPROGRESS
+  NOCBC
+  BUDGETDB ./output/VolumetricBudget.txt
+  PAUSE
+
+END OPTIONS
+
+             - Note that "OPTIONS BLOCK" maybe empty or entirely not present,
+               nor is it required to specify an "OPTIONS LINE"
+
+             - DO NOT specify both an "OPTIONS BLOCK" and "OPTIONS LINE" at the same time.
+
+########################################################################################################
+
+
+
+ NOW READING BAS OPTIONS
+
+ FOUND OPTION: NOFREE
+     THE FREE FORMAT OPTION IS DISABLED (INPUT USES FIXED FORMATTED READ)
+
+ FOUND OPTION: BUDGETDB
+
+
+########################################################################################################
+
+                           WARNING_MESSAGE
+
+         THE FOLLOWING COMMENTS WERE PASSED TO THE WARNING ROUTINE
+
+THE WARNING IS BELIEVED TO HAVE ORIGINATED FROM THE FOLLOWING FILE:
+"examples\mf-2005\fhb.ba6"
+
+THE GUESSED LINE THAT THE WARNING OCCURED ON IS:
+"NOFREE  BUDGETDB ./output/fhb_VolumetricBudget.txt  CUMULATIVE_HEAD_CHANGE ./output/fhb_CumHCHG.txt  PRINT_HEAD NPER ./output/fhb_Head.txt"
+
+THE DESRIPTION OF THE WARNING IS:
+
+...CHECK_FOR_POST_KEY WARNINGS...
+ THE FOLLOWING MESSAGES WERE PASSED WHILE CHECKING FOR ANY ADDITIONAL KEYWORDS ON LOADED LINE.
+
+
+FAILED TO IDENTIFY THE FOLLOWING POST-KEYWORD: 
+
+"CUMULATIVE_HEAD_CHANGE"
+
+IT WILL BE IGNORED AND NO FURTHER KEYWORDS WILL BE CHECKED/INCLUDED TO THE RIGHT OF IT.
+TO SUPRESS THIS WARNING PLEASE PLACE A "#" SYMBOL TO THE LEFT OF THE WORD TO INDICATE EVERYTHING TO THE RIGHT OF THE # IS A COMMENT
+
+########################################################################################################
+
+
+
+ FOUND OPTION: CUMULATIVE_HEAD_CHANGE
+    THIS OPTION IS ONLY USEFUL FOR MODEL RESULT COMPARISON WITH DIFFERENT CODE COMPARISONS.
+
+
+
+########################################################################################################
+
+                           WARNING_MESSAGE
+
+         THE FOLLOWING COMMENTS WERE PASSED TO THE WARNING ROUTINE
+
+THE WARNING IS BELIEVED TO HAVE ORIGINATED FROM THE FOLLOWING FILE:
+"examples\mf-2005\fhb.ba6"
+
+THE GUESSED LINE THAT THE WARNING OCCURED ON IS:
+"NOFREE  BUDGETDB ./output/fhb_VolumetricBudget.txt  CUMULATIVE_HEAD_CHANGE ./output/fhb_CumHCHG.txt  PRINT_HEAD NPER ./output/fhb_Head.txt"
+
+THE DESRIPTION OF THE WARNING IS:
+
+...CHECK_FOR_POST_KEY WARNINGS...
+ THE FOLLOWING MESSAGES WERE PASSED WHILE CHECKING FOR ANY ADDITIONAL KEYWORDS ON LOADED LINE.
+
+
+FAILED TO IDENTIFY THE FOLLOWING POST-KEYWORD: 
+
+"PRINT_HEAD"
+
+IT WILL BE IGNORED AND NO FURTHER KEYWORDS WILL BE CHECKED/INCLUDED TO THE RIGHT OF IT.
+TO SUPRESS THIS WARNING PLEASE PLACE A "#" SYMBOL TO THE LEFT OF THE WORD TO INDICATE EVERYTHING TO THE RIGHT OF THE # IS A COMMENT
+
+########################################################################################################
+
+
+
+ FOUND OPTION: PRINT_HEAD    SP    TS   FILE
+                              3     6   ./output/fhb_Head.txt
+
+ THE MAX STORAGE FOR PROPERTIES DEFINED BY PARAMETERS IS: 
+ MAX STORAGE OF PARAMETERS (MXPAR)  IS       2000
+ MAX STORAGE OF INSTANCES  (MXINST) IS      50000
+ MAX STORAGE OF CLUSTERS   (MXCLST) IS    2000000
+
+
+
+
+                     BOUNDARY ARRAY FOR LAYER   1
+ READING ON UNIT    8 WITH FORMAT: (20I4)              
+
+        1   2   3   4   5   6   7   8   9  10
+ ............................................
+   1    1   1   1   1   1   1   1   1   1   1
+   2    1   1   1   1   1   1   1   1   1   1
+   3    1   1   1   1   1   1   1   1   1   1
+
+ AQUIFER HEAD WILL BE SET TO 0.0 AT ALL NO-FLOW NODES (IBOUND=0).
+
+
+             INITIAL HEAD =   0.00000     FOR LAYER   1
+
+-- READING OC PACKAGE INPUT --
+
+# fhb
+# MODFLOW-2005 Example problem documented in:
+#   Harbaugh, A.W., 2005, MODFLOW-2005, the U.S. Geological Survey modular ground-water model -- the Ground-Water Flow Process: U.S. Geological Survey Techniques and Methods 6-A16.
+#   Harbaugh, A.W., Banta, E.R., Hill, M.C. and McDonald, M.G., 2000, MODFLOW-2000, The U.S. Geological Survey Modular Ground-Water Model - User Guide to Modularization Concepts and the Ground-Water Flow Process: U.S Geological Survey Open-File Report 2000-92, 121 p., https://doi.org/10.3133/ofr200092
+#   Leake and Lilly, 1997, Documentation of computer program (FHB1) for assignment of transient specified-flow and specified-head boundaries in applications of the modular finite-diference ground-water flow model (MODFLOW): U.S Geological Survey Open-File Report 97-571       , 50 p., https://doi.org/10.3133/ofr97571
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+ OUTPUT CONTROL IS SPECIFIED EVERY TIME STEP
+ HEAD PRINT FORMAT CODE IS   9    DRAWDOWN PRINT FORMAT CODE IS   9
+ HEADS WILL BE SAVED ON UNIT   41    DRAWDOWNS WILL BE SAVED ON UNIT   41
+
+ BCF -- BLOCK-CENTERED FLOW PACKAGE, VERSION 7, 5/2/2005
+         INPUT READ FROM UNIT 11
+
+-- READING BCF PACKAGE INPUT --
+
+# fhb
+# MODFLOW-2005 Example problem documented in:
+#   Harbaugh, A.W., 2005, MODFLOW-2005, the U.S. Geological Survey modular ground-water model -- the Ground-Water Flow Process: U.S. Geological Survey Techniques and Methods 6-A16.
+#   Harbaugh, A.W., Banta, E.R., Hill, M.C. and McDonald, M.G., 2000, MODFLOW-2000, The U.S. Geological Survey Modular Ground-Water Model - User Guide to Modularization Concepts and the Ground-Water Flow Process: U.S Geological Survey Open-File Report 2000-92, 121 p., https://doi.org/10.3133/ofr200092
+#   Leake and Lilly, 1997, Documentation of computer program (FHB1) for assignment of transient specified-flow and specified-head boundaries in applications of the modular finite-diference ground-water flow model (MODFLOW): U.S Geological Survey Open-File Report 97-571       , 50 p., https://doi.org/10.3133/ofr97571
+#
+#      -Comments are preceded by a # sign
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+ TRANSIENT SIMULATION
+ HEAD AT CELLS THAT CONVERT TO DRY=   0.0000    
+ WETTING CAPABILITY IS NOT ACTIVE
+      LAYER  LAYER-TYPE CODE     INTERBLOCK T
+      --------------------------------------------
+         1            0          0 -- HARMONIC    
+
+ COLUMN TO ROW ANISOTROPY =   1.00000    
+
+     PRIMARY STORAGE COEF =  1.000000E-02 FOR LAYER   1
+
+     TRANSMIS. ALONG ROWS =   5000.00     FOR LAYER   1
+
+ FHB1 -- SPECIFIED FLOW PACKAGE, VERSION OWHM INPUT READ FROM 31
+ TOTAL OF    4 TIMES WILL BE USED TO DEFINE VARIATIONS IN FLOW AND HEAD.
+ FLOW WILL BE SPECIFIED AT A TOTAL OF    1 CELLS.
+ HEAD WILL BE SPECIFIED AT A TOTAL OF    3 CELLS.
+ FHB STEADY-STATE OPTION FLAG WILL BE IGNORED,
+ AT LEAST ONE STRESS PERIOD IS TRANSIENT.
+ CELL-BY-CELL FLOWS WILL BE RECORDED ON UNIT 44
+  0 AUXILIARY VARIABLES FOR SPECIFIED-FLOW CELLS WILL
+  BE DEFINED BY FHB FOR USE BY OTHER PACKAGES.
+  0 AUXILIARY VARIABLES FOR SPECIFIED-HEAD CELLS WILL
+  BE DEFINED BY FHB FOR USE BY OTHER PACKAGES.
+ TIMES FOR SPECIFIED-FLOW AND HEAD VALUES WILL BE READ ON UNIT  31 AND
+ MULTIPLIED BY   1.000    .
+     4 TIMES FOR SPECIFYING FLOWS AND HEADS:
+                       1           2           3           4
+                 ------------------------------------------------
+                    0.000       307.0       791.0       1000.    
+
+ CELL INDICES AND SPECIFIED-FLOW RATES WILL BE READ ON UNIT  31. RATES WILL
+ BE MULTIPLIED BY   1.000    .
+ LAYER  ROW  COL IAUX              FLOW RATES
+ -------------------------------------------------------------------
+    1    2    1    0   2000.       6000.       5000.       9000.    
+
+ CELL INDICES AND SPECIFIED-HEAD VALUES WILL BE READ ON UNIT  31. HEAD VALUES
+ WILL BE MULTIPLIED BY   1.000    .
+ LAYER  ROW  COL IAUX             HEAD VALUES
+ -------------------------------------------------------------------
+    1    1   10    0   0.000       1.000       5.000       2.000    
+    1    2   10    0   0.000       1.000       5.000       2.000    
+    1    3   10    0   0.000       1.000       5.000       2.000    
+
+ SIP -- STRONGLY-IMPLICIT PROCEDURE SOLUTION PACKAGE
+                    VERSION OWHM INPUT READ FROM UNIT   19
+
+-- READING SIP PACKAGE INPUT --
+
+# fhb
+# MODFLOW-2005 Example problem documented in:
+#   Harbaugh, A.W., 2005, MODFLOW-2005, the U.S. Geological Survey modular ground-water model -- the Ground-Water Flow Process: U.S. Geological Survey Techniques and Methods 6-A16.
+#   Harbaugh, A.W., Banta, E.R., Hill, M.C. and McDonald, M.G., 2000, MODFLOW-2000, The U.S. Geological Survey Modular Ground-Water Model - User Guide to Modularization Concepts and the Ground-Water Flow Process: U.S Geological Survey Open-File Report 2000-92, 121 p., https://doi.org/10.3133/ofr200092
+#   Leake and Lilly, 1997, Documentation of computer program (FHB1) for assignment of transient specified-flow and specified-head boundaries in applications of the modular finite-diference ground-water flow model (MODFLOW): U.S Geological Survey Open-File Report 97-571       , 50 p., https://doi.org/10.3133/ofr97571
+#
+#      -Comments are preceded by a # sign
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+ MAXIMUM OF 120 ITERATIONS ALLOWED FOR CLOSURE
+  5 ITERATION PARAMETERS
+
+          SOLUTION BY THE STRONGLY IMPLICIT PROCEDURE
+          -------------------------------------------
+ MAXIMUM ITERATIONS ALLOWED FOR CLOSURE =      120
+                 ACCELERATION PARAMETER =     1.0000    
+      HEAD CHANGE CRITERION FOR CLOSURE =    0.10000E-02
+      SIP HEAD CHANGE PRINTOUT INTERVAL =        5
+
+     CALCULATE ITERATION PARAMETERS FROM MODEL CALCULATED WSEED
+
+
+########################################################################################################
+
+                           WARNING_MESSAGE
+
+         THE FOLLOWING COMMENTS WERE PASSED TO THE WARNING ROUTINE
+
+THE DESRIPTION OF THE WARNING IS:
+
+DIS PACKAGE: THE GROUND SURFACE ELEVATION WAS NOT SPECIFIED WITH THE KEYWORD "SURFACE_ELEVATION"
+
+BEFORE LOADING THE "TOP" ARRAY FOR LAYER 1
+NOR WAS IT DEFINED WITH ANOTHER PACKAGE   (e.g. FMPs GLOBAL DIMENSION KEYWORD "SURFACE_ELEVATION")
+
+OneWater WILL SET THE GROUND SURFACE ELEVATION (GSE)
+TO THE TOP ELEVATION OF THE UPPER MOST ACTIVE CELL OR THE DIS TOP OF LAY1.
+
+NOTE THAT SFR DOES USE GSE FOR ALL DIVERSION SEGMENTS
+   WHEN "IRDFLG" IS SET TO 2 or -2.
+
+########################################################################################################
+
+
+
+1
+                            STRESS PERIOD NO.      1, LENGTH =   400.0000    
+                            -----------------------------------------------
+
+                              NUMBER OF TIME STEPS =    10
+
+                               MULTIPLIER FOR DELT =     1.000
+
+                            INITIAL TIME STEP SIZE =   40.00000    
+
+PARAMETERS HAVE BEEN USED IN PACKAGES
+
+THE CURRENT STORAGE FOR PARAMETERS IS: 
+No. PARAMETER=         0 WITH MAX STORAGE (MXPAR)  OF      2000
+No. CLUSTERS =         0 WITH MAX STORAGE (MXCLST) OF   2000000
+No. INSTANCES=         0 WITH MAX STORAGE (MXINST) OF     50000
+
+YOU CAN INCREASE/DECREASE STORAGE WITH BAS OPTION:
+MAXPARAM  MXPAR  MXCLST MXINST
+
+FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
+(NOTE THE THREE NUMBERS ARE A MINUMUM SIZE):
+   MAXPARAM          1         1         1
+
+ 
+ SOLVING FOR HEAD 
+
+ AVERAGE SEED = 0.02467401
+ MINIMUM SEED = 0.02467401
+
+     5 ITERATION PARAMETERS CALCULATED FROM AVERAGE SEED:
+
+  0.000000E+00 0.603667E+00 0.842920E+00 0.937744E+00 0.975326E+00
+
+    10 ITERATIONS FOR TIME STEP   1 IN STRESS PERIOD    1
+
+ HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 0
+ CELL-BY-CELL FLOW TERM FLAG = 1
+
+ OUTPUT FLAGS FOR ALL LAYERS ARE THE SAME:
+   HEAD    DRAWDOWN  HEAD  DRAWDOWN
+ PRINTOUT  PRINTOUT  SAVE    SAVE
+ ----------------------------------
+     0         0       1       0
+ UBUDSV SAVING " SPECIFIED FLOWS" ON UNIT 44 AT TIME STEP 1, STRESS PERIOD 1
+
+ HEAD WILL BE SAVED ON UNIT   41 AT END OF TIME STEP     1 IN STRESS PERIOD      1
+ 
+ SOLVING FOR HEAD 
+    10 ITERATIONS FOR TIME STEP   2 IN STRESS PERIOD    1
+
+ HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 0
+ CELL-BY-CELL FLOW TERM FLAG = 1
+ REUSING PREVIOUS VALUES OF IOFLG
+ UBUDSV SAVING " SPECIFIED FLOWS" ON UNIT 44 AT TIME STEP 2, STRESS PERIOD 1
+
+ HEAD WILL BE SAVED ON UNIT   41 AT END OF TIME STEP     2 IN STRESS PERIOD      1
+ 
+ SOLVING FOR HEAD 
+    10 ITERATIONS FOR TIME STEP   3 IN STRESS PERIOD    1
+
+ HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 0
+ CELL-BY-CELL FLOW TERM FLAG = 1
+ REUSING PREVIOUS VALUES OF IOFLG
+ UBUDSV SAVING " SPECIFIED FLOWS" ON UNIT 44 AT TIME STEP 3, STRESS PERIOD 1
+
+ HEAD WILL BE SAVED ON UNIT   41 AT END OF TIME STEP     3 IN STRESS PERIOD      1
+ 
+ SOLVING FOR HEAD 
+    10 ITERATIONS FOR TIME STEP   4 IN STRESS PERIOD    1
+
+ HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 0
+ CELL-BY-CELL FLOW TERM FLAG = 1
+ REUSING PREVIOUS VALUES OF IOFLG
+ UBUDSV SAVING " SPECIFIED FLOWS" ON UNIT 44 AT TIME STEP 4, STRESS PERIOD 1
+
+ HEAD WILL BE SAVED ON UNIT   41 AT END OF TIME STEP     4 IN STRESS PERIOD      1
+ 
+ SOLVING FOR HEAD 
+    10 ITERATIONS FOR TIME STEP   5 IN STRESS PERIOD    1
+
+ MAXIMUM HEAD CHANGE FOR EACH ITERATION:
+
+    HEAD CHANGE   HEAD CHANGE   HEAD CHANGE   HEAD CHANGE   HEAD CHANGE
+  LAYER,ROW,COL LAYER,ROW,COL LAYER,ROW,COL LAYER,ROW,COL LAYER,ROW,COL
+ ----------------------------------------------------------------------
+     0.1124        0.1003        0.1189        0.1014        0.4731E-01
+  (  1,  2,  1) (  1,  1,  2) (  1,  1,  1) (  1,  3,  1) (  1,  3,  4)
+     0.3261E-02    0.2024E-02    0.1956E-02    0.1973E-02    0.9481E-03
+  (  1,  1,  8) (  1,  2,  7) (  1,  1,  4) (  1,  1,  1) (  1,  1,  4)
+
+
+ HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 0
+ CELL-BY-CELL FLOW TERM FLAG = 1
+ REUSING PREVIOUS VALUES OF IOFLG
+ UBUDSV SAVING " SPECIFIED FLOWS" ON UNIT 44 AT TIME STEP 5, STRESS PERIOD 1
+
+ HEAD WILL BE SAVED ON UNIT   41 AT END OF TIME STEP     5 IN STRESS PERIOD      1
+ 
+ SOLVING FOR HEAD 
+    10 ITERATIONS FOR TIME STEP   6 IN STRESS PERIOD    1
+
+ HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 0
+ CELL-BY-CELL FLOW TERM FLAG = 1
+ REUSING PREVIOUS VALUES OF IOFLG
+ UBUDSV SAVING " SPECIFIED FLOWS" ON UNIT 44 AT TIME STEP 6, STRESS PERIOD 1
+
+ HEAD WILL BE SAVED ON UNIT   41 AT END OF TIME STEP     6 IN STRESS PERIOD      1
+ 
+ SOLVING FOR HEAD 
+    10 ITERATIONS FOR TIME STEP   7 IN STRESS PERIOD    1
+
+ HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 0
+ CELL-BY-CELL FLOW TERM FLAG = 1
+ REUSING PREVIOUS VALUES OF IOFLG
+ UBUDSV SAVING " SPECIFIED FLOWS" ON UNIT 44 AT TIME STEP 7, STRESS PERIOD 1
+
+ HEAD WILL BE SAVED ON UNIT   41 AT END OF TIME STEP     7 IN STRESS PERIOD      1
+ 
+ SOLVING FOR HEAD 
+    10 ITERATIONS FOR TIME STEP   8 IN STRESS PERIOD    1
+
+ HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 0
+ CELL-BY-CELL FLOW TERM FLAG = 1
+ REUSING PREVIOUS VALUES OF IOFLG
+ UBUDSV SAVING " SPECIFIED FLOWS" ON UNIT 44 AT TIME STEP 8, STRESS PERIOD 1
+
+ HEAD WILL BE SAVED ON UNIT   41 AT END OF TIME STEP     8 IN STRESS PERIOD      1
+ 
+ SOLVING FOR HEAD 
+    11 ITERATIONS FOR TIME STEP   9 IN STRESS PERIOD    1
+
+ HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 0
+ CELL-BY-CELL FLOW TERM FLAG = 1
+ REUSING PREVIOUS VALUES OF IOFLG
+ UBUDSV SAVING " SPECIFIED FLOWS" ON UNIT 44 AT TIME STEP 9, STRESS PERIOD 1
+
+ HEAD WILL BE SAVED ON UNIT   41 AT END OF TIME STEP     9 IN STRESS PERIOD      1
+ 
+ SOLVING FOR HEAD 
+    10 ITERATIONS FOR TIME STEP  10 IN STRESS PERIOD    1
+
+ MAXIMUM HEAD CHANGE FOR EACH ITERATION:
+
+    HEAD CHANGE   HEAD CHANGE   HEAD CHANGE   HEAD CHANGE   HEAD CHANGE
+  LAYER,ROW,COL LAYER,ROW,COL LAYER,ROW,COL LAYER,ROW,COL LAYER,ROW,COL
+ ----------------------------------------------------------------------
+     0.2208        0.9976E-01    0.9948E-01    0.9739E-01    0.4721E-01
+  (  1,  3,  9) (  1,  2,  8) (  1,  1,  1) (  1,  3,  1) (  1,  3,  4)
+     0.3176E-02    0.2047E-02    0.1987E-02    0.2004E-02    0.9616E-03
+  (  1,  1,  8) (  1,  2,  7) (  1,  1,  4) (  1,  1,  1) (  1,  1,  4)
+
+
+ HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 0
+ CELL-BY-CELL FLOW TERM FLAG = 1
+ REUSING PREVIOUS VALUES OF IOFLG
+ UBUDSV SAVING " SPECIFIED FLOWS" ON UNIT 44 AT TIME STEP 10, STRESS PERIOD 1
+
+ HEAD WILL BE SAVED ON UNIT   41 AT END OF TIME STEP    10 IN STRESS PERIOD      1
+
+
+
+  -------------------------------------------------------------------------------------
+  VOLUMETRIC BUDGET FOR ENTIRE MODEL AT END OF TIME STEP   10 IN STRESS PERIOD      1
+  -------------------------------------------------------------------------------------
+
+     CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+     ------------------                 ------------------------
+
+           IN:                                      IN:
+           ---                                      ---
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+     SPECIFIED FLOWS =     1777065.0826       SPECIFIED FLOWS =        5849.1736
+
+            TOTAL IN =     1777065.0826              TOTAL IN =        5849.1736
+
+          OUT:                                     OUT:
+          ----                                     ----
+             STORAGE =      860090.2771               STORAGE =        2264.6074
+       CONSTANT HEAD =      916104.8009         CONSTANT HEAD =        3582.3153
+     SPECIFIED FLOWS =           0.0000       SPECIFIED FLOWS =           0.0000
+
+           TOTAL OUT =     1776195.0780             TOTAL OUT =        5846.9228
+
+            IN - OUT =         870.0046              IN - OUT =           2.2508
+
+ PERCENT DISCREPANCY =           0.05     PERCENT DISCREPANCY =           0.04
+
+
+          TIME SUMMARY AT END OF TIME STEP    10 IN STRESS PERIOD      1
+                    SECONDS     MINUTES      HOURS       DAYS        YEARS
+                    -----------------------------------------------------------
+   TIME STEP LENGTH 3.45600E+06  57600.      960.00      40.000     0.10951    
+ STRESS PERIOD TIME 3.45600E+07 5.76000E+05  9600.0      400.00      1.0951    
+         TOTAL TIME 3.45600E+07 5.76000E+05  9600.0      400.00      1.0951    
+ 
+1
+                            STRESS PERIOD NO.      2, LENGTH =   200.0000    
+                            -----------------------------------------------
+
+                              NUMBER OF TIME STEPS =     4
+
+                               MULTIPLIER FOR DELT =     1.000
+
+                            INITIAL TIME STEP SIZE =   50.00000    
+ 
+ SOLVING FOR HEAD 
+
+    11 ITERATIONS FOR TIME STEP   1 IN STRESS PERIOD    2
+
+ HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 0
+ CELL-BY-CELL FLOW TERM FLAG = 1
+ REUSING PREVIOUS VALUES OF IOFLG
+ UBUDSV SAVING " SPECIFIED FLOWS" ON UNIT 44 AT TIME STEP 1, STRESS PERIOD 2
+
+ HEAD WILL BE SAVED ON UNIT   41 AT END OF TIME STEP     1 IN STRESS PERIOD      2
+ 
+ SOLVING FOR HEAD 
+    11 ITERATIONS FOR TIME STEP   2 IN STRESS PERIOD    2
+
+ HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 0
+ CELL-BY-CELL FLOW TERM FLAG = 1
+ REUSING PREVIOUS VALUES OF IOFLG
+ UBUDSV SAVING " SPECIFIED FLOWS" ON UNIT 44 AT TIME STEP 2, STRESS PERIOD 2
+
+ HEAD WILL BE SAVED ON UNIT   41 AT END OF TIME STEP     2 IN STRESS PERIOD      2
+ 
+ SOLVING FOR HEAD 
+    11 ITERATIONS FOR TIME STEP   3 IN STRESS PERIOD    2
+
+ HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 0
+ CELL-BY-CELL FLOW TERM FLAG = 1
+ REUSING PREVIOUS VALUES OF IOFLG
+ UBUDSV SAVING " SPECIFIED FLOWS" ON UNIT 44 AT TIME STEP 3, STRESS PERIOD 2
+
+ HEAD WILL BE SAVED ON UNIT   41 AT END OF TIME STEP     3 IN STRESS PERIOD      2
+ 
+ SOLVING FOR HEAD 
+    11 ITERATIONS FOR TIME STEP   4 IN STRESS PERIOD    2
+
+ MAXIMUM HEAD CHANGE FOR EACH ITERATION:
+
+    HEAD CHANGE   HEAD CHANGE   HEAD CHANGE   HEAD CHANGE   HEAD CHANGE
+  LAYER,ROW,COL LAYER,ROW,COL LAYER,ROW,COL LAYER,ROW,COL LAYER,ROW,COL
+ ----------------------------------------------------------------------
+     0.2726        0.1205        0.1050        0.1158        0.6361E-01
+  (  1,  3,  9) (  1,  2,  8) (  1,  3,  5) (  1,  3,  1) (  1,  3,  3)
+     0.4410E-02    0.3001E-02    0.3350E-02    0.3623E-02    0.1943E-02
+  (  1,  1,  8) (  1,  2,  7) (  1,  3,  1) (  1,  1,  1) (  1,  1,  4)
+     0.1375E-03
+  (  1,  3,  8)
+
+
+ HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 0
+ CELL-BY-CELL FLOW TERM FLAG = 1
+ REUSING PREVIOUS VALUES OF IOFLG
+ UBUDSV SAVING " SPECIFIED FLOWS" ON UNIT 44 AT TIME STEP 4, STRESS PERIOD 2
+
+ HEAD WILL BE SAVED ON UNIT   41 AT END OF TIME STEP     4 IN STRESS PERIOD      2
+
+
+
+  -------------------------------------------------------------------------------------
+  VOLUMETRIC BUDGET FOR ENTIRE MODEL AT END OF TIME STEP    4 IN STRESS PERIOD      2
+  -------------------------------------------------------------------------------------
+
+     CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+     ------------------                 ------------------------
+
+           IN:                                      IN:
+           ---                                      ---
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+     SPECIFIED FLOWS =     2897313.0165       SPECIFIED FLOWS =        5446.2810
+
+            TOTAL IN =     2897313.0165              TOTAL IN =        5446.2810
+
+          OUT:                                     OUT:
+          ----                                     ----
+             STORAGE =     1284297.3615               STORAGE =        2075.0770
+       CONSTANT HEAD =     1611473.9969         CONSTANT HEAD =        3367.9297
+     SPECIFIED FLOWS =           0.0000       SPECIFIED FLOWS =           0.0000
+
+           TOTAL OUT =     2895771.3583             TOTAL OUT =        5443.0067
+
+            IN - OUT =        1541.6582              IN - OUT =           3.2743
+
+ PERCENT DISCREPANCY =           0.05     PERCENT DISCREPANCY =           0.06
+
+
+          TIME SUMMARY AT END OF TIME STEP     4 IN STRESS PERIOD      2
+                    SECONDS     MINUTES      HOURS       DAYS        YEARS
+                    -----------------------------------------------------------
+   TIME STEP LENGTH 4.32000E+06  72000.      1200.0      50.000     0.13689    
+ STRESS PERIOD TIME 1.72800E+07 2.88000E+05  4800.0      200.00     0.54757    
+         TOTAL TIME 5.18400E+07 8.64000E+05  14400.      600.00      1.6427    
+ 
+1
+                            STRESS PERIOD NO.      3, LENGTH =   400.0000    
+                            -----------------------------------------------
+
+                              NUMBER OF TIME STEPS =     6
+
+                               MULTIPLIER FOR DELT =     1.100
+
+                            INITIAL TIME STEP SIZE =   51.84295    
+ 
+ SOLVING FOR HEAD 
+
+    11 ITERATIONS FOR TIME STEP   1 IN STRESS PERIOD    3
+
+ HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 0
+ CELL-BY-CELL FLOW TERM FLAG = 1
+ REUSING PREVIOUS VALUES OF IOFLG
+ UBUDSV SAVING " SPECIFIED FLOWS" ON UNIT 44 AT TIME STEP 1, STRESS PERIOD 3
+
+ HEAD WILL BE SAVED ON UNIT   41 AT END OF TIME STEP     1 IN STRESS PERIOD      3
+ 
+ SOLVING FOR HEAD 
+    11 ITERATIONS FOR TIME STEP   2 IN STRESS PERIOD    3
+
+ HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 0
+ CELL-BY-CELL FLOW TERM FLAG = 1
+ REUSING PREVIOUS VALUES OF IOFLG
+ UBUDSV SAVING " SPECIFIED FLOWS" ON UNIT 44 AT TIME STEP 2, STRESS PERIOD 3
+
+ HEAD WILL BE SAVED ON UNIT   41 AT END OF TIME STEP     2 IN STRESS PERIOD      3
+ 
+ SOLVING FOR HEAD 
+    11 ITERATIONS FOR TIME STEP   3 IN STRESS PERIOD    3
+
+ HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 0
+ CELL-BY-CELL FLOW TERM FLAG = 1
+ REUSING PREVIOUS VALUES OF IOFLG
+ UBUDSV SAVING " SPECIFIED FLOWS" ON UNIT 44 AT TIME STEP 3, STRESS PERIOD 3
+
+ HEAD WILL BE SAVED ON UNIT   41 AT END OF TIME STEP     3 IN STRESS PERIOD      3
+ 
+ SOLVING FOR HEAD 
+     6 ITERATIONS FOR TIME STEP   4 IN STRESS PERIOD    3
+
+ HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 0
+ CELL-BY-CELL FLOW TERM FLAG = 1
+ REUSING PREVIOUS VALUES OF IOFLG
+ UBUDSV SAVING " SPECIFIED FLOWS" ON UNIT 44 AT TIME STEP 4, STRESS PERIOD 3
+
+ HEAD WILL BE SAVED ON UNIT   41 AT END OF TIME STEP     4 IN STRESS PERIOD      3
+ 
+ SOLVING FOR HEAD 
+    11 ITERATIONS FOR TIME STEP   5 IN STRESS PERIOD    3
+
+ MAXIMUM HEAD CHANGE FOR EACH ITERATION:
+
+    HEAD CHANGE   HEAD CHANGE   HEAD CHANGE   HEAD CHANGE   HEAD CHANGE
+  LAYER,ROW,COL LAYER,ROW,COL LAYER,ROW,COL LAYER,ROW,COL LAYER,ROW,COL
+ ----------------------------------------------------------------------
+    -0.6808       -0.2661       -0.1448       -0.7894E-01   -0.6365E-01
+  (  1,  3,  9) (  1,  2,  8) (  1,  2,  7) (  1,  1,  5) (  1,  1,  1)
+    -0.4272E-02   -0.3330E-02   -0.4339E-02   -0.5214E-02   -0.3401E-02
+  (  1,  1,  7) (  1,  2,  6) (  1,  3,  1) (  1,  1,  1) (  1,  3,  1)
+    -0.2476E-03
+  (  1,  3,  8)
+
+
+ HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 0
+ CELL-BY-CELL FLOW TERM FLAG = 1
+ REUSING PREVIOUS VALUES OF IOFLG
+ UBUDSV SAVING " SPECIFIED FLOWS" ON UNIT 44 AT TIME STEP 5, STRESS PERIOD 3
+
+ HEAD WILL BE SAVED ON UNIT   41 AT END OF TIME STEP     5 IN STRESS PERIOD      3
+ 
+ SOLVING FOR HEAD 
+    11 ITERATIONS FOR TIME STEP   6 IN STRESS PERIOD    3
+
+ MAXIMUM HEAD CHANGE FOR EACH ITERATION:
+
+    HEAD CHANGE   HEAD CHANGE   HEAD CHANGE   HEAD CHANGE   HEAD CHANGE
+  LAYER,ROW,COL LAYER,ROW,COL LAYER,ROW,COL LAYER,ROW,COL LAYER,ROW,COL
+ ----------------------------------------------------------------------
+    -0.7654       -0.3129       -0.1865       -0.1363       -0.1090    
+  (  1,  3,  9) (  1,  2,  8) (  1,  3,  7) (  1,  3,  1) (  1,  1,  1)
+    -0.7505E-02   -0.5849E-02   -0.7884E-02   -0.9670E-02   -0.6561E-02
+  (  1,  1,  7) (  1,  2,  6) (  1,  3,  1) (  1,  1,  1) (  1,  3,  1)
+    -0.4790E-03
+  (  1,  3,  8)
+
+
+ HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 0
+ CELL-BY-CELL FLOW TERM FLAG = 1
+
+ OUTPUT FLAGS FOR EACH LAYER:
+          HEAD    DRAWDOWN  HEAD  DRAWDOWN
+ LAYER  PRINTOUT  PRINTOUT  SAVE    SAVE
+ -----------------------------------------
+    1       1         0       1       0
+ UBUDSV SAVING " SPECIFIED FLOWS" ON UNIT 44 AT TIME STEP 6, STRESS PERIOD 3
+1
+              HEAD IN LAYER   1 AT END OF TIME STEP   6 IN STRESS PERIOD    3
+  ---------------------------------------------------------------------------
+
+         1     2     3     4     5     6     7     8     9    10
+ ...............................................................
+   1   7.22  6.78  6.25  5.70  5.12  4.54  3.94  3.31  2.67  2.00
+   2   7.65  6.87  6.27  5.70  5.13  4.54  3.94  3.31  2.67  2.00
+   3   7.22  6.78  6.25  5.70  5.12  4.54  3.94  3.31  2.67  2.00
+
+ HEAD WILL BE SAVED ON UNIT   41 AT END OF TIME STEP     6 IN STRESS PERIOD      3
+
+
+
+  -------------------------------------------------------------------------------------
+  VOLUMETRIC BUDGET FOR ENTIRE MODEL AT END OF TIME STEP    6 IN STRESS PERIOD      3
+  -------------------------------------------------------------------------------------
+
+     CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+     ------------------                 ------------------------
+
+           IN:                                      IN:
+           ---                                      ---
+             STORAGE =      284414.2595               STORAGE =        1836.9205
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+     SPECIFIED FLOWS =     5353000.0000       SPECIFIED FLOWS =        8201.0183
+
+            TOTAL IN =     5637414.2595              TOTAL IN =       10037.9387
+
+          OUT:                                     OUT:
+          ----                                     ----
+             STORAGE =     1656061.8128               STORAGE =           0.0000
+       CONSTANT HEAD =     3979498.9371         CONSTANT HEAD =       10050.3268
+     SPECIFIED FLOWS =           0.0000       SPECIFIED FLOWS =           0.0000
+
+           TOTAL OUT =     5635560.7499             TOTAL OUT =       10050.3268
+
+            IN - OUT =        1853.5096              IN - OUT =         -12.3881
+
+ PERCENT DISCREPANCY =           0.03     PERCENT DISCREPANCY =          -0.12
+
+
+          TIME SUMMARY AT END OF TIME STEP     6 IN STRESS PERIOD      3
+                    SECONDS     MINUTES      HOURS       DAYS        YEARS
+                    -----------------------------------------------------------
+   TIME STEP LENGTH 7.21385E+06 1.20231E+05  2003.8      83.494     0.22859    
+ STRESS PERIOD TIME 3.45600E+07 5.76000E+05  9600.0      400.00      1.0951    
+         TOTAL TIME 8.64000E+07 1.44000E+06  24000.      1000.0      2.7379    
+ 
+
+ Final Remark:
+
+   The solver successfully met the user supplied convergence criteria, HCLOSE and RCLOSE, for all 20 time steps.
+
+   Please check the "VOLUMETRIC BUDGET FOR ENTIRE MODEL" to ensure that mass rate balance errors are acceptable for all time steps.
+
+   The cumulative mass error for the entire simulation is 0.03 %
+
+
+
+
+ Simulation finished at  
+
+
+ Which had an elapsed run time of: 0.0 seconds
+
+
+    OneWater Simulation Now Complete
+
+

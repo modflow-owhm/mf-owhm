@@ -1,0 +1,20 @@
+# RIP-ET_EX1
+# MODFLOW-RIP Example problem documented in: 
+#   Maddock, T., III, Baird, K.J., Hanson, R.T., Schmid, Wolfgang, and Ajami, H., 2012, RIP-ET: A riparian evapotranspiration package for MODFLOW-2005: U.S. Geological Survey Techniques and Methods 6-A39, 76 p.
+# 
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+#
+LIST  26   ./output/RIP-ET_EX1.lst
+BAS6  13   RIP-ET_EX1.bas
+BCF6  11   RIP-ET_EX1.bcf
+WEL   12   RIP-ET_EX1.wel
+STR   14   RIP-ET_EX1.str
+SIP   16   RIP-ET_EX1.sip
+#PCG  16  RIP-ET_EX1.pcg
+OC    17   RIP-ET_EX1.oc
+RIP   20   RIP-ET_EX1.rip
+DIS   21   RIP-ET_EX1.dis
+DATA  40   ./data/INITIAL_HEAD.txt
+DATA  45   ./data/LandSurfaceDEM.txt
+DATA  30   ./output/RIP-ET_EX1.hed
+DATA  50   ./output/RIP-ET_EX1.ret

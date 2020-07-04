@@ -1,0 +1,114 @@
+# MNW2-Fig28
+# MODFLOW-2005 Example problem documented in: 
+#   Harbaugh, A.W., 2005, MODFLOW-2005, the U.S. Geological Survey modular ground-water model -- the Ground-Water Flow Process: U.S. Geological Survey Techniques and Methods 6-A16.
+#   Harbaugh, A.W., Banta, E.R., Hill, M.C. and McDonald, M.G., 2000, MODFLOW-2000, The U.S. Geological Survey Modular Ground-Water Model - User Guide to Modularization Concepts and the Ground-Water Flow Process: U.S Geological Survey Open-File Report 2000-92, 121 p., https://doi.org/10.3133/ofr200092
+#   Konikow, L.F., Hornberger, G.Z., Halford, K.J., and Hanson, R.T., 2009, Revised multi-node well (MNW2) package for MODFLOW ground-water flow model: U.S. Geological Survey Techniques and Methods 6–A30, 67 p.
+# 
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+HEAD SAVE FORMAT '(10(1X1PE13.5))' LABEL
+HEAD SAVE UNIT 33
+
+PERIOD 1 STEP 1
+   PRINT BUDGET
+   SAVE HEAD
+
+PERIOD 2 STEP 1
+   PRINT BUDGET
+   SAVE HEAD
+   
+
+PERIOD 2 STEP 2
+   PRINT BUDGET
+   SAVE HEAD
+   
+PERIOD 2 STEP 3
+   PRINT BUDGET
+   SAVE HEAD
+   
+PERIOD 2 STEP 4
+   PRINT BUDGET
+   SAVE HEAD
+   
+PERIOD 2 STEP 5
+   PRINT BUDGET
+   SAVE HEAD
+   
+PERIOD 2 STEP 6
+   PRINT BUDGET
+   SAVE HEAD
+   
+PERIOD 2 STEP 7
+   PRINT BUDGET
+   SAVE HEAD
+   
+PERIOD 2 STEP 8
+   PRINT BUDGET
+   SAVE HEAD
+   
+PERIOD 2 STEP 9
+   PRINT BUDGET
+   SAVE HEAD
+   
+PERIOD 2 STEP 10
+   PRINT BUDGET
+   SAVE HEAD
+   
+PERIOD 2 STEP 11
+   PRINT BUDGET
+   SAVE HEAD
+   
+PERIOD 2 STEP 12
+   PRINT BUDGET
+   SAVE HEAD
+   
+PERIOD 3 STEP 1
+   PRINT BUDGET
+   SAVE HEAD
+   
+
+PERIOD 3 STEP 2
+   PRINT BUDGET
+   SAVE HEAD
+   
+PERIOD 3 STEP 3
+   PRINT BUDGET
+   SAVE HEAD
+   
+PERIOD 3 STEP 4
+   PRINT BUDGET
+   SAVE HEAD
+   
+PERIOD 3 STEP 5
+   PRINT BUDGET
+   SAVE HEAD
+   
+PERIOD 3 STEP 6
+   PRINT BUDGET
+   SAVE HEAD
+   
+PERIOD 3 STEP 7
+   PRINT BUDGET
+   SAVE HEAD
+   
+PERIOD 3 STEP 8
+   PRINT BUDGET
+   SAVE HEAD
+   
+PERIOD 3 STEP 9
+   PRINT BUDGET
+   SAVE HEAD
+   
+PERIOD 3 STEP 10
+   PRINT BUDGET
+   SAVE HEAD
+   
+PERIOD 3 STEP 11
+   PRINT BUDGET
+   SAVE HEAD
+   
+PERIOD 3 STEP 12
+   PRINT BUDGET
+   SAVE HEAD
+   
+

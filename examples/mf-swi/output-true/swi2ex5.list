@@ -1,0 +1,268 @@
+
+      MMMMMMM                                       MM      MMM     MM
+    MMM     MMM    MM      M   MMMMMMMM             LM     DM M     ML     MM     MMMMMMMMM  MMMMMMMM  MMMMMMMM
+   MM         MM   MMM     M   MM                    MM    MM M     M     MMMM        M      M         MM     NM
+   MM         MM   MM M    M   MM                    MM    M  MM   MM    MM  MM       M      M         MM      M
+   MM         MM   MM  M   M   MMMMMMMM               MN  MM   M   MM   MM    MM      M      MMMMMMM   MMMMMMMMM
+   MM         MM   MM   M  M   MM         MMMMMMM     MM  M    MM MM    MMMMMMMM      M      M         MM   MM
+   MM         MM   MM    M M   MM                     LM MM    NM MM   MM      MM     M      M         MM    MM
+    MM       NM    MM     MM   MM                      M M      M M   MN        MM    M      M         MM     MM
+     MMMMMMMMN     MM      M   MMMMMMMM                7MM      7MM  MN          MM   M      MMMMMMMM  MM      MM
+
+
+ MODFLOW-OWHM v2.0.01  
+
+
+                        MODFLOW
+            ONE-WATER HYDROLOGIC-FLOW MODEL
+
+    U.S. GEOLOGICAL SURVEY MODULAR FINITE-DIFFERENCE 
+           CONJUNCTIVE USE SIMULATION PROGRAM
+
+                     Version 2.0
+
+ Release: 01          4/23/2020
+
+ Includes:
+          MODFLOW-2005 Version 1.12.0   02/03/2017
+          MODFLOW-FMP  Version 4.00.0   04/23/2017
+          MODFLOW-SWR  Version 1.04.0   09/15/2016
+          MODFLOW-SWI  Version 2.00.0   07/22/2013
+          MODFLOW-LGR  Version 2.00.0   09/19/2013
+          MODFLOW-NWT  Version 1.2.0    03/01/2020
+          MODFLOW-CFP  Version 1.09.57  09/12/2017
+
+
+ OneWater Simulation Initiated at  
+
+
+ LIST FILE: ./output/swi2ex5.list
+      UNIT: 2
+
+OPENING DATA FILES [DATA AND DATA(BINARY)]
+
+OPENED DATA FILE ON UNIT     55 WITH FILENAME OF: ./output/swi2ex5.zta
+OPENED DATA FILE ON UNIT     56 WITH FILENAME OF: ./output/swi2ex5.swb
+OPENED DATA FILE ON UNIT     51 WITH FILENAME OF: ./output/swi2ex5.hds
+OPENED DATA FILE ON UNIT     52 WITH FILENAME OF: ./output/swi2ex5.ddn
+OPENED DATA FILE ON UNIT     53 WITH FILENAME OF: ./output/swi2ex5.cbc
+
+OPENING PACKAGES
+
+DIS  PACKAGE OPENED.
+BAS6 PACKAGE OPENED.
+LPF  PACKAGE OPENED.
+WEL  PACKAGE OPENED.
+GHB  PACKAGE OPENED.
+SWI  PACKAGE OPENED.
+PCG  PACKAGE OPENED.
+OC   PACKAGE OPENED.
+
+NOTIFICATION: A FILE UNIT NUMBER WAS FOUND FOR EITHER THE LIST FILE OR A PACAKGE.
+IT WILL BE USED EVEN THOUGH UNIT NUMBERS FOR THE LIST FILE AND PACKAGES ARE NOW OPTIONAL.
+[IT IS RECOMMENDED TO STILL USE A UNIT NUMBER FOR DATA and DATA(BINARY) ]
+
+
+ BAS -- BASIC PACKAGE, VERSION OWHM INPUT READ FROM UNIT    13
+ 
+MODFLOW was compiled using uniform precision (Precision => Number of meaningful digits in numbers)
+Precision of REAL and DOUBLE PRECISION variables: 15
+
+ DISCRETIZATION INPUT DATA READ FROM UNIT   11
+
+-- READING DIS PACKAGE INPUT --
+
+# swi2ex5
+# MODFLOW-SWI Example problem documented in:
+#   Bakker, M., Schaars, F., Hughes, J.D., Langevin, C.D., Dausman, A.M., 2013, Documentation of the seawater intrusion (SWI2) package for MODFLOW: U.S. Geological Survey Techniques and Methods 6-A46, 47 p.
+#
+#      -Comments are preceded by a # sign
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+# DIS
+
+
+*** DIS COORDINATE SYSTEM NOT SEPECIFIED ***
+DEFAULT VALUES APPLIED ARE 0° ROTATION
+WITH THE ORIGIN (0,0) LOCATED AT THE MODEL'S LOWER LEFT CORNER
+
+
+
+
+DIS COORDINATE SYSTEM SEPECIFIED WITH:
+GRID ROTATION OF 0.0°
+WITH THE ORIGIN LOCATED AT THE OUTER MOST CORNER OF MODEL CELL [1,1] WITH:
+X-COORDINATE:0.0
+Y-COORDINATE:0.0
+    6 LAYERS         1 ROWS       113 COLUMNS
+      2 STRESS PERIOD(S) IN SIMULATION
+ MODEL TIME UNIT IS DAYS
+ MODEL LENGTH UNIT IS METERS
+  Confining bed flag for each layer:
+   0   0   0   0   0   0
+         0  2.500e+01           (5G13.0)         -1               # DELR(NCOL)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
+
+                     DELR =   25.0000    
+         0  1.000e+00           (5G13.0)         -1               # DELC(NROW)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
+
+                     DELC =   1.00000    
+ 
+ SOLVING FOR HEAD 
+
+ NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP  1457
+ SOLVING FOR ZETA FOR LAYER     5 ZONE     2
+ SOLVING FOR ZETA FOR LAYER     6 ZONE     2
+ 
+ SOLVING FOR HEAD 
+
+ NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP  1458
+ SOLVING FOR ZETA FOR LAYER     5 ZONE     2
+ SOLVING FOR ZETA FOR LAYER     6 ZONE     2
+ 
+ SOLVING FOR HEAD 
+
+ NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP  1459
+ SOLVING FOR ZETA FOR LAYER     5 ZONE     2
+ SOLVING FOR ZETA FOR LAYER     6 ZONE     2
+ 
+ SOLVING FOR HEAD 
+
+ OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP  1460
+    PRINT BUDGET
+    SAVE HEAD FOR ALL LAYERS
+ SOLVING FOR ZETA FOR LAYER     5 ZONE     2
+ SOLVING FOR ZETA FOR LAYER     6 ZONE     2
+ UBUDSV SAVING "      ZETASRF  1" ON UNIT 55 AT TIME STEP 1460, STRESS PERIOD 2
+
+
+                      VOLUMETRIC SWI ZONE BUDGET FOR ENTIRE MODEL
+                     AT END OF TIME STEP 1460 IN STRESS PERIOD   2
+                                      ZONE     1
+  -----------------------------------------------------------------------------------
+
+        CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+        ------------------                 ------------------------
+
+              IN:                                      IN:
+              ---                                      ---
+             BOUNDARIES =     2920000.0068            BOUNDARIES =           0.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =      866818.5571           ZONE CHANGE =         119.6833
+       ZONE CHG TIP/TOE =      254558.0482      ZONE CHG TIP/TOE =          74.2335
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+               TOTAL IN =     4041376.6121              TOTAL IN =         193.9168
+
+             OUT:                                     OUT:
+             ----                                     ----
+             BOUNDARIES =     3504000.0207            BOUNDARIES =       1.5928E-05
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =      328232.5603           ZONE CHANGE =         125.5430
+       ZONE CHG TIP/TOE =      209139.7504      ZONE CHG TIP/TOE =          68.3724
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+              TOTAL OUT =     4041372.3314             TOTAL OUT =         193.9154
+
+               IN - OUT =           4.2806              IN - OUT =       1.3567E-03
+
+    PERCENT DISCREPANCY =           0.00     PERCENT DISCREPANCY =           0.00
+
+
+
+                      VOLUMETRIC SWI ZONE BUDGET FOR ENTIRE MODEL
+                     AT END OF TIME STEP 1460 IN STRESS PERIOD   2
+                                      ZONE     2
+  -----------------------------------------------------------------------------------
+
+        CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+        ------------------                 ------------------------
+
+              IN:                                      IN:
+              ---                                      ---
+             BOUNDARIES =      584000.0162            BOUNDARIES =       1.5928E-05
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =      328232.4944           ZONE CHANGE =         125.5430
+       ZONE CHG TIP/TOE =      209139.8263      ZONE CHG TIP/TOE =          68.3724
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+               TOTAL IN =     1121372.3369              TOTAL IN =         193.9154
+
+             OUT:                                     OUT:
+             ----                                     ----
+             BOUNDARIES =       2.3490E-03            BOUNDARIES =           0.0000
+          CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+            ZONE CHANGE =      866818.6329           ZONE CHANGE =         119.6833
+       ZONE CHG TIP/TOE =      254557.9823      ZONE CHG TIP/TOE =          74.2335
+            ZONE MIXING =           0.0000           ZONE MIXING =           0.0000
+
+              TOTAL OUT =     1121376.6175             TOTAL OUT =         193.9168
+
+               IN - OUT =          -4.2806              IN - OUT =      -1.3567E-03
+
+    PERCENT DISCREPANCY =          -0.00     PERCENT DISCREPANCY =          -0.00
+
+
+ HEAD WILL BE SAVED ON UNIT   51 AT END OF TIME STEP  1460 IN STRESS PERIOD      2
+
+
+
+  -------------------------------------------------------------------------------------
+  VOLUMETRIC BUDGET FOR ENTIRE MODEL AT END OF TIME STEP 1460 IN STRESS PERIOD      2
+  -------------------------------------------------------------------------------------
+
+     CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+     ------------------                 ------------------------
+
+           IN:                                      IN:
+           ---                                      ---
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+               WELLS =           0.0000                 WELLS =           0.0000
+     HEAD DEP BOUNDS =     3504000.0230       HEAD DEP BOUNDS =       1.5928E-05
+          SWIADDTOCH =           0.0000            SWIADDTOCH =           0.0000
+
+            TOTAL IN =     3504000.0230              TOTAL IN =       1.5928E-05
+
+          OUT:                                     OUT:
+          ----                                     ----
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+               WELLS =     3504000.0000                 WELLS =           0.0000
+     HEAD DEP BOUNDS =       2.3040E-02       HEAD DEP BOUNDS =       1.5928E-05
+          SWIADDTOCH =           0.0000            SWIADDTOCH =           0.0000
+
+           TOTAL OUT =     3504000.0230             TOTAL OUT =       1.5928E-05
+
+            IN - OUT =      -9.3132E-10              IN - OUT =      -5.3281E-13
+
+ PERCENT DISCREPANCY =          -0.00     PERCENT DISCREPANCY =          -0.00
+
+
+          TIME SUMMARY AT END OF TIME STEP  1460 IN STRESS PERIOD      2
+                    SECONDS     MINUTES      HOURS       DAYS        YEARS
+                    -----------------------------------------------------------
+   TIME STEP LENGTH  86400.      1440.0      24.000      1.0000     2.73785E-03
+ STRESS PERIOD TIME 1.26144E+08 2.10240E+06  35040.      1460.0      3.9973    
+         TOTAL TIME 2.52288E+08 4.20480E+06  70080.      2920.0      7.9945    
+ 
+
+ Final Remark:
+
+   The solver successfully met the user supplied convergence criteria, HCLOSE and RCLOSE, for all 2920 time steps.
+
+   Please check the "VOLUMETRIC BUDGET FOR ENTIRE MODEL" to ensure that mass rate balance errors are acceptable for all time steps.
+
+   The cumulative mass error for the entire simulation is 0.00 %
+
+
+
+
+ Simulation finished at  
+
+
+ Which had an elapsed run time of: 0.0 seconds
+
+
+    OneWater Simulation Now Complete
+
+

@@ -1,0 +1,19 @@
+# Pr1bMFNWT
+# MODFLOW-NWT Example problem documented in: 
+# Niswonger, R.G., Panday, Sorab, and Ibaraki, Motomu, 2011, MODFLOW-NWT, A Newton formulation for MODFLOW-2005: U.S. Geological Survey Techniques and Methods 6-A37, 44 p.
+# 
+# Input modified for MODFLOW-OWHM by adding a BAS OPTIONS BLOCK with output options.
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+#
+BEGIN OPTIONS
+   BUDGETDB                ./output/Pr1bMFNWT_VolumetricBudget.txt  
+   PRINT_HEAD   NPER       ./output/Pr1bMFNWT_Head.txt
+   CUMULATIVE_HEAD_CHANGE  ./output/Pr1bMFNWT_CumHCHG.txt  
+END OPTIONS
+#
+INTERNAL  1     (FREE)  0
+-1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+    999.99    # HNOFLO
+CONSTANT 10.0

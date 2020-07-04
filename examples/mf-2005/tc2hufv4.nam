@@ -1,0 +1,27 @@
+# tc2hufv4
+# MODFLOW-2005 Example problem documented in: 
+#   Harbaugh, A.W., 2005, MODFLOW-2005, the U.S. Geological Survey modular ground-water model -- the Ground-Water Flow Process: U.S. Geological Survey Techniques and Methods 6-A16.
+#   Harbaugh, A.W., Banta, E.R., Hill, M.C. and McDonald, M.G., 2000, MODFLOW-2000, The U.S. Geological Survey Modular Ground-Water Model - User Guide to Modularization Concepts and the Ground-Water Flow Process: U.S Geological Survey Open-File Report 2000-92, 121 p., https://doi.org/10.3133/ofr200092
+#   Anderman, E.R., and Hill, M.C., 2000, MODFLOW-2000, the U.S. Geological Survey Modular Ground-Water Model - Documentation of the Hydrogeologic-Unit Flow (HUF) Package: U.S. Geological Survey Open-File Report 00-342, 89 p.
+# 
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+#
+# NAME file for test case HUF Package TC2 Variant 4 without Parameter
+# Estimation.
+#
+# Files for this variant
+list             2   ./output/tc2hufv4.lst
+huf2            11   tc2hufv4.huf
+DATA            90   ./output/tc2hufv4.hds
+
+#Common files
+bas6             8   tc2hufv4.bas
+dis              9   tc2hufv4.dis
+wel             12   tc2hufv4.wel
+drn             13   tc2hufv4.drn
+evt             15   tc2hufv4.evt
+ghb             17   tc2hufv4.ghb
+rch             18   tc2hufv4.rch
+oc              22   tc2hufv4.oc
+pcg             23   tc2hufv4.pcg
+zone            39   tc2hufv4.zon

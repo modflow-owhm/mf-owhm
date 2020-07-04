@@ -1,0 +1,3 @@
+ "GAGE No.    1:  K,I,J Coord. =     1,    3,    4;  STREAM SEGMENT =     1;  REACH =     4 "
+     "DATA: Time           Stage            Flow           Depth           Width      Midpt-Flow         Precip.              ET          Runoff     Conductance        HeadDiff       Hyd.Grad."
+     8.6400000E+04   1.0784713E+03   1.6522168E+01   1.0635020E+00   1.1323967E+01   1.7799084E+01   0.0000000E+00   0.0000000E+00   0.0000000E+00   6.2848017E-01   4.0635020E+00   1.3545007E+00

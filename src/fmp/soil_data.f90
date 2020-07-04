@@ -1,0 +1,363 @@
+!
+!#########################################################################################################
+!
+MODULE SOIL_DATA_FMP_MODULE!, ONLY: SOIL_DATA, SOIL_DATA_INITIALIZE
+  !
+  USE FMP_DIMENSION_MODULE, ONLY: FMP_DIMENSION
+  !
+  USE CONSTANTS
+  USE ULOAD_AND_SFAC_INTERFACE
+  USE ERROR_INTERFACE,                  ONLY: STOP_ERROR, WARNING_MESSAGE, FILE_IO_ERROR
+  USE PARSE_WORD_INTERFACE,             ONLY: PARSE_WORD, PARSE_WORD_UP
+  USE STRINGS,                          ONLY: UPPER, JOIN_TXT
+  USE NUM2STR_INTERFACE,                ONLY: NUM2STR
+  USE ALLOC_INTERFACE,                  ONLY: ALLOC
+  USE GENERIC_BLOCK_READER_INSTRUCTION, ONLY: GENERIC_BLOCK_READER
+  USE LIST_ARRAY_INPUT_INTERFACE,       ONLY: LIST_ARRAY_INPUT, LIST_ARRAY_INPUT_INT
+  USE WARNING_TYPE_INSTRUCTION,         ONLY: WARNING_TYPE
+  USE LOOKUP_TABLE_INSTRUCTION,         ONLY: LOOKUP_TABLE_TYPE
+  !
+  IMPLICIT NONE
+  PRIVATE
+  PUBLIC:: SOIL_DATA, INITIALIZE_SOIL_DATA
+  !
+  TYPE SOIL_COEF_DATA
+      DOUBLE PRECISION:: A,B,C,D,E
+      !CONTAINS                                           !-- MAYBE NECESSARY TO UNCOMMENT IF THERE IS A PROBLEM WITH SOIL%COEF(I,J) = SOIL_COEF(SOIL%SID(I,J))
+      !GENERIC:: ASSIGNMENT(=) => COPY_SOIL_COEF_DATA
+      !PROCEDURE, PRIVATE::       COPY_SOIL_COEF_DATA
+  END TYPE
+  !
+  TYPE SOIL_DATA
+      INTEGER:: IOUT=Z, LOUT=Z
+      LOGICAL:: HAS_SOIL      = FALSE
+      LOGICAL:: TFR_READ      = FALSE
+      LOGICAL:: HAS_FRINGE    = FALSE
+      LOGICAL:: HAS_SOIL_COEF = FALSE
+      INTEGER:: HAS_Pe_TABLE  = Z     !0 = NO Pe, 1 = Pe, 2 =Pe as Fraction
+      INTEGER,                DIMENSION(:,:),ALLOCATABLE:: SID
+      DOUBLE PRECISION,       DIMENSION(:,:),ALLOCATABLE:: CAPILLARY_FRINGE
+      TYPE(SOIL_COEF_DATA),   DIMENSION(:,:),ALLOCATABLE:: COEF
+      TYPE(LOOKUP_TABLE_TYPE),DIMENSION(:),  ALLOCATABLE:: Pe_Table !Lookup tables that determine effective precip
+      DOUBLE PRECISION,       DIMENSION(:,:),ALLOCATABLE:: SURF_VK
+      !
+      TYPE(LIST_ARRAY_INPUT):: CAPILLARY_TFR
+      TYPE(LIST_ARRAY_INPUT):: SURF_VK_TFR
+      !
+  CONTAINS
+      !
+      PROCEDURE, PASS(SOIL):: NO_SOIL  => SET_NO_SOIL
+      FINAL:: DEALLOCATE_SOIL_FINAL
+  END TYPE
+  !
+  CONTAINS
+  !
+  !PURE ELEMENTAL SUBROUTINE COPY_SOIL_COEF_DATA(SOIL_OUT,SOIL_IN)  !-- MAYBE NECESSARY TO UNCOMMENT IF THERE IS A PROBLEM WITH SOIL%COEF(I,J) = SOIL_COEF(SOIL%SID(I,J))
+  !  CLASS(SOIL_COEF_DATA), INTENT(IN ):: SOIL_IN
+  !  CLASS(SOIL_COEF_DATA), INTENT(OUT):: SOIL_OUT
+  !  !
+  !  SOIL_OUT%A = SOIL_IN%A 
+  !  SOIL_OUT%B = SOIL_IN%B 
+  !  SOIL_OUT%C = SOIL_IN%C 
+  !  SOIL_OUT%D = SOIL_IN%D 
+  !  SOIL_OUT%E = SOIL_IN%E 
+  !  !
+  !END SUBROUTINE
+  !
+  SUBROUTINE DEALLOCATE_SOIL_FINAL(SOIL)
+  TYPE(SOIL_DATA)::SOIL
+  CALL DEALLOCATE_SOIL(SOIL)
+  END SUBROUTINE
+  !
+  PURE ELEMENTAL SUBROUTINE DEALLOCATE_SOIL(SOIL)
+  CLASS(SOIL_DATA), INTENT(INOUT)::SOIL
+  !
+  IF(ALLOCATED(SOIL%SID))              DEALLOCATE(SOIL%SID)
+  IF(ALLOCATED(SOIL%CAPILLARY_FRINGE)) DEALLOCATE(SOIL%CAPILLARY_FRINGE)
+  IF(ALLOCATED(SOIL%COEF))             DEALLOCATE(SOIL%COEF)
+  IF(ALLOCATED(SOIL%SURF_VK))          DEALLOCATE(SOIL%SURF_VK)
+  !
+  END SUBROUTINE
+  !
+  SUBROUTINE SET_NO_SOIL(SOIL, FDIM, SET_ONE)
+    CLASS(SOIL_DATA),    INTENT(INOUT):: SOIL
+    TYPE(FMP_DIMENSION), INTENT(IN   ):: FDIM
+    LOGICAL,             INTENT(IN   ):: SET_ONE
+    INTEGER:: NS
+    NS = FDIM%NSOIL
+    IF(NS<ONE) NS=ONE
+    !
+    CALL DEALLOCATE_SOIL(SOIL)
+    !
+    IF(SET_ONE) THEN
+        CALL SOIL%CAPILLARY_TFR%INIT('CAP_FRINGE',DZ, Z, Z, NS, ONE, Z, Z)
+        ALLOCATE(SOIL%SID(FDIM%NCOL,FDIM%NROW),              SOURCE=ONE)
+        ALLOCATE(SOIL%CAPILLARY_FRINGE(FDIM%NCOL,FDIM%NROW), SOURCE=DZ)
+    END IF
+    !
+    SOIL%HAS_SOIL      = SET_ONE
+    SOIL%HAS_FRINGE    = SET_ONE
+    SOIL%HAS_SOIL_COEF = FALSE
+    SOIL%HAS_Pe_TABLE  = Z
+    !
+    IF(ALLOCATED(SOIL%SURF_VK)) THEN
+                                SOIL%SURF_VK = D200
+    ELSE
+        ALLOCATE(SOIL%SURF_VK(FDIM%NCOL,FDIM%NROW), SOURCE=D200)
+    END IF
+  END SUBROUTINE
+  !  
+  SUBROUTINE INITIALIZE_SOIL_DATA( BL, SOIL, LINE, FDIM )
+    CLASS(GENERIC_BLOCK_READER), INTENT(INOUT):: BL   !DATA BLOCK
+    CLASS(SOIL_DATA),            INTENT(INOUT):: SOIL
+    CHARACTER(*),                INTENT(INOUT):: LINE
+    TYPE(FMP_DIMENSION),         INTENT(IN   ):: FDIM
+    TYPE(SOIL_COEF_DATA),DIMENSION(:), ALLOCATABLE:: SOIL_COEF
+    CHARACTER(200),      DIMENSION(:), ALLOCATABLE:: SOIL_COEF_LINE
+    CHARACTER(5):: ERROR
+    LOGICAL:: EOF, NO_SOIL_LOCATION
+    INTEGER:: I, J, LLOC, ISTART, ISTOP, IU
+    TYPE(WARNING_TYPE):: WARN_MSG
+    !
+    CALL WARN_MSG%INIT()
+    !
+    WRITE(BL%IOUT,'(/A/)') 'SOIL BLOCK FOUND AND NOW LOADING PROPERTIES'
+    !
+    SOIL%IOUT = BL%IOUT
+    SOIL%LOUT = BL%IOUT
+    SOIL%HAS_Pe_TABLE  = Z
+    !
+    ALLOCATE(SOIL%SURF_VK(FDIM%NCOL,FDIM%NROW), SOURCE=D200)  !Default value is not to limit
+    !
+    IF (FDIM%NSOIL > Z) THEN
+        SOIL%HAS_SOIL      = TRUE
+    ELSE
+        CALL WARNING_MESSAGE(OUTPUT=BL%IOUT,MSG='FMP SOIL. NSOIL = 0. SOIL BLOCK WILL ASSUME SOIL_ID = 0 SO NO SOILS CACULATIONS ALLOWED AND THE CAPILARY FRINGE IS SET TO ZERO. IF YOU ARE USING CROPS THEN PROGRAM WILL STOP SOON WITH AN ERROR.')
+        !ALLOCATE(SOIL%SID(FDIM%NCOL,FDIM%NROW), SOURCE=Z)
+        !ALLOCATE(SOIL%CAPILLARY_FRINGE(FDIM%NCOL,FDIM%NROW), SOURCE=DZ)
+        CALL SET_NO_SOIL(SOIL, FDIM, FALSE)
+        RETURN
+    END IF
+    !
+    NO_SOIL_LOCATION = TRUE
+    ERROR='ERROR'
+    !
+    IF(SOIL%HAS_SOIL) THEN
+       !
+       CALL BL%MAKE_SCRATCH_FILE()
+       !
+       !READ(BL%SCRATCH, '(A)', IOSTAT=IERR) LINE
+       CALL BL%READ_SCRATCH(EOF, LINE)
+       !
+       DO WHILE (.NOT. EOF)
+         !
+         LLOC=ONE
+         CALL PARSE_WORD_UP(LINE,LLOC,ISTART,ISTOP)
+         !
+         SELECT CASE ( LINE(ISTART:ISTOP) )
+         CASE ("SOIL_ID","SOILID","SID","LOCATION")
+                           WRITE(BL%IOUT,'(A)') '   SOIL_ID (LOCATION, SID) KEYWORD FOUND. NOW LOADING USING ULOAD TO LOAD IN 2D ARRAY SOILD IDs.'
+                           IU=Z
+                           NO_SOIL_LOCATION = FALSE
+                           ALLOCATE(SOIL%SID(FDIM%NCOL,FDIM%NROW))
+                           CALL ULOAD(SOIL%SID, LLOC, LINE, BL%IOUT, BL%IU, IU, NOID=TRUE, SCRATCH=BL%SCRATCH)
+                           !
+                           WHERE( SOIL%SID > FDIM%NSOIL ) SOIL%SID = Z
+                           !
+         CASE ("CAPILLARY_FRINGE","CAPF")
+                           WRITE(BL%IOUT,'(A)') '   CAPILLARY_FRINGE (CAPF) KEYWORD FOUND. NOW LOADING LIST/ARRAY KEYWORD.'
+                           ALLOCATE(SOIL%CAPILLARY_FRINGE(FDIM%NCOL,FDIM%NROW), SOURCE=DZ)
+                           CALL SOIL%CAPILLARY_TFR%INIT('CAP_FRINGE',  LLOC, LINE, BL%IOUT, BL%IU, FDIM%NSOIL, ONE, FDIM%NROW, FDIM%NCOL, FDIM%NSOIL, 'BYSOIL', SCRATCH=BL%SCRATCH, NO_TRANSIENT=TRUE)
+                           SOIL%HAS_FRINGE = TRUE
+                           !
+         CASE ("COEFFICIENT", "COEFICIENT")
+                           WRITE(BL%IOUT,'(A)') '   COEFFICIENT             KEYWORD FOUND. NOW LOADING USING ULOAD TO LOAD LIST OF SOIL COEFIENTS (EITHER AS KEYWORDS OR COEFICIENTS A,B,C,D,E).'
+                           SOIL%HAS_SOIL_COEF = TRUE
+                           IU=Z
+                           ALLOCATE(SOIL_COEF(FDIM%NSOIL), SOIL_COEF_LINE(FDIM%NSOIL))
+                           CALL ULOAD(SOIL_COEF_LINE, LLOC, LINE, BL%IOUT, BL%IU, IU, SCRATCH=BL%SCRATCH, ENTIRE_LINE = TRUE)  !READ ENTIRE LINE AND PARSE LATER
+                           !CALL UPPER(SOIL_COEF(ONE,:))
+         CASE ("EFFECTIVE_PRECIPITATION_TABLE","EFFECTIVE_PRECIP_TABLE")
+                           WRITE(BL%IOUT,'(A)') '   EFFECTIVE_PRECIPITATION_TABLE KEYWORD FOUND. FIRST CHECKING "BY_LENGTH" OR "BY_FRAC" KEYWORD. IF NOT PRESENT THEN AN ERROR IS  RAISED.'
+                           !
+                           CALL PARSE_WORD_UP(LINE,LLOC,ISTART,ISTOP)
+                           !
+                           SELECT CASE ( LINE(ISTART:ISTOP) )
+                           CASE('BYLENGTH', 'BY_LENGTH','BYHEIGHT',"BY_HEIGHT");  SOIL%HAS_Pe_TABLE = ONE
+                           CASE('BYFRAC',"BY_FRAC","BYFRACTION","BY_FRACTION");   SOIL%HAS_Pe_TABLE = TWO
+                           CASE DEFAULT
+                                           !WRITE(BL%IOUT,'(3x,3A)') '"BY_LENGTH" OR "BY_FRAC" FLAG NOT FOUND, ASSUMING IT IS NOT SPECIFIED AND WILL USE "BY_FRAC".'
+                                           CALL STOP_ERROR(LINE=LINE, INFILE=BL%IU, OUTPUT=BL%IOUT, MSG='FMP SOIL ERROR. KEYWORD "EFFECTIVE_PRECIPITATION_TABLE" MUST BE FOLLOWED BY THE KEYWORD "BY_LENGTH" OR "BY_FRAC"')
+                           END SELECT
+                           !
+                           WRITE(BL%IOUT,'(3x,2A)') LINE(ISTART:ISTOP),' KEYWORD FOUND, SO IF USING ULOAD LIST-STYLE TO READ NSOIL EFFECTIVE PRECIPITATION LOOKUP TABLES.'
+                           !
+                           ALLOCATE(SOIL%Pe_Table(FDIM%NSOIL))
+                           IU=Z
+                           CALL ULOAD(SOIL%Pe_Table, LLOC, LINE, BL%IOUT, BL%IU, IU, SCRATCH=BL%SCRATCH)
+                           !
+         CASE ("SURFACE_VERTICAL_HYDRAULIC_CONDUCTIVITY", "SURF_VK")
+                           WRITE(BL%IOUT,'(A)') '   SURFACE_VERTICAL_HYDRAULIC_CONDUCTIVITY (SURF_VK) KEYWORD FOUND. NOW LOADING LIST/ARRAY KEYWORD.'
+                           CALL SOIL%SURF_VK_TFR%INIT('SURF_VK',  LLOC, LINE, BL%IOUT, BL%IU, FDIM%NSOIL, ONE, FDIM%NROW, FDIM%NCOL, FDIM%NSOIL, 'BYSOIL', SCRATCH=BL%SCRATCH, NO_TRANSIENT=TRUE)
+         CASE DEFAULT
+                           CALL WARN_MSG%ADD('FOUND UNKNOWN KEYWORD "'//LINE(ISTART:ISTOP)//'" ***IT WILL BE IGNORED***'//BLN)
+                           
+         END SELECT
+         !
+         !READ(BL%SCRATCH, '(A)', IOSTAT=IERR) LINE
+         CALL BL%READ_SCRATCH(EOF, LINE)
+         !
+       END DO
+    END IF
+    !
+    CALL WARN_MSG%CHECK(HED='FMP SOIL BLOCK'//NL,INFILE=BL%IU,OUTPUT=BL%IOUT,INLINE=TRUE,CMD_PRINT=TRUE,TAIL=NL)
+    !
+    IF(NO_SOIL_LOCATION .AND. FDIM%NSOIL == ONE) THEN
+        !
+        NO_SOIL_LOCATION = FALSE
+        ALLOCATE(SOIL%SID(FDIM%NCOL,FDIM%NROW), SOURCE=ONE)
+        !
+    END IF
+    !
+    !Check if Capilary Fringe is specifed as an ARRAY and nothing else is specified, then fake soil IDs
+    !
+    IF(NO_SOIL_LOCATION .AND.       SOIL%HAS_FRINGE             &
+                        .AND. .NOT. SOIL%HAS_SOIL_COEF          &
+                        .AND. .NOT. SOIL%CAPILLARY_TFR%LISTLOAD &
+                        .AND.       SOIL%HAS_Pe_TABLE == Z      ) THEN
+                                                                      ALLOCATE(SOIL%SID(FDIM%NCOL,FDIM%NROW), SOURCE=ONE)
+                                                                      NO_SOIL_LOCATION = FALSE
+    END IF
+    !
+    ! -----------------------------------------------------------------------------------------------------------------------------------
+    !
+    IF(NO_SOIL_LOCATION) THEN
+        CALL WARNING_MESSAGE(OUTPUT=BL%IOUT,MSG='FMP SOIL. FAILED TO LOCATE KEYWORD "SOIL_ID" WITHIN SOIL BLOCK. IT WILL BE ASSUMED THAT  SOIL_ID = 0 SO NO SOILS CACULATIONS ALLOWED AND THE CAPILARY FRINGE IS SET TO ZERO. IF YOU ARE USING CROPS THEN PROGRAM WILL STOP SOON WITH AN ERROR.')
+        !
+        IF(SOIL%HAS_SOIL_COEF) DEALLOCATE(SOIL_COEF, SOIL_COEF_LINE)
+        IF(ALLOCATED(SOIL%CAPILLARY_FRINGE)) DEALLOCATE(SOIL%CAPILLARY_FRINGE)
+        IF(SOIL%HAS_Pe_TABLE > Z )           DEALLOCATE(SOIL%Pe_Table        )
+        !
+        SOIL%HAS_SOIL      = FALSE
+        SOIL%HAS_FRINGE    = FALSE
+        SOIL%HAS_SOIL_COEF = FALSE
+        SOIL%HAS_Pe_TABLE  = Z
+        RETURN
+        !
+    ELSEIF(.NOT. SOIL%CAPILLARY_TFR%INUSE) THEN
+        CALL WARNING_MESSAGE(OUTPUT=BL%IOUT,MSG='FMP SOIL ERROR. FAILED TO LOCATE KEYWORD "CAPILLARY_FRINGE" WITHIN SOIL BLOCK. IT WILL BE ASSUMED ZERO.')
+        !
+        ALLOCATE(SOIL%CAPILLARY_FRINGE(FDIM%NCOL,FDIM%NROW), SOURCE=DZ)
+        CALL SOIL%CAPILLARY_TFR%INIT('CAP_FRINGE',  DZ, BL%IOUT, BL%IU, FDIM%NSOIL, ONE, FDIM%NROW, FDIM%NCOL)
+        SOIL%HAS_FRINGE    = FALSE
+        SOIL%HAS_SOIL_COEF = FALSE
+        !
+    END IF
+    !
+    IF(SOIL%CAPILLARY_TFR%SFAC%HAS_ALL) THEN
+        DO CONCURRENT(J=ONE:FDIM%NROW, I=ONE:FDIM%NCOL, SOIL%SID(I,J)>Z .AND. SOIL%SID(I,J)<=FDIM%NSOIL)
+              !
+              SOIL%CAPILLARY_FRINGE(I,J) = SOIL%CAPILLARY_TFR%GET(SOIL%SID(I,J), I, J) * SOIL%CAPILLARY_TFR%SFAC%ALL
+        END DO
+    ELSE
+        DO CONCURRENT(J=ONE:FDIM%NROW, I=ONE:FDIM%NCOL, SOIL%SID(I,J)>Z .AND. SOIL%SID(I,J)<=FDIM%NSOIL)
+              !
+              SOIL%CAPILLARY_FRINGE(I,J) = SOIL%CAPILLARY_TFR%GET(SOIL%SID(I,J), I, J)
+        END DO
+    END IF
+    !
+    IF(SOIL%CAPILLARY_TFR%SFAC%HAS_EX1) THEN
+        DO CONCURRENT(J=ONE:FDIM%NROW, I=ONE:FDIM%NCOL, SOIL%SID(I,J)>Z .AND. SOIL%SID(I,J)<=FDIM%NSOIL)
+              !
+              SOIL%CAPILLARY_FRINGE(I,J) = SOIL%CAPILLARY_FRINGE(I,J) * SOIL%CAPILLARY_TFR%SFAC%EX1(SOIL%SID(I,J))
+        END DO
+    END IF
+    !
+    ! -----------------------------------------------------------------------------------------------------------------------------------
+    !
+    IF(SOIL%SURF_VK_TFR%INUSE) THEN
+       !
+       IF(SOIL%SURF_VK_TFR%SFAC%HAS_ALL) THEN
+           DO CONCURRENT(J=ONE:FDIM%NROW, I=ONE:FDIM%NCOL, SOIL%SID(I,J)>Z .AND. SOIL%SID(I,J)<=FDIM%NSOIL)
+                 !
+                 SOIL%SURF_VK(I,J) = SOIL%SURF_VK_TFR%GET(SOIL%SID(I,J), I, J) * SOIL%SURF_VK_TFR%SFAC%ALL
+           END DO
+       ELSE
+           DO CONCURRENT(J=ONE:FDIM%NROW, I=ONE:FDIM%NCOL, SOIL%SID(I,J)>Z .AND. SOIL%SID(I,J)<=FDIM%NSOIL)
+                 !
+                 SOIL%SURF_VK(I,J) = SOIL%SURF_VK_TFR%GET(SOIL%SID(I,J), I, J)
+           END DO
+       END IF
+       !
+       IF(SOIL%SURF_VK_TFR%SFAC%HAS_EX1) THEN
+           DO CONCURRENT(J=ONE:FDIM%NROW, I=ONE:FDIM%NCOL, SOIL%SID(I,J)>Z .AND. SOIL%SID(I,J)<=FDIM%NSOIL)
+                 !
+                 SOIL%SURF_VK(I,J) = SOIL%SURF_VK(I,J) * SOIL%SURF_VK_TFR%SFAC%EX1(SOIL%SID(I,J))
+           END DO
+       END IF
+       !
+    END IF
+    !
+    ! -----------------------------------------------------------------------------------------------------------------------------------
+    !
+    IF(SOIL%HAS_SOIL_COEF) THEN
+        !
+        DO I=ONE, FDIM%NSOIL
+              !
+              LLOC=ONE
+              CALL PARSE_WORD_UP(SOIL_COEF_LINE(I),LLOC,ISTART,ISTOP)
+              !
+              SELECT CASE(SOIL_COEF_LINE(I)(ISTART:ISTOP))
+              CASE("SILT")
+                               SOIL_COEF(I)%A =  0.320149668D0 
+                               SOIL_COEF(I)%B = -0.328586793D0
+                               SOIL_COEF(I)%C =  2.851921250D0
+                               SOIL_COEF(I)%D =  1.3027D0
+                               SOIL_COEF(I)%E = -2.0416D0
+              CASE("SANDYLOAM")
+                               !SOIL_COEF(I)%A =  0.201D0
+                               !SOIL_COEF(I)%B = -0.195D0
+                               !SOIL_COEF(I)%C =  3.083D0
+                               !SOIL_COEF(I)%D =  3.201D0
+                               !SOIL_COEF(I)%E = -3.903D0
+                               SOIL_COEF(I)%A =  0.200738267D0
+                               SOIL_COEF(I)%B = -0.195485538D0
+                               SOIL_COEF(I)%C =  3.083110101D0
+                               SOIL_COEF(I)%D =  3.2012D0
+                               SOIL_COEF(I)%E = -3.9025D0
+              CASE("SILTYCLAY")
+                               SOIL_COEF(I)%A =  0.348098866D0
+                               SOIL_COEF(I)%B = -0.327445062D0
+                               SOIL_COEF(I)%C =  1.730759566D0
+                               SOIL_COEF(I)%D =  0.5298D0
+                               SOIL_COEF(I)%E = -0.3767D0
+              CASE("SAND")
+                               SOIL_COEF(I)%A =  0.11D0                       
+                               SOIL_COEF(I)%B = -0.059D0
+                               SOIL_COEF(I)%C =  3.09D0
+                               SOIL_COEF(I)%D =  4.326D0
+                               SOIL_COEF(I)%E = -4.099D0
+              CASE DEFAULT
+                                         READ(SOIL_COEF_LINE(I)(ISTART:ISTOP), *, IOSTAT=IU) SOIL_COEF(I)%A   ;  CALL PARSE_WORD(SOIL_COEF_LINE(I),LLOC,ISTART,ISTOP)
+                               IF(IU==Z) READ(SOIL_COEF_LINE(I)(ISTART:ISTOP), *, IOSTAT=IU) SOIL_COEF(I)%B   ;  CALL PARSE_WORD(SOIL_COEF_LINE(I),LLOC,ISTART,ISTOP)
+                               IF(IU==Z) READ(SOIL_COEF_LINE(I)(ISTART:ISTOP), *, IOSTAT=IU) SOIL_COEF(I)%C   ;  CALL PARSE_WORD(SOIL_COEF_LINE(I),LLOC,ISTART,ISTOP)
+                               IF(IU==Z) READ(SOIL_COEF_LINE(I)(ISTART:ISTOP), *, IOSTAT=IU) SOIL_COEF(I)%D   ;  CALL PARSE_WORD(SOIL_COEF_LINE(I),LLOC,ISTART,ISTOP)
+                               IF(IU==Z) READ(SOIL_COEF_LINE(I)(ISTART:ISTOP), *, IOSTAT=IU) SOIL_COEF(I)%E
+                               !
+                               IF(IU.NE.Z) CALL STOP_ERROR(INFILE=BL%IU, OUTPUT=BL%IOUT,MSG='FMP SOIL ERROR. KEYWORD "COEFFICIENT" FOUND'//NL//'BUT FAILED TO EITHER CONVERT SOIL COEFICIENTS (A, B, C, D, E) TO A NUMBER'//NL//'OR IDENTIFY THE KEYWORDS "SILT", "SANDYLOAM", OR "SILTYCLAY"'//NL//'FOR SOIL ID '//NUM2STR(I)//NL//'THE FOLLOWING IS THE LINE (OR PORTION OF THE LINE) THAT WAS BEING PROCESSED THAT RESULTED IN THE ERROR: '//NL//SOIL_COEF_LINE(I))
+              END SELECT
+        END DO
+        !
+        ALLOCATE(SOIL%COEF(FDIM%NCOL,FDIM%NROW))
+        !
+        DO CONCURRENT(J=ONE:FDIM%NROW, I=ONE:FDIM%NCOL,SOIL%SID(I,J)>Z);   SOIL%COEF(I,J) = SOIL_COEF(SOIL%SID(I,J))
+        END DO
+        DEALLOCATE(SOIL_COEF, SOIL_COEF_LINE)
+    END IF
+    !
+  END SUBROUTINE 
+  !
+END MODULE
+!
+!#########################################################################################################
+!
