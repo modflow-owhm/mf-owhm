@@ -1,0 +1,12 @@
+# Pr3_MFNWT_XXX
+# MODFLOW-NWT Example problem documented in: 
+# Niswonger, R.G., Panday, Sorab, and Ibaraki, Motomu, 2011, MODFLOW-NWT, A Newton formulation for MODFLOW-2005: U.S. Geological Survey Techniques and Methods 6-A37, 44 p.
+# 
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+#
+# MODFLOW2005 OC Input File
+# Test Problem 3 for UPW Package and NWT Solver
+HEAD PRINT FORMAT   12
+HEAD SAVE UNIT 30
+PERIOD   1 STEP   1    
+PRINT HEAD

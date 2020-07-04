@@ -1,0 +1,26 @@
+# mnw1
+# MODFLOW-2005 Example problem documented in: 
+#   Harbaugh, A.W., 2005, MODFLOW-2005, the U.S. Geological Survey modular ground-water model -- the Ground-Water Flow Process: U.S. Geological Survey Techniques and Methods 6-A16.
+#   Harbaugh, A.W., Banta, E.R., Hill, M.C. and McDonald, M.G., 2000, MODFLOW-2000, The U.S. Geological Survey Modular Ground-Water Model - User Guide to Modularization Concepts and the Ground-Water Flow Process: U.S Geological Survey Open-File Report 2000-92, 121 p., https://doi.org/10.3133/ofr200092
+#   Halford, K.J. and Hanson R.T., 2002, User Guide for the Drawdown-Limited, Multi-Node Well (MNW) Package for the U.S. Geological Survey’s Modular Three-Dimensional Finite-Difference Ground-Water Flow Model, Versions MODFLOW-96 and MODFLOW-2000t: U.S. Geological Survey Open-File Report 02-293, 33 p.
+# 
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+#
+# Main output file
+LIST   7 ./output/mnw1.lst
+#
+# Input files
+DIS    8 mnw1.dis
+BAS6   9 mnw1.bas
+BCF6  10 mnw1.bcf
+MNW1  75 mnw1.mnw
+DRN   77 mnw1.drn
+RCH   72 mnw1.rch
+PCG   74 mnw1.pcg
+CHD   76 mnw1.chd
+OC    71 mnw1.oc
+#
+# Binary output files
+DATA(BINARY)  89  ./output/mnw1.ufh       REPLACE
+DATA(BINARY)  90  ./output/mnw1.cbc       REPLACE
+

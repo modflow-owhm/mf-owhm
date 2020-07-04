@@ -1,0 +1,981 @@
+
+      MMMMMMM                                       MM      MMM     MM
+    MMM     MMM    MM      M   MMMMMMMM             LM     DM M     ML     MM     MMMMMMMMM  MMMMMMMM  MMMMMMMM
+   MM         MM   MMM     M   MM                    MM    MM M     M     MMMM        M      M         MM     NM
+   MM         MM   MM M    M   MM                    MM    M  MM   MM    MM  MM       M      M         MM      M
+   MM         MM   MM  M   M   MMMMMMMM               MN  MM   M   MM   MM    MM      M      MMMMMMM   MMMMMMMMM
+   MM         MM   MM   M  M   MM         MMMMMMM     MM  M    MM MM    MMMMMMMM      M      M         MM   MM
+   MM         MM   MM    M M   MM                     LM MM    NM MM   MM      MM     M      M         MM    MM
+    MM       NM    MM     MM   MM                      M M      M M   MN        MM    M      M         MM     MM
+     MMMMMMMMN     MM      M   MMMMMMMM                7MM      7MM  MN          MM   M      MMMMMMMM  MM      MM
+
+
+ MODFLOW-OWHM v2.0.01  
+
+
+                        MODFLOW
+            ONE-WATER HYDROLOGIC-FLOW MODEL
+
+    U.S. GEOLOGICAL SURVEY MODULAR FINITE-DIFFERENCE 
+           CONJUNCTIVE USE SIMULATION PROGRAM
+
+                     Version 2.0
+
+ Release: 01          4/23/2020
+
+ Includes:
+          MODFLOW-2005 Version 1.12.0   02/03/2017
+          MODFLOW-FMP  Version 4.00.0   04/23/2017
+          MODFLOW-SWR  Version 1.04.0   09/15/2016
+          MODFLOW-SWI  Version 2.00.0   07/22/2013
+          MODFLOW-LGR  Version 2.00.0   09/19/2013
+          MODFLOW-NWT  Version 1.2.0    03/01/2020
+          MODFLOW-CFP  Version 1.09.57  09/12/2017
+
+
+ OneWater Simulation Initiated at 
+
+
+ LIST FILE: ./output/twrip.lst
+      UNIT: 2
+
+OPENING PACKAGES
+
+BAS6 PACKAGE OPENED.
+LPF  PACKAGE OPENED.
+WEL  PACKAGE OPENED.
+DRN  PACKAGE OPENED.
+RCH  PACKAGE OPENED.
+SIP  PACKAGE OPENED.
+OC   PACKAGE OPENED.
+MULT PACKAGE OPENED.
+ZONE PACKAGE OPENED.
+DIS  PACKAGE OPENED.
+
+NOTIFICATION: A FILE UNIT NUMBER WAS FOUND FOR EITHER THE LIST FILE OR A PACAKGE.
+IT WILL BE USED EVEN THOUGH UNIT NUMBERS FOR THE LIST FILE AND PACKAGES ARE NOW OPTIONAL.
+[IT IS RECOMMENDED TO STILL USE A UNIT NUMBER FOR DATA and DATA(BINARY) ]
+
+
+ BAS -- BASIC PACKAGE, VERSION OWHM INPUT READ FROM UNIT     3
+ 
+MODFLOW was compiled using uniform precision (Precision => Number of meaningful digits in numbers)
+Precision of REAL and DOUBLE PRECISION variables: 15
+
+ DISCRETIZATION INPUT DATA READ FROM UNIT   10
+
+-- READING DIS PACKAGE INPUT --
+
+# twrip
+# MODFLOW-2005 Example problem documented in:
+#   Harbaugh, A.W., 2005, MODFLOW-2005, the U.S. Geological Survey modular ground-water model -- the Ground-Water Flow Process: U.S. Geological Survey Techniques and Methods 6-A16.
+#   Harbaugh, A.W., Banta, E.R., Hill, M.C. and McDonald, M.G., 2000, MODFLOW-2000, The U.S. Geological Survey Modular Ground-Water Model - User Guide to Modularization Concepts and the Ground-Water Flow Process: U.S Geological Survey Open-File Report 2000-92, 121 p., https://doi.org/10.3133/ofr200092
+#
+#      -Comments are preceded by a # sign
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+*** DIS COORDINATE SYSTEM NOT SEPECIFIED ***
+DEFAULT VALUES APPLIED ARE 0° ROTATION
+WITH THE ORIGIN (0,0) LOCATED AT THE MODEL'S LOWER LEFT CORNER
+
+
+
+
+DIS COORDINATE SYSTEM SEPECIFIED WITH:
+GRID ROTATION OF 0.0°
+WITH THE ORIGIN LOCATED AT THE OUTER MOST CORNER OF MODEL CELL [15,1] WITH:
+X-COORDINATE:0.0
+Y-COORDINATE:0.0
+    3 LAYERS        15 ROWS        15 COLUMNS
+      1 STRESS PERIOD(S) IN SIMULATION
+ MODEL TIME UNIT IS SECONDS
+ MODEL LENGTH UNIT IS UNDEFINED
+  Confining bed flag for each layer:
+   1   1   0
+
+                     DELR =   5000.00    
+
+                     DELC =   5000.00    
+
+ TOP ELEVATION OF LAYER 1 =   200.000    
+
+   MODEL LAYER BOTTOM EL. =  -150.000     FOR LAYER   1
+
+ BOT. EL. OF QUASI-3D BED =  -200.000     FOR LAYER   1
+
+   MODEL LAYER BOTTOM EL. =  -300.000     FOR LAYER   2
+
+ BOT. EL. OF QUASI-3D BED =  -350.000     FOR LAYER   2
+
+   MODEL LAYER BOTTOM EL. =  -450.000     FOR LAYER   3
+
+
+ STRESS PERIOD     LENGTH       TIME STEPS     MULTIPLIER FOR DELT    SS FLAG  (OPTIONAL TIME STEP LENGTH)
+ ---------------------------------------------------------------------------------------------------
+        1         86400.00          1                  1.00000         SS
+
+ STEADY-STATE SIMULATION
+
+
+
+
+-- READING BAS PACKAGE INPUT --
+
+# twrip
+# MODFLOW-2005 Example problem documented in:
+#   Harbaugh, A.W., 2005, MODFLOW-2005, the U.S. Geological Survey modular ground-water model -- the Ground-Water Flow Process: U.S. Geological Survey Techniques and Methods 6-A16.
+#   Harbaugh, A.W., Banta, E.R., Hill, M.C. and McDonald, M.G., 2000, MODFLOW-2000, The U.S. Geological Survey Modular Ground-Water Model - User Guide to Modularization Concepts and the Ground-Water Flow Process: U.S Geological Survey Open-File Report 2000-92, 121 p., https://doi.org/10.3133/ofr200092
+#
+# Input modified for MODFLOW-OWHM by including the BAS options:
+#    NOFREE  BUDGETDB ./output/twrip_VolumetricBudget.txt  CUMULATIVE_HEAD_CHANGE ./output/twrip_CumHCHG.txt  PRINT_HEAD NPER ./output/twrip_Head.txt
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+#SAMPLE----3 LAYERS, 15 ROWS, 15 COLUMNS; STEADY STATE; CONSTANT HEADS COLUMN 1
+#LAYERS 1 AND 2; RECHARGE, WELLS AND DRAINS
+
+
+ THE BAS PACKAGE NOW DEFAULTS TO FREE FORMAT.
+ USE OPTION "NOFREE" TO DISABLE FREE FORMAT.
+
+
+
+########################################################################################################
+
+                           WARNING_MESSAGE
+
+         THE FOLLOWING COMMENTS WERE PASSED TO THE WARNING ROUTINE
+
+THE WARNING IS BELIEVED TO HAVE ORIGINATED FROM THE FOLLOWING FILE:
+"examples\mf-2005\twrip.ba6"
+
+THE GUESSED LINE THAT THE WARNING OCCURED ON IS:
+"NOFREE  BUDGETDB ./output/twrip_VolumetricBudget.txt  CUMULATIVE_HEAD_CHANGE ./output/twrip_CumHCHG.txt  PRINT_HEAD NPER ./output/twrip_Head.txt"
+
+THE DESRIPTION OF THE WARNING IS:
+
+FOUND BAS PACKAGE OPTION KEYWORDS ALONG PACKAGE "OPTIONS LINE" (ie Data Set 1)
+
+The BAS package options should be within an "OPTIONS BLOCK" rather than along the first line of input.
+
+The BAS package will attempt to read the options line, but some advanced options may fail to load due to their complex input,
+For example the option "SHIFT_STRT" uses ULOAD to read NLAY shift values, which would crash under certain ULOAD keyword combinations.
+
+Also note that if any of the options specify a GENERIC_OUTPUT file, 
+then there may be additional warnings about a BAS OPTION not being a recognized GENERIC_OUTPUT post-keyword.
+These warnings can be ignored, since its a post-keyword warning pertaining to the GENERIC_OUTPUT file and 
+the BAS OPTION is still processed by the BAS package.
+
+It is recommended for new models to use "BEGIN OPTIONS" and then have one option per line and
+end the options block with the word "END" in place of single line of options.
+
+For example:
+
+BEGIN OPTIONS
+
+  START_DATE  4/23/1901
+  SHOWPROGRESS
+  NOCBC
+  BUDGETDB ./output/VolumetricBudget.txt
+  PAUSE
+
+END OPTIONS
+
+             - Note that "OPTIONS BLOCK" maybe empty or entirely not present,
+               nor is it required to specify an "OPTIONS LINE"
+
+             - DO NOT specify both an "OPTIONS BLOCK" and "OPTIONS LINE" at the same time.
+
+########################################################################################################
+
+
+
+ NOW READING BAS OPTIONS
+
+ FOUND OPTION: NOFREE
+     THE FREE FORMAT OPTION IS DISABLED (INPUT USES FIXED FORMATTED READ)
+
+ FOUND OPTION: BUDGETDB
+
+
+########################################################################################################
+
+                           WARNING_MESSAGE
+
+         THE FOLLOWING COMMENTS WERE PASSED TO THE WARNING ROUTINE
+
+THE WARNING IS BELIEVED TO HAVE ORIGINATED FROM THE FOLLOWING FILE:
+"examples\mf-2005\twrip.ba6"
+
+THE GUESSED LINE THAT THE WARNING OCCURED ON IS:
+"NOFREE  BUDGETDB ./output/twrip_VolumetricBudget.txt  CUMULATIVE_HEAD_CHANGE ./output/twrip_CumHCHG.txt  PRINT_HEAD NPER ./output/twrip_Head.txt"
+
+THE DESRIPTION OF THE WARNING IS:
+
+...CHECK_FOR_POST_KEY WARNINGS...
+ THE FOLLOWING MESSAGES WERE PASSED WHILE CHECKING FOR ANY ADDITIONAL KEYWORDS ON LOADED LINE.
+
+
+FAILED TO IDENTIFY THE FOLLOWING POST-KEYWORD: 
+
+"CUMULATIVE_HEAD_CHANGE"
+
+IT WILL BE IGNORED AND NO FURTHER KEYWORDS WILL BE CHECKED/INCLUDED TO THE RIGHT OF IT.
+TO SUPRESS THIS WARNING PLEASE PLACE A "#" SYMBOL TO THE LEFT OF THE WORD TO INDICATE EVERYTHING TO THE RIGHT OF THE # IS A COMMENT
+
+########################################################################################################
+
+
+
+ FOUND OPTION: CUMULATIVE_HEAD_CHANGE
+    THIS OPTION IS ONLY USEFUL FOR MODEL RESULT COMPARISON WITH DIFFERENT CODE COMPARISONS.
+
+
+
+########################################################################################################
+
+                           WARNING_MESSAGE
+
+         THE FOLLOWING COMMENTS WERE PASSED TO THE WARNING ROUTINE
+
+THE WARNING IS BELIEVED TO HAVE ORIGINATED FROM THE FOLLOWING FILE:
+"examples\mf-2005\twrip.ba6"
+
+THE GUESSED LINE THAT THE WARNING OCCURED ON IS:
+"NOFREE  BUDGETDB ./output/twrip_VolumetricBudget.txt  CUMULATIVE_HEAD_CHANGE ./output/twrip_CumHCHG.txt  PRINT_HEAD NPER ./output/twrip_Head.txt"
+
+THE DESRIPTION OF THE WARNING IS:
+
+...CHECK_FOR_POST_KEY WARNINGS...
+ THE FOLLOWING MESSAGES WERE PASSED WHILE CHECKING FOR ANY ADDITIONAL KEYWORDS ON LOADED LINE.
+
+
+FAILED TO IDENTIFY THE FOLLOWING POST-KEYWORD: 
+
+"PRINT_HEAD"
+
+IT WILL BE IGNORED AND NO FURTHER KEYWORDS WILL BE CHECKED/INCLUDED TO THE RIGHT OF IT.
+TO SUPRESS THIS WARNING PLEASE PLACE A "#" SYMBOL TO THE LEFT OF THE WORD TO INDICATE EVERYTHING TO THE RIGHT OF THE # IS A COMMENT
+
+########################################################################################################
+
+
+
+ FOUND OPTION: PRINT_HEAD    SP    TS   FILE
+                              1     1   ./output/twrip_Head.txt
+
+ THE MAX STORAGE FOR PROPERTIES DEFINED BY PARAMETERS IS: 
+ MAX STORAGE OF PARAMETERS (MXPAR)  IS       2000
+ MAX STORAGE OF INSTANCES  (MXINST) IS      50000
+ MAX STORAGE OF CLUSTERS   (MXCLST) IS    2000000
+
+
+
+
+                     BOUNDARY ARRAY FOR LAYER   1
+ READING ON UNIT    3 WITH FORMAT: (20I4)              
+
+        1   2   3   4   5   6   7   8   9  10  11  12  13  14  15
+ ................................................................
+   1   -1   1   1   1   1   1   1   1   1   1   1   1   1   1   1
+   2   -1   1   1   1   1   1   1   1   1   1   1   1   1   1   1
+   3   -1   1   1   1   1   1   1   1   1   1   1   1   1   1   1
+   4   -1   1   1   1   1   1   1   1   1   1   1   1   1   1   1
+   5   -1   1   1   1   1   1   1   1   1   1   1   1   1   1   1
+   6   -1   1   1   1   1   1   1   1   1   1   1   1   1   1   1
+   7   -1   1   1   1   1   1   1   1   1   1   1   1   1   1   1
+   8   -1   1   1   1   1   1   1   1   1   1   1   1   1   1   1
+   9   -1   1   1   1   1   1   1   1   1   1   1   1   1   1   1
+  10   -1   1   1   1   1   1   1   1   1   1   1   1   1   1   1
+  11   -1   1   1   1   1   1   1   1   1   1   1   1   1   1   1
+  12   -1   1   1   1   1   1   1   1   1   1   1   1   1   1   1
+  13   -1   1   1   1   1   1   1   1   1   1   1   1   1   1   1
+  14   -1   1   1   1   1   1   1   1   1   1   1   1   1   1   1
+  15   -1   1   1   1   1   1   1   1   1   1   1   1   1   1   1
+
+
+
+                     BOUNDARY ARRAY FOR LAYER   2
+ READING ON UNIT    3 WITH FORMAT: (20I4)              
+
+        1   2   3   4   5   6   7   8   9  10  11  12  13  14  15
+ ................................................................
+   1   -1   1   1   1   1   1   1   1   1   1   1   1   1   1   1
+   2   -1   1   1   1   1   1   1   1   1   1   1   1   1   1   1
+   3   -1   1   1   1   1   1   1   1   1   1   1   1   1   1   1
+   4   -1   1   1   1   1   1   1   1   1   1   1   1   1   1   1
+   5   -1   1   1   1   1   1   1   1   1   1   1   1   1   1   1
+   6   -1   1   1   1   1   1   1   1   1   1   1   1   1   1   1
+   7   -1   1   1   1   1   1   1   1   1   1   1   1   1   1   1
+   8   -1   1   1   1   1   1   1   1   1   1   1   1   1   1   1
+   9   -1   1   1   1   1   1   1   1   1   1   1   1   1   1   1
+  10   -1   1   1   1   1   1   1   1   1   1   1   1   1   1   1
+  11   -1   1   1   1   1   1   1   1   1   1   1   1   1   1   1
+  12   -1   1   1   1   1   1   1   1   1   1   1   1   1   1   1
+  13   -1   1   1   1   1   1   1   1   1   1   1   1   1   1   1
+  14   -1   1   1   1   1   1   1   1   1   1   1   1   1   1   1
+  15   -1   1   1   1   1   1   1   1   1   1   1   1   1   1   1
+
+           BOUNDARY ARRAY =              1 FOR LAYER   3
+
+ AQUIFER HEAD WILL BE SET TO 999.99 AT ALL NO-FLOW NODES (IBOUND=0).
+
+
+             INITIAL HEAD =   0.00000     FOR LAYER   1
+
+             INITIAL HEAD =   0.00000     FOR LAYER   2
+
+             INITIAL HEAD =   0.00000     FOR LAYER   3
+
+-- READING OC PACKAGE INPUT --
+
+# twrip
+# MODFLOW-2005 Example problem documented in:
+#   Harbaugh, A.W., 2005, MODFLOW-2005, the U.S. Geological Survey modular ground-water model -- the Ground-Water Flow Process: U.S. Geological Survey Techniques and Methods 6-A16.
+#   Harbaugh, A.W., Banta, E.R., Hill, M.C. and McDonald, M.G., 2000, MODFLOW-2000, The U.S. Geological Survey Modular Ground-Water Model - User Guide to Modularization Concepts and the Ground-Water Flow Process: U.S Geological Survey Open-File Report 2000-92, 121 p., https://doi.org/10.3133/ofr200092
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+ OUTPUT CONTROL IS SPECIFIED ONLY AT TIME STEPS FOR WHICH OUTPUT IS DESIRED
+ HEAD PRINT FORMAT CODE IS  20    DRAWDOWN PRINT FORMAT CODE IS   0
+ HEADS WILL BE SAVED ON UNIT    0    DRAWDOWNS WILL BE SAVED ON UNIT    0  WATER BUDGETs WILL BE SAVED ON UNIT 
+
+ ZONE OPTION, INPUT READ FROM UNIT 9
+
+# twrip
+# MODFLOW-2005 Example problem documented in:
+#   Harbaugh, A.W., 2005, MODFLOW-2005, the U.S. Geological Survey modular ground-water model -- the Ground-Water Flow Process: U.S. Geological Survey Techniques and Methods 6-A16.
+#   Harbaugh, A.W., Banta, E.R., Hill, M.C. and McDonald, M.G., 2000, MODFLOW-2000, The U.S. Geological Survey Modular Ground-Water Model - User Guide to Modularization Concepts and the Ground-Water Flow Process: U.S Geological Survey Open-File Report 2000-92, 121 p., https://doi.org/10.3133/ofr200092
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+ 1 ZONE ARRAYS
+
+ZONEPRINT NOT SPECIFIED
+ZONE ARRAYS WILL NOT BE PRINTED TO EXTERNAL FILE
+
+ MULTIPLIER OPTION, INPUT READ FROM UNIT 8
+
+# twrip
+# MODFLOW-2005 Example problem documented in:
+#   Harbaugh, A.W., 2005, MODFLOW-2005, the U.S. Geological Survey modular ground-water model -- the Ground-Water Flow Process: U.S. Geological Survey Techniques and Methods 6-A16.
+#   Harbaugh, A.W., Banta, E.R., Hill, M.C. and McDonald, M.G., 2000, MODFLOW-2000, The U.S. Geological Survey Modular Ground-Water Model - User Guide to Modularization Concepts and the Ground-Water Flow Process: U.S Geological Survey Open-File Report 2000-92, 121 p., https://doi.org/10.3133/ofr200092
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+ 1 MULTIPLIER ARRAYS
+
+MULTPRINT NOT SPECIFIED
+MULT ARRAYS WILL NOT BE PRINTED TO EXTERNAL FILE
+
+  MULT. ARRAY: MULT1      =  1.000000E-06
+
+
+
+             ZONE ARRAY: RCHZONES  
+ READING ON UNIT    9 WITH FORMAT: (15I2)              
+
+      1 2 3 4 5 6 7 8 9101112131415
+ ..................................
+   1  1 1 1 1 1 1 1 2 2 2 2 2 2 2 2
+   2  1 1 1 1 1 1 1 2 2 2 2 2 2 2 2
+   3  1 1 1 1 1 1 1 2 2 2 2 2 2 2 2
+   4  1 1 1 1 1 1 1 2 2 2 2 2 2 2 2
+   5  1 1 1 1 1 1 1 2 2 2 2 2 2 2 2
+   6  1 1 1 1 1 1 1 2 2 2 2 2 2 2 2
+   7  1 1 1 1 1 1 1 2 2 2 2 2 2 2 2
+   8  1 1 1 1 1 1 1 2 2 2 2 2 2 2 2
+   9  1 1 1 1 1 1 1 2 2 2 2 2 2 2 2
+  10  1 1 1 1 1 1 1 2 2 2 2 2 2 2 2
+  11  1 1 1 1 1 1 1 2 2 2 2 2 2 2 2
+  12  1 1 1 1 1 1 1 2 2 2 2 2 2 2 2
+  13  1 1 1 1 1 1 1 2 2 2 2 2 2 2 2
+  14  1 1 1 1 1 1 1 2 2 2 2 2 2 2 2
+  15  1 1 1 1 1 1 1 2 2 2 2 2 2 2 2
+
+ LPF -- LAYER-PROPERTY FLOW PACKAGE, VERSION OWHM
+         INPUT READ FROM UNIT   11
+
+-- READING LPF PACKAGE INPUT --
+
+# twrip
+# MODFLOW-2005 Example problem documented in:
+#   Harbaugh, A.W., 2005, MODFLOW-2005, the U.S. Geological Survey modular ground-water model -- the Ground-Water Flow Process: U.S. Geological Survey Techniques and Methods 6-A16.
+#   Harbaugh, A.W., Banta, E.R., Hill, M.C. and McDonald, M.G., 2000, MODFLOW-2000, The U.S. Geological Survey Modular Ground-Water Model - User Guide to Modularization Concepts and the Ground-Water Flow Process: U.S Geological Survey Open-File Report 2000-92, 121 p., https://doi.org/10.3133/ofr200092
+#
+#      -Comments are preceded by a # sign
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+#  LPF Package input data for example problem
+
+ HEAD AT CELLS THAT CONVERT TO DRY=  1.00000E+30
+     5 Named Parameters     
+
+   LAYER FLAGS:
+ LAYER       LAYTYP        LAYAVG         CHANI        LAYVKA        LAYWET
+ ---------------------------------------------------------------------------
+    1             1             0     1.000E+00             0             0
+    2             0             0     1.000E+00             0             0
+    3             0             0     1.000E+00             0             0
+
+   INTERPRETATION OF LAYER FLAGS:
+                        INTERBLOCK     HORIZONTAL    DATA IN
+         LAYER TYPE   TRANSMISSIVITY   ANISOTROPY   ARRAY VKA   WETTABILITY
+ LAYER      (LAYTYP)      (LAYAVG)       (CHANI)      (LAYVKA)      (LAYWET)
+ ---------------------------------------------------------------------------
+    1   CONVERTIBLE      HARMONIC     1.000E+00    VERTICAL K  NON-WETTABLE
+    2      CONFINED      HARMONIC     1.000E+00    VERTICAL K  NON-WETTABLE
+    3      CONFINED      HARMONIC     1.000E+00    VERTICAL K  NON-WETTABLE
+
+ WETTING CAPABILITY IS NOT ACTIVE IN ANY LAYER
+
+ PARAMETERS DEFINED IN THE LPF PACKAGE
+
+ PARAMETER NAME:HK1                    TYPE:HK     CLUSTERS:   1
+ Parameter value from package file is: 0.001
+                LAYER:   1    MULTIPLIER ARRAY: NONE    ZONE ARRAY: ALL
+
+ PARAMETER NAME:HK2                    TYPE:HK     CLUSTERS:   1
+ Parameter value from package file is: 1.0000000E-4
+                LAYER:   2    MULTIPLIER ARRAY: NONE    ZONE ARRAY: ALL
+
+ PARAMETER NAME:HK3                    TYPE:HK     CLUSTERS:   1
+ Parameter value from package file is: 2.0000000E-4
+                LAYER:   3    MULTIPLIER ARRAY: NONE    ZONE ARRAY: ALL
+
+ PARAMETER NAME:VKCB1                  TYPE:VKCB   CLUSTERS:   1
+ Parameter value from package file is: 1.0
+                LAYER:   1    MULTIPLIER ARRAY: MULT1    ZONE ARRAY: ALL
+
+ PARAMETER NAME:VKCB2                  TYPE:VKCB   CLUSTERS:   1
+ Parameter value from package file is: 0.5
+                LAYER:   2    MULTIPLIER ARRAY: MULT1    ZONE ARRAY: ALL
+
+    HYD. COND. ALONG ROWS FOR LAYER   1 WILL BE DEFINED BY PARAMETERS
+ (PRINT FLAG=   0)
+
+    HYD. COND. ALONG ROWS is defined by the following parameters:
+ HK1                 
+
+    HYD. COND. ALONG ROWS =  1.000000E-03 FOR LAYER   1
+
+      VERTICAL HYD. COND. =   1.00000     FOR LAYER   1
+
+ QUASI3D VERT. HYD. COND. FOR LAYER   1 WILL BE DEFINED BY PARAMETERS
+ (PRINT FLAG=   0)
+
+ QUASI3D VERT. HYD. COND. is defined by the following parameters:
+ VKCB1               
+
+ QUASI3D VERT. HYD. COND. =  1.000000E-06 FOR LAYER   1
+
+    HYD. COND. ALONG ROWS FOR LAYER   2 WILL BE DEFINED BY PARAMETERS
+ (PRINT FLAG=   0)
+
+    HYD. COND. ALONG ROWS is defined by the following parameters:
+ HK2                 
+
+    HYD. COND. ALONG ROWS =  1.000000E-04 FOR LAYER   2
+
+      VERTICAL HYD. COND. =   1.00000     FOR LAYER   2
+
+ QUASI3D VERT. HYD. COND. FOR LAYER   2 WILL BE DEFINED BY PARAMETERS
+ (PRINT FLAG=   0)
+
+ QUASI3D VERT. HYD. COND. is defined by the following parameters:
+ VKCB2               
+
+ QUASI3D VERT. HYD. COND. =  5.000000E-07 FOR LAYER   2
+
+    HYD. COND. ALONG ROWS FOR LAYER   3 WILL BE DEFINED BY PARAMETERS
+ (PRINT FLAG=   0)
+
+    HYD. COND. ALONG ROWS is defined by the following parameters:
+ HK3                 
+
+    HYD. COND. ALONG ROWS =  2.000000E-04 FOR LAYER   3
+
+      VERTICAL HYD. COND. =   1.00000     FOR LAYER   3
+
+-- READING WEL PACKAGE INPUT --
+
+# twrip
+# MODFLOW-2005 Example problem documented in:
+#   Harbaugh, A.W., 2005, MODFLOW-2005, the U.S. Geological Survey modular ground-water model -- the Ground-Water Flow Process: U.S. Geological Survey Techniques and Methods 6-A16.
+#   Harbaugh, A.W., Banta, E.R., Hill, M.C. and McDonald, M.G., 2000, MODFLOW-2000, The U.S. Geological Survey Modular Ground-Water Model - User Guide to Modularization Concepts and the Ground-Water Flow Process: U.S Geological Survey Open-File Report 2000-92, 121 p., https://doi.org/10.3133/ofr200092
+#
+#      -Comments are preceded by a # sign
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+WEL -- WELL PACKAGE, VERSION OWHM INPUT READ FROM UNIT 12
+
+     1 Named Parameters                  12 List entries
+
+ NO TABFILE SPECIFIED FOR PACKAGE WEL  
+
+
+ NO LINEFEEDS ARE SPECIFIED FOR PACKAGE WEL  
+
+
+MAXIMUM OF 15 ACTIVE WELLS AT ONE TIME
+
+
+1 Well parameters
+
+ WEL PACKAGE PARAMETER INFORMATION [BEFORE APPLICATION OF TABFILES]
+
+ PARAMETER NAME:WELL1                  TYPE:Q   
+ Parameter value from package file is: 1.0
+   NUMBER OF ENTRIES:     12
+
+ WELL NO.  LAYER   ROW   COL   STRESS FACTOR         
+ ----------------------------------------------------
+      1      1      9      8  -5.0000000    
+      2      1      9     10  -5.0000000    
+      3      1      9     12  -5.0000000    
+      4      1      9     14  -5.0000000    
+      5      1     11      8  -5.0000000    
+      6      1     11     10  -5.0000000    
+      7      1     11     12  -5.0000000    
+      8      1     11     14  -5.0000000    
+      9      1     13      8  -5.0000000    
+     10      1     13     10  -5.0000000    
+     11      1     13     12  -5.0000000    
+     12      1     13     14  -5.0000000    
+
+# twrip
+# MODFLOW-2005 Example problem documented in:
+#   Harbaugh, A.W., 2005, MODFLOW-2005, the U.S. Geological Survey modular ground-water model -- the Ground-Water Flow Process: U.S. Geological Survey Techniques and Methods 6-A16.
+#   Harbaugh, A.W., Banta, E.R., Hill, M.C. and McDonald, M.G., 2000, MODFLOW-2000, The U.S. Geological Survey Modular Ground-Water Model - User Guide to Modularization Concepts and the Ground-Water Flow Process: U.S Geological Survey Open-File Report 2000-92, 121 p., https://doi.org/10.3133/ofr200092
+#
+#      -Comments are preceded by a # sign
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+ DRN -- DRAIN PACKAGE, VERSION OWHM INPUT READ FROM UNIT   13
+     1 Named Parameters                   2 List entries
+ MAXIMUM OF      9 ACTIVE DRAINS AT ONE TIME
+
+
+     1 Drain parameters
+
+ PARAMETER NAME:DRN1                   TYPE:DRN 
+ Parameter value from package file is: 1.0
+   NUMBER OF ENTRIES:      2
+
+ DRAIN NO.  LAYER   ROW   COL     DRAIN EL.  STRESS FACTOR         
+ ------------------------------------------------------------------
+      1      1      8      2       0.000           1.000    
+      2      1      8      3       0.000           1.000    
+
+ RCH -- RECHARGE PACKAGE, VERSION OWHM INPUT READ FROM UNIT   18
+
+-- READING RCH PACKAGE INPUT --
+
+# twrip
+# MODFLOW-2005 Example problem documented in:
+#   Harbaugh, A.W., 2005, MODFLOW-2005, the U.S. Geological Survey modular ground-water model -- the Ground-Water Flow Process: U.S. Geological Survey Techniques and Methods 6-A16.
+#   Harbaugh, A.W., Banta, E.R., Hill, M.C. and McDonald, M.G., 2000, MODFLOW-2000, The U.S. Geological Survey Modular Ground-Water Model - User Guide to Modularization Concepts and the Ground-Water Flow Process: U.S Geological Survey Open-File Report 2000
+#
+#      -Comments are preceded by a # sign
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+     2 Named Parameters     
+ OPTION 1 -- RECHARGE TO LAYER 1
+
+
+     2 Recharge parameters
+
+ PARAMETER NAME:RCH1                   TYPE:RCH    CLUSTERS:   1
+ Parameter value from package file is: 3.0000000E-8
+                MULTIPLIER ARRAY: NONE    ZONE ARRAY: RCHZONES
+                ZONE VALUES:    1
+
+ PARAMETER NAME:RCH2                   TYPE:RCH    CLUSTERS:   1
+ Parameter value from package file is: 3.0000000E-8
+                MULTIPLIER ARRAY: NONE    ZONE ARRAY: RCHZONES
+                ZONE VALUES:    2
+
+ SIP -- STRONGLY-IMPLICIT PROCEDURE SOLUTION PACKAGE
+                    VERSION OWHM INPUT READ FROM UNIT   19
+
+-- READING SIP PACKAGE INPUT --
+
+# twrip
+# MODFLOW-2005 Example problem documented in:
+#   Harbaugh, A.W., 2005, MODFLOW-2005, the U.S. Geological Survey modular ground-water model -- the Ground-Water Flow Process: U.S. Geological Survey Techniques and Methods 6-A16.
+#   Harbaugh, A.W., Banta, E.R., Hill, M.C. and McDonald, M.G., 2000, MODFLOW-2000, The U.S. Geological Survey Modular Ground-Water Model - User Guide to Modularization Concepts and the Ground-Water Flow Process: U.S Geological Survey Open-File Report 2000-92, 121 p., https://doi.org/10.3133/ofr200092
+#
+#      -Comments are preceded by a # sign
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+ MAXIMUM OF  50 ITERATIONS ALLOWED FOR CLOSURE
+  5 ITERATION PARAMETERS
+
+          SOLUTION BY THE STRONGLY IMPLICIT PROCEDURE
+          -------------------------------------------
+ MAXIMUM ITERATIONS ALLOWED FOR CLOSURE =       50
+                 ACCELERATION PARAMETER =     1.0000    
+      HEAD CHANGE CRITERION FOR CLOSURE =    0.10000E-02
+      SIP HEAD CHANGE PRINTOUT INTERVAL =        1
+
+     5 ITERATION PARAMETERS CALCULATED FROM SPECIFIED WSEED = 0.00100000 :
+
+  0.000000E+00 0.822172E+00 0.968377E+00 0.994377E+00 0.999000E+00
+
+
+########################################################################################################
+
+                           WARNING_MESSAGE
+
+         THE FOLLOWING COMMENTS WERE PASSED TO THE WARNING ROUTINE
+
+THE DESRIPTION OF THE WARNING IS:
+
+DIS PACKAGE: THE GROUND SURFACE ELEVATION WAS NOT SPECIFIED WITH THE KEYWORD "SURFACE_ELEVATION"
+
+BEFORE LOADING THE "TOP" ARRAY FOR LAYER 1
+NOR WAS IT DEFINED WITH ANOTHER PACKAGE   (e.g. FMPs GLOBAL DIMENSION KEYWORD "SURFACE_ELEVATION")
+
+OneWater WILL SET THE GROUND SURFACE ELEVATION (GSE)
+TO THE TOP ELEVATION OF THE UPPER MOST ACTIVE CELL OR THE DIS TOP OF LAY1.
+
+NOTE THAT SFR DOES USE GSE FOR ALL DIVERSION SEGMENTS
+   WHEN "IRDFLG" IS SET TO 2 or -2.
+
+########################################################################################################
+
+
+
+1
+                            STRESS PERIOD NO.      1, LENGTH =   86400.00    
+                            -----------------------------------------------
+
+                              NUMBER OF TIME STEPS =     1
+
+                               MULTIPLIER FOR DELT =     1.000
+
+                            INITIAL TIME STEP SIZE =   86400.00    
+
+PARAMETERS HAVE BEEN USED IN PACKAGES
+
+THE CURRENT STORAGE FOR PARAMETERS IS: 
+No. PARAMETER=         9 WITH MAX STORAGE (MXPAR)  OF      2000
+No. CLUSTERS =         7 WITH MAX STORAGE (MXCLST) OF   2000000
+No. INSTANCES=         0 WITH MAX STORAGE (MXINST) OF     50000
+
+YOU CAN INCREASE/DECREASE STORAGE WITH BAS OPTION:
+MAXPARAM  MXPAR  MXCLST MXINST
+
+FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
+(NOTE THE THREE NUMBERS ARE A MINUMUM SIZE):
+   MAXPARAM         10         8         1
+
+
+ WEL PACKAGE STRESS PERIOD INFORMATION [BEFORE APPLICATION OF TABFILES]
+
+ WELL NO.  LAYER   ROW   COL   STRESS RATE         
+ --------------------------------------------------
+      1      3      5     11  -5.0000000    
+      2      2      4      6  -5.0000000    
+      3      2      6     12  -5.0000000    
+ Parameter:  WELL1
+ WELL NO.  LAYER   ROW   COL   STRESS RATE         
+ --------------------------------------------------
+      4      1      9      8  -5.0000000    
+      5      1      9     10  -5.0000000    
+      6      1      9     12  -5.0000000    
+      7      1      9     14  -5.0000000    
+      8      1     11      8  -5.0000000    
+      9      1     11     10  -5.0000000    
+     10      1     11     12  -5.0000000    
+     11      1     11     14  -5.0000000    
+     12      1     13      8  -5.0000000    
+     13      1     13     10  -5.0000000    
+     14      1     13     12  -5.0000000    
+     15      1     13     14  -5.0000000    
+
+15 WELLS
+
+ DRAIN NO.  LAYER   ROW   COL     DRAIN EL.  CONDUCTANCE         
+ ----------------------------------------------------------------
+      1      1      8      4       10.00           1.000    
+      2      1      8      5       20.00           1.000    
+      3      1      8      6       30.00           1.000    
+      4      1      8      7       50.00           1.000    
+      5      1      8      8       70.00           1.000    
+      6      1      8      9       90.00           1.000    
+      7      1      8     10       100.0           1.000    
+
+ Parameter:  DRN1
+ DRAIN NO.  LAYER   ROW   COL     DRAIN EL.  CONDUCTANCE         
+ ----------------------------------------------------------------
+      8      1      8      2       0.000           1.000    
+      9      1      8      3       0.000           1.000    
+
+      9 DRAINS
+
+
+
+ RECH array defined by the following parameters:
+ Parameter:  RCH1
+ Parameter:  RCH2
+
+                 RECHARGE =  3.000000E-08
+ 
+ SOLVING FOR HEAD 
+
+    31 ITERATIONS FOR TIME STEP   1 IN STRESS PERIOD    1
+
+ MAXIMUM HEAD CHANGE FOR EACH ITERATION:
+
+    HEAD CHANGE   HEAD CHANGE   HEAD CHANGE   HEAD CHANGE   HEAD CHANGE
+  LAYER,ROW,COL LAYER,ROW,COL LAYER,ROW,COL LAYER,ROW,COL LAYER,ROW,COL
+ ----------------------------------------------------------------------
+     -22.41         12.48         13.39         48.21         35.91    
+  (  3,  5, 11) (  1,  1, 15) (  3,  1, 14) (  1,  1, 15) (  3,  1, 13)
+      2.482         1.430         6.214         7.411         13.66    
+  (  1,  9, 14) (  3, 10, 13) (  1, 12, 14) (  3, 11, 14) (  1, 15, 15)
+     0.5503        0.4821        0.4711         2.019         2.302    
+  (  3,  8,  7) (  2,  6,  9) (  3,  5, 10) (  1, 11, 14) (  3,  5, 13)
+     0.1108        0.7059E-01    0.2819        0.3141        0.3320    
+  (  1, 13, 12) (  3, 12, 11) (  1, 14, 14) (  3, 13, 14) (  1, 15, 15)
+     0.7853E-02    0.1586E-01    0.1777E-01    0.7910E-01    0.8500E-01
+  (  1, 13, 12) (  2, 11, 11) (  3, 11, 10) (  1, 14, 14) (  3,  7, 14)
+     0.4169E-02    0.2555E-02    0.9769E-02    0.1082E-01    0.1030E-01
+  (  1, 13, 14) (  3, 14, 15) (  1, 14, 14) (  3, 13, 14) (  1, 15, 15)
+     0.2430E-03
+  (  1, 13, 12)
+
+
+ OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP     1
+    PRINT HEAD FOR ALL LAYERS
+1
+              HEAD IN LAYER   1 AT END OF TIME STEP   1 IN STRESS PERIOD    1
+  ---------------------------------------------------------------------------
+
+            1           2           3           4           5           6
+            7           8           9          10          11          12
+           13          14          15
+ ........................................................................
+   1    0.000       24.95       44.01       59.26       71.82       82.52    
+        91.91       100.0       106.9       112.6       117.4       121.3    
+        124.3       126.4       127.4    
+   2    0.000       24.45       43.10       57.98       70.17       80.57    
+        90.12       98.40       105.3       111.0       115.7       119.6    
+        122.7       124.9       126.1    
+   3    0.000       23.45       41.30       55.43       66.78       76.21    
+        86.51       95.20       102.2       107.6       112.0       116.1    
+        119.6       122.1       123.4    
+   4    0.000       21.92       38.61       51.75       61.79       68.03    
+        81.34       90.75       97.64       102.5       106.1       110.7    
+        114.9       117.9       119.4    
+   5    0.000       19.73       34.92       47.32       57.69       66.74    
+        77.09       85.76       92.22       96.15       97.29       103.1    
+        108.8       112.5       114.3    
+   6    0.000       16.51       29.50       40.90       51.30       61.21    
+        71.19       79.85       86.47       90.82       93.03       94.23    
+        102.1       106.4       108.4    
+   7    0.000       11.55       21.10       31.21       41.40       51.84    
+        63.08       72.68       79.95       84.92       88.60       91.66    
+        96.43       99.82       101.8    
+   8    0.000       3.483       6.832       16.25       26.30       36.97    
+        52.59       64.31       72.52       77.25       81.99       85.00    
+        89.27       91.72       94.33    
+   9    0.000       10.54       19.11       28.12       36.92       45.27    
+        52.95       55.38       65.15       66.07       73.93       73.79    
+        80.84       80.17       86.49    
+  10    0.000       14.62       25.86       35.38       43.49       50.11    
+        54.93       57.55       62.95       65.55       70.39       72.44    
+        76.72       78.26       81.79    
+  11    0.000       17.11       29.96       40.01       47.78       53.24    
+        55.81       53.33       60.27       59.29       66.43       65.45    
+        72.22       71.04       77.62    
+  12    0.000       18.68       32.56       43.07       50.81       55.92    
+        58.33       58.47       61.93       63.18       67.12       68.50    
+        72.29       73.46       76.85    
+  13    0.000       19.67       34.24       45.14       53.01       58.04    
+        59.91       56.75       62.59       60.91       67.22       65.75    
+        71.90       70.35       76.48    
+  14    0.000       20.27       35.27       46.48       54.61       60.08    
+        63.17       64.52       67.25       68.79       71.64       73.18    
+        75.84       77.03       79.09    
+  15    0.000       20.56       35.78       47.16       55.48       61.26    
+        65.02       67.52       69.94       72.01       74.29       76.22    
+        78.22       79.66       80.82    
+1
+              HEAD IN LAYER   2 AT END OF TIME STEP   1 IN STRESS PERIOD    1
+  ---------------------------------------------------------------------------
+
+            1           2           3           4           5           6
+            7           8           9          10          11          12
+           13          14          15
+ ........................................................................
+   1    0.000       24.66       43.73       59.02       71.61       82.32    
+        91.72       99.86       106.7       112.5       117.2       121.1    
+        124.1       126.2       127.3    
+   2    0.000       24.17       42.83       57.74       69.95       80.36    
+        89.93       98.22       105.1       110.8       115.5       119.4    
+        122.6       124.8       125.9    
+   3    0.000       23.17       41.03       55.19       66.53       75.77    
+        86.29       95.02       102.0       107.4       111.8       116.0    
+        119.5       121.9       123.2    
+   4    0.000       21.65       38.34       51.50       61.35       60.17    
+        80.90       90.55       97.45       102.3       105.4       110.4    
+        114.8       117.7       119.2    
+   5    0.000       19.48       34.65       47.07       57.44       66.30    
+        76.85       85.57       92.00       95.41       91.09       102.1    
+        108.6       112.4       114.2    
+   6    0.000       16.27       29.24       40.65       51.07       60.98    
+        70.98       79.65       86.28       90.54       92.06       86.23    
+        101.7       106.2       108.3    
+   7    0.000       11.38       20.95       31.05       41.25       51.70    
+        62.90       72.48       79.76       84.73       88.35       91.24    
+        96.22       99.65       101.6    
+   8    0.000       4.209       8.330       17.58       27.58       38.25    
+        52.94       64.19       72.34       77.12       81.81       84.86    
+        89.10       91.59       94.17    
+   9    0.000       10.38       18.96       27.98       36.79       45.16    
+        52.86       56.13       65.08       66.79       73.87       74.48    
+        80.77       80.84       86.38    
+  10    0.000       14.40       25.61       35.15       43.27       49.91    
+        54.76       57.48       62.79       65.49       70.24       72.37    
+        76.57       78.20       81.64    
+  11    0.000       16.87       29.70       39.78       47.56       53.05    
+        55.68       54.09       60.20       60.04       66.37       66.18    
+        72.16       71.75       77.51    
+  12    0.000       18.43       32.31       42.85       50.60       55.73    
+        58.16       58.41       61.78       63.12       66.98       68.44    
+        72.15       73.40       76.69    
+  13    0.000       19.42       33.98       44.91       52.80       57.85    
+        59.78       57.50       62.53       61.65       67.16       66.48    
+        71.84       71.06       76.37    
+  14    0.000       20.02       35.02       46.26       54.41       59.88    
+        62.99       64.39       67.08       68.66       71.48       73.06    
+        75.68       76.91       78.93    
+  15    0.000       20.30       35.52       46.94       55.28       61.07    
+        64.84       67.34       69.76       71.84       74.11       76.04    
+        78.04       79.49       80.65    
+1
+              HEAD IN LAYER   3 AT END OF TIME STEP   1 IN STRESS PERIOD    1
+  ---------------------------------------------------------------------------
+
+            1           2           3           4           5           6
+            7           8           9          10          11          12
+           13          14          15
+ ........................................................................
+   1    1.800       24.34       43.36       58.70       71.33       82.06    
+        91.48       99.63       106.5       112.3       117.0       120.9    
+        123.9       126.0       127.1    
+   2    1.764       23.85       42.46       57.42       69.66       80.07    
+        89.68       97.99       104.9       110.6       115.3       119.2    
+        122.4       124.6       125.7    
+   3    1.691       22.86       40.67       54.87       66.20       75.28    
+        85.98       94.77       101.7       107.2       111.5       115.7    
+        119.3       121.7       123.0    
+   4    1.578       21.35       37.98       51.17       60.85       62.69    
+        80.41       90.28       97.19       101.9       104.1       110.0    
+        114.5       117.5       119.0    
+   5    1.415       19.18       34.30       46.75       57.10       65.80    
+        76.54       85.30       91.67       94.17       77.46       100.7    
+        108.2       112.1       114.0    
+   6    1.176       15.99       28.91       40.33       50.76       60.67    
+        70.70       79.38       86.01       90.12       90.60       88.55    
+        101.2       106.0       108.0    
+   7   0.8273       11.21       20.79       30.88       41.09       51.55    
+        62.67       72.22       79.50       84.46       87.98       90.77    
+        95.94       99.41       101.4    
+   8   0.4331       5.131       10.19       19.27       29.19       39.84    
+        53.40       64.07       72.11       76.95       81.58       84.68    
+        88.88       91.44       93.95    
+   9   0.7543       10.22       18.82       27.84       36.66       45.06    
+        52.78       57.03       65.02       67.64       73.81       75.31    
+        80.72       81.64       86.24    
+  10    1.039       14.13       25.29       34.85       42.99       49.65    
+        54.54       57.44       62.61       65.44       70.05       72.33    
+        76.39       78.15       81.43    
+  11    1.224       16.59       29.37       39.47       47.28       52.79    
+        55.53       55.01       60.16       60.94       66.33       67.06    
+        72.13       72.60       77.38    
+  12    1.341       18.15       31.97       42.54       50.32       55.47    
+        57.94       58.37       61.60       63.08       66.80       68.41    
+        71.97       73.36       76.49    
+  13    1.415       19.14       33.65       44.61       52.53       57.60    
+        59.63       58.39       62.48       62.54       67.12       67.35    
+        71.80       71.90       76.24    
+  14    1.460       19.73       34.68       45.96       54.13       59.63    
+        62.76       64.24       66.87       68.52       71.27       72.91    
+        75.47       76.77       78.71    
+  15    1.481       20.01       35.18       46.63       55.00       60.81    
+        64.59       67.11       69.52       71.61       73.87       75.82    
+        77.81       79.27       80.42    
+
+
+
+  -------------------------------------------------------------------------------------
+  VOLUMETRIC BUDGET FOR ENTIRE MODEL AT END OF TIME STEP    1 IN STRESS PERIOD      1
+  -------------------------------------------------------------------------------------
+
+     CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+     ------------------                 ------------------------
+
+           IN:                                      IN:
+           ---                                      ---
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+               WELLS =           0.0000                 WELLS =           0.0000
+              DRAINS =           0.0000                DRAINS =           0.0000
+            RECHARGE =    13608000.0000              RECHARGE =         157.5000
+
+            TOTAL IN =    13608000.0000              TOTAL IN =         157.5000
+
+          OUT:                                     OUT:
+          ----                                     ----
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =     4326522.0833         CONSTANT HEAD =          50.0755
+               WELLS =     6480000.0000                 WELLS =          75.0000
+              DRAINS =     2801081.2295                DRAINS =          32.4199
+            RECHARGE =           0.0000              RECHARGE =           0.0000
+
+           TOTAL OUT =    13607603.3128             TOTAL OUT =         157.4954
+
+            IN - OUT =         396.6872              IN - OUT =       4.5913E-03
+
+ PERCENT DISCREPANCY =           0.00     PERCENT DISCREPANCY =           0.00
+
+
+          TIME SUMMARY AT END OF TIME STEP     1 IN STRESS PERIOD      1
+                    SECONDS     MINUTES      HOURS       DAYS        YEARS
+                    -----------------------------------------------------------
+   TIME STEP LENGTH  86400.      1440.0      24.000      1.0000     2.73785E-03
+ STRESS PERIOD TIME  86400.      1440.0      24.000      1.0000     2.73785E-03
+         TOTAL TIME  86400.      1440.0      24.000      1.0000     2.73785E-03
+ 
+
+ Final Remark:
+
+   The solver successfully met the user supplied convergence criteria, HCLOSE and RCLOSE, for all 1 time steps.
+
+   Please check the "VOLUMETRIC BUDGET FOR ENTIRE MODEL" to ensure that mass rate balance errors are acceptable for all time steps.
+
+   The cumulative mass error for the entire simulation is 0.00 %
+
+
+
+
+ Simulation finished at  
+
+
+ Which had an elapsed run time of: 0.0 seconds
+
+
+    OneWater Simulation Now Complete
+
+

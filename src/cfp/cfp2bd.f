@@ -1542,7 +1542,7 @@ C--BARC**ENDDO FOR MXNODE DO
       ENDDO
 C--TOTAL INPUT THIS TIMESTEP
 !     TS_IN = TS_BUD_SOURCE + TS_QBDIR + TS_IN_MAT +                    
-      TS_IN = TS_BUD_SOURCE + TS_IN_QBDIR + TS_IN_MAT +                 !TR: 2012 04 24 REPLACED TS_QBDIR TO DISTIGUISH RECHARGE IN- AND OUT
+      TS_IN = TS_BUD_SOURCE + TS_IN_QBDIR + TS_IN_MAT                   !TR: 2012 04 24 REPLACED TS_QBDIR TO DISTIGUISH RECHARGE IN- AND OUT
      +        + TS_IN_PFPS                                              
 !     +        + TS_IN_CADS                                              !TR: 2012 04 26 CADS
      +        + TS_IN_FHLQ                                              !TR: 2012 05 11 FHLQ

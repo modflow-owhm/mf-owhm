@@ -1,0 +1,15 @@
+# Pr3_MFNWT_lower
+# MODFLOW-NWT Example problem documented in: 
+# Niswonger, R.G., Panday, Sorab, and Ibaraki, Motomu, 2011, MODFLOW-NWT, A Newton formulation for MODFLOW-2005: U.S. Geological Survey Techniques and Methods 6-A37, 44 p.
+# 
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+#
+# MODFLOW-NWT Name File
+# Problem 3 
+LIST  7 ./output/Pr3_MFNWT_lower.lst
+BAS6  1 Pr3_lower.bas
+DIS  10 Pr3.dis
+UPW  11 Pr3.upw
+RCH  18 Pr3_lower.rch
+NWT  13 Pr3.nwt
+OC   22 Pr3.oc

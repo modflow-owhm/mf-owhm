@@ -1,0 +1,18 @@
+# swi2ex4sww
+# MODFLOW-NWT Example problem documented in: 
+# Niswonger, R.G., Panday, Sorab, and Ibaraki, Motomu, 2011, MODFLOW-NWT, A Newton formulation for MODFLOW-2005: U.S. Geological Survey Techniques and Methods 6-A37, 44 p.
+# 
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+#
+# Name file for MF-OWHM
+LIST           2 ./output/swi2ex4sww.lst
+DIS           11 swi2ex4sww.dis 
+BAS6          13 swi2ex4sww.bas 
+GHB           23 swi2ex4sww.ghb 
+WEL           20 swi2ex4sww.wel 
+UPW           15 swi2ex4sww.upw 
+NWT           27 swi2ex4sww.nwt
+SWI2          29 swi2ex4sww.swi 
+OC            14 swi2ex4sww.oc 
+DATA(BINARY)  55 ./output/swi2ex4sww.zta  WRITE
+DATA(BINARY)  51 ./output/swi2ex4sww.hds  WRITE

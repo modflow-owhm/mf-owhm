@@ -28,10 +28,10 @@ C-----
 C----- VERSION 0101 16OCTOBER2009 HYDFMT
 C=============================================================================
       PARAMETER(nmt=500000)
-      CHARACTER FN1*80,FN2*80,FMT1*80,FN3*80,WELLID*20
+      CHARACTER FN1*2048,FN2*2048,FMT1*80,FN3*2048,WELLID*20
       CHARACTER TIMTYP*1,ELPTYP*1,arr*2,timlbl*4,fmtout*27,fmtoute*18
 C      character fmtoutd*20,blank*80,SITTYP*1,LEAPYR*1/'L'/
-      character fmtoutd*21,blank*80,SITTYP*1,LEAPYR*1
+      character fmtoutd*21,blank,SITTYP*1,LEAPYR*1
       character WELLIDH*20,WELLIDD*20,WELLIDCH*20,
      & WELLIDC*20,WELLIDS*20,WELLIDFI*20,
      & WELLIDHF*20,WELLIDFO*20,WELLIDFA*20,
@@ -74,7 +74,6 @@ C seb MOVED INITIALIZTION OUTSIDE OF DATA TO MAKE EXE SMALLER
       wellidce=' ------------------ '
       icnt=0
       blank=''
-       
       itype=13
       LEAPYR='L'
       inunit=60
@@ -100,7 +99,7 @@ C seb MOVED INITIALIZTION OUTSIDE OF DATA TO MAKE EXE SMALLER
       numhcv=0
       numhce=0
       LEN=0
-      ISTRNG=80
+      ISTRNG=2048
       FN1=blank
       FN2=blank
       FN3=blank
@@ -133,7 +132,7 @@ C----- Read second unformatted header record with labels of hydrographs saved
      &' (ex. hydro):'
       READ(*,'(A)') FN2
       CALL LNOTE(FN2,ISTRNG,LEN)
-      if(LEN.gt.76)LEN=76
+CC    if(LEN.gt.76)LEN=76  !No longer needed test
 CC
       WRITE(*,*)'DO YOU WANT DECIMAL OR CALENDAR(DATE) ',
      &'TIME FORMAT(D/C):'
@@ -700,7 +699,7 @@ CC
       RETURN
       END
 CC*****************************************************************************
-       SUBROUTINE LNOTE(STRING,DIMS,LEN)
+       SUBROUTINE LNOTE(CSTRING,DIMS,LEN)
 C-----
 C----- VERSION 0100 29JULY1998 LNOTE
 C     ***********************************************************************
@@ -711,9 +710,9 @@ C
 C     SPECIFICATIONS:
 C     ------------------------------------------------------------------
        INTEGER DIMS,LEN
-       CHARACTER STRING*80
+       CHARACTER CSTRING*2048
        DO 10 N=DIMS,1,-1
-       IF(STRING(N:N).NE.' ')GO TO 20
+       IF(CSTRING(N:N).NE.' ')GO TO 20
    10  CONTINUE
        LEN=0
        RETURN

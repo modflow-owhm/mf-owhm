@@ -1,0 +1,10 @@
+# Pr1aMFNWT
+# MODFLOW-NWT Example problem documented in: 
+# Niswonger, R.G., Panday, Sorab, and Ibaraki, Motomu, 2011, MODFLOW-NWT, A Newton formulation for MODFLOW-2005: U.S. Geological Survey Techniques and Methods 6-A37, 44 p.
+# 
+#      -Comments are preceded by a # sign
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+#
+       100        20         1                                          # MXITER  ITER1  NPCOND
+  1.00E-04  1.00E+03  1.00E+00         2         1         0 1.000E+00  # HCLOSE RCLOSE RELAX NPBOL IPRPCG MUTPCG DAMP

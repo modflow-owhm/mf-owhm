@@ -1,0 +1,11 @@
+LIST   2 ./output/twrip.lst
+BAS6   3 twrip.ba6
+UPW   11 twrip.upw
+WEL   12 twrip.wel
+DRN   13 twrip.drn
+RCH   18 twrip.rch
+NWT   19 NWT.nwt
+OC    22 twrip.oc
+MULT   8 twrip.mlt
+ZONE   9 twrip.zon
+DIS   10 twrip.dis

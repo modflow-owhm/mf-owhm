@@ -1,14 +1,14 @@
 {
   "source_dirs": [
     "src",
+    "src/bif_lib",
     "src/cfp",
     "src/fmp",
     "src/gmg_c",
+    "src/inc",
+    "src/main",
     "src/modflow_base",
     "src/nwt",
-    "src/slang",
-    "src/swo",
-    "src/utility_lib",
     "obj"
   ],
 

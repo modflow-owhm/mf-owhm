@@ -1,0 +1,27 @@
+# test1ss
+# MODFLOW-2005 Example problem documented in: 
+#   Harbaugh, A.W., 2005, MODFLOW-2005, the U.S. Geological Survey modular ground-water model -- the Ground-Water Flow Process: U.S. Geological Survey Techniques and Methods 6-A16.
+#   Harbaugh, A.W., Banta, E.R., Hill, M.C. and McDonald, M.G., 2000, MODFLOW-2000, The U.S. Geological Survey Modular Ground-Water Model - User Guide to Modularization Concepts and the Ground-Water Flow Process: U.S Geological Survey Open-File Report 2000-92, 121 p., https://doi.org/10.3133/ofr200092
+#   Prudic. D.E., Konikow, L.F., and Banta, E.R., 2004, A new streamflow-routing (SFR1) package to simulate stream-aquifer interaction with MODFLOW-2000: U.S Geological Survey Open-File Report 2004-1042, 104 p., https://doi.org/10.3133/ofr20041042
+# 
+#      -Comments are preceded by a # sign
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+         1         0       NRCHOP IRCHCB
+         0         0       INRECH INIRCH
+INTERNAL   5.000E-10 (10F4.0)    0    RECH
+ 0.5 2.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+ 2.0 0.5 2.0 0.0 0.0 8.0 8.0 8.0 0.0 0.0
+ 0.0 2.0 0.5 2.0 2.0 0.5 0.5 0.5 0.0 0.0
+ 8.0 0.5 0.5 0.5 0.5 0.5 0.5 0.5 2.0 0.0
+ 8.0 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5
+ 2.0 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 2.0
+ 2.0 0.5 0.5 0.5 0.5 0.5 0.5 0.5 2.0 0.0
+ 0.0 2.0 0.5 0.5 0.5 0.5 0.5 0.5 2.0 0.0
+ 0.0 2.0 0.5 0.5 0.5 0.5 0.5 0.5 2.0 0.0
+ 0.0 2.0 0.5 0.5 0.5 0.5 0.5 0.5 0.5 8.0
+ 0.0 2.0 0.5 0.5 0.5 0.5 0.5 0.5 2.0 0.0
+ 2.0 0.5 0.5 0.5 0.5 0.5 0.5 0.5 2.0 0.0
+ 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 2.0 0.0
+ 0.0 0.5 0.5 0.5 0.5 0.5 2.0 2.0 0.5 0.0
+ 0.0 0.0 2.0 2.0 2.0 2.0 0.0 0.0 0.0 0.0

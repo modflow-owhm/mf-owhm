@@ -1,0 +1,3 @@
+# CUMULATIVE_HEAD_CHANGE FILE FOR COMPARING CODE VERSIONS WITH MODELS. The sum of following two numbers represent the sum of all the absolute value of active cell head changes.
+        2825.127   0
+

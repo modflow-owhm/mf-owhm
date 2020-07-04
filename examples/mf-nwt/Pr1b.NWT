@@ -1,0 +1,11 @@
+# Pr1bMFNWT
+# MODFLOW-NWT Example problem documented in: 
+# Niswonger, R.G., Panday, Sorab, and Ibaraki, Motomu, 2011, MODFLOW-NWT, A Newton formulation for MODFLOW-2005: U.S. Geological Survey Techniques and Methods 6-A37, 44 p.
+# 
+#      -Comments are preceded by a # sign
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+#
+# MODFLOW-NWT Input File Problem 1b
+1.0e-4 5.0e-4 500 0.00001  2  1 1 SPECIFIED 0.90 0.0001 0.000  0.10 0  20 2.0 0.6  # linmeth=1 (GMRES); =2 (xmd)  
+2 0 8 2 0 0.0 1 1.0E-3 1.0e-4 50                                                   # XMD Settings

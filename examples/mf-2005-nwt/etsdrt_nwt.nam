@@ -1,0 +1,15 @@
+# NAME file for etsdrt test case
+list    12  ./output/etsdrt_nwt.lst
+#
+# Global input files
+dis     21  etsdrt.dis
+#
+# Flow process input files
+bas6    31  etsdrt.bas
+oc      32  etsdrt.oc
+upw     33  etsdrt.upw
+drt     34  etsdrt.drt
+rch     36  etsdrt.rch
+ets     37  etsdrt.ets
+nwt     39  NWT.nwt
+pval    45  etsdrt.pvl

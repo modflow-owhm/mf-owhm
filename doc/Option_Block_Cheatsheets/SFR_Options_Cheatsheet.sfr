@@ -1,0 +1,225 @@
+#
+# Listing of all available Options for the SFR package
+#
+# Options are grouped based on common usage or when only one should be selected
+#
+# The Option block is placed at the start of the SFR package input.
+#    If there are multiple block style inputs (BEGIN/END), the order of the blocks does not matter.
+#
+BEGIN OPTIONS
+    #
+    # Suppress writing SFR stream network to LIST file after reading input.
+    NO_PRINT
+    #
+    # Read network for first stress period, then reuse for rest of simulation.
+    #   Use Time Series Input, TABFILEs, or LineFeed to specify segment FLOW
+    AUTOMATIC_NEGATIVE_ITMP
+    #
+    # Adjusts the stream bottom elevation if it is lower than the upper most active cell bottom.  --> Warning, this can cause the gradient of the stream reach to shift.
+    FIX_STREAM_BOTTOM
+    #
+    # By default SFR automatically uses the upper most non-dry model cell for determining the SFR reach stream-aquifer interaction.
+    #   The following option disables changing the SFR reach layer and uses the layer number specified in the SFR input.
+    NO_REACH_LAYER_CHANGE
+    #
+    #   The following option only changes the SFR reach if it is deeper than the currently assigned one.
+    REACH_LAYER_CHANGE_DEEPER
+    #
+    # Indicates that IFACE value for modpath is read by reach.
+    #   This can also be initiated by the option "AUXILIARY IFACE"
+    IFACE
+    #
+    # NSTRM<0 is the same as including REACHINPUT and TRANSROUTE ------------------------------------------------------------------------------------
+    #
+    # Indicates that input reads ISFROPT,
+    #   which controls the format for entering reach and segment data and if unsaturated flow beneath streams is simulated.
+    REACHINPUT
+    #
+    # Indicates that input reads IRTFLG, which defines if transient streamflow routing is active.
+    #   If IRTFLG > 0 then streamflow will be routed using the kinematic-wave equation.
+    TRANSROUTE
+    #
+    # Output Files ----------------------------------------------------------------------------------------------------------------------------------
+    #   Generic_Output is a place holder for the output file location.
+    #   The file name that is commented to the right is the recommended name.
+    #   Example use:
+    #               DBFILE   ./output/SFR_Streamflow.txt
+    #
+    # Print for each SFR reach, for all time steps, in a column based format, reach inflow, seepage, reach outflow, and base properties.
+    DBFILE                  Generic_Output                  # SFR_Streamflow.txt Segment/Reach -> inflow/outflow/seepage
+    #
+    #
+    # Print SFR head, flows, and convergence information by iteration for every time step to a file.
+    #  Useful for diagnosing SFR network problems for time steps that fail to converge.
+    #  NTERM       is the number of worst model cells with a stream reach within to print (for example, NTERM = 2 will print every solver iteration the 2 worst SFR reaches).
+    #  OUTER_START is the solver iteration number to start printing the convergence information.
+    #                 If set to 0, then output is only for the last solver iteration.
+    #                 If set   <0, then output is only for MXITER + OUTER_START solver iterations (that is, the last OUTER_START iterations).
+    #
+    PRINT_GW_FLOW_RESIDUAL  NTERM  OUTER_START  Generic_Output    # 1 0 ./conv_sfr.txt    -> SFR residual convergence (RCLOSE)
+    #
+    # Prints all reaches for a segment that contains the reach with the worst residual error.
+    #   For example, Segment 3 has 4 reaches;
+    #                Segment 3 Reach 2 after a solver iteration has the largest residual error compared to all segment/reaches in the network;
+    #                then the head and residual information is printed for that solver iteration for Segment 3 at Reach 1, 2, 3, and 4.
+    PRINT_SEGMENT_GW_FLOW_RESIDUAL  OUTER_START  Generic_Output    # 0 ./conv_sfr_seg.txt
+    #
+    # Advanced Options ------------------------------------------------------------------------------------------------------------------------------
+    #
+    #  Indicate how the water table elevation is calculated.
+    #  The water table elevation determines the amount of evaporation and transpiration from groundwater.
+    #
+    #  The default is to use the head solution (HNEW) at the end of the time step.
+    #  It may be more accurate to use a combination of the head at the start of the time step (HOLD) with HNEW.
+    #
+    #  HEAD_PREDICTOR_FACTOR specifies a weight for determining the water table (WT) from HNEW and HOLD
+    #     WT = FACT*HNEW + (1-FACT)*HOLD
+    #
+    #  FACT should be set to 0.0 or 0.5 or 1.0 to indicate using only HOLD, the average, or only HNEW
+    #
+    #  If keyword is not specified, then, by default, FACT = 1 which makes:
+    #     WT = HNEW
+    HEAD_PREDICTOR_FACTOR FACTOR
+    #
+    # Special Options - NOT RECOMMENDED - USE WITH CAUTION ------------------------------------------------------------------------------------------
+    #
+    # By default, after a time step groundwater head solution is complete then
+    #   SFR solves the stream network and associated stream-aquifer interaction before caculating the groundwater volumetric budgets.
+    #   This makes the SFR solution a half solver iteration ahead of the groundwater solution (that is, streamflow is groundwater head dependent).
+    #
+    # The following option disables recalculating the SFR stream flows at the end of the time step.
+    #   This makes the SFR solution a half solver iteration behind   the groundwater solution (that is, groundwater head is streamflow dependent).
+    NO_BUDGET_RECALCULATE_FLOW
+    #
+    #  This next option is the default when NO_BUDGET_RECALCULATE_FLOW is not specified.
+    #    It is provided for the user to explicitly specify the default operation.
+       BUDGET_RECALCULATE_FLOW
+    #
+    # These two options should only be used if you have floating-point overflow issues.
+    # They impose flow and depth limits that are defined for each SFR segment, but applied all reaches in the network.
+    #
+    #   MAX_STAGE defines a maximum stream stage (depth) allowed in a segment 
+    #               That is, a limit on the distance above the stream bottom. 
+    #    MAX_FLOW defines a maximum stream flow allowed along a segment. 
+    #               This limits inflow into each reach, potential flow to/from groundwater, and outflow of the reach.
+    #
+    # These options are draconian with overriding calculated values, irrelevant of mass errors.
+    #    So you should only set them to values that should never occur in the modeled reality.
+    #
+    # Input uses the Universal Loader (ULOAD) to read with NSEG values with List-Style. 
+    #    The INTERNAL directive is not allowed.
+    #
+    #    For example, assume that NSEG=3, and you want to specify a max flow of 1e10 m^3/d and max depth of 2, 4, and 6 m 
+    #                 MAX_FLOW  CONSTANT 1.0e10
+    #                 MAX_STAGE OPEN/CLOSE SFR_seg_stage_lim.txt
+    #
+    #    and SFR_seg_stage_lim.txt has:
+    #      _____________________________________
+    #     |  # SFR stage depth limit by segment |
+    #     |  1   2.0                            |
+    #     |  2   4.0                            |
+    #     |  3   4.0                            |
+    #     |_____________________________________|
+    #
+    # *Note that, floating-point overflow issues can also occur due to bad parameterization.
+    #     A common method for preventing SFR floating-point overflows is to reduce the streambed hydraulic conductivity (HCOND1 and HCOND2)
+    #
+    MAX_STAGE ULOAD
+    MAX_FLOW  ULOAD
+    #
+    # Global factor that is multiplied the streambed hydraulic conductivity (HCOND1 and HCOND2)
+    #   for calculating stream loss for all SFR stream reaches.
+    LOSSFACTOR    FACTOR
+    #
+    # Apply a relaxation factor (RELAX) to aquifer head when making seepage calculation.
+    #   This might help for unstable stream networks, but may be better to use HEAD_PREDICTOR_FACTOR instead.
+    HEAD_RELAXATION  RELAX
+    #
+    # MF-NWT style TABFILE. NUMTAB is the number of file unit numbers that are read.
+    # MAXROW is the size of the largest tabfile (most rows/lines in the file).
+    # Recommended to use either Time Series Input Block (see below)
+    #   Or MF-OWHM style TABFILE with keyword specified as TABFILE outside of options block.
+    TABFILES  NUMTAB MAXROW
+    #
+END OPTIONS
+#
+# SFR Also supports the following blocks
+#
+# Time series file input requires that BAS specify START_DATE
+
+BEGIN TIME SERIES INPUT
+  #
+  # Repeat as needed.
+  #   ISEG is the segment that has FLOW defined with a Time Series File (See Time Series Input in Appendix 3)
+  #
+  #   Generic_Input is a file with two columns: | Date FLOW |, based on Date, the appropiate flow is applied
+  #   Generic_Input can be the file location, or supports the keywords EXTERNAL, OPEN/CLOSE, DATAFILE, DATAUNIT
+  #
+  #   Option is:
+  #             CONSTANT  FLOAT     -> Set ISEG FLOW to FLOAT for all time
+  #             INTERPOLATE         -> Use time step starting date to interpolate FLOW
+  #             STEP_FUNCTION       -> Use FLOW with date closest, but  does not exceed, the time step starting date (looks like a step function)
+  #             NEXT_VALUE          -> Use FLOW with date closest, that does     exceed, the time step starting date
+  #             NEAREST             -> Use FLOW with date closest to the time step starting date
+  #             TIME_MEAN           -> Elapsed time average flow within the time step
+  #             MAX                 -> Maximum flow value  within the time step
+  #             MIN                 -> Minimum flow value  within the time step
+  #             SUM                 -> Sum of  flow values within the time step
+  #             DAY_SUM             -> Sum of  flow values multiplied by their elapsed time within the time step
+  #             SKIP                -> Set all FLOW to zero
+  #             TIME_MEAN_LOOK_BACK -> Note yet implemented
+  #
+  ISEG  Option  Generic_Input    #  Example:   " 22  STEP_FUNCTION   ./SFR_Inflow/Seg22_Inflow.txt "
+  #
+END
+
+BEGIN LineFeed  #Alternative SFR Segment FLOW input
+  #
+  # Repeat as needed.
+  #   FeedFile is opened with Generic_Input (See LineFeed in Appendix 3)
+  FeedFile     #  Example:   "./SFR_Inflow/FeedFile_SFR_UpperBasin_Inflow.txt "
+  #
+END LineFeed
+#
+#
+# Example FeedFile (Not it has been commented out because it is a separate file (eg FeedFile_SFR_UpperBasin_Inflow.txt)
+# The vertical pipe, |, is used to represent the page borders (# indicates a comment within the FeedFile):
+#   ____________________________________________________________________________
+#   |                                                                          |
+#   |   # FeedFile that specifies the inflow by stress period                  |
+#   |   #   for the upper basin (Segments: 2, 5, 8, and 15)                    |
+#   |   #                                                                      |
+#   |   # Define the segments that will have inflow defined.                   |
+#   |   # Terminate reading of segments with keyword "TEMPORAL INPUT"          |
+#   |   #                                                                      |
+#   |   #   The order specified, also is the order that FLOW is specified      |
+#   |   # ISEG                                                                 |
+#   |   2                                                                      |
+#   |   5                                                                      |
+#   |   8                                                                      |
+#   |   15                                                                     |
+#   |                                                                          |
+#   |   #     Terminate reading of segments that are defined in the FeedFile   |
+#   |                                                                          |
+#   |   TEMPORAL INPUT                                                         |
+#   |   # Each column is the inflow for the Segments defined above             |
+#   |   # Seg: 2    5      8     15                                            |
+#   |          0.0  145.0  66.0  88.0    # Stress Period 1  FLOW input         |
+#   |          0.0  146.0  67.0  87.0    # Stress Period 2  FLOW input         |
+#   |          0.0  147.0  68.0  86.0    # Stress Period 3  FLOW input         |
+#   |          0.0  148.0  69.0  0.0     # Stress Period 4  FLOW input         |
+#   |          0.0  149.0  70.0  1.5     # Stress Period 5  FLOW input         |
+#   |   # Seg: 2    5      8     15                                            |
+#   |          33.0 21.0   40.0  0.0     # Stress Period 6  FLOW input         |
+#   |          32.0 22.0   40.0  0.5     # Stress Period 7  FLOW input         |
+#   |          33.0 23.0   40.0  0.5     # Stress Period 8  FLOW input         |
+#   |          32.0 24.0   40.0  0.5     # Stress Period 9  FLOW input         |
+#   |          33.0 25.0   40.0  0.0     # Stress Period 10 FLOW input         |
+#   |          32.0 26.0   40.0  0.0     # Stress Period 11 FLOW input         |
+#   |          33.0 27.0   40.0  0.0     # Stress Period 12 FLOW input         |
+#   |          32.0 28.0   40.0  0.1     # Stress Period 13 FLOW input         |
+#   |          33.0 29.0   40.0  0.1     # Stress Period 14 FLOW input         |
+#   |          32.0 28.0   40.0  0.0     # Stress Period 15 FLOW input         |
+#   |          33.0 27.0   40.0  0.0     # Stress Period 16 FLOW input         |
+#
+#

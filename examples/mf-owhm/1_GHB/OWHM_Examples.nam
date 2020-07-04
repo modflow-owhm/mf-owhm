@@ -1,0 +1,12 @@
+#Input
+#Package    Unit  File
+DIS            12 OWHM_Examples.dis
+BAS6           13 OWHM_Examples.bas
+#OC            39 OWHM_Examples.oc  # The output control is specified instead with BAS options instead
+PCG            18 OWHM_Examples.pcg
+LPF            14 OWHM_Examples.lpf
+GHB            15 OWHM_Examples.ghb
+#Output
+LIST           11 ./output/OWHM_Examples.lst  WRITE
+DATA(BINARY)    9 ./output/OWHM_Examples.cbc  WRITE
+#DATA           37 ./output/OWHM_Examples.fhd  WRITE

@@ -1,0 +1,132 @@
+# Transient File Reader
+#  For specifying the FMP Semi-Routed Delivery (SRD) Upper Limit for removing water.
+#
+# Each uncommented line uses the Universal Loader (ULOAD) to read NSFR_DELIV upper limits
+# 
+# In this example, since there is only 1 SRD, 
+#   ULOAD uses an implied internal read (no read directive present, like INTERNAL or OPEN/CLOSE)
+#   To read the input along each line.
+#   This makes it easy to specify the upper limit on each line
+#DiversionNum	1
+#Subregion	1
+#Fraction	1
+3000     # Stress Period 1
+3000     # Stress Period 2
+3000     # Stress Period 3
+3000     # Stress Period 4
+1000     # Stress Period 5
+1000     # Stress Period 6
+1000     # and so forth...
+1000
+0
+0
+0
+0
+3000
+3000
+3000
+3000
+1000
+1000
+1000
+1000
+0
+0
+0
+0
+3000
+3000
+3000
+3000
+1000
+1000
+1000
+1000
+0
+0
+0
+0
+3000
+3000
+3000
+3000
+1000
+1000
+1000
+1000
+0
+0
+0
+0
+3000
+3000
+3000
+3000
+1000
+1000
+1000
+1000
+0
+0
+0
+0
+3000
+3000
+3000
+3000
+1000
+1000
+1000
+1000
+0
+0
+0
+0
+3000
+3000
+3000
+3000
+1000
+1000
+1000
+1000
+0
+0
+0
+0
+3000
+3000
+3000
+3000
+1000
+1000
+1000
+1000
+0
+0
+0
+0
+3000
+3000
+3000
+3000
+1000
+1000
+1000
+1000
+0
+0
+0
+0
+3000
+3000
+3000
+3000
+1000
+1000
+1000
+1000
+0
+0
+0
+0

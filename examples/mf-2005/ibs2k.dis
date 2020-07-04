@@ -1,0 +1,19 @@
+# ibs2k
+# MODFLOW-2005 Example problem documented in: 
+#   Harbaugh, A.W., 2005, MODFLOW-2005, the U.S. Geological Survey modular ground-water model -- the Ground-Water Flow Process: U.S. Geological Survey Techniques and Methods 6-A16.
+#   Harbaugh, A.W., Banta, E.R., Hill, M.C. and McDonald, M.G., 2000, MODFLOW-2000, The U.S. Geological Survey Modular Ground-Water Model - User Guide to Modularization Concepts and the Ground-Water Flow Process: U.S Geological Survey Open-File Report 2000-92, 121 p., https://doi.org/10.3133/ofr200092
+#   Leake, S.A., and Prudic, D.E., 1991, Documentation of a computer program to simulate aquifer-system compaction using the modular finite-difference ground-water flow model: U.S. Geological Survey Techniques of Water- Resources Investigations, book 6, chap. A2, 68 p.
+# 
+#      -Comments are preceded by a # sign
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+    2   10   12    3    4    0  # NLAY,NROW,NCOL,NPER,ITMUNI,LENUNI
+ 0 0
+CONSTANT   1.000000E+03  # DELR
+CONSTANT   1.000000E+03  # DELC
+CONSTANT  -5.000000E+02  # TOP of system          
+CONSTANT  -6.000000E+02  # Layer BOTM layer   1
+CONSTANT  -7.000000E+02  # Layer BOTM layer   2
+ 1.000E+03        10 1.500E+00  TR  # PERLEN,NSTP,TSMULT,Ss/tr
+ 1.000E+03        10 1.500E+00  TR  # PERLEN,NSTP,TSMULT,Ss/tr
+ 1.000E+03        10 1.500E+00  TR  # PERLEN,NSTP,TSMULT,Ss/tr

@@ -1,0 +1,848 @@
+
+      MMMMMMM                                       MM      MMM     MM
+    MMM     MMM    MM      M   MMMMMMMM             LM     DM M     ML     MM     MMMMMMMMM  MMMMMMMM  MMMMMMMM
+   MM         MM   MMM     M   MM                    MM    MM M     M     MMMM        M      M         MM     NM
+   MM         MM   MM M    M   MM                    MM    M  MM   MM    MM  MM       M      M         MM      M
+   MM         MM   MM  M   M   MMMMMMMM               MN  MM   M   MM   MM    MM      M      MMMMMMM   MMMMMMMMM
+   MM         MM   MM   M  M   MM         MMMMMMM     MM  M    MM MM    MMMMMMMM      M      M         MM   MM
+   MM         MM   MM    M M   MM                     LM MM    NM MM   MM      MM     M      M         MM    MM
+    MM       NM    MM     MM   MM                      M M      M M   MN        MM    M      M         MM     MM
+     MMMMMMMMN     MM      M   MMMMMMMM                7MM      7MM  MN          MM   M      MMMMMMMM  MM      MM
+
+
+ MODFLOW-OWHM v2.0.01  
+
+
+                        MODFLOW
+            ONE-WATER HYDROLOGIC-FLOW MODEL
+
+    U.S. GEOLOGICAL SURVEY MODULAR FINITE-DIFFERENCE 
+           CONJUNCTIVE USE SIMULATION PROGRAM
+
+                     Version 2.0
+
+ Release: 01          4/23/2020
+
+ Includes:
+          MODFLOW-2005 Version 1.12.0   02/03/2017
+          MODFLOW-FMP  Version 4.00.0   04/23/2017
+          MODFLOW-SWR  Version 1.04.0   09/15/2016
+          MODFLOW-SWI  Version 2.00.0   07/22/2013
+          MODFLOW-LGR  Version 2.00.0   09/19/2013
+          MODFLOW-NWT  Version 1.2.0    03/01/2020
+          MODFLOW-CFP  Version 1.09.57  09/12/2017
+
+
+ OneWater Simulation Initiated at 
+
+
+ LIST FILE: ./output/bcf2ss.lst
+      UNIT: 7
+
+OPENING PACKAGES
+
+BAS6 PACKAGE OPENED.
+BCF  PACKAGE OPENED.
+WEL  PACKAGE OPENED.
+RIV  PACKAGE OPENED.
+RCH  PACKAGE OPENED.
+PCG  PACKAGE OPENED.
+OC   PACKAGE OPENED.
+DIS  PACKAGE OPENED.
+
+NOTIFICATION: A FILE UNIT NUMBER WAS FOUND FOR EITHER THE LIST FILE OR A PACAKGE.
+IT WILL BE USED EVEN THOUGH UNIT NUMBERS FOR THE LIST FILE AND PACKAGES ARE NOW OPTIONAL.
+[IT IS RECOMMENDED TO STILL USE A UNIT NUMBER FOR DATA and DATA(BINARY) ]
+
+
+ BAS -- BASIC PACKAGE, VERSION OWHM INPUT READ FROM UNIT     8
+ 
+MODFLOW was compiled using uniform precision (Precision => Number of meaningful digits in numbers)
+Precision of REAL and DOUBLE PRECISION variables: 15
+
+ DISCRETIZATION INPUT DATA READ FROM UNIT   10
+
+-- READING DIS PACKAGE INPUT --
+
+# bcf2ss
+# MODFLOW-2005 Example problem documented in:
+#   Harbaugh, A.W., 2005, MODFLOW-2005, the U.S. Geological Survey modular ground-water model -- the Ground-Water Flow Process: U.S. Geological Survey Techniques and Methods 6-A16.
+#   Harbaugh, A.W., Banta, E.R., Hill, M.C. and McDonald, M.G., 2000, MODFLOW-2000, The U.S. Geological Survey Modular Ground-Water Model - User Guide to Modularization Concepts and the Ground-Water Flow Process: U.S Geological Survey Open-File Report 2000-92, 121 p., https://doi.org/10.3133/ofr200092
+#   Goode, D.J., and Appel, C.E., 1992, Finite-difference interblock transmissivity for unconfined aquifers and for aquifers having smoothly varying transmissivity: U.S. Geological Survey Water-Resources Investigations Report 92-4124, 79 p.
+#   McDonald, M.G., Harbaugh, A.W., Orr, B.R., and Ackerman, D.J., 1992, A method of converting no-flow cells to variable-head cells for the U.S. Geological Survey modular finite-difference ground-water flow model: U.S. Geological Survey Open-File Report 91-536, 99 p.
+#   McDonald, M.G., and Harbaugh, A.W., 1988, A modular three-dimensional finite-difference ground-water flow model: U.S. Geological Survey Techniques of Water-Resources Investigations, book 6, chap. A1, 586 p.
+#
+#      -Comments are preceded by a # sign
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+*** DIS COORDINATE SYSTEM NOT SEPECIFIED ***
+DEFAULT VALUES APPLIED ARE 0° ROTATION
+WITH THE ORIGIN (0,0) LOCATED AT THE MODEL'S LOWER LEFT CORNER
+
+
+
+
+DIS COORDINATE SYSTEM SEPECIFIED WITH:
+GRID ROTATION OF 0.0°
+WITH THE ORIGIN LOCATED AT THE OUTER MOST CORNER OF MODEL CELL [10,1] WITH:
+X-COORDINATE:0.0
+Y-COORDINATE:0.0
+    2 LAYERS        10 ROWS        15 COLUMNS
+      2 STRESS PERIOD(S) IN SIMULATION
+ MODEL TIME UNIT IS DAYS
+ MODEL LENGTH UNIT IS UNDEFINED
+  Confining bed flag for each layer:
+   1   0
+
+                     DELR =   500.000    
+
+                     DELC =   500.000    
+
+ TOP ELEVATION OF LAYER 1 =   150.000    
+
+   MODEL LAYER BOTTOM EL. =   50.0000     FOR LAYER   1
+
+ BOT. EL. OF QUASI-3D BED =   0.00000     FOR LAYER   1
+
+   MODEL LAYER BOTTOM EL. =  -50.0000     FOR LAYER   2
+
+
+ STRESS PERIOD     LENGTH       TIME STEPS     MULTIPLIER FOR DELT    SS FLAG  (OPTIONAL TIME STEP LENGTH)
+ ---------------------------------------------------------------------------------------------------
+        1         1.000000          1                  1.00000         SS
+        2         1.000000          1                  1.00000         SS
+
+ STEADY-STATE SIMULATION
+
+
+
+
+-- READING BAS PACKAGE INPUT --
+
+# bcf2ss
+# MODFLOW-2005 Example problem documented in:
+#   Harbaugh, A.W., 2005, MODFLOW-2005, the U.S. Geological Survey modular ground-water model -- the Ground-Water Flow Process: U.S. Geological Survey Techniques and Methods 6-A16.
+#   Harbaugh, A.W., Banta, E.R., Hill, M.C. and McDonald, M.G., 2000, MODFLOW-2000, The U.S. Geological Survey Modular Ground-Water Model - User Guide to Modularization Concepts and the Ground-Water Flow Process: U.S Geological Survey Open-File Report 2000-92, 121 p., https://doi.org/10.3133/ofr200092
+#   Goode, D.J., and Appel, C.E., 1992, Finite-difference interblock transmissivity for unconfined aquifers and for aquifers having smoothly varying transmissivity: U.S. Geological Survey Water-Resources Investigations Report 92-4124, 79 p.
+#   McDonald, M.G., Harbaugh, A.W., Orr, B.R., and Ackerman, D.J., 1992, A method of converting no-flow cells to variable-head cells for the U.S. Geological Survey modular finite-difference ground-water flow model: U.S. Geological Survey Open-File Report 91-536, 99 p.
+#   McDonald, M.G., and Harbaugh, A.W., 1988, A modular three-dimensional finite-difference ground-water flow model: U.S. Geological Survey Techniques of Water-Resources Investigations, book 6, chap. A1, 586 p.
+#
+# Input modified for MODFLOW-OWHM by including the BAS options:
+#    NOFREE  BUDGETDB ./output/bcf2ss_VolumetricBudget.txt  CUMULATIVE_HEAD_CHANGE ./output/bcf2ss_CumHCHG.txt  PRINT_HEAD NPER ./output/bcf2ss_Head.txt
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+#
+# Valley aquifer with 2 sand layers separated by silt.  Stress period 1 is natural conditions.  Stress period 2 adds wells.
+#
+
+
+ THE BAS PACKAGE NOW DEFAULTS TO FREE FORMAT.
+ USE OPTION "NOFREE" TO DISABLE FREE FORMAT.
+
+
+
+########################################################################################################
+
+                           WARNING_MESSAGE
+
+         THE FOLLOWING COMMENTS WERE PASSED TO THE WARNING ROUTINE
+
+THE WARNING IS BELIEVED TO HAVE ORIGINATED FROM THE FOLLOWING FILE:
+"examples\mf-2005\bcf2ss.ba6"
+
+THE GUESSED LINE THAT THE WARNING OCCURED ON IS:
+"NOFREE  BUDGETDB ./output/bcf2ss_VolumetricBudget.txt  CUMULATIVE_HEAD_CHANGE ./output/bcf2ss_CumHCHG.txt  PRINT_HEAD NPER ./output/bcf2ss_Head.txt"
+
+THE DESRIPTION OF THE WARNING IS:
+
+FOUND BAS PACKAGE OPTION KEYWORDS ALONG PACKAGE "OPTIONS LINE" (ie Data Set 1)
+
+The BAS package options should be within an "OPTIONS BLOCK" rather than along the first line of input.
+
+The BAS package will attempt to read the options line, but some advanced options may fail to load due to their complex input,
+For example the option "SHIFT_STRT" uses ULOAD to read NLAY shift values, which would crash under certain ULOAD keyword combinations.
+
+Also note that if any of the options specify a GENERIC_OUTPUT file, 
+then there may be additional warnings about a BAS OPTION not being a recognized GENERIC_OUTPUT post-keyword.
+These warnings can be ignored, since its a post-keyword warning pertaining to the GENERIC_OUTPUT file and 
+the BAS OPTION is still processed by the BAS package.
+
+It is recommended for new models to use "BEGIN OPTIONS" and then have one option per line and
+end the options block with the word "END" in place of single line of options.
+
+For example:
+
+BEGIN OPTIONS
+
+  START_DATE  4/23/1901
+  SHOWPROGRESS
+  NOCBC
+  BUDGETDB ./output/VolumetricBudget.txt
+  PAUSE
+
+END OPTIONS
+
+             - Note that "OPTIONS BLOCK" maybe empty or entirely not present,
+               nor is it required to specify an "OPTIONS LINE"
+
+             - DO NOT specify both an "OPTIONS BLOCK" and "OPTIONS LINE" at the same time.
+
+########################################################################################################
+
+
+
+ NOW READING BAS OPTIONS
+
+ FOUND OPTION: NOFREE
+     THE FREE FORMAT OPTION IS DISABLED (INPUT USES FIXED FORMATTED READ)
+
+ FOUND OPTION: BUDGETDB
+
+
+########################################################################################################
+
+                           WARNING_MESSAGE
+
+         THE FOLLOWING COMMENTS WERE PASSED TO THE WARNING ROUTINE
+
+THE WARNING IS BELIEVED TO HAVE ORIGINATED FROM THE FOLLOWING FILE:
+"examples\mf-2005\bcf2ss.ba6"
+
+THE GUESSED LINE THAT THE WARNING OCCURED ON IS:
+"NOFREE  BUDGETDB ./output/bcf2ss_VolumetricBudget.txt  CUMULATIVE_HEAD_CHANGE ./output/bcf2ss_CumHCHG.txt  PRINT_HEAD NPER ./output/bcf2ss_Head.txt"
+
+THE DESRIPTION OF THE WARNING IS:
+
+...CHECK_FOR_POST_KEY WARNINGS...
+ THE FOLLOWING MESSAGES WERE PASSED WHILE CHECKING FOR ANY ADDITIONAL KEYWORDS ON LOADED LINE.
+
+
+FAILED TO IDENTIFY THE FOLLOWING POST-KEYWORD: 
+
+"CUMULATIVE_HEAD_CHANGE"
+
+IT WILL BE IGNORED AND NO FURTHER KEYWORDS WILL BE CHECKED/INCLUDED TO THE RIGHT OF IT.
+TO SUPRESS THIS WARNING PLEASE PLACE A "#" SYMBOL TO THE LEFT OF THE WORD TO INDICATE EVERYTHING TO THE RIGHT OF THE # IS A COMMENT
+
+########################################################################################################
+
+
+
+ FOUND OPTION: CUMULATIVE_HEAD_CHANGE
+    THIS OPTION IS ONLY USEFUL FOR MODEL RESULT COMPARISON WITH DIFFERENT CODE COMPARISONS.
+
+
+
+########################################################################################################
+
+                           WARNING_MESSAGE
+
+         THE FOLLOWING COMMENTS WERE PASSED TO THE WARNING ROUTINE
+
+THE WARNING IS BELIEVED TO HAVE ORIGINATED FROM THE FOLLOWING FILE:
+"examples\mf-2005\bcf2ss.ba6"
+
+THE GUESSED LINE THAT THE WARNING OCCURED ON IS:
+"NOFREE  BUDGETDB ./output/bcf2ss_VolumetricBudget.txt  CUMULATIVE_HEAD_CHANGE ./output/bcf2ss_CumHCHG.txt  PRINT_HEAD NPER ./output/bcf2ss_Head.txt"
+
+THE DESRIPTION OF THE WARNING IS:
+
+...CHECK_FOR_POST_KEY WARNINGS...
+ THE FOLLOWING MESSAGES WERE PASSED WHILE CHECKING FOR ANY ADDITIONAL KEYWORDS ON LOADED LINE.
+
+
+FAILED TO IDENTIFY THE FOLLOWING POST-KEYWORD: 
+
+"PRINT_HEAD"
+
+IT WILL BE IGNORED AND NO FURTHER KEYWORDS WILL BE CHECKED/INCLUDED TO THE RIGHT OF IT.
+TO SUPRESS THIS WARNING PLEASE PLACE A "#" SYMBOL TO THE LEFT OF THE WORD TO INDICATE EVERYTHING TO THE RIGHT OF THE # IS A COMMENT
+
+########################################################################################################
+
+
+
+ FOUND OPTION: PRINT_HEAD    SP    TS   FILE
+                              2     1   ./output/bcf2ss_Head.txt
+
+ THE MAX STORAGE FOR PROPERTIES DEFINED BY PARAMETERS IS: 
+ MAX STORAGE OF PARAMETERS (MXPAR)  IS       2000
+ MAX STORAGE OF INSTANCES  (MXINST) IS      50000
+ MAX STORAGE OF CLUSTERS   (MXCLST) IS    2000000
+
+
+           BOUNDARY ARRAY =              0 FOR LAYER   1
+
+           BOUNDARY ARRAY =              1 FOR LAYER   2
+
+ AQUIFER HEAD WILL BE SET TO 999.99 AT ALL NO-FLOW NODES (IBOUND=0).
+
+
+             INITIAL HEAD =   0.00000     FOR LAYER   1
+
+             INITIAL HEAD =   0.00000     FOR LAYER   2
+
+-- READING OC PACKAGE INPUT --
+
+# bcf2ss
+# MODFLOW-2005 Example problem documented in:
+#   Harbaugh, A.W., 2005, MODFLOW-2005, the U.S. Geological Survey modular ground-water model -- the Ground-Water Flow Process: U.S. Geological Survey Techniques and Methods 6-A16.
+#   Harbaugh, A.W., Banta, E.R., Hill, M.C. and McDonald, M.G., 2000, MODFLOW-2000, The U.S. Geological Survey Modular Ground-Water Model - User Guide to Modularization Concepts and the Ground-Water Flow Process: U.S Geological Survey Open-File Report 2000-92, 121 p., https://doi.org/10.3133/ofr200092
+#   Goode, D.J., and Appel, C.E., 1992, Finite-difference interblock transmissivity for unconfined aquifers and for aquifers having smoothly varying transmissivity: U.S. Geological Survey Water-Resources Investigations Report 92-4124, 79 p.
+#   McDonald, M.G., Harbaugh, A.W., Orr, B.R., and Ackerman, D.J., 1992, A method of converting no-flow cells to variable-head cells for the U.S. Geological Survey modular finite-difference ground-water flow model: U.S. Geological Survey Open-File Report 91-536, 99 p.
+#   McDonald, M.G., and Harbaugh, A.W., 1988, A modular three-dimensional finite-difference ground-water flow model: U.S. Geological Survey Techniques of Water-Resources Investigations, book 6, chap. A1, 586 p.
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+ OUTPUT CONTROL IS SPECIFIED EVERY TIME STEP
+ HEAD PRINT FORMAT CODE IS  -4    DRAWDOWN PRINT FORMAT CODE IS  -4
+ HEADS WILL BE SAVED ON UNIT   50    DRAWDOWNS WILL BE SAVED ON UNIT   50
+
+ BCF -- BLOCK-CENTERED FLOW PACKAGE, VERSION 7, 5/2/2005
+         INPUT READ FROM UNIT 11
+
+-- READING BCF PACKAGE INPUT --
+
+# bcf2ss
+# MODFLOW-2005 Example problem documented in:
+#   Harbaugh, A.W., 2005, MODFLOW-2005, the U.S. Geological Survey modular ground-water model -- the Ground-Water Flow Process: U.S. Geological Survey Techniques and Methods 6-A16.
+#   Harbaugh, A.W., Banta, E.R., Hill, M.C. and McDonald, M.G., 2000, MODFLOW-2000, The U.S. Geological Survey Modular Ground-Water Model - User Guide to Modularization Concepts and the Ground-Water Flow Process: U.S Geological Survey Open-File Report 2000-92, 121 p., https://doi.org/10.3133/ofr200092
+#   Goode, D.J., and Appel, C.E., 1992, Finite-difference interblock transmissivity for unconfined aquifers and for aquifers having smoothly varying transmissivity: U.S. Geological Survey Water-Resources Investigations Report 92-4124, 79 p.
+#   McDonald, M.G., Harbaugh, A.W., Orr, B.R., and Ackerman, D.J., 1992, A method of converting no-flow cells to variable-head cells for the U.S. Geological Survey modular finite-difference ground-water flow model: U.S. Geological Survey Open-File Report 91-536, 99 p.
+#   McDonald, M.G., and Harbaugh, A.W., 1988, A modular three-dimensional finite-difference ground-water flow model: U.S. Geological Survey Techniques of Water-Resources Investigations, book 6, chap. A1, 586 p.
+#
+#      -Comments are preceded by a # sign
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+ STEADY-STATE SIMULATION
+ CELL-BY-CELL FLOWS WILL BE SAVED ON UNIT 30
+ HEAD AT CELLS THAT CONVERT TO DRY=   777.77    
+ WETTING CAPABILITY IS ACTIVE
+ WETTING FACTOR=   1.00000     WETTING ITERATION INTERVAL=   1
+ FLAG THAT SPECIFIES THE EQUATION TO USE FOR HEAD AT WETTED CELLS=   0
+      LAYER  LAYER-TYPE CODE     INTERBLOCK T
+      --------------------------------------------
+         1            1          0 -- HARMONIC    
+         2            0          0 -- HARMONIC    
+
+ COLUMN TO ROW ANISOTROPY =   1.00000    
+
+    HYD. COND. ALONG ROWS =   10.0000     FOR LAYER   1
+
+ VERT HYD COND /THICKNESS =  1.000000E-03 FOR LAYER   1
+
+
+
+                   WETDRY PARAMETER FOR LAYER   1
+ READING ON UNIT   11 WITH FORMAT: (10F13.0)           
+
+         1     2     3     4     5     6     7     8     9    10    11    12    13    14    15
+ .............................................................................................
+   1     2.    2.    2.    2.    2.    2.    2.    2.   -2.   -2.   -2.   -2.   -2.   -2.   -2.
+   2     2.    2.    2.    2.    2.    2.    2.    2.   -2.   -2.   -2.   -2.   -2.   -2.   -2.
+   3     2.    2.    2.   -2.    2.    2.    2.    2.   -2.   -2.   -2.   -2.   -2.   -2.   -2.
+   4     2.    2.    2.    2.    2.    2.    2.    2.   -2.   -2.   -2.   -2.   -2.   -2.   -2.
+   5     2.    2.    2.    2.    2.    2.    2.    2.   -2.   -2.   -2.   -2.   -2.   -2.   -2.
+   6     2.    2.    2.    2.    2.    2.    2.    2.   -2.   -2.   -2.   -2.   -2.   -2.   -2.
+   7     2.    2.    2.    2.    2.    2.    2.    2.   -2.   -2.   -2.   -2.   -2.   -2.   -2.
+   8     2.    2.    2.   -2.    2.    2.    2.    2.   -2.   -2.   -2.   -2.   -2.   -2.   -2.
+   9     2.    2.    2.    2.    2.    2.    2.    2.   -2.   -2.   -2.   -2.   -2.   -2.   -2.
+  10     2.    2.    2.    2.    2.    2.    2.    2.   -2.   -2.   -2.   -2.   -2.   -2.   -2.
+
+     TRANSMIS. ALONG ROWS =   500.000     FOR LAYER   2
+
+-- READING WEL PACKAGE INPUT --
+
+# bcf2ss
+# MODFLOW-2005 Example problem documented in:
+#   Harbaugh, A.W., 2005, MODFLOW-2005, the U.S. Geological Survey modular ground-water model -- the Ground-Water Flow Process: U.S. Geological Survey Techniques and Methods 6-A16.
+#   Harbaugh, A.W., Banta, E.R., Hill, M.C. and McDonald, M.G., 2000, MODFLOW-2000, The U.S. Geological Survey Modular Ground-Water Model - User Guide to Modularization Concepts and the Ground-Water Flow Process: U.S Geological Survey Open-File Report 2000-92, 121 p., https://doi.org/10.3133/ofr200092
+#   Goode, D.J., and Appel, C.E., 1992, Finite-difference interblock transmissivity for unconfined aquifers and for aquifers having smoothly varying transmissivity: U.S. Geological Survey Water-Resources Investigations Report 92-4124, 79 p.
+#   McDonald, M.G., Harbaugh, A.W., Orr, B.R., and Ackerman, D.J., 1992, A method of converting no-flow cells to variable-head cells for the U.S. Geological Survey modular finite-difference ground-water flow model: U.S. Geological Survey Open-File Report 91-536, 99 p.
+#   McDonald, M.G., and Harbaugh, A.W., 1988, A modular three-dimensional finite-difference ground-water flow model: U.S. Geological Survey Techniques of Water-Resources Investigations, book 6, chap. A1, 586 p.
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+WEL -- WELL PACKAGE, VERSION OWHM INPUT READ FROM UNIT 12
+
+ No named parameters
+
+ NO TABFILE SPECIFIED FOR PACKAGE WEL  
+
+
+ NO LINEFEEDS ARE SPECIFIED FOR PACKAGE WEL  
+
+
+MAXIMUM OF 2 ACTIVE WELLS AT ONE TIME
+
+
+0 Well parameters
+
+# bcf2ss
+# MODFLOW-2005 Example problem documented in:
+#   Harbaugh, A.W., 2005, MODFLOW-2005, the U.S. Geological Survey modular ground-water model -- the Ground-Water Flow Process: U.S. Geological Survey Techniques and Methods 6-A16.
+#   Harbaugh, A.W., Banta, E.R., Hill, M.C. and McDonald, M.G., 2000, MODFLOW-2000, The U.S. Geological Survey Modular Ground-Water Model - User Guide to Modularization Concepts and the Ground-Water Flow Process: U.S Geological Survey Open-File Report 2000-92, 121 p., https://doi.org/10.3133/ofr200092
+#   Goode, D.J., and Appel, C.E., 1992, Finite-difference interblock transmissivity for unconfined aquifers and for aquifers having smoothly varying transmissivity: U.S. Geological Survey Water-Resources Investigations Report 92-4124, 79 p.
+#   McDonald, M.G., Harbaugh, A.W., Orr, B.R., and Ackerman, D.J., 1992, A method of converting no-flow cells to variable-head cells for the U.S. Geological Survey modular finite-difference ground-water flow model: U.S. Geological Survey Open-File Report 91-536, 99 p.
+#   McDonald, M.G., and Harbaugh, A.W., 1988, A modular three-dimensional finite-difference ground-water flow model: U.S. Geological Survey Techniques of Water-Resources Investigations, book 6, chap. A1, 586 p.
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+ RIV -- RIVER PACKAGE, VERSION OWHM INPUT READ FROM UNIT   14
+ No named parameters
+ MAXIMUM OF     10 ACTIVE RIVER REACHES AT ONE TIME
+ CELL-BY-CELL FLOWS WILL BE SAVED ON UNIT   30
+
+
+     0 River parameters
+
+ RCH -- RECHARGE PACKAGE, VERSION OWHM INPUT READ FROM UNIT   18
+
+-- READING RCH PACKAGE INPUT --
+
+# bcf2ss
+# MODFLOW-2005 Example problem documented in:
+#   Harbaugh, A.W., 2005, MODFLOW-2005, the U.S. Geological Survey modular ground-water model -- the Ground-Water Flow Process: U.S. Geological Survey Techniques and Methods 6-A16.
+#   Harbaugh, A.W., Banta, E.R., Hill, M.C. and McDonald, M.G., 2000, MODFLOW-2000, The U.S. Geological Survey Modular Ground-Water Model - User Guide to Modularization Concepts and the Ground-Water Flow Process: U.S Geological Survey Open-File Report 2000
+#   Goode, D.J., and Appel, C.E., 1992, Finite-difference interblock transmissivity for unconfined aquifers and for aquifers having smoothly varying transmissivity: U.S. Geological Survey Water-Resources Investigations Report 92-4124, 79 p.
+#   McDonald, M.G., Harbaugh, A.W., Orr, B.R., and Ackerman, D.J., 1992, A method of converting no-flow cells to variable-head cells for the U.S. Geological Survey modular finite-difference ground-water flow model: U.S. Geological Survey Open-File Report 9
+#   McDonald, M.G., and Harbaugh, A.W., 1988, A modular three-dimensional finite-difference ground-water flow model: U.S. Geological Survey Techniques of Water-Resources Investigations, book 6, chap. A1, 586 p.
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+ No named parameters
+ OPTION 3 -- RECHARGE TO HIGHEST ACTIVE NODE IN EACH VERTICAL COLUMN
+ CELL-BY-CELL FLOWS WILL BE SAVED ON UNIT   30
+
+
+     0 Recharge parameters
+
+ PCG -- CONJUGATE-GRADIENT SOLUTION PACKAGE, VERSION OWHM
+
+-- READING PCG PACKAGE INPUT --
+
+# bcf2ss
+# MODFLOW-2005 Example problem documented in:
+#   Harbaugh, A.W., 2005, MODFLOW-2005, the U.S. Geological Survey modular ground-water model -- the Ground-Water Flow Process: U.S. Geological Survey Techniques and Methods 6-A16.
+#   Harbaugh, A.W., Banta, E.R., Hill, M.C. and McDonald, M.G., 2000, MODFLOW-2000, The U.S. Geological Survey Modular Ground-Water Model - User Guide to Modularization Concepts and the Ground-Water Flow Process: U.S Geological Survey Open-File Report 2000-92, 121 p., https://doi.org/10.3133/ofr200092
+#   Goode, D.J., and Appel, C.E., 1992, Finite-difference interblock transmissivity for unconfined aquifers and for aquifers having smoothly varying transmissivity: U.S. Geological Survey Water-Resources Investigations Report 92-4124, 79 p.
+#   McDonald, M.G., Harbaugh, A.W., Orr, B.R., and Ackerman, D.J., 1992, A method of converting no-flow cells to variable-head cells for the U.S. Geological Survey modular finite-difference ground-water flow model: U.S. Geological Survey Open-File Report 91-536, 99 p.
+#   McDonald, M.G., and Harbaugh, A.W., 1988, A modular three-dimensional finite-difference ground-water flow model: U.S. Geological Survey Techniques of Water-Resources Investigations, book 6, chap. A1, 586 p.
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+ MAXIMUM OF     40 CALLS OF SOLUTION ROUTINE
+ MAXIMUM OF     20 INTERNAL ITERATIONS PER CALL TO SOLUTION ROUTINE
+ MATRIX PRECONDITIONING TYPE :    1
+
+
+
+                                    SOLUTION BY THE CONJUGATE-GRADIENT METHOD
+                                   -------------------------------------------
+                    MAXIMUM NUMBER OF CALLS TO PCG ROUTINE =       40
+                        MAXIMUM ITERATIONS PER CALL TO PCG =       20
+                               MATRIX PRECONDITIONING TYPE =        1
+        RELAXATION FACTOR (ONLY USED WITH PRECOND. TYPE 1) =    0.10000E+01
+ PARAMETER OF POLYNOMIAL PRECOND. = 2 (2) OR IS CALCULATED :        2
+                         HEAD CHANGE CRITERION FOR CLOSURE =    0.10000E-02
+                     RESIDUAL CHANGE CRITERION FOR CLOSURE =    0.10000E+04
+            PCG HEAD AND RESIDUAL CHANGE PRINTOUT INTERVAL =        1
+     PRINTING FROM SOLVER IS LIMITED(1) OR SUPPRESSED (>1) =        1
+                            STEADY-STATE DAMPING PARAMETER =    0.10000E+01
+                               TRANSIENT DAMPING PARAMETER =    0.10000E+01
+
+
+########################################################################################################
+
+                           WARNING_MESSAGE
+
+         THE FOLLOWING COMMENTS WERE PASSED TO THE WARNING ROUTINE
+
+THE DESRIPTION OF THE WARNING IS:
+
+DIS PACKAGE: THE GROUND SURFACE ELEVATION WAS NOT SPECIFIED WITH THE KEYWORD "SURFACE_ELEVATION"
+
+BEFORE LOADING THE "TOP" ARRAY FOR LAYER 1
+NOR WAS IT DEFINED WITH ANOTHER PACKAGE   (e.g. FMPs GLOBAL DIMENSION KEYWORD "SURFACE_ELEVATION")
+
+OneWater WILL SET THE GROUND SURFACE ELEVATION (GSE)
+TO THE TOP ELEVATION OF THE UPPER MOST ACTIVE CELL OR THE DIS TOP OF LAY1.
+
+NOTE THAT SFR DOES USE GSE FOR ALL DIVERSION SEGMENTS
+   WHEN "IRDFLG" IS SET TO 2 or -2.
+
+########################################################################################################
+
+
+
+1
+                            STRESS PERIOD NO.      1, LENGTH =   1.000000    
+                            -----------------------------------------------
+
+                              NUMBER OF TIME STEPS =     1
+
+                               MULTIPLIER FOR DELT =     1.000
+
+                            INITIAL TIME STEP SIZE =   1.000000    
+
+PARAMETERS HAVE BEEN USED IN PACKAGES
+
+THE CURRENT STORAGE FOR PARAMETERS IS: 
+No. PARAMETER=         0 WITH MAX STORAGE (MXPAR)  OF      2000
+No. CLUSTERS =         0 WITH MAX STORAGE (MXCLST) OF   2000000
+No. INSTANCES=         0 WITH MAX STORAGE (MXINST) OF     50000
+
+YOU CAN INCREASE/DECREASE STORAGE WITH BAS OPTION:
+MAXPARAM  MXPAR  MXCLST MXINST
+
+FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
+(NOTE THE THREE NUMBERS ARE A MINUMUM SIZE):
+   MAXPARAM          1         1         1
+
+
+WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
+
+
+0 WELLS
+
+ REACH NO.  LAYER   ROW   COL     STAGE      CONDUCTANCE     BOTTOM EL.         
+ -------------------------------------------------------------------------------
+      1      2      1     15       0.000          0.1000E+05      -5.000    
+      2      2      2     15       0.000          0.1000E+05      -5.000    
+      3      2      3     15       0.000          0.1000E+05      -5.000    
+      4      2      4     15       0.000          0.1000E+05      -5.000    
+      5      2      5     15       0.000          0.1000E+05      -5.000    
+      6      2      6     15       0.000          0.1000E+05      -5.000    
+      7      2      7     15       0.000          0.1000E+05      -5.000    
+      8      2      8     15       0.000          0.1000E+05      -5.000    
+      9      2      9     15       0.000          0.1000E+05      -5.000    
+     10      2     10     15       0.000          0.1000E+05      -5.000    
+
+     10 RIVER REACHES
+
+                 RECHARGE =  4.000000E-03
+ 
+ SOLVING FOR HEAD 
+
+ CELL CONVERSIONS FOR ITER.=  2  LAYER=  1  STEP=  1  PERIOD=  1   (ROW,COL)
+    WET(  1,  1)   WET(  1,  2)   WET(  1,  3)   WET(  1,  4)   WET(  1,  5)   
+    WET(  1,  6)   WET(  1,  7)   WET(  1,  8)   WET(  1,  9)   WET(  1, 10)   
+    WET(  1, 11)   WET(  1, 12)   WET(  1, 13)   WET(  2,  1)   WET(  2,  2)   
+    WET(  2,  3)   WET(  2,  4)   WET(  2,  5)   WET(  2,  6)   WET(  2,  7)   
+    WET(  2,  8)   WET(  2,  9)   WET(  2, 10)   WET(  2, 11)   WET(  2, 12)   
+    WET(  2, 13)   WET(  3,  1)   WET(  3,  2)   WET(  3,  3)   WET(  3,  4)   
+    WET(  3,  5)   WET(  3,  6)   WET(  3,  7)   WET(  3,  8)   WET(  3,  9)   
+    WET(  3, 10)   WET(  3, 11)   WET(  3, 12)   WET(  3, 13)   WET(  4,  1)   
+    WET(  4,  2)   WET(  4,  3)   WET(  4,  4)   WET(  4,  5)   WET(  4,  6)   
+    WET(  4,  7)   WET(  4,  8)   WET(  4,  9)   WET(  4, 10)   WET(  4, 11)   
+    WET(  4, 12)   WET(  4, 13)   WET(  5,  1)   WET(  5,  2)   WET(  5,  3)   
+    WET(  5,  4)   WET(  5,  5)   WET(  5,  6)   WET(  5,  7)   WET(  5,  8)   
+    WET(  5,  9)   WET(  5, 10)   WET(  5, 11)   WET(  5, 12)   WET(  5, 13)   
+    WET(  6,  1)   WET(  6,  2)   WET(  6,  3)   WET(  6,  4)   WET(  6,  5)   
+    WET(  6,  6)   WET(  6,  7)   WET(  6,  8)   WET(  6,  9)   WET(  6, 10)   
+    WET(  6, 11)   WET(  6, 12)   WET(  6, 13)   WET(  7,  1)   WET(  7,  2)   
+    WET(  7,  3)   WET(  7,  4)   WET(  7,  5)   WET(  7,  6)   WET(  7,  7)   
+    WET(  7,  8)   WET(  7,  9)   WET(  7, 10)   WET(  7, 11)   WET(  7, 12)   
+    WET(  7, 13)   WET(  8,  1)   WET(  8,  2)   WET(  8,  3)   WET(  8,  4)   
+    WET(  8,  5)   WET(  8,  6)   WET(  8,  7)   WET(  8,  8)   WET(  8,  9)   
+    WET(  8, 10)   WET(  8, 11)   WET(  8, 12)   WET(  8, 13)   WET(  9,  1)   
+    WET(  9,  2)   WET(  9,  3)   WET(  9,  4)   WET(  9,  5)   WET(  9,  6)   
+    WET(  9,  7)   WET(  9,  8)   WET(  9,  9)   WET(  9, 10)   WET(  9, 11)   
+    WET(  9, 12)   WET(  9, 13)   WET( 10,  1)   WET( 10,  2)   WET( 10,  3)   
+    WET( 10,  4)   WET( 10,  5)   WET( 10,  6)   WET( 10,  7)   WET( 10,  8)   
+    WET( 10,  9)   WET( 10, 10)   WET( 10, 11)   WET( 10, 12)   WET( 10, 13)   
+
+ HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 1
+ CELL-BY-CELL FLOW TERM FLAG = 0
+
+ OUTPUT FLAGS FOR ALL LAYERS ARE THE SAME:
+   HEAD    DRAWDOWN  HEAD  DRAWDOWN
+ PRINTOUT  PRINTOUT  SAVE    SAVE
+ ----------------------------------
+     1         0       0       0
+
+
+     8 CALLS TO PCG ROUTINE FOR TIME STEP   1 IN STRESS PERIOD    1
+    89 TOTAL ITERATIONS
+1
+              HEAD IN LAYER   1 AT END OF TIME STEP   1 IN STRESS PERIOD    1
+  ---------------------------------------------------------------------------
+
+           1       2       3       4       5       6       7       8       9      10      11      12      13      14      15
+ ...........................................................................................................................
+   1   138.94  138.23  136.79  134.61  131.65  127.87  123.19  117.53  110.77  102.77   93.33   82.39   71.06  999.99  999.99
+   2   138.94  138.23  136.79  134.61  131.65  127.87  123.19  117.53  110.78  102.77   93.33   82.39   71.06  999.99  999.99
+   3   138.94  138.23  136.79  134.61  131.65  127.87  123.19  117.53  110.78  102.77   93.33   82.39   71.06  999.99  999.99
+   4   138.94  138.23  136.79  134.61  131.65  127.87  123.19  117.53  110.78  102.77   93.33   82.39   71.06  999.99  999.99
+   5   138.94  138.23  136.79  134.61  131.65  127.87  123.19  117.53  110.78  102.77   93.33   82.39   71.06  999.99  999.99
+   6   138.94  138.23  136.79  134.61  131.65  127.87  123.19  117.53  110.78  102.77   93.33   82.39   71.06  999.99  999.99
+   7   138.94  138.23  136.79  134.61  131.65  127.87  123.19  117.53  110.78  102.77   93.33   82.39   71.06  999.99  999.99
+   8   138.94  138.23  136.79  134.61  131.65  127.87  123.19  117.53  110.78  102.77   93.33   82.39   71.06  999.99  999.99
+   9   138.94  138.23  136.79  134.61  131.65  127.87  123.19  117.53  110.78  102.77   93.33   82.39   71.06  999.99  999.99
+  10   138.94  138.23  136.79  134.61  131.65  127.87  123.19  117.53  110.78  102.77   93.33   82.39   71.06  999.99  999.99
+1
+              HEAD IN LAYER   2 AT END OF TIME STEP   1 IN STRESS PERIOD    1
+  ---------------------------------------------------------------------------
+
+           1       2       3       4       5       6       7       8       9      10      11      12      13      14      15
+ ...........................................................................................................................
+   1   137.46  136.72  135.24  132.97  129.89  125.92  120.98  114.93  107.58   98.63   87.60   73.72   55.50   29.50    1.50
+   2   137.46  136.72  135.24  132.97  129.89  125.92  120.98  114.93  107.58   98.63   87.60   73.72   55.50   29.50    1.50
+   3   137.46  136.72  135.24  132.97  129.89  125.92  120.98  114.93  107.58   98.63   87.60   73.72   55.50   29.50    1.50
+   4   137.46  136.72  135.24  132.97  129.89  125.92  120.98  114.93  107.58   98.63   87.60   73.72   55.50   29.50    1.50
+   5   137.46  136.72  135.24  132.97  129.89  125.92  120.98  114.93  107.58   98.63   87.60   73.72   55.50   29.50    1.50
+   6   137.46  136.72  135.24  132.97  129.89  125.92  120.98  114.93  107.58   98.63   87.60   73.72   55.50   29.50    1.50
+   7   137.46  136.72  135.24  132.97  129.89  125.92  120.98  114.93  107.58   98.63   87.60   73.72   55.50   29.50    1.50
+   8   137.46  136.72  135.24  132.97  129.89  125.92  120.98  114.93  107.58   98.63   87.60   73.72   55.50   29.50    1.50
+   9   137.46  136.72  135.24  132.97  129.89  125.92  120.98  114.93  107.58   98.63   87.60   73.72   55.50   29.50    1.50
+  10   137.46  136.72  135.24  132.97  129.89  125.92  120.98  114.93  107.58   98.63   87.60   73.72   55.50   29.50    1.50
+
+
+
+  -------------------------------------------------------------------------------------
+  VOLUMETRIC BUDGET FOR ENTIRE MODEL AT END OF TIME STEP    1 IN STRESS PERIOD      1
+  -------------------------------------------------------------------------------------
+
+     CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+     ------------------                 ------------------------
+
+           IN:                                      IN:
+           ---                                      ---
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+               WELLS =           0.0000                 WELLS =           0.0000
+       RIVER LEAKAGE =           0.0000         RIVER LEAKAGE =           0.0000
+            RECHARGE =      150000.0000              RECHARGE =      150000.0000
+
+            TOTAL IN =      150000.0000              TOTAL IN =      150000.0000
+
+          OUT:                                     OUT:
+          ----                                     ----
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+               WELLS =           0.0000                 WELLS =           0.0000
+       RIVER LEAKAGE =      150000.0000         RIVER LEAKAGE =      150000.0000
+            RECHARGE =           0.0000              RECHARGE =           0.0000
+
+           TOTAL OUT =      150000.0000             TOTAL OUT =      150000.0000
+
+            IN - OUT =           0.0000              IN - OUT =           0.0000
+
+ PERCENT DISCREPANCY =           0.00     PERCENT DISCREPANCY =           0.00
+
+
+          TIME SUMMARY AT END OF TIME STEP     1 IN STRESS PERIOD      1
+                    SECONDS     MINUTES      HOURS       DAYS        YEARS
+                    -----------------------------------------------------------
+   TIME STEP LENGTH  86400.      1440.0      24.000      1.0000     2.73785E-03
+ STRESS PERIOD TIME  86400.      1440.0      24.000      1.0000     2.73785E-03
+         TOTAL TIME  86400.      1440.0      24.000      1.0000     2.73785E-03
+ 
+1
+                            STRESS PERIOD NO.      2, LENGTH =   1.000000    
+                            -----------------------------------------------
+
+                              NUMBER OF TIME STEPS =     1
+
+                               MULTIPLIER FOR DELT =     1.000
+
+                            INITIAL TIME STEP SIZE =   1.000000    
+
+ WEL PACKAGE STRESS PERIOD INFORMATION [BEFORE APPLICATION OF TABFILES]
+
+ WELL NO.  LAYER   ROW   COL   STRESS RATE         
+ --------------------------------------------------
+      1      2      3      4  -35000.000    
+      2      2      8      4  -35000.000    
+
+2 WELLS
+
+ REUSING NON-PARAMETER RIVER REACHES FROM LAST STRESS PERIOD
+
+     10 RIVER REACHES
+
+ REUSING RECH FROM LAST STRESS PERIOD
+
+READING PCG SOLVER STRESS PERIOD INFORMATION
+
+
+########################################################################################################################
+PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERIOD     2
+ REUSING PREVIOUSLY DEFINED CRITERIA FOR REMAINDER OF SIMULATION.
+########################################################################################################################
+ 
+ SOLVING FOR HEAD 
+
+ CELL CONVERSIONS FOR ITER.=  2  LAYER=  1  STEP=  1  PERIOD=  2   (ROW,COL)
+    DRY(  1,  1)   DRY(  1,  2)   DRY(  1,  3)   DRY(  1,  4)   DRY(  1,  5)   
+    DRY(  1,  6)   DRY(  1,  7)   DRY(  1,  8)   DRY(  1,  9)   DRY(  1, 10)   
+    DRY(  1, 11)   DRY(  1, 12)   DRY(  1, 13)   DRY(  2,  1)   DRY(  2,  2)   
+    DRY(  2,  3)   DRY(  2,  4)   DRY(  2,  5)   DRY(  2,  6)   DRY(  2,  7)   
+    DRY(  2,  8)   DRY(  2,  9)   DRY(  2, 10)   DRY(  2, 11)   DRY(  2, 12)   
+    DRY(  2, 13)   DRY(  3,  1)   DRY(  3,  2)   DRY(  3,  3)   DRY(  3,  4)   
+    DRY(  3,  5)   DRY(  3,  6)   DRY(  3,  7)   DRY(  3,  8)   DRY(  3,  9)   
+    DRY(  3, 10)   DRY(  3, 11)   DRY(  3, 12)   DRY(  3, 13)   DRY(  4,  1)   
+    DRY(  4,  2)   DRY(  4,  3)   DRY(  4,  4)   DRY(  4,  5)   DRY(  4,  6)   
+    DRY(  4,  7)   DRY(  4,  8)   DRY(  4,  9)   DRY(  4, 10)   DRY(  4, 11)   
+    DRY(  4, 12)   DRY(  4, 13)   DRY(  5,  1)   DRY(  5,  2)   DRY(  5,  3)   
+    DRY(  5,  4)   DRY(  5,  5)   DRY(  5,  6)   DRY(  5,  7)   DRY(  5,  8)   
+    DRY(  5,  9)   DRY(  5, 10)   DRY(  5, 11)   DRY(  5, 12)   DRY(  5, 13)   
+    DRY(  6,  1)   DRY(  6,  2)   DRY(  6,  3)   DRY(  6,  4)   DRY(  6,  5)   
+    DRY(  6,  6)   DRY(  6,  7)   DRY(  6,  8)   DRY(  6,  9)   DRY(  6, 10)   
+    DRY(  6, 11)   DRY(  6, 12)   DRY(  6, 13)   DRY(  7,  1)   DRY(  7,  2)   
+    DRY(  7,  3)   DRY(  7,  4)   DRY(  7,  5)   DRY(  7,  6)   DRY(  7,  7)   
+    DRY(  7,  8)   DRY(  7,  9)   DRY(  7, 10)   DRY(  7, 11)   DRY(  7, 12)   
+    DRY(  7, 13)   DRY(  8,  1)   DRY(  8,  2)   DRY(  8,  3)   DRY(  8,  4)   
+    DRY(  8,  5)   DRY(  8,  6)   DRY(  8,  7)   DRY(  8,  8)   DRY(  8,  9)   
+    DRY(  8, 10)   DRY(  8, 11)   DRY(  8, 12)   DRY(  8, 13)   DRY(  9,  1)   
+    DRY(  9,  2)   DRY(  9,  3)   DRY(  9,  4)   DRY(  9,  5)   DRY(  9,  6)   
+    DRY(  9,  7)   DRY(  9,  8)   DRY(  9,  9)   DRY(  9, 10)   DRY(  9, 11)   
+    DRY(  9, 12)   DRY(  9, 13)   DRY( 10,  1)   DRY( 10,  2)   DRY( 10,  3)   
+    DRY( 10,  4)   DRY( 10,  5)   DRY( 10,  6)   DRY( 10,  7)   DRY( 10,  8)   
+    DRY( 10,  9)   DRY( 10, 10)   DRY( 10, 11)   DRY( 10, 12)   DRY( 10, 13)   
+
+ CELL CONVERSIONS FOR ITER.=  3  LAYER=  1  STEP=  1  PERIOD=  2   (ROW,COL)
+    WET(  1,  1)   WET(  1,  2)   WET(  1,  3)   WET(  1,  5)   WET(  1,  6)   
+    WET(  1,  7)   WET(  1,  8)   WET(  1,  9)   WET(  2,  1)   WET(  2,  2)   
+    WET(  2,  6)   WET(  2,  7)   WET(  2,  8)   WET(  2,  9)   WET(  3,  1)   
+    WET(  3,  2)   WET(  3,  6)   WET(  3,  7)   WET(  3,  8)   WET(  3,  9)   
+    WET(  4,  1)   WET(  4,  2)   WET(  4,  6)   WET(  4,  7)   WET(  4,  8)   
+    WET(  4,  9)   WET(  5,  1)   WET(  5,  2)   WET(  5,  3)   WET(  5,  5)   
+    WET(  5,  6)   WET(  5,  7)   WET(  5,  8)   WET(  5,  9)   WET(  6,  1)   
+    WET(  6,  2)   WET(  6,  3)   WET(  6,  5)   WET(  6,  6)   WET(  6,  7)   
+    WET(  6,  8)   WET(  6,  9)   WET(  7,  1)   WET(  7,  2)   WET(  7,  6)   
+    WET(  7,  7)   WET(  7,  8)   WET(  7,  9)   WET(  8,  1)   WET(  8,  2)   
+    WET(  8,  6)   WET(  8,  7)   WET(  8,  8)   WET(  8,  9)   WET(  9,  1)   
+    WET(  9,  2)   WET(  9,  6)   WET(  9,  7)   WET(  9,  8)   WET(  9,  9)   
+    WET( 10,  1)   WET( 10,  2)   WET( 10,  3)   WET( 10,  5)   WET( 10,  6)   
+    WET( 10,  7)   WET( 10,  8)   WET( 10,  9)   
+
+ CELL CONVERSIONS FOR ITER.=  4  LAYER=  1  STEP=  1  PERIOD=  2   (ROW,COL)
+    WET(  1,  4)   WET(  2,  3)   WET(  2,  5)   WET(  3,  3)   WET(  3,  5)   
+    WET(  4,  3)   WET(  4,  5)   WET(  5,  4)   WET(  6,  4)   WET(  7,  3)   
+    WET(  7,  5)   WET(  8,  3)   WET(  8,  5)   WET(  9,  3)   WET(  9,  5)   
+    WET( 10,  4)   
+
+ CELL CONVERSIONS FOR ITER.=  5  LAYER=  1  STEP=  1  PERIOD=  2   (ROW,COL)
+    WET(  2,  4)   WET(  4,  4)   WET(  7,  4)   WET(  9,  4)   
+
+ HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 1
+ CELL-BY-CELL FLOW TERM FLAG = 0
+
+ OUTPUT FLAGS FOR ALL LAYERS ARE THE SAME:
+   HEAD    DRAWDOWN  HEAD  DRAWDOWN
+ PRINTOUT  PRINTOUT  SAVE    SAVE
+ ----------------------------------
+     1         0       0       0
+
+
+    12 CALLS TO PCG ROUTINE FOR TIME STEP   1 IN STRESS PERIOD    2
+   106 TOTAL ITERATIONS
+1
+              HEAD IN LAYER   1 AT END OF TIME STEP   1 IN STRESS PERIOD    2
+  ---------------------------------------------------------------------------
+
+           1       2       3       4       5       6       7       8       9      10      11      12      13      14      15
+ ...........................................................................................................................
+   1    60.36   59.22   57.34   56.09   57.33   59.20   60.31   60.26   59.22  777.77  777.77  777.77  777.77  999.99  999.99
+   2    60.01   58.51   55.51   51.96   55.51   58.53   60.06   60.17   59.18  777.77  777.77  777.77  777.77  999.99  999.99
+   3    59.75   57.91   52.79  777.77   52.81   57.95   59.86   60.10   59.15  777.77  777.77  777.77  777.77  999.99  999.99
+   4    60.01   58.51   55.51   51.96   55.51   58.53   60.06   60.17   59.18  777.77  777.77  777.77  777.77  999.99  999.99
+   5    60.36   59.22   57.34   56.09   57.33   59.20   60.31   60.26   59.22  777.77  777.77  777.77  777.77  999.99  999.99
+   6    60.36   59.22   57.34   56.09   57.33   59.20   60.31   60.26   59.22  777.77  777.77  777.77  777.77  999.99  999.99
+   7    60.01   58.51   55.51   51.96   55.51   58.53   60.06   60.17   59.18  777.77  777.77  777.77  777.77  999.99  999.99
+   8    59.75   57.91   52.79  777.77   52.81   57.95   59.86   60.10   59.15  777.77  777.77  777.77  777.77  999.99  999.99
+   9    60.01   58.51   55.51   51.96   55.51   58.53   60.06   60.17   59.18  777.77  777.77  777.77  777.77  999.99  999.99
+  10    60.36   59.22   57.34   56.09   57.33   59.20   60.31   60.26   59.22  777.77  777.77  777.77  777.77  999.99  999.99
+1
+              HEAD IN LAYER   2 AT END OF TIME STEP   1 IN STRESS PERIOD    2
+  ---------------------------------------------------------------------------
+
+           1       2       3       4       5       6       7       8       9      10      11      12      13      14      15
+ ...........................................................................................................................
+   1    56.94   55.65   53.51   51.92   53.51   55.63   56.86   56.69   54.83   50.81   44.80   36.80   26.80   14.80    0.80
+   2    56.53   54.71   51.06   46.65   51.06   54.72   56.55   56.58   54.79   50.80   44.80   36.80   26.80   14.80    0.80
+   3    56.18   53.71   47.14   29.89   47.15   53.74   56.28   56.50   54.77   50.79   44.80   36.80   26.80   14.80    0.80
+   4    56.53   54.71   51.06   46.65   51.06   54.72   56.55   56.58   54.79   50.80   44.80   36.80   26.80   14.80    0.80
+   5    56.94   55.65   53.51   51.92   53.51   55.63   56.86   56.69   54.83   50.81   44.80   36.80   26.80   14.80    0.80
+   6    56.94   55.65   53.51   51.92   53.51   55.63   56.86   56.69   54.83   50.81   44.80   36.80   26.80   14.80    0.80
+   7    56.53   54.71   51.06   46.65   51.06   54.72   56.55   56.58   54.79   50.80   44.80   36.80   26.80   14.80    0.80
+   8    56.18   53.71   47.14   29.89   47.15   53.74   56.28   56.50   54.77   50.79   44.80   36.80   26.80   14.80    0.80
+   9    56.53   54.71   51.06   46.65   51.06   54.72   56.55   56.58   54.79   50.80   44.80   36.80   26.80   14.80    0.80
+  10    56.94   55.65   53.51   51.92   53.51   55.63   56.86   56.69   54.83   50.81   44.80   36.80   26.80   14.80    0.80
+
+
+
+  -------------------------------------------------------------------------------------
+  VOLUMETRIC BUDGET FOR ENTIRE MODEL AT END OF TIME STEP    1 IN STRESS PERIOD      2
+  -------------------------------------------------------------------------------------
+
+     CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+     ------------------                 ------------------------
+
+           IN:                                      IN:
+           ---                                      ---
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+               WELLS =           0.0000                 WELLS =           0.0000
+       RIVER LEAKAGE =           0.0000         RIVER LEAKAGE =           0.0000
+            RECHARGE =      300000.0000              RECHARGE =      150000.0000
+
+            TOTAL IN =      300000.0000              TOTAL IN =      150000.0000
+
+          OUT:                                     OUT:
+          ----                                     ----
+             STORAGE =           0.0000               STORAGE =           0.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+               WELLS =       70000.0000                 WELLS =       70000.0000
+       RIVER LEAKAGE =      230000.0000         RIVER LEAKAGE =       80000.0000
+            RECHARGE =           0.0000              RECHARGE =           0.0000
+
+           TOTAL OUT =      300000.0000             TOTAL OUT =      150000.0000
+
+            IN - OUT =           0.0000              IN - OUT =           0.0000
+
+ PERCENT DISCREPANCY =           0.00     PERCENT DISCREPANCY =           0.00
+
+
+          TIME SUMMARY AT END OF TIME STEP     1 IN STRESS PERIOD      2
+                    SECONDS     MINUTES      HOURS       DAYS        YEARS
+                    -----------------------------------------------------------
+   TIME STEP LENGTH  86400.      1440.0      24.000      1.0000     2.73785E-03
+ STRESS PERIOD TIME  86400.      1440.0      24.000      1.0000     2.73785E-03
+         TOTAL TIME 1.72800E+05  2880.0      48.000      2.0000     5.47570E-03
+ 
+
+ Final Remark:
+
+   The solver successfully met the user supplied convergence criteria, HCLOSE and RCLOSE, for all 2 time steps.
+
+   Please check the "VOLUMETRIC BUDGET FOR ENTIRE MODEL" to ensure that mass rate balance errors are acceptable for all time steps.
+
+   The cumulative mass error for the entire simulation is 0.00 %
+
+
+
+
+ Simulation finished at  
+
+
+ Which had an elapsed run time of: 0.0 seconds
+
+
+    OneWater Simulation Now Complete
+
+

@@ -1,0 +1,18 @@
+# swi2ex1
+# MODFLOW-SWI Example problem documented in: 
+#   Bakker, M., Schaars, F., Hughes, J.D., Langevin, C.D., Dausman, A.M., 2013, Documentation of the seawater intrusion (SWI2) package for MODFLOW: U.S. Geological Survey Techniques and Methods 6-A46, 47 p.
+# 
+#      -Comments are preceded by a # sign
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+# LPF
+        53  -1.0e+30         0 
+ 0
+ 0
+ 1
+ 0
+ 0
+        15         1          (50G13.0)         -1  # HK() = Horizontal hydraulic conductivity of layer 1
+            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2
+        15         1          (50G13.0)         -1  # VKA() = Vertical hydraulic conductivity of layer 1
+            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2            2

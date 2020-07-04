@@ -1,0 +1,166 @@
+#MNW2 INPUT FILE CONVERTED FROM MNW1
+5 70 1                                       # 1.    Data: MNWMAX IWL2CB MNWPRNT {OPTION}
+MNW2WELL_1  4                                # 2a.   Data: WELLID NNODES
+  SKIN  0 1 0 0                              # 2b.   Data: LOSSTYPE PUMPLOC Qlimit PPFLAG PUMPCAP
+  -1.  -1.  -1.                              # 2c.   Data: {Rw Rskin Kskin B C P CWC}  Negative values indicate that properties are read on a node by noe basis
+     1  6   2   0.1  0.35  1.6683            # 2d-1. Data: LAY ROW COL {Rw Rskin Kskin B C P CWC}
+     3  6   2   0.1  0.35  1.1122            # 
+     5  6   2   0.1  0.35  1.1122            # 
+     7  6   2   0.1  0.35  1.1122            # 
+    205.  0                                  # 2f.   Data: Hlim QCUT {Qfrcmn Qfrcmx}
+MNW2WELL_2  4                                # 2a.   Data: WELLID NNODES
+  SKIN  0 1 0 0                              # 2b.   Data: LOSSTYPE PUMPLOC Qlimit PPFLAG PUMPCAP
+  -1.  -1.  -1.                              # 2c.   Data: {Rw Rskin Kskin B C P CWC}  Negative values indicate that properties are read on a node by noe basis
+     1  8   2   0.1  0.35  1.6683            # 2d-1. Data: LAY ROW COL {Rw Rskin Kskin B C P CWC}
+     3  8   2   0.1  0.35  1.1122            # 
+     5  8   2   0.1  0.35  1.1122            # 
+     7  8   2   0.1  0.35  1.1122            # 
+    205.  0                                  # 2f.   Data: Hlim QCUT {Qfrcmn Qfrcmx}
+MNW2WELL_3  4                                # 2a.   Data: WELLID NNODES
+  SKIN  0 1 0 0                              # 2b.   Data: LOSSTYPE PUMPLOC Qlimit PPFLAG PUMPCAP
+  -1.  -1.  -1.                              # 2c.   Data: {Rw Rskin Kskin B C P CWC}  Negative values indicate that properties are read on a node by noe basis
+     1  10  2   0.1  0.35  1.6683            # 2d-1. Data: LAY ROW COL {Rw Rskin Kskin B C P CWC}
+     3  10  2   0.1  0.35  1.1122            # 
+     5  10  2   0.1  0.35  1.1122            # 
+     7  10  2   0.1  0.35  1.1122            # 
+    205.  0                                  # 2f.   Data: Hlim QCUT {Qfrcmn Qfrcmx}
+MNW2WELL_4  3                                # 2a.   Data: WELLID NNODES
+  SKIN  0 1 0 0                              # 2b.   Data: LOSSTYPE PUMPLOC Qlimit PPFLAG PUMPCAP
+  -1.  -1.  -1.                              # 2c.   Data: {Rw Rskin Kskin B C P CWC}  Negative values indicate that properties are read on a node by noe basis
+     3  3   19   0.1  0.35  1.1122           # 2d-1. Data: LAY ROW COL {Rw Rskin Kskin B C P CWC}
+     5  3   19   0.1  0.35  1.1122           # 
+     7  3   19   0.1  0.35  1.1122           # 
+    205.  0                                  # 2f.   Data: Hlim QCUT {Qfrcmn Qfrcmx}
+MNW2WELL_5  3                                # 2a.   Data: WELLID NNODES
+SKIN  0 1 0 0                                # 2b.   Data: LOSSTYPE PUMPLOC Qlimit PPFLAG PUMPCAP
+  -1.  -1.  -1.                              # 2c.   Data: {Rw Rskin Kskin B C P CWC}  Negative values indicate that properties are read on a node by noe basis
+     3  6   17   0.1  0.35  1.1122           # 2d-1. Data: LAY ROW COL {Rw Rskin Kskin B C P CWC}
+     5  6   17   0.1  0.35  1.1122           # 
+     7  6   17   0.1  0.35  1.1122           # 
+    205.  0                                  # 2f.   Data: Hlim QCUT {Qfrcmn Qfrcmx}
+5                                            # 3.    Data: ITMP
+MNW2WELL_1   0.0                             # SP1
+MNW2WELL_2   0.0
+MNW2WELL_3   0.0
+MNW2WELL_4   0.0
+MNW2WELL_5   0.0
+-1                                           # SP2
+-1                                           # SP3  
+-1                                           # SP4  
+-1                                           # SP5  
+-1                                           # SP6  
+-1                                           # SP7  
+-1                                           # SP8  
+-1                                           # SP9  
+-1                                           # SP10 
+-1                                           # SP11 
+-1                                           # SP12 
+-1                                           # SP13 
+-1                                           # SP14 
+-1                                           # SP15 
+-1                                           # SP16 
+-1                                           # SP17 
+-1                                           # SP18 
+-1                                           # SP19 
+-1                                           # SP20 
+-1                                           # SP21 
+-1                                           # SP22 
+-1                                           # SP23 
+-1                                           # SP24 
+-1                                           # SP25 
+-1                                           # SP26 
+-1                                           # SP27 
+-1                                           # SP28 
+-1                                           # SP29 
+-1                                           # SP30 
+-1                                           # SP31 
+-1                                           # SP32 
+-1                                           # SP33 
+-1                                           # SP34 
+-1                                           # SP35 
+-1                                           # SP36 
+-1                                           # SP37 
+-1                                           # SP38 
+-1                                           # SP39 
+-1                                           # SP40 
+-1                                           # SP41 
+-1                                           # SP42 
+-1                                           # SP43 
+-1                                           # SP44 
+-1                                           # SP45 
+-1                                           # SP46 
+-1                                           # SP47 
+-1                                           # SP48 
+-1                                           # SP49 
+-1                                           # SP50 
+-1                                           # SP51 
+-1                                           # SP52 
+-1                                           # SP53 
+-1                                           # SP54 
+-1                                           # SP55 
+-1                                           # SP56 
+-1                                           # SP57 
+-1                                           # SP58 
+-1                                           # SP59 
+-1                                           # SP60 
+-1                                           # SP61 
+-1                                           # SP62 
+-1                                           # SP63 
+-1                                           # SP64 
+-1                                           # SP65 
+-1                                           # SP66 
+-1                                           # SP67 
+-1                                           # SP68 
+-1                                           # SP69 
+-1                                           # SP70 
+-1                                           # SP71 
+-1                                           # SP72 
+-1                                           # SP73 
+-1                                           # SP74 
+-1                                           # SP75 
+-1                                           # SP76 
+-1                                           # SP77 
+-1                                           # SP78 
+-1                                           # SP79 
+-1                                           # SP80 
+-1                                           # SP81 
+-1                                           # SP82 
+-1                                           # SP83 
+-1                                           # SP84 
+-1                                           # SP85 
+-1                                           # SP86 
+-1                                           # SP87 
+-1                                           # SP88 
+-1                                           # SP89 
+-1                                           # SP90 
+-1                                           # SP91 
+-1                                           # SP92 
+-1                                           # SP93 
+-1                                           # SP94 
+-1                                           # SP95 
+-1                                           # SP96 
+-1                                           # SP97 
+-1                                           # SP98 
+-1                                           # SP99 
+-1                                           # SP100
+-1                                           # SP101
+-1                                           # SP102
+-1                                           # SP103
+-1                                           # SP104
+-1                                           # SP105
+-1                                           # SP106
+-1                                           # SP107
+-1                                           # SP108
+-1                                           # SP109
+-1                                           # SP110
+-1                                           # SP111
+-1                                           # SP112
+-1                                           # SP113
+-1                                           # SP114
+-1                                           # SP115
+-1                                           # SP116
+-1                                           # SP117
+-1                                           # SP118
+-1                                           # SP119
+-1                                           # SP120
+-1                                           # SP121

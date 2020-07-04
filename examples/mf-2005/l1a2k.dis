@@ -1,0 +1,24 @@
+# l1a2k
+# MODFLOW-2005 Example problem documented in: 
+#   Harbaugh, A.W., 2005, MODFLOW-2005, the U.S. Geological Survey modular ground-water model -- the Ground-Water Flow Process: U.S. Geological Survey Techniques and Methods 6-A16.
+#   Harbaugh, A.W., Banta, E.R., Hill, M.C. and McDonald, M.G., 2000, MODFLOW-2000, The U.S. Geological Survey Modular Ground-Water Model - User Guide to Modularization Concepts and the Ground-Water Flow Process: U.S Geological Survey Open-File Report 2000-92, 121 p., https://doi.org/10.3133/ofr200092
+#   Merritt, M.L., and Konikow, L.F., 2000, Documentation of a Computer Program to Simulate Lake-Aquifer Interaction Using the MODFLOW Ground-Water Flow Model and the MOC3D Solute-Transport Model: U.S. Geological Survey Water-Resources Investigations Report 00-4167, 146 p.
+# 
+#      -Comments are preceded by a # sign
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+    5   17   17    1    4    0          # NLAY,NROW,NCOL,NPER,ITMUNI,LENUNI
+ 0 0 0 0 0
+INTERNAL   1.000000E+00 (10F13.0)    0  # DELR
+ 2.500000E+02 1.000000E+03 1.000000E+03 1.000000E+03 1.000000E+03 1.000000E+03 5.000000E+02 5.000000E+02 5.000000E+02 5.000000E+02
+ 5.000000E+02 1.000000E+03 1.000000E+03 1.000000E+03 1.000000E+03 1.000000E+03 2.500000E+02
+INTERNAL   1.000000E+00 (10F13.0)    0  # DELC
+ 2.500000E+02 1.000000E+03 1.000000E+03 1.000000E+03 1.000000E+03 1.000000E+03 5.000000E+02 5.000000E+02 5.000000E+02 5.000000E+02
+ 5.000000E+02 1.000000E+03 1.000000E+03 1.000000E+03 1.000000E+03 1.000000E+03 2.500000E+02
+CONSTANT   5.000000E+02             # TOP of system          
+CONSTANT   1.070000E+02             # Layer BOTM layer   1
+CONSTANT   9.700000E+01             # Layer BOTM layer   2
+CONSTANT   8.700000E+01             # Layer BOTM layer   3
+CONSTANT   7.700000E+01             # Layer BOTM layer   4
+CONSTANT   6.700000E+01             # Layer BOTM layer   5
+ 5.000E+03       100 1.020E+00  TR  # PERLEN,NSTP,TSMULT,Ss/tr

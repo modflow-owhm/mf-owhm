@@ -1,0 +1,16 @@
+# NAME file for test case swtex4
+#
+LIST                 92 ./output/swtex4.lst
+BAS6                  4 swtex4.ba6
+DIS                  10 swtex4.dis
+UPW                  11 swtex4.upw
+WEL                  12 swtex4.wel
+NWT                  19 NWT.nwt
+OC                   22 swtex4.oc
+SWT                  24 swtex4.swt
+DATA(BINARY)         34 ./output/swtex4.bud
+DATA(BINARY)         35 ./output/swtex4.hed
+DATA(BINARY)         71 ./output/swtex4.cmp
+DATA(BINARY)         72 ./output/swtex4.srs
+DATA(BINARY)         76 ./output/swtex4.gst
+DATA(BINARY)         70 ./output/swtex4.sb

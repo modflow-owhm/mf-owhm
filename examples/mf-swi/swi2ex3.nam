@@ -1,0 +1,21 @@
+# swi2ex3
+# MODFLOW-SWI Example problem documented in: 
+#   Bakker, M., Schaars, F., Hughes, J.D., Langevin, C.D., Dausman, A.M., 2013, Documentation of the seawater intrusion (SWI2) package for MODFLOW: U.S. Geological Survey Techniques and Methods 6-A46, 47 p.
+# 
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+# SWI2 Example Problem 2 - stratified density model
+LIST  2 ./output/swi2ex3.list
+DIS  11 swi2ex3.dis 
+BAS6 13 swi2ex3.bas 
+WEL  20 swi2ex3.wel 
+GHB  23 swi2ex3.ghb 
+BCF6 15 swi2ex3.bcf 
+SWI2 29 swi2ex3.swi 
+PCG  27 swi2ex3.pcg 
+OC   14 swi2ex3.oc 
+DATA(BINARY)  55 ./output/swi2ex3.zta WRITE
+DATA(BINARY)  56 ./output/swi2ex3.swb WRITE
+DATA(BINARY)  51 ./output/swi2ex3.hds WRITE
+DATA(BINARY)  52 ./output/swi2ex3.ddn WRITE
+DATA(BINARY)  53 ./output/swi2ex3.cbc WRITE

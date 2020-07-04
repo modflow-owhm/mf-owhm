@@ -1,0 +1,14 @@
+# swi2ex2_cont
+# MODFLOW-SWI Example problem documented in: 
+#   Bakker, M., Schaars, F., Hughes, J.D., Langevin, C.D., Dausman, A.M., 2013, Documentation of the seawater intrusion (SWI2) package for MODFLOW: U.S. Geological Survey Techniques and Methods 6-A46, 47 p.
+# 
+#      -Comments are preceded by a # sign
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+         0  -1.0e+30         0  0.100000         1         0
+00 
+        15         1           (5G13.0)         -1 # TRPY(): Anisotropy factor of layers
+            1
+        15         1          (60G13.0)         -1 # TRANS() = Transmissivity of layer 1
+           80           80           80           80           80           80           80           80           80           80           80           80           80           80           80           80           80           80           80           80           80           80           80           80           80           80           80           80           80           80           80           80           80           80           80           80           80           80           80           80           80           80           80           80           80           80           80           80           80           80           80           80           80           80           80           80           80           80           80           80

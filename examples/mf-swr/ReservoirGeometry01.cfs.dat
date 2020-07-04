@@ -1,0 +1,21 @@
+# SWRSample01
+# MODFLOW-SWR Example problem documented in: 
+#    Hughes, J.D., Langevin, C.D., Chartier, K.L., and White, J.T., 2012, Documentation of the Surface-Water Routing (SWR1) Process for modeling surface-water flow with the U.S. Geological Survey Modular Ground-Water Model: U.S. Geological Survey Techniques and Methods 6-A40, 113 p.
+# 
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+#
+# RESERVOIR GEOMETRY FROM BEDIENT AND HUBER 1988
+# ELEV    VOLUME    WP SAREA XAREA
+  5.00      0.00  1.00  2.00  3.00
+  6.00  43560.00  1.00  2.00  3.00
+  7.00  87120.00  1.00  2.00  3.00
+  8.00 130680.00  1.00  2.00  3.00
+  9.00 174240.00  1.00  2.00  3.00
+ 10.00 217800.00  1.00  2.00  3.00
+ 11.00 261360.00  1.00  2.00  3.00
+ 12.00 326700.00  1.00  2.00  3.00
+ 13.00 457380.00  1.00  2.00  3.00
+ 14.00 522720.00  1.00  2.00  3.00
+ 15.00 588060.00  1.00  2.00  3.00
+ 16.00 871200.00  1.00  2.00  3.00
+ 17.00 958320.00  1.00  2.00  3.00

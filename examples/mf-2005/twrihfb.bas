@@ -1,0 +1,51 @@
+# twrihfb
+# MODFLOW-2005 Example problem documented in: 
+#   Harbaugh, A.W., 2005, MODFLOW-2005, the U.S. Geological Survey modular ground-water model -- the Ground-Water Flow Process: U.S. Geological Survey Techniques and Methods 6-A16.
+#   Harbaugh, A.W., Banta, E.R., Hill, M.C. and McDonald, M.G., 2000, MODFLOW-2000, The U.S. Geological Survey Modular Ground-Water Model - User Guide to Modularization Concepts and the Ground-Water Flow Process: U.S Geological Survey Open-File Report 2000-92, 121 p., https://doi.org/10.3133/ofr200092
+#   Hsieh, P.A., and Freckleton, J.R., 1993, Documentation of a computer program to simulate horizontal-flow barriers using the U.S. Geological Survey modular three- dimensional finite-difference ground-water flow model: U.S. Geological Survey Open-File Report 92-477, 32 p.
+# 
+# Input modified for MODFLOW-OWHM by including the BAS options:
+#     BUDGETDB ./output/twrihfb_VolumetricBudget.txt  CUMULATIVE_HEAD_CHANGE ./output/twrihfb_CumHCHG.txt  PRINT_HEAD NPER ./output/twrihfb_Head.txt
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+# SAMPLE----3 LAYERS, 15 ROWS, 15 COLUMNS; STEADY STATE; CONSTANT HEADS COLUMN 1,
+# LAYERS 1 AND 2; RECHARGE, WELLS AND DRAINS - test case twri
+#
+FREE  BUDGETDB ./output/twrihfb_VolumetricBudget.txt  CUMULATIVE_HEAD_CHANGE ./output/twrihfb_CumHCHG.txt  PRINT_HEAD NPER ./output/twrihfb_Head.txt
+INTERNAL  1  (15I3)  3                         Item 2:  IBOUND, layer 1
+ -1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+ -1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+ -1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+ -1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+ -1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+ -1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+ -1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+ -1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+ -1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+ -1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+ -1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+ -1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+ -1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+ -1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+ -1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+INTERNAL  1  (15I3)  3                         Item 2:  IBOUND, layer 2
+ -1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+ -1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+ -1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+ -1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+ -1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+ -1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+ -1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+ -1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+ -1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+ -1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+ -1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+ -1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+ -1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+ -1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+ -1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+CONSTANT  1                                    Item 2:  IBOUND, layer 3
+ 999.99                                        Item 3:  HNOFLO
+CONSTANT  0.0                                  Item 4:  STRT, layer 1
+CONSTANT  0.0                                  Item 4:  STRT, layer 2
+CONSTANT  0.0                                  Item 4:  STRT, layer 3

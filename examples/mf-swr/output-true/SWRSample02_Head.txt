@@ -1,0 +1,12 @@
+SP TS  1  5040  ITER 1  DELT 120.0  (NROW,NCOL,NLAY) = (11, 11, 1)   ERROR 0.0 %  FORMAT "(*(ES12.5, :, 1x))"     LAY 1
+         NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN
+         NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN
+         NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN
+         NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN
+         NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN
+         NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN
+         NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN
+         NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN
+         NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN
+         NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN
+         NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN

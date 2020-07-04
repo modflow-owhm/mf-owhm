@@ -1,0 +1,656 @@
+#
+#
+#  If you want to see the actual input go to line 210 or search for "BEGIN GLOBAL DIMENSION"
+#
+#
+# FMP4 ALL INPUT OPTIONS
+#
+#   This is a simple text file that provides the FMP basic block input structure
+#      all the currently supported keywords, and a brief description.
+#      This document can serve as a template for building new models or cheat sheet
+#      for quickly looking up keywords.
+#
+#   Comments are preceded with a # symbol and block input starts with the keyword BEGIN
+#      and terminates with the keyword END
+#
+#   Syntax highlighting is supported in the text editor Notepad++. This will make this file easier to read.
+#          Please see the folder: "doc/Notepad++_Syntax_Highlighting"
+#            which contains Readme_install_Notepadpp_Syntax.pdf that explains how to install the syntax files
+#
+##########################################################################################################################
+#                                                                                                                        #
+#     Header notes about read utilities, Please see MODFLOW-OWHM Version 2 Appendix 1 and 2 for a full description.      #
+#                                                                                                                        #
+#     The FMP Input description is detailed in MODFLOW-OWHM Version 2 Appendix 6.                                        #
+#                                                                                                                        #
+##########################################################################################################################
+#
+#   The following is a brief description of the shorthand notation and input structures
+#
+#   This is a full listing of all keywords,
+#     however some are optional and use default values when not specified.
+#
+#  [ ] are used to nest optional arguments and keywords used in the input
+#  { } are used to nest arguments, where one must be chosen
+#
+#  GENERIC_INPUT  -- Specify name of input  file, primary keywords supported are
+#                                           CONSTANT    Value ==> If allowed, then indicates that Value is read and used as input
+#                                           INTERNAL          ==> Read input on subsequent lines
+#                                           OPEN/CLOSE  file  ==> Open "file", load input, then close the file.
+#                                           DATAFILE    file  ==> Open "file", load input, keep current read position in memory and file remains open until simulation ends. If file is a Transient File Reader (TFR) then the DATAFILE indicates input is directly loaded rather than looking for TFR directives.
+#                                           EXTERNAL    unit  ==> Load input on unit number "unit"
+#                                           DATAUNIT    unit  ==> Load input on unit number "unit", for TFR has same effect as a DATAFILE, but uses the unit number.
+#                                           SKIP or NULL     ==> Ignores file I/O
+#                                           implied_internal  ==> Not a keyword ==> Special case when no keyword is found, then input is assumed to be on current line.
+#
+#                 -- GENERIC_INPUT has a set of post-keywords that are read after the primary keyword.
+#                    The post-keywords are:
+#                          SF Scale    ==>  Reads in the number Scale and multiplies it to the input within the GENERIC_INPUT file.
+#                                           The post-keyword "SF" is optional and if only a number is found, then it is treated as SCALE
+#                          BUFFER BUF  ==>  Preload input file into BUF kilobytes of RAM. If not specified, then default value is 32 KB. BUF should not be larger than 1024 KB.
+#                          REWIND      ==>  If file is already opened from EXTERNAL, DATAFILE, or DATAUNIT, then rewind file to the first line. Otherwise, do nothing.
+#                          DIM    N    ==>  If input supports a DIMENSION specification, then N overrides the default DIM. For example, if GENERIC_INPUT is opening a TFR, then DIM N will override the buffer line length used for identifying keywords and loading ImpliedInternal input (note the TFR default is 700 characters).
+#
+#  GENERIC_OUTPUT -- Specify name of output file, same keywords as GENERIC_INPUT, but represent file to write too. INTERNAL will write to LIST, but is not recommended.
+#                 -- GENERIC_OUTPUT has a set of post-keywords that are read after the primary keyword.
+#                    The post-keywords are:
+#                          BUFFER BUF  ==>  Write output file to RAM until it uses BUF kilobytes of memory and then write to file. If not specified, then default value is 32 KB. BUF should not be larger than 1024 KB. Note that output is written in BUF chunks to the hard drive.
+#                          SPLIT  SPT  ==>  When file size exceeds SPT megabytes, start a new file with a sequential number appended to the file name. This results in large output files being broken into smaller pieces.
+#
+#  ULOAD => Universal loader, loads either a scalar, a vector, or array.
+#           ULOAD uses GENERIC_INPUT to specify the location of the input date
+#           The input that is loaded is designated with the following shorthand:
+#
+#          INT    => Integer; 1 ,2, -1, -2
+#          FLOAT  => Floating Point Number; 1., 1.0, 1.1, -1.5, 1E0, 1D0
+#          CHAR   => Character string/text/predefined words
+#          DTIM   => One-Water DateTime Objects ( any accepted date format, such as mm/dd/yyyy or mm/dd/yyyyThh:ss:mm or yyyy-mm-dd )
+#          TSF    => Time Series Files (either a single file or set of files) as described in Appendix 2, Time Series Files (TSF)
+#          LU_TAB => LookUp Table, follows the input structure for a LookUp Table as described in Appendix 6, Lookup-Table Input Structure
+#
+#          ULOAD may optional load an INT record identifier (ID) before reading one row of input
+#                                                               (This is called List-Style Input).
+#
+#  ULOAD Input Examples => Data is loaded with ULOAD using the List-Style or Array-Style input.
+#                          Note that the keywords "TRANSIENT", "STATIC", "ARRAY", and "LIST" are discussed later under "LAI => List-Array Input Style"
+#
+#        List-Style reads a set of records of the structure (record ID, property).
+#             List-Style supports reading in more than one property per ID, such that (record ID, property1, property2, etc)
+#             Typically the number of records is the same for each block.
+#             For example the WATER_BALANCE_SUBREGION Block reads NWBS records when using List-Style.
+#             The number of records MUST be well ordered, starting with 1 and sequentially increasing to the number or records.
+#
+#        Array-Style reads in a NROW by NCOL array.
+#
+#           The following is an example ULOAD with NROW = 3,  NCOL = 5, NWBS = 4, and NIRRIGATE = 2
+#
+#                   The first example loads a single property used by the keyword "DEFICIENCY_SCENARIO STATIC LIST" ULOAD
+#                     (Note that the words "STATIC" and "LIST" are discussed later.)
+#
+#                     DEFICIENCY_SCENARIO STATIC LIST ULOAD could have ULOAD as:
+#
+#                                        DEFICIENCY_SCENARIO STATIC LIST   OPEN/CLOSE Input.txt
+#                    where Input.txt is:  _________________________
+#                                        | #RecID  DeficiencyFlag  |
+#                                        |    1     1              |
+#                                        |    2     1              |
+#                                        |    3     1              |
+#                                        |    4     1              |
+#                                        ---------------------------
+#                   or
+#                                         DEFICIENCY_SCENARIO STATIC LIST   INTERNAL
+#                                            #RecID  DeficiencyFlag
+#                                               1     1
+#                                               2     1
+#                                               3     1
+#                                               4     1
+#
+#                   If no GENERIC_INPUT keyword is detected and List-Style only load a single property,
+#                      then it will assume an ImpliedInternal Load (note the record ID is not read and is implied by the order of the input).
+#
+#                   For example:
+#                                         DEFICIENCY_SCENARIO STATIC LIST  1  1  1  1
+#                   or more simply just:
+#                                         DEFICIENCY_SCENARIO STATIC LIST  CONSTANT 1
+#
+#                   An example of List-Style with 2 properties loaded (e.g. EFFICIENCY keyword).
+#                   Record ID is the the WBS number, and represents where the properties are applied,
+#                   and after the RecID is the EFFICIENCY for each irrigation type for that WBS.
+#                                         EFFICIENCY STATIC LIST  INTERNAL
+#                                            #RecID  IRR1  IRR2
+#                                               1    0.6   0.8
+#                                               2    0.6   0.8
+#                                               3    0.6   0.8
+#                                               4    0.6   0.8
+#
+#                   Array-Style reads NROW by NCOL values
+#                   to apply properties spatially rather then through the record ID
+#                   The keyword EFFICIENCY supports both List-Style and Array-Style.
+#                   The following is Array-Style:
+#                                         EFFICIENCY STATIC ARRAY  INTERNAL
+#                                               0.6  0.6  0.6  0.8  0.8
+#                                               0.6  0.6  0.6  0.8  0.8
+#                                               0.6  0.6  0.6  0.8  0.8
+#
+#  TFR => Transient File Reader   -- Read when the keyword "TRANSIENT" is present
+#
+#         TFR is a file that contains on each uncommented row a ULOAD that specifies the stress period (SP) input.
+#         The TFR file is opened with GENERIC_INPUT, which supports all its keywords except INTERNAL.
+#             --Note that that is the TFR cannot be loaded with INTERNAL, but within the TFR a ULOAD may use INTERNAL.
+#
+#           For example a TFR could be opened with: OPEN/CLOSE  TFR.txt
+#
+#           The general structure of a TFR is: _____________________
+#                                              |  ULOAD   # SP 1   |
+#                                              |  ULOAD   # SP 2   |
+#                                              |                   |   Blank lines are ignored and skipped
+#                                              |  ULOAD   # SP 3   |
+#                                              |  ULOAD   # SP 4   |
+#                                              |  # Comment        |   Line is ignored cause its commented
+#                                              |  ULOAD   # SP 5   |
+#                                              |  ULOAD   # SP 6   |  ==> and so forth for each stress period
+#                                              ---------------------
+#
+#           If a TFR file is opened with DATAFILE or DATAUNIT, then it is assumed that the input data directly resides in the file.
+#              This file is called a Direct Data File (DDF), which bypasses the need to specify for each stress period the location of the input.
+#              The closest equivalent would be as if a TFR was specified with all its ULOADS with INTERNAL, but the lines that contained INTERNAL are deleted.
+#
+#           Within the TFR each ULOAD supports the following keywords:
+#                 [SFAC]      => Optional keyword to indicate that advanced scale factors are applied to the keyword on the next line (that is the next stress periods input)
+#                 SKIP        => Input is skipped and automatically set to zero (NULL works as well)
+#                 CONSTANT    => Input is set to a single value that is read after the word CONSTANT ==> CONSTANT 5.5
+#                 INTERNAL    => Input is on subsequent lines
+#                 OPEN/CLOSE  => Input within the file name specified after OPEN/CLOSE.
+#                                   File is opened in memory, input loaded from start of file and then is closed once loaded. If file is reopened with OPEN/CLOSE then it loads from the first line.
+#                 DATAFILE    => Input within the file name specified after DATAFILE.
+#                                   First call of DATAFILE opens in memory, input loaded from start of file, and position within file remains until file is loaded again and the file remains open until simulation ends.
+#                                   Subsequent calls to the same DATAFILE will continue loading from where the last load ended.
+#                 EXTERNAL    => Input within the unit number specified after EXTERNAL, which is specified in the name file as "DATA unit" or "DATA(BINARY) unit". This is equivalent to DATAFILE except the file is declared in the NAME file and referenced by unit number.
+#                 DATAUNIT    => Same as EXTERNAL
+#                 REPEAT      => Reuse previously loaded input, any previously applied scale factors are not carried forward
+#                 RELOAD      => Move previously used file to first line and load input from the start. Previous file must have been opened with DATAFILE, DATAUNIT, OR EXTERNAL
+#                 LOAD_NEXT   => Load previously used file to at its current location with the file.    Previous file must have been opened with DATAFILE, DATAUNIT, OR EXTERNAL
+#
+#  LAI => List-Array Input Style -- Directs if input is loaded once, by stress period and the input structure.
+#
+#  LAI[S,T,A,L] => Letters indicate the supported keyword options:
+#
+#                      S = STATIC    => ULOAD                       -> Data is loaded once with ULOAD for entire simulation
+#
+#                      T = TRANSIENT => Transient File Reader (TFR) -> Data is loaded      with TFR that specifies the input location for each stress period.
+#                                                                                          **Note that if TFR is opened with DATAFILE or DATAUNIT then the TFR is bypassed and the data is loaded directly.
+#                      A = ARRAY     => Data input is NROW by NCOL array-style loaded with ULOAD
+#                      L = LIST      => Data input is record based list-style  loaded with ULOAD using the structure of (record ID, input). The number of records depends on the input type (for example NWBS or NCROP records)
+#
+# LAI[S,T,A,L-N] => N indicates number of List-Style properties that must be read. For example, LAI[S,T,L-2] indicates that STATIC and TRANSIENT keywords are supported and input is LIST with three columns => (record ID, input1, input2)
+#                   N is only specified when it is >1, otherwise it is assumed to be 1
+#
+# Examples for a Keyword "Property"
+#    Property LAI[S,T,A,L] accepts:
+#           Property STATIC     ARRAY  ULOAD    # Data is specified as an array; loaded once by ULOAD; and used for entire simulation.  ***Note that ULOAD is replaced by a GENERIC_INPUT keyword that points to where the data is.
+#           Property TRANSIENT  ARRAY  TFR      # Data is specified as an array; loaded each stress period by a TFR.                    ***Note that TFR   is replaced by a GENERIC_INPUT keyword that points to where the TFR is located. If the TFR is opened with DATAFILE or DATAUNIT, then the raw data is expected to reside in the file (that is no ULOAD on each line in the TFR, but just the raw data).
+#           Property STATIC     LIST   ULOAD    # Data is specified as an List;  loaded once by ULOAD; and used for entire simulation.  ***Note that ULOAD is replaced by a GENERIC_INPUT keyword that points to where the data is.
+#           Property TRANSIENT  LIST   TFR      # Data is specified as an List;  loaded each stress period by a TFR.                    ***Note that TFR   is replaced by a GENERIC_INPUT keyword that points to where the TFR is located. If the TFR is opened with DATAFILE or DATAUNIT, then the raw data is expected to reside in the file (that is no ULOAD on each line in the TFR, but just the raw data).
+#
+#
+##########################################################################################################################
+#
+#
+#
+#         #######################################################################################
+#         #######################################################################################
+#         ###                                                                                 ###
+#         ###     The following is now the FMP4 input blocks and their supported keywords     ###
+#         ###                                                                                 ###
+#         #######################################################################################
+#         #######################################################################################
+#
+#
+#
+BEGIN GLOBAL DIMENSION
+   #
+   # Define maximum dimensions for (defines LIST-Style record count that are read and the range of available IDs)
+   #
+   #   NWBS      => No. of Water Balance Subregions (or Farms)
+   #   NCROP     => No. of Land Use Types (CROPS)
+   #   NSOIL     => No. of Soil Types
+   #
+   NWBS        1
+   NCROP       1
+   NSOIL       1
+   #
+   #   NIRRIGATE  => No. of Irrigation Types (# of columns in EFFICIENCY) -- Set to zero if not specified
+   #   NRD_TYPES  => No. of Non-Routed Deliveries (NRD) Types, this is the number of NRD triplets specified
+   #                        (NRD List Load is: NRD_TYPES*3 Columns) -- Set to zero if not specified
+   #   NSFR_DELIV => No. of SFR semi-routed delivery    (SRD) points that are defined.
+   #   NSFR_RETURN=> No. of SFR semi-routed return flow (SRR) points that are defined.
+   #
+   NIRRIGATE   1
+   NRD_TYPES   0
+   NSFR_DELIV  0
+   NSFR_RETURN 0
+   #
+   # SURFACE_ELEVATION is a 2D FLOAT ARRAY of land surface elevations
+   #
+   SURFACE_ELEVATION CONSTANT 100
+   #
+END
+#
+#
+BEGIN OUTPUT
+   #
+   # Optional Block
+   # Specify Outputs as needed,
+   # If not present then output not created
+   #
+   FARM_WELL_CBC           9                          #IFWLCB -- INT IS THE CBC UNIT TO WRITE TO, Set to zero if not specified
+   FARM_NET_RECHARGE_CBC   9                          #IFNRCB -- INT IS THE CBC UNIT TO WRITE TO, Set to zero if not specified
+   #
+   # The following will either use a predefined name (specified at comment)
+   #   or write file to GENERIC_OUTPUT location/name
+   #
+   FARM_BUDGET                       ./output/fmp_fb_details.txt     # WRITE FB_DETAILS.out
+   WBS_WATER_USE                     ./output/fmp_water_use.txt      # WRITE FMP_WBS_WATER_USE.txt
+END
+#
+BEGIN WATER_BALANCE_SUBREGION
+   #
+   # READ 2D Array of INT that are from 0 to NWBS to indicate the spatial area and location of each WBS
+   #
+   LOCATION  CONSTANT 1
+   #
+   # ------------------------------------------------------------------------------------------------------------------
+   #
+   # EFFICIENCY is REQUIRED if NIRRIGATE > 0
+   #
+   # Irrigation Efficiency (OFE) is between 0-1 and represents OFE=CIR/DEMAND,
+   #    where CIR is the crop irrigation requirement under perfect efficiency
+   #    and Demand is the necessary water demand to meet the CIR
+   #
+   # List-Style Loads NWBS x NIRRIGATE and Array-Style Loads NROW x NCOL
+   #
+   # OFE is tied to the IRRIGATION type, GLOBAL DIMENSION keyword NIRRIGATE.
+   #   If a crop is irrigated then it's IRRIGATION flag is >0 and set equal to the irrigation type (1 to NIRRIGATE).
+   #   If EFFICIENCY input is set to ARRAY, then the (ROW, COL) that the crop is located in determines its OFE when irrigated.
+   #   If EFFICIENCY input is set to LIST,  then the WBS located at the crop's (ROW, COL) determines the EFFICIENCY row
+   #                                             and the crop's IRRIGATION flag determines the EFFICIENCY column.
+   #
+   EFFICIENCY  CONSTANT  0.7
+   #
+END WATER_BALANCE_SUBREGION
+#
+#
+BEGIN SOIL
+   #
+   # Specify soil capillary fringe depth. If specified with LIST,
+   #         then record ID is the location in SOIL_ID that the capillary fringe is applied too.
+   #
+   CAPILLARY_FRINGE  STATIC  LIST  INTERNAL
+   1  1.0
+   #
+   # ------------------------------------------------------------------------------------------------------------------
+   #
+   # SOIL_ID is a NROW by NCOL INT array of Soil ID locations
+   #   The location of each ID are used for the remaining properties if they use LIST input (that is if CAPILLARY_FRINGE is specified by .
+   #
+   SOIL_ID   CONSTANT   1
+   #
+   # ------------------------------------------------------------------------------------------------------------------
+   #
+   # COEFFICIENT is only required if you specify "ROOT_PRESSURE" in the LAND_USE Block
+   #
+   # It is used to determine the water pressure on a crop root and
+   # the root pressures determine its groundwater uptake and soil stress
+   #
+   # If not specified then the groundwater uptake and anoxia follows a linear model as described in Appendix 4 and 5
+   #
+   # ULOAD List-Style input reads NSOIL records that either are a keyword or set of soil coefficients (A, B, C, D, and E)
+   #   Accepted soil COEFFICIENT keywords are:
+   #                                          SILTYCLAY
+   #                                          SILT
+   #                                          SANDYLOAM
+   #                                          SAND
+   #   if a keyword is not detected then input expects five FLOAT soil coefficients, which are:
+   #                                          A B C D E
+   #   For example if NSOIL = 3, then the input could be:
+   #        COEFFICIENT  INTERNAL
+   #          1  SILTYCLAY
+   #          2  0.320149668   -0.328586793   2.851921250   1.3027   -2.0416  # Read "A, B, C, D, and E", which these values happen to be equivalent to the keyword "SILT"
+   #          3  SANDYLOAM
+   #
+   COEFFICIENT  INTERNAL
+   1   SILTYCLAY
+   #
+END SOIL
+#
+#
+BEGIN CLIMATE
+   #
+   # Precipitation that falls on model domain (L/T)
+   #   ***Only the precip that falls land defined with a nonzero WBS (FARM) ID is simulated,
+   #      any zero WBS ID cells have precip set to zero
+   #
+   PRECIPITATION  CONSTANT   0.001
+   #
+   # ------------------------------------------------------------------------------------------------------------------
+   #
+   #
+   # Reference ET (L/T)
+   #      If not specified, then REFERENCE_ET is set to 0.0
+   #   ***This is required there are fallow/bare soil cells,
+   #                    Crop Coefficients (Kc) specified, or
+   #                    Crops specified as FRACTIONS (multiple crops per model cell)
+   #
+   REFERENCE_ET  CONSTANT   0.009
+   #
+END CLIMATE
+#
+#
+BEGIN SURFACE_WATER
+   #
+   # ------------------------------------------------------------------------------------------------------------------
+   #
+   # Defining How Runoff is Handled
+   #
+   # WBS Runoff has four options for how is it is applied. (Note they are listed in order of priority)
+   #   1) Require all runoff to re-infiltrate as deep percolation. (NORETURNFLOW)
+   #   2) Specify the SFR segments/reaches that receive runoff, or define runoff to leave model (SEMI_ROUTED_RETURN)
+   #   3) Prorate runoff across all SFR reaches within a WBS. If no SFR reaches are found then
+   #   4) If a WBS does not have anywhere to apply runoff then it leaves the model domain and a warning is raised.
+   #
+   # If WBS is defined with multiple runoff options, then the previous order determines which one is selected.
+   #   For example NORETURN flow is chosen over SEMI_ROUTED_RETURN if both are specified.
+   #
+   # 1) NO_RETURN_FLOW indicates that surface runoff re-infiltrates as deep percolation.
+   #
+   #     LAI[S,T,L] is optional. If not specified then all WBS have NO_RETURN_FLOW.
+   #     if included then specify NWBS records that have either
+   #        a  1 to indicate the WBS has NO_RETURN_FLOW/No runoff
+   #        or 0 to indicate that it does have return flow and Options 2, 3, and 4 decide the runoff location
+   #
+   NORETURNFLOW
+   #
+END
+#
+#
+BEGIN SUPPLY_WELL
+   #
+   #    The following keywords result in an output file that contains information about the SUPPLY_WELLs
+   #
+   PRINT BYWELL      ./output/fmp_supply_well.txt        # Summary Supply Well output for each active well
+   PRINT ByWBS       ./output/fmp_supply_well_wbs.txt  # Summary Supply Well output by WBS
+   #
+   # ------------------------------------------------------------------------------------------------------------------
+   #
+   # Global Keywords (optional)
+   #
+   # When the demanded water is less than total supply (QMAX) PROTATE specifies how much each well pumps
+   #    ByCapacity uses the ratio of the demand to the total well capacity                 --more Q for large   capacity wells
+   #    ByAverage  uses the average demanded rate per well to determine each wells capacity--more Q for smaller capacity wells
+   #
+   # If not specified then ByCapacity is the default
+   #    ***Similar input as QMAXRESET
+   #
+   PRORATE_DEMAND ByCapacity
+   #
+   # ------------------------------------------------------------------------------------------------------------------
+   #
+   # MNW2 Modification Keywords
+   #
+   # MNW_AUTOMATIC allows for FMP to check if the MNW2 if the MNW2-FMP linked well is enabled in MNW2.
+   #   When a SUPPLY_WELL is enabled in the FMP input and linked to MNW2, it should also be enabled in MNW2 with a Qdes = 0.
+   #
+   #   The keyword MNW_AUTOMATIC_ON tells FMP that it can enable any linked wells in MNW2 when they are enabled in FMP.
+   #      The MNW2 wells remain active with a Qdes = 0 until the simulation ends.
+   #
+   #   The keyword MNW_AUTOMATIC_OFF tells FMP that it can disable any linked wells in MNW2 when they are removed in FMP (no longer provide supply).
+   #      If a MNW2 well is active, but FMP no longer has it as a supply well, then this will disable it from MNW2 as (no intraborehole flow calculation)
+   #
+   #   Ideally it is recommend to have MNW2 activate its linked wells and have them remain active with the drill and destroy dates of the well.
+   #     FMP would then only be linked to the well when they provide groundwater supply.
+   #     These options provide a convenient method to simplify input when the drill and destroy dates are coincident with the FMP supply dates.
+   #
+   MNW_AUTOMATIC_ON  
+   #MNW_AUTOMATIC_OFF
+   #
+   # ------------------------------------------------------------------------------------------------------------------
+   #
+   # REQUIRED INPUT
+   #
+   # Must chose: TIME FRAME, WBS LineFeed, Capacity LineFeed
+   # Then follow the keyword with appropriate WELL_INPUT
+   #
+   #  All well input a minimum contains:
+   #    Well_Name =>  Is a character string to identify the well (20 character max)
+   #                     If supply well is linked to MNW2, then the name must be the
+   #                     same as the MNW2 WELLID it is linked to
+   #    WBS_ID    =>  The WBS that the well provides supply to
+   #    LAY       =>  Is the layer that the supply well pumps from.
+   #                     If set to 0 or "MNW", then Well_Name points to
+   #                     the MNW2 WELLID that does the actual pumping
+   #    ROW       =>  Row    location of supply well (not used if LAY = MNW)
+   #    COL       =>  Column location of supply well (not used if LAY = MNW)
+   #    QCap      =>  Maximum capacity of the supply well (L^3/T). Well cannot pump more than this amount
+   #
+   #
+   #  For all cases if LAY = 0 or "MNW" then FMP-MWN2 link occurs
+   #     Well_Name must equal to a WELLID defined in the MWN2 package
+   #     The pumpage from Well_Name is then handled by MNW2
+   #
+   #
+   TIME FRAME
+   OPEN/CLOSE ./data_fmp/fmp_well.txt
+   #
+   #  WELL_INPUT =>
+   #
+   #  TIME FRAME (recommended option):
+   #   Either specify input on subsequent lines as:
+   #
+   #       Well_Name WBS_ID LAY ROW COL QCapacity Date_Start Date_End
+   #
+   #           --Date_Start/Date_End can either be a stress period number or calendar data:
+   #               mm/dd/yyyy, yyyy-mm-dd, or mm/yyyy
+   #   or
+   #    GENERIC_INPUT, one per line, of file that contain on each row:
+   #                                 Well_Name WBS_ID LAY ROW COL QCapacity Date_Start Date_End
+   #
+   #
+END SUPPLY_WELL
+#
+#
+BEGIN LAND_USE
+   #
+   # The land use block specifies the properties of each land use
+   #  and location in the model grid
+   #
+   #  The input may either expect at most one land use per surface model cell
+   #    or allow for multiple land use types per surface model cell.
+   #
+   # ------------------------------------------------------------------------------------------------------------------
+   #
+   #  The keywords
+   #     SINGLE_LAND_USE_PER_CELL   is the default option if not specified,
+   #                                allowing for at most one land use per model cell
+   #     MULTIPLE_LAND_USE_PER_CELL is used to indicate that simulation should
+   #                                allow for multiple land use types per model cell
+   #
+   # The Land_Use block has all LIST style read NCROP records
+   # If SINGLE_LAND_USE_PER_CELL   is specified then then all ARRAY style input is       NROW by NCOL
+   # If MULTIPLE_LAND_USE_PER_CELL is specified then then all ARRAY style input is NCROP*NROW by NCOL
+   #          (each NROW by NCOL specifies the spatial input for each crop)
+   #
+   SINGLE_LAND_USE_PER_CELL
+   #
+   #
+   # If SINGLE_LAND_USE_PER_CELL then it is required to specify LOCATION
+   #  which indicates where each crop ID is located.
+   #  NROW by NCOL INT array, 0 is bare land, >0 and <= NCROP is the crop grown there
+   #  CANNOT specify LOCATION with MULTIPLE_LAND_USE_PER_CELL
+   #
+   LOCATION  CONSTANT  1
+   #
+   # ------------------------------------------------------------------------------------------------------------------
+   #
+   # OUTPUT OPTIONS --All Optional
+   #
+   PRINT BYWBS_BYCROP  ./output/fmp_land_use_summary.txt  # Summarize output by each WBS for each crop in WBS/Farm
+   PRINT ALL_VERBOSE   ./output/fmp_land_use_verbose.txt  # Summarize output by of every crop by model cell --includes enormous amount of crop information from head to root pressures to crop fractions
+   #
+   # ------------------------------------------------------------------------------------------------------------------
+   #
+   # CROP_COEFFICIENT (Kc) is multiplied by the ETref to get CU -- input requires that REFERENCE_ET (ETref) to be specified
+   # CONSUMPTIVE_USE  (CF) specifies directly the CU
+   #
+   # Potential Consumptive Use CU = CF + Kc*ETref
+   #    If not specified then set to zero.
+   #    If CU = 0.0, then land is assumed to be bare/fallow,
+   #    so all precipitation either becomes runoff or deep percolation
+   #    and groundwater evaporation is determined from (in order of priority):
+   #        1) If POTENTIAL_EVAPORATION_BARE is provided, it is used as the potential evaporation of groundwater underneath the bare soil
+   #        2) If REFERENCE_ET               is provided, it is used as the potential evaporation of groundwater underneath the bare soil
+   #        3) There is no groundwater evaporation
+   #
+   CROP_COEFFICIENT  CONSTANT 1.0
+   #
+   # ------------------------------------------------------------------------------------------------------------------
+   #
+   # IRRIGATION Flag (0 to NIRRIGATE)
+   #
+   #    Determines if crop receives applied water (irrigation) to meet CU
+   #       and the irrigation efficiency (OFE)
+   #
+   #        =0 Indicates that it is not irrigated
+   #        >0 Indicates crop is irrigated and the number is the irrigation type
+   #              The INT specified is the column in EFFICIENCY (WBS Block)
+   #
+   IRRIGATION  CONSTANT	1
+   #
+   # ------------------------------------------------------------------------------------------------------------------
+   #
+   # Crop root depth below land surface.
+   #   Must be >0.0; NOT required or maybe zero if GROUNDWATER_ROOT_INTERACTION = 0 or 1
+   #
+   ROOT_DEPTH  CONSTANT 1.0
+   #
+   #
+   # ROOT_PRESSURE determines if, CONCEPT ONE, an empirical root pressure formulation is used (when specified)
+   #                       or if, CONCEPT TWO, a linear groundwater uptake/linear anoxia model is used (not specified, or all pressures are set to 0.0)
+   #
+   # If specified then SOIL block COEFFICIENT must be specified
+   # If all pressures are specified as 0.0, then the root pressure calculation is not made and the linear uptake model is used for that crop
+   #
+   #ROOT_PRESSURE    LAI[S,T,L-4]
+   #
+   #
+   # Groundwater Root Interaction Flag, Specify as 0, 1 , 2, 3, 4, 5 (default is 5)
+   #     This determines if there is groundwater uptake to meet crop demand and
+   #     if the Potential Consumptive Use is reduced due to anoxia and soil stresses
+   #
+   # 0 = No Transpiration            ==> Zeros out any T requirement
+   # 1 = No Groundwater Interaction  ==> No Root-Groundwater Uptake, No  Anoxia or Stress Reduction, Full CU must be met through surface sources (Precip or Irrigation)
+   # 2 = Has Anoxia/Soil Stress Loss,                      NO Root-Groundwater Uptake ==> CU Reduced from any anoxia and soil stress, but CU may only be satisfied with surface sources
+   # 3 = Has Root-Groundwater Uptake,                      NO Anoxia/Soil Stress Loss ==> Anoxia and Soil Stress losses are either added to Root-Groundwater Uptake or surface consumption requirement  (i.e. if there is root-groundwater uptake, then the amount lost through anoxia is consumed as root-groundwater uptake. However if there is no root-groundwater uptake then the anoxia is added to the surface sources consumption (Precip or Irrigation)
+   # 4 = Has Root-Groundwater Uptake and Soil Stress Loss, NO Anoxia Loss             ==> Anoxia                 losses are either added to Root-Groundwater Uptake or surface consumption requirement  (i.e. if there is root-groundwater uptake, then the amount lost through anoxia is consumed as root-groundwater uptake. However if there is no root-groundwater uptake then the anoxia is added to the surface sources consumption (Precip or Irrigation)
+   # 5 = Full Interaction  ==> HAS Anoxia/Soil Stress Reduction, HAS Root-Groundwater Uptake  (DEFAULT)
+   #
+   GROUNDWATER_ROOT_INTERACTION CONSTANT 3
+   #
+   # ------------------------------------------------------------------------------------------------------------------
+   #
+   # TRANSPIRATION_FRACTION (FTR):
+   #     Fraction of consumptive use that is the potential transpiration of the crop
+   #     Formally defined as FTR = Kcb/Kc = Basal Crop Coefficient / Crop Coefficient
+   #     Can be viewed as the fraction of a unit cropped area covered by leaf matter, i.e. crop cover.
+   #
+   #     If set to zero, then crop is assumed to be fallowed or its area is bare soil
+   #
+   TRANSPIRATION_FRACTION    CONSTANT  0.8
+   #
+   #
+   # EVAPORATION_IRRIGATION_FRACTION (FEI):
+   #     Fraction of a cropped area that is irrigated but is not covered by a crop.
+   #     It should be less than or equal to 1 - FTR  (That is FEI + FTR <= 1), but this is not required.
+   #
+   #     Can be viewed as the area that irrigated water is exposed to the sun and evaporates.
+   #     For example(for example on top of bare soil space between row crops.
+   #
+   #     If FEI + FTR > 1, then the final consumptive use can be larger
+   #                       than the input specified due to evaporation.
+   #                       It can viewed as the water that evaporates before it
+   #                       reaches the crop or evaporates while sitting atop of the leaves.
+   #
+   #    By including the keyword EVAPORATION_IRRIGATION_FRACTION_SUM_ONE_CORRECTION
+   #        forces FMP to correct FEI + FTR > 1 by setting FEI = 1 - FTR (Not Recommended)
+   #
+   #      Optionally, BY_CROP or BY_IRRIGATE may be specified after EVAPORATION_IRRIGATION_FRACTION
+   #
+   #        EVAPORATION_IRRIGATION_FRACTION BY_CROP indicates that
+   #           List-Style input expects NCROP records and applies them by crop type
+   #
+   #        EVAPORATION_IRRIGATION_FRACTION BY_IRRIGATE indicates that
+   #           List-Style input expects NIRRIGATE records and applies them
+   #           by each crop's irrigation type defined with the IRRIGATION keyword
+   #
+   #        If BY_CROP or BY_IRRIGATE is not specified then the input assumes List-Style
+   #           is NCROP records (same as specifying BY_CROP)
+   #
+   #       If FEI = -1, then it is recalculated as FEI = 1 - FTR
+   #
+   EVAPORATION_IRRIGATION_FRACTION   CONSTANT  0.2
+   #
+   #
+   # Any precipitation not consumed by the crop either becomes an inefficient loss.
+   #     The inefficient loss becomes either runoff or deep percolation.
+   #
+   # SURFACEWATER_LOSS_FRACTION_PRECIPITATION indicates
+   #     the fraction of inefficient losses from precipitation that
+   #     goes to surface water compared to deep percolation.
+   #     (e.g. 0.75 indicates 75% of unconsumed precip becomes surface runoff)
+   #
+   SURFACEWATER_LOSS_FRACTION_PRECIPITATION   CONSTANT  0.5
+   #
+   #
+   # Inefficient losses from irrigation is the extra water required to meet an irrigation requirement
+   # They are a result of the EFFICIENCY being less than 1
+   #
+   # SURFACEWATER_LOSS_FRACTION_IRRIGATION: indicates
+   #     the fraction of inefficient losses from irrigation that go
+   #     to surface water compared to deep percolation.
+   #     (e.g. 0.75 indicates 75% of extra irrigation becomes surface runoff)
+   #
+   #      Optionally, BY_CROP or BY_IRRIGATE may be specified after SURFACEWATER_LOSS_FRACTION_IRRIGATION
+   #
+   #        If the keyword is SURFACEWATER_LOSS_FRACTION_IRRIGATION BY_CROP,
+   #           then List-Style input expects NCROP records and applies them by crop type
+   #
+   #        If the keyword is SURFACEWATER_LOSS_FRACTION_IRRIGATION BY_IRRIGATE,
+   #           then List-Style input expects NIRRIGATE records and
+   #           applies them by each crops irrigation type defined with the IRRIGATION keyword
+   #
+   #        If BY_CROP or BY_IRRIGATE is not specified then the input assumes List-Style
+   #           is NCROP records (same as specifying BY_CROP)
+   #
+   SURFACEWATER_LOSS_FRACTION_IRRIGATION  CONSTANT  0.5
+   #
+END LAND_USE
+#
+#
+##########################################################################################################################
+##########################################################################################################################
+##########################################################################################################################
+#                                                                                                                        #
+#                                                                                                                        #
+#           #######################################################################################                      #
+#           #######################################################################################                      #
+#           ###                                                                                 ###                      #
+#           ###         END OF FMP INPUT BLOCKS - THE REMAINDER OF FILE ARE JUST NOTES          ###                      #
+#           ###                                                                                 ###                      #
+#           #######################################################################################                      #
+#           #######################################################################################                      #
+#                                                                                                                        #
+#                                                                                                                        #
+##########################################################################################################################
+##########################################################################################################################
+##########################################################################################################################
+#
+#

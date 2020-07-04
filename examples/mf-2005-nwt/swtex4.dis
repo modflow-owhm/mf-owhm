@@ -1,0 +1,22 @@
+# swtex4
+# MODFLOW-2005 Example problem documented in: 
+#   Harbaugh, A.W., 2005, MODFLOW-2005, the U.S. Geological Survey modular ground-water model -- the Ground-Water Flow Process: U.S. Geological Survey Techniques and Methods 6-A16.
+#   Harbaugh, A.W., Banta, E.R., Hill, M.C. and McDonald, M.G., 2000, MODFLOW-2000, The U.S. Geological Survey Modular Ground-Water Model - User Guide to Modularization Concepts and the Ground-Water Flow Process: U.S Geological Survey Open-File Report 2000-92, 121 p., https://doi.org/10.3133/ofr200092
+#   Leake, S.A., and Galloway, D.L., 2007, MODFLOW ground-water model -- User guide to the Subsidence and Aquifer-System Compaction Package (SUB-WT) for Water-Table Aquifers: U.S. Geological Survey Techniques and Methods, Book 6, Chap. A23, 42 p.
+# 
+#      -Comments are preceded by a # sign
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+         4        20        15   3   4   2  # NLAY,NROW,NCOL,NPER,ITMUNI,LENUNI
+ 0 0 0 0
+CONSTANT   2.000E+03                        # DELR
+CONSTANT   2.000E+03                        # DELC
+CONSTANT   1.500000E+02                     # TOP
+CONSTANT   5.000000E+01                     # BOT layer  1
+CONSTANT  -1.000000E+02                     # BOT layer  2
+CONSTANT  -1.500000E+02                     # BOT layer  3
+CONSTANT  -3.500000E+02                     # BOT layer  4
+   1.0                  1 1.000E00   SS     # PERLEN,NSTP,TSMULT,Ss/tr
+   2.191500E+04        60 1.000E+00  TR     # PERLEN,NSTP,TSMULT,Ss/tr
+   2.191500E+04        60 1.000E+00  TR     # PERLEN,NSTP,TSMULT,Ss/tr

@@ -1,0 +1,124 @@
+#
+# Listing of all available Options for the MNW2 package
+#
+# Options are grouped based on common usage or when only one should be selected
+#
+# The Option block is placed at the start of the MNW2 package input.
+#    If there are multiple block style inputs (BEGIN/END), the order of the blocks does not matter.
+#
+BEGIN OPTIONS
+    #
+    # Output Files ----------------------------------------------------------------------------------------------------------------------------------
+    #   Generic_Output is a place holder for the output file location.
+    #   The file name that is commented to the right is the recommended name.
+    #   Example use:
+    #               PRINT_WELL_PUMPING   ./output/MNW2_Pumping.txt
+    #
+    # Simple output that prints for all active wells Desired and Actual pumping and the Well Head
+    PRINT_WELL_PUMPING    GENERIC_OUTPUT                      # MNW2_Pumping.txt
+    #
+    #Similar to previous output, but includes total groundwater flow into the well and out of the well
+    PRINT_WELL_INOUT      GENERIC_OUTPUT                      # MNW2_INOUT.txt
+    #
+    # Prints each well's desired pumping rate and each of its nodes flow rates
+    PRINT_WELL_NODE_FLOW  GENERIC_OUTPUT                      # MNW2_Node_Flow.txt
+    #
+    # Prints each well's node flow rate between the node and model cell, the node's well head, cell's head, and conductance.
+    #    The well head is either the entire well's head value or the cell's bottom elevation.
+    PRINT_NODE_INFO       GENERIC_OUTPUT                      # MNW2_Node_Info.txt   #Head and Cond by Node
+    #
+    # Advanced Options ------------------------------------------------------------------------------------------------------------------------------
+    #
+    # If screen interval is less than FracScrn fraction of layer then ignore that section of the screen
+    #     --If screen includes multiple layers and is >FracScrn, then those are simulated.
+    #   If not specified then FracScrn = 0.01, which indicates well screens are ignored if they are less than 1% of a layer.
+    CELL_PERF_MIN_FRACTION FracScrn
+    #
+    # Iteration limit before holding partial penetration correction factor constant.
+    # The correction factor is applied to the estimated well node's pumping rate, which changes every solver iteration.
+    #  If not specified, then MxIter = 15
+    #     That is, the PP correction factor is calculated for the first 15 solver iterations, then held constant.
+    #     Typically after 15 iterations the correction factor no longer changes.
+    PP_CON_ITER_LIM        MxIter
+    #
+    # Defines auxiliary values that are read with input.
+    #   AuxName is the specific auxiliary value that is read.
+    AUXILIARY  AuxName
+    AUX        AuxName
+    #
+    # Special Options - NOT RECOMMENDED - USE WITH CAUTION ------------------------------------------------------------------------------------------
+    #
+    # By default, MNW solves for the first solver iteration the nodal pumping rate
+    #   and subtracts it from the RHS vector (like the WEL package).
+    #   Then the next solver iteration applies the well head and conductance to the HCOF vector (like the GHB package).
+    #   Then the next solver flips back to using the RHS side, and then HCOF again, and so forth until convergence is met.
+    #
+    # Option indicates that MNW2 should only solve using the RHS vector only (WEL package like solution)
+    RHS_ONLY
+    #
+    # Option indicates that MNW2 should only solve using the HCOF vector only (GHB package like solution)
+    HCOF_ONLY
+    #
+    # MNW2 flips between RHS and HCOF until MxIter solver iterations, and then only solves using HCOF.
+    ONLY_HCOF_AFTER  MxIter
+END OPTIONS
+#
+# MNW2 Also supports the following blocks
+#
+BEGIN BUDGET_GROUP
+                #
+                BGROUP   #Repeat for as many budget group names that should be calculated as part of the volumetric budget (see Appendix 3 Budget Groups for more details).
+                #
+END BUDGET_GROUP
+#
+BEGIN LineFeed  #Alternative MNW Q-desired input
+  #
+  # Repeat as needed.
+  #   FeedFile is opened with Generic_Input (See LineFeed in Appendix 2 and 3)
+  FeedFile     #  Example:   " ./Pumping/FeedFile_MNW2_Domestic_Pumping.txt "
+  #
+END LineFeed
+#
+#
+#
+# Example FeedFile (Not it has been commented out because it is a separate file (eg FeedFile_MNW2_Domestic_Pumping.txt)
+# The vertical pipe, |, is used to represent the page borders (# indicates a comment within the FeedFile):
+#   ___________________________________________________________________________________
+#   |                                                                                 |
+#   |   # FeedFile that specifies domestic pumping by stress period                   |
+#   |   #                                                                             |
+#   |   # Define the MNW2 WELLIDs that will have desired pumping (Qdes) defined.      |
+#   |   # Terminate reading of segments with keyword "TEMPORAL INPUT"                 |
+#   |   #                                                                             |
+#   |   #   The order specified, also is the order that Qdes is specified             |
+#   |   # WELLID                                                                      |
+#   |     Well_55                                                                       |
+#   |     USGS_Obs1                                                                     |
+#   |     City_Supply                                                                   |
+#   |     Injector1                                                                     |
+#   |                                                                                 |
+#   |   #     Terminate reading of segments that are defined in the FeedFile          |
+#   |                                                                                 |
+#   |   TEMPORAL INPUT                                                                |
+#   |   #                                                                             |
+#   |   # Each column is the Qdes for the WELLID defined above                        |
+#   |   # Well_55  USGS_Obs1  City_Supply   Injector1                                 |
+#   |     -145.0   0.0        -1066.0       88.0      # Stress Period 1  FLOW input   |
+#   |     -146.0   0.0        -1067.0       87.0      # Stress Period 2  FLOW input   |
+#   |     -147.0   0.0        -1068.0       86.0      # Stress Period 3  FLOW input   |
+#   |     -148.0   0.0        -1069.0       0.0       # Stress Period 4  FLOW input   |
+#   |     -149.0   0.0        -1070.0       50.0      # Stress Period 5  FLOW input   |
+#   |   # Well_55  USGS_Obs1  City_Supply   Injector1                                 |
+#   |     -233.0   0.0        -1080.0       50.0      # Stress Period 6  FLOW input   |
+#   |     -232.0   0.0        -1095.0       50.0      # Stress Period 7  FLOW input   |
+#   |     -233.0   0.0        -1000.0       50.0      # Stress Period 8  FLOW input   |
+#   |     -232.0   0.0        -1000.0       50.0      # Stress Period 9  FLOW input   |
+#   |     -233.0   0.0        -1000.0       50.0      # Stress Period 10 FLOW input   |
+#   |     -232.0   0.0        -1000.0       50.0      # Stress Period 11 FLOW input   |
+#   |     -233.0   0.0        -1000.0       50.0      # Stress Period 12 FLOW input   |
+#   |     -232.0   0.0        -1000.0       50.0      # Stress Period 13 FLOW input   |
+#   |     -233.0   0.0        -1000.0       50.0      # Stress Period 14 FLOW input   |
+#   |     -232.0   0.0        -1000.0       50.0      # Stress Period 15 FLOW input   |
+#   |     -233.0   0.0        -1000.0       50.0      # Stress Period 16 FLOW input   |
+#
+#

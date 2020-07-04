@@ -1,0 +1,14 @@
+# SWRSample03
+# MODFLOW-SWR Example problem documented in: 
+#    Hughes, J.D., Langevin, C.D., Chartier, K.L., and White, J.T., 2012, Documentation of the Surface-Water Routing (SWR1) Process for modeling surface-water flow with the U.S. Geological Survey Modular Ground-Water Model: U.S. Geological Survey Techniques and Methods 6-A40, 113 p.
+# 
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+#
+LIST 7 ./output/SWRSample03.lst
+BAS6  1 SWRSample03.bas
+DIS  29 SWRSample03.dis
+LPF 11 SWRSample03.lpf
+OC  22 SWRSample03.oc
+PCG 19 SWRSample03.pcg
+SWR 61 SWRSample03.swr
+DATA         102 ./output/SWRSample03_Stage.stg

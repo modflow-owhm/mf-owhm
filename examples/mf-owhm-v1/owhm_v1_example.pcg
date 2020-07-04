@@ -1,0 +1,2 @@
+1000 100 1                  # NPCOND 1 - mod. incomplete, 2 - polynomial
+0.001 0.02 1. 2 1 1 0.4     # HCLOSE(head),RCLOSE(FLOWRATE: should be rel. high for m3/DAY)

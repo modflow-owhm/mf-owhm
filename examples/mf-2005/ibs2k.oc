@@ -1,0 +1,43 @@
+# ibs2k
+# MODFLOW-2005 Example problem documented in: 
+#   Harbaugh, A.W., 2005, MODFLOW-2005, the U.S. Geological Survey modular ground-water model -- the Ground-Water Flow Process: U.S. Geological Survey Techniques and Methods 6-A16.
+#   Harbaugh, A.W., Banta, E.R., Hill, M.C. and McDonald, M.G., 2000, MODFLOW-2000, The U.S. Geological Survey Modular Ground-Water Model - User Guide to Modularization Concepts and the Ground-Water Flow Process: U.S Geological Survey Open-File Report 2000-92, 121 p., https://doi.org/10.3133/ofr200092
+#   Leake, S.A., and Prudic, D.E., 1991, Documentation of a computer program to simulate aquifer-system compaction using the modular finite-difference ground-water flow model: U.S. Geological Survey Techniques of Water- Resources Investigations, book 6, chap. A2, 68 p.
+# 
+#      -Comments are preceded by a # sign
+#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+         5         5         0         0   # IHEDFM, IDDNFM
+        -1         0         0         0   # INCODE, IHDDFL period 1, step 1
+        -1         0         0         0   # INCODE, IHDDFL period 1, step 2
+        -1         0         0         0   # INCODE, IHDDFL period 1, step 3
+        -1         0         0         0   # INCODE, IHDDFL period 1, step 4
+        -1         0         0         0   # INCODE, IHDDFL period 1, step 5
+        -1         0         0         0   # INCODE, IHDDFL period 1, step 6
+        -1         0         0         0   # INCODE, IHDDFL period 1, step 7
+        -1         0         0         0   # INCODE, IHDDFL period 1, step 8
+        -1         0         0         0   # INCODE, IHDDFL period 1, step 9
+         0         1         1         0   # INCODE, IHDDFL period 1, step 10
+         1         0         0         0   # Hdpr
+        -1         0         0         0   # INCODE, IHDDFL period 2, step 1
+        -1         0         0         0   # INCODE, IHDDFL period 2, step 2
+        -1         0         0         0   # INCODE, IHDDFL period 2, step 3
+        -1         0         0         0   # INCODE, IHDDFL period 2, step 4
+        -1         0         0         0   # INCODE, IHDDFL period 2, step 5
+        -1         0         0         0   # INCODE, IHDDFL period 2, step 6
+        -1         0         0         0   # INCODE, IHDDFL period 2, step 7
+        -1         0         0         0   # INCODE, IHDDFL period 2, step 8
+        -1         0         0         0   # INCODE, IHDDFL period 2, step 9
+         0         1         1         0   # INCODE, IHDDFL period 2, step 10
+         1         0         0         0   # Hdpr
+        -1         0         0         0   # INCODE, IHDDFL period 3, step 1
+        -1         0         0         0   # INCODE, IHDDFL period 3, step 2
+        -1         0         0         0   # INCODE, IHDDFL period 3, step 3
+        -1         0         0         0   # INCODE, IHDDFL period 3, step 4
+        -1         0         0         0   # INCODE, IHDDFL period 3, step 5
+        -1         0         0         0   # INCODE, IHDDFL period 3, step 6
+        -1         0         0         0   # INCODE, IHDDFL period 3, step 7
+        -1         0         0         0   # INCODE, IHDDFL period 3, step 8
+        -1         0         0         0   # INCODE, IHDDFL period 3, step 9
+         0         1         1         0   # INCODE, IHDDFL period 3, step 10
+         1         0         0         0   # Hdpr

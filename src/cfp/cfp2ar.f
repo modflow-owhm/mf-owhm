@@ -238,8 +238,8 @@ C--LOCAL VARIABLES
       REAL,DIMENSION(:,:),ALLOCATABLE:: ARR
 C
 C--BARC**FOR CFPMODE 2 U2DREL
-      CHARACTER*24 ANAME(5)
-CB      CHARACTER*12 AVGNAM(4)
+      CHARACTER(24) ANAME(5)
+CB      CHARACTER(12) AVGNAM(4)
 CB      DATA AVGNAM/'HARMONIC    ','ARITHMETIC  ',
 CB     1            'LOGARITHMIC ','*UNCONFINED*'/
 C
@@ -1191,19 +1191,19 @@ C
  9004 FORMAT (4X, 'NUMBER OF FHLQ BCS IS ', I5) 
  9005 FORMAT (I4, 4X, G11.4)                                             !TR: 2012 05 25 
  9006 FORMAT (I4, 4X, G11.4, 5X, F7.3)      
- 9016 FORMAT (I4, 4X, G11.4, 5X, 4(F7.2,X,F7.3))                         !TR: 2013 06 28 CADSML
+ 9016 FORMAT (I4, 4X, G11.4, 5X, 4(F7.2,1x,F7.3))                         !TR: 2013 06 28 CADSML
  9007 FORMAT (4X, 'NUMBER OF WELL BCS IS ', I5,'; THEREOF TD WELLS:',I5)!TR: 2013 04 03 
  9008 FORMAT (4X, 'NUMBER OF CAUCHY BCS IS ', I3,'; THEREOF TD BCS:',I5)!TR: 2013 03 14 CAUCHY / 2013 04 03 CAUCHY TD
  9015 FORMAT (4X, 'NUMBER OF LH BCS IS ', I7)                           !TR: 2013 03 22 LH 
  9020 FORMAT (F5.0, 3X, F7.3, 7X, F5.2, 2X, F7.4, 4X, F8.2, 3X, F8.2)   !TR: 2012 12 11 FORMAT FOR TUBE DATA OUTPUT
- 9030 FORMAT (I5,2X,F8.4,x,'FHLQ, LQ:',F8.4)                            !TR: 2013 03 19 FORMAT FHLQ BC OUTPUT
+ 9030 FORMAT (I5,2X,F8.4,1x,'FHLQ, LQ:',F8.4)                            !TR: 2013 03 19 FORMAT FHLQ BC OUTPUT
  9035 FORMAT (I5,4X,'FHLQ WITH FH DATA READ FROM UNIT:',I3,' FHLQ, LQ:',
      +        F8.4)                                                     !TR: 2013 03 19 FORMAT FHLQ BC OUTPUT 
- 9040 FORMAT (I5,3X,F8.4,X,'WELL (NO INTERNAL SKIN)')                   !TR: 2013 03 19 FORMAT WELL BC OUTPUT // 2016 10 11 ADD NO SKIN MESSAGE
- 9042 FORMAT (I5,3X,F8.4,X,'WELL (INTERNAL SKIN WITH CWC_WELL: ',F10.6,
+ 9040 FORMAT (I5,3X,F8.4,1x,'WELL (NO INTERNAL SKIN)')                   !TR: 2013 03 19 FORMAT WELL BC OUTPUT // 2016 10 11 ADD NO SKIN MESSAGE
+ 9042 FORMAT (I5,3X,F8.4,1x,'WELL (INTERNAL SKIN WITH CWC_WELL: ',F10.6,
      +        ')')                                                      !TR: 2013 03 19 FORMAT WELL BC OUTPUT  
- 9045 FORMAT (I5,2X,F8.4,X,'WELL TD (NO INTERNAL SKIN)')                !TR: 2013 04 03 FORMAT WELL TD BC OUTPUT   
- 9047 FORMAT (I5,2X,F8.4,X,'WELL TD (INTERNAL SKIN WITH CWC_WELL: ',
+ 9045 FORMAT (I5,2X,F8.4,1x,'WELL TD (NO INTERNAL SKIN)')                !TR: 2013 04 03 FORMAT WELL TD BC OUTPUT   
+ 9047 FORMAT (I5,2X,F8.4,1x,'WELL TD (INTERNAL SKIN WITH CWC_WELL: ',
      +        F10.6,')')                                                !TR: 2016 10 21 FORMAT WELL BC OUTPUT       
  9050 FORMAT (I5,4X,'CAUCHY, HCY:',F8.4,2X,'CCY:',F8.4,2X,'CYLQ:',F8.4) !TR: 2013 03 19 FORMAT CAUCHY BC OUTPUT
  9055 FORMAT (I5,4X,'CAUCHY, HCY AS TD DATA FROM UNIT:',I3,2X,
@@ -1256,7 +1256,7 @@ C--ARGUMENTS
 C
 C--LOCAL VARIABLES
       INTEGER I, N, T, IDUMMY
-      CHARACTER*8 NAME, NAME_MULTI(8)                                   !TR: 2013 08 12 TSAN
+      CHARACTER(8) NAME, NAME_MULTI(8)                                   !TR: 2013 08 12 TSAN
 C
 C--BARC**ALLOCATE
       ALLOCATE (NOTSNO, NOTSTU, NNODES, NTUBES, TSNO, TSTU, TSA_FLG,
@@ -1296,7 +1296,7 @@ C--READ NNODES
       NNODES = READIN(1)                                                !TR: 2013 08 12 TSAN
       NTSAN = READIN(2)                                                 !TR: 2013 08 13 TSAN
       IF (NNODES.LT.Z) THEN                                             !TR: 2013 05 13 TSA OUTPUT
-        NNODES = NNODES * -1                                            !TR: 2013 05 13 TSA OUTPUT
+        NNODES = -NNODES !* -1                                            !TR: 2013 05 13 TSA OUTPUT
         TSA_FLG = TRUE                                                !TR: 2013 05 13 TSA OUTPUT
       ENDIF                                                             !TR: 2013 05 13 TSA OUTPUT
       NCOUNT = NNODES                                                   !TR: 2013 05 17 SET NCOUNT FOR THE FIRST TIME
