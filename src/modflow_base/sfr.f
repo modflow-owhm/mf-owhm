@@ -3975,7 +3975,7 @@ C29-----CALCULATE AN INITIAL ESTIMATE OF FLOW IN CHANNEL.
               IF ( flwmpt.LT.NEARZERO .AND. h.GT.strtop ) THEN
                 flwest = (strlen*avhc/sbdthk)*(ABS(strtop-h))
               ELSE
-                flwest = 0d0 ! flwmpt SCOTT
+                flwest = flwmpt
               END IF
               IF ( flwest.LT.NEARZERO ) THEN
                 depth = 0.0D0

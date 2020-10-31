@@ -16,6 +16,24 @@ Boyce, S.E., Hanson, R.T., Ferguson, I., Schmid, W., Henson, W., Reimann, T., Me
 
 ------
 
+## 2.0.2a
+
+yyyy-mm-dd
+
+### Fixed
+
+* `SFR` issue for segments with `ICALC ≥ 2` that would solve for stream depth with Newton–Raphson with an initial stream flow guess of zero instead of the stream reaches inflow.
+    * For most cases this fix only affected simulation runtime and only altered the solution after the sixth significant digit (single precision tolerance).
+
+- `FMP` — `LAND_USE (Crop) Block` output files did not correctly write `TOT_SURF_RUNOFF`  
+    for crops that set `SURFACEWATER_LOSS_FRACTION_PRECIPITATION` to one. 
+    - The affected options were `BYWBS`, `BYWBS_BYCROP`, `BYCROP`, `ALL`, and `ALL_VERBOSE`
+    - This error had no affect on the actual simulation results nor other output files.
+
+&nbsp; 
+
+------
+
 ## 2.0.1
 
 2021-03-15
