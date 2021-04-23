@@ -3975,7 +3975,7 @@ C29-----CALCULATE AN INITIAL ESTIMATE OF FLOW IN CHANNEL.
               IF ( flwmpt.LT.NEARZERO .AND. h.GT.strtop ) THEN
                 flwest = (strlen*avhc/sbdthk)*(ABS(strtop-h))
               ELSE
-                flwest = 0d0 ! flwmpt SCOTT
+                flwest = flwmpt
               END IF
               IF ( flwest.LT.NEARZERO ) THEN
                 depth = 0.0D0
@@ -4348,12 +4348,18 @@ C45-----CALCULATE NEWTON VARIABLES FOR ICALC EQUAL TO 4.
 C
 C46-----CALCULATE DERIVATIVES FOR DEPTH DEPENDENT VARIABLES FOR ICALC
 C         GREATER THAN 1.
-                dlpp1 = (precip*(widtha-widthb))/(deptha-depthb)
-                dlpp2 = (precip*(widthc-widthd))/(depthc-depthd)
-                dlet1 = (etstr*(widtha-widthb))/(deptha-depthb)
-                dlet2 = (etstr*(widthc-widthd))/(depthc-depthd)
-                dlwp1 = (wetperma-wetpermb)/(deptha-depthb)
-                dlwp2 = (wetpermc-wetpermd)/(depthc-depthd)
+                dlpp1 = DIV(precip*(widtha-widthb), deptha-depthb)
+                dlpp2 = DIV(precip*(widthc-widthd), depthc-depthd)
+                dlet1 = DIV(etstr*(widtha-widthb) , deptha-depthb)
+                dlet2 = DIV(etstr*(widthc-widthd) , depthc-depthd)
+                dlwp1 = DIV(wetperma-wetpermb     , deptha-depthb)
+                dlwp2 = DIV(wetpermc-wetpermd     , depthc-depthd)
+                !dlpp1 = (precip*(widtha-widthb))/(deptha-depthb)
+                !dlpp2 = (precip*(widthc-widthd))/(depthc-depthd)
+                !dlet1 = (etstr*(widtha-widthb))/(deptha-depthb)
+                !dlet2 = (etstr*(widthc-widthd))/(depthc-depthd)
+                !dlwp1 = (wetperma-wetpermb)/(deptha-depthb)
+                !dlwp2 = (wetpermc-wetpermd)/(depthc-depthd)
 Cdep revised pp1,pp2,et1,and et2, wrong placement of parenthesis.
                 pp1 = precip*(width1)+dlpp1*dlh
                 pp2 = precip*(width2)+dlpp2*dlh
@@ -5101,6 +5107,19 @@ C81-----END INTERNAL TIME LOOP FOR ROUTING STREAMFLOWS.
 C
 C82-----RETURN.
       RETURN
+      CONTAINS
+             PURE FUNCTION DIV(NUM, DENOM) RESULT(ANS)
+             IMPORT:: NEARZERO
+             REAL, INTENT(IN):: NUM, DENOM
+             REAL:: ANS
+             !
+             IF(ABS(DENOM) < NEARZERO) THEN
+                                       ANS = 0.
+             ELSE
+                                       ANS = NUM/DENOM
+             END IF
+             !
+             END FUNCTION
       END SUBROUTINE GWF2SFR7FM
 C
 C-------SUBROUTINE GWF2SFR7BD
@@ -6565,7 +6584,7 @@ C     ******************************************************************
 C     COMPUTE STREAM DEPTH GIVEN FLOW USING 8-POINT CROSS SECTION
 !--------REVISED FOR MODFLOW-2005 RELEASE 1.9, FEBRUARY 6, 2012
 C     ******************************************************************
-      USE CONSTANTS, ONLY: DZ,NEARZERO_12,NEARZERO_20
+      USE CONSTANTS, ONLY: DZ,NEARZERO_30
       USE GWFSFRMODULE, ONLY: CONST, XSEC, NEARZERO, IOUT
       IMPLICIT NONE
       INTRINSIC DMIN1, SQRT, DABS
@@ -6585,7 +6604,7 @@ C     ------------------------------------------------------------------
      +                 depth1, depth2, depth3, f1, f2, f3, err1, err2, 
      +                 err3
 C     ------------------------------------------------------------------
-      IF(Flow < NEARZERO_12) THEN
+      IF(Flow < NEARZERO_30) THEN
                               Flow    = DZ
                               Depth   = DZ
                               Wetperm = DZ
@@ -6737,9 +6756,9 @@ C15-----CALCULATE WETTED PERIMETER AND WIDTH FROM FINAL DEPTH.
         Itstr   = 0
       END IF
       !
-      IF(Depth   < NEARZERO_20 .OR. 
-     +   Totwdth < NEARZERO_20 .OR. 
-     +   Wetperm < NEARZERO_20     ) THEN
+      IF(Depth   < NEARZERO_30 .OR. 
+     +   Totwdth < NEARZERO_30 .OR. 
+     +   Wetperm < NEARZERO_30     ) THEN
                                      Flow    = DZ
                                      Depth   = DZ
                                      Totwdth = DZ
@@ -6757,7 +6776,7 @@ C     *******************************************************************
 C     COMPUTE FLOW IN STREAM GIVEN DEPTH USING 8-POINT CROSS SECTION
 !--------REVISED FOR MODFLOW-2005 RELEASE 1.9, FEBRUARY 6, 2012
 C     *******************************************************************
-      USE CONSTANTS, ONLY: DZ,NEARZERO_12,NEARZERO_20
+      USE CONSTANTS, ONLY: DZ,NEARZERO_30
       USE GWFSFRMODULE, ONLY: XSEC, CONST
       IMPLICIT NONE
       INTRINSIC DABS, DSQRT
@@ -6779,7 +6798,7 @@ C     -------------------------------------------------------------------
      +                 width2, width3, width, subarea1, subarea2, 
      +                 subarea3, subflow1, subflow2, subflow3
 C     -------------------------------------------------------------------
-      IF(Depth < NEARZERO_12) THEN
+      IF(Depth < NEARZERO_30) THEN
                               Flow    = DZ
                               Depth   = DZ
                               Totwdth = DZ
@@ -6898,9 +6917,9 @@ C10-----SUM FLOW, WETTED PERIMETER, AND WIDTH FOR SUBSECTIONS.
       Totwdth = width1 + width2 + width3
       Wetperm = wtprm1 + wtprm2 + wtprm3
       !
-      IF(Flow    < NEARZERO_20 .OR. 
-     +   Totwdth < NEARZERO_20 .OR. 
-     +   Wetperm < NEARZERO_20     ) THEN
+      IF(Flow    < NEARZERO_30 .OR. 
+     +   Totwdth < NEARZERO_30 .OR. 
+     +   Wetperm < NEARZERO_30     ) THEN
                                      Flow    = DZ
                                      Depth   = DZ
                                      Totwdth = DZ
@@ -6917,7 +6936,7 @@ C     *******************************************************************
 C     COMPUTE DEPTH AND WIDTH IN STREAM GIVEN FLOW USING RATING TABLES.
 !--------REVISED FOR MODFLOW-2005 RELEASE 1.9, FEBRUARY 6, 2012
 C     *******************************************************************
-      USE CONSTANTS,    ONLY: DZ,HUND,DIEZ,D100,NEARZERO_12,NEARZERO_20
+      USE CONSTANTS,    ONLY: DZ,HUND,DIEZ,D100,NEARZERO_30
       USE GWFSFRMODULE, ONLY: QSTAGE
       IMPLICIT NONE
       INTRINSIC DLOG10
@@ -6936,7 +6955,7 @@ C     -------------------------------------------------------------------
      +                 dflwhi, dstglw, dstghi, dwthlw, dwthhi, dlgflw, 
      +                 dlgsls, dlgslw, dlgstg, dlgwth
 C     -------------------------------------------------------------------
-      IF(Flow  < NEARZERO_12) THEN
+      IF(Flow  < NEARZERO_30) THEN
                               Flow  = DZ
                               Width = DZ
                               Depth = DZ
@@ -6955,7 +6974,7 @@ C2------USE A LINEAR INTERPOLATION TO ESTIMATE DEPTH AND WIDTH WHEN
 C         FLOW IS LESS THAN LOWEST VALUE IN TABLE.
       IF ( Flow.LE.flwlw ) THEN
         !
-        IF (flwlw < NEARZERO_12) THEN
+        IF (flwlw < NEARZERO_30) THEN
             Flow  = DZ
             Width = DZ
             Depth = DZ
@@ -7010,7 +7029,7 @@ C6------COMPUTE DEPTH AND WIDTH FROM LOG INTERPOLATION.
         dflwhi = DLOG10(flwhi)
         dlgflw = DLOG10(Flow) - dflwlw
         !
-        IF(ABS(dflwhi-dflwlw) > NEARZERO_20) THEN
+        IF(ABS(dflwhi-dflwlw) > NEARZERO_30) THEN
                                 dlgsls = (dstghi-dstglw)/(dflwhi-dflwlw)
                                 dlgslw = (dwthhi-dwthlw)/(dflwhi-dflwlw)
         ELSE
@@ -7051,7 +7070,7 @@ C     COMPUTE FLOW AND WIDTH IN STREAM GIVEN DEPTH USING RATING TABLES.
 !--------REVISED FOR MODFLOW-2005 RELEASE 1.9, FEBRUARY 6, 2012
 C     *******************************************************************
       USE GWFSFRMODULE, ONLY: QSTAGE, IOUT!!, DVRPERC
-      USE CONSTANTS,    ONLY: DZ,HUND,DIEZ,D100,NEARZERO_12,NEARZERO_20
+      USE CONSTANTS,    ONLY: DZ,HUND,DIEZ,D100,NEARZERO_30
       IMPLICIT NONE
       INTRINSIC DLOG10
 C     -------------------------------------------------------------------
@@ -7070,7 +7089,7 @@ C     -------------------------------------------------------------------
      +                 dlgslf, dlgslw, dlgstg, dlgwth
 !!      REAL dum, totdum
 C     -------------------------------------------------------------------
-      IF(Depth < NEARZERO_12) THEN
+      IF(Depth < NEARZERO_30) THEN
                               Flow  = DZ
                               Width = DZ
                               Depth = DZ
@@ -7089,7 +7108,7 @@ C2------USE A LINEAR INTERPOLATION TO ESTIMATE FLOW AND WIDTH WHEN
 C         DEPTH IS LESS THAN LOWEST VALUE IN TABLE.
       IF ( Depth.LE.stglw ) THEN
         !
-        IF (stglw < NEARZERO_12 .OR. flwlw < NEARZERO_12) THEN
+        IF (stglw < NEARZERO_30 .OR. flwlw < NEARZERO_30) THEN
             Flow  = DZ
             Width = DZ
             Depth = DZ
@@ -7152,7 +7171,7 @@ C6------COMPUTE DEPTH AND WIDTH FROM LOG INTERPOLATION.
         dflwhi = DLOG10(flwhi)
         dlgstg = DLOG10(Depth) - dstglw
         !
-        IF(ABS(dstghi-dstglw) > NEARZERO_20) THEN
+        IF(ABS(dstghi-dstglw) > NEARZERO_30) THEN
                                 dlgslf = (dflwhi-dflwlw)/(dstghi-dstglw)
                                 dlgslw = (dwthhi-dwthlw)/(dstghi-dstglw)
         ELSE

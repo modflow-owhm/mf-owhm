@@ -14,7 +14,7 @@ MODULE CROP_DATA_FMP_MODULE
   !
   USE CONSTANTS
   USE ULOAD_AND_SFAC_INTERFACE
-  USE SORT_INTERFACE
+  USE SORT_INTERFACE,                   ONLY: SORT
   USE SET_ARRAY_INTERFACE,              ONLY: SET_ZERO
   !USE RELAX_INTERFACE,                  ONLY: RELAX_IT
   USE ERROR_INTERFACE,                  ONLY: STOP_ERROR, WARNING_MESSAGE, FILE_IO_ERROR
@@ -1152,7 +1152,7 @@ MODULE CROP_DATA_FMP_MODULE
                                   DO K = ONE, THREE
                                         IF(PSI(K) < PSI(K+1)) THEN
                                             ERROR = ERROR//'ROOT PRESSURES (PSI) ARE NOT IN DESCENDING ORDER FOR CROP '//NUM2STR(I,-8)//' THEY WILL BE SORTED TO BE IN DECENDING ORDER (PLEASE CHECK YOUR INPUT).'//NL
-                                            CALL SORT(FOUR, PSI)
+                                            CALL SORT(PSI)
                                             EXIT
                                         END IF
                                   END DO
@@ -6381,14 +6381,14 @@ MODULE CROP_DATA_FMP_MODULE
           !
           IF(EXCESS > NEARZERO_30) THEN
                 IF(UPLAY(C,R) == Z) THEN  ! ALL LAYERS ARE IBOUND=Z SO NO PERMIABLE MATERIAL TO PERCOLATE INTO
+                               WBS%RUNOFF(C,R)       = WBS%RUNOFF(C,R) + EXCESS
                                CDAT%CROP(I)%RNOFF(K) = EXCESS
-                               WBS%RUNOFF(C,R) = WBS%RUNOFF(C,R) + EXCESS
                 ELSE
                      IF(    CDAT%CROP(I)%FIESWI(K) < NEARZERO_30) THEN
-                                                               WBS%DPERC(C,R)  = WBS%DPERC(C,R)  + EXCESS
+                                                               WBS%DPERC(C,R)        = WBS%DPERC(C,R)  + EXCESS
                                                                CDAT%CROP(I)%DPERC(K) = EXCESS
                      ELSEIF(CDAT%CROP(I)%FIESWI(K) >= UNO) THEN!------------------------------------------
-                                                               WBS%RUNOFF(C,R) = WBS%RUNOFF(C,R) + EXCESS
+                                                               WBS%RUNOFF(C,R)       = WBS%RUNOFF(C,R) + EXCESS
                                                                CDAT%CROP(I)%RNOFF(K) = EXCESS
                      ELSE!--------------------------------------------------------------------------------
                                                                RUNOFF = EXCESS * CDAT%CROP(I)%FIESWI(K)
@@ -6416,13 +6416,14 @@ MODULE CROP_DATA_FMP_MODULE
             !INEFFICIENT LOSSED EXTRA WATER
             IF(EXCESS > NEARZERO_30) THEN
                   IF(L == Z) THEN  ! ALL LAYERS ARE IBOUND=Z SO NO PERMIABLE MATERIAL TO PERCOLATE INTO
-                                 WBS%RUNOFF(C,R) = WBS%RUNOFF(C,R) + EXCESS
+                                WBS%RUNOFF(C,R)          = WBS%RUNOFF(C,R) + EXCESS
+                                CDAT%CROP(I)%RNOFF_EXT(K) = EXCESS
                   ELSE
                        IF(    CDAT%CROP(I)%FIESWI(K) < NEARZERO_30) THEN
-                                                                 WBS%DPERC(C,R)  = WBS%DPERC(C,R)  + EXCESS
+                                                                 WBS%DPERC(C,R)            = WBS%DPERC(C,R)  + EXCESS
                                                                  CDAT%CROP(I)%DPERC_EXT(K) = EXCESS
                        ELSEIF(CDAT%CROP(I)%FIESWI(K) >= UNO) THEN!------------------------------------------
-                                                                 WBS%RUNOFF(C,R) = WBS%RUNOFF(C,R) + EXCESS
+                                                                 WBS%RUNOFF(C,R)           = WBS%RUNOFF(C,R) + EXCESS
                                                                  CDAT%CROP(I)%RNOFF_EXT(K) = EXCESS
                        ELSE!--------------------------------------------------------------------------------
                                                                  RUNOFF = EXCESS * CDAT%CROP(I)%FIESWI(K)
@@ -6440,14 +6441,14 @@ MODULE CROP_DATA_FMP_MODULE
             !
             IF(EXCESS > NEARZERO_30) THEN
                   IF(L == Z) THEN  ! ALL LAYERS ARE IBOUND=Z SO NO PERMIABLE MATERIAL TO PERCOLATE INTO
-                                                                WBS%RUNOFF(C,R) = WBS%RUNOFF(C,R) + EXCESS
+                                                                WBS%RUNOFF(C,R)           = WBS%RUNOFF(C,R) + EXCESS
                                                                 CDAT%CROP(I)%RNOFF_EXT(K) = CDAT%CROP(I)%RNOFF_EXT(K) + EXCESS
                   ELSE!----------------------------------------------------------------------------------------------------------------
                        IF(    CDAT%CROP(I)%ADRF(K) < NEARZERO_30) THEN
-                                                                WBS%DPERC(C,R)  = WBS%DPERC(C,R)  + EXCESS
+                                                                WBS%DPERC(C,R)            = WBS%DPERC(C,R)  + EXCESS
                                                                 CDAT%CROP(I)%DPERC_EXT(K) = CDAT%CROP(I)%DPERC_EXT(K) + EXCESS
                        ELSEIF(CDAT%CROP(I)%ADRF(K) >= UNO) THEN!-----------------------------------------------------------------------
-                                                                WBS%RUNOFF(C,R) = WBS%RUNOFF(C,R) + EXCESS
+                                                                WBS%RUNOFF(C,R)           = WBS%RUNOFF(C,R) + EXCESS
                                                                 CDAT%CROP(I)%RNOFF_EXT(K) = CDAT%CROP(I)%RNOFF_EXT(K) + EXCESS
                        ELSE!-----------------------------------------------------------------------------------------------------------
                                                                 RUNOFF = EXCESS * CDAT%CROP(I)%ADRF(K)
@@ -6496,14 +6497,15 @@ MODULE CROP_DATA_FMP_MODULE
           IF(EXCESS  > NEARZERO_15) THEN
                 !
                 IF(UPLAY(C,R) == Z) THEN  ! ALL LAYERS ARE IBOUND=Z SO NO PERMIABLE MATERIAL TO PERCOLATE INTO
-                                                             WBS%RUNOFF(C,R) = WBS%RUNOFF(C,R) + EXCESS
+                                                             WBS%RUNOFF(C,R)       = WBS%RUNOFF(C,R) + EXCESS
                                                              CDAT%CROP(I)%RNOFF(K) = CDAT%CROP(I)%RNOFF(K) + EXCESS
                 ELSE!-----------------------------------------------------------------------------------------------------
                     IF(    CDAT%CROP(I)%FIESWP(K) < NEARZERO_30) THEN
-                                                             WBS%DPERC(C,R)  = WBS%DPERC(C,R)  + EXCESS
-                                                             CDAT%CROP(I)%DPERC(K) = CDAT%CROP(I)%DPERC(K) + EXCESS
+                                                              WBS%DPERC(C,R)        = WBS%DPERC(C,R)  + EXCESS
+                                                              CDAT%CROP(I)%DPERC(K) = CDAT%CROP(I)%DPERC(K) + EXCESS
                     ELSEIF(CDAT%CROP(I)%FIESWP(K) >= UNO) THEN!-----------------------------------------------------------
-                                                              WBS%RUNOFF(C,R) = WBS%RUNOFF(C,R) + EXCESS
+                                                              WBS%RUNOFF(C,R)       = WBS%RUNOFF(C,R) + EXCESS
+                                                              CDAT%CROP(I)%RNOFF(K) = CDAT%CROP(I)%RNOFF(K) + EXCESS
                     ELSE!-------------------------------------------------------------------------------------------------
                                                               RUNOFF = EXCESS * CDAT%CROP(I)%FIESWP(K)
                                                               !

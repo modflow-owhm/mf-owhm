@@ -104,10 +104,11 @@ C     ------------------------------------------------------------------
      1                       NODTOT,INTTOT,MNWAUX,MNW2,MNWNOD,MNWINT,
      2                    CapTable,SMALL,NTOTNOD,WELLID,LIMQ,
      3               MNW2TABFILE, MNW_FEED,MNW2BUD, GRPNODE,IOUT,
-     4               MNW_FMP_LINK, HAS_FMP_WELLS,MNW2_WARN,SOLV_FLG,
+     4               MNW_FMP_LINK, HAS_FMP_WELLS,SOLV_FLG,
      5               HCOF_ONLY_ITER,HCOF_RHS_FLIP, QDES_OLD,
      6               HAS_NWT,MIN_PERF,PP_CON_ITER_LIM,MXNODE,LEN_WELLID,
-     7      PRNT_MNW2, PRNT_MNW2_Q_NODE,PRNT_MNW2_Q_INOUT,PRNT_MNW2_NODE
+     7               MNW2_WARN, SMNW2COND_WARN,
+     8      PRNT_MNW2, PRNT_MNW2_Q_NODE,PRNT_MNW2_Q_INOUT,PRNT_MNW2_NODE
       
       USE GWFMNW2MODULE, ONLY: SGWF2MNW2PSV
       !
@@ -137,7 +138,7 @@ C1------Allocate scalar variables, which makes it possible for multiple
 C1------grids to be defined.
       ALLOCATE(NMNW2,MNWMAX,NTOTNOD,IWL2CB,MNWPRNT,NODTOT,INTTOT,SMALL,
      1 NMNWVL)
-      ALLOCATE(MNW2BUD,IOUT,MNW2_WARN)
+      ALLOCATE(MNW2BUD,IOUT,MNW2_WARN,SMNW2COND_WARN)
       ALLOCATE(SOLV_FLG,HCOF_ONLY_ITER,HCOF_RHS_FLIP,MIN_PERF)
       ALLOCATE(PRNT_MNW2, PRNT_MNW2_Q_NODE,PRNT_MNW2_Q_INOUT)
       ALLOCATE(PRNT_MNW2_NODE)
@@ -742,7 +743,8 @@ c     count nodes (will uses this to check vs. allocation)
 c     loop over nodes 
           DO INODE=1,NNODES
            !
-           RwNode=1D-30; RskinNode=RwNode; KskinNode=RwNode
+           RwNode=NEARZERO_20
+           RskinNode=RwNode; KskinNode=RwNode
            BNode=RwNode; CNode=RwNode; PNode=UNO
            !
 c     If PPFLAG=0, don't read PP variable
@@ -1141,22 +1143,24 @@ c     save node location, set Qdes=0.0, set PP, flag ZPD
             end if
             MNWNOD(19,NODNUM+INODE-1)=PP 
             !
-            if(RwNode < NEARZERO_20) then
+            if(RwNode < NEARZERO_20 .AND. Rw <= DZ) then
                   CALL ERR%ADD(WELLID(MNWID)//
      +            ' -- Rw <= 0.0??? This is not allowed'//NL)
             endif
-            if(RskinNode < NEARZERO_20) then
+            if(RskinNode < NEARZERO_20 .AND. Rskin <= DZ) then
                   CALL ERR%ADD(WELLID(MNWID)//
      +            ' -- Rskin <= 0.0??? This is not allowed'//NL)
             end if
-            if(KskinNode < NEARZERO_20) then
+            if(KskinNode < NEARZERO_20 .AND. Kskin <= DZ) then
                   CALL ERR%ADD(WELLID(MNWID)//
      +            ' -- Kskin <= 0.0??? This is not allowed'//NL)
             endif
-            if(PNode > DZ .and. (PNode < UNO .or. PNode>3.5D0)) then
-                  CALL ERR%ADD(WELLID(MNWID)//
-     +            ' -- P  MUST BE 1 <= P <=3.5, BUT FOUND: '//
-     +            NUM2STR(PNode)//NL)
+            if(P < DZ) then
+              if(PNode > DZ .and. (PNode < UNO .or. PNode>3.5D0)) then
+                    CALL ERR%ADD(WELLID(MNWID)//
+     +              ' -- P  MUST BE 1 <= P <=3.5, BUT FOUND: '//
+     +              NUM2STR(PNode)//NL)
+              endif
             endif
             !
 c     save IR and IC to check vs the subsequent nodes for vert/horiz
@@ -1389,22 +1393,24 @@ c     Set var for interval
                 MNWINT(11,INTNUM+IINT-1)=CWCNode             
             END SELECT
             !
-            if(RwNode < NEARZERO_20) then
+            if(RwNode < NEARZERO_20 .AND. Rw <= DZ) then
                   CALL ERR%ADD(WELLID(MNWID)//
      +            ' -- Rw <= 0.0??? This is not allowed'//NL)
             endif
-            if(RskinNode < NEARZERO_20) then
+            if(RskinNode < NEARZERO_20 .AND. Rskin <= DZ) then
                   CALL ERR%ADD(WELLID(MNWID)//
      +            ' -- Rskin <= 0.0??? This is not allowed'//NL)
             end if
-            if(KskinNode < NEARZERO_20) then
+            if(KskinNode < NEARZERO_20 .AND. Kskin <= DZ) then
                   CALL ERR%ADD(WELLID(MNWID)//
      +            ' -- Kskin <= 0.0??? This is not allowed'//NL)
             endif
-            if(PNode > DZ .and. (PNode<UNO.or.PNode>3.5D0)) then
-                  CALL ERR%ADD(WELLID(MNWID)//
-     +            ' -- P  MUST BE 1 <= P <=3.5, BUT FOUND: '//
-     +            NUM2STR(PNode)//NL)
+            if(P < DZ) then
+              if(PNode > DZ .and. (PNode<UNO.or.PNode>3.5D0)) then
+                    CALL ERR%ADD(WELLID(MNWID)//
+     +              ' -- P  MUST BE 1 <= P <=3.5, BUT FOUND: '//
+     +              NUM2STR(PNode)//NL)
+              endif
             endif
             !
             IF(IINT > ONE) THEN
@@ -1639,14 +1645,14 @@ c
 c     now that we have coordinates, start creating cells
 c
 c           Check if there is a screened iterval
-            IF(Ztop == Zbotm) THEN
+            IF(Ztop <= Zbotm) THEN
                 !
                 IF(IINT == NINTVL .AND. intnodes.eq.0) THEN
                     MNW2(1,MNWID)=DNEG
                     CALL WRN%ADD(WELLID(MNWID)//
-     +' -- Ztop-Zbotm intervals all located within in IBOUND=0 layers'//
-     + '. Well will be deactivated for the rest of the simulation.'//
-     +  NL )
+     +' -- Ztop <=Zbotm for all intervals causing '//
+     +'cell-to-well cond = 0. Well deactivated '//
+     +'for entire simulation.'//NL )
                 END IF
                 !
                 GO TO 4  !Skip interval cause it has no lenght
@@ -2227,7 +2233,7 @@ C
                 IF(IBOUND(IC,IR,IL) /= Z) THEN
                     EXIT
                 ELSEIF(J==LASTNODE) THEN
-                    CALL WRN3%ADD(WELLID(I)//NL)
+                    CALL WRN3%ADD(TRIM(WELLID(I))//NL)
                     MNW2(1, I) = DNEG
                     MNW2(5, I) = DZ
                     MNW2(18,I) = DZ
@@ -2235,7 +2241,7 @@ C
                 END IF
             END DO
          ELSE
-                CALL WRN3%ADD(WELLID(I)//NL)
+                CALL WRN3%ADD(TRIM(WELLID(I))//NL)
                 MNW2(5, I) = DZ
                 MNW2(18,I) = DZ
                 MNWNOD(4,FIRSTNODE:LASTNODE) = DZ
@@ -2244,9 +2250,9 @@ C
       END DO
       !
       IF(WRN3%RAISED) CALL WRN3%CHECK(
-     +    'MNW2 had the following wells DEACTIVATED FOR THE ENTIRE '//
-     +    'SIMULATION because their nodes are located '//
-     +    'within IBOUND=0 layers.'//BLN//'WELLID', OUTPUT=IOUT)
+     +    'MNW2 DEACTIVATED THE FOLLOWING WELLS FOR THE ENTIRE '//
+     +    'SIMULATION due to issues with their nodes.'//BLN//
+     +    'WELLID', OUTPUT=IOUT)
       !
       IF(WRN%RAISED) CALL WRN%CHECK(
      +      'MNW2 HAD THE FOLLOWING WARNINGS:'//BLN//
@@ -2343,7 +2349,7 @@ C     ------------------------------------------------------------------
       USE FILE_IO_INTERFACE,  ONLY: READ_TO_DATA
       USE STRINGS,            ONLY: JOIN_TXT
       USE NUM2STR_INTERFACE,  ONLY: NUM2STR
-      USE CONSTANTS,          ONLY: NL, BLN, TRUE, FALSE, Z, ONE, 
+      USE CONSTANTS,          ONLY: NL, BLN, TRUE, FALSE, NEG, Z, ONE, 
      +                              DZ, HALF, UNO
 C     ------------------------------------------------------------------
       IMPLICIT NONE
@@ -2364,7 +2370,7 @@ C     ------------------------------------------------------------------
       CHARACTER(20):: WELLNAME,LOSSTYPE
       INTEGER:: TABFOUND                                                !seb
       !CHARACTER(768):: LINE
-      LOGICAL:: CHECK
+      LOGICAL:: EXIST
       LOGICAL, SAVE:: READ_ITMP = TRUE
 C
       CALL SGWF2MNW2PNT(IGRID)
@@ -2503,6 +2509,7 @@ c-lfk    read(in,*) WELLNAME
          backspace(in)
          call UPCASE(WELLNAME)
 c  check for existence of well
+         EXIST  = FALSE
          ifound = Z
          MNWID  = Z
          do iw=1,MNWMAX
@@ -2512,6 +2519,7 @@ c             set IACTIV=1 to turn well on for this SP
               IF(MNW2(1,iw) > -0.5D0) THEN
                   MNW2(1,iw)=UNO
                   nmnw2 = nmnw2 + ONE
+                  EXIST = TRUE
               END IF
               MNWID=iw
 C-LFK
@@ -2520,8 +2528,8 @@ C-LFK
          WRITE(IOUT,*)'WELLNAME = ',WELLNAME
              END IF
              EXIT
-       end if
-        end do
+           end if
+         end do
          if (ifound == Z) then
             CALL STOP_ERROR(INFILE=IN,OUTPUT=IOUT,MSG=
      +'MNW2 ERROR: FAILED TO LOCATE WELLID "'//TRIM(WELLNAME)//'"'//NL//
@@ -2530,8 +2538,8 @@ C-LFK
      +   JOIN_TXT(WELLID(:MNWMAX),', '))
          end if
          !
-         IF(MNW2TABFILE%NTAB > Z) CALL MNW2TABFILE2QDES(MNW2TABFILE,   !seb IF TABFILES THEN CHECK IF QDES IS RELATED TO 1 TABFILE. IF IT IS THEN UPDATE IT WITH TABIFORMATION
-     +                                              MNWID,QDES,TABFOUND)
+         IF(MNW2TABFILE%NTAB > Z .AND. EXIST)                      ! IF TABFILES THEN CHECK IF QDES IS RELATED TO 1 TABFILE. IF IT IS THEN UPDATE IT WITH TABIFORMATION
+     +            CALL MNW2TABFILE2QDES(MNW2TABFILE,MNWID,QDES,TABFOUND)
          !
 c   continue reading data set 4a        
          PUMPCAP=MNW2(22,MNWID)
@@ -2563,10 +2571,10 @@ c-lfk:  Only read Cprime for recharge/injection well (Qdes.gt.0.0)
      &                 (MNW2(30+IAUX,MNWID),IAUX=1,NAUX)
             end if
          endif
-         IF(MNW2TABFILE%NTAB > Z) CALL MNW2TABFILE2QDES(MNW2TABFILE,   !seb IF TABFILES THEN CHECK IF QDES IS RELATED TO 1 TABFILE. IF IT IS THEN UPDATE IT WITH TABIFORMATION
-     +                                              MNWID,QDES,TABFOUND)
+         IF(MNW2TABFILE%NTAB > Z .AND. EXIST)   !seb IF TABFILES THEN CHECK IF QDES IS RELATED TO 1 TABFILE. IF IT IS THEN UPDATE IT WITH TABIFORMATION
+     +            CALL MNW2TABFILE2QDES(MNW2TABFILE,MNWID,QDES,TABFOUND)
 C-LFK (2/13) Check consistency of Qdes with CapTable values for Q
-         if (CapMult > DZ .and. Qdes < DZ) then
+         if (CapMult > DZ .and. Qdes < DZ .and. EXIST) then
          index = pumpcap + ONE
           if(abs(Qdes) < CapTable(MNWID,index,2)*CapMult) then
             CALL STOP_ERROR(INFILE=IN,OUTPUT=IOUT,MSG=
@@ -2654,6 +2662,15 @@ c     error check Qfrcmx
          END IF
 c
 c     end read Data Set 4b
+         IF(.not. EXIST) THEN
+             QDES_OLD(MNWID)= DZ
+             MNW2(5, MNWID) = DZ
+             MNW2(18,MNWID) = DZ
+             MNW2(25,MNWID) = DZ
+             MNW2(27,MNWID) = DZ  
+             write(iout,2114) WELLNAME,kper
+             CYCLE
+         END IF
 c
 c        set desired flow rate for well
          QDES_OLD(MNWID)= Qdes
@@ -2678,6 +2695,9 @@ c          put total Qdes in first node, allow it to go from there
      + ES12.4,' for stress period ',I4)
  2113 FORMAT('MNW2 Well ', A20,' active, desired Q =',
      + ES12.4,' for stress period ',I4,' [Q Derived from Tabfile]')
+ 2114 FORMAT('MNW2 Well ', A20,' was specified, but a previous ',
+     + 'stress period disabled it for the rest of the simulation, ',
+     + 'so Q=NaN for stress period ',I4)
          if(PUMPCAP.GT.0) then
 c  if Qdes is not negative for this stress period, do not apply pump capacity restraints
            if(Qdes > DZ) then                                        !seb (Qdes.GE.0.d0) CHANGED TO (Qdes.GT.0.d0)
@@ -3344,7 +3364,7 @@ C     ------------------------------------------------------------------
      1                       NODTOT,INTTOT,MNWAUX,MNW2,MNWNOD,
 C-LFK     2                       SMALL,WELLID,NTOTNOD
      2                       SMALL,WELLID,NTOTNOD,LIMQ,MNW2BUD,GRPNODE,
-     3                       IOUT,MNW2_WARN,HAS_NWT,
+     3                       IOUT,MNW2_WARN,SMNW2COND_WARN,HAS_NWT,
      4                       SOLV_FLG,HCOF_ONLY_ITER,MXNODE,LEN_WELLID,
      7                       PRNT_MNW2, PRNT_MNW2_Q_NODE,
      +                       PRNT_MNW2_Q_INOUT,PRNT_MNW2_NODE
@@ -3404,6 +3424,12 @@ c
       ibd = Z
       IF(IWL2CB > Z) IBD=ICBCFL
       !
+      if(MNWPRNT>-1) WRITE(iout,*)
+      !
+      IF(SMNW2COND_WARN%RAISED) CALL SMNW2COND_WARN%CHECK(
+     + 'MNW2 subroutine that calculates the cell-to-well conductance '//
+     + 'terms (SMNW2COND) '//NL//'Had the following warnings raised '//
+     + 'while solving the time step:',OUTPUT=IOUT)
 C
 c -----print the header for individual rates if requested(IWL2CB<0).
       ioch = Z
@@ -3732,7 +3758,8 @@ c10-----increment budget term counter(msum).
      +                              HNEW, BOTM, LBOTM)
       !
       CALL MNW2_WARN%CHECK('MNW2 HAS THE FOLLOWING WARNINGS RAISED '//
-     +          'WHILE SOLVING THE CURRENT TIME STEP:',OUTPUT=IOUT)
+     +          'WHILE SOLVING THE TIME STEP:',OUTPUT=IOUT)
+      !
 !      IF(MNW2_WARN%STR.NE.NL) THEN
 !            CALL WARNING_MESSAGE(OUTPUT=IOUT,
 !     +      MSG='MNW2 HAS THE FOLLOWING WARNINGS RAISED WHILE '//
@@ -4275,7 +4302,8 @@ C     ------------------------------------------------------------------
       USE GWFBASMODULE, ONLY:HDRY
       USE GWFMNW2MODULE, ONLY:NMNW2,MNWMAX,MNWPRNT,MNWINT,INTTOT,
      1                       NODTOT,MNW2,MNWNOD,SMALL,WELLID,IOUT,
-     2                       MNW2_WARN,HAS_NWT,PP_CON_ITER_LIM
+     2                       HAS_NWT,PP_CON_ITER_LIM,
+     3                       MNW2_WARN,SMNW2COND_WARN
       USE GWFMNW2MODULE, ONLY: SGWF2MNW2PNT
       USE ERROR_INTERFACE, ONLY: WARNING_MESSAGE
       USE NUM2STR_INTERFACE, ONLY: NUM2STR
@@ -4302,6 +4330,7 @@ C
       ISS=ISSFLG(KPER)
 C
       PPC_CHK = TRUE
+      CALL SMNW2COND_WARN%INIT()
 c
 c1------if number of wells <= 0 then return.
       if(nmnw2 < ONE) return
@@ -4443,8 +4472,8 @@ c   compute conductance term for node
      &                 WELLID(iw),Skin,iw,ix,iy,iz) !rgn added iw+
 c   check cond<0, reset to 0 and print warning
               if(cond < DZ) then
-                  CALL MNW2_WARN%ADD(WELLID(IW)//'HAS CWC<0 FOR NODE '//
-     +                               NUM2STR(INODE-firstnode,2)//
+                 CALL MNW2_WARN%ADD(WELLID(IW)//' HAS CWC<0 FOR NODE '//
+     +                              NUM2STR(nod,2)//
      +'. NODE WILL BE DEACTIVATED FOR THE TIME STEP'//NL)
 !            CALL WARNING_MESSAGE(OUTPUT=IOUT,
 !     +      MSG='MNW2 WELLID '//WELLID(IW)//': CWC<0 IN WELL, '//
@@ -4496,9 +4525,13 @@ c              If yes, well node is dry; set PPFLAG=0; deactivate node.
                   Cf    = MNWINT(9,iint)
                   Ploss = MNWINT(10,iint)
 C
-                  if (mnwprnt.gt.0) WRITE(iout,83) wellid(iw),inode
-   83 FORMAT(1X,' Open interval above water table; MNW2 node deactivated
-     1 in Well ',A20,' Node ',I4)
+                  if (mnwprnt.gt.0) CALL SMNW2COND_WARN%ADD(
+     +                   'Open interval above water table; '//
+     +                   'Deactivated node '//NUM2STR(nod,2)//
+     +                   ' in well '//wellid(iw)//NL ) 
+!                  WRITE(iout,83) wellid(iw),inode
+!   83 FORMAT(1X,' Open interval above water table; MNW2 node deactivated
+!     1',A20,' Node ',I4)
                   CYCLE
                 end if
                 if(ztop  > top) ztop =top
@@ -4540,7 +4573,7 @@ c   check cond<0, reset to 0 and print warning
                        MNWNOD(22,INODE) = DZ
                        CALL MNW2_WARN%ADD(WELLID(IW)//
      +                 'HAS CWC<0 FOR NODE '//
-     +                 NUM2STR(INODE-firstnode,2)//
+     +                 NUM2STR(nod,2)//
      +              '. NODE WILL BE DEACTIVATED FOR THE TIME STEP'//NL)
 !            CALL WARNING_MESSAGE(OUTPUT=IOUT,
 !     +      MSG='MNW2 WELLID '//WELLID(IW)//': CWC<0 IN WELL, '//
@@ -4561,10 +4594,14 @@ c   calculate alpha for partial penetration effect if PPFLAG is on
                 if ( thck>NEARZERO_20 ) alpha = totlength/thck
                 if(alpha > 0.99 .and. alpha < 1.0) then
                   if (MNWPRNT.gt.1.and.kiter.eq.1) then
-                    nd=INODE-firstnode+1
-                    write(iout,*) 'Penetration fraction > 0.99 for',
-     & ' node ',nd,' of well ',wellid(iw)
-                    write(iout,*) 'Value reset to 1.0 for this well'
+                  CALL SMNW2COND_WARN%ADD(
+     +               'Penetration fraction > 0.99; '//
+     +               'Reset to 1.0 for node '//NUM2STR(nod,2)//
+     +               ' in well '//wellid(iw)//NL ) 
+!                    nd=INODE-firstnode+1
+!                    write(iout,*) 'Penetration fraction > 0.99 for',
+!     & ' node ',nd,' of well ',wellid(iw)
+!                    write(iout,*) 'Value reset to 1.0 for this well'
                   end if
                   alpha = UNO
                 end if
@@ -4591,9 +4628,13 @@ c              go to 567
                 MNW2(19,IW) = DZ
                 COND  = DZ
                 alpha = DZ
-                if(mnwprnt.gt.0) WRITE(iout,85) wellid(iw),iw
-   85 FORMAT(1X,' hwell <(zbotm+0.01) in convertible layer; PPFLAG reset
-     1 to 0; WELLNAME = ',A20,'  iw = ',I4)
+                if(mnwprnt.gt.0) CALL SMNW2COND_WARN%ADD(
+     +               'hwell < (zbotm+0.01) in convertible layer; '//
+     +               'PPFLAG disabled, set to 0, for well '//
+     +               wellid(iw)//NL ) 
+!                WRITE(iout,85) wellid(iw),iw
+!   85 FORMAT(1X,' hwell <(zbotm+0.01) in convertible layer; PPFLAG reset
+!     1 to 0; WELLNAME = ',A20,'  iw = ',I4)
 c       write (iout,*) ' alpha reset to 0.0 '
               ELSE
                 alpha3 = UNO
@@ -4603,9 +4644,13 @@ c       write (iout,*) ' alpha reset to 0.0 '
                   PPFLAG      = Z
                   MNW2(19,IW) = DZ
                   alpha       = DZ
-                  if(mnwprnt.gt.0) WRITE(iout,87) wellid(iw)
-   87 FORMAT(1X,' MNW2 node in convertible layer & hwell at <10% open in
-     1terval; PPFLAG reset to 0; WELLNAME = ',A20)
+                  if(mnwprnt.gt.0) CALL SMNW2COND_WARN%ADD(
+     +               'hwell at <10% open interval in convertible '//
+     +               'layer; PPFLAG disabled, set to 0, for well '//
+     +               wellid(iw)//NL ) 
+!                  WRITE(iout,87) wellid(iw)
+!   87 FORMAT(1X,' MNW2 node in convertible layer & hwell at <10% open in
+!     1terval; PPFLAG reset to 0; WELLNAME = ',A20)
 c       write (iout,*) ' alpha reset to 0.0 '                
                 end if
               END IF  !(alpha2 < 0.01D0) then
@@ -4730,22 +4775,32 @@ c  if analytical solution failed, report no partial penetration and set dhp=0.0
 c  if alpha <= 0.2, shut well off if PPC did not converge
                   if(alpha < 0.2) then
                    if (MNWPRNT > 1) then
-                    nd=INODE-firstnode+1
-                    write(IOUT,*) 'Partial penetration solution did not
-     & converge; penetration fraction < 0.2,      resetting CWC= 0.0 for
-     & node '
-     & ,nd,' of well ',wellid(iw)
+                       CALL SMNW2COND_WARN%ADD(
+     +               'Partial penetration solution did not converge; '//
+     +               'penetration fraction < 0.2; Resetting CWC= 0.0 '//
+     +               'for node '//NUM2STR(nod,2)//
+     +               ' in well '//wellid(iw)//NL ) 
+!                    nd=INODE-firstnode+1
+!                    write(IOUT,*) 'Partial penetration solution did not
+!     & converge; penetration fraction < 0.2,      resetting CWC= 0.0 for
+!     & node '
+!     & ,nd,' of well ',wellid(iw)
                    end if
                    cond            = DZ
                    MNWNOD(22,INODE)= DZ 
                   else
 c  if alpha > 0.2, set PPC effect = 0 if did not converge
                    if (MNWPRNT.gt.1) then
-                     nd=INODE-firstnode+1
-                     write(IOUT,*) 'Partial penetration solution did not
-     & converge; penetration fraction > 0.2,      assume full 
-     & penetration for
-     & node ',nd,' of well ',wellid(iw)
+                       CALL SMNW2COND_WARN%ADD(
+     +               'Partial penetration solution did not converge; '//
+     +               'penetration fraction > 0.2; '//
+     +               'PPFLAG is disabled, set to 0, for well '//
+     +                wellid(iw)//NL ) 
+!                     nd=INODE-firstnode+1
+!                     write(IOUT,*) 'Partial penetration solution did not
+!     & converge; penetration fraction > 0.2,      assume full 
+!     & penetration for
+!     & node ',nd,' of well ',wellid(iw)
                    end if
                    ppflag     = Z
                    mnw2(19,iw)= DZ

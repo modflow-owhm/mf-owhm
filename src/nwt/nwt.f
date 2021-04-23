@@ -17,7 +17,7 @@
       USE GWFNWTMODULE
       USE XMDMODULE,                ONLY: XMDPSV
       USE GMRESMODULE,              ONLY: GMRESPSV
-      USE ERROR_INTERFACE,          ONLY: WARNING_MESSAGE
+      USE ERROR_INTERFACE,          ONLY: WARNING_MESSAGE, STOP_ERROR
       USE FILE_IO_INTERFACE,        ONLY: READ_TO_DATA
       USE PARSE_WORD_INTERFACE,     ONLY: PARSE_WORD_UP
       USE STRINGS,                  ONLY: GET_NUMBER 
@@ -46,7 +46,6 @@
       INTEGER lrwrk,liwrk,NODES,MBLACK,NJAF
       REAL Memuse1,Memuse2
       DOUBLE PRECISION:: THK,MXTHCK                                     !seb ADDED VARIABLES
-      CHARACTER:: LN
       LOGICAL:: THIN_CHECK, ADJUST_MXIter
       TYPE(WARNING_TYPE):: WRN
 !     ------------------------------------------------------------------
@@ -143,13 +142,10 @@
       CALL URWORD(line, lloc, istart, istop, 2, IPRNWT, r, Iout, In)
       CALL URWORD(line, lloc, istart, istop, 2, IBOTAV, r, Iout, In)
 ! seb ADDED CHECK FOR USING XMD AND LGR
-      IF(Linmeth.EQ.2 .AND. ILGR.NE.0) THEN
-        LINE='NWT-LGR ERROR: THE NWT SOLVER PACKAGE USING THE XMD '//
-     +  '(LINEMETH=2) SOLVER DOES NOT WORK WITH LGR.'//NEW_LINE(' ')//
-     +  'PLEASE CHANGE THE SOLVER TO GMRES (LINEMETH=1) TO CONTINUE.'
-        WRITE(IOUT,'(A)') TRIM(LINE)
-        CALL USTOP(TRIM(LINE))
-      END IF
+      IF(Linmeth.EQ.2 .AND. ILGR.NE.0) CALL STOP_ERROR(line, In, Iout, 
+     + MSG='NWT-LGR ERROR: THE NWT SOLVER PACKAGE USING THE XMD '//
+     + '(LINEMETH=2) SOLVER DOES NOT WORK WITH LGR.'//NL//
+     + 'PLEASE CHANGE THE SOLVER TO GMRES (LINEMETH=1) TO CONTINUE.')
 C
 C3B-----GET OPTIONS.
       IFDPARAM = Z
@@ -180,12 +176,11 @@ C3B-----GET OPTIONS.
         CASE('CONTINUE')
         ICNVGFLG = 1
         IF( STOPER>0.0) THEN
-            LN = NEW_LINE(LN)
             CALL WARNING_MESSAGE('',0,IOUT,
-     +           'NWT "CONTINUE" KEYWORD FOUND,'//LN//
-     +           'IT WILL OVERRIDE BAS OPTION "STOPERROR"'//LN//
+     +           'NWT "CONTINUE" KEYWORD FOUND,'//NL//
+     +           'IT WILL OVERRIDE BAS OPTION "STOPERROR"'//NL//
      +           'AND SIMULATION WILL ALWAYS CONTINUE DESPITE '//
-     +           'FAILED CONVERGENCE'//LN, TRUE)
+     +           'FAILED CONVERGENCE'//NL, TRUE)
         END IF
         STOPER = 1E30
         CASE('THIN_CELL_CHECK')
@@ -297,8 +292,10 @@ C3B-----GET OPTIONS.
         Btoldum    = 1.1
         Breducdum  = 0.7
       ELSE
-        CALL USTOP('NWT SOLVER FAILED TO IDENTIFY NWT CONFIG OPTION: '//
-     +             'SIMPLE, MODERATE, COMPLEX, or SPECIFIED')
+        CALL STOP_ERROR(line, In, Iout, MSG=
+     + 'NWT SOLVER FAILED TO IDENTIFY NWT CONFIG OPTION.'//BLN//
+     + 'It must be one of the following: '//NL//
+     + 'SIMPLE, MODERATE, COMPLEX, or SPECIFIED')
       END IF
  !     
  !     IF ( Nonmeth==1 )Then
@@ -321,14 +318,14 @@ C3B-----GET OPTIONS.
       ELSEIF ( Linmeth==2 )Then
         Write(iout,*) '***XMD linear solver will be used***'
         Write(iout,*)
-       ELSEIF ( Linmeth==3 )Then
-        Write(iout,*) '***SAMG linear solver will be used***'
-        Write(iout,*)
+      !ELSEIF ( Linmeth==3 )Then
+      ! Write(iout,*) '***SAMG linear solver will be used***'
+      ! Write(iout,*)
       ELSE
-        Write(iout,*) '***Incorrect value for Linear solution method ',
-     +                'specified. Check input.***'
-        Write(iout,*)
-        Call USTOP('  ')
+        CALL STOP_ERROR( line, In, Iout, MSG=
+     + 'NWT SOLVER HAS INCORRECT VALUE FOR LINEAR SOLUTION METHOD.'//
+     +  NL//'LINMETH can only be set to 1 or 2,'//NL//
+     +  'but it was set to '//NUM2STR(Linmeth) )
       END IF
 !
       Thickfact = Thickdum
@@ -449,9 +446,8 @@ C seb Build HFB ORDERCELL INDEX
       IF(IUNIT(21).NE.0) CALL ORDERCELLHFB()
       CALL COUNTACTIVE(jj)
       IF ( Numactive.LT.2 ) THEN
-          WRITE(Iout,*)'MODFLOW-NWT does run with single-cell models. ',
-     +               'Model Stopping.'
-        CALL USTOP('')
+        CALL STOP_ERROR( '', In, Iout, MSG=
+     + 'NWT SOLVER DOES RUN WITH SINGLE-CELL MODELS.' )
       END IF
       Numnonzero = jj
       Numcell = Numactive

@@ -8,6 +8,68 @@
 !
 !     ******************************************************************
 !
+SUBROUTINE PRINT_MAIN_HEADER(IU)  ! Set to 6 for cmd prompt or use output_unit from: "use, intrinsic:: iso_fortran_env, only: output_unit"
+  !
+  USE, INTRINSIC:: ISO_FORTRAN_ENV, ONLY: stdout=>OUTPUT_UNIT
+  USE CONSTANTS, ONLY: NL
+  USE OWHM_HEADER_INTERFACE
+  !  
+  IMPLICIT NONE
+  !
+  INTEGER, INTENT(IN)::IU
+  !
+  !1 ASSIGN VERSION NUMBER AND DATE
+  !
+  CHARACTER(:),ALLOCATABLE:: VERSION_OWHM
+  CHARACTER(:),ALLOCATABLE:: VERSION_MF, VERSION_FMP
+  CHARACTER(:),ALLOCATABLE:: VERSION_SWR,VERSION_LGR
+  CHARACTER(:),ALLOCATABLE:: VERSION_SWI,VERSION_NWT
+  CHARACTER(:),ALLOCATABLE:: VERSION_CFP                            !TR: 2017 09 13 CFP
+  CHARACTER(:),ALLOCATABLE:: VERSION_SWO                            !TR: 2017 09 13 CFP
+  CHARACTER(:),ALLOCATABLE:: Revision
+  !
+  VERSION_OWHM='2.0'                                 ! "Psyduck After Advil" 
+  Revision    ='02          4/23/2021'
+  VERSION_MF  ='1.12.0   02/03/2017'        
+  VERSION_FMP ='4.00.0   04/23/2017'       
+  VERSION_SWR ='1.04.0   09/15/2016'       
+  VERSION_SWI ='2.00.0   07/22/2013'     
+  VERSION_LGR ='2.00.0   09/19/2013'      
+  VERSION_NWT ='1.2.0    03/01/2020'     
+  VERSION_CFP ='1.09.57  09/12/2017'
+  VERSION_SWO ='1.0.0    10/28/2020'
+  !
+  IF(IU /= stdout) WRITE(IU,'(/A//)') OWHM_HEADER()     ! Only print to file and skip cmd prompt
+  !
+  WRITE (IU,123) "v"//VERSION_OWHM//"."//Revision(:4), &
+                  VERSION_OWHM, &
+                  Revision,     &
+                  VERSION_MF,   &
+                  VERSION_FMP,  &
+                  VERSION_SWR,  &
+                  VERSION_SWI,  &
+                  VERSION_LGR,  &
+                  VERSION_NWT,  &
+                  VERSION_CFP
+  !
+  123 FORMAT( " MODFLOW-OWHM ", A///,24X,'MODFLOW' /,12X,                                         &
+                   'ONE-WATER HYDROLOGIC-FLOW MODEL', //, 4X,                 &
+                   'U.S. GEOLOGICAL SURVEY MODULAR FINITE-DIFFERENCE ',/ 11x, &
+                   'CONJUNCTIVE USE SIMULATION PROGRAM',//,21X,               &
+                   'Version ',A /,/                                           &
+                   ' Release: ',A /,/                                     &
+                   ' Includes:', / 10x,                                       &
+                   'MODFLOW-2005 Version ',A,        / 10x,                   &
+                   'MODFLOW-FMP  Version ',A,        / 10x,                   &
+                   'MODFLOW-SWR  Version ',A,        / 10x,                   &
+                   'MODFLOW-SWI  Version ',A,        / 10x,                   &
+                   'MODFLOW-LGR  Version ',A,        / 10x,                   &
+                   'MODFLOW-NWT  Version ',A,        / 10x,                   &
+                   'MODFLOW-CFP  Version ',A / / )                            !TR: 2017 09 13 CFP
+     
+END SUBROUTINE
+!
+!
 PROGRAM MODFLOW_OWHM
   IMPLICIT NONE
   CHARACTER(1):: NAME_FILE                  !If blank then MF-OWHM checks command arguments
@@ -477,7 +539,7 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
           IF(IUNIT(4)  /= Z) CALL GWF2RIV7RP(IUNIT(4),IGRID)
           IF(IUNIT(5)  /= Z) CALL GWF2EVT7RP(IUNIT(5),IGRID)
           If(IUNIT(6)  /= Z) CALL GWF2RIP4RP(IUNIT(6),IGRID)                 ! inserted by schmid
-          IF(IUNIT(7)  /= Z) CALL GWF2GHB7RP(IUNIT(7),IGRID,KKPER,IUNIT(63)) ! inserted Iunit(63) for NWT by rth
+          IF(IUNIT(7)  /= Z) CALL GWF2GHB7RP(IUNIT(7),IGRID,KKPER)           ! ,IUNIT(63) for NWT
           !
           IF(IUNIT(8)  /= Z) CALL GWF2RCH7RP(IUNIT(8),IGRID)
           IF(IUNIT(17) /= Z) CALL GWF2RES7RP(IUNIT(17),IGRID)
@@ -1393,67 +1455,6 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
   !
   IF(USE_PAUSE) CALL PAUSE('BAS "PAUSE" OPTION ACTIVATED, SIMULATION IS NOW PAUSED.'//BLN//'       PRESS ENTER TO END SIMULATION')
   !
-END SUBROUTINE
-!
-SUBROUTINE PRINT_MAIN_HEADER(FN)  !SET TO 6 FOR CMD PROMPT
-  !
-  USE, INTRINSIC:: ISO_FORTRAN_ENV, ONLY: stdout=>OUTPUT_UNIT
-  USE CONSTANTS, ONLY: NL
-  USE OWHM_HEADER_INTERFACE
-  !  
-  IMPLICIT NONE
-  !
-  INTEGER, INTENT(IN)::FN
-  !
-  !1 ASSIGN VERSION NUMBER AND DATE
-  !
-  CHARACTER(:),ALLOCATABLE:: VERSION_OWHM
-  CHARACTER(:),ALLOCATABLE:: VERSION_MF, VERSION_FMP
-  CHARACTER(:),ALLOCATABLE:: VERSION_SWR,VERSION_LGR
-  CHARACTER(:),ALLOCATABLE:: VERSION_SWI,VERSION_NWT
-  CHARACTER(:),ALLOCATABLE:: VERSION_CFP                            !TR: 2017 09 13 CFP
-  CHARACTER(:),ALLOCATABLE:: VERSION_SWO                            !TR: 2017 09 13 CFP
-  CHARACTER(:),ALLOCATABLE:: Revision
-  !
-  VERSION_OWHM='2.0'                                 !"Psyduck After Advil" !"2.0" ! 
-  Revision    ='01          4/23/2020'
-  VERSION_MF  ='1.12.0   02/03/2017'        
-  VERSION_FMP ='4.00.0   04/23/2017'       
-  VERSION_SWR ='1.04.0   09/15/2016'       
-  VERSION_SWI ='2.00.0   07/22/2013'     
-  VERSION_LGR ='2.00.0   09/19/2013'      
-  VERSION_NWT ='1.2.0    03/01/2020'     
-  VERSION_CFP ='1.09.57  09/12/2017'
-  VERSION_SWO ='1.0.0    10/28/2020'
-  !
-  IF(FN /= stdout) WRITE(FN,'(/A//)') OWHM_HEADER()     !ONLY PRINT TO FILE AND SKIP CMD PROMPT
-  !
-  WRITE (FN,123) "v"//VERSION_OWHM//"."//Revision(:4), &
-                  VERSION_OWHM, &
-                  Revision,     &
-                  VERSION_MF,   &
-                  VERSION_FMP,  &
-                  VERSION_SWR,  &
-                  VERSION_SWI,  &
-                  VERSION_LGR,  &
-                  VERSION_NWT,  &
-                  VERSION_CFP
-  !
-  123 FORMAT( " MODFLOW-OWHM ", A///,24X,'MODFLOW' /,12X,                                         &
-                   'ONE-WATER HYDROLOGIC-FLOW MODEL', //, 4X,                 &
-                   'U.S. GEOLOGICAL SURVEY MODULAR FINITE-DIFFERENCE ',/ 11x, &
-                   'CONJUNCTIVE USE SIMULATION PROGRAM',//,21X,               &
-                   'Version ',A /,/                                           &
-                   ' Release: ',A /,/                                     &
-                   ' Includes:', / 10x,                                       &
-                   'MODFLOW-2005 Version ',A,        / 10x,                   &
-                   'MODFLOW-FMP  Version ',A,        / 10x,                   &
-                   'MODFLOW-SWR  Version ',A,        / 10x,                   &
-                   'MODFLOW-SWI  Version ',A,        / 10x,                   &
-                   'MODFLOW-LGR  Version ',A,        / 10x,                   &
-                   'MODFLOW-NWT  Version ',A,        / 10x,                   &
-                   'MODFLOW-CFP  Version ',A / / )                            !TR: 2017 09 13 CFP
-     
 END SUBROUTINE
 !
 SUBROUTINE CMD_PRINT_STOP(SIZ)

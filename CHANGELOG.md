@@ -16,6 +16,33 @@ Boyce, S.E., Hanson, R.T., Ferguson, I., Schmid, W., Henson, W., Reimann, T., Me
 
 ------
 
+## 2.0.2
+
+2021-05-15
+
+### Merge ⯬ BiF v1.0.1
+
+- Batteries Included Fortran (BiF) version 1.0.1 source code merged.
+    - https://code.usgs.gov/fortran/bif/-/tags/1.0.1
+
+### Fixed
+
+* `SFR` issue for segments with `ICALC ≥ 2` that would solve for stream depth with Newton–Raphson with an initial stream flow guess of zero instead of the stream reaches inflow.
+    * For most cases this fix only affected simulation runtime and only altered the solution after the sixth significant digit (single precision tolerance).
+
+- `FMP` — `LAND_USE (Crop) Block` output files did not correctly write `TOT_SURF_RUNOFF`  
+    for crops that set `SURFACEWATER_LOSS_FRACTION_PRECIPITATION` to one. 
+    - The affected options were `BYWBS`, `BYWBS_BYCROP`, `BYCROP`, `ALL`, and `ALL_VERBOSE`
+    - This error had no affect on the actual simulation results nor other output files.
+
+* `MNW2` using the `THIEM` losstype resulted in a warnings being triggered for a near zero skin radius, which is an input option used by he `SKIN` losstype.
+
+- `MNW2` using `NWT` resulted in the specific storage was not calculated correctly for use in the partial penetration correction.
+
+&nbsp; 
+
+------
+
 ## 2.0.1
 
 2021-03-15

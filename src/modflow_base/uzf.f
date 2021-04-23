@@ -4508,6 +4508,7 @@ C     ------------------------------------------------------------------
       DOUBLE PRECISION eps_m1, timenew, feps3, bottom,epsd
       DOUBLE PRECISION thsrinv, epsfksths, timedt, big, f7, f8
       DOUBLE PRECISION ttt, diff, comp1, comp2, ftheta1, ftheta2
+      DOUBLE PRECISION tmp
       INTEGER idif, iflag, iflag2, iflx, iremove, itrwaveb, j, jj, k, 
      +        kk, l, jpnwavesm1
       INTEGER jpntm1, jpntm2, jpntm3, jpntp1, nwavp1, jjj, km1
@@ -4987,8 +4988,12 @@ C18-----ROUTE TRAILING WAVES.
               IF ( bottom.LT.ZEROD15 ) bottom = ZEROD15
               ttt = 1.0D0/bottom
               DO k = j+jpntm1, j + Itrwave(jpntm1+j) - 1
-                Depth(k) = Depth(jjj)*(((f7*Theta(k)
-     +                     +f8*Theta(k-1)-Thetar)*ttt)**eps_m1)
+                tmp = (f7*Theta(k) + f8*Theta(k-1)-Thetar)*ttt
+                IF(tmp > 0.0D0) THEN
+                    Depth(k) = Depth(jjj)*(tmp**eps_m1)
+                ELSE
+                    Depth(k) = 0.0D0
+                END IF
               END DO
               j = j + Itrwave(jpntm1+j) - 1
             END IF

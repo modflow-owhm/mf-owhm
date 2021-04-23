@@ -2,6 +2,7 @@
 !     NEW READ AND PREPARE ROUTINE DEVELOPED BY SCOTT E BOYCE 8/8/2013
       USE GLOBAL,     ONLY:IOUT
       USE GWFNWTMODULE
+      USE ERROR_INTERFACE, ONLY: STOP_ERROR
       IMPLICIT NONE
 !     ------------------------------------------------------------------
 !     SPECIFICATIONS:
@@ -179,6 +180,10 @@ C3B-----GET OPTIONS.
       CALL URWORD(LINE, LLOC, ISTART, ISTOP, 2, NUMTRACK, R, IOUT,INNWT)
       CALL URWORD(LINE, LLOC, ISTART, ISTOP, 3, I, BTOLDUM,  IOUT,INNWT)
       CALL URWORD(LINE, LLOC, ISTART, ISTOP, 3, I, BREDUCDUM,IOUT,INNWT)
+      ELSE
+         Numtrack  = 0
+         Btoldum   = 1.0D0
+         Breducdum = 1.0D0
       END IF
       ELSEIF ( IFDPARAM.EQ.1 ) THEN
 ! Set values based on default and Option keyword.
@@ -209,11 +214,9 @@ C3B-----GET OPTIONS.
         Btoldum = 1.1
         Breducdum = 0.7
       ELSE
-        WRITE(IOUT,*)
-        WRITE(IOUT,*)'***Erroneous value for Input value "Options."***'
-        WRITE(IOUT,*)'Check input. Model Stopping.'
-        WRITE(IOUT,*) 
-        CALL USTOP(' ')
+        CALL STOP_ERROR(LINE,INNWT,IOUT,MSG=
+     +     'NWT has erroneous value for "Options" '//
+     +     'Unknown option found: '//LINE(ISTART:ISTOP) )
       END IF
 !
       MXITER=MXITERDUM

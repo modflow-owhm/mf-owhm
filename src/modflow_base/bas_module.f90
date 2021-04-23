@@ -82,6 +82,12 @@ MODULE GWFBASMODULE
   TYPE(GENERIC_OUTPUT_FILE), DIMENSION(:), POINTER, SAVE, CONTIGUOUS:: PRINT_HEAD
   INTEGER,                                 POINTER, SAVE            :: PRINT_HEAD_FLAG  ! 0: not in use, 1 in use and SP specified, 2, print last time step, 3 print every timestep
   !
+  TYPE(GENERIC_OUTPUT_FILE), DIMENSION(:), POINTER, SAVE, CONTIGUOUS:: PRINT_WTAB
+  INTEGER,                                 POINTER, SAVE            :: PRINT_WTAB_FLAG  ! 0: not in use, 1 in use and SP specified, 2, print last time step, 3 print every timestep
+  !
+  TYPE(GENERIC_OUTPUT_FILE), DIMENSION(:), POINTER, SAVE, CONTIGUOUS:: PRINT_WDEP
+  INTEGER,                                 POINTER, SAVE            :: PRINT_WDEP_FLAG  ! 0: not in use, 1 in use and SP specified, 2, print last time step, 3 print every timestep
+  !
   LOGICAL,          POINTER, SAVE:: DAMPEN_START
   INTEGER,          POINTER, SAVE:: DAMPEN_START_ITR
   DOUBLE PRECISION, POINTER, SAVE:: DAMPEN_START_DMP
@@ -172,7 +178,13 @@ MODULE GWFBASMODULE
     DOUBLE PRECISION,DIMENSION(:),  POINTER, CONTIGUOUS:: PRNT_VERR_DIF
     !
     TYPE(GENERIC_OUTPUT_FILE), DIMENSION(:), POINTER, CONTIGUOUS:: PRINT_HEAD
-  INTEGER,                                   POINTER            :: PRINT_HEAD_FLAG    ! 0: not in use, 1 in use and SP specified, 2, print last time step, 3 print every timestep
+    INTEGER,                                 POINTER            :: PRINT_HEAD_FLAG    ! 0: not in use, 1 in use and SP specified, 2, print last time step, 3 print every timestep
+    !
+    TYPE(GENERIC_OUTPUT_FILE), DIMENSION(:), POINTER, CONTIGUOUS:: PRINT_WTAB
+    INTEGER,                                 POINTER            :: PRINT_WTAB_FLAG  ! 0: not in use, 1 in use and SP specified, 2, print last time step, 3 print every timestep
+    !
+    TYPE(GENERIC_OUTPUT_FILE), DIMENSION(:), POINTER, CONTIGUOUS:: PRINT_WDEP
+    INTEGER,                                 POINTER            :: PRINT_WDEP_FLAG  ! 0: not in use, 1 in use and SP specified, 2, print last time step, 3 print every timestep
     !
     LOGICAL,          POINTER:: DAMPEN_START
     INTEGER,          POINTER:: DAMPEN_START_ITR
