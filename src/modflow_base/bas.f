@@ -43,6 +43,8 @@ C     ------------------------------------------------------------------
      +                      PRNT_VERR_OUTER, PRNT_VERR_NTERM, PRNT_VERR,
      +                      PRNT_VERR_LRC,PRNT_VERR_DIF,
      +                      PRINT_HEAD,PRINT_HEAD_FLAG,
+     +                      PRINT_WTAB,PRINT_WTAB_FLAG,
+     +                      PRINT_WDEP,PRINT_WDEP_FLAG,
      +                      ADAMP_INPUT, BAS_ADAMP, BAS_ADAMP_TOL,
      +                      BAS_ADAMP_TOL2,HED_CHNG2, HED_CHNG3,
      +                      HED_LOCK,INTER_INFO,HAS_STARTDATE,
@@ -125,8 +127,12 @@ C1------grids to be defined.
       ALLOCATE(BACKTRACKING, SOURCE=.FALSE.)
       !
       ALLOCATE(PRINT_HEAD_FLAG, SOURCE=0)   ! 0: not in use, 1 in use and SP specified, 2, print last time step, 3 print every timestep
+      ALLOCATE(PRINT_WTAB_FLAG, SOURCE=0)
+      ALLOCATE(PRINT_WDEP_FLAG, SOURCE=0)
       !
       ALLOCATE(PRINT_HEAD(1))
+      ALLOCATE(PRINT_WTAB(1))
+      ALLOCATE(PRINT_WDEP(1))
       !PRINT_HEAD(1)%EXTRA = ""  ! Allocate as empty to indicate option not in use
       !
       BAS_ADAMP            = inf_I
@@ -946,8 +952,8 @@ C     ------------------------------------------------------------------
       USE GWFBASMODULE,ONLY:GWFBASDAT!,BAS_ADAMP,HED_CHNG2,HED_CHNG3
       IMPLICIT NONE
       INTEGER, INTENT(IN):: IGRID, KPER, KSTP, KITER
-      INTEGER:: I, J, K
-      REAL,DIMENSION(:,:,:),POINTER, CONTIGUOUS:: PNT
+      !INTEGER:: I, J, K
+      !REAL,DIMENSION(:,:,:),POINTER, CONTIGUOUS:: PNT
 C     ------------------------------------------------------------------
       !
        !
@@ -1007,8 +1013,8 @@ C     ------------------------------------------------------------------
      +                     ABOVE_GSE_LIM,ABOVE_GSE_PRT_LIM,ABOVE_GSE_PRT
       USE UTIL_INTERFACE,    ONLY: LRC_TO_CELLID, CELLID_TO_LRC
       USE NUM2STR_INTERFACE, ONLY: NUM2STR, NUM2STR7
+      USE SORT_INTERFACE,    ONLY: SORT
       USE BAS_UTIL,    ONLY: RELAX_HNEW, TOP_LIM_HNEW,PRINT_TOP_LIM_HNEW
-      USE SORT_INTERFACE
       USE GWFSFRMODULE, ONLY: SFR_IN_USE, SFR_FRES, SFR_SEG_FRES
       IMPLICIT NONE
       INTEGER, INTENT(IN   ):: KPER, KSTP, KITER, MXITER
@@ -1283,7 +1289,9 @@ C     ------------------------------------------------------------------
         PRNT_CNVG_DIF = DZ
         CNT = Z
         !
-        DO K=ONE,NLAY; DO I=ONE,NROW; DO J=ONE,NCOL
+        DO K=ONE,NLAY
+        DO I=ONE,NROW
+        DO J=ONE,NCOL
            !
            IF(IBOUND(J,I,K)>Z) THEN
                DIF = ABS(HNEW(J,I,K) - HNEW_OLD(J,I,K))
@@ -1312,10 +1320,8 @@ C     ------------------------------------------------------------------
                    PRNT_CNVG_DIF(CNT) = DIF
                    !
                    IF(CNT == PRNT_CNVG_NTERM) THEN
-                       CALL SORT(PRNT_CNVG_NTERM,
-     +                           PRNT_CNVG_DIF, PRNT_CNVG_LRC)
-                       CALL REVERSE_ORDER(PRNT_CNVG_NTERM,PRNT_CNVG_DIF)  !MAKE IT SO ITS LARGEST TO SMALLEST
-                       CALL REVERSE_ORDER(PRNT_CNVG_NTERM,PRNT_CNVG_LRC)
+                       CALL SORT(PRNT_CNVG_DIF, PRNT_CNVG_LRC, 
+     +                           SORT_B=FALSE, DESCEND=[TRUE, FALSE])
                        CNT = CNT + ONE
                    END IF
                END IF
@@ -1339,9 +1345,11 @@ C     ------------------------------------------------------------------
                !END IF
            END IF
            !
-        END DO; END DO; END DO
+        END DO
+        END DO
+        END DO
         !
-        CALL SORT(PRNT_CNVG_NTERM, PRNT_CNVG_LRC, PRNT_CNVG_DIF)  !SORT ON INDEX
+        CALL SORT(PRNT_CNVG_LRC, PRNT_CNVG_DIF, SORT_B=FALSE)  !SORT ON INDEX
         !
         IF(HAS_STARTDATE) THEN
             DT = DATE_SP(KPER)%TS(KSTP)%STR_MONTHYEAR()
@@ -1355,7 +1363,7 @@ C     ------------------------------------------------------------------
          !
          CALL CELLID_TO_LRC(ID, K, I, J, NLAY, NROW, NCOL)
          !
-         DIF = HNEW(J,I,K) - HNEW_OLD(J,I,K)
+         DIF = PRNT_CNVG_DIF(II) ! HNEW(J,I,K) - HNEW_OLD(J,I,K) uncomment if output wants sign
          !
          IF(PRNT_CNVG%BINARY) THEN
          WRITE(PRNT_CNVG%IU)KPER,KSTP,KITER,K,I,J,HNEW(J,I,K),DIF,DT,ID
@@ -1386,22 +1394,25 @@ C     ------------------------------------------------------------------
         PRNT_FRES_DIF = DZ
         CNT = Z
         !
-        DO K=ONE,NLAY; DO I=ONE,NROW; DO J=ONE,NCOL
+        DO K=ONE,NLAY
+        DO I=ONE,NROW
+        DO J=ONE,NCOL
            !
            IF(IBOUND(J,I,K)>Z) THEN
                !
                !=================================================
                !
-               DIF = CELL_MASS_BALANCE(I,J,K)
+               DIF  = CELL_MASS_BALANCE(I,J,K)
+               ADIF = ABS(DIF)
                !
                !=================================================
                !
                CALL LRC_TO_CELLID(ID, K, I, J, NLAY, NROW, NCOL)
                !
                IF(CNT > PRNT_FRES_NTERM) THEN
-                   ADIF = ABS(DIF)
                    DO II = ONE, PRNT_FRES_NTERM
-                       IF( ADIF > ABS(PRNT_FRES_DIF(II)) ) THEN
+                       !IF( ADIF > ABS(PRNT_FRES_DIF(II)) ) THEN
+                       IF( ADIF > PRNT_FRES_DIF(II) ) THEN
                          !
                          IF(II<PRNT_FRES_NTERM) THEN
                            DO ITMP=PRNT_FRES_NTERM, II+ONE, NEG
@@ -1411,7 +1422,7 @@ C     ------------------------------------------------------------------
                          END IF
                          !
                          PRNT_FRES_LRC(II) = ID
-                         PRNT_FRES_DIF(II) = DIF
+                         PRNT_FRES_DIF(II) = ADIF  ! DIF
                          !
                          EXIT
                        END IF
@@ -1419,21 +1430,21 @@ C     ------------------------------------------------------------------
                ELSE
                    CNT = CNT + ONE
                    PRNT_FRES_LRC(CNT) = ID
-                   PRNT_FRES_DIF(CNT) = DIF
+                   PRNT_FRES_DIF(CNT) = ADIF  ! DIF
                    !
                    IF(CNT == PRNT_FRES_NTERM) THEN
-                       CALL SORT(PRNT_FRES_NTERM,
-     +                           PRNT_FRES_DIF, PRNT_FRES_LRC, TRUE)
-                       CALL REVERSE_ORDER(PRNT_FRES_NTERM,PRNT_FRES_DIF)  !MAKE IT SO ITS LARGEST TO SMALLEST
-                       CALL REVERSE_ORDER(PRNT_FRES_NTERM,PRNT_FRES_LRC)
+                       CALL SORT(PRNT_FRES_DIF, PRNT_FRES_LRC, 
+     +                           SORT_B=FALSE, DESCEND=[TRUE, FALSE] )
                        CNT = CNT + ONE
                    END IF
                END IF
            END IF
            !
-        END DO; END DO; END DO
+        END DO
+        END DO
+        END DO
         !
-        CALL SORT(PRNT_FRES_NTERM, PRNT_FRES_LRC, PRNT_FRES_DIF)  !SORT ON INDEX
+        CALL SORT(PRNT_FRES_LRC, PRNT_FRES_DIF, SORT_B=FALSE)  !SORT ON INDEX
         !
         IF(HAS_STARTDATE) THEN
             DT = DATE_SP(KPER)%TS(KSTP)%STR_MONTHYEAR()
@@ -1483,7 +1494,9 @@ C     ------------------------------------------------------------------
         PRNT_VERR_DIF = DZ
         CNT = Z
         !
-        DO K=ONE,NLAY; DO I=ONE,NROW; DO J=ONE,NCOL
+        DO K=ONE,NLAY
+        DO I=ONE,NROW
+        DO J=ONE,NCOL
            !
            IF(IBOUND(J,I,K)>Z) THEN
                !
@@ -1518,18 +1531,18 @@ C     ------------------------------------------------------------------
                    PRNT_VERR_DIF(CNT) = DIF
                    !
                    IF(CNT == PRNT_VERR_NTERM) THEN
-                       CALL SORT(PRNT_VERR_NTERM,
-     +                           PRNT_VERR_DIF, PRNT_VERR_LRC)
-                       CALL REVERSE_ORDER(PRNT_VERR_NTERM,PRNT_VERR_DIF)  !MAKE IT SO ITS LARGEST TO SMALLEST
-                       CALL REVERSE_ORDER(PRNT_VERR_NTERM,PRNT_VERR_LRC)
+                       CALL SORT(PRNT_VERR_DIF, PRNT_VERR_LRC, 
+     +                           SORT_B=FALSE, DESCEND=[TRUE, FALSE] )
                        CNT = CNT + ONE
                    END IF
                END IF
            END IF
            !
-        END DO; END DO; END DO
+        END DO
+        END DO
+        END DO
         !
-        CALL SORT(PRNT_VERR_NTERM, PRNT_VERR_LRC, PRNT_VERR_DIF)  !SORT ON INDEX
+        CALL SORT(PRNT_VERR_LRC, PRNT_VERR_DIF, SORT_B=FALSE)  !SORT ON INDEX
         !
         IF(HAS_STARTDATE) THEN
             DT = DATE_SP(KPER)%TS(KSTP)%STR_MONTHYEAR()
@@ -1591,14 +1604,14 @@ C
 C        SPECIFICATIONS:
 C     ------------------------------------------------------------------
       USE, INTRINSIC:: IEEE_ARITHMETIC, ONLY: IEEE_VALUE, IEEE_QUIET_NAN
-      USE CONSTANTS,   ONLY: NEG,Z,ONE,DZ,TRUE
+      USE CONSTANTS,   ONLY: NEG,Z,ONE,DZ,TRUE,FALSE
       USE GLOBAL,      ONLY:NCOL,NROW,NLAY,HNEW,IBOUND,
      +                      BOTM,LBOTM,AREA,UPLAY,
      +                      CELL_MASS_BALANCE
       USE GWFBASMODULE,      ONLY: DATE_SP, HAS_STARTDATE
       USE UTIL_INTERFACE,    ONLY: LRC_TO_CELLID, CELLID_TO_LRC
       USE NUM2STR_INTERFACE, ONLY: NUM2STR, NUM2STR7
-      USE SORT_INTERFACE
+      USE SORT_INTERFACE,    ONLY: SORT
       USE GWFSFRMODULE, ONLY: NSTRM, ISTRM, STRM, SEG_NSTRM
       USE GWFSFRMODULE, ONLY: SFR_FRES,SFR_FRES_OUTER,SFR_FRES_NTERM,
      +                        SFR_FRES_LRC, SFR_FRES_DIF,
@@ -1661,14 +1674,15 @@ C     ------------------------------------------------------------------
                !
                !=================================================
                !
-               DIF = CELL_MASS_BALANCE(I,J,K)
+               DIF  = CELL_MASS_BALANCE(I,J,K)
+               ADIF = ABS(DIF)
                !
                !=================================================
                !
                IF(CNT > NTERM) THEN
-                   ADIF = ABS(DIF)
                    DO II = ONE, NTERM
-                       IF( ADIF > ABS(SFR_FRES_DIF(II)) ) THEN
+                       !IF( ADIF > ABS(SFR_FRES_DIF(II)) ) THEN
+                       IF( ADIF > SFR_FRES_DIF(II) ) THEN
                          !
                          IF(II<NTERM) THEN
                            DO ITMP=NTERM, II+ONE, NEG
@@ -1678,7 +1692,7 @@ C     ------------------------------------------------------------------
                          END IF
                          !
                          SFR_FRES_LRC(II) = L
-                         SFR_FRES_DIF(II) = DIF
+                         SFR_FRES_DIF(II) = ADIF  ! DIF
                          !
                          EXIT
                        END IF
@@ -1686,13 +1700,11 @@ C     ------------------------------------------------------------------
                ELSE
                    CNT = CNT + ONE
                    SFR_FRES_LRC(CNT) = L
-                   SFR_FRES_DIF(CNT) = DIF
+                   SFR_FRES_DIF(CNT) = ADIF  ! DIF
                    !
                    IF(CNT == NTERM) THEN
-                       CALL SORT(NTERM,
-     +                           SFR_FRES_DIF, SFR_FRES_LRC, TRUE)
-                       CALL REVERSE_ORDER(NTERM,SFR_FRES_DIF)  !MAKE IT SO ITS LARGEST TO SMALLEST
-                       CALL REVERSE_ORDER(NTERM,SFR_FRES_LRC)
+                       CALL SORT(SFR_FRES_DIF, SFR_FRES_LRC, 
+     +                           SORT_B=FALSE, DESCEND=[TRUE, FALSE] )
                        CNT = CNT + ONE
                    END IF
                END IF
@@ -1702,7 +1714,7 @@ C     ------------------------------------------------------------------
         !
         ITMP = SFR_FRES_LRC(ONE)  !Hold backup of worst reach
         !
-        CALL SORT(NTERM, SFR_FRES_LRC, SFR_FRES_DIF)  !SORT ON INDEX
+        CALL SORT(SFR_FRES_LRC, SFR_FRES_DIF)  !SORT ON INDEX
         !
         IF(HAS_STARTDATE) THEN
             DT = DATE_SP(KPER)%TS(KSTP)%STR_MONTHYEAR()
@@ -1858,7 +1870,7 @@ C1------OUTPUT CONTROL IS ACTIVE.  IF NOT, SET DEFAULTS AND RETURN.
       IF(INOC == 0) THEN
          IHDDFL=0
          IF(ICNVG == 0 .OR. KSTP == NSTP(KPER))IHDDFL=1
-         IF(PRINT_HEAD_FLAG /= 0 ) IHDDFL=0           ! Head output requested through the BAS
+         IF(PRINT_HEAD_FLAG /= 0 ) IHDDFL=0           ! Head output requested through the BAS - Use that output instead
          IBUDFL=0
          IF(ICNVG == 0 .OR. KSTP == NSTP(KPER))IBUDFL=1
          ICBCFL=0
@@ -1981,17 +1993,21 @@ C     ------------------------------------------------------------------
       USE CONSTANTS,   ONLY: BLNK, BLN, NL, TRUE, FALSE, DZ, D10, Z, ONE
       USE GLOBAL,      ONLY:ITMUNI,IOUT,NCOL,NROW,NLAY,HNEW,STRT,DDREF,
      1                      INPUT_CHECK,WORST_CELL_MASS_BALANCE,IBOUND,
-     2                      MAX_RELATIVE_VOL_ERROR,NPER, NSTP, RBUF,
-     +                      CELL_MASS_BALANCE, HOLD, ALLOC_DDREF
+     2                      MAX_RELATIVE_VOL_ERROR,NPER, NSTP, RBUF,GSE,
+     +                      CELL_MASS_BALANCE, HOLD, ALLOC_DDREF, WTABLE
       USE GWFBASMODULE,ONLY:DELT,PERTIM,TOTIM,IHDDFL,IBUDFL,BUDGETDB,
-     1                     MSUM,VBVL,VBNM,IDDREF,IUBGT,PDIFFPRT,DATE_SP,
-     2                     MAX_REL_VOL_ERROR,MAX_REL_VOL_INVOKED,
-     3                     INTER_INFO,PVOL_ERR, HAS_STARTDATE,
-     4                     PRNT_RES, PRNT_RES_LIM, PRNT_RES_CUM,
-     5                     PRNT_RES_CUM_ARR,PRINT_HEAD,PRINT_HEAD_FLAG,
-     6                     PRNT_CUM_HEAD_CHNG, CUM_HEAD_CHNG,
-     7                     CUM_HEAD_CHNG_E10, HDRY
-      USE ERROR_INTERFACE,    ONLY: WARNING_MESSAGE
+     +                     MSUM,VBVL,VBNM,IDDREF,IUBGT,PDIFFPRT,DATE_SP,
+     +                     MAX_REL_VOL_ERROR,MAX_REL_VOL_INVOKED,
+     +                     INTER_INFO,PVOL_ERR, HAS_STARTDATE,
+     +                     PRNT_RES, PRNT_RES_LIM, PRNT_RES_CUM,
+     +                     PRNT_RES_CUM_ARR,
+     +                     PRINT_HEAD,PRINT_HEAD_FLAG,
+     +                     PRINT_WTAB,PRINT_WTAB_FLAG,
+     +                     PRINT_WDEP,PRINT_WDEP_FLAG,
+     +                     PRNT_CUM_HEAD_CHNG, CUM_HEAD_CHNG,
+     +                     CUM_HEAD_CHNG_E10, HDRY
+      USE ALLOC_INTERFACE,   ONLY: ALLOC
+      USE ERROR_INTERFACE,   ONLY: WARNING_MESSAGE
       USE NUM2STR_INTERFACE, ONLY: NUM2STR
       USE BUDGET_DATEBASE_WRITER
       USE BAS_UTIL, ONLY: MASS_ERROR_PRINT
@@ -2272,7 +2288,7 @@ C4------PRINT TOTAL BUDGET IF REQUESTED
        END ASSOCIATE
       END IF
       !
-      ! Print Head Arrays if Requested
+      ! Print Head Arrays if Requested ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       !
       IF(PRINT_HEAD_FLAG /= 0) THEN !R, C, L, I, J, K
         !
@@ -2298,7 +2314,7 @@ C4------PRINT TOTAL BUDGET IF REQUESTED
         !
         IF ( n > 0 ) THEN
           !
-          ALLOCATE( HD(NCOL) )
+          CALL ALLOC(HD, NCOL)
           !
           CALL PRINT_HEAD(n)%SIZE_CHECK()
           !
@@ -2339,11 +2355,149 @@ C4------PRINT TOTAL BUDGET IF REQUESTED
                 WRITE(PRINT_HEAD(n)%IU, PRINT_HEAD(n)%FMT) HD
              END DO
           END DO
-          DEALLOCATE(HD, stat=i)
+          !
         END IF
       END IF
       !
-      ! Print Cumulative Head Change
+      ! Print Water Table Arrays if Requested ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      !
+      IF(PRINT_WTAB_FLAG /= 0) THEN !R, C, L, I, J, K
+        !
+        n  = 0
+        !
+        IF ( PRINT_WTAB_FLAG == 1 ) THEN
+          BLOCK
+              CHARACTER(8):: SPTS
+              SPTS(1:4) = TRANSFER( KPER, SPTS(1:4) )     !  I = TRANSFER(c, I)  !GET SP
+              SPTS(5:8) = TRANSFER( KSTP, SPTS(5:8) )     !  J = TRANSFER(PRINT_WTAB(n)%EXTRA(5:8), J)  !GET TS
+              DO I=1, SIZE(PRINT_WTAB)
+                 IF( SPTS == PRINT_WTAB(I)%EXTRA ) THEN
+                                                   n = I
+                                                   EXIT                ! Only one file per SP/TS
+                 END IF
+              END DO
+          END BLOCK
+        ELSEIF(PRINT_WTAB_FLAG == 2) THEN  ! Last Time Step
+                 if(kstp==nstp(kper))  n = 1
+        ELSEIF(PRINT_WTAB_FLAG == 3) THEN  ! Every Time Step
+                                       n = 1
+        END IF
+        !
+        IF ( n > 0 ) THEN
+          !
+          CALL ALLOC(HD, NCOL)
+          !
+          CALL PRINT_WTAB(n)%SIZE_CHECK()
+          !
+          K = -14  !NUM2STR Pad
+          RAT = ABS(TOTRIN-TOTROT)
+          VOL = RAT*DELT
+          !
+          WRITE(PRINT_WTAB(n)%IU,'(A)', ADVANCE='NO')
+     +    "SP TS  "//NUM2STR(KPER)//"  "//NUM2STR(KSTP)//
+     +    "  ITER "//NUM2STR(KITER)//"  DELT "//NUM2STR(DELT)//
+     +    "  (NROW,NCOL) = ("//NUM2STR(NROW)//", "//
+     +                         NUM2STR(NCOL)//")   "//
+     +    "ERROR "//NUM2STR(ABS(BUDPERC))//" %  "//
+     +    'FORMAT "'//PRINT_WTAB(n)%FMT//'"     '
+          !
+          IF(HAS_STARTDATE) THEN
+              WRITE(PRINT_WTAB(n)%IU,'(A,4x)',ADVANCE='NO')
+     +                  DATE_SP(KPER)%TS(KSTP-1)%STR_MONTHYEAR()
+          END IF
+          WRITE(PRINT_HEAD(n)%IU,"(A)") "WATER_TABLE"
+          !
+          DO I=1, NROW
+             !
+             HD(1:NCOL) = WTABLE(1:NCOL, I)
+             DO J=1, NCOL
+                IF    (HD(J) == HDRY  .OR.
+     +                 HD(J) /= HD(J) .OR. HD(J) == -HUGE(HD)) THEN
+                                          HD(J) = NaN
+                ELSEIF(HD(J) >=  1D100) THEN
+                                          HD(J) = inf
+                ELSEIF(HD(J) <= -1D100) THEN
+                                          HD(J) = ninf
+                END IF
+             END DO
+             !
+             WRITE(PRINT_WTAB(n)%IU, PRINT_WTAB(n)%FMT) HD
+          END DO
+          !
+        END IF
+      END IF
+      !
+      ! Print Depth to Water Arrays if Requested ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      !
+      IF(PRINT_WDEP_FLAG /= 0) THEN !R, C, L, I, J, K
+        !
+        n  = 0
+        !
+        IF ( PRINT_WDEP_FLAG == 1 ) THEN
+          BLOCK
+              CHARACTER(8):: SPTS
+              SPTS(1:4) = TRANSFER( KPER, SPTS(1:4) )     !  I = TRANSFER(c, I)  !GET SP
+              SPTS(5:8) = TRANSFER( KSTP, SPTS(5:8) )     !  J = TRANSFER(PRINT_WDEP(n)%EXTRA(5:8), J)  !GET TS
+              DO I=1, SIZE(PRINT_WDEP)
+                 IF( SPTS == PRINT_WDEP(I)%EXTRA ) THEN
+                                                   n = I
+                                                   EXIT                ! Only one file per SP/TS
+                 END IF
+              END DO
+          END BLOCK
+        ELSEIF(PRINT_WDEP_FLAG == 2) THEN  ! Last Time Step
+                 if(kstp==nstp(kper))  n = 1
+        ELSEIF(PRINT_WDEP_FLAG == 3) THEN  ! Every Time Step
+                                       n = 1
+        END IF
+        !
+        IF ( n > 0 ) THEN
+          !
+          CALL ALLOC(HD, NCOL)
+          !
+          CALL PRINT_WDEP(n)%SIZE_CHECK()
+          !
+          K = -14  !NUM2STR Pad
+          RAT = ABS(TOTRIN-TOTROT)
+          VOL = RAT*DELT
+          !
+          WRITE(PRINT_WDEP(n)%IU,'(A)', ADVANCE='NO')
+     +    "SP TS  "//NUM2STR(KPER)//"  "//NUM2STR(KSTP)//
+     +    "  ITER "//NUM2STR(KITER)//"  DELT "//NUM2STR(DELT)//
+     +    "  (NROW,NCOL) = ("//NUM2STR(NROW)//", "//
+     +                         NUM2STR(NCOL)//")   "//
+     +    "ERROR "//NUM2STR(ABS(BUDPERC))//" %  "//
+     +    'FORMAT "'//PRINT_WDEP(n)%FMT//'"     '
+          !
+          IF(HAS_STARTDATE) THEN
+              WRITE(PRINT_WTAB(n)%IU,'(A,4x)',ADVANCE='NO')
+     +                  DATE_SP(KPER)%TS(KSTP-1)%STR_MONTHYEAR()
+          END IF
+          WRITE(PRINT_HEAD(n)%IU,"(A)") "WATER_DEPTH"
+          !
+          DO I=1, NROW
+             !
+             HD(1:NCOL) = WTABLE(1:NCOL, I)
+             DO J=1, NCOL
+                IF    (HD(J) == HDRY  .OR.
+     +                 HD(J) /= HD(J) .OR. HD(J) == -HUGE(HD)) THEN
+                                          HD(J) = NaN
+                ELSEIF(HD(J) >=  1D100) THEN
+                                          HD(J) = inf
+                ELSEIF(HD(J) <= -1D100) THEN
+                                          HD(J) = ninf
+                ELSE
+                    HD(J) = GSE(J,I) - HD(J)
+                END IF
+             END DO
+             !
+             WRITE(PRINT_WDEP(n)%IU, PRINT_WDEP(n)%FMT) HD
+          END DO
+          !
+        END IF
+      END IF
+      !
+      ! Print Cumulative Head Change ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       !
       IF(PRNT_CUM_HEAD_CHNG%IU /= 0) THEN
         !
@@ -2398,6 +2552,8 @@ C5------WILL BE PRODUCED.
       CALL SGWF2BAS7T(KSTP,KPER,DELT,PERTIM,TOTIM,ITMUNI,IOUT)
       WRITE(IOUT,*)
       END IF
+      !
+      IF(ALLOCATED(HD)) DEALLOCATE(HD, stat=i)  !Clean up the tmp array if allocated
 C
       END SUBROUTINE
       !
@@ -4051,8 +4207,7 @@ C      INCLUDE 'openspec.inc'
       INTEGER::BUFBLOCKSIZE, BUFCOUNT, WARN_IU
       !CHARACTER(:),ALLOCATABLE:: OLD,REED,REPL,WRIT,REWR
       CHARACTER(3):: ASYN
-      LOGICAL:: UNIT_SPECIFIED, NOPRINT, NOLIST, NOWARN, EOF, CHK
-      DOUBLE PRECISION:: DP
+      LOGICAL:: UNIT_SPECIFIED, NOLIST, NOWARN, EOF, CHK
       CHARACTER(:), ALLOCATABLE:: TMP !COMPILER BUG REQUIRED THIS TMP VARIABLE
       TYPE(DATE_OPERATOR):: DATE
 C     ---------------------------------------------------------------
@@ -5492,6 +5647,8 @@ C
       DEALLOCATE( GWFBASDAT(IGRID)% PRNT_VERR_DIF        , STAT=J)
       DEALLOCATE( GWFBASDAT(IGRID)% PRINT_HEAD           , STAT=J)
       DEALLOCATE( GWFBASDAT(IGRID)% PRINT_HEAD_FLAG      , STAT=J)
+      DEALLOCATE( GWFBASDAT(IGRID)% PRINT_WTAB_FLAG      , STAT=J)
+      DEALLOCATE( GWFBASDAT(IGRID)% PRINT_WDEP_FLAG      , STAT=J)
       DEALLOCATE( GWFBASDAT(IGRID)% DAMPEN_START         , STAT=J)
       DEALLOCATE( GWFBASDAT(IGRID)% DAMPEN_START_ITR     , STAT=J)
       DEALLOCATE( GWFBASDAT(IGRID)% DAMPEN_START_DMP     , STAT=J)
@@ -5588,6 +5745,8 @@ C
       NULLIFY( GWFBASDAT(IGRID)% PRNT_VERR_DIF        )
       NULLIFY( GWFBASDAT(IGRID)% PRINT_HEAD           )
       NULLIFY( GWFBASDAT(IGRID)% PRINT_HEAD_FLAG      )
+      NULLIFY( GWFBASDAT(IGRID)% PRINT_WTAB_FLAG      )
+      NULLIFY( GWFBASDAT(IGRID)% PRINT_WDEP_FLAG      )
       NULLIFY( GWFBASDAT(IGRID)% DAMPEN_START         )
       NULLIFY( GWFBASDAT(IGRID)% DAMPEN_START_ITR     )
       NULLIFY( GWFBASDAT(IGRID)% DAMPEN_START_DMP     )
@@ -5685,6 +5844,8 @@ C
          NULLIFY( PRNT_VERR_DIF        )
          NULLIFY( PRINT_HEAD           )
          NULLIFY( PRINT_HEAD_FLAG      )
+         NULLIFY( PRINT_WTAB_FLAG      )
+         NULLIFY( PRINT_WDEP_FLAG      )
          NULLIFY( DAMPEN_START         )
          NULLIFY( DAMPEN_START_ITR     )
          NULLIFY( DAMPEN_START_DMP     )
@@ -5916,6 +6077,8 @@ C
       PRNT_VERR_DIF        => GWFBASDAT(IGRID)% PRNT_VERR_DIF
       PRINT_HEAD           => GWFBASDAT(IGRID)% PRINT_HEAD
       PRINT_HEAD_FLAG      => GWFBASDAT(IGRID)% PRINT_HEAD_FLAG
+      PRINT_WTAB_FLAG      => GWFBASDAT(IGRID)% PRINT_WTAB_FLAG
+      PRINT_WDEP_FLAG      => GWFBASDAT(IGRID)% PRINT_WDEP_FLAG
       DAMPEN_START         => GWFBASDAT(IGRID)% DAMPEN_START
       DAMPEN_START_ITR     => GWFBASDAT(IGRID)% DAMPEN_START_ITR
       DAMPEN_START_DMP     => GWFBASDAT(IGRID)% DAMPEN_START_DMP
@@ -6102,6 +6265,8 @@ C  Save global data for a grid.
       GWFBASDAT(IGRID)% PRNT_VERR_DIF        => PRNT_VERR_DIF
       GWFBASDAT(IGRID)% PRINT_HEAD           => PRINT_HEAD
       GWFBASDAT(IGRID)% PRINT_HEAD_FLAG      => PRINT_HEAD_FLAG
+      GWFBASDAT(IGRID)% PRINT_WTAB_FLAG      => PRINT_WTAB_FLAG
+      GWFBASDAT(IGRID)% PRINT_WDEP_FLAG      => PRINT_WDEP_FLAG
       GWFBASDAT(IGRID)% DAMPEN_START         => DAMPEN_START
       GWFBASDAT(IGRID)% DAMPEN_START_ITR     => DAMPEN_START_ITR
       GWFBASDAT(IGRID)% DAMPEN_START_DMP     => DAMPEN_START_DMP

@@ -29,7 +29,7 @@ SUBROUTINE PRINT_MAIN_HEADER(IU)  ! Set to 6 for cmd prompt or use output_unit f
   CHARACTER(:),ALLOCATABLE:: Revision
   !
   VERSION_OWHM='2.0'                                 ! "Psyduck After Advil" 
-  Revision    ='02a         4/23/2020'
+  Revision    ='02          4/23/2021'
   VERSION_MF  ='1.12.0   02/03/2017'        
   VERSION_FMP ='4.00.0   04/23/2017'       
   VERSION_SWR ='1.04.0   09/15/2016'       
@@ -539,7 +539,7 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
           IF(IUNIT(4)  /= Z) CALL GWF2RIV7RP(IUNIT(4),IGRID)
           IF(IUNIT(5)  /= Z) CALL GWF2EVT7RP(IUNIT(5),IGRID)
           If(IUNIT(6)  /= Z) CALL GWF2RIP4RP(IUNIT(6),IGRID)                 ! inserted by schmid
-          IF(IUNIT(7)  /= Z) CALL GWF2GHB7RP(IUNIT(7),IGRID,KKPER,IUNIT(63)) ! inserted Iunit(63) for NWT by rth
+          IF(IUNIT(7)  /= Z) CALL GWF2GHB7RP(IUNIT(7),IGRID,KKPER)           ! ,IUNIT(63) for NWT
           !
           IF(IUNIT(8)  /= Z) CALL GWF2RCH7RP(IUNIT(8),IGRID)
           IF(IUNIT(17) /= Z) CALL GWF2RES7RP(IUNIT(17),IGRID)

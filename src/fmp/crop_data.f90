@@ -14,7 +14,7 @@ MODULE CROP_DATA_FMP_MODULE
   !
   USE CONSTANTS
   USE ULOAD_AND_SFAC_INTERFACE
-  USE SORT_INTERFACE
+  USE SORT_INTERFACE,                   ONLY: SORT
   USE SET_ARRAY_INTERFACE,              ONLY: SET_ZERO
   !USE RELAX_INTERFACE,                  ONLY: RELAX_IT
   USE ERROR_INTERFACE,                  ONLY: STOP_ERROR, WARNING_MESSAGE, FILE_IO_ERROR
@@ -1152,7 +1152,7 @@ MODULE CROP_DATA_FMP_MODULE
                                   DO K = ONE, THREE
                                         IF(PSI(K) < PSI(K+1)) THEN
                                             ERROR = ERROR//'ROOT PRESSURES (PSI) ARE NOT IN DESCENDING ORDER FOR CROP '//NUM2STR(I,-8)//' THEY WILL BE SORTED TO BE IN DECENDING ORDER (PLEASE CHECK YOUR INPUT).'//NL
-                                            CALL SORT(FOUR, PSI)
+                                            CALL SORT(PSI)
                                             EXIT
                                         END IF
                                   END DO
