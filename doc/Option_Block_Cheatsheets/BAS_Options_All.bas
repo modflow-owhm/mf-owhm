@@ -131,6 +131,17 @@ BEGIN OPTIONS
     #   PRINT_HEAD can be repeated, one per line, to output head for different "SPTS" time steps 
     #                                             --Note only one PRINT_HEAD can be specified if SPTS is "LAST_TIMESTEP" or "EVERY_TIMESTEP".
     PRINT_HEAD  SPTS  Generic_Output
+    #
+    # PRINT_WATER_TABLE and PRINT_WATER_DEPTH use the same input options as PRINT_HEAD, but 
+    #   the output for:
+    #        PRINT_WATER_TABLE is the water table elevation, which is defined as the head for the upper most layer with the HEAD > that layer's bottom elevation (upper most saturated cell)
+    #        PRINT_WATER_DEPTH is the depth to the water table from the ground surface elevation (GSE). That is, GSE minus the water table elevation. 
+    #           GSE is ether the top elevation of the upper most active cell
+    #                  or specified in the DIS package with the SURFACE_ELEVATION option.
+    #
+    PRINT_WATER_TABLE  SPTS  Generic_Output
+    #
+    PRINT_WATER_DEPTH  SPTS  Generic_Output
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #
     # Print the layer, row, column of any cell whose head value exceeds the ground surface elevation plus DstPrt.

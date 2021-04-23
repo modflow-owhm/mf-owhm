@@ -21,7 +21,7 @@ fi
 # ---- Override and use specified PROGRAM. Uncomment and set to use  --------------------------------------
 #
 #
-#PROGRAM=mf-owhm_debug.exe
+#PROGRAM=mf-owhm-debug.exe
 #PROGRAM=mf-owhm_debug.nix
 #
 #

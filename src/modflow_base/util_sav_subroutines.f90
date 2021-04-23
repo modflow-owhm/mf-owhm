@@ -35,9 +35,9 @@ SUBROUTINE ULASAV(BUF,TEXT,KSTP,KPER,PERTIM,TOTIM,NCOL,NROW,ILAY,ICHN)
              SELECT CASE(BIN_REAL_KIND)
              CASE(REAL32)
                          WRITE(ICHN) KSTP,KPER,TO_SNGL(PERTIM),TO_SNGL(TOTIM),TEXT,NCOL,NROW,ILAY
-                         DO CONCURRENT(J=1:NCOL, I=1:NROW)
+                         DO I=1,NROW;  DO J=1,NCOL
                                                                RBUF(J,I,1) = TO_SNGL(BUF(J,I))
-                         END DO
+                         END DO; END DO
                          WRITE(ICHN) RBUF(:,:,1)
              CASE(REAL64)
                          WRITE(ICHN) KSTP,KPER,PERTIM,TOTIM,TEXT,NCOL,NROW,ILAY

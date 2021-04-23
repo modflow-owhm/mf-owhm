@@ -8,7 +8,7 @@
 #
 #    Boyce, S.E., Hanson, R.T., Ferguson, I., Schmid, W., Henson, W., Reimann, T., Mehl, S.M., and Earll, M.M., 2020, One-Water Hydrologic Flow Model: A MODFLOW based conjunctive-use simulation software: U.S. Geological Survey Techniques and Methods 6–A60, 435 p., https://doi.org/10.3133/tm6A60
 #
-#    Boyce, S.E., 2021, MODFLOW One-Water Hydrologic Flow Model (MF-OWHM) Conjunctive Use and Integrated Hydrologic Flow Modeling Software, version 2.0.1: U.S. Geological Survey Software Release, https://doi.org/10.5066/P9P8I8GS
+#    Boyce, S.E., 2021, MODFLOW One-Water Hydrologic Flow Model (MF-OWHM) Conjunctive Use and Integrated Hydrologic Flow Modeling Software, version 2.0.x: U.S. Geological Survey Software Release, https://doi.org/10.5066/P9P8I8GS
 #
 # PROVIDED AS IS WITHOUT WARRANTY OR HELP.
 #
@@ -123,6 +123,22 @@ mfb_src_dir :=$(src_dir)/modflow_base
 nwt_src_dir :=$(src_dir)/nwt
 bif_src_dir :=$(src_dir)/bif_lib
 #
+# BiF Directory Groups
+bif_sub_dir := $(bif_src_dir)/datetime             \
+               $(bif_src_dir)/dynamic_arrays       \
+               $(bif_src_dir)/error                \
+               $(bif_src_dir)/input_reader         \
+               $(bif_src_dir)/io                   \
+               $(bif_src_dir)/math_numbers         \
+               $(bif_src_dir)/sort                 \
+               $(bif_src_dir)/spatial              \
+               $(bif_src_dir)/strings              \
+               $(bif_src_dir)/system               \
+               $(bif_src_dir)/types_and_containers \
+               $(bif_src_dir)/unicode              \
+               $(bif_src_dir)/unit_test            \
+               $(bif_src_dir)/util_misc
+#
 #src_slg := $(src)/slang
 #src_swo := $(src)/swo
 #
@@ -144,7 +160,7 @@ int_dir ?=./obj/$(obj_dir)
 VPATH := $(src_dir)     $(int_dir)     $(bin_dir)     \
          $(cfp_src_dir) $(fmp_src_dir) $(gmg_src_dir) \
          $(mfb_src_dir) $(nwt_src_dir) $(bif_src_dir) \
-         $(slg_src_dir) $(swo_src_dir)
+         $(bif_sub_dir)  $(slg_src_dir) $(swo_src_dir)
 #
 #
 #############################################################################
@@ -184,54 +200,61 @@ endif
 # Define the Fortran source files.
 #
 bif_src:= \
-           $(bif_src_dir)/constants.f90                                      \
-           $(bif_src_dir)/alloc_interface.f90                                \
-           $(bif_src_dir)/array_data_types_instruction.f90                   \
-           $(bif_src_dir)/binary_heap_instruction.f90                        \
-           $(bif_src_dir)/calendar_functions.f90                             \
-           $(bif_src_dir)/cast_to_string_interface.f90                       \
-           $(bif_src_dir)/console_commander.f90                              \
-           $(bif_src_dir)/integer_array_builder.f90                          \
-           $(bif_src_dir)/integer_queue_instruction.f90                      \
-           $(bif_src_dir)/is_routine_interface.f90                           \
-           $(bif_src_dir)/linked_list_instruction.f90                        \
-           $(bif_src_dir)/log2_interface.f90                                 \
-           $(bif_src_dir)/name_id_interface.f90                              \
-           $(bif_src_dir)/num2str_interface.f90                              \
-           $(bif_src_dir)/parse_word_interface.f90                           \
-           $(bif_src_dir)/random_routines_interface.f90                      \
-           $(bif_src_dir)/relax_interface.f90                                \
-           $(bif_src_dir)/set_array_interface.f90                            \
-           $(bif_src_dir)/simple_timer_instruction.f90                       \
-           $(bif_src_dir)/sort_interface.f90                                 \
-           $(bif_src_dir)/xy_grid_coordinate_interface.f90                   \
-           $(bif_src_dir)/date_operator_instruction.f90                      \
-           $(bif_src_dir)/error_interface.f90                                \
-           $(bif_src_dir)/line_writer_interface.f90                          \
-           $(bif_src_dir)/path_interface.f90                                 \
-           $(bif_src_dir)/position_interface.f90                             \
-           $(bif_src_dir)/post_key_sub.f90                                   \
-           $(bif_src_dir)/util_interface.f90                                 \
-           $(bif_src_dir)/EquationParser.f90                                 \
-           $(bif_src_dir)/generic_open_interface.fpp                         \
-           $(bif_src_dir)/is_ascii_interface.f90                             \
-           $(bif_src_dir)/obs_group_interpolator.f90                         \
-           $(bif_src_dir)/warning_type_instruction.f90                       \
-           $(bif_src_dir)/adjacency_list_instruction_and_shortest_path.f90   \
-           $(bif_src_dir)/file_incrementer_interface.f90                     \
-           $(bif_src_dir)/file_io_interface.f90                              \
-           $(bif_src_dir)/string_routines.f90                                \
-           $(bif_src_dir)/cycling_text_file_interface.f90                    \
-           $(bif_src_dir)/generic_input_file_instruction.f90                 \
-           $(bif_src_dir)/generic_output_file_instruction.f90                \
-           $(bif_src_dir)/generic_block_reader_instruction.f90               \
-           $(bif_src_dir)/IXJ_instruction.f90                                \
-           $(bif_src_dir)/lookup_table_instruction.f90                       \
-           $(bif_src_dir)/time_series_file_instruction.f90                   \
-           $(bif_src_dir)/uload_and_sfac_interface.f90                       \
-           $(bif_src_dir)/transient_file_reader_instruction.f90              \
-           $(bif_src_dir)/list_array_input_interface.f90                     \
-           $(bif_src_dir)/sub_block_input_interface.f90
+           $(bif_src_dir)/util_misc/constants.f90                                  \
+           $(bif_src_dir)/datetime/calendar_functions.f90                          \
+           $(bif_src_dir)/datetime/timer_instruction.f90                           \
+           $(bif_src_dir)/math_numbers/log2_interface.f90                          \
+           $(bif_src_dir)/math_numbers/random_routines_interface.f90               \
+           $(bif_src_dir)/math_numbers/relax_interface.f90                         \
+           $(bif_src_dir)/spatial/xy_grid_coordinate_interface.f90                 \
+           $(bif_src_dir)/strings/cast_to_string_interface.f90                     \
+           $(bif_src_dir)/strings/num2str_interface.f90                            \
+           $(bif_src_dir)/strings/parse_word_interface.f90                         \
+           $(bif_src_dir)/system/console_commander.f90                             \
+           $(bif_src_dir)/types_and_containers/array_data_types_instruction.f90    \
+           $(bif_src_dir)/types_and_containers/binary_heap_instruction.f90         \
+           $(bif_src_dir)/types_and_containers/integer_array_builder.f90           \
+           $(bif_src_dir)/types_and_containers/integer_queue_instruction.f90       \
+           $(bif_src_dir)/types_and_containers/linked_list_instruction.f90         \
+           $(bif_src_dir)/types_and_containers/name_id_interface.f90               \
+           $(bif_src_dir)/util_misc/alloc_interface.f90                            \
+           $(bif_src_dir)/util_misc/is_routine_interface.f90                       \
+           $(bif_src_dir)/util_misc/set_array_interface.f90                        \
+           $(bif_src_dir)/datetime/date_operator_instruction.f90                   \
+           $(bif_src_dir)/error/error_interface.f90                                \
+           $(bif_src_dir)/io/post_key_sub.f90                                      \
+           $(bif_src_dir)/sort/sort_interface_driver.f90                           \
+           $(bif_src_dir)/sort/sort_interface_ascii.f90                            \
+           $(bif_src_dir)/sort/sort_interface_int32.f90                            \
+           $(bif_src_dir)/sort/sort_interface_int64.f90                            \
+           $(bif_src_dir)/sort/sort_interface_multi.f90                            \
+           $(bif_src_dir)/sort/sort_interface_rel32.f90                            \
+           $(bif_src_dir)/sort/sort_interface_rel64.f90                            \
+           $(bif_src_dir)/sort/sort_interface_wild.f90                             \
+           $(bif_src_dir)/strings/line_writer_interface.f90                        \
+           $(bif_src_dir)/system/path_interface.f90                                \
+           $(bif_src_dir)/util_misc/position_interface.f90                         \
+           $(bif_src_dir)/util_misc/util_interface.f90                             \
+           $(bif_src_dir)/error/warning_type_instruction.f90                       \
+           $(bif_src_dir)/io/generic_open_interface.fpp                            \
+           $(bif_src_dir)/math_numbers/EquationParser.f90                          \
+           $(bif_src_dir)/spatial/obs_group_interpolator.f90                       \
+           $(bif_src_dir)/strings/is_ascii_interface.f90                           \
+           $(bif_src_dir)/io/file_incrementer_interface.f90                        \
+           $(bif_src_dir)/io/file_io_interface.f90                                 \
+           $(bif_src_dir)/spatial/adjacency_list_instruction_and_shortest_path.f90 \
+           $(bif_src_dir)/strings/string_routines.f90                              \
+           $(bif_src_dir)/io/cycling_text_file_interface.f90                       \
+           $(bif_src_dir)/io/generic_input_file_instruction.f90                    \
+           $(bif_src_dir)/io/generic_output_file_instruction.f90                   \
+           $(bif_src_dir)/input_reader/generic_block_reader_instruction.f90        \
+           $(bif_src_dir)/datetime/time_series_file_instruction.f90                \
+           $(bif_src_dir)/types_and_containers/IXJ_instruction.f90                 \
+           $(bif_src_dir)/types_and_containers/lookup_table_instruction.f90        \
+           $(bif_src_dir)/input_reader/uload_and_sfac_interface.f90                \
+           $(bif_src_dir)/input_reader/transient_file_reader_instruction.f90       \
+           $(bif_src_dir)/input_reader/list_array_input_interface.f90              \
+           $(bif_src_dir)/input_reader/sub_block_input_interface.f90 
 #
 main_src:= \
            $(mfb_src_dir)/global_module.f90        \
@@ -338,8 +361,9 @@ main_src:= \
            $(cfp_src_dir)/cfp2_TM_utl.f            \
            $(src)main.f90
 #
-owhm_src := $(GMG_src) $(bif_src) $(main_src)
+all_src := $(GMG_src) $(bif_src) $(main_src)
 #
+# Get all source names with extension changed to ".o"
 obj:=  $(patsubst               %.f90, %.o,   \
          $(patsubst             %.f,   %.o,   \
            $(patsubst           %.fpp, %.o,   \
@@ -348,7 +372,7 @@ obj:=  $(patsubst               %.f90, %.o,   \
                  $(patsubst     %.F,   %.o,   \
                    $(patsubst   %.F90, %.o,   \
                      $(patsubst %.FOR, %.o,   \
-                            $(notdir $(owhm_src))  \
+                            $(notdir $(all_src))  \
         ) ) ) ) ) ) ) )
 #
 #obj:= $(patsubst %.f90,%.o,$(patsubst %.f,%.o,$(src)))
@@ -366,12 +390,41 @@ endif
 #
 ########################################################################
 #
-# Check for if Windows and set resource file for icon  -> windres ./icon/owhm_icon_win.rc  ./icon/owhm_icon_win.res
+# Note bash on windows sometimes calls C:\Windows\System32\find.exe, 
+#   but want Bash "find" with no extension
+# Check if windows, if so, then find bash find equivalent.
+#
+ifeq ($(OS),Windows_NT)
+    FIND:=$(strip $(shell                                       \
+                   (                                            \
+                   notSET="T";                                  \
+                   for FP in `which --all find`; do             \
+                      if [[ $$FP == *Win* ]] ||                 \
+                         [[ $$FP == *WIN* ]] ||                 \
+                         [[ $$FP == *win* ]];                   \
+                         then continue ;                        \
+                         else                                   \
+                             echo "$$FP";                       \
+                             notSET="F";                        \
+                             break;  fi;                        \
+                   done;                                        \
+                   if [ $$notSET = "T" ]; then echo "find"; fi; \
+                   FP=;                                         \
+                   notSET=;                                     \
+                   )                                            \
+           ) )
+else
+    FIND:=find
+endif
+#
+########################################################################
+#
+# Check for if Windows and set resource file for icon  -> windres ./icon/*.rc  ./icon/*.res
 #  
 #  --> windres and gfortran can have issues so skipping makefile icon generation
 #  
-###icon_rc  := ./icon/owhm_icon_win.rc
-###icon_res := ./icon/owhm_icon_win.res
+###icon_rc  := ./icon/XYZ.rc
+###icon_res := ./icon/XYZ.res
 ####
 ###ifeq ($(OS),Windows_NT)
 ###    res:=$(shell windres $(icon_rc) $(icon_res) || echo )
@@ -385,17 +438,6 @@ endif
 ###        res:=
 ###endif
 #
-########################################################################
-#
-# Set up new line echo commands -- Replaced with printf
-#
-#
-# ------------------------------------
-###ifeq ($(OS),Windows_NT)
-###    echoNL:="echo -e" 
-###else
-###    echoNL:="echo"
-###endif
 # ------------------------------------
 define echo2
             @echo; echo
@@ -623,21 +665,21 @@ completed:
 #          If you get an error on windows, its using the wrong one --> See MinGW or MySYS64)
 clean: 
 	@echo
-	find ./obj -not -name 'obj' -name '*.o'    -delete
-	find ./obj -not -name 'obj' -name '*.mod'  -delete
-	find ./obj -not -name 'obj' -name '*.smod' -delete
+	$(FIND) ./obj -not -name 'obj' -name '*.o'    -delete
+	$(FIND) ./obj -not -name 'obj' -name '*.mod'  -delete
+	$(FIND) ./obj -not -name 'obj' -name '*.smod' -delete
 	${echo2}
 #
 cleanOBJ: 
 	@echo
-	find ./obj -not -name 'obj' -not -name '.keep' -name '*'  -delete
+	$(FIND) ./obj -not -name 'obj' -not -name '.keep' -name '*'  -delete
 	${echo2}
 #
 quietClean: 
 	@echo
-	find $(int_dir) -name '*.o'    -delete  2>/dev/null  ||  true
-	find $(int_dir) -name '*.mod'  -delete  2>/dev/null  ||  true
-	find $(int_dir) -name '*.smod' -delete  2>/dev/null  ||  true
+	$(FIND) $(int_dir) -name '*.o'    -delete  2>/dev/null  ||  true
+	$(FIND) $(int_dir) -name '*.mod'  -delete  2>/dev/null  ||  true
+	$(FIND) $(int_dir) -name '*.smod' -delete  2>/dev/null  ||  true
 	${echo2}
 #
 errorClean: 
@@ -657,13 +699,13 @@ errorClean:
 #
 reset: 
 	@echo
-	find . -name '*.o'    -delete
-	find . -name '*.mod'  -delete
-	find . -name '*.smod' -delete
+	$(FIND) . -name '*.o'    -delete
+	$(FIND) . -name '*.mod'  -delete
+	$(FIND) . -name '*.smod' -delete
 	@echo
-	find ./obj -not -name 'obj' -not -name '.keep' -name '*'  -delete
+	$(FIND) ./obj -not -name 'obj' -not -name '.keep' -name '*'  -delete
 	@echo
-	find $(notdir $(bin_dir)) -not -name '$(notdir $(bin_dir))' -not -name '.keep' -name '*'  -delete
+	$(FIND) $(notdir $(bin_dir)) -not -name '$(notdir $(bin_dir))' -not -name '.keep' -name '*'  -delete
 	${echo2}
 #
 # The following target allows for printing a specific variable.  old method: @echo $*=$($*)

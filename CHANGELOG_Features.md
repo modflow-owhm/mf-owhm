@@ -10,11 +10,23 @@
 
 ------
 
-## 2.0.2a
+## 2.0.2
 
-yyyy-mm-dd
+2021-04-23
 
-- 
+- `BAS` — Options Block
+    - `PRINT_HEAD         SPTS   Generic_Output `  
+      `PRINT_WATER_TABLE  SPTS   Generic_Output `  
+      `PRINT_WATER_DEPTH  SPTS   Generic_Output `
+        - Prints the head, water table, or depth to water to a file. If head is requested then `NLAY` 2D (`NROW,NCOL`) head arrays are written with `NaN` as the placeholder for inactive or dry cells. Water table writes a single 2D array that specifies for each (`row, col`) the upper most active (saturated) cell's head. Water depth is the distance from either the upper most active cells top elevation to the water table or if the distance from the `SURFACE_ELEVATION` specified in the`DIS` or `FMP`.
+        - `SPTS` indicates what time step to use for the output. It must either be a single date (eg `4/23/1979`), or a stress period and time step (eg `5 2`), can be set to `NPER` for the last stress period and time step, the keyword `LAST_TIMESTEP`  to indicate it should write the last time step of every stress period, or `EVERY_TIMESTEP` to write for every time step.
+        - The keywords may be repeated multiple times to specify different times.  
+          For example:  
+          `PRINT_HEAD  5 2  ./output/Head_SP5_TS2.txt `  
+          `PRINT_HEAD  8 1  ./output/Head_SP8_TS1.txt `  
+          `PRINT_HEAD  3 2  ./output/Head_SP3_TS2.txt `  
+          however you can only specify it once if using either `LAST_TIMESTEP`  or `EVERY_TIMESTEP`:  
+          `PRINT_HEAD  LAST_TIMESTEP  ./output/Head_End_of_Each_SP.txt `
 
 &nbsp; 
 
