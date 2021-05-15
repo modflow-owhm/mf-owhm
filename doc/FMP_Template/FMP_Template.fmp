@@ -1455,13 +1455,15 @@ BEGIN LAND_USE
    #
    # OUTPUT OPTIONS --All Optional
    #
-   PRINT BYWBS         GENERIC_OUTPUT_OptKey  # Summarize output by each WBS/Farm
-   PRINT BYWBS_BYCROP  GENERIC_OUTPUT_OptKey  # Summarize output by each WBS for each crop in WBS/Farm
-   PRINT BYCROP        GENERIC_OUTPUT_OptKey  # Summarize output by each crop across entire model
-   PRINT BARE          GENERIC_OUTPUT_OptKey  # Summarize output by any bare soil/fallow crops in model
-   PRINT ALL           GENERIC_OUTPUT_OptKey  # Summarize output of of every crop by model cell --includes additional info, such as head and root elevation
-   PRINT ALL_VERBOSE   GENERIC_OUTPUT_OptKey  # Summarize output by of every crop by model cell --includes enormous amount of crop information from head to root pressures to crop fractions
-   PRINT INPUT         GENERIC_OUTPUT_OptKey  # Echo input loaded to file
+   PRINT BYWBS         GENERIC_OUTPUT_OptKey   # Summarize output by each WBS/Farm
+   PRINT BYWBS_BYCROP  GENERIC_OUTPUT_OptKey   # Summarize output by each WBS for each crop in WBS/Farm
+   PRINT BYCROP        GENERIC_OUTPUT_OptKey   # Summarize output by each crop across entire model
+   PRINT BARE          GENERIC_OUTPUT_OptKey   # Summarize output by any bare soil/fallow crops in model
+   PRINT ALL           GENERIC_OUTPUT_OptKey   # Summarize output of of every crop by model cell --includes additional info, such as head and root elevation
+   PRINT ALL_VERBOSE   GENERIC_OUTPUT_OptKey   # Summarize output by of every crop by model cell --includes enormous amount of crop information from head to root pressures to crop fractions
+   PRINT INPUT         GENERIC_OUTPUT_OptKey   # Echo input loaded to file
+   #
+   PRINT ET_BYWBS_BYCROP GENERIC_OUTPUT_OptKey # ETref, ETpot, and ETact by each WBS for each crop in WBS/Farm. Note that ETpot <-> CU_INI and ETact <-> CU
    #
    PRINT ROW_COLUMN INT INT GENERIC_OUTPUT_OptKey  # Same as PRINT ALL, except (INT, INT) is the model grid (ROW, COL) to print all crop information. This reduces the file size significantly.
    #

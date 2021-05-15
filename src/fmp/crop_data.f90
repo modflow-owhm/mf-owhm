@@ -175,6 +175,7 @@ MODULE CROP_DATA_FMP_MODULE
       TYPE(GENERIC_OUTPUT_FILE):: OUT_ALL
       TYPE(GENERIC_OUTPUT_FILE):: OUT_BARE
       TYPE(GENERIC_OUTPUT_FILE):: OUT_INPUT
+      TYPE(GENERIC_OUTPUT_FILE):: OUT_ET
       INTEGER,                  DIMENSION(:,:), ALLOCATABLE:: OUT_CROP_RC  !(R, C)
       TYPE(GENERIC_OUTPUT_FILE), DIMENSION(:),  ALLOCATABLE:: OUT_CROP
       !TYPE(GENERIC_OUTPUT_FILE):: OUT_ROOT
@@ -211,6 +212,7 @@ MODULE CROP_DATA_FMP_MODULE
       PROCEDURE, PASS(CDAT):: PRINT_OUT_INPUT!(WBS, KPER, KSTP)
       PROCEDURE, PASS(CDAT):: PRINT_OUT_ALL_CROP
       PROCEDURE, PASS(CDAT):: PRINT_OUT_SPECIFIED
+      PROCEDURE, PASS(CDAT):: PRINT_OUT_ET
       !
       !PROCEDURE, PASS(CDAT):: SET_PRECIP_POTENTIAL => SETUP_CROP_PRECIP_POTENTIAL
       FINAL:: DEALLOCATE_CROP_DATA_FINAL
@@ -722,6 +724,8 @@ MODULE CROP_DATA_FMP_MODULE
                                           CALL CDAT%OUT_ALL%OPEN(LINE,LLOC,BL%IOUT,BL%IU,BINARY=BINARY,SPLITMAXCOUNT=1)
                         CASE ("BARE")
                                           CALL CDAT%OUT_BARE%OPEN(LINE,LLOC,BL%IOUT,BL%IU,BINARY=BINARY,SPLITMAXCOUNT=11)
+                        CASE ("ET_BYWBS_BYCROP")
+                                          CALL CDAT%OUT_ET%OPEN(LINE,LLOC,BL%IOUT,BL%IU,NOBINARY=.TRUE.,SPLITMAXCOUNT=11)
                         CASE ("INPUT")
                                           CALL CDAT%OUT_INPUT%OPEN(LINE,LLOC,BL%IOUT,BL%IU,BINARY=BINARY,SPLITMAXCOUNT=11)
                         CASE ("ROW_COL","ROW_COLUMN","ROW")
@@ -2069,7 +2073,7 @@ MODULE CROP_DATA_FMP_MODULE
                              CDAT%BARE_TOT_PRECEP = DZ
          END IF
          !
-         CDAT%BARE_POT_EVAP  = CDAT%BARE_FRAC * WBS%AREA * CLIM%BARE_POT_EVAP
+         CDAT%BARE_POT_EVAP = CDAT%BARE_FRAC * WBS%AREA * CLIM%BARE_POT_EVAP
          !
          WHERE(CDAT%BARE_POT_EVAP < DZ); CDAT%BARE_POT_EVAP = DZ
          END WHERE
@@ -2104,6 +2108,95 @@ MODULE CROP_DATA_FMP_MODULE
     !    CDAT%BARE_PRECEP_EXCESS    = DZ
     !    CDAT%BARE_POT_EVAP  = DZ
     END IF
+    !
+  END SUBROUTINE
+  !
+  SUBROUTINE PRINT_OUT_ET(CDAT, WBS, CLIM, KPER, KSTP, DELT, DYEAR, DATE)
+    CLASS(CROP_DATA),   INTENT(INOUT):: CDAT
+    TYPE(WBS_DATA),     INTENT(IN   ):: WBS
+    TYPE(CLIMATE_DATA), INTENT(IN   ):: CLIM
+    INTEGER,            INTENT(IN   ):: KPER, KSTP
+    DOUBLE PRECISION,   INTENT(IN   ):: DELT
+    DOUBLE PRECISION,   INTENT(IN   ):: DYEAR
+    CHARACTER(*),       INTENT(IN   ):: DATE
+    DOUBLE PRECISION, DIMENSION(:,:), ALLOCATABLE:: Area, ETref, ETpot, ETact
+    INTEGER:: IU, R, C, I, K, F, L, nfarm, ncrop
+    CHARACTER(17):: DT
+    CHARACTER(20):: BARE
+    !
+    IF(.not. CLIM%HAS_REF_ET) CALL CDAT%OUT_ET%CLOSE()
+    !
+    IF(.not. CDAT%OUT_ET%IS_OPEN) RETURN
+    !
+    DT = NUM2STR(DELT)
+    DT = ADJUSTR(DT)
+    !
+    nfarm = wbs%nfarm
+    ncrop = cdat%ncrop
+    !
+    BARE = 'BARE_LAND'
+    L    = CDAT%CROP_NAME_LEN
+    !
+    allocate( ETref(0:ncrop, nfarm) )
+    allocate( ETpot(0:ncrop, nfarm) )
+    allocate( ETact(0:ncrop, nfarm) )
+    allocate(  Area(0:ncrop, nfarm) )
+    Etref = DZ
+    ETpot = DZ
+    ETact = DZ
+    Area  = DZ
+    !
+    CALL CDAT%OUT_ET%SIZE_CHECK()  !CHECK SIZE EVERY 10 STRESS PERIODS
+    IU = CDAT%OUT_ET%IU
+    !
+    IF( (KPER==ONE .AND. KSTP==ONE) .OR. CDAT%IOUT==IU )  THEN
+            IF (CDAT%IOUT==IU) WRITE(IU,*)
+            !                                                                                                                                                                                                                                                                                                                                           
+            CALL CDAT%OUT_ET%SET_HEADER( '    PER    STP    WBS   CROP  CROP_NAME'//REPEAT(' ',L+4)//'AREA            ETref            ETpot            ETact             DELT   DYEAR            DATE_START' )
+    END IF
+    !
+    DO I=ONE, ncrop    
+    DO K=ONE, CDAT%CROP(I)%N
+        F = CDAT%CROP(I)%FID(K) 
+        IF( F < ONE .OR. WBS%NFARM < F) CYCLE
+        R = CDAT%CROP(I)%RC(ONE,K)
+        C = CDAT%CROP(I)%RC(TWO,K)
+        !
+         Area(I,F) =  Area(I,F) + CDAT%CROP(I)%AREA(K)
+        ETref(I,F) = ETref(I,F) + CDAT%CROP(I)%AREA(K) * CLIM%REF_ET(C,R)
+        ETpot(I,F) = ETpot(I,F) + CDAT%CROP(I)%CU(K)
+        ETact(I,F) = ETact(I,F) + CDAT%CROP(I)%TI(K)*(UNO + CDAT%CROP(I)%CECT(K)) + CDAT%CROP(I)%TP(K) + CDAT%CROP(I)%EP(K) + CDAT%CROP(I)%TGWA(K) + CDAT%CROP(I)%EGWA(K)
+    END DO 
+    END DO
+    !
+    IF(CDAT%CHECK_BARE) THEN
+       DO R=ONE, CDAT%NROW
+       DO C=ONE, CDAT%NCOL
+          !
+          F = WBS%FID_ARRAY(C,R)
+          IF( F < ONE .OR. WBS%NFARM < F) CYCLE
+          !
+          IF(CDAT%BARE_FRAC(C,R) > DZ)  THEN
+                                         Area(Z,F) =  Area(Z,F) + CDAT%BARE_FRAC(C,R) * WBS%AREA(C,R)
+                                        ETref(Z,F) = ETref(Z,F) + CDAT%BARE_FRAC(C,R) * WBS%AREA(C,R) * CLIM%REF_ET(C,R)
+                                        ETpot(Z,F) = ETpot(Z,F) + CDAT%BARE_POT_EVAP(C,R)
+                                        ETact(Z,F) = ETact(Z,F) + CDAT%BARE_EVAP(C,R)
+          END IF
+        END DO 
+        END DO
+    END IF
+    !
+    DO F=ONE, WBS%NFARM
+       !
+       IF(WBS%FID(F)%COUNT < ONE) CYCLE
+       !
+       IF(   Area(Z,F) > DZ) WRITE(IU, '(4I7, 2x,A, 5A17, 2x,F13.7, 2x,A)') KPER, KSTP, F, Z,              BARE(:L), NUM2STR(Area(Z,F)), NUM2STR(ETref(Z,F)), NUM2STR(ETpot(Z,F)), NUM2STR(ETact(Z,F)), DT, DYEAR, DATE
+       !
+       DO I=ONE, ncrop
+          IF(Area(I,F) > DZ) WRITE(IU, '(4I7, 2x,A, 5A17, 2x,F13.7, 2x,A)') KPER, KSTP, F, I, CDAT%CROP_NAME(I)(:L), NUM2STR(Area(I,F)), NUM2STR(ETref(I,F)), NUM2STR(ETpot(I,F)), NUM2STR(ETact(I,F)), DT, DYEAR, DATE
+       END DO
+       !
+    END DO 
     !
   END SUBROUTINE
   !
@@ -6705,6 +6798,8 @@ MODULE CROP_DATA_FMP_MODULE
                   BARE_AREA  = BARE_AREA   + CDAT%BARE_FRAC(C,R) * WBS%AREA(C,R)
                   BARE_EVAP  = BARE_EVAP   + CDAT%BARE_EVAP(C,R)
                   BARE_EVAP_P= BARE_EVAP_P + CDAT%BARE_EVAP_PRECIP(C,R)
+                  CU_I = CU_I + CDAT%BARE_POT_EVAP(C,R)
+                  CU   = CU   + CDAT%BARE_EVAP(C,R)
               END IF
           END DO
        END IF
@@ -6769,11 +6864,15 @@ MODULE CROP_DATA_FMP_MODULE
     P          = DZ
     DP         = DZ
     RO         = DZ
+    CU_I       = DZ
+    CU         = DZ
     IF(CDAT%CHECK_BARE) THEN
           DO CONCURRENT ( R=ONE:CDAT%NROW, C=ONE:CDAT%NCOL, CDAT%BARE_FRAC(C,R) > DZ  )
                 AREA       = AREA        + CDAT%BARE_FRAC(C,R) * WBS%AREA(C,R)
                 BARE_EVAP  = BARE_EVAP   + CDAT%BARE_EVAP(C,R)
                 BARE_EVAP_P= BARE_EVAP_P + CDAT%BARE_EVAP_PRECIP(C,R)
+                CU_I = CU_I + CDAT%BARE_POT_EVAP(C,R)
+                CU   = CU   + CDAT%BARE_EVAP(C,R)
                 !
                 P = P + CDAT%BARE_TOT_PRECEP(C,R)
                 !
@@ -6792,9 +6891,9 @@ MODULE CROP_DATA_FMP_MODULE
     END IF
     !
     IF(CDAT%OUT_BYCROP%BINARY) THEN
-        WRITE(IU) DATE,DYEAR,DELT,KPER,KSTP,Z,BARE,AREA,DZ,DZ,DZ,DZ,DZ,DZ,DZ,DZ,DZ,DZ,DP,RO,DZ,DZ,DZ,DZ,DZ,DZ,DZ,DZ,DZ,DZ,DZ,DZ,BARE_EVAP_P,BARE_EVAP,P
+        WRITE(IU) DATE,DYEAR,DELT,KPER,KSTP,Z,BARE,AREA,DZ,DZ,CU_I,CU,DZ,DZ,DZ,DZ,DZ,DZ,DP,RO,DZ,DZ,DZ,DZ,DZ,DZ,DZ,DZ,DZ,DZ,DZ,DZ,BARE_EVAP_P,BARE_EVAP,P
     ELSE
-        WRITE(IU, '(3I7, 2x,A, 29A17, 2x,F13.7, 2x,A)') KPER, KSTP, Z, BARE(:L), NUM2STR(AREA), ZER, ZER, ZER, ZER, ZER, ZER, ZER, ZER, ZER, ZER, NUM2STR(DP), NUM2STR(RO), ZER, ZER, ZER, ZER, ZER, ZER, ZER, ZER, ZER, ZER, ZER, ZER, NUM2STR(BARE_EVAP_P), NUM2STR(BARE_EVAP), NUM2STR(P), DT, DYEAR, DATE
+        WRITE(IU, '(3I7, 2x,A, 29A17, 2x,F13.7, 2x,A)') KPER, KSTP, Z, BARE(:L), NUM2STR(AREA), ZER, ZER, NUM2STR(CU_I), NUM2STR(CU), ZER, ZER, ZER, ZER, ZER, ZER, NUM2STR(DP), NUM2STR(RO), ZER, ZER, ZER, ZER, ZER, ZER, ZER, ZER, ZER, ZER, ZER, ZER, NUM2STR(BARE_EVAP_P), NUM2STR(BARE_EVAP), NUM2STR(P), DT, DYEAR, DATE
     END IF
     !
     DO I=ONE, CDAT%NCROP
@@ -6947,6 +7046,8 @@ MODULE CROP_DATA_FMP_MODULE
           P = DZ
           DP = DZ
           RO = DZ
+          CU_I  = DZ
+          CU    = DZ
           FOUND = FALSE
           IF(CDAT%CHECK_BARE) THEN
              DO K=ONE, WBS%FID(F)%Count
@@ -6957,7 +7058,9 @@ MODULE CROP_DATA_FMP_MODULE
                       AREA       = AREA        + CDAT%BARE_FRAC(C,R) * WBS%AREA(C,R)
                       BARE_EVAP  = BARE_EVAP   + CDAT%BARE_EVAP(C,R)
                       BARE_EVAP_P= BARE_EVAP_P + CDAT%BARE_EVAP_PRECIP(C,R)
-                      P = P + CDAT%BARE_TOT_PRECEP(C,R)
+                      CU_I = CU_I + CDAT%BARE_POT_EVAP(C,R)
+                      CU   = CU   + CDAT%BARE_EVAP(C,R)
+                      P    = P + CDAT%BARE_TOT_PRECEP(C,R)
                       !
                       IF(CDAT%HAS_Pe)  P = P + CDAT%BARE_RNOFF_Peff(C,R)
                       !
@@ -6973,9 +7076,9 @@ MODULE CROP_DATA_FMP_MODULE
           !
           IF(FOUND) THEN
             IF(CDAT%OUT_BYFARMCROP%BINARY) THEN
-                WRITE(IU) DATE, DYEAR, DELT, KPER, KSTP, F, Z, BARE, AREA, DZ, DZ, DZ, DZ, DZ, DZ, DZ, DZ, DZ, DZ, DP, RO, DZ, DZ, DZ, DZ, DZ, DZ, DZ, DZ, DZ, DZ, DZ, DZ, BARE_EVAP_P, BARE_EVAP, P
+                WRITE(IU) DATE, DYEAR, DELT, KPER, KSTP, F, Z, BARE, AREA, DZ, DZ, CU_I, CU, DZ, DZ, DZ, DZ, DZ, DZ, DP, RO, DZ, DZ, DZ, DZ, DZ, DZ, DZ, DZ, DZ, DZ, DZ, DZ, BARE_EVAP_P, BARE_EVAP, P
             ELSE
-                WRITE(IU, '(4I7, 2x,A, 29A17, 2x,F13.7, 2x,A)') KPER, KSTP, F, Z, BARE(:L), NUM2STR(AREA), ZER, ZER, ZER, ZER, ZER, ZER, ZER, ZER, ZER, ZER, NUM2STR(DP), NUM2STR(RO), ZER, ZER, ZER, ZER, ZER, ZER, ZER, ZER, ZER, ZER, ZER, ZER, NUM2STR(BARE_EVAP_P), NUM2STR(BARE_EVAP), NUM2STR(P), DT, DYEAR, DATE
+                WRITE(IU, '(4I7, 2x,A, 29A17, 2x,F13.7, 2x,A)') KPER, KSTP, F, Z, BARE(:L), NUM2STR(AREA), ZER, ZER, NUM2STR(CU_I), NUM2STR(CU), ZER, ZER, ZER, ZER, ZER, ZER, NUM2STR(DP), NUM2STR(RO), ZER, ZER, ZER, ZER, ZER, ZER, ZER, ZER, ZER, ZER, ZER, ZER, NUM2STR(BARE_EVAP_P), NUM2STR(BARE_EVAP), NUM2STR(P), DT, DYEAR, DATE
             END IF
           END IF
           !
