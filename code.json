@@ -1,14 +1,14 @@
 [
   {
-    "version": "2.0.2",
+    "version": "2.0.3",
     "status": "Preliminary",
 
     "date": {
-      "metadataLastUpdated": "2020-10-31"
+      "metadataLastUpdated": "2021-05-20"
     },
 
-    "downloadURL":   "https://code.usgs.gov/modflow/mf-owhm/-/archive/2.0.2/mf-owhm-2.0.2.zip",
-    "disclaimerURL": "https://code.usgs.gov/modflow/mf-owhm/-/raw/2.0.2/DISCLAIMER.md",
+    "downloadURL":   "https://code.usgs.gov/modflow/mf-owhm/-/archive/2.0.3/mf-owhm-2.0.3.zip",
+    "disclaimerURL": "https://code.usgs.gov/modflow/mf-owhm/-/raw/2.0.3/DISCLAIMER.md",
 
     "contact": {
       "name": "Scott E. Boyce",
@@ -24,7 +24,7 @@
       "licenses": [
         {
           "name": "Apache License, Version 2.0",
-          "URL":  "https://code.usgs.gov/modflow/mf-owhm/-/raw/2.0.2/LICENSE.md"
+          "URL":  "https://code.usgs.gov/modflow/mf-owhm/-/raw/2.0.3/LICENSE.md"
         }
       ]
     },

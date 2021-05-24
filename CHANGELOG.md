@@ -16,6 +16,18 @@ Boyce, S.E., Hanson, R.T., Ferguson, I., Schmid, W., Henson, W., Reimann, T., Me
 
 ------
 
+## 2.0.3
+
+2021-05-25
+
+### Fixed
+
+* Improvement on warning and error messages in `MNW2`, `UPW`, and `NWT` packages.
+
+&nbsp; 
+
+------
+
 ## 2.0.2
 
 2021-05-15

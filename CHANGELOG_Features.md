@@ -10,6 +10,19 @@
 
 ------
 
+## 2.0.3
+
+2021-05-25
+
+* `FMP` — `Land_Use` Block Output Option
+    * `PRINT  ET_ByWBS_ByCROP  GENERIC_OUTPUT `
+        * Writes the total Reference ET (`ETref`), Potential ET (`ETpot`), and Actual ET (`ETact`) for each crop in each farm that is in use during the time step.
+        * Note that in FMP that `ETact` is equivalent to Consumptive Use (CU), and `ETpot` is equivalent to `CU_INI`
+
+&nbsp; 
+
+------
+
 ## 2.0.2
 
 2021-04-23
