@@ -10,6 +10,41 @@
 
 ------
 
+## 2.1.0-beta
+
+yyyy-mm-dd
+
+- S Interpretive Language for Customizable User Input (`slang`)
+    - Custom scripting langauge that can be used for dynmaic changes to MODFLOW-OWHM.
+    - Developed to enable custom reservoir opeations decision trees in MODFLOW.
+
+* `U1DREL`, `U2DREL`, and `U2DINT` no longer require specifying `CNSTNT`, `FMTIN`, and `IPRN`
+    * If the values are not specified, then they are set to:  
+      `CNSTNT = 1`  
+      `FMTIN  = '(FREE)'`
+      `IPRN   = -1`
+    * Read utility checks for end of line or comment symbol `#` to terminate reading input.
+    * The following are acceptable input options:  
+      `OPEN/CLOSE ./input.txt                    # All set to default values`  
+      `OPEN/CLOSE ./input.txt  1.0               # FMTIN and IPRN set to default`  
+      `OPEN/CLOSE ./input.txt  1.0  '(FREE)'     # IPRN set to default`  
+      `OPEN/CLOSE ./input.txt  1.0  '(FREE)'  -1 # Normal input structure`  
+      `OPEN/CLOSE ./input.txt       '(FREE)'     # CNSTNT and IPRN set to default`  
+      `OPEN/CLOSE ./input.txt       '(FREE)'  -1 # CNSTNT set to default`
+    * This is NOT allowed:  
+      `OPEN/CLOSE ./input.txt  1.0            -1 # NOT ALLOWED - Specify only CNSTNT and IPRN`  
+      `OPEN/CLOSE ./input.txt                 -1 # NOT ALLOWED - Specify only IPRN`  
+    * The directive `CONSTANT` still requires specifying `CNSTNT`,  
+      That is, `CONSTANT CNSTNT` must specify the value that is made constant.
+
+* `U1DREL` and `U2DREL` can specify keyword `SHIFT` **FLOAT** multiple times  
+  and can be used when `CNSTNT`, `FMTIN`, and `IPRN` are not specified.
+    * For example, `OPEN/CLOSE ./IC.txt 1 (FREE) -1 SHIFT 15 SHIFT -5` would add 10 to the input read in `IC.txt`
+    * For example, `OPEN/CLOSE ./IC.txt             SHIFT 15 SHIFT -5` would add 10 to the input read in `IC.txt`
+&nbsp; 
+
+------
+
 ## 2.0.3
 
 2021-05-25

@@ -2,8 +2,8 @@
 
 ![MF-OWHM_banner_v2b](img/MF-OWHM_banner_v2b.png)
 
-&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; **IPDS No.**&nbsp; `NA`
-# Version 2.0.3
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; **IPDS No.**&nbsp; `IP-129524`
+# Version 2.1.0-beta
 
 MODFLOW One-Water Hydrologic Flow Model (MF-OWHM) Conjunctive Use and Integrated Hydrologic Flow Modeling Software.
 
@@ -94,13 +94,15 @@ To obtain this repository via git run:
 
 ## Code Citation
 
-Boyce, S.E., 2021, MODFLOW One-Water Hydrologic Flow Model (MF-OWHM) Conjunctive Use and Integrated Hydrologic Flow Modeling Software, version 2.0.3: U.S. Geological Survey Software Release, https://doi.org/10.5066/P9P8I8GS
+> Boyce, S.E., 2021, MODFLOW One-Water Hydrologic Flow Model (MF-OWHM) Conjunctive Use and Integrated Hydrologic Flow Modeling Software, version 2.1.0: U.S. Geological Survey Software Release, https://doi.org/10.5066/P9P8I8GS
 
+And if you use Surface Water Operations (`SWO`)  in your project:
 
+> Boyce, S.E. and Ferguson, I.M., 2021, MODFLOW One-Water Hydrologic Flow Model (MF-OWHM) Conjunctive Use and Integrated Hydrologic Flow Modeling Software with Surface Water Operations, version 2.1.0: U.S. Geological Survey Software Release, https://doi.org/10.5066/2FP9C6F6C5
 
 ## Documentation Citation
 
-Boyce, S.E., Hanson, R.T., Ferguson, I., Schmid, W., Henson, W., Reimann, T., Mehl, S.M., and Earll, M.M., 2020, One-Water Hydrologic Flow Model: A MODFLOW based conjunctive-use simulation software: U.S. Geological Survey Techniques and Methods 6–A60, 435 p., [https://doi.org/10.3133/tm6A60](https://doi.org/10.3133/tm6A60)
+> Boyce, S.E., Hanson, R.T., Ferguson, I., Schmid, W., Henson, W., Reimann, T., Mehl, S.M., and Earll, M.M., 2020, One-Water Hydrologic Flow Model: A MODFLOW based conjunctive-use simulation software: U.S. Geological Survey Techniques and Methods 6–A60, 435 p., [https://doi.org/10.3133/tm6A60](https://doi.org/10.3133/tm6A60)
 
 &nbsp;
 
@@ -590,6 +592,13 @@ Borden, John Carter; Gaur, Anju; Singh, Chabungbam Rajagopal, 2016, Water resour
   
 
 - Borsi, I., Rossetto, R., Cannata, M., De Filippis, G., & Ghetta, M., 2016, Open Source for Water Management: including capabilities of MODFLOW-OWHM in the FREEWAT GIS modelling environment (No. e2209v2). PeerJ Preprints. https://peerj.com/preprints/2209.pdf
+
+  
+
+- Ferguson, I.M.., Llewellyn, D., Hanson, R.T., and Boyce S.E., 2016,
+User guide to the surface water operations process—An integrated approach to
+simulating large-scale surface water management in MODFLOW-based hydrologic models:
+Denver, Colo., Bureau of Reclamation Technical Memorandum no. 86-68210–2016-02, 96 p.
 
   
 

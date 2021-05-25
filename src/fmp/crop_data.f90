@@ -718,7 +718,7 @@ MODULE CROP_DATA_FMP_MODULE
                                           CALL CDAT%OUT_BYFARM%OPEN(LINE,LLOC,BL%IOUT,BL%IU,BINARY=BINARY,SPLITMAXCOUNT=11)
                         CASE ("BYWBS_BYCROP", "BYWBSBYCROP","BYWBSCROP","BYFARM_BYCROP", "BYFARMBYCROP")
                                           CALL CDAT%OUT_BYFARMCROP%OPEN(LINE,LLOC,BL%IOUT,BL%IU,BINARY=BINARY,SPLITMAXCOUNT=11)
-                        CASE ("ALL_VERBOSE")
+                        CASE ("ALL_VERBOSE","ALL_DETAIL")
                                           CALL CDAT%OUT_DETAIL%OPEN(LINE,LLOC,BL%IOUT,BL%IU,BINARY=BINARY,SPLITMAXCOUNT=1)
                         CASE ("ALL")
                                           CALL CDAT%OUT_ALL%OPEN(LINE,LLOC,BL%IOUT,BL%IU,BINARY=BINARY,SPLITMAXCOUNT=1)

@@ -28,16 +28,16 @@ SUBROUTINE PRINT_MAIN_HEADER(IU)  ! Set to 6 for cmd prompt or use output_unit f
   CHARACTER(:),ALLOCATABLE:: VERSION_SWO                            !TR: 2017 09 13 CFP
   CHARACTER(:),ALLOCATABLE:: Revision
   !
-  VERSION_OWHM='2.0'                                 ! "Psyduck After Advil" 
-  Revision    ='03          4/23/2021'
-  VERSION_MF  ='1.12.0   02/03/2017'        
-  VERSION_FMP ='4.00.0   04/23/2017'       
-  VERSION_SWR ='1.04.0   09/15/2016'       
-  VERSION_SWI ='2.00.0   07/22/2013'     
-  VERSION_LGR ='2.00.0   09/19/2013'      
-  VERSION_NWT ='1.2.0    03/01/2020'     
+  VERSION_OWHM='2.1'                                 ! "Psyduck After Advil" 
+  Revision    ='00          5/25/2021'
+  VERSION_MF  ='1.12     02/03/2017'        
+  VERSION_FMP ='4.1      05/25/2021'       
+  VERSION_SWR ='1.04     09/15/2016'       
+  VERSION_SWI ='2.0      07/22/2013'     
+  VERSION_LGR ='2.0      09/19/2013'      
+  VERSION_NWT ='1.2      03/01/2020'     
   VERSION_CFP ='1.09.57  09/12/2017'
-  VERSION_SWO ='1.0.0    10/28/2020'
+  VERSION_SWO ='1.0      05/25/2021'
   !
   IF(IU /= stdout) WRITE(IU,'(/A//)') OWHM_HEADER()     ! Only print to file and skip cmd prompt
   !
@@ -52,7 +52,7 @@ SUBROUTINE PRINT_MAIN_HEADER(IU)  ! Set to 6 for cmd prompt or use output_unit f
                   VERSION_NWT,  &
                   VERSION_CFP
   !
-  123 FORMAT( " MODFLOW-OWHM ", A///,24X,'MODFLOW' /,12X,                                         &
+  123 FORMAT( " MODFLOW-OWHM ", A///,24X,'MODFLOW' /,12X,                     &
                    'ONE-WATER HYDROLOGIC-FLOW MODEL', //, 4X,                 &
                    'U.S. GEOLOGICAL SURVEY MODULAR FINITE-DIFFERENCE ',/ 11x, &
                    'CONJUNCTIVE USE SIMULATION PROGRAM',//,21X,               &
@@ -66,7 +66,20 @@ SUBROUTINE PRINT_MAIN_HEADER(IU)  ! Set to 6 for cmd prompt or use output_unit f
                    'MODFLOW-LGR  Version ',A,        / 10x,                   &
                    'MODFLOW-NWT  Version ',A,        / 10x,                   &
                    'MODFLOW-CFP  Version ',A / / )                            !TR: 2017 09 13 CFP
-     
+  !
+  WRITE (IU,'(A, /, 7(/, 3x, A))')                                                                   &
+                    'USGS Software Disclaimer:',                                                     &
+                    'No warranty, expressed or implied, is made by the USGS or the U.S. Government', &
+                    'as to the functionality of the software and related material nor shall the',    &
+                    'fact of release constitute any such warranty.',                                 &
+                    '',                                                                              &
+                    'The software is provided on the condition that neither the USGS nor',           &
+                    'the U.S. Government shall be held liable for any damages resulting from the',   &
+                    'authorized or unauthorized use of the software.'
+  
+  WRITE (IU,'( /, /, 3x, A,  /, 6x, A, /, /)')                                                           &
+                    'Newer versions may be present at the official code and download repository:',   &
+                    'https://code.usgs.gov/modflow/mf-owhm'
 END SUBROUTINE
 !
 !

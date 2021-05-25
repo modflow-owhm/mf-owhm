@@ -590,7 +590,7 @@ C
 C        SPECIFICATIONS:
 C     ------------------------------------------------------------------
       USE CONSTANTS,              ONLY: Z, ONE, NL, BLN, TRUE
-      USE ERROR_INTERFACE,        ONLY: STOP_ERROR
+      USE ERROR_INTERFACE,        ONLY: STOP_ERROR, WARNING_MESSAGE
       USE FILE_IO_INTERFACE,      ONLY: READ_TO_DATA, MOVE_TO_DATA
       USE STRINGS,                ONLY: GET_WORD, GET_NUMBER
       USE GENERIC_OPEN_INTERFACE, ONLY: GENERIC_OPEN
@@ -606,12 +606,11 @@ C     ------------------------------------------------------------------
       INTEGER:: IE, N, J
       INTEGER:: ICOL, ISTART, ISTOP
       INTEGER:: ICLOSE, IFREE, IPRN, LOCAT
-      CHARACTER(5):: SHIFT
+      LOGICAL:: FAIL
       REAL:: SHFT, ZERO, CNSTNT
 C     ------------------------------------------------------------------
       ZERO  = 0.0
       SHFT  = ZERO
-      SHIFT = ""
 C
 C1------READ ARRAY CONTROL RECORD AS CHARACTER DATA.
       CALL READ_TO_DATA(CNTRL,IN,IOUT,NOSHIFT=TRUE) !seb originally => READ(IN,'(A)') CNTRL
@@ -669,19 +668,65 @@ C2A-----READ THE CONTROL RECORD THE ORIGINAL WAY.
 C
 C3------FOR FREE FORMAT CONTROL RECORD, READ REMAINING FIELDS.
       IF(IFREE /= Z) THEN
+         CALL NEXT_WORD_CHECK_SHIFT(CNTRL,ICOL,ISTART,ISTOP,SHFT)
+         !
          CALL GET_NUMBER(CNTRL,ICOL,ISTART,ISTOP,IOUT,IN,CNSTNT,
-     &                     MSG='ULSTRD FAILED TO READ CNSTNT NUMBER')
-         IF(LOCAT /= Z) THEN
-            CALL PARSE_WORD_UP(CNTRL,ICOL,ISTART,ISTOP)
-            FMTIN=CNTRL(ISTART:ISTOP)
-            CALL GET_INTEGER(CNTRL,ICOL,ISTART,ISTOP,IOUT,IN,IPRN,MSG=
-     &                                  'U1DREL - FAILED TO READ IPRN')
-            !
-            CALL GET_WORD(CNTRL,ICOL,ISTART,ISTOP,SHIFT)
-            IF(SHIFT == "SHIFT") THEN
-               CALL GET_NUMBER(CNTRL,ICOL,ISTART,ISTOP,IOUT,IN,SHFT,MSG=
-     +'U1DREL FOUND KEYWORD "SHIFT", BUT ERROR READING THE SHFT FACTOR')
+     +                            NO_PARSE_WORD=TRUE, HAS_ERROR=FAIL)
+                                  !
+         IF(LOCAT == Z .AND. FAIL) THEN
+           CALL STOP_ERROR(CNTRL, IN, IOUT, 
+     +                     MSG='U1DREL - FAILED TO READ CNSTNT')
+         ELSEIF(FAIL) THEN
+             CNSTNT=1.0
+             CALL WARNING_MESSAGE(LINE=CNTRL, INFILE=IN, OUTPUT=IOUT,
+     +       MSG= 'U1DREL - Failed to identify CNSTNT for "'//
+     +       TRIM(ADJUSTL(ANAME))//
+     +       '". Program will contine with CNSTNT = 1.0', inline=TRUE)
+            IF(ISTOP < ISTART) THEN
+                   CONTINUE
+            ELSEIF(CNTRL(ISTART:ISTART) == '#') THEN
+                   ICOL = LEN(CNTRL) + 1
+                   ISTART = ICOL   - 1
+                   ISTOP  = ISTART - 1
+            ELSE
+                   ICOL = ISTART
             END IF
+         END IF
+         !
+         IF(LOCAT /= Z) THEN
+            CALL NEXT_WORD_CHECK_SHIFT(CNTRL,ICOL,ISTART,ISTOP,SHFT)
+            !
+            IF(ISTOP < ISTART) THEN
+                   FMTIN = '(FREE)'
+            ELSEIF(CNTRL(ISTART:ISTART) == '#') THEN
+                   FMTIN = '(FREE)'
+                   ICOL = LEN(CNTRL) + 1
+                   ISTART = ICOL   - 1
+                   ISTOP  = ISTART - 1
+            ELSE
+                   FMTIN=CNTRL(ISTART:ISTOP)
+            END IF
+            !
+            IF(FMTIN == '(BINARY)') 
+     +           CALL STOP_ERROR(CNTRL, IN, IOUT, MSG=
+     +           'U1DREL - Error foudn "(BINARY)" option for'//NL//
+     +            '"'//TRIM(ADJUSTL(ANAME))//'"'//NL//
+     +            'This reader does not support reading A '//
+     +            '"(BINARY)" formatted file.'//NL//
+     +            'Please change input file to formatted text.')
+            !
+            CALL NEXT_WORD_CHECK_SHIFT(CNTRL,ICOL,ISTART,ISTOP,SHFT)
+            CALL GET_INTEGER(CNTRL,ICOL,ISTART,ISTOP,IOUT,IN,IPRN,
+     +                         NO_PARSE_WORD=TRUE, HAS_ERROR=FAIL)
+            IF(FAIL) THEN
+              IPRN=-1
+              CALL WARNING_MESSAGE(LINE=CNTRL, INFILE=IN, OUTPUT=IOUT,
+     +        MSG= 'U1DREL - Failed to identify IPRN for "'//
+     +        TRIM(ADJUSTL(ANAME))//
+     +        '". Program will contine with IPRN = -1', inline=TRUE)
+            END IF
+            !
+            CALL NEXT_WORD_CHECK_SHIFT(CNTRL,ICOL,ISTART,ISTOP,SHFT)
          END IF
       END IF
 C
@@ -742,6 +787,30 @@ C8------CONTROL RECORD ERROR.
 500   FNAME = 'ERROR READING ARRAY CONTROL RECORD FOR "'//
      +        TRIM(ADJUSTL(ANAME))//'"'
       CALL STOP_ERROR(CNTRL, IN, IOUT, MSG=FNAME)
+      !
+      CONTAINS
+        SUBROUTINE NEXT_WORD_CHECK_SHIFT(CNTRL,ICOL,ISTART,ISTOP,SHFT)
+          CHARACTER(*), INTENT(INOUT):: CNTRL
+          INTEGER,      INTENT(INOUT):: ICOL,ISTART,ISTOP
+          REAL,         INTENT(INOUT):: SHFT
+          REAL:: VAL
+          !
+          CALL PARSE_WORD_UP(CNTRL,ICOL,ISTART,ISTOP)
+          DO WHILE(ISTART <= ISTOP)
+             IF(CNTRL(ISTART:ISTART) == '#') THEN
+                   ICOL = LEN(CNTRL) + 1
+                   ISTART = ICOL   - 1
+                   ISTOP  = ISTART - 1
+                   EXIT
+             END IF
+             IF(CNTRL(ISTART:ISTOP) /= "SHIFT") EXIT
+             !
+             CALL GET_NUMBER(CNTRL,ICOL,ISTART,ISTOP,IOUT,IN,VAL,MSG=
+     +'U2DREL FOUND KEYWORD "SHIFT", BUT ERROR READING THE SHFT FACTOR')
+             SHFT = SHFT + VAL
+             CALL PARSE_WORD_UP(CNTRL,ICOL,ISTART,ISTOP)
+          END DO
+        END SUBROUTINE 
       END SUBROUTINE
       !
       SUBROUTINE U2DINT(IA,ANAME,II,JJ,K,IN,IOUT)
@@ -761,7 +830,7 @@ C
 C        SPECIFICATIONS:
 C     ------------------------------------------------------------------
       USE CONSTANTS,              ONLY: NL,BLN,TRUE,Z,ONE,NEG,TRUE,FALSE
-      USE ERROR_INTERFACE,        ONLY: STOP_ERROR
+      USE ERROR_INTERFACE,        ONLY: STOP_ERROR, WARNING_MESSAGE
       USE FILE_IO_INTERFACE,      ONLY: READ_TO_DATA, MOVE_TO_DATA
       USE NUM2STR_INTERFACE,      ONLY: NUM2STR
       USE GENERIC_OPEN_INTERFACE, ONLY: GENERIC_OPEN
@@ -777,7 +846,7 @@ C     ------------------------------------------------------------------
       INTEGER:: IE, N, I, J
       INTEGER:: ICOL, ISTART, ISTOP
       INTEGER:: ICLOSE, IFREE, ICONST, IPRN, LOCAT
-      LOGICAL:: FORMATTED
+      LOGICAL:: FORMATTED, FAIL
 C     ------------------------------------------------------------------
 C
 C1------READ ARRAY CONTROL RECORD AS CHARACTER DATA.
@@ -845,11 +914,43 @@ C2A-----READ THE CONTROL RECORD THE ORIGINAL WAY.
 C
 C3------FOR FREE FORMAT CONTROL RECORD, READ REMAINING FIELDS.
       IF(IFREE /= Z) THEN
-         CALL GET_INTEGER(CNTRL,ICOL,ISTART,ISTOP,IOUT,IN,ICONST,MSG=
-     &                                'U2DINT - FAILED TO READ ICONST')
+         CALL GET_INTEGER(CNTRL,ICOL,ISTART,ISTOP,IOUT,IN,ICONST,
+     +                                            HAS_ERROR=FAIL)
+         IF(LOCAT == Z .AND. FAIL) THEN
+           CALL STOP_ERROR(CNTRL, IN, IOUT, 
+     +                     MSG='U2DINT - FAILED TO READ ICONST')
+         ELSEIF(FAIL) THEN
+             ICONST=1
+             CALL WARNING_MESSAGE(LINE=CNTRL, INFILE=IN, OUTPUT=IOUT,
+     +       MSG= 'U2DINT - Failed to identify ICONST for "'//
+     +       TRIM(ADJUSTL(ANAME))//
+     +       '". Program will contine with ICONST = 1', inline=TRUE)
+            IF(ISTOP < ISTART) THEN
+                   CONTINUE
+            ELSEIF(CNTRL(ISTART:ISTART) == '#') THEN
+                   ICOL = LEN(CNTRL) + 1
+                   ISTART = ICOL   - 1
+                   ISTOP  = ISTART - 1
+            ELSE
+                   ICOL = ISTART
+            END IF
+         END IF
+!         CALL GET_INTEGER(CNTRL,ICOL,ISTART,ISTOP,IOUT,IN,ICONST,MSG=
+!     &                                'U2DINT - FAILED TO READ ICONST')
          IF(LOCAT /= Z) THEN
             CALL PARSE_WORD_UP(CNTRL,ICOL,ISTART,ISTOP)
-            FMTIN=CNTRL(ISTART:ISTOP)
+            !
+            IF(ISTOP < ISTART) THEN
+                   FMTIN = '(FREE)'
+            ELSEIF(CNTRL(ISTART:ISTART) == '#') THEN
+                   FMTIN = '(FREE)'
+                   ICOL = LEN(CNTRL) + 1
+                   ISTART = ICOL   - 1
+                   ISTOP  = ISTART - 1
+            ELSE
+                   FMTIN=CNTRL(ISTART:ISTOP)
+            END IF
+            !
             IF(ICLOSE /= Z) THEN
              LOCAT = Z
              IF(FMTIN == '(BINARY)') THEN
@@ -865,8 +966,15 @@ C3------FOR FREE FORMAT CONTROL RECORD, READ REMAINING FIELDS.
              END IF
             END IF
             IF(LOCAT /= Z .AND. FMTIN == '(BINARY)') FORMATTED=FALSE !LOCAT=-LOCAT
-            CALL GET_INTEGER(CNTRL,ICOL,ISTART,ISTOP,IOUT,IN,IPRN,MSG=
-     &                                  'U2DINT - FAILED TO READ IPRN')
+            CALL GET_INTEGER(CNTRL,ICOL,ISTART,ISTOP,IOUT,IN,IPRN,
+     +                                             HAS_ERROR=FAIL)
+            IF(FAIL) THEN
+              IPRN=-1
+              CALL WARNING_MESSAGE(LINE=CNTRL, INFILE=IN, OUTPUT=IOUT,
+     +        MSG= 'U2DINT - Failed to identify IPRN for "'//
+     +        TRIM(ADJUSTL(ANAME))//
+     +        '". Program will contine with IPRN = -1', inline=TRUE)
+            END IF
          END IF
       END IF
 C
@@ -939,7 +1047,7 @@ C4C-----LOCAT<0; READ UNFORMATTED RECORD CONTAINING ARRAY VALUES.
 C
 C5------IF ICONST NOT ZERO THEN MULTIPLY ARRAY VALUES BY ICONST.
       IF(ICLOSE /= Z) CLOSE(UNIT=LOCAT)
-      IF(ICONST == Z) GO TO 320
+      IF(ICONST == Z .or. ICONST == 1) GO TO 320
       DO 310 I=1,II
       DO 310 J=1,JJ
       IA(J,I)=IA(J,I)*ICONST
@@ -1050,15 +1158,17 @@ C     ******************************************************************
 C
 C        SPECIFICATIONS:
 C     ------------------------------------------------------------------
+      USE, INTRINSIC:: ISO_FORTRAN_ENV, ONLY: REAL32, REAL64
       USE CONSTANTS,             ONLY: Z, ONE, NL, BLN, NEG, 
      &                                 TRUE, FALSE
-      USE ERROR_INTERFACE,       ONLY: STOP_ERROR
+      USE ERROR_INTERFACE,       ONLY: STOP_ERROR, WARNING_MESSAGE
       USE FILE_IO_INTERFACE,     ONLY: READ_TO_DATA, MOVE_TO_DATA
       USE STRINGS,               ONLY: GET_WORD, GET_NUMBER
       USE NUM2STR_INTERFACE,     ONLY: NUM2STR
       USE GENERIC_OPEN_INTERFACE,ONLY: GENERIC_OPEN
       USE PARSE_WORD_INTERFACE,  ONLY: PARSE_WORD, PARSE_WORD_UP
-      USE STRINGS,                ONLY: GET_INTEGER, GET_NUMBER
+      USE STRINGS,               ONLY: GET_INTEGER, GET_NUMBER
+      USE UTIL_INTERFACE,        ONLY: TO_SNGL
       USE OPENSPEC
       IMPLICIT NONE
       CHARACTER(24), INTENT(IN):: ANAME
@@ -1070,13 +1180,11 @@ C     ------------------------------------------------------------------
       INTEGER:: IE, N, I, J
       INTEGER:: ICOL, ISTART, ISTOP
       INTEGER:: ICLOSE, IFREE, IPRN, LOCAT
-      LOGICAL:: FORMATTED
-      CHARACTER(5):: SHIFT
+      LOGICAL:: FORMATTED, FAIL
       REAL:: SHFT, CNSTNT, ZERO
 C     ------------------------------------------------------------------
       ZERO  = 0.0
       SHFT  = ZERO
-      SHIFT = ""
 C
 C1------READ ARRAY CONTROL RECORD AS CHARACTER DATA.
       CALL READ_TO_DATA(CNTRL,IN,IOUT,NOSHIFT=TRUE) !seb originally => READ(IN,'(A)') CNTRL
@@ -1142,11 +1250,44 @@ C2A-----READ THE CONTROL RECORD THE ORIGINAL WAY.
 C
 C3------FOR FREE FORMAT CONTROL RECORD, READ REMAINING FIELDS.
       IF(IFREE /= Z) THEN
+         CALL NEXT_WORD_CHECK_SHIFT(CNTRL,ICOL,ISTART,ISTOP,SHFT)
+         !
          CALL GET_NUMBER(CNTRL,ICOL,ISTART,ISTOP,IOUT,IN,CNSTNT,
-     &                      MSG='U2DREL - FAILED TO READ CNSTNT NUMBER')
+     +                            NO_PARSE_WORD=TRUE, HAS_ERROR=FAIL)
+         IF(LOCAT == Z .AND. FAIL) THEN
+           CALL STOP_ERROR(CNTRL, IN, IOUT, 
+     +                     MSG='U2DREL - FAILED TO READ CNSTNT')
+         ELSEIF(FAIL) THEN
+             CNSTNT=1.0
+             CALL WARNING_MESSAGE(LINE=CNTRL, INFILE=IN, OUTPUT=IOUT,
+     +       MSG= 'U2DREL - Failed to identify CNSTNT for "'//
+     +       TRIM(ADJUSTL(ANAME))//
+     +       '". Program will contine with CNSTNT = 1.0', inline=TRUE)
+            IF(ISTOP < ISTART) THEN
+                   CONTINUE
+            ELSEIF(CNTRL(ISTART:ISTART) == '#') THEN
+                   ICOL = LEN(CNTRL) + 1
+                   ISTART = ICOL   - 1
+                   ISTOP  = ISTART - 1
+            ELSE
+                   ICOL = ISTART
+            END IF
+         END IF
+         !
          IF(LOCAT /= Z) THEN
-            CALL PARSE_WORD_UP(CNTRL,ICOL,ISTART,ISTOP)
-            FMTIN=CNTRL(ISTART:ISTOP)
+            CALL NEXT_WORD_CHECK_SHIFT(CNTRL,ICOL,ISTART,ISTOP,SHFT)
+            !
+            IF(ISTOP < ISTART) THEN
+                   FMTIN = '(FREE)'
+            ELSEIF(CNTRL(ISTART:ISTART) == '#') THEN
+                   FMTIN = '(FREE)'
+                   ICOL = LEN(CNTRL) + 1
+                   ISTART = ICOL   - 1
+                   ISTOP  = ISTART - 1
+            ELSE
+                   FMTIN=CNTRL(ISTART:ISTOP)
+            END IF
+            !
             IF(ICLOSE /= Z) THEN
                IF(LOCAT == NEG) LOCAT = Z
                IF(FMTIN == '(BINARY)') THEN
@@ -1161,15 +1302,20 @@ C3------FOR FREE FORMAT CONTROL RECORD, READ REMAINING FIELDS.
                END IF
             END IF
             IF(LOCAT /= Z .AND. FMTIN == '(BINARY)') FORMATTED=FALSE !LOCAT=-LOCAT
-            CALL GET_INTEGER(CNTRL,ICOL,ISTART,ISTOP,IOUT,IN,IPRN,MSG=
-     &                                  'U2DREL - FAILED TO READ IPRN')
+            !
+            CALL NEXT_WORD_CHECK_SHIFT(CNTRL,ICOL,ISTART,ISTOP,SHFT)
+            CALL GET_INTEGER(CNTRL,ICOL,ISTART,ISTOP,IOUT,IN,IPRN,
+     +                         NO_PARSE_WORD=TRUE, HAS_ERROR=FAIL)
+            IF(FAIL) THEN
+              IPRN=-1
+              CALL WARNING_MESSAGE(LINE=CNTRL, INFILE=IN, OUTPUT=IOUT,
+     +        MSG= 'U2DREL - Failed to identify IPRN for "'//
+     +        TRIM(ADJUSTL(ANAME))//
+     +        '". Program will contine with IPRN = -1', inline=TRUE)
+            END IF
          END IF
          !
-         CALL GET_WORD(CNTRL,ICOL,ISTART,ISTOP,SHIFT)
-         IF(SHIFT == "SHIFT") THEN
-            CALL GET_NUMBER(CNTRL,ICOL,ISTART,ISTOP,IOUT,IN,SHFT,MSG=
-     +'U2DREL FOUND KEYWORD "SHIFT", BUT ERROR READING THE SHFT FACTOR')
-         END IF
+         CALL NEXT_WORD_CHECK_SHIFT(CNTRL,ICOL,ISTART,ISTOP,SHFT)
       END IF
 C
 C4------TEST LOCAT TO SEE HOW TO DEFINE ARRAY VALUES.
@@ -1223,25 +1369,80 @@ C4B-----LOCAT>0; READ FORMATTED RECORDS USING FORMAT FMTIN.
       ELSE
 C
 C4C-----LOCAT<0; READ UNFORMATTED ARRAY VALUES.
-        CALL STOP_ERROR(CNTRL, IN, IOUT, MSG=
-     +   'U2DREL - ERROR READING CURRENT INPUT FOR'//NL//
-     +   '"'//TRIM(ADJUSTL(ANAME))//'"'//BLN//
-     +   'THE INPUT DOES NOT ALLOW READING "(BINARY)" FORMATTED DATA.')
-!        IF(K > Z) THEN
-!             WRITE(IOUT,201) ANAME,K,LOCAT
-!  201      FORMAT(1X,///11X,A,' FOR LAYER',I4,/
-!     1      1X,'READING BINARY ON UNIT ',I4)
-!        ELSE IF(K == Z) THEN
-!             WRITE(IOUT,202) ANAME,LOCAT
-!  202      FORMAT(1X,///1X,A,/
-!     1      1X,'READING BINARY ON UNIT ',I4)
-!        ELSE
-!             WRITE(IOUT,203) ANAME,LOCAT
-!  203      FORMAT(1X,///1X,A,' FOR CROSS SECTION',/
-!     1      1X,'READING BINARY ON UNIT ',I4)
-!        END IF
-!        READ(LOCAT) KSTP,KPER,PERTIM,TOTIM,TEXT,NCOL,NROW,ILAY
-!        READ(LOCAT) A
+        IF(K > Z) THEN
+             WRITE(IOUT,201) ANAME,K,LOCAT
+  201      FORMAT(1X,///11X,A,' FOR LAYER',I4,/
+     1      1X,'READING BINARY ON UNIT ',I4)
+        ELSE IF(K == Z) THEN
+             WRITE(IOUT,202) ANAME,LOCAT
+  202      FORMAT(1X,///1X,A,/
+     1      1X,'READING BINARY ON UNIT ',I4)
+        ELSE
+             WRITE(IOUT,203) ANAME,LOCAT
+  203      FORMAT(1X,///1X,A,' FOR CROSS SECTION',/
+     1      1X,'READING BINARY ON UNIT ',I4)
+        END IF
+        CALL WARNING_MESSAGE(LINE=CNTRL, INFILE=IN, OUTPUT=IOUT,
+     +       MSG= 'U2DREL - Found "BINARY" flag for '//
+     + '"'//TRIM(ADJUSTL(ANAME))//'" on unit # '//NUM2STR(LOCAT)//
+     + '. For portability it is recommended to only use text '//
+     +'formatted data only.'//NL//'U2DREL will guess the binary '//
+     +'sturcture of the file.'//NL//
+     +'1st attempt will assume 4 byte per floating point number'//
+     +         '(Single Precision).'//NL//
+     +'2nd attempt will assume 8 byte per floating point number'//
+     +         '(Double Precision).', inline=TRUE)
+        BLOCK
+           INTEGER:: NCOL,NROW,ILAY
+           REAL(REAL32), DIMENSION(:,:), ALLOCATABLE:: dat32
+           REAL(REAL64), DIMENSION(:,:), ALLOCATABLE:: dat64
+           CHARACTER(52):: HEAD
+           HEAD = ''
+           READ(LOCAT) HEAD(1:44) ! KSTP,KPER,PERTIM,TOTIM,TEXT,NCOL,NROW,ILAY
+           NCOL = TRANSFER( HEAD(33:36), NCOL )
+           NROW = TRANSFER( HEAD(37:40), NROW )
+           ILAY = TRANSFER( HEAD(41:44), ILAY )
+           IF(II == NROW .and. JJ == NCOL) THEN
+              ALLOCATE(dat32(NCOL, NROW))
+              READ(LOCAT) dat32
+              IF(PRECISION(A) < 7) THEN
+                 A = dat32
+              ELSE
+                 DO I=1,II
+                 DO J=1,JJ
+                       A(J,I)=REAL(dat32(J,I), real64)
+                 END DO
+                 END DO
+              END IF
+              DEALLOCATE(dat32)
+           ELSE
+              READ(LOCAT) HEAD(45:52) 
+              NCOL = TRANSFER( HEAD(41:44), NCOL )
+              NROW = TRANSFER( HEAD(45:48), NROW )
+              ILAY = TRANSFER( HEAD(49:52), ILAY )
+              IF(II == NROW .and. JJ == NCOL) THEN
+                 ALLOCATE(dat64(NCOL, NROW))
+                 READ(LOCAT) dat64
+                 IF(PRECISION(A) < 7) THEN
+                    DO I=1,II
+                    DO J=1,JJ
+                          A(J,I) = TO_SNGL(dat64(J,I))
+                    END DO
+                    END DO
+                 ELSE
+                    A = dat64
+                 END IF
+                 DEALLOCATE(dat64)
+              ELSE
+                 CALL STOP_ERROR(CNTRL, IN, IOUT, MSG=
+     +           'U2DREL - Error reading current input for'//NL//
+     +            '"'//TRIM(ADJUSTL(ANAME))//'"'//NL//
+     +            'The reader failed to identify the input struture '//
+     +            'in the "(BINARY)" formatted file.'//NL//
+     +            'Please change input file to formatted text.')
+              END IF
+           END IF
+        END BLOCK
       END IF
 C
 C5------IF CNSTNT NOT ZERO THEN MULTIPLY ARRAY VALUES BY CNSTNT.
@@ -1273,6 +1474,30 @@ C8------CONTROL RECORD ERROR.
       END IF
       !CALL USTOP(' ')
       CALL STOP_ERROR(CNTRL, IN, IOUT, MSG=FNAME)
+      !
+      CONTAINS
+        SUBROUTINE NEXT_WORD_CHECK_SHIFT(CNTRL,ICOL,ISTART,ISTOP,SHFT)
+          CHARACTER(*), INTENT(INOUT):: CNTRL
+          INTEGER,      INTENT(INOUT):: ICOL,ISTART,ISTOP
+          REAL,         INTENT(INOUT):: SHFT
+          REAL:: VAL
+          !
+          CALL PARSE_WORD_UP(CNTRL,ICOL,ISTART,ISTOP)
+          DO WHILE(ISTART <= ISTOP)
+             IF(CNTRL(ISTART:ISTART) == '#') THEN
+                   ICOL = LEN(CNTRL) + 1
+                   ISTART = ICOL   - 1
+                   ISTOP  = ISTART - 1
+                   EXIT
+             END IF
+             IF(CNTRL(ISTART:ISTOP) /= "SHIFT") EXIT
+             !
+             CALL GET_NUMBER(CNTRL,ICOL,ISTART,ISTOP,IOUT,IN,VAL,MSG=
+     +'U2DREL FOUND KEYWORD "SHIFT", BUT ERROR READING THE SHFT FACTOR')
+             SHFT = SHFT + VAL
+             CALL PARSE_WORD_UP(CNTRL,ICOL,ISTART,ISTOP)
+          END DO
+        END SUBROUTINE 
       END SUBROUTINE
       !
       SUBROUTINE UCOLNO(NLBL1,NLBL2,NSPACE,NCPL,NDIG,IOUT)

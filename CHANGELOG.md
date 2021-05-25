@@ -16,6 +16,29 @@ Boyce, S.E., Hanson, R.T., Ferguson, I., Schmid, W., Henson, W., Reimann, T., Me
 
 ------
 
+## 2.1.0-beta
+
+yyyy-mm-dd
+
+### Fixed
+
+- `U2DREL` with "`BINARY`" input option now raises a warning instead of stopping with an error.
+    - When the "`BINARY`"  option is found, MF-OWHM attempts to identify the binary input structure.  
+      If it succeeds, a warning is raised about the portability of binary-unformatted files.  
+      If it fails, then the program stops with an error message. 
+
+### Refactoring
+
+* Added `slang/s_language.f90`
+* Added `slang/s_language_global_pull.f90`
+- Added `bif_lib/types_and_containers/variable_pointer_list_interface.f90`  
+    from Batteries Included Fortran (BiF) version 1.0.1 source code.  
+    https://code.usgs.gov/fortran/bif/-/tags/1.0.1
+
+&nbsp; 
+
+------
+
 ## 2.0.3
 
 2021-05-25
