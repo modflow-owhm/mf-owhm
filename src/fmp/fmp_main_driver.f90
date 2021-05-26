@@ -47,7 +47,7 @@ MODULE FMP_MAIN_DRIVER
     USE    OUTPUT_DATA_FMP_MODULE,       ONLY: INITIALIZE_OUTPUT_DATA
     USE   SALINITY_DATA_FMP_MODULE,      ONLY: INITIALIZE_SALINITY_DATA
     USE   SURFACE_WATER_DATA_FMP_MODULE, ONLY:INITIALIZE_SURFACE_WATER_DATA
-    !swo USE             SWO_DATA_FMP_INTERFACE, ONLY: INITIALIZE_SWO_DATA
+    USE             SWO_DATA_FMP_MODULE, ONLY: INITIALIZE_SWO_DATA
     !
     INTEGER, INTENT(IN):: IN_FMP,IUNITSFR,IUNITMNW1,IUNITMNW2,IUNITUZF,IUNITNWT,IUNITDRT,IGRID,ILGR,MXITER
     !
@@ -81,7 +81,7 @@ MODULE FMP_MAIN_DRIVER
     ALLOCATE(FDIM, WBS)
     !
     ALLOCATE(FCROP,SWFL,CLIMATE,ALLOT,SOIL,FMPOPT,FMPOUT,SALT)
-    !swo ALLOCATE(SWODAT)
+    ALLOCATE(SWODAT)
     !
     FDIM%NFARM = Z
     !
@@ -257,18 +257,18 @@ MODULE FMP_MAIN_DRIVER
              !
              CALL INITIALIZE_OPTIONS_DATA( BLK, FMPOPT )
              !
-      !swo ELSEIF(       (BLK%NAME=='SWO' .OR.                             &
-      !swo                BLK%NAME=='SURFACE_WATER_OPERATIONS' .OR.        &
-      !swo                BLK%NAME=='SURFACEWATER_OPERATIONS') .AND.       &
-      !swo                                                BLK%NLINE>0) THEN
-      !swo        !
-      !swo        CALL INITIALIZE_SWO_DATA(BLK,SWODAT,LINE,FDIM,NSEG,NSTRM,SEG_NSTRM,SPSTART,MXITER)
-      !swo        !
-      !swo        IF(SWODAT%HAS_SWO .AND. WBS%HAS_SFR) THEN
-      !swo            CALL SWODAT%ALLOC_N_INIT(ISTRM)
-      !swo            SWO_ENABLED = TRUE  !DISABLES SFR BD POST FM ROUTINE WHICH THROWS MASS BALANCE
-      !swo        END IF
-      !swo        !
+      ELSEIF(       (BLK%NAME=='SWO' .OR.                             &
+                     BLK%NAME=='SURFACE_WATER_OPERATIONS' .OR.        &
+                     BLK%NAME=='SURFACEWATER_OPERATIONS') .AND.       &
+                                                     BLK%NLINE>0) THEN
+             !
+             CALL INITIALIZE_SWO_DATA(BLK,SWODAT,LINE,FDIM,NSEG,NSTRM,SEG_NSTRM,SPSTART,MXITER)
+             !
+             IF(SWODAT%HAS_SWO .AND. WBS%HAS_SFR) THEN
+                 CALL SWODAT%ALLOC_N_INIT(ISTRM)
+                 SWO_ENABLED = TRUE  !DISABLES SFR BD POST FM ROUTINE WHICH THROWS MASS BALANCE
+             END IF
+             !
       ELSEIF(ANY( BLK%NAME==['GLOBAL   ','DIMENSION', 'CROP     ','LAND_USE ']))THEN
                  CONTINUE
       ELSEIF(BLK%NLINE>0) THEN  !TRUE IF "BEGIN" FOUND
@@ -333,13 +333,13 @@ MODULE FMP_MAIN_DRIVER
         END IF
     END IF
     !
-    !swo IF(SWODAT%HAS_SWO .AND. .NOT. WBS%HAS_SFR) THEN
-    !swo     CALL STOP_ERROR(INFILE=IN_FMP, OUTPUT=IOUT,                                                                        &
-    !swo                    MSG='FMP SURFACE_WATER_OPERATIONS BLOCK ERROR: '//NL//                                                    &
-    !swo                    'FMP SURFACE WATER OPERATIONS REQUIRES THAT SFR PACKAGE BE IN USE AND DECLAIRED IN THE NAME FILE.'//NL//  &
-    !swo                    'PLEASE SPECIFY THE SFR PACKAGE OR REMOVE THE SURFACE_WATER_OPERATIONS BLOCK FROM THE FMP INPUT'//NL//    &
-    !swo                    '(OR JUST MAKE SURE THE BLOCK IS EMPTY).')
-    !swo END IF
+    IF(SWODAT%HAS_SWO .AND. .NOT. WBS%HAS_SFR) THEN
+        CALL STOP_ERROR(INFILE=IN_FMP, OUTPUT=IOUT,                                                                        &
+                       MSG='FMP SURFACE_WATER_OPERATIONS BLOCK ERROR: '//NL//                                                    &
+                       'FMP SURFACE WATER OPERATIONS REQUIRES THAT SFR PACKAGE BE IN USE AND DECLAIRED IN THE NAME FILE.'//NL//  &
+                       'PLEASE SPECIFY THE SFR PACKAGE OR REMOVE THE SURFACE_WATER_OPERATIONS BLOCK FROM THE FMP INPUT'//NL//    &
+                       '(OR JUST MAKE SURE THE BLOCK IS EMPTY).')
+    END IF
     !
     IF(SWFL%REQ_SFR .AND. .NOT. WBS%HAS_SFR)  CALL STOP_ERROR(INFILE=IN_FMP, OUTPUT=IOUT,MSG= &
                        'FMP SURFACE_WATER BLOCK ERROR. FMP FEATURES THAT REQUIRE SFR '//            &
@@ -457,7 +457,7 @@ MODULE FMP_MAIN_DRIVER
     USE GENERIC_OUTPUT_FILE_INSTRUCTION, ONLY: GENERIC_OUTPUT_FILE
     USE FMP_GLOBAL,   ONLY:FWELL,NRD,UNRD,RNRD,IFA,ISTARTFL,FMPOUT,FMP_LGR_PNT,  &
                            SFR_DELIV,SFR_RUNOFF,FMP_MOD_SFR_RUNOFF,              &
-                           FDIM, FCROP, WBS, CLIMATE, SOIL, ALLOT, SWFL, SALT
+                           FDIM, FCROP, WBS, CLIMATE, SOIL, ALLOT, SWFL, SALT, SWODAT
     USE GLOBAL,       ONLY:PERLEN,SPSTART
     USE GWFSFRMODULE, ONLY:ISTRM,STRM,NSTRM,IDIVAR,SEG,IOTSG,SEG_NSTRM
     USE GWFMNW2MODULE,ONLY: SGWF2MNW2PNT
@@ -767,11 +767,11 @@ MODULE FMP_MAIN_DRIVER
     !
     ! SWO DATA INPUT FOR RP
     !
-    !swo IF(SWODAT%HAS_SWO) THEN
-    !swo            WBS%HAS_SWO =  KPER >= SWODAT%BEGIN_SP
-    !swo            !
-    !swo            IF(WBS%HAS_SWO)  CALL SWODAT%NEXT(WBS, SWFL, KPER, IDIVAR, IOTSG, SEG, ISTRM, STRM)
-    !swo END IF
+    IF(SWODAT%HAS_SWO) THEN
+               WBS%HAS_SWO =  KPER >= SWODAT%BEGIN_SP
+               !
+               IF(WBS%HAS_SWO)  CALL SWODAT%NEXT(WBS, SWFL, KPER, IDIVAR, IOTSG, SEG, ISTRM, STRM)
+    END IF
     !
   END SUBROUTINE
   !
@@ -834,7 +834,6 @@ MODULE FMP_MAIN_DRIVER
   !
   !
   SUBROUTINE FMP_AD(KPER, KSTP, IGRID)
-    !-----VERSION 2 09/18/2009 FMP_AD
     !*********************************************************************
     !     RESET (REDUCED) DIVERSION RATE OF PREVIOUS TIME STEP,
     !     COMPUTE AVERAGE EVAPOTRANSPIRATION, ROOT DEPTHS AND EFFECTIVE
@@ -846,7 +845,7 @@ MODULE FMP_MAIN_DRIVER
     !        SPECIFICATIONS:
     !     -----------------------------------------------------------------
     USE CONSTANTS
-    USE FMP_GLOBAL, ONLY:FDIM, WBS, SOIL, CLIMATE, FCROP, SALT, SWFL, ISTARTFL,  FMP_LGR_PNT, SFR_RUNOFF, FMP_MOD_SFR_RUNOFF
+    USE FMP_GLOBAL, ONLY:FDIM, WBS, SOIL, CLIMATE, FCROP, SALT, SWFL, ISTARTFL,  FMP_LGR_PNT, SFR_RUNOFF, FMP_MOD_SFR_RUNOFF, SWODAT
     USE GWFSFRMODULE, ONLY: IDIVAR, ISTRM, STRM, SEG, NSTRM
     USE GWFMNW2MODULE,ONLY: SGWF2MNW2PNT
     !
@@ -946,13 +945,12 @@ MODULE FMP_MAIN_DRIVER
     !
     IF(SWFL%HAS_SW)  CALL SWFL%NEXT_TS()
     !
-    !swo IF(WBS%HAS_SWO)  CALL SWODAT%NEXT_TIME_STEP(WBS,KPER,KSTP,SEG)
+    IF(WBS%HAS_SWO)  CALL SWODAT%NEXT_TIME_STEP(WBS,KPER,KSTP,SEG)
     !
   END SUBROUTINE
   !
   !
   SUBROUTINE FMP_FM(KITER,KPER,KSTP,IGRID,NGRIDS,ILGR,LGRITER,DELT)  !added IUNITNWT,IUNITMNW2 by rth
-    !-----VERSION 2 09/21/09 FMP_FM
     !     ******************************************************************
     !     COMPUTE FARM WELL DISCHARGE AND NET-RECHARGE AND ADD THE TERMS TO
     !     RHS OR THE RHS AND HCOF, RESPECTIVELY.
@@ -977,7 +975,7 @@ MODULE FMP_MAIN_DRIVER
     USE CONSTANTS
     USE FMP_GLOBAL, ONLY:  TFDROLD, NRD,  UNRD, RNRD, IFA, FMPDAT, FMP_LGR_PNT,         &
                            ISTARTFL, SFR_RUNOFF, DRTFLOW,                               &
-                           WBS, FWELL, SWFL, FCROP, SOIL, FDIM, ALLOT, CLIMATE, SALT,   &
+                           WBS, FWELL, SWFL, FCROP, SOIL, FDIM, ALLOT, CLIMATE, SALT, SWODAT,  &
                            FMP_MOD_SFR_RUNOFF, SFR_DELIV, FMPOPT 
     USE FMPBLK
     !USE GWFBASMODULE, ONLY:DELT
@@ -1248,92 +1246,92 @@ MODULE FMP_MAIN_DRIVER
        ENDIF
     ENDIF    !(FMPOPT%WELLFIELD) 
     !
-    !swo IF(WBS%HAS_SWO) THEN
-    !swo     IF(KITER <= SWODAT%SWMXITER(1)) THEN
-    !swo                                         GO_SWO_ALLOC = TRUE
-    !swo     ELSEIF(KITER > SWODAT%SWMXITER(3)) THEN
-    !swo                                         GO_SWO_ALLOC = FALSE
-    !swo     ELSE
-    !swo                                         GO_SWO_ALLOC = MOD(KITER,SWODAT%SWMXITER(2)) == Z
-    !swo     END IF
-    !swo ELSE
-    !swo     GO_SWO_ALLOC = FALSE
-    !swo END IF
-    !swo !
-    !swo IF(GO_SWO_ALLOC) THEN 
-    !swo !
-    !swo SWODAT%FMP_SW_DEMAND = WBS%DEMAND
-    !swo !
-    !swo ! ASSUME NON-ROUTED DELIVERIES ARE USED BEFORE MAKING A CALL ON RESERVOIR
-    !swo IF(SWFL%HAS_NRD) THEN
-    !swo     ASSOCIATE(SWO_DMD => SWODAT%FMP_SW_DEMAND)
-    !swo        !
-    !swo        DO CONCURRENT(NF=1:WBS%NFARM, SWO_DMD(NF)> NEARZERO_10 .AND. WBS%H2OSOURCE%NRD(NF))
-    !swo              ITTOT = Z
-    !swo              DO IT=1,SWFL%MXNRD
-    !swo                  N = IDINT(UNRD(3*IT,NF))                           !define nrd-ranks as array to find maximum rank for current farm
-    !swo                  IF(ITTOT < N) ITTOT = N
-    !swo              END DO
-    !swo              !
-    !swo              DSUM=DZ
-    !swo              DO IRT=1,ITTOT
-    !swo                 DSUM=DSUM+RNRD(1,IRT,NF)
-    !swo              ENDDO
-    !swo              !
-    !swo              SWO_DMD(NF) = SWO_DMD(NF)-DSUM
-    !swo        END DO
-    !swo        !
-    !swo     END ASSOCIATE
-    !swo END IF
-    !swo !
-    !swo DO CONCURRENT(NF=1:WBS%NFARM, SWODAT%FMP_SW_DEMAND(NF) < NEARZERO_10)
-    !swo     SWODAT%FMP_SW_DEMAND(NF) = DZ
-    !swo END DO
-    !swo !
-    !swo !APPLY ANY FMP SW ALLOTMENTS
-    !swo !
-    !swo IF(ALLOT%HAS_SW_ALLOTMENT) THEN
-    !swo     FARMALLOT = DELT/PERLEN(KPER)
-    !swo     DO CONCURRENT (NF=1:WBS%NFARM)
-    !swo         IF(ALLOT%SW_ALLOTMENT(NF) < D100) THEN
-    !swo                                           SWODAT%FMP_SW_ALLOTMENT(NF) = ALLOT%SW_ALLOTMENT(NF)*FARMALLOT             ! FARMALLOT = DBLE(DELT)/DBLE(PERLEN(KPER))
-    !swo         ELSE
-    !swo                                           SWODAT%FMP_SW_ALLOTMENT(NF) = inf
-    !swo         END IF
-    !swo     END DO
-    !swo END IF
-    !swo !
-    !swo ! CALCULATE SURFACE WATER OPERATIONS RELEASES BASED ON DEMAND.  (SWO)
-    !swo N = -1  !PASSED AS ICNVG TO SWO_CONVERGENCE_CHECK. BY SETTING TO -1 PREVENTS OUTPUT 
-    !swo SITER = ONE
-    !swo !!!IF(SWODAT%INNER_ITERATION > ONE) THEN  -- Not yet implmented
-    !swo !!!  !
-    !swo !!!  DO SITER=1, SWODAT%INNER_ITERATION - 1
-    !swo !!!     !                                          KPER,KSTP,KITER,DELT,IDIVAR,STRM,SEG,SITER
-    !swo !!!     CALL SWODAT%COMPUTE_ALLOCATION_AND_RELEASE(KPER,KSTP,KITER,IDIVAR,STRM,SEG, SITER)
-    !swo !!!     !
-    !swo !!!    ERROR STOP 'SWO ERROR - INTERNAL_ITERATION > 1 IS NOT ALLOWED'
-    !swo !!!     !!!           CALL SWO_SOLVE_SFR_NETWORK(KITER,KPER,KSTP,IUNITLAK,IUNITNWT,
-    !swo !!!     !!!     +                                ILGR, LGRITER, NGRIDS, IGRID)
-    !swo !!!                !
-    !swo !!!                !CALL SFR_DELIV%SET_INFLOW(STRM)
-    !swo !!!                !!
-    !swo !!!                !DO CONCURRENT(F=1:WBS%NFARM, SWODAT%FMP_SW_DEMAND(NF) > DZ)
-    !swo !!!                !    !
-    !swo !!!                !    CALL SWFL%APPLY_SRD_DEMAND(NF,RDEL,SFR_DELIV)
-    !swo !!!                !END DO
-    !swo !!!                !
-    !swo !!!                CALL SWODAT%CONVERGENCE_CHECK(KPER,KSTP,KITER,STRM,SWFL%SRDLOC,N)
-    !swo !!!     !
-    !swo !!!  END DO
-    !swo !!!  !
-    !swo !!!  CALL SFR_DELIV%SET_INFLOW(STRM)  !UPDATE POTENTIAL FLOW FROM SFR DELIVERY POINTS AS A RESULT OF SWO
-    !swo !!!END IF
-    !swo !
-    !swo !
-    !swo CALL SWODAT%COMPUTE_ALLOCATION_AND_RELEASE(KPER,KSTP,KITER,IDIVAR,STRM,SEG, SITER)       ! FINAL SET OF RELEASES AFTER INNER, INNER ITERATIONS
-    !swo !
-    !swo END IF !WBS%HAS_SWO
+    IF(WBS%HAS_SWO) THEN
+        IF(KITER <= SWODAT%SWMXITER(1)) THEN
+                                            GO_SWO_ALLOC = TRUE
+        ELSEIF(KITER > SWODAT%SWMXITER(3)) THEN
+                                            GO_SWO_ALLOC = FALSE
+        ELSE
+                                            GO_SWO_ALLOC = MOD(KITER,SWODAT%SWMXITER(2)) == Z
+        END IF
+    ELSE
+        GO_SWO_ALLOC = FALSE
+    END IF
+    !
+    IF(GO_SWO_ALLOC) THEN 
+    !
+    SWODAT%FMP_SW_DEMAND = WBS%DEMAND
+    !
+    ! ASSUME NON-ROUTED DELIVERIES ARE USED BEFORE MAKING A CALL ON RESERVOIR
+    IF(SWFL%HAS_NRD) THEN
+        ASSOCIATE(SWO_DMD => SWODAT%FMP_SW_DEMAND)
+           !
+           DO CONCURRENT(NF=1:WBS%NFARM, SWO_DMD(NF)> NEARZERO_10 .AND. WBS%H2OSOURCE%NRD(NF))
+                 ITTOT = Z
+                 DO IT=1,SWFL%MXNRD
+                     N = IDINT(UNRD(3*IT,NF))                           !define nrd-ranks as array to find maximum rank for current farm
+                     IF(ITTOT < N) ITTOT = N
+                 END DO
+                 !
+                 DSUM=DZ
+                 DO IRT=1,ITTOT
+                    DSUM=DSUM+RNRD(1,IRT,NF)
+                 ENDDO
+                 !
+                 SWO_DMD(NF) = SWO_DMD(NF)-DSUM
+           END DO
+           !
+        END ASSOCIATE
+    END IF
+    !
+    DO CONCURRENT(NF=1:WBS%NFARM, SWODAT%FMP_SW_DEMAND(NF) < NEARZERO_10)
+        SWODAT%FMP_SW_DEMAND(NF) = DZ
+    END DO
+    !
+    !APPLY ANY FMP SW ALLOTMENTS
+    !
+    IF(ALLOT%HAS_SW_ALLOTMENT) THEN
+        FARMALLOT = DELT/PERLEN(KPER)
+        DO CONCURRENT (NF=1:WBS%NFARM)
+            IF(ALLOT%SW_ALLOTMENT(NF) < D100) THEN
+                                              SWODAT%FMP_SW_ALLOTMENT(NF) = ALLOT%SW_ALLOTMENT(NF)*FARMALLOT             ! FARMALLOT = DBLE(DELT)/DBLE(PERLEN(KPER))
+            ELSE
+                                              SWODAT%FMP_SW_ALLOTMENT(NF) = inf
+            END IF
+        END DO
+    END IF
+    !
+    ! CALCULATE SURFACE WATER OPERATIONS RELEASES BASED ON DEMAND.  (SWO)
+    N = -1  !PASSED AS ICNVG TO SWO_CONVERGENCE_CHECK. BY SETTING TO -1 PREVENTS OUTPUT 
+    SITER = ONE
+    !!!IF(SWODAT%INNER_ITERATION > ONE) THEN  -- Not yet implmented
+    !!!  !
+    !!!  DO SITER=1, SWODAT%INNER_ITERATION - 1
+    !!!     !                                          KPER,KSTP,KITER,DELT,IDIVAR,STRM,SEG,SITER
+    !!!     CALL SWODAT%COMPUTE_ALLOCATION_AND_RELEASE(KPER,KSTP,KITER,IDIVAR,STRM,SEG, SITER)
+    !!!     !
+    !!!    ERROR STOP 'SWO ERROR - INTERNAL_ITERATION > 1 IS NOT ALLOWED'
+    !!!     !!!           CALL SWO_SOLVE_SFR_NETWORK(KITER,KPER,KSTP,IUNITLAK,IUNITNWT,
+    !!!     !!!     +                                ILGR, LGRITER, NGRIDS, IGRID)
+    !!!                !
+    !!!                !CALL SFR_DELIV%SET_INFLOW(STRM)
+    !!!                !!
+    !!!                !DO CONCURRENT(F=1:WBS%NFARM, SWODAT%FMP_SW_DEMAND(NF) > DZ)
+    !!!                !    !
+    !!!                !    CALL SWFL%APPLY_SRD_DEMAND(NF,RDEL,SFR_DELIV)
+    !!!                !END DO
+    !!!                !
+    !!!                CALL SWODAT%CONVERGENCE_CHECK(KPER,KSTP,KITER,STRM,SWFL%SRDLOC,N)
+    !!!     !
+    !!!  END DO
+    !!!  !
+    !!!  CALL SFR_DELIV%SET_INFLOW(STRM)  !UPDATE POTENTIAL FLOW FROM SFR DELIVERY POINTS AS A RESULT OF SWO
+    !!!END IF
+    !
+    !
+    CALL SWODAT%COMPUTE_ALLOCATION_AND_RELEASE(KPER,KSTP,KITER,IDIVAR,STRM,SEG, SITER)       ! FINAL SET OF RELEASES AFTER INNER, INNER ITERATIONS
+    !
+    END IF !WBS%HAS_SWO
     !
     !IF(WBS%HAS_SFR) THEN !RESEST BACK TO ORIGINAL RUNOFF FROM SFR INPUT
     !   !
@@ -1480,9 +1478,9 @@ MODULE FMP_MAIN_DRIVER
                  END IF
              END IF
              !
-             !swo IF(WBS%HAS_SWO)THEN
-             !swo                IF(RDEL > SWODAT%FMP_SW_LIMIT(NF))  RDEL=SWODAT%FMP_SW_LIMIT(NF)
-             !swo END IF
+             IF(WBS%HAS_SWO)THEN
+                            IF(RDEL > SWODAT%FMP_SW_LIMIT(NF))  RDEL=SWODAT%FMP_SW_LIMIT(NF)
+             END IF
              !
              CALL SWFL%APPLY_SRD_DEMAND(NF,RDEL,SFR_DELIV)
              RDEL = SWFL%SRDLOC(NF)%TOT_DMD_MET
@@ -1561,27 +1559,18 @@ MODULE FMP_MAIN_DRIVER
              !
              CALL FCROP%APPLY_DEFICIENCY_SCENARIO(WBS, NF)
              !
-             IF(WBS%DEFICIENCY%LIST(NF) == ONE) THEN
-                 !
-                 TF = WBS%CROP_DEMAND(NF)  !UPDATE DEMAND
-                 !
-                 QR=TF-ND-SWFL%SRDLOC(NF)%TOT_DMD_MET
-                 !!!IF(IRDFL.NE.0.OR.ISRDFL.GT.0) THEN
-                 !!!  QR=TF-ND-AFDELSW
-                 !!!ELSE
-                 !!!  QR=TF-ND
-                 !!!ENDIF
-                 !             store original pumping requirement before updates after acreage-optimization are done
-                 !
-                 IF(.NOT. ( FMPOPT%WELLFIELD .AND. (KITER.LE.1.OR.ISTARTFL.LE.1))) THEN 
-                    IF(NRD(2,NF).EQ.0.0D0) NRD(2,NF)=NRD(1,NF)
-                    IF(TFDROLD(NF).EQ.0.0D0) TFDROLD(NF)=WBS%DEMAND(NF)
-                 END IF
-                 !
-                 WBS%Q_DEMAND(NF)=QR     
-                 WBS%DEMAND(NF) = TF
+             TF = WBS%CROP_DEMAND(NF)  !UPDATE DEMAND
+             !
+             QR=TF-ND-SWFL%SRDLOC(NF)%TOT_DMD_MET
+             !
+             !             store original pumping requirement before updates after acreage-optimization are done
+             IF(.NOT. ( FMPOPT%WELLFIELD .AND. (KITER.LE.1.OR.ISTARTFL.LE.1))) THEN 
+                IF(NRD(2,NF).EQ.0.0D0) NRD(2,NF)=NRD(1,NF)
+                IF(TFDROLD(NF).EQ.0.0D0) TFDROLD(NF)=WBS%DEMAND(NF)
              END IF
              !
+             WBS%Q_DEMAND(NF)=QR     
+             WBS%DEMAND(NF) = TF
          END IF
       END IF
       !
@@ -1894,7 +1883,7 @@ MODULE FMP_MAIN_DRIVER
   END SUBROUTINE
   !
   SUBROUTINE FMP_CNVG(IGRID, KPER, KSTP, KITER, ICNVG)
-    USE FMP_GLOBAL,    ONLY: SWFL, WBS, FCROP,ISTARTFL,FMP_LGR_PNT
+    USE FMP_GLOBAL,    ONLY: SWFL, WBS, FCROP, ISTARTFL, FMP_LGR_PNT, SWODAT
     USE GWFSFRMODULE, ONLY: STRM
     USE CONSTANTS,    ONLY: BLN, NL, ONE, Z, DZ, HALF, UNO, MILLI,NEARZERO_5
     !
@@ -1926,13 +1915,13 @@ MODULE FMP_MAIN_DRIVER
     IF(KITER    < 7) ICNVG = Z                    !ENSURE AT LEAST SIX ITERATIONS
     IF(KITER    < 13 .AND. WBS%HAS_SWO) ICNVG = Z !SWO REQUIRES A MIN OF 12 OUTER ITERACTIONS
     !
-    !swo IF(KITER    > 13 .AND. WBS%HAS_SWO) THEN      ! Required flow cnvg check
-    !swo   !
-    !swo   IF( KITER < 21 .AND. SWODAT%REQFLOW%HAS_REQ) THEN
-    !swo       !
-    !swo       IF( ANY( SWODAT%REQFLOW%REQ(:) > NEARZERO_5) ) ICNVG = Z
-    !swo   END IF
-    !swo END IF
+    IF(KITER    > 13 .AND. WBS%HAS_SWO) THEN      ! Required flow cnvg check
+      !
+      IF( KITER < 21 .AND. SWODAT%REQFLOW%HAS_REQ) THEN
+          !
+          IF( ANY( SWODAT%REQFLOW%REQ(:) > NEARZERO_5) ) ICNVG = Z
+      END IF
+    END IF
     !
     IF(SWFL%NSFR_DELIV > Z) THEN !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
           !
@@ -1993,24 +1982,24 @@ MODULE FMP_MAIN_DRIVER
           END DO
       END IF !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       !
-      !swo IF(WBS%HAS_SWO) THEN
-      !swo     !
-      !swo     IF(KITER.LE.SWODAT%SWMXITER(3)) THEN 
-      !swo                                     CALL SWODAT%CONVERGENCE_CHECK(KPER, KSTP, KITER, STRM,SWFL%SRDLOC,ICNVG)
-      !swo     ELSEIF(ICNVG==1) THEN
-      !swo                                     CALL WARNING_MESSAGE(OUTPUT=SWODAT%IOUT,MSG=                                                                                             &
-      !swo                                             'SWO WARNING: REACHED SWMXITER(3) ITERATION LIMIT BEFORE MODEL CONVERGED.'//NL//                                    &
-      !swo                                             'SWO DELIVERIES ASSUMED TO HAVE CONVERGED AFTER '//NUM2STR(SWODAT%SWMXITER(3))//' ITERATIONS [SWMXITER(3)].'//NL//  &
-      !swo                                             'THIS IS THE THIRD NUMBER AFTER THE KEYWORD "ITERATION_THRESHOLD" IN THE FMP-SWO BLOCK')
-      !swo     END IF
-      !swo END IF
+      IF(WBS%HAS_SWO) THEN
+          !
+          IF(KITER.LE.SWODAT%SWMXITER(3)) THEN 
+                                          CALL SWODAT%CONVERGENCE_CHECK(KPER, KSTP, KITER, STRM,SWFL%SRDLOC,ICNVG)
+          ELSEIF(ICNVG==1) THEN
+                                          CALL WARNING_MESSAGE(OUTPUT=SWODAT%IOUT,MSG=                                                                                             &
+                                                  'SWO WARNING: REACHED SWMXITER(3) ITERATION LIMIT BEFORE MODEL CONVERGED.'//NL//                                    &
+                                                  'SWO DELIVERIES ASSUMED TO HAVE CONVERGED AFTER '//NUM2STR(SWODAT%SWMXITER(3))//' ITERATIONS [SWMXITER(3)].'//NL//  &
+                                                  'THIS IS THE THIRD NUMBER AFTER THE KEYWORD "ITERATION_THRESHOLD" IN THE FMP-SWO BLOCK')
+          END IF
+      END IF
       !
   END SUBROUTINE
   !
   SUBROUTINE FMP_BD(KITER,KPER,KSTP,IGRID,NGRIDS,ILGR,LGRITER)
     USE GLOBAL,       ONLY: SPTIM, INPUT_CHECK,NCOL,NROW,NLAY
     USE GWFBASMODULE, ONLY: HAS_STARTDATE, DATE_SP, TOTIM
-    USE FMP_GLOBAL,   ONLY: FDIM, WBS, CLIMATE, FCROP, FMPOUT,SALT,SOIL,SWFL,FMPOPT,FMP_LGR_PNT,DRTFLOW
+    USE FMP_GLOBAL,   ONLY: FDIM, WBS, CLIMATE, FCROP, FMPOUT,SALT,SOIL,SWFL,FMPOPT,FMP_LGR_PNT,DRTFLOW, SWODAT
     USE GWFSFRMODULE, ONLY: SEG, STRM
     USE GWFMNW2MODULE,ONLY: SGWF2MNW2PNT
     USE GENERIC_OUTPUT_FILE_INSTRUCTION, ONLY: GENERIC_OUTPUT_FILE
@@ -2100,12 +2089,12 @@ MODULE FMP_MAIN_DRIVER
     !
     CALL SWFL%RUNOFF_LOST_CHECK()
     !
-    !swo IF(WBS%HAS_SWO) THEN
-    !swo    ! Call SWO_FINALIZE_TIMESTEP to (1) update year-to-date values based on final budget, 
-    !swo    !                               (2) write output
-    !swo    CALL SWODAT%SWO_FINALIZE_TIMESTEP(KPER,KSTP,KITER,STRM,SEG) 
-    !swo    !
-    !swo END IF
+    IF(WBS%HAS_SWO) THEN
+       ! Call SWO_FINALIZE_TIMESTEP to (1) update year-to-date values based on final budget, 
+       !                               (2) write output
+       CALL SWODAT%SWO_FINALIZE_TIMESTEP(KPER,KSTP,KITER,STRM,SEG) 
+       !
+    END IF
     !
     ! WRITE ANY ADDITIONAL OUTPUT-----------------------------------------------------------------------
     !
@@ -2375,7 +2364,6 @@ MODULE FMP_MAIN_DRIVER
   !
   !
   SUBROUTINE FMP4QCNVG()
-    !-----VERSION 1 09/21/09 FMP3QCNVG
     !     ******************************************************************
     !     ADJUST CLOSURE CRITERIA TO ALLOW CONVERGENCE OF MNW-PUMPING TO 
     !     FMP-PUMPING REQUIREMENT (EXCLUDE MNW-WELLS NOT LINKED TO FMP)
@@ -2488,7 +2476,6 @@ MODULE FMP_MAIN_DRIVER
   !
   !
   SUBROUTINE FMP3WELBD(KSTP,KPER,DELT,DATE,IGRID)
-    !-----VERSION 2 09/18/2009 FMP3WELBD
     !     ******************************************************************
     !     CALCUALTE AND PRINT FARM DEMAND AND SUPPLY BUDGET
     !     CALCULATE AND PRINT COMPACT OR DETAILED FARM BUDGET
@@ -2644,7 +2631,6 @@ MODULE FMP_MAIN_DRIVER
          NDOUT  = DZ
          SRDOUT = DZ
          RDOUT  = DZ  !Feature no longer used
-         QFOUT  = DZ
          TOTIN  = DZ
          TOTOUT = DZ
          DISC   = DZ
@@ -2652,8 +2638,23 @@ MODULE FMP_MAIN_DRIVER
          TF = WBS%DEMAND(NF)
          ND = NRD(1,NF)
          QR = WBS%Q_DEMAND(NF)
-         IF(QR.LT.FWELL(NF)%QMAX) QF=QR
-         IF(QR.GE.FWELL(NF)%QMAX) QF=FWELL(NF)%QMAX
+         !IF(QR < FWELL(NF)%QMAX) THEN
+         !        QF = QR
+         !ELSE
+         !        QF = FWELL(NF)%QMAX
+         !END IF
+         QF    = ZER
+         QFOUT = ZER
+         DO I=1, FWELL(NF)%DIM
+            IF(FWELL(NF)%ACT(I) ) THEN  
+                if(FWELL(NF)%Q(I) < ZER) then
+                      QF = QF + FWELL(NF)%Q(I)
+                else
+                      QFOUT = QFOUT + FWELL(NF)%Q(I)
+                end if
+            END IF
+         END DO
+         QF = ABS(QF)
          !
          IF(SWFL%HAS_SRD_WBS(NF).OR.(IGRID.GT.1.AND.FMPDAT(1)%SWFL%HAS_SRD_WBS(NF))) SRD=TF-ND-QR
          !
@@ -2679,11 +2680,6 @@ MODULE FMP_MAIN_DRIVER
          IF(SRD < DZ) THEN
                       SRDOUT=-SRD
                       SRD=DZ
-         ENDIF
-         !
-         IF(QF.LT.DZ) THEN
-           QFOUT=-QF
-           QF=DZ
          ENDIF
          !
          IF(SRD < NEARZERO_10) SRD=DZ
@@ -2776,11 +2772,6 @@ MODULE FMP_MAIN_DRIVER
                CALL UBDSV4(KSTP,KPER,TEXT,NAUX,FWLAUX,FMPOUT%WEL_CBC,NCOL,NROW,NLAY,NFW,WBS%IOUT,SNGL(DELT),PERTIM,TOTIM,IBOUND)
                !
            ENDIF
-           !
-           !8D-----CLEAR THE BUFFER.
-           DO CONCURRENT (IC=1:NCOL,IR=1:NROW,IL=1:NLAY) 
-                                                        BUFF(IC,IR,IL)=ZER  
-           END DO
            !  
            !8F-----LOOP THROUGH EACH FARM WELL CALCULATING FLOW AND PRINTING
            !
@@ -2818,28 +2809,44 @@ MODULE FMP_MAIN_DRIVER
               END DO
            ENDIF
            !
-           IF(IBD.EQ.1)  THEN             !Only include wells that are NOT linked to MNW2
-               DO CONCURRENT (NF=1:WBS%NFARM)
-               DO CONCURRENT (I=1:FWELL(NF)%DIM, FWELL(NF)%ACT(I) .AND. FWELL(NF)%MNWLOC(I) == Z )
-                   IL = FWELL(NF)%LRC(1,I) 
-                   IR = FWELL(NF)%LRC(2,I) 
-                   IC = FWELL(NF)%LRC(3,I)
-                   !
-                   BUFF(IC,IR,IL)=BUFF(IC,IR,IL)+SNGL(FWELL(NF)%Q(I))
-               END DO
-               END DO
-           END IF
-           !
            !8F7----SEE IF FLOW IS POSITIVE OR NEGATIVE.
-           DO CONCURRENT (NF=1:WBS%NFARM)
-           DO CONCURRENT (I=1:FWELL(NF)%DIM, FWELL(NF)%ACT(I) .AND. FWELL(NF)%MNWLOC(I) == Z ) !Only include wells that are NOT linked to MNW2
+           DO NF=1, WBS%NFARM
+           DO I =1, FWELL(NF)%DIM
+           IF(FWELL(NF)%ACT(I) .AND. FWELL(NF)%MNWLOC(I) == Z ) THEN !Only include wells that are NOT linked to MNW2
                IF ( FWELL(NF)%Q(I) < DZ ) THEN
                                                RATOUT = RATOUT - FWELL(NF)%Q(I)
                ELSE
                                                RATIN  = RATIN  + FWELL(NF)%Q(I)
                END IF
+           END IF
            END DO
            END DO
+           !
+           !8G-----CELL-BY-CELL FLOWS (PUMPING RATES) WILL BE SAVED AS A 3-D ARRAY IN A BINARY FILE, 
+           !       IF "COMPACT BUDGET" IS NOT SPECIFIED IN OUTPUT CONTROL (ANALOGOUS TO WEL6),
+           !       AND PRINT INFO TELLING THAT MULTI-AQUIFER WELL PUMPAGE IN 3-D ARRAY IS
+           !       ASSOCIATED WITH NODE OF TOP LAYER OF MULTI-LAYER MNW-WELL.
+           !
+           !
+           IF(IBD.EQ.1)  THEN
+               !
+               DO CONCURRENT (IC=1:NCOL,IR=1:NROW,IL=1:NLAY) 
+                                                            BUFF(IC,IR,IL)=ZER  
+               END DO
+               !
+               DO NF=1, WBS%NFARM
+               DO I =1, FWELL(NF)%DIM
+               IF(FWELL(NF)%ACT(I) .AND. FWELL(NF)%MNWLOC(I) == Z ) THEN
+                   IL = FWELL(NF)%LRC(1,I) 
+                   IR = FWELL(NF)%LRC(2,I) 
+                   IC = FWELL(NF)%LRC(3,I)
+                   !
+                   BUFF(IC,IR,IL)=BUFF(IC,IR,IL)+SNGL(FWELL(NF)%Q(I))
+               END IF
+               END DO
+               END DO
+               CALL UBUDSV(KSTP,KPER,TEXT,FMPOUT%WEL_CBC,BUFF,NCOL,NROW,NLAY,WBS%IOUT)
+           END IF
            !
            !8F10---CELL-BY-CELL FLOWS (PUMPING RATES) WILL BE SAVED AS A LIST IN A BINARY FILE, 
            !       IF "COMPACT BUDGET" IS SPECIFIED IN OUTPUT CONTROL. (ANALOGOUS TO WEL6)
@@ -2858,14 +2865,6 @@ MODULE FMP_MAIN_DRIVER
                END DO
                END DO
            END IF
-           !
-           !8G-----CELL-BY-CELL FLOWS (PUMPING RATES) WILL BE SAVED AS A 3-D ARRAY IN A BINARY FILE, 
-           !       IF "COMPACT BUDGET" IS NOT SPECIFIED IN OUTPUT CONTROL (ANALOGOUS TO WEL6),
-           !       AND PRINT INFO TELLING THAT MULTI-AQUIFER WELL PUMPAGE IN 3-D ARRAY IS
-           !       ASSOCIATED WITH NODE OF TOP LAYER OF MULTI-LAYER MNW-WELL.
-           !
-           IF(IBD.EQ.1)  CALL UBUDSV(KSTP,KPER,TEXT,FMPOUT%WEL_CBC,BUFF,NCOL,NROW,NLAY,WBS%IOUT)
-           !
            !
            !8H-----MOVE RATES, VOLUMES & LABELS INTO ARRAYS FOR PRINTING.
            RIN         =SNGL(RATIN)
@@ -3218,7 +3217,6 @@ MODULE FMP_MAIN_DRIVER
   !
   !
   SUBROUTINE FMP3ETPRT(KSTP,KPER,IGRID)                             !seb NEW PRINT OUTPUT SUBROUTINE
-    !-----VERSION 1 01/27/13 FMP3FNRBD
     !     ******************************************************************
     !     PRINT TOTAL EVAPORATION AND TRANSPIRATION FOR MODEL CELLS
     !     ******************************************************************

@@ -112,9 +112,6 @@ C-------SUBROUTINE GWF2UZF1AR
 C     ******************************************************************
 C     ALLOCATE ARRAY STORAGE FOR UNSATURATED FLOW, RECHARGE, AND ET
 C     READ AND CHECK VARIABLES THAT REMAIN CONSTANT
-!--------REVISED FOR MODFLOW-2005 RELEASE 1.9, FEBRUARY 6, 2012
-!rgn------REVISION NUMBER CHANGED TO BE CONSISTENT WITH NWT RELEASE
-!rgn------NEW VERSION NUMBER 1.2.0, 3/01/2020
 C     ******************************************************************
       USE GWFUZFMODULE
       USE GLOBAL,       ONLY: LIST_UNIT => IOUT
@@ -162,9 +159,7 @@ C     ------------------------------------------------------------------
       DATA aname(8)/'   INITIAL WATER CONTENT'/
       DATA aname(9)/' LAND SURFACE VERTICAL K'/
 C     ------------------------------------------------------------------
-      Version_uzf =
-     +'$Id: gwf2uzf1_NWT.f 4071 2014-07-01 23:30:24Z rniswon $'
-       text = 'UZF'
+      text = 'UZF'
       ALLOCATE(NUMCELLS, TOTCELLS, Iseepsupress, IPRCNT, Isavefinf)
       ALLOCATE(Isurfkreject, Ireadsurfk, Iseepreject,ETOFH_FLAG)
       Iseepsupress = 0   ! Iseepsupress = 1 means seepout not calculated
@@ -1118,8 +1113,6 @@ C     ******************************************************************
 C     ASSIGN SATURATED VERTICAL HYDRAULIC CONDUCTIVITY ARRAY 
 C     (VKS) IN UZF TO EQUAL VERTICAL HYDRAULIC CONDUCTIVITY IN LAYER-
 C     PROPERTY FLOW PACKAGE
-!--------REVISED FOR MODFLOW-2005 RELEASE 1.9, FEBRUARY 6, 2012
-C     VERSION 1.0.5:  April 5, 2012
 C     ******************************************************************
       USE GWFUZFMODULE, ONLY: VKS, IUZFBND, CLOSEZERO, NUZTOP,
      +                        IOUT, LAYNUM
@@ -5769,7 +5762,7 @@ C     ------------------------------------------------------------------
 C
 C65-----TOTAL WATER CONTENT AND FLUX OVER SPECIFIED DEPTH.
 !        IF ( il.GT.0 ) THEN
-          ZEROD9 = 1.0d0-9
+          ZEROD9 = 1.0d-9
           ghdif = celtop - H
           totalwc = 0.0
           iset = 1

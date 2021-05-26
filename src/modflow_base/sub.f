@@ -1,7 +1,3 @@
-cwschmid 03/21/11: This version is based on mf2005_1.06.01_fmp2.1 version and
-c                  minor changes between mf2005_1.6.02 and mf2005_1.8 (which was used by LGR) were added in
-crth 01/10/2013: This version was updated to MF2005 1.09.01
-cseb 04/04/2014: Added sub parameters and updated to MF 1.11
       MODULE GWFSUBMODULE
         USE GENERIC_OUTPUT_FILE_INSTRUCTION, ONLY: GENERIC_OUTPUT_FILE
         PRIVATE:: GENERIC_OUTPUT_FILE

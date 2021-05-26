@@ -10,9 +10,17 @@
 
 ------
 
-## 2.1.0-beta
+## 2.1.0
 
-yyyy-mm-dd
+2021-05-25
+
+* Surface Water Operations (`SWO`) incorporated to `FMP`
+    * Feature based on the following publication:
+        * Ferguson, I.M.., Llewellyn, D., Hanson, R.T., and Boyce S.E., 2016,  
+          User guide to the surface water operations process—An integrated approach to  
+          simulating large-scale surface water management in MODFLOW-based hydrologic models:  
+          Denver, Colo., Bureau of Reclamation Technical Memorandum no. 86-68210–2016-02, 96 p.
+    * Input is a `SURFACE_WATER_OPERATIONS` block in the FMP input file.
 
 - S Interpretive Language for Customizable User Input (`slang`)
     - Custom scripting langauge that can be used for dynmaic changes to MODFLOW-OWHM.

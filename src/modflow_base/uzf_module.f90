@@ -4,7 +4,6 @@
         !
         INTEGER,SAVE,POINTER:: IOUT
         !
-        CHARACTER(LEN=64):: Version_uzf
         REAL,                 PARAMETER:: CLOSEZERO=1.0E-15
         DOUBLE PRECISION,     PARAMETER:: NEARZERO=1.0D-30
         DOUBLE PRECISION,     PARAMETER:: ZEROD15=1.0D-15, ZEROD9=1.0D-09

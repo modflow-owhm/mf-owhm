@@ -4285,8 +4285,6 @@ c
 c_________________________________________________________________________________
 c
       SUBROUTINE SMNW2COND(IGRID,kstp,kper,kiter,ITFLAG)
-C     VERSION 20060704 KJH
-c
 c----- MNW1 by K.J. Halford
 c----- MNW2 by G.Z. Hornberger
 c
@@ -4625,13 +4623,13 @@ c              go to 567
               IF(KITER > 50) THEN   !Check is not needed anymore, but keeping in just in case LFK had a reason for it -- Added KITER>50
               IF(alpha2 < 0.01D0) then
                 PPFLAG = Z
-                MNW2(19,IW) = DZ
+                !MNW2(19,IW) = DZ - commented out to keep PP on for convertible layers
                 COND  = DZ
                 alpha = DZ
-                if(mnwprnt.gt.0) CALL SMNW2COND_WARN%ADD(
-     +               'hwell < (zbotm+0.01) in convertible layer; '//
-     +               'PPFLAG disabled, set to 0, for well '//
-     +               wellid(iw)//NL ) 
+!                if(mnwprnt.gt.0) CALL SMNW2COND_WARN%ADD(
+!     +               'hwell < (zbotm+0.01) in convertible layer; '//
+!     +               'PPFLAG disabled, set to 0, for well '//
+!     +               wellid(iw)//NL ) 
 !                WRITE(iout,85) wellid(iw),iw
 !   85 FORMAT(1X,' hwell <(zbotm+0.01) in convertible layer; PPFLAG reset
 !     1 to 0; WELLNAME = ',A20,'  iw = ',I4)
@@ -5006,12 +5004,6 @@ c
       DOUBLE PRECISION function cel2wel2(LOSSTYPE,Txx,Tyy,dx,dy,
      +                 rw,Rskin,Kskin,B,Cf,PLoss,thck,Q,WELLNAME,Skin,
      +                 iw,C1,R1,L1)
-C
-C     VERSION 20030327 KJH        -- Patched Hyd.K term in LPF solution
-C     VERSION 20090405 GZH        -- MNW2
-c
-c----- MNW1 by K.J. Halford
-c
 c     ******************************************************************
 c     Compute conductance term to define head loss from cell to wellbore
 c      Methodology is described in full by Peaceman (1983)
@@ -5233,7 +5225,7 @@ C-LFK     1                       NODTOT,MNW2,MNWNOD,SMALL,WELLID
       DOUBLE PRECISION:: qdes, qact, Qseep, seepchk
       DOUBLE PRECISION:: Hcell, csum, chsum,
      & hwell,hlim,hmax,hsim,bottom,qoff,qon,qsmall,
-     & qpot,cond,ratio
+     & qpot,cond,ratio, wel_bot
       DOUBLE PRECISION:: SGN
       INTEGER:: NNODES, INODE
       INTEGER:: QCUT, CapFlag2, QlimFlag
@@ -5449,6 +5441,7 @@ c
 C-LFK   Skip seepage face calculations for single-node well
 c--lfk
 c     IF (NNODES.EQ.1) GO TO 100
+      wel_bot = huge(wel_bot)
 c  Make 2 passes to find seepage faces
       do kSeep = 1, 2          
         csum  = DZ
@@ -5464,9 +5457,13 @@ c  Loop over nodes in well
             !
             Bottom = BOTM(ic,ir,LBOTM(il))
             Hcell  = Bottom
+            
 c  First time through, set the hwell_by_node to big; this will be used as a flag for 
 c  whether or not there is a seepage face in the cell
-            if( kSeep == ONE )  MNWNOD(15,INODE) = inf
+            if( kSeep == ONE )  then
+                         MNWNOD(15,INODE) = inf
+                         if( wel_bot > Bottom ) wel_bot = Bottom
+            end if
             !
             if(IBOUND(ic,ir,il) /= Z) then
               Hcell = HNEW(ic,ir,il)
@@ -5515,8 +5512,10 @@ c  End loop over nodes in well
 c---div0 ---  CSUM could go to verysmall if the entire well is dry
         if( csum > NEARZERO_20 ) then
           hwell = ( qact - Qseep + chsum ) / csum  ! (Desired pumping, Seepage Flow, Intraborehol flow)/CSUM
-        else
+        elseif(kSeep == ONE) then
           hwell = Hcell  ! hnew(ic,ir,il) -- Well is totally dry so set water level to bottom
+        else
+          hwell = wel_bot  ! Well is dry, use bottom elevation as well head.
         endif
 c   Because the q/hwell may now be different due to seepage flow, need to re-check constraints
 c   Test Hlim constraints, Hlim is assumed to be a Max/Min for Injection/Production wells
@@ -6562,12 +6561,6 @@ c_______________________________________________________________________________
 c
       DOUBLE PRECISION function cel2wel2SEG(lw,theta,omega,LOSSTYPE,Txx,
      &  Tyy,dx,dy,rw,Rskin,Kskin,B,Cf,PLoss,thck,Q,WELLNAME,Kz)
-c
-C
-C     VERSION 20030327 KJH        -- Patched Hyd.K term in LPF solution
-C     VERSION 20090405 GZH        -- MNW2
-c
-c----- MNW1 by K.J. Halford
 c
 c     ******************************************************************
 c     Compute conductance term to define head loss from cell to wellbore

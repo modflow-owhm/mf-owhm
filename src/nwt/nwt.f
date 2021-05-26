@@ -3,8 +3,6 @@
 !-------SUBROUTINE GWF2NWT1AR
 !
       SUBROUTINE GWF2NWT1AR(In, Mxiter, Iunitlak, ILGR, Igrid)
-!
-!------NEWTON SOLVER VERSION NUMBER 1.2.0, 3/01/2020
       USE, INTRINSIC:: IEEE_ARITHMETIC, ONLY: IEEE_VALUE, IEEE_QUIET_NAN
       USE CONSTANTS,                    ONLY:BLNK,BLN,NL,FALSE,TRUE,
      +                                       Z,ONE,TWO,DZ,UNO,inf,D100
@@ -12,7 +10,6 @@
       USE GLOBAL,     ONLY:NCOL,NROW,NLAY,ITRSS,LAYHDT,LAYHDS,LAYCBD,
      1                     NCNFBD,IBOUND,BUFF,BOTM,NBOTM,DELR,DELC,IOUT,
      2                     LBOTM,HNEW, IUNIT, GSE
-      !USE GLOBAL,     ONLY:LENUNI                                !seb added additional global var
       USE GWFBASMODULE,             ONLY: STOPER !HDRY,
       USE GWFNWTMODULE
       USE XMDMODULE,                ONLY: XMDPSV
@@ -58,7 +55,6 @@
       !
       CALL WRN%INIT()
       !
-      !CALL URDCOM(In, Iout, line)
       CALL READ_TO_DATA(LINE,IN,IOUT,IOUT)
       lloc = 1
       ALLOCATE (Tol, Ftol, RMS2, RMS1, Iierr,IFDPARAM,ICNVGFLG)

@@ -16,11 +16,28 @@ Boyce, S.E., Hanson, R.T., Ferguson, I., Schmid, W., Henson, W., Reimann, T., Me
 
 ------
 
-## 2.1.0-beta
+## 2.1.0 ⯬ MODFLOW Surface Water Operations (`SWO`)
 
-yyyy-mm-dd
+2021-05-25
+
+Initial release of MODFLOW Surface Water Operations (`SWO`) in MF-OWHM
+* Ferguson, I.M.., Llewellyn, D., Hanson, R.T., and Boyce S.E., 2016,  
+  User guide to the surface water operations process—An integrated approach to  
+  simulating large-scale surface water management in MODFLOW-based hydrologic models:  
+  Denver, Colo., Bureau of Reclamation Technical Memorandum no. 86-68210–2016-02, 96 p.
 
 ### Fixed
+
+* `UZF` incorrectly set `ZEROD9 = 1.0d0-9`, now it is `1.0d-9` (that is, it was set to -8 and now it is 10<sup>-9</sup>).
+    * This variable was used for near zero conditional checks.
+* `GMRES` Solver incorrectly set `Stop_toldum = 1.0d0-9`, now it is `1.0d-9`.
+    * `Stop_tol_gmres` is the tolerance for convergence of the iterative solver
+
+- `MNW2` reported the well head (`hwel`) as the cell head for wells that went were dry (that is when pumping that exceeded the well capacity).
+    - This affects the actual pumping if the well has partial penetration (PP) enabled and was in a convertible layer.  
+      Because it would apply the PP correction to what is a seepage face rather than a pumping well.
+
+* `CHOB` now works when using the `UPW` flow package and `NWT` solver.
 
 - `U2DREL` with "`BINARY`" input option now raises a warning instead of stopping with an error.
     - When the "`BINARY`"  option is found, MF-OWHM attempts to identify the binary input structure.  
@@ -31,6 +48,7 @@ yyyy-mm-dd
 
 * Added `slang/s_language.f90`
 * Added `slang/s_language_global_pull.f90`
+* Added `fmp/surface_water_operations_data.f90`
 - Added `bif_lib/types_and_containers/variable_pointer_list_interface.f90`  
     from Batteries Included Fortran (BiF) version 1.0.1 source code.  
     https://code.usgs.gov/fortran/bif/-/tags/1.0.1

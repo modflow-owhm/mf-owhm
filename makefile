@@ -325,6 +325,7 @@ main_src:= \
            $(fmp_src_dir)/crop_data.f90                     \
            $(fmp_src_dir)/salinity_data.f90                 \
            $(fmp_src_dir)/well_data.f90                     \
+           $(fmp_src_dir)/surface_water_operations_data.f90 \
            $(fmp_src_dir)/fmp_global.f90                    \
            $(mfb_src_dir)/parutl.f                          \
            $(mfb_src_dir)/rch.f                             \

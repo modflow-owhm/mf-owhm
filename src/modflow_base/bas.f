@@ -4313,9 +4313,10 @@ C2----OPEN LIST FILE
             CALL PRINT_MAIN_HEADER(IOUT)
             !
             CALL DATE%NOW()
-            WRITE(IOUT,'( 1x,2A//)')
+            WRITE(IOUT,'( A/, 4x,2A/,A,//)') REPEAT("∙",62),
      +                            'OneWater Simulation Initiated at  ',
-     +                             DATE%STR('  ')
+     +                             DATE%STR('  '),
+     +                             REPEAT("∙",62)
             !
             WRITE(IOUT,'(1x,A,/6x,A)')'LIST FILE: '//TRIM(FNAME),
      +                                  'UNIT: '//NUM2STR(IOUT)

@@ -153,6 +153,7 @@
 		<File RelativePath="..\..\src\fmp\salinity_data.f90"/>
 		<File RelativePath="..\..\src\fmp\soil_data.f90"/>
 		<File RelativePath="..\..\src\fmp\surface_water_data.f90"/>
+		<File RelativePath="..\..\src\fmp\surface_water_operations_data.f90"/>
 		<File RelativePath="..\..\src\fmp\wbs_data.f90"/>
 		<File RelativePath="..\..\src\fmp\well_data.f90"/></Filter>
 		<Filter Name="gmg_c_interface">

@@ -2,7 +2,7 @@
 !     ******************************************************************
 !     MAIN CODE FOR U.S. GEOLOGICAL SURVEY SIMULATION MODEL
 !
-!         MODFLOW - ONE-WATER Hydrologic Model (OWHM) Version 2
+!         MODFLOW - ONE-WATER Hydrologic Model (OWHM) Version 2.x
 !
 !     WITH THE FARM PROCESS (version 4), LGR2, NWT1, SWR1, RIP1, and SWI2
 !
@@ -29,7 +29,7 @@ SUBROUTINE PRINT_MAIN_HEADER(IU)  ! Set to 6 for cmd prompt or use output_unit f
   CHARACTER(:),ALLOCATABLE:: Revision
   !
   VERSION_OWHM='2.1'                                 ! "Psyduck After Advil" 
-  Revision    ='00          5/25/2021'
+  Revision    ='0           5/25/2021'
   VERSION_MF  ='1.12     02/03/2017'        
   VERSION_FMP ='4.1      05/25/2021'       
   VERSION_SWR ='1.04     09/15/2016'       
@@ -39,47 +39,51 @@ SUBROUTINE PRINT_MAIN_HEADER(IU)  ! Set to 6 for cmd prompt or use output_unit f
   VERSION_CFP ='1.09.57  09/12/2017'
   VERSION_SWO ='1.0      05/25/2021'
   !
-  IF(IU /= stdout) WRITE(IU,'(/A//)') OWHM_HEADER()     ! Only print to file and skip cmd prompt
+  IF(IU == stdout) WRITE (IU,'(A)') ''
   !
-  WRITE (IU,123) "v"//VERSION_OWHM//"."//Revision(:4), &
-                  VERSION_OWHM, &
-                  Revision,     &
-                  VERSION_MF,   &
-                  VERSION_FMP,  &
-                  VERSION_SWR,  &
-                  VERSION_SWI,  &
-                  VERSION_LGR,  &
-                  VERSION_NWT,  &
-                  VERSION_CFP
+  WRITE (IU,'(4A)') 'MODFLOW-OWHM v', VERSION_OWHM,".",Revision(:4)
   !
-  123 FORMAT( " MODFLOW-OWHM ", A///,24X,'MODFLOW' /,12X,                     &
-                   'ONE-WATER HYDROLOGIC-FLOW MODEL', //, 4X,                 &
-                   'U.S. GEOLOGICAL SURVEY MODULAR FINITE-DIFFERENCE ',/ 11x, &
-                   'CONJUNCTIVE USE SIMULATION PROGRAM',//,21X,               &
-                   'Version ',A /,/                                           &
-                   ' Release: ',A /,/                                     &
-                   ' Includes:', / 10x,                                       &
-                   'MODFLOW-2005 Version ',A,        / 10x,                   &
-                   'MODFLOW-FMP  Version ',A,        / 10x,                   &
-                   'MODFLOW-SWR  Version ',A,        / 10x,                   &
-                   'MODFLOW-SWI  Version ',A,        / 10x,                   &
-                   'MODFLOW-LGR  Version ',A,        / 10x,                   &
-                   'MODFLOW-NWT  Version ',A,        / 10x,                   &
-                   'MODFLOW-CFP  Version ',A / / )                            !TR: 2017 09 13 CFP
+  IF(IU /= stdout) WRITE(IU,'(/A/)') OWHM_HEADER()     ! Only print to file and skip cmd prompt
   !
-  WRITE (IU,'(A, /, 7(/, 3x, A))')                                                                   &
-                    'USGS Software Disclaimer:',                                                     &
-                    'No warranty, expressed or implied, is made by the USGS or the U.S. Government', &
-                    'as to the functionality of the software and related material nor shall the',    &
-                    'fact of release constitute any such warranty.',                                 &
-                    '',                                                                              &
-                    'The software is provided on the condition that neither the USGS nor',           &
-                    'the U.S. Government shall be held liable for any damages resulting from the',   &
-                    'authorized or unauthorized use of the software.'
+  WRITE (IU,'(/, A)')     '                        MODFLOW'
+  WRITE (IU,'(A)')        '            ONE-WATER HYDROLOGIC-FLOW MODEL'
   
-  WRITE (IU,'( /, /, 3x, A,  /, 6x, A, /, /)')                                                           &
-                    'Newer versions may be present at the official code and download repository:',   &
-                    'https://code.usgs.gov/modflow/mf-owhm'
+  WRITE (IU,'(/, A)')     '    U.S. Geological Survey Modular Finite-Difference'
+  WRITE (IU,'(A)')        '           Conjunctive Use Simulation Program'
+  
+  WRITE (IU,'(/, 2A)')    '                      Version ', VERSION_OWHM
+  
+  WRITE (IU,'(/, 2A)')    ' Release: ', Revision
+  IF(IU /= stdout) THEN
+     WRITE (IU,'(/, A)')  ' Includes:'
+     WRITE (IU,'(2A)')    '          MODFLOW-2005 Version ', VERSION_MF
+     WRITE (IU,'(2A)')    '          MODFLOW-FMP  Version ', VERSION_FMP
+     WRITE (IU,'(2A)')    '          MODFLOW-SWR  Version ', VERSION_SWR
+     WRITE (IU,'(2A)')    '          MODFLOW-SWI  Version ', VERSION_SWI
+     WRITE (IU,'(2A)')    '          MODFLOW-LGR  Version ', VERSION_LGR
+     WRITE (IU,'(2A)')    '          MODFLOW-NWT  Version ', VERSION_NWT
+     WRITE (IU,'(2A)')    '          MODFLOW-CFP  Version ', VERSION_CFP
+     WRITE (IU,'(2A)')    '                  SWO  Version ', VERSION_SWO
+  END IF
+  !
+  WRITE (IU,'(/, *(A, /))')                                                                                  &
+                    REPEAT('-',84),                                                                          &
+                    'USGS Software Disclaimer:                                                          |',  &                                                
+                    '                                                                                   |',  &                                                                         
+                    '   No warranty, expressed or implied, is made by the USGS or the U.S. Government   |',  &
+                    '   as to the functionality of the software and related material nor shall the      |',  &
+                    '   fact of release constitute any such warranty.                                   |',  &                            
+                    '                                                                                   |',  &                                                                         
+                    '   The software is provided on the condition that neither the USGS nor             |',  &      
+                    '   the U.S. Government shall be held liable for any damages resulting from the     |',  &
+                    '   authorized or unauthorized use of the software.                                 |',  &
+                    '                                                                                   |',  &                                                                         
+                    '   Newer versions may be present at the official code and download repository:     |',  &
+                    '      https://code.usgs.gov/modflow/mf-owhm                                        |',  &
+                    '                                                                                   |',  &                                                                         
+                    REPEAT('-',84)
+                    !
+  !IF(IU /= stdout) WRITE(IU,'(A,/)') ''
 END SUBROUTINE
 !
 !
@@ -953,18 +957,6 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
                    !
                    IF(IERR == ONE) CALL USTOP(' ')
                    !
-                   !-WSCHMID-INSERT (06/18/2009)
-                   !-------ALLOW CONVERGENCE CRITERIA FOR MNW WELL PUMPAGE LINKED TO FARM PROCESS
-                   !       (will be active in next version once net MNW rates are computed at the end of FMP-routine)
-                   !             IF (IUNIT(62) /= Z.AND.
-                   !     1        IUNIT(52) /= Z.AND.ICNVG == 1) THEN !.AND.MCLOSE == 1)THEN
-                   !              CALL FMP_LGR_PNT(IGRID) 
-                   !              CALL FMP3QCNVG(IUNIT(52),IUNIT(13),IUNIT(9),              !FMP3QCNVG CALL ADDED BY SCHMID / WSCHMID-03/23/11 - MNW1 changed unit#
-                   !     1                       IUNIT(10),IUNIT(42),IUNIT(63),IUNIT(70))
-                   !             ENDIF
-                   !-WSCHMID-END OF INSERT
-                   !
-                   !-WSCHMID-MODIFIED (07/21/08)
                    !-------ENSURE CONVERGENCE OF SWR - BASEFLOW CHANGES LESS THAN TOLF - JDH
                    IF(IUNIT(64) /= Z) THEN
                      CALL GWF2SWR7CV(KKITER,IGRID,ICNVG,MXITER)
@@ -1233,7 +1225,7 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
               IF(IUNIT(33) /= Z) CALL OBS2DRN7SE(IGRID)
               IF(IUNIT(34) /= Z) CALL OBS2RIV7SE(IGRID)
               IF(IUNIT(35) /= Z) CALL OBS2GHB7SE(IGRID)
-              IF(IUNIT(38) /= Z) CALL OBS2CHD7SE(KKPER,IGRID)
+              IF(IUNIT(38) /= Z) CALL OBS2CHD7SE(KKPER, IUNIT(62), IGRID)
               IF(IUNIT(41) /= Z) CALL OBS2DRT7SE(IGRID)
               IF(IUNIT(43) /= Z) THEN
                                    CALL GWF2HYD7BAS7SE(1,IGRID)

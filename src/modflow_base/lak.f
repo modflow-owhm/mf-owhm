@@ -19,12 +19,6 @@ C     Previous change:  ERB  13 Sep 2002    9:22 am
 C
 C
       SUBROUTINE GWF2LAK7AR(IN,IUNITSFR,IUNITGWT,IUNITUZF,NSOL,IGRID)
-C
-C------OLD USGS VERSION 7.1; JUNE 2006 GWF2LAK7AR; 
-C------UPDATED FOR MF-2005, FEBRUARY 6, 2012  
-!rgn------REVISION NUMBER CHANGED TO BE CONSISTENT WITH NWT RELEASE
-!rgn------NEW VERSION NUMBER FOR NWT 1.1.4, 4/01/2018
-!         MODFIED AND IMPROVED FOR USE WITH MODFLOW-OWHM
 C     ******************************************************************
 C     INITIALIZE POINTER VARIABLES USED BY SFR1 TO SUPPORT LAKE3 AND
 C     GAGE PACKAGES AND THE GWT PROCESS
@@ -45,26 +39,28 @@ C      ALLOCATE ARRAY STORAGE FOR LAKES
 C      ******************************************************************
 C
 C      ------------------------------------------------------------------
-C      SPECIFICATIONS:
-       CHARACTER (LEN=40):: CARD 
-       CHARACTER(768):: line
-       LOGICAL:: NOFREE
+C     SPECIFICATIONS:
+      CHARACTER (LEN=40):: CARD 
+      CHARACTER(768):: line
+      LOGICAL:: NOFREE
       NOFREE = IFREFM == Z
 C      ------------------------------------------------------------------
+      ALLOCATE(IOUT)
+      IOUT=LIST_OUT
 Crsr  Allocate lake variables used by SFR even if lakes not active so that
 C       argument lists are defined     
       ALLOCATE (NLAKES, NLAKESAR,THETA,LAKUNIT,NSFRLAK,NLKFLWTYP)       !EDM          
-      !swm: added allocation below - copied from NWT
+      ALLOCATE (READTEST)
       ALLOCATE(LKFLOWTYPE(6)) ! POSITION 1: STORAGE; 2: DELVOL; 3: PRECIP; 4: EVAP; 5: RUNOFF; 6: WITHDRAWL
 C
 
       
-      ALLOCATE(IOUT)
-      IOUT=LIST_OUT
       NLAKES = Z
       LAKUNIT = IN
       NLAKESAR = ONE
       THETA = DZ
+      READTEST  = Z
+      NLKFLWTYP = Z
       IF (IN /= Z) THEN
 Cdep added SURFDEPTH 3/3/2009
         ALLOCATE (ILKCB, NSSITR, SSCNCR, SURFDEPTH, RAMP)
@@ -450,11 +446,6 @@ C
       SUBROUTINE GWF2LAK7RP(IN,IUNITBCF,IUNITGWT,IUNITLPF,IUNITHUF,
      +                      IUNITSFR,IUNITUZF,IUNITUPW,KKPER,NSOL,
      +                      IOUTS,IGRID)
-C
-C------OLD USGS VERSION 7.1; JUNE 2006 GWF2LAK7RP
-C        REVISED FEBRUARY 6, 2012
-C------REVISION NUMBER CHANGED TO BE CONSISTENT WITH NWT RELEASE
-C------NEW VERSION NUMBER 1.1.4, 4/01/2018
 C     ******************************************************************
 C       READ INPUT DATA FOR THE LAKE PACKAGE.
 C     ------------------------------------------------------------------
@@ -585,6 +576,7 @@ C
 ! RGN 9/25/12 moved this to read lake bathymetry before stress period information.
       IF ( KKPER==1 .AND. IRDTAB.GT.0 ) THEN
         DO L1=1,NLAKES
+          READTEST = 1
           WRITE(IOUT,1399) L1
           iunitnum = LAKTAB(L1)
  1399     FORMAT(//1X,'STAGE/VOLUME RELATION FOR LAKE',I3//6X,'STAGE',
@@ -874,6 +866,7 @@ C
 !      IF(NLAY.EQ.1) GO TO 1331       !RGN 5/21/12
       DO 1330 L1=1,NLAKES
         WRITE(IOUT,1306) L1
+        READTEST = 1
 Cdep  revised print statement to include area
  1306 FORMAT(//1X,'STAGE/VOLUME RELATION FOR LAKE',I3//6X,'STAGE',
      1        8X,'VOLUME',8X,'AREA'/)
@@ -1036,7 +1029,6 @@ C--REINITIALIZE LKFLOWTYPE WITH EACH STRESS PERIOD
         LKFLOWTYPE(4)='NA'
         LKFLOWTYPE(5)='NA'
         LKFLOWTYPE(6)='NA'
-        NLKFLWTYP=0
       ENDIF
 C
       DO 300 LM=1,NLAKES
@@ -1142,37 +1134,35 @@ C        6 is type 0
  8900       CONTINUE
       ENDIF
 
- 900  IF (IUNITBCF.NE.0) THEN  ! rsr, moved if block from main
-        CALL SGWF2LAK7BCF7RPS(LWRT)
-      ELSE IF (IUNITLPF.NE.0) THEN
-        CALL SGWF2LAK7LPF7RPS(LWRT)
-      ELSE IF (IUNITHUF.NE.0) THEN
-        CALL SGWF2LAK7HUF7RPS(LWRT)
-      ELSE IF (IUNITUPW.NE.0) THEN
-        CALL SGWF2LAK7UPW1RPS(LWRT)
-      ELSE
-          WRITE (IOUT, *) 'LAK Package requires BCF, LPF, UPW, or HUF'
-        CALL USTOP(' ')
-      END IF
-      IF (IUNITSFR.NE.0) CALL SGWF2LAK7SFR7RPS()     
+
+ 900  IF ( READTEST .EQ. 1 ) THEN
+        IF (IUNITBCF /= 0) THEN  ! rsr, moved if block from main
+          CALL SGWF2LAK7BCF7RPS(LWRT)
+        ELSE IF (IUNITLPF /= 0) THEN
+          CALL SGWF2LAK7LPF7RPS(LWRT)
+        ELSE IF (IUNITHUF /= 0) THEN
+          CALL SGWF2LAK7HUF7RPS(LWRT)
+        ELSE IF (IUNITUPW /= 0) THEN
+          CALL SGWF2LAK7UPW1RPS(LWRT)
+        ELSE
+          CALL USTOP('LAK Package requires BCF, LPF, UPW, or HUF')
+        END IF
+        IF (IUNITSFR /= 0) CALL SGWF2LAK7SFR7RPS()     
+        IF(KKPER.EQ.1) THEN
+          DO I=1,NLAKES
+            STGOLD(I)  = STAGES(I)
+            VOLOLDD(I) = VOLTERP(STGOLD(I),I)
+            VOLOLD(I)  = VOLOLDD(I)
+            VOLINIT(I) = VOLOLDD(I)
+            STGNEW(I)  = STAGES(I)
+          END DO
+        END IF  
+      END IF        
 C
-C7------RETURN
-      RETURN
-      END
+      END SUBROUTINE
 C
       SUBROUTINE GWF2LAK7AD(KKPER,KKSTP,IUNITBCF,IUNITLPF,IUNITHUF,
      +                      IUNITSFR,IUNITUZF,IUNITUPW,IUNITGWT,IGRID)
-C
-C------OLD USGS VERSION 7.1; JUNE 2006 GWF2LAK7AD; REVISED FEBRUARY 6, 2012
-C------REVISION NUMBER CHANGED TO BE CONSISTENT WITH NWT RELEASE
-C------NEW VERSION NUMBER 1.1.4, 4/01/2018   
-C------NEW VERSION NUMBER 1.0.6:  December 31, 2012  R.T. Hanson Added SUBLINK capability to Lake Package
-C------NEW VERSION NUMBER 1.0.9:  July 1, 2014  
-C------NEW VERSION NUMBER 1.1.1, 7/28/2016  
-C------NEW VERSION NUMBER 1.1.2, 9/15/2016 
-C------NEW VERSION NUMBER 1.1.3, 8/01/2017  
-C------NEW VERSION NUMBER 1.2.0, 3/01/2020   
-C
 C     ******************************************************************
 C     ADVANCE TO NEXT TIME STEP FOR TRANSIENT LAKE SIMULATION, AND COPY
 C             INITIAL LAKE STAGES TO STGOLD FOR STEADY STATE.
@@ -1181,7 +1171,7 @@ C     SPECIFICATIONS:
 C     ------------------------------------------------------------------
       USE GWFLAKMODULE, ONLY: NLAKES, LKNODE, FLOB, STAGES,ILAKE,
      +                        STGNEW, STGOLD, VOLOLDD, VOLOLD, VOLINIT,
-     +                        BOTTMS, IDIV, STGOLD2, NDV
+     +                        BOTTMS, IDIV, STGOLD2, NDV, READTEST
       USE GWFSFRMODULE, ONLY: DLKSTAGE
       USE GLOBAL,       ONLY: IOUT,IBOUND,BOTM,LBOTM
       USE GLOBAL,       ONLY:SUBLNK
@@ -1200,17 +1190,11 @@ C1 --- COPY INITIAL LAKE STAGES TO STGOLD.
 ! RGN COMBINED IF AND ADDED VOLOLDD 4/17/09
 Cdep  initialized VOLINIT and VOLOLD to VOLOLDD 6/4/2009
       DO I=1,NLAKES
-        IF(KKPER.EQ.1.AND.KKSTP.EQ.1) THEN
-          STGOLD(I)=STAGES(I)
-          VOLOLDD(I)=VOLTERP(STGOLD(I),I)
-          VOLOLD(I) = VOLOLDD(I)
-          VOLINIT(I) = VOLOLDD(I)
-          STGNEW(I)=STAGES(I)
-        ELSE
-          STGOLD2(I)=STGNEW(I)
-          STGOLD(I)=STGNEW(I)
-          VOLOLDD(I)=VOLTERP(STGOLD(I),I)
-          VOLOLD(I)=VOLOLDD(I)
+        IF( READTEST == 1 ) THEN
+          STGOLD2(I) = STGNEW(I)
+          STGOLD(I)  = STGNEW(I)
+          VOLOLDD(I) = VOLTERP(STGOLD(I),I)
+          VOLOLD(I)  = VOLOLDD(I)
         END IF 
 ccrth Update BOTTMS if LPFLNK is activated from Subsidence linkage
         IF(ASSOCIATED(LPFLNK))THEN                                      !seb ADDED CHECK INCASE LPFLNK IS NOT ALLOCATED
@@ -1341,10 +1325,6 @@ C3------RETURN
       END
 C
       SUBROUTINE GWF2LAK7FM(KKITER,KKPER,KKSTP,IUNITSFR,IUNITUZF,IGRID)
-C
-C------OLD USGS VERSION 7.1; JUNE 2006 GWF2LAK7FM; 
-C------REVISION NUMBER CHANGED TO BE CONSISTENT WITH NWT RELEASE
-C------NEW VERSION NUMBER 1.1.4, 4/01/2018  
 C     ******************************************************************
 C     ADD LAKE TERMS TO RHS AND HCOF IF SEEPAGE OCCURS IN MODEL CELLS
 C     ******************************************************************
@@ -1839,10 +1819,6 @@ Cdep  202  FORMAT(i5,8(1X,E20.10)) !format used for debugging
 C
       SUBROUTINE GWF2LAK7BD(KSTP,KPER,IUNITGWT,IUNITGAGE,IUNITSFR,
      1                     IUNITUZF,NSOL,IGRID)
-C
-C------OLD USGS VERSION 7.1; JUNE 2006 GWF2LAK7BD; 
-C------REVISION NUMBER CHANGED TO BE CONSISTENT WITH NWT RELEASE
-C------NEW VERSION NUMBER 1.1.4, 4/01/2018
 C     ******************************************************************
 C     CALCULATE VOLUMETRIC BUDGET FOR LAKES
 C     ******************************************************************
@@ -4177,6 +4153,7 @@ C     ------------------------------------------------------------------
       INTEGER, INTENT(IN) :: IUNITLAK, IGRID
 C
       DEALLOCATE (GWFLAKDAT(IGRID)%NLAKES)
+      DEALLOCATE (GWFLAKDAT(IGRID)%READTEST)
       DEALLOCATE (GWFLAKDAT(IGRID)%NLAKESAR)
       DEALLOCATE (GWFLAKDAT(IGRID)%THETA)
       DEALLOCATE (GWFLAKDAT(IGRID)%STGNEW)
@@ -4188,6 +4165,7 @@ C
 C NULLIFY THE LOCAL POINTERS
       IF(IGRID.EQ.1)THEN
         NLAKES  =>NULL()
+        READTEST=>NULL()
         NLAKESAR=>NULL()
         THETA   =>NULL()
         STGNEW  =>NULL()
@@ -4461,6 +4439,7 @@ C
       NLKFLWTYP=>GWFLAKDAT(IGRID)%NLKFLWTYP
       NLAKES=>GWFLAKDAT(IGRID)%NLAKES
       NLAKESAR=>GWFLAKDAT(IGRID)%NLAKESAR
+      READTEST=>GWFLAKDAT(IGRID)%READTEST
       ILKCB=>GWFLAKDAT(IGRID)%ILKCB
       LAKTAB=>GWFLAKDAT(IGRID)%LAKTAB
       IRDTAB=>GWFLAKDAT(IGRID)%IRDTAB
@@ -4597,6 +4576,7 @@ C  Save LAK data for a grid for data shared with SFR
       USE GWFLAKMODULE
 C
       GWFLAKDAT(IGRID)%NLAKES=>NLAKES
+      GWFLAKDAT(IGRID)%READTEST=>READTEST
       GWFLAKDAT(IGRID)%NLAKESAR=>NLAKESAR
       GWFLAKDAT(IGRID)%THETA=>THETA
       GWFLAKDAT(IGRID)%STGOLD=>STGOLD
