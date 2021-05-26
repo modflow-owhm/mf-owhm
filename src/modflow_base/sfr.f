@@ -370,9 +370,6 @@ C     ALLOCATE ARRAY STORAGE FOR STREAMS
 C     INITIALIZE VARIABLES FOR SFR PACKAGES
 C     READ STREAM DATA THAT IS CONSTANT FOR ENTIRE SIMULATION:
 C     REACH DATA AND PARAMETER DEFINITIONS
-!--------REVISED FOR MODFLOW-2005 RELEASE 1.9, FEBRUARY 6, 2012
-!rgn------REVISION NUMBER CHANGED TO BE CONSISTENT WITH NWT RELEASE
-!rgn------NEW VERSION NUMBER 1.1.4, 4/01/2018
 C     ******************************************************************
 C     SPECIFICATIONS:
 C     ------------------------------------------------------------------
@@ -1457,7 +1454,7 @@ C        AND SPECIFIC YIELD WHEN UNSATURATED FLOW IS ACTIVE.
      +          3(1X, 0PE11.4), 2(1X, 1PE11.4),I8)
 C
 C13-----CHECK RANGE AND ORDER FOR SEGMENTS AND REACHES.
-        IF ( jseg <= Z .OR. jseg.GT.NSS ) THEN
+        IF ( jseg <= Z .OR. jseg > NSS ) THEN
               CALL ERR%ADD('THERE ARE SEGMENTS SPECIFIED THAT ARE '//
      +                     'LESS THAN ZERO OR GREATER THEN NSS'//
      +        '. ERROR ON LINE "'//SFR_PREV_LINE(IN)//'"'//BLN)
@@ -1996,8 +1993,6 @@ C-------SUBROUTINE SGWF2SFR7UHC
 C     ******************************************************************
 C     SETS UNSATURATED VERTICAL HYDRAULIC CONDUCTIVITY TO VERTICAL
 C     HYDRAULIC CONDUCTIVITY IN THE LAYER-PROPERTY FLOW PACKAGE.
-!--------REVISED FOR MODFLOW-2005 RELEASE 1.9, FEBRUARY 6, 2012
-C     NEW VERSION NUMBER 1.0.6:  December 5, 2012 modified by rth for OWHM
 C     ******************************************************************
       USE GWFSFRMODULE, ONLY: NSTRM, ISTRM, UHC
       USE GLOBAL,       ONLY: IOUT, IBOUND, LAYHDT
@@ -3176,7 +3171,6 @@ C-------SUBROUTINE GWF2SFR7AD
       SUBROUTINE GWF2SFR7AD(In, Iunitlak, kstp, kper, Igrid)
 C     *****************************************************************
 C     APPLY EFFECTS OF SUBSIDENCE ON SW_GW INTERACTION AND CONVEYANCE
-C     VERSION  7.2.00: July 7, 2010
 C     *****************************************************************
       USE GWFSFRMODULE
       USE GLOBAL,       ONLY: BOTM,LBOTM,SUBLNK
@@ -6352,7 +6346,6 @@ C-------SUBROUTINE GWF2SFR7DIVERS
       SUBROUTINE GWF2SFR7DIVERS(Iprior, Upflw, Dvrsn)
 C     ******************************************************************
 C     COMPUTES DIVERSIONS FROM AN UPSTREAM SEGMENT
-!--------REVISED FOR MODFLOW-2005 RELEASE 1.9, FEBRUARY 6, 2012
 C     ******************************************************************
       IMPLICIT NONE
 C     SPECIFICATIONS:

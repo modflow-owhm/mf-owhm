@@ -117,10 +117,10 @@ MODULE WBS_DATA_FMP_MODULE
       LOGICAL,                 DIMENSION(:), ALLOCATABLE:: INUSE
       !
       TYPE(FARMLOCATION),      DIMENSION(:), ALLOCATABLE:: FID
-      !!!TYPE (FARM_RELATIONSHIP),DIMENSION(:), ALLOCATABLE:: FARM, AUX_DEMAND
-      !!!TYPE (PROJ_RELATIONSHIP),DIMENSION(:), ALLOCATABLE:: PROJ
-      !!!TYPE (DIST_RELATIONSHIP),DIMENSION(:), ALLOCATABLE:: DIST
-      !!!TYPE (UNIT_RELATIONSHIP),DIMENSION(:), ALLOCATABLE:: UNIT
+      TYPE (FARM_RELATIONSHIP),DIMENSION(:), ALLOCATABLE:: FARM, AUX_DEMAND
+      TYPE (PROJ_RELATIONSHIP),DIMENSION(:), ALLOCATABLE:: PROJ
+      TYPE (DIST_RELATIONSHIP),DIMENSION(:), ALLOCATABLE:: DIST
+      TYPE (UNIT_RELATIONSHIP),DIMENSION(:), ALLOCATABLE:: UNIT
       TYPE (CROP_POINTER),DIMENSION(:),      ALLOCATABLE:: CROP
       TYPE (WBS_SUPPLY),  DIMENSION(:),      ALLOCATABLE:: SUPPLY
       TYPE(WATER_SOURCES):: H2OSOURCE
@@ -130,7 +130,7 @@ MODULE WBS_DATA_FMP_MODULE
       !
       INTEGER,                 DIMENSION(:),   ALLOCATABLE:: FALLOW_RANK, MAX_FALLOW_RANK
       INTEGER,                 DIMENSION(:,:), ALLOCATABLE:: FID_ARRAY
-      !INTEGER,                 DIMENSION(:,:), ALLOCATABLE:: HIERARCHY_ARRAY
+      INTEGER,                 DIMENSION(:,:), ALLOCATABLE:: HIERARCHY_ARRAY
       !
       DOUBLE PRECISION,        DIMENSION(:,:), ALLOCATABLE:: GSE
       DOUBLE PRECISION,        DIMENSION(:,:), ALLOCATABLE:: AREA
@@ -161,9 +161,9 @@ MODULE WBS_DATA_FMP_MODULE
       !DOUBLE PRECISION,        DIMENSION(:,:), ALLOCATABLE:: OFE
       !
       CHARACTER(20)           ,DIMENSION(:), ALLOCATABLE:: FARM_NAME
-      !!!CHARACTER(20)           ,DIMENSION(:), ALLOCATABLE:: PROJ_NAME, DIST_NAME, UNIT_NAME
+      CHARACTER(20)           ,DIMENSION(:), ALLOCATABLE:: PROJ_NAME, DIST_NAME, UNIT_NAME
       !
-      !TYPE(LIST_ARRAY_INPUT_INT):: HIERARCHY_TFR
+      TYPE(LIST_ARRAY_INPUT_INT):: HIERARCHY_TFR
       TYPE(LIST_ARRAY_INPUT_INT):: FID_TFR, FALLOW_RANK_TFR, DEFICIENCY, H2OSOURCE_TFR, EFF_IMPROVE_TFR!, FALLOW_TFR
       TYPE(LIST_ARRAY_INPUT    ):: EFF_TFR
       TYPE(LIST_ARRAY_INPUT    ):: ADRF_TFR
@@ -205,7 +205,7 @@ MODULE WBS_DATA_FMP_MODULE
       PROCEDURE, PASS(WBS):: NEXT => SETUP_NEXT_STRESS_PERIOD
       !
       PROCEDURE, PASS(WBS):: SETUP_FID_RC
-      !!!PROCEDURE, PASS(WBS):: SETUP_FARM_HIERARCHY_POINTERS
+      PROCEDURE, PASS(WBS):: SETUP_FARM_HIERARCHY_POINTERS
       PROCEDURE, PASS(WBS):: SETUP_FALLOW_FRACTION_ARRAY
       PROCEDURE, PASS(WBS):: SUM_WBS_DEMAND!(WBS)
       PROCEDURE, PASS(WBS):: SUM_WBS_PRECIP!(CLIM%PRECIP)
@@ -287,12 +287,12 @@ MODULE WBS_DATA_FMP_MODULE
     !
     ALLOCATE( WBS%SUPPLY      (WBS%NFARM) )
     ALLOCATE( WBS%CROP        (WBS%NFARM) )
-    !!!ALLOCATE( WBS%FARM        (WBS%NFARM) )
+    ALLOCATE( WBS%FARM        (WBS%NFARM) )
     ALLOCATE( WBS%FARM_NAME   (WBS%NFARM) )
     !
     ALLOCATE(WBS%CROP_DEMAND_ADDED(WBS%NFARM), SOURCE = DZ)
     !
-    !!!IF(WBS%NAUXDEM > Z) ALLOCATE(WBS%AUX_DEMAND(WBS%NAUXDEM))
+    IF(WBS%NAUXDEM > Z) ALLOCATE(WBS%AUX_DEMAND(WBS%NAUXDEM))
     !
     ALLOCATE(WBS%FID_ARRAY        (FDIM%NCOL,FDIM%NROW), SOURCE = NINER )
     ALLOCATE(WBS%FNRCH            (FDIM%NCOL,FDIM%NROW) , &
@@ -310,25 +310,25 @@ MODULE WBS_DATA_FMP_MODULE
     ALLOCATE(WBS%AREA(WBS%NCOL,WBS%NROW))
     WBS%AREA = DIS_AREA    !REDUNDANT FROM BAS BECAUSE THERE MAYBE A TIME TO HAVE FMP GRID BE INDEPENDENT OF MODEL GRID.  --WHEN MADE GRID INDEPENDENT, REMOVE AND CALCULATE AREA
     !
-    !!!DO CONCURRENT (I=ONE:WBS%NFARM)
-    !!!                             WBS%FARM(I)%UNIT = I
-    !!!                             WBS%FARM(I)%DIST = I
-    !!!                             WBS%FARM(I)%PROJ = I    
-    !!!END DO
-    !!!!
-    !!!IF(WBS%HAS_HIERARCHY) THEN
-    !!!                          ALLOCATE(WBS%HIERARCHY_ARRAY(THREE, FDIM%NFARM + FDIM%NAUXDEM), SOURCE=Z)
-    !!!                          ALLOCATE(WBS%PROJ(FDIM%NPROJ))
-    !!!                          ALLOCATE(WBS%DIST(FDIM%NDIST))
-    !!!                          ALLOCATE(WBS%UNIT(FDIM%NUNIT))
-    !!!                          !
-    !!!                          ALLOCATE(WBS%PROJ_NAME(FDIM%NPROJ))
-    !!!                          ALLOCATE(WBS%DIST_NAME(FDIM%NDIST))
-    !!!                          ALLOCATE(WBS%UNIT_NAME(FDIM%NUNIT))
-    !!!                          WBS%PROJ_NAME = BLNK
-    !!!                          WBS%DIST_NAME = BLNK
-    !!!                          WBS%UNIT_NAME = BLNK
-    !!!END IF
+    DO CONCURRENT (I=ONE:WBS%NFARM)
+                                 WBS%FARM(I)%UNIT = I
+                                 WBS%FARM(I)%DIST = I
+                                 WBS%FARM(I)%PROJ = I    
+    END DO
+    !
+    IF(WBS%HAS_HIERARCHY) THEN
+                              ALLOCATE(WBS%HIERARCHY_ARRAY(THREE, FDIM%NFARM + FDIM%NAUXDEM), SOURCE=Z)
+                              ALLOCATE(WBS%PROJ(FDIM%NPROJ))
+                              ALLOCATE(WBS%DIST(FDIM%NDIST))
+                              ALLOCATE(WBS%UNIT(FDIM%NUNIT))
+                              !
+                              ALLOCATE(WBS%PROJ_NAME(FDIM%NPROJ))
+                              ALLOCATE(WBS%DIST_NAME(FDIM%NDIST))
+                              ALLOCATE(WBS%UNIT_NAME(FDIM%NUNIT))
+                              WBS%PROJ_NAME = BLNK
+                              WBS%DIST_NAME = BLNK
+                              WBS%UNIT_NAME = BLNK
+    END IF
     ! 
     DO CONCURRENT(I=ONE:WBS%NFARM); WBS%FARM_NAME(I) = 'FARM_'//NUM2STR(I,THREE,TRUE)
     END DO
@@ -419,39 +419,39 @@ MODULE WBS_DATA_FMP_MODULE
                         WRITE(BL%IOUT,'(A)') '   WATER_SOURCE (H2OSRC)                         KEYWORD FOUND. NOW LOADING STATIC/TRANSIENT KEYWORD AND LIST OF FARMS AND WHAT WATER SOURCES THEY HAVE TO PROVIDE WATER SUPPLIES.'
                         CALL WBS%H2OSOURCE_TFR%INIT('H2OSRC', LLOC, LINE, BL%IOUT, BL%IU, FDIM%NFARM, THREE, Z, Z, SCRATCH=BL%SCRATCH)  !, FDIM%NFARM, 'BYWBS', FDIM%NCROP, 'BYCROP'
       !
-      !CASE ("HIERARCHY")
-      !                  WRITE(BL%IOUT,'(A)') '   HIERARCHY                        KEYWORD FOUND. NOW LOADING STATIC/TRANSIENT KEYWORD AND FIRST LIST OF HIERARCHYS.'
-      !                  IF(.NOT. WBS%HAS_HIERARCHY) CALL STOP_ERROR(INFILE=BL%IU, OUTPUT=BL%IOUT,MSG='FOUND "HIERARCHY" KEYWORD, WHICH REQUIRES REQUIRES THAT "NPROJ", "NDIST", AND "NUNIT" BE SPECIFIED AND SET TO GREATER THAN ZERO IN THE GLOBAL DIMENSION BLOCK. PLEASE DOUBLE CHECK BLOCK SET UP.')
-      !                  CALL WBS%HIERARCHY_TFR%INIT('HIERARCHY', LLOC, LINE, BL%IOUT, BL%IU, FDIM%NFARM+FDIM%NAUXDEM, THREE, Z, Z, SCRATCH=BL%SCRATCH)  !, FDIM%NFARM, 'BYWBS', FDIM%NCROP, 'BYCROP'
+      CASE ("HIERARCHY")
+                        WRITE(BL%IOUT,'(A)') '   HIERARCHY                        KEYWORD FOUND. NOW LOADING STATIC/TRANSIENT KEYWORD AND FIRST LIST OF HIERARCHYS.'
+                        IF(.NOT. WBS%HAS_HIERARCHY) CALL STOP_ERROR(INFILE=BL%IU, OUTPUT=BL%IOUT,MSG='FOUND "HIERARCHY" KEYWORD, WHICH REQUIRES REQUIRES THAT "NPROJ", "NDIST", AND "NUNIT" BE SPECIFIED AND SET TO GREATER THAN ZERO IN THE GLOBAL DIMENSION BLOCK. PLEASE DOUBLE CHECK BLOCK SET UP.')
+                        CALL WBS%HIERARCHY_TFR%INIT('HIERARCHY', LLOC, LINE, BL%IOUT, BL%IU, FDIM%NFARM+FDIM%NAUXDEM, THREE, Z, Z, SCRATCH=BL%SCRATCH)  !, FDIM%NFARM, 'BYWBS', FDIM%NCROP, 'BYCROP'
       !
       CASE ("WBS_NAME","FARM_NAME", "NAME")
                         WRITE(BL%IOUT,'(A)') '   FARM_NAME                        KEYWORD FOUND. NOW LOADING WBS NAMES.'
                         IU = Z
                         CALL ULOAD(WBS%FARM_NAME, LLOC, LINE, BL%IOUT, BL%IU, IU, SCRATCH=BL%SCRATCH)
-      !!!CASE ("PROJ_NAME")
-      !!!                  WRITE(BL%IOUT,'(A)') '   PROJ_NAME                        KEYWORD FOUND. NOW LOADING PROJECT NAMES.'
-      !!!                  IF(WBS%HAS_HIERARCHY) THEN
-      !!!                      IU = Z
-      !!!                      CALL ULOAD(WBS%PROJ_NAME, LLOC, LINE, BL%IOUT, BL%IU, IU, SCRATCH=BL%SCRATCH)
-      !!!                  ELSE
-      !!!                      CALL STOP_ERROR(LINE, INFILE=BL%IU, OUTPUT=BL%IOUT, MSG='FOUND KEYWORD "PROJ_NAME", WHICH REQUIRES THAT "NPROJ", "NDIST", AND "NUNIT" BE SPECIFIED AND SET TO GREATER THAN ZERO IN THE GLOBAL DIMENSION BLOCK. PLEASE DOUBLE CHECK BLOCK SET UP.')
-      !!!                  END IF
-      !!!CASE ("DIST_NAME")
-      !!!                  WRITE(BL%IOUT,'(A)') '   DIST_NAME                        KEYWORD FOUND. NOW LOADING DSTRICT NAMES.'
-      !!!                  IF(WBS%HAS_HIERARCHY) THEN
-      !!!                      IU = Z
-      !!!                      CALL ULOAD(WBS%DIST_NAME, LLOC, LINE, BL%IOUT, BL%IU, IU, SCRATCH=BL%SCRATCH)
-      !!!                  ELSE
-      !!!                      CALL STOP_ERROR(LINE, INFILE=BL%IU, OUTPUT=BL%IOUT, MSG='FOUND KEYWORD "DIST_NAME", WHICH REQUIRES THAT "NPROJ", "NDIST", AND "NUNIT" BE SPECIFIED AND SET TO GREATER THAN ZERO IN THE GLOBAL DIMENSION BLOCK. PLEASE DOUBLE CHECK BLOCK SET UP.')
-      !!!                  END IF
-      !!!CASE ("UNIT_NAME")
-      !!!                  WRITE(BL%IOUT,'(A)') '   UNIT_NAME                        KEYWORD FOUND. NOW LOADING UNIT NAMES.'
-      !!!                  IF(WBS%HAS_HIERARCHY) THEN
-      !!!                      IU = Z
-      !!!                      CALL ULOAD(WBS%UNIT_NAME, LLOC, LINE, BL%IOUT, BL%IU, IU, SCRATCH=BL%SCRATCH)
-      !!!                  ELSE
-      !!!                      CALL STOP_ERROR(LINE, INFILE=BL%IU, OUTPUT=BL%IOUT, MSG='FOUND KEYWORD "UNIT_NAME", WHICH REQUIRES THAT "NPROJ", "NDIST", AND "NUNIT" BE SPECIFIED AND SET TO GREATER THAN ZERO IN THE GLOBAL DIMENSION BLOCK. PLEASE DOUBLE CHECK BLOCK SET UP.')
-      !!!                  END IF
+      CASE ("PROJ_NAME")
+                        WRITE(BL%IOUT,'(A)') '   PROJ_NAME                        KEYWORD FOUND. NOW LOADING PROJECT NAMES.'
+                        IF(WBS%HAS_HIERARCHY) THEN
+                            IU = Z
+                            CALL ULOAD(WBS%PROJ_NAME, LLOC, LINE, BL%IOUT, BL%IU, IU, SCRATCH=BL%SCRATCH)
+                        ELSE
+                            CALL STOP_ERROR(LINE, INFILE=BL%IU, OUTPUT=BL%IOUT, MSG='FOUND KEYWORD "PROJ_NAME", WHICH REQUIRES THAT "NPROJ", "NDIST", AND "NUNIT" BE SPECIFIED AND SET TO GREATER THAN ZERO IN THE GLOBAL DIMENSION BLOCK. PLEASE DOUBLE CHECK BLOCK SET UP.')
+                        END IF
+      CASE ("DIST_NAME")
+                        WRITE(BL%IOUT,'(A)') '   DIST_NAME                        KEYWORD FOUND. NOW LOADING DSTRICT NAMES.'
+                        IF(WBS%HAS_HIERARCHY) THEN
+                            IU = Z
+                            CALL ULOAD(WBS%DIST_NAME, LLOC, LINE, BL%IOUT, BL%IU, IU, SCRATCH=BL%SCRATCH)
+                        ELSE
+                            CALL STOP_ERROR(LINE, INFILE=BL%IU, OUTPUT=BL%IOUT, MSG='FOUND KEYWORD "DIST_NAME", WHICH REQUIRES THAT "NPROJ", "NDIST", AND "NUNIT" BE SPECIFIED AND SET TO GREATER THAN ZERO IN THE GLOBAL DIMENSION BLOCK. PLEASE DOUBLE CHECK BLOCK SET UP.')
+                        END IF
+      CASE ("UNIT_NAME")
+                        WRITE(BL%IOUT,'(A)') '   UNIT_NAME                        KEYWORD FOUND. NOW LOADING UNIT NAMES.'
+                        IF(WBS%HAS_HIERARCHY) THEN
+                            IU = Z
+                            CALL ULOAD(WBS%UNIT_NAME, LLOC, LINE, BL%IOUT, BL%IU, IU, SCRATCH=BL%SCRATCH)
+                        ELSE
+                            CALL STOP_ERROR(LINE, INFILE=BL%IU, OUTPUT=BL%IOUT, MSG='FOUND KEYWORD "UNIT_NAME", WHICH REQUIRES THAT "NPROJ", "NDIST", AND "NUNIT" BE SPECIFIED AND SET TO GREATER THAN ZERO IN THE GLOBAL DIMENSION BLOCK. PLEASE DOUBLE CHECK BLOCK SET UP.')
+                        END IF
       CASE DEFAULT
                         CALL WARN_MSG%ADD('FOUND UNKNOWN KEYWORD "'//LINE(ISTART:ISTOP)//'" ***IT WILL BE IGNORED***'//BLN)
       !
@@ -563,7 +563,7 @@ MODULE WBS_DATA_FMP_MODULE
                          CALL WBS%BARE_FRAC_RUNOFF%NEXT()
                          !CALL WBS%BARE_FRAC_PRECIP%NEXT()
                          CALL WBS%DEFICIENCY      %NEXT()
-                         !CALL WBS%HIERARCHY_TFR   %NEXT()
+                         CALL WBS%HIERARCHY_TFR   %NEXT()
                          CALL WBS%FALLOW_RANK_TFR %NEXT()
                          CALL WBS%H2OSOURCE_TFR   %NEXT()
                          CALL WBS%CROP_FLUX_TFR   %NEXT()
@@ -590,7 +590,7 @@ MODULE WBS_DATA_FMP_MODULE
         !
     END IF
     !
-    !!!IF(WBS%HAS_HIERARCHY .AND. (WBS%HIERARCHY_TFR%TRANSIENT .OR. UPDATE)) CALL WBS%SETUP_FARM_HIERARCHY_POINTERS() !TRANSIENT WILL NEVER BE TRUE IF NOT INUSE
+    IF(WBS%HAS_HIERARCHY .AND. (WBS%HIERARCHY_TFR%TRANSIENT .OR. UPDATE)) CALL WBS%SETUP_FARM_HIERARCHY_POINTERS() !TRANSIENT WILL NEVER BE TRUE IF NOT INUSE
     !
     IF(WBS%HAS_WATERSTACK .AND. (WBS%FALLOW_RANK_TFR%TRANSIENT .OR. UPDATE) ) THEN
           !
@@ -906,214 +906,214 @@ MODULE WBS_DATA_FMP_MODULE
     !
   END SUBROUTINE
   !
-  !!!SUBROUTINE SETUP_FARM_HIERARCHY_POINTERS(WBS)
-  !!!  CLASS(WBS_DATA),  INTENT(INOUT):: WBS
-  !!!  !
-  !!!  TYPE(INTEGER_LINKED_LIST):: DIST_LIST, UNIT_LIST, FARM_LIST, AUX_LIST
-  !!!  INTEGER:: I, J, P, D, U, NFARM, NAUX, TOT, AUX_STR
-  !!!  LOGICAL:: SORT
-  !!!  TYPE(WARNING_TYPE):: WARN_MSG
-  !!!  !
-  !!!  IF (WBS%HAS_HIERARCHY) THEN
-  !!!      !
-  !!!      NFARM= WBS%NFARM
-  !!!      NAUX = WBS%NAUXDEM 
-  !!!      AUX_STR = WBS%NFARM + ONE      
-  !!!      TOT  = NFARM + NAUX
-  !!!      !
-  !!!      IF( ANY(WBS%HIERARCHY_ARRAY .NE. WBS%HIERARCHY_TFR%ARRAY) ) THEN
-  !!!          !
-  !!!          CALL WARN_MSG%INIT()
-  !!!          !
-  !!!          DO CONCURRENT (I=ONE:TOT, ANY(WBS%HIERARCHY_TFR%ARRAY(:,I) == Z) .AND. ANY(WBS%HIERARCHY_TFR%ARRAY(:,I) .NE. Z))
-  !!!              IF(I <= WBS%NFARM) THEN
-  !!!                  CALL WARN_MSG%ADD('WBS     '//NUM2STR(I)//NL )
-  !!!              ELSE
-  !!!                  CALL WARN_MSG%ADD('AUX_DEM '//NUM2STR(I-WBS%NFARM)//NL)
-  !!!              END IF
-  !!!              WBS%HIERARCHY_TFR%ARRAY(:,I) = Z
-  !!!          END DO
-  !!!          !
-  !!!          CALL WARN_MSG%CHECK('FMP WBS BLOCK: VALUES IN THE HIERARCHY CONTAINED ZEROS AND NONZEROS FOR THE SAME WBS/AUXILIARY DEMAND.'//BLN//'SINCE THERE WAS A ZERO PROJECT, DISTRICT, OR UNIT SPECIFIED, THE REST ARE SET TO ZERO'//NL//'(EITHER ALL HIERARCHY RELATIONSHIPS MUST BE SPECIFIED GREATER THAN ZERO OR ALL SET TO ZERO).'//NL//'FOR PROGRAM TO CONTINUE THE FARMS/AUXILIARY DEMANDS WITH ZERO VALUES WILL BE SET TO 0 FOR ITS PROJECT, DISTRICT, AND UNIT.'//BLN//'THE FOLLOWING ARE THE FARMS/AUXILIARY DEMANDS THAT HAD THEIR HIERARCHY ZEROED OUT:', OUTPUT=WBS%IOUT, INLINE=TRUE, INIT=TRUE)
-  !!!          !
-  !!!          WBS%HIERARCHY_ARRAY = WBS%HIERARCHY_TFR%ARRAY
-  !!!          !
-  !!!          SORT = TRUE
-  !!!          !
-  !!!          !CHECK THAT PROJ, DIST, AND UNIT ARE UNIQUE
-  !!!          P=Z;U=Z;D=Z
-  !!!          DO CONCURRENT (U=ONE:WBS%NUNIT)
-  !!!             D=Z
-  !!!             DO CONCURRENT (I=ONE:TOT, WBS%HIERARCHY_ARRAY(ONE,I) == U)
-  !!!                 IF(D==Z) THEN
-  !!!                         D  =   WBS%HIERARCHY_ARRAY(TWO,I)
-  !!!                 ELSEIF (D .NE. WBS%HIERARCHY_ARRAY(TWO,I)) THEN
-  !!!                         CALL WARN_MSG%ADD('FMP UNIT '//NUM2STR(U)//' CAN ONLY BE ASSOCIATED WITH ONE DISTRICT AT ONE TIME. INSTEAD IT HAS BEEN SPECIFIED TO BE APART OF DISTRICT '//NUM2STR(D)//' AND DISTRICT '//NUM2STR(WBS%HIERARCHY_ARRAY(TWO,I))//NL )
-  !!!                 END IF
-  !!!             END DO
-  !!!          END DO
-  !!!          P=Z;U=Z;D=Z
-  !!!          !
-  !!!          DO CONCURRENT (D=ONE:WBS%NDIST)
-  !!!             P=Z
-  !!!             DO CONCURRENT (I=ONE:TOT, WBS%HIERARCHY_ARRAY(TWO,I) == D)
-  !!!                 IF(P==Z) THEN
-  !!!                         P  =   WBS%HIERARCHY_ARRAY(THREE,I)
-  !!!                 ELSEIF (P .NE. WBS%HIERARCHY_ARRAY(THREE,I)) THEN
-  !!!                         CALL WARN_MSG%ADD( 'FMP DISTRICT '//NUM2STR(D)//' CAN ONLY BE ASSOCIATED WITH ONE DISTRICT AT ONE TIME. INSTEAD IT HAS BEEN SPECIFIED TO BE APART OF DISTRICT '//NUM2STR(P)//' AND DISTRICT '//NUM2STR(WBS%HIERARCHY_ARRAY(THREE,I))//NL )
-  !!!                 END IF
-  !!!             END DO
-  !!!          END DO
-  !!!          !
-  !!!          CALL WARN_MSG%CHECK(HED='FMP HIERARCHY HAD FATAL ERRORS:'//NL, OUTPUT=WBS%IOUT, KILL=TRUE, TAIL=NL )
-  !!!          !
-  !!!          ! ASSINGLE EACH FARMS PROJ, DIST, UNIT
-  !!!          DO CONCURRENT (I=ONE:NFARM)
-  !!!                                       WBS%FARM(I)%UNIT = WBS%HIERARCHY_ARRAY(ONE,  I)
-  !!!                                       WBS%FARM(I)%DIST = WBS%HIERARCHY_ARRAY(TWO,  I)
-  !!!                                       WBS%FARM(I)%PROJ = WBS%HIERARCHY_ARRAY(THREE,I)    
-  !!!          END DO
-  !!!          !
-  !!!          IF( NAUX > Z) THEN
-  !!!             J = AUX_STR
-  !!!             DO I=ONE, NAUX
-  !!!                                          WBS%AUX_DEMAND(I)%UNIT = WBS%HIERARCHY_ARRAY(ONE,  J)
-  !!!                                          WBS%AUX_DEMAND(I)%DIST = WBS%HIERARCHY_ARRAY(TWO,  J)
-  !!!                                          WBS%AUX_DEMAND(I)%PROJ = WBS%HIERARCHY_ARRAY(THREE,J)    
-  !!!                                          J=J+1
-  !!!             END DO
-  !!!          END IF
-  !!!          !
-  !!!          !FIND ALL DIST, UNIT, AND FARM ASSOCIATED WITH PROJECT----------------------------------------------------------------
-  !!!          P=Z;U=Z;D=Z
-  !!!          DO P=ONE, WBS%NPROJ
-  !!!            CALL DIST_LIST%INIT()
-  !!!            CALL UNIT_LIST%INIT()
-  !!!            CALL FARM_LIST%INIT()
-  !!!            CALL AUX_LIST%INIT()
-  !!!            !
-  !!!            DO I=ONE, NFARM
-  !!!                IF ( WBS%HIERARCHY_ARRAY(THREE,I) == P )  THEN!FIND ROWS WITH PROJECT P
-  !!!                    CALL UNIT_LIST%ADD(WBS%HIERARCHY_ARRAY(ONE,I))
-  !!!                    CALL DIST_LIST%ADD(WBS%HIERARCHY_ARRAY(TWO,I))
-  !!!                    CALL FARM_LIST%ADD(I)
-  !!!                END IF
-  !!!            END DO
-  !!!            !
-  !!!            IF( NAUX > Z) THEN
-  !!!               J = AUX_STR
-  !!!               DO I=ONE, NAUX
-  !!!                   IF ( WBS%HIERARCHY_ARRAY(THREE,J) == P )  THEN!FIND ROWS WITH PROJECT P
-  !!!                              CALL UNIT_LIST%ADD(WBS%HIERARCHY_ARRAY(ONE,J))
-  !!!                              CALL DIST_LIST%ADD(WBS%HIERARCHY_ARRAY(TWO,J))
-  !!!                              CALL AUX_LIST%ADD(I)
-  !!!                              J=J+1
-  !!!                   END IF
-  !!!               END DO
-  !!!            END IF
-  !!!            !
-  !!!            CALL DIST_LIST%DROP_DUPLICATES()
-  !!!            CALL UNIT_LIST%DROP_DUPLICATES()
-  !!!            !CALL FARM_LIST%DROP_DUPLICATES()  --SHOULD NEVER BE A DUBLICATE FARM
-  !!!            !
-  !!!            WBS%PROJ(P)%NDIST=DIST_LIST%LEN()
-  !!!            WBS%PROJ(P)%NUNIT=UNIT_LIST%LEN()
-  !!!            WBS%PROJ(P)%NFARM=FARM_LIST%LEN()
-  !!!            WBS%PROJ(P)%NAUX =AUX_LIST %LEN()
-  !!!            !
-  !!!            CALL DIST_LIST%TOARRAY(WBS%PROJ(P)%DIST, SORT)
-  !!!            CALL UNIT_LIST%TOARRAY(WBS%PROJ(P)%UNIT, SORT)
-  !!!            CALL FARM_LIST%TOARRAY(WBS%PROJ(P)%FARM, SORT)
-  !!!            CALL AUX_LIST %TOARRAY(WBS%PROJ(P)%AUX,  SORT)
-  !!!          END DO
-  !!!          !
-  !!!          !FIND ALL UNIT, AND FARM ASSOCIATED WITH DIST----------------------------------------------------------------
-  !!!          P=Z;U=Z;D=Z
-  !!!          DO D=ONE, WBS%NDIST
-  !!!            CALL UNIT_LIST%INIT()
-  !!!            CALL FARM_LIST%INIT()
-  !!!            CALL AUX_LIST%INIT()
-  !!!            !
-  !!!            WBS%DIST(D)%PROJ = Z
-  !!!            DO I=ONE, NFARM
-  !!!                IF ( WBS%HIERARCHY_ARRAY(TWO,I) == D ) THEN !FIND ROWS WITH DISTRIC D
-  !!!                    CALL UNIT_LIST%ADD(WBS%HIERARCHY_ARRAY(ONE,I))
-  !!!                    CALL FARM_LIST%ADD(I)
-  !!!                    !
-  !!!                    IF(WBS%DIST(D)%PROJ == Z) WBS%DIST(D)%PROJ = WBS%HIERARCHY_ARRAY(THREE,I)
-  !!!                END IF
-  !!!            END DO
-  !!!            !
-  !!!            IF( NAUX > Z) THEN
-  !!!                J = AUX_STR
-  !!!                DO I=ONE, NAUX
-  !!!                 IF ( WBS%HIERARCHY_ARRAY(TWO,J) == D ) THEN !FIND ROWS WITH DISTRIC D
-  !!!                     CALL UNIT_LIST%ADD(WBS%HIERARCHY_ARRAY(ONE,J))
-  !!!                     CALL AUX_LIST%ADD(I)
-  !!!                     !
-  !!!                     IF(WBS%DIST(D)%PROJ == Z) WBS%DIST(D)%PROJ = WBS%HIERARCHY_ARRAY(THREE,J)
-  !!!                 END IF
-  !!!                 J=J+1
-  !!!                END DO
-  !!!            END IF
-  !!!            !
-  !!!            CALL UNIT_LIST%DROP_DUPLICATES()
-  !!!            !CALL FARM_LIST%DROP_DUPLICATES()  --SHOULD NEVER BE A DUBLICATE FARM
-  !!!            !
-  !!!            WBS%DIST(D)%NUNIT=UNIT_LIST%LEN()
-  !!!            WBS%DIST(D)%NFARM=FARM_LIST%LEN()
-  !!!            WBS%DIST(D)%NAUX = AUX_LIST%LEN()
-  !!!            !
-  !!!            CALL UNIT_LIST%TOARRAY(WBS%DIST(D)%UNIT, SORT)
-  !!!            CALL FARM_LIST%TOARRAY(WBS%DIST(D)%FARM, SORT)
-  !!!            CALL AUX_LIST %TOARRAY(WBS%DIST(D)%AUX,  SORT)
-  !!!          END DO
-  !!!          !
-  !!!          !FIND ALL FARM ASSOCIATED WITH UNIT----------------------------------------------------------------
-  !!!          P=Z;U=Z;D=Z
-  !!!          DO U=ONE, WBS%NUNIT
-  !!!            CALL FARM_LIST%INIT()
-  !!!            !
-  !!!            WBS%UNIT(U)%PROJ = Z
-  !!!            WBS%UNIT(U)%DIST = Z
-  !!!            DO I=ONE, WBS%NFARM
-  !!!                IF ( WBS%HIERARCHY_ARRAY(ONE,I) == U ) THEN !FIND ROWS WITH UNIT U
-  !!!                   CALL FARM_LIST%ADD(I)
-  !!!                   IF(WBS%UNIT(U)%DIST == Z) WBS%UNIT(U)%DIST = WBS%HIERARCHY_ARRAY(TWO,I)
-  !!!                   IF(WBS%UNIT(U)%PROJ == Z) WBS%UNIT(U)%PROJ = WBS%HIERARCHY_ARRAY(THREE,I)
-  !!!                END IF
-  !!!            END DO
-  !!!            !
-  !!!            IF( NAUX > Z) THEN
-  !!!              J = AUX_STR
-  !!!              DO I=ONE, NAUX
-  !!!                IF ( WBS%HIERARCHY_ARRAY(ONE,J) == U ) THEN !FIND ROWS WITH UNIT U
-  !!!                   CALL AUX_LIST%ADD(I)
-  !!!                   IF(WBS%UNIT(U)%DIST == Z) WBS%UNIT(U)%DIST = WBS%HIERARCHY_ARRAY(TWO,  J)
-  !!!                   IF(WBS%UNIT(U)%PROJ == Z) WBS%UNIT(U)%PROJ = WBS%HIERARCHY_ARRAY(THREE,J)
-  !!!                END IF  
-  !!!                J=J+1
-  !!!              END DO
-  !!!            END IF
-  !!!            !
-  !!!            !CALL FARM_LIST%DROP_DUPLICATES()  --SHOULD NEVER BE A DUBLICATE FARM
-  !!!            !
-  !!!            WBS%UNIT(U)%NFARM=FARM_LIST%LEN()
-  !!!            WBS%UNIT(U)%NAUX = AUX_LIST%LEN()
-  !!!            !
-  !!!            CALL FARM_LIST%TOARRAY(WBS%UNIT(U)%FARM, SORT)
-  !!!            CALL AUX_LIST %TOARRAY(WBS%UNIT(U)%AUX,  SORT)
-  !!!          END DO
-  !!!          !
-  !!!          CALL DIST_LIST%DESTROY()
-  !!!          CALL UNIT_LIST%DESTROY()
-  !!!          CALL FARM_LIST%DESTROY()
-  !!!          CALL AUX_LIST%DESTROY()
-  !!!          !
-  !!!      END IF
-  !!!      !
-  !!!  END IF
-  !!!END SUBROUTINE
+  SUBROUTINE SETUP_FARM_HIERARCHY_POINTERS(WBS)
+    CLASS(WBS_DATA),  INTENT(INOUT):: WBS
+    !
+    TYPE(INTEGER_LINKED_LIST):: DIST_LIST, UNIT_LIST, FARM_LIST, AUX_LIST
+    INTEGER:: I, J, P, D, U, NFARM, NAUX, TOT, AUX_STR
+    LOGICAL:: SORT
+    TYPE(WARNING_TYPE):: WARN_MSG
+    !
+    IF (WBS%HAS_HIERARCHY) THEN
+        !
+        NFARM= WBS%NFARM
+        NAUX = WBS%NAUXDEM 
+        AUX_STR = WBS%NFARM + ONE      
+        TOT  = NFARM + NAUX
+        !
+        IF( ANY(WBS%HIERARCHY_ARRAY .NE. WBS%HIERARCHY_TFR%ARRAY) ) THEN
+            !
+            CALL WARN_MSG%INIT()
+            !
+            DO CONCURRENT (I=ONE:TOT, ANY(WBS%HIERARCHY_TFR%ARRAY(:,I) == Z) .AND. ANY(WBS%HIERARCHY_TFR%ARRAY(:,I) .NE. Z))
+                IF(I <= WBS%NFARM) THEN
+                    CALL WARN_MSG%ADD('WBS     '//NUM2STR(I)//NL )
+                ELSE
+                    CALL WARN_MSG%ADD('AUX_DEM '//NUM2STR(I-WBS%NFARM)//NL)
+                END IF
+                WBS%HIERARCHY_TFR%ARRAY(:,I) = Z
+            END DO
+            !
+            CALL WARN_MSG%CHECK('FMP WBS BLOCK: VALUES IN THE HIERARCHY CONTAINED ZEROS AND NONZEROS FOR THE SAME WBS/AUXILIARY DEMAND.'//BLN//'SINCE THERE WAS A ZERO PROJECT, DISTRICT, OR UNIT SPECIFIED, THE REST ARE SET TO ZERO'//NL//'(EITHER ALL HIERARCHY RELATIONSHIPS MUST BE SPECIFIED GREATER THAN ZERO OR ALL SET TO ZERO).'//NL//'FOR PROGRAM TO CONTINUE THE FARMS/AUXILIARY DEMANDS WITH ZERO VALUES WILL BE SET TO 0 FOR ITS PROJECT, DISTRICT, AND UNIT.'//BLN//'THE FOLLOWING ARE THE FARMS/AUXILIARY DEMANDS THAT HAD THEIR HIERARCHY ZEROED OUT:', OUTPUT=WBS%IOUT, INLINE=TRUE, INIT=TRUE)
+            !
+            WBS%HIERARCHY_ARRAY = WBS%HIERARCHY_TFR%ARRAY
+            !
+            SORT = TRUE
+            !
+            !CHECK THAT PROJ, DIST, AND UNIT ARE UNIQUE
+            P=Z;U=Z;D=Z
+            DO CONCURRENT (U=ONE:WBS%NUNIT)
+               D=Z
+               DO CONCURRENT (I=ONE:TOT, WBS%HIERARCHY_ARRAY(ONE,I) == U)
+                   IF(D==Z) THEN
+                           D  =   WBS%HIERARCHY_ARRAY(TWO,I)
+                   ELSEIF (D .NE. WBS%HIERARCHY_ARRAY(TWO,I)) THEN
+                           CALL WARN_MSG%ADD('FMP UNIT '//NUM2STR(U)//' CAN ONLY BE ASSOCIATED WITH ONE DISTRICT AT ONE TIME. INSTEAD IT HAS BEEN SPECIFIED TO BE APART OF DISTRICT '//NUM2STR(D)//' AND DISTRICT '//NUM2STR(WBS%HIERARCHY_ARRAY(TWO,I))//NL )
+                   END IF
+               END DO
+            END DO
+            P=Z;U=Z;D=Z
+            !
+            DO CONCURRENT (D=ONE:WBS%NDIST)
+               P=Z
+               DO CONCURRENT (I=ONE:TOT, WBS%HIERARCHY_ARRAY(TWO,I) == D)
+                   IF(P==Z) THEN
+                           P  =   WBS%HIERARCHY_ARRAY(THREE,I)
+                   ELSEIF (P .NE. WBS%HIERARCHY_ARRAY(THREE,I)) THEN
+                           CALL WARN_MSG%ADD( 'FMP DISTRICT '//NUM2STR(D)//' CAN ONLY BE ASSOCIATED WITH ONE DISTRICT AT ONE TIME. INSTEAD IT HAS BEEN SPECIFIED TO BE APART OF DISTRICT '//NUM2STR(P)//' AND DISTRICT '//NUM2STR(WBS%HIERARCHY_ARRAY(THREE,I))//NL )
+                   END IF
+               END DO
+            END DO
+            !
+            CALL WARN_MSG%CHECK(HED='FMP HIERARCHY HAD FATAL ERRORS:'//NL, OUTPUT=WBS%IOUT, KILL=TRUE, TAIL=NL )
+            !
+            ! ASSINGLE EACH FARMS PROJ, DIST, UNIT
+            DO CONCURRENT (I=ONE:NFARM)
+                                         WBS%FARM(I)%UNIT = WBS%HIERARCHY_ARRAY(ONE,  I)
+                                         WBS%FARM(I)%DIST = WBS%HIERARCHY_ARRAY(TWO,  I)
+                                         WBS%FARM(I)%PROJ = WBS%HIERARCHY_ARRAY(THREE,I)    
+            END DO
+            !
+            IF( NAUX > Z) THEN
+               J = AUX_STR
+               DO I=ONE, NAUX
+                                            WBS%AUX_DEMAND(I)%UNIT = WBS%HIERARCHY_ARRAY(ONE,  J)
+                                            WBS%AUX_DEMAND(I)%DIST = WBS%HIERARCHY_ARRAY(TWO,  J)
+                                            WBS%AUX_DEMAND(I)%PROJ = WBS%HIERARCHY_ARRAY(THREE,J)    
+                                            J=J+1
+               END DO
+            END IF
+            !
+            !FIND ALL DIST, UNIT, AND FARM ASSOCIATED WITH PROJECT----------------------------------------------------------------
+            P=Z;U=Z;D=Z
+            DO P=ONE, WBS%NPROJ
+              CALL DIST_LIST%INIT()
+              CALL UNIT_LIST%INIT()
+              CALL FARM_LIST%INIT()
+              CALL AUX_LIST%INIT()
+              !
+              DO I=ONE, NFARM
+                  IF ( WBS%HIERARCHY_ARRAY(THREE,I) == P )  THEN!FIND ROWS WITH PROJECT P
+                      CALL UNIT_LIST%ADD(WBS%HIERARCHY_ARRAY(ONE,I))
+                      CALL DIST_LIST%ADD(WBS%HIERARCHY_ARRAY(TWO,I))
+                      CALL FARM_LIST%ADD(I)
+                  END IF
+              END DO
+              !
+              IF( NAUX > Z) THEN
+                 J = AUX_STR
+                 DO I=ONE, NAUX
+                     IF ( WBS%HIERARCHY_ARRAY(THREE,J) == P )  THEN!FIND ROWS WITH PROJECT P
+                                CALL UNIT_LIST%ADD(WBS%HIERARCHY_ARRAY(ONE,J))
+                                CALL DIST_LIST%ADD(WBS%HIERARCHY_ARRAY(TWO,J))
+                                CALL AUX_LIST%ADD(I)
+                                J=J+1
+                     END IF
+                 END DO
+              END IF
+              !
+              CALL DIST_LIST%DROP_DUPLICATES()
+              CALL UNIT_LIST%DROP_DUPLICATES()
+              !CALL FARM_LIST%DROP_DUPLICATES()  --SHOULD NEVER BE A DUBLICATE FARM
+              !
+              WBS%PROJ(P)%NDIST=DIST_LIST%LEN()
+              WBS%PROJ(P)%NUNIT=UNIT_LIST%LEN()
+              WBS%PROJ(P)%NFARM=FARM_LIST%LEN()
+              WBS%PROJ(P)%NAUX =AUX_LIST %LEN()
+              !
+              CALL DIST_LIST%TOARRAY(WBS%PROJ(P)%DIST, SORT)
+              CALL UNIT_LIST%TOARRAY(WBS%PROJ(P)%UNIT, SORT)
+              CALL FARM_LIST%TOARRAY(WBS%PROJ(P)%FARM, SORT)
+              CALL AUX_LIST %TOARRAY(WBS%PROJ(P)%AUX,  SORT)
+            END DO
+            !
+            !FIND ALL UNIT, AND FARM ASSOCIATED WITH DIST----------------------------------------------------------------
+            P=Z;U=Z;D=Z
+            DO D=ONE, WBS%NDIST
+              CALL UNIT_LIST%INIT()
+              CALL FARM_LIST%INIT()
+              CALL AUX_LIST%INIT()
+              !
+              WBS%DIST(D)%PROJ = Z
+              DO I=ONE, NFARM
+                  IF ( WBS%HIERARCHY_ARRAY(TWO,I) == D ) THEN !FIND ROWS WITH DISTRIC D
+                      CALL UNIT_LIST%ADD(WBS%HIERARCHY_ARRAY(ONE,I))
+                      CALL FARM_LIST%ADD(I)
+                      !
+                      IF(WBS%DIST(D)%PROJ == Z) WBS%DIST(D)%PROJ = WBS%HIERARCHY_ARRAY(THREE,I)
+                  END IF
+              END DO
+              !
+              IF( NAUX > Z) THEN
+                  J = AUX_STR
+                  DO I=ONE, NAUX
+                   IF ( WBS%HIERARCHY_ARRAY(TWO,J) == D ) THEN !FIND ROWS WITH DISTRIC D
+                       CALL UNIT_LIST%ADD(WBS%HIERARCHY_ARRAY(ONE,J))
+                       CALL AUX_LIST%ADD(I)
+                       !
+                       IF(WBS%DIST(D)%PROJ == Z) WBS%DIST(D)%PROJ = WBS%HIERARCHY_ARRAY(THREE,J)
+                   END IF
+                   J=J+1
+                  END DO
+              END IF
+              !
+              CALL UNIT_LIST%DROP_DUPLICATES()
+              !CALL FARM_LIST%DROP_DUPLICATES()  --SHOULD NEVER BE A DUBLICATE FARM
+              !
+              WBS%DIST(D)%NUNIT=UNIT_LIST%LEN()
+              WBS%DIST(D)%NFARM=FARM_LIST%LEN()
+              WBS%DIST(D)%NAUX = AUX_LIST%LEN()
+              !
+              CALL UNIT_LIST%TOARRAY(WBS%DIST(D)%UNIT, SORT)
+              CALL FARM_LIST%TOARRAY(WBS%DIST(D)%FARM, SORT)
+              CALL AUX_LIST %TOARRAY(WBS%DIST(D)%AUX,  SORT)
+            END DO
+            !
+            !FIND ALL FARM ASSOCIATED WITH UNIT----------------------------------------------------------------
+            P=Z;U=Z;D=Z
+            DO U=ONE, WBS%NUNIT
+              CALL FARM_LIST%INIT()
+              !
+              WBS%UNIT(U)%PROJ = Z
+              WBS%UNIT(U)%DIST = Z
+              DO I=ONE, WBS%NFARM
+                  IF ( WBS%HIERARCHY_ARRAY(ONE,I) == U ) THEN !FIND ROWS WITH UNIT U
+                     CALL FARM_LIST%ADD(I)
+                     IF(WBS%UNIT(U)%DIST == Z) WBS%UNIT(U)%DIST = WBS%HIERARCHY_ARRAY(TWO,I)
+                     IF(WBS%UNIT(U)%PROJ == Z) WBS%UNIT(U)%PROJ = WBS%HIERARCHY_ARRAY(THREE,I)
+                  END IF
+              END DO
+              !
+              IF( NAUX > Z) THEN
+                J = AUX_STR
+                DO I=ONE, NAUX
+                  IF ( WBS%HIERARCHY_ARRAY(ONE,J) == U ) THEN !FIND ROWS WITH UNIT U
+                     CALL AUX_LIST%ADD(I)
+                     IF(WBS%UNIT(U)%DIST == Z) WBS%UNIT(U)%DIST = WBS%HIERARCHY_ARRAY(TWO,  J)
+                     IF(WBS%UNIT(U)%PROJ == Z) WBS%UNIT(U)%PROJ = WBS%HIERARCHY_ARRAY(THREE,J)
+                  END IF  
+                  J=J+1
+                END DO
+              END IF
+              !
+              !CALL FARM_LIST%DROP_DUPLICATES()  --SHOULD NEVER BE A DUBLICATE FARM
+              !
+              WBS%UNIT(U)%NFARM=FARM_LIST%LEN()
+              WBS%UNIT(U)%NAUX = AUX_LIST%LEN()
+              !
+              CALL FARM_LIST%TOARRAY(WBS%UNIT(U)%FARM, SORT)
+              CALL AUX_LIST %TOARRAY(WBS%UNIT(U)%AUX,  SORT)
+            END DO
+            !
+            CALL DIST_LIST%DESTROY()
+            CALL UNIT_LIST%DESTROY()
+            CALL FARM_LIST%DESTROY()
+            CALL AUX_LIST%DESTROY()
+            !
+        END IF
+        !
+    END IF
+  END SUBROUTINE
   !
   SUBROUTINE SETUP_FALLOW_FRACTION_ARRAY(WBS, WBS_BARE_FRAC, BFR, UPDATE)
     CLASS(WBS_DATA),                             INTENT(IN   ):: WBS

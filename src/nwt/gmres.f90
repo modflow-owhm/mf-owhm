@@ -49,9 +49,6 @@
       END MODULE GMRESMODULE
 !C------------------------------------------------------------------
       SUBROUTINE GMRES7AR(IN,IGRID)
-!rgn------REVISION NUMBER CHANGED TO BE CONSISTENT WITH NWT RELEASE
-!rgn------NEW VERSION NUMBER 1.1.2, 9/15/2016
-
       USE GLOBAL, ONLY: IOUT,STRT,IBOUND
       USE GMRESMODULE
       USE GWFNWTMODULE,      ONLY: IPRNWT,NUMACTIVE,IA,JA,NJA,IFDPARAM
@@ -113,7 +110,7 @@
 !         This is the residual of the linear equations scaled by
 !         the norm of the rhs.
 !         Usually 10^-8 to 10^-12 works ok.
-      Stop_toldum = 1.0D0-10
+      Stop_toldum = 1.0D-10
 ! Idir  - index for reordering direction permutation [1-6]
 !        the actual order is not needed to be known by the
 !        user. But the convergence rate will depend on the

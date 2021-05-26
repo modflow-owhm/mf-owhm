@@ -27,13 +27,13 @@ MODULE FMP_GLOBAL
   USE     ALLOTMENT_DATA_FMP_MODULE, ONLY:     ALLOTMENT_DATA
   USE SURFACE_WATER_DATA_FMP_MODULE, ONLY: SURFACE_WATER_DATA
   USE SFR_INPUT_DATA_TYPES,             ONLY: FMP_FLOW_REMOVE_SFR
-  !USE SWO_DATA_FMP_INTERFACE,           ONLY:       SWO_DATA
+  USE           SWO_DATA_FMP_MODULE, ONLY:       SWO_DATA
   !    
   IMPLICIT NONE
   !
   PRIVATE:: DRTFLOWLINK
   PRIVATE:: FMP_DIMENSION, WBS_DATA, FARM_WELL_DATA, SOIL_DATA
-  PRIVATE:: CROP_DATA, CLIMATE_DATA, ALLOTMENT_DATA!, SWO_DATA
+  PRIVATE:: CROP_DATA, CLIMATE_DATA, ALLOTMENT_DATA, SWO_DATA
   !
   SAVE
   !
@@ -46,7 +46,7 @@ MODULE FMP_GLOBAL
   TYPE(CLIMATE_DATA),                             POINTER:: CLIMATE
   TYPE(ALLOTMENT_DATA),                           POINTER:: ALLOT
   TYPE(CROP_DATA),                                POINTER:: FCROP
-  !TYPE(SWO_DATA),                                 POINTER:: SWODAT
+  TYPE(SWO_DATA),                                 POINTER:: SWODAT
   TYPE(OPTIONS_DATA),                             POINTER:: FMPOPT
   TYPE(OUTPUT_DATA),                              POINTER:: FMPOUT
   !
@@ -76,7 +76,7 @@ MODULE FMP_GLOBAL
       TYPE(CLIMATE_DATA),                    POINTER:: CLIMATE
       TYPE(ALLOTMENT_DATA),                  POINTER:: ALLOT
       TYPE(CROP_DATA),                       POINTER:: FCROP
-      !TYPE(SWO_DATA),                        POINTER:: SWODAT
+      TYPE(SWO_DATA),                        POINTER:: SWODAT
       TYPE(OPTIONS_DATA),                    POINTER:: FMPOPT
       TYPE(OUTPUT_DATA),                     POINTER:: FMPOUT
       !
@@ -116,7 +116,7 @@ MODULE FMP_GLOBAL
     CLIMATE  => FMPDAT(IGRID)%CLIMATE
     ALLOT    => FMPDAT(IGRID)%ALLOT
     FCROP    => FMPDAT(IGRID)%FCROP
-    !SWODAT   => FMPDAT(IGRID)%SWODAT
+    SWODAT   => FMPDAT(IGRID)%SWODAT
     FMPOPT   => FMPDAT(IGRID)%FMPOPT
     FMPOUT   => FMPDAT(IGRID)%FMPOUT
     !        
@@ -157,7 +157,7 @@ MODULE FMP_GLOBAL
     FMPDAT(IGRID)%CLIMATE  => CLIMATE
     FMPDAT(IGRID)%ALLOT    => ALLOT
     FMPDAT(IGRID)%FCROP    => FCROP
-    !FMPDAT(IGRID)%SWODAT   => SWODAT
+    FMPDAT(IGRID)%SWODAT   => SWODAT
     FMPDAT(IGRID)%FMPOPT   => FMPOPT
     FMPDAT(IGRID)%FMPOUT   => FMPOUT
     !        
@@ -254,10 +254,10 @@ MODULE FMP_GLOBAL
     DEALLOCATE(SALT)
     SALT=>NULL()
     !
-    !SWODAT=>FMPDAT(IGRID)%SWODAT
-    !FMPDAT(IGRID)%SWODAT=> NULL()
-    !DEALLOCATE(SWODAT)
-    !SWODAT=>NULL()
+    SWODAT=>FMPDAT(IGRID)%SWODAT
+    FMPDAT(IGRID)%SWODAT=> NULL()
+    DEALLOCATE(SWODAT)
+    SWODAT=>NULL()
     !
     FMPOPT=>FMPDAT(IGRID)%FMPOPT
     FMPDAT(IGRID)%FMPOPT=> NULL()
@@ -285,7 +285,7 @@ MODULE FMP_GLOBAL
                       CLIMATE            =>NULL()
                       ALLOT              =>NULL()
                       FCROP              =>NULL()
-                      !SWODAT             =>NULL()
+                      SWODAT             =>NULL()
                       FMPOPT             =>NULL()
                       FMPOUT             =>NULL()
                       ISTARTFL           =>NULL()

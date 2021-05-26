@@ -124,7 +124,8 @@
 		<File RelativePath="..\..\src\bif_lib\types_and_containers\IXJ_instruction.f90"/>
 		<File RelativePath="..\..\src\bif_lib\types_and_containers\linked_list_instruction.f90"/>
 		<File RelativePath="..\..\src\bif_lib\types_and_containers\lookup_table_instruction.f90"/>
-		<File RelativePath="..\..\src\bif_lib\types_and_containers\name_id_interface.f90"/></Filter>
+		<File RelativePath="..\..\src\bif_lib\types_and_containers\name_id_interface.f90"/>
+		<File RelativePath="..\..\src\bif_lib\types_and_containers\variable_pointer_list_interface.f90"/></Filter>
 		<Filter Name="util_misc">
 		<File RelativePath="..\..\src\bif_lib\util_misc\alloc_interface.f90"/>
 		<File RelativePath="..\..\src\bif_lib\util_misc\constants.f90"/>
@@ -152,6 +153,7 @@
 		<File RelativePath="..\..\src\fmp\salinity_data.f90"/>
 		<File RelativePath="..\..\src\fmp\soil_data.f90"/>
 		<File RelativePath="..\..\src\fmp\surface_water_data.f90"/>
+		<File RelativePath="..\..\src\fmp\surface_water_operations_data.f90"/>
 		<File RelativePath="..\..\src\fmp\wbs_data.f90"/>
 		<File RelativePath="..\..\src\fmp\well_data.f90"/></Filter>
 		<Filter Name="gmg_c_interface">
@@ -239,6 +241,9 @@
 		<File RelativePath="..\..\src\nwt\upw_module.f90"/>
 		<File RelativePath="..\..\src\nwt\xmd.f"/>
 		<File RelativePath="..\..\src\nwt\xmd_lib.f"/></Filter>
+		<Filter Name="slang">
+		<File RelativePath="..\..\src\slang\s_language.f90"/>
+		<File RelativePath="..\..\src\slang\s_language_global_pull.f90"/></Filter>
 		<Filter Name="z_icon">
 		<File RelativePath="..\..\icon\owhm_icon_win.rc"/></Filter>
 		<File RelativePath="..\..\src\main.f90"/>
