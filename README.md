@@ -2,8 +2,8 @@
 
 ![MF-OWHM_banner_v2b](img/MF-OWHM_banner_v2b.png)
 
-&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; **IPDS No.**&nbsp; `IP-129524`
-# Version 2.1.0
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; **IPDS No.**&nbsp; `NA`
+# Version 2.1.1a
 
 MODFLOW One-Water Hydrologic Flow Model (MF-OWHM) Conjunctive Use and Integrated Hydrologic Flow Modeling Software.
 
@@ -62,16 +62,22 @@ The difference between the two release types are:
    - `"status": "Production"` &nbsp; for a  *Production Release* and  
    - `"status": "Preliminary"` for a  *Preliminary Release*  
       &nbsp; 
-1. A *Production Release* is a *git tag* registered with the USGS Information Product Data System (`IPDS`).  
-   Any other commit is considered a *Preliminary Release*.
-   - All code updates and bug fixes start as a *Preliminary Release*;   
-     after the code commit is registered with `IPDS` it becomes a *Production Release*.
-   - Typically the *Production Release*'s are kept in the `release` branch and all other branches are  *Preliminary Release*'s.
+1. If the code version is registered in the USGS Information Product Data System (`IPDS`).  
+   -> A *Production Release* is registered in `IPDS` and includes a *git tag* with the message "production release".  
+   Any other commit (or *git tag*) is considered a *Preliminary Release*.
+    - All code changes, including bug fixes, start as a *Preliminary Release*;  
+      when the code version is registered with `IPDS` it becomes a *Production Release*.
+    - A *Production Release* and its associated *git tag* are stable and guaranteed to remain in the code.usgs.gov repository.
+    - A *Preliminary Release* is semi-stable and may be replaced by a newer *Preliminary* or *Production Release*.
+        - The source code is stable and remains in the `main` branch,  
+          but the `release` branch commit that contains compiled executables may be removed.
+        - That is, the `main` branch is stable and the `release` branch may drop intermediate-preliminary releases.
 
 &nbsp;
 
 > :warning: **Note that it is possible for a *Production Release* and *Preliminary Release* to have the same version number.**  
-> &emsp;&emsp;That is, they are the same release but contain a different disclaimer.
+> &emsp;&emsp;That is, they are the same release but contain a different disclaimer in the `main` branch (source branch).  
+> &emsp;&emsp;However, the *Production Release* supersedes a *Preliminary Release* in the `release` branch (executable branch) .
 
 > :warning: **Contact a developer if you need to convert the current *Preliminary Release* to a *Production Release*.**  
 > &emsp;&emsp;Some publication sources—particularly USGS Scientific Investigations Report (SIR)—can only cite a *Production Release*.
@@ -98,7 +104,7 @@ To obtain this repository via git run:
 
 And if you use Surface Water Operations (`SWO`)  in your project:
 
-> Boyce, S.E. and Ferguson, I.M., 2021, MODFLOW One-Water Hydrologic Flow Model (MF-OWHM) Conjunctive Use and Integrated Hydrologic Flow Modeling Software with Surface Water Operations, version 2.1.0: U.S. Geological Survey Software Release, https://doi.org/10.5066/2FP9C6F6C5
+> Boyce, S.E. and Ferguson, I.M., 2021, MODFLOW One-Water Hydrologic Flow Model (MF-OWHM) Conjunctive Use and Integrated Hydrologic Flow Modeling Software with Surface Water Operations, version 2.1.0: U.S. Geological Survey Software Release, https://doi.org/10.5066/P9P8I8GS
 
 ## Documentation Citation
 
