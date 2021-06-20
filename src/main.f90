@@ -29,19 +29,24 @@ SUBROUTINE PRINT_MAIN_HEADER(IU)  ! Set to 6 for cmd prompt or use output_unit f
   CHARACTER(:),ALLOCATABLE:: Revision
   !
   VERSION_OWHM='2.1'                                 ! "Psyduck After Advil" 
-  Revision    ='0           5/25/2021'
-  VERSION_MF  ='1.12     02/03/2017'        
-  VERSION_FMP ='4.1      05/25/2021'       
-  VERSION_SWR ='1.04     09/15/2016'       
-  VERSION_SWI ='2.0      07/22/2013'     
-  VERSION_LGR ='2.0      09/19/2013'      
-  VERSION_NWT ='1.2      03/01/2020'     
-  VERSION_CFP ='1.09.57  09/12/2017'
-  VERSION_SWO ='1.0      05/25/2021'
+  Revision    ='1a'
+  VERSION_MF  ='1.12'        
+  VERSION_FMP ='4.1'       
+  VERSION_SWR ='1.04'       
+  VERSION_SWI ='2.0'     
+  VERSION_LGR ='2.0'      
+  VERSION_NWT ='1.2'     
+  VERSION_CFP ='1.09.57'
+  VERSION_SWO ='1.0'
   !
-  IF(IU == stdout) WRITE (IU,'(A)') ''
+  IF(IU == stdout) THEN
+                   WRITE (IU,'(A)') ''
+  ELSE
+                   WRITE (IU,'(A,/,20x,A,/,/)') '💧🧙💦🌊  <-These symbols help text editors identify file as Unicode UTF8.', &
+                                                'UTF8 is not necessary to view numerical results, but no UTF8 support can have artifacts where non-ascii symbols are used (such as the degree symbol).'
+  END IF
   !
-  WRITE (IU,'(4A)') 'MODFLOW-OWHM v', VERSION_OWHM,".",Revision(:4)
+  WRITE (IU,'(4A)') 'MODFLOW-OWHM v', VERSION_OWHM,".",Revision !(:MIN(len_trim(Revision), 4))
   !
   IF(IU /= stdout) WRITE(IU,'(/A/)') OWHM_HEADER()     ! Only print to file and skip cmd prompt
   !
@@ -55,15 +60,15 @@ SUBROUTINE PRINT_MAIN_HEADER(IU)  ! Set to 6 for cmd prompt or use output_unit f
   
   WRITE (IU,'(/, 2A)')    ' Release: ', Revision
   IF(IU /= stdout) THEN
-     WRITE (IU,'(/, A)')  ' Includes:'
-     WRITE (IU,'(2A)')    '          MODFLOW-2005 Version ', VERSION_MF
-     WRITE (IU,'(2A)')    '          MODFLOW-FMP  Version ', VERSION_FMP
-     WRITE (IU,'(2A)')    '          MODFLOW-SWR  Version ', VERSION_SWR
-     WRITE (IU,'(2A)')    '          MODFLOW-SWI  Version ', VERSION_SWI
-     WRITE (IU,'(2A)')    '          MODFLOW-LGR  Version ', VERSION_LGR
-     WRITE (IU,'(2A)')    '          MODFLOW-NWT  Version ', VERSION_NWT
-     WRITE (IU,'(2A)')    '          MODFLOW-CFP  Version ', VERSION_CFP
-     WRITE (IU,'(2A)')    '                  SWO  Version ', VERSION_SWO
+     WRITE (IU,'(/,A,/)') ' Includes the following base versions with enhancements:'
+     WRITE (IU,'(2A)')  '          MODFLOW-2005 Version ', VERSION_MF
+     WRITE (IU,'(2A)')  '          MODFLOW-FMP  Version ', VERSION_FMP
+     WRITE (IU,'(2A)')  '          MODFLOW-SWR  Version ', VERSION_SWR
+     WRITE (IU,'(2A)')  '          MODFLOW-SWI  Version ', VERSION_SWI
+     WRITE (IU,'(2A)')  '          MODFLOW-LGR  Version ', VERSION_LGR
+     WRITE (IU,'(2A)')  '          MODFLOW-NWT  Version ', VERSION_NWT
+     WRITE (IU,'(2A)')  '          MODFLOW-CFP  Version ', VERSION_CFP
+     WRITE (IU,'(2A)')  '                  SWO  Version ', VERSION_SWO
   END IF
   !
   WRITE (IU,'(/, *(A, /))')                                                                                  &
