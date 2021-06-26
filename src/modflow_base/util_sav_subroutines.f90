@@ -5,7 +5,6 @@ SUBROUTINE ULASAV(BUF,TEXT,KSTP,KPER,PERTIM,TOTIM,NCOL,NROW,ILAY,ICHN)
   ! ******************************************************************
   USE, INTRINSIC:: ISO_FORTRAN_ENV, ONLY: REAL32, REAL64
   USE GLOBAL,                       ONLY: BIN_REAL_KIND, RBUF
-  USE UTIL_INTERFACE,               ONLY: TO_SNGL
   IMPLICIT NONE
   !
   INTEGER,                    INTENT(IN):: NCOL,NROW
@@ -14,6 +13,7 @@ SUBROUTINE ULASAV(BUF,TEXT,KSTP,KPER,PERTIM,TOTIM,NCOL,NROW,ILAY,ICHN)
   INTEGER,                    INTENT(IN):: KSTP,KPER,ILAY,ICHN
   REAL,                       INTENT(IN):: PERTIM,TOTIM
   INTEGER:: I,J
+  REAL(REAL32):: rPERTIM,rTOTIM
   !
   !1------WRITE AN UNFORMATTED RECORD CONTAINING IDENTIFYING INFORMATION.
   !2------WRITE AN UNFORMATTED RECORD CONTAINING ARRAY VALUES THE ARRAY IS DIMENSIONED (NCOL,NROW)
@@ -34,9 +34,11 @@ SUBROUTINE ULASAV(BUF,TEXT,KSTP,KPER,PERTIM,TOTIM,NCOL,NROW,ILAY,ICHN)
   CASE(REAL64)
              SELECT CASE(BIN_REAL_KIND)
              CASE(REAL32)
-                         WRITE(ICHN) KSTP,KPER,TO_SNGL(PERTIM),TO_SNGL(TOTIM),TEXT,NCOL,NROW,ILAY
+                         CALL COPY_SNGL(PERTIM, rPERTIM)
+                         CALL COPY_SNGL(TOTIM,  rTOTIM)
+                         WRITE(ICHN) KSTP,KPER,rPERTIM,rTOTIM,TEXT,NCOL,NROW,ILAY
                          DO I=1,NROW;  DO J=1,NCOL
-                                                               RBUF(J,I,1) = TO_SNGL(BUF(J,I))
+                                                  CALL COPY_SNGL(BUF(J,I), RBUF(J,I,1))
                          END DO; END DO
                          WRITE(ICHN) RBUF(:,:,1)
              CASE(REAL64)
@@ -54,7 +56,6 @@ SUBROUTINE UBUDSV(KSTP,KPER,TEXT,IBDCHN,BUF,NCOL,NROW,NLAY,IOUT)
   !
   USE, INTRINSIC:: ISO_FORTRAN_ENV, ONLY: REAL32, REAL64
   USE GLOBAL,                       ONLY: BIN_REAL_KIND, RBUF
-  USE UTIL_INTERFACE,               ONLY: TO_SNGL
   USE NUM2STR_INTERFACE,            ONLY: NUM2STR
   IMPLICIT NONE
   !
@@ -83,9 +84,9 @@ SUBROUTINE UBUDSV(KSTP,KPER,TEXT,IBDCHN,BUF,NCOL,NROW,NLAY,IOUT)
   CASE(REAL64)
              SELECT CASE(BIN_REAL_KIND)
              CASE(REAL32)
-                           DO CONCURRENT(J=1:NCOL, I=1:NROW, K=1:NLAY)
-                                                               RBUF(J,I,K) = TO_SNGL(BUF(J,I,K))
-                           END DO
+                           DO K=1,NLAY;  DO I=1,NROW;  DO J=1,NCOL
+                                                       CALL COPY_SNGL(BUF(J,I,K), RBUF(J,I,K))
+                           END DO; END DO; END DO
                            WRITE(IBDCHN) RBUF
              CASE(REAL64); WRITE(IBDCHN) BUF
              END SELECT
@@ -101,7 +102,6 @@ SUBROUTINE UBDSV1(KSTP,KPER,TEXT,IBDCHN,BUF,NCOL,NROW,NLAY,IOUT,DELT,PERTIM,TOTI
   !
   USE, INTRINSIC:: ISO_FORTRAN_ENV, ONLY: REAL32, REAL64
   USE GLOBAL,                       ONLY: BIN_REAL_KIND,RBUF
-  USE UTIL_INTERFACE,               ONLY: TO_SNGL
   USE NUM2STR_INTERFACE,            ONLY: NUM2STR
   IMPLICIT NONE
   !
@@ -112,6 +112,7 @@ SUBROUTINE UBDSV1(KSTP,KPER,TEXT,IBDCHN,BUF,NCOL,NROW,NLAY,IOUT,DELT,PERTIM,TOTI
   INTEGER,                            INTENT(IN):: KSTP,KPER,IOUT,IBDCHN
   REAL,                               INTENT(IN):: PERTIM,TOTIM,DELT
   INTEGER:: I,J,K
+  REAL(REAL32):: rDELT, rPERTIM, rTOTIM
   !     ------------------------------------------------------------------
   !
   !1------WRITE TWO UNFORMATTED RECORDS IDENTIFYING DATA.
@@ -138,10 +139,13 @@ SUBROUTINE UBDSV1(KSTP,KPER,TEXT,IBDCHN,BUF,NCOL,NROW,NLAY,IOUT,DELT,PERTIM,TOTI
   CASE(REAL64)
              SELECT CASE(BIN_REAL_KIND)
              CASE(REAL32)
-                         WRITE(IBDCHN) 1,TO_SNGL(DELT),TO_SNGL(PERTIM),TO_SNGL(TOTIM)
-                         DO CONCURRENT(J=1:NCOL, I=1:NROW, K=1:NLAY)
-                                                             RBUF(J,I,K) = TO_SNGL(BUF(J,I,K))
-                         END DO
+                         CALL COPY_SNGL(DELT,   rDELT)
+                         CALL COPY_SNGL(PERTIM, rPERTIM)
+                         CALL COPY_SNGL(TOTIM,  rTOTIM)
+                         WRITE(IBDCHN) 1, rDELT, rPERTIM, rTOTIM
+                         DO K=1,NLAY;  DO I=1,NROW;  DO J=1,NCOL
+                                                       CALL COPY_SNGL(BUF(J,I,K), RBUF(J,I,K))
+                         END DO; END DO; END DO
                          WRITE(IBDCHN) RBUF
              CASE(REAL64)
                          WRITE(IBDCHN) 1,DELT,PERTIM,TOTIM
@@ -160,7 +164,6 @@ SUBROUTINE UBDSV2(KSTP,KPER,TEXT,IBDCHN,NCOL,NROW,NLAY,NLIST,IOUT,DELT,PERTIM,TO
   !
   USE, INTRINSIC:: ISO_FORTRAN_ENV, ONLY: REAL32, REAL64
   USE GLOBAL,                       ONLY: BIN_REAL_KIND
-  USE UTIL_INTERFACE,               ONLY: TO_SNGL
   USE NUM2STR_INTERFACE,            ONLY: NUM2STR
   IMPLICIT NONE
   !
@@ -169,6 +172,7 @@ SUBROUTINE UBDSV2(KSTP,KPER,TEXT,IBDCHN,NCOL,NROW,NLAY,NLIST,IOUT,DELT,PERTIM,TO
   CHARACTER(16),                      INTENT(IN):: TEXT
   INTEGER,                            INTENT(IN):: KSTP,KPER,IBDCHN,NLIST,IOUT
   REAL,                               INTENT(IN):: PERTIM,TOTIM,DELT
+  REAL(REAL32):: rDELT, rPERTIM, rTOTIM
   !
   !1------WRITE THREE UNFORMATTED RECORDS IDENTIFYING DATA.
   IF(IOUT.NE.0) WRITE(IOUT,'(A)') ' UBDSV2 SAVING "'//TEXT//'" ON UNIT '//NUM2STR(IBDCHN)//' AT TIME STEP '//NUM2STR(KSTP)//', STRESS PERIOD '//NUM2STR(KPER)
@@ -185,8 +189,12 @@ SUBROUTINE UBDSV2(KSTP,KPER,TEXT,IBDCHN,NCOL,NROW,NLAY,NLIST,IOUT,DELT,PERTIM,TO
              
   CASE(REAL64)
              SELECT CASE(BIN_REAL_KIND)
-             CASE(REAL32); WRITE(IBDCHN) 2,TO_SNGL(DELT),TO_SNGL(PERTIM),TO_SNGL(TOTIM)
-             CASE(REAL64); WRITE(IBDCHN) 2,DELT,PERTIM,TOTIM
+             CASE(REAL32)
+                           CALL COPY_SNGL(DELT,   rDELT)
+                           CALL COPY_SNGL(PERTIM, rPERTIM)
+                           CALL COPY_SNGL(TOTIM,  rTOTIM) 
+                           WRITE(IBDCHN) 2, rDELT, rPERTIM, rTOTIM
+             CASE(REAL64); WRITE(IBDCHN) 2,  DELT,  PERTIM,  TOTIM
              END SELECT
   END SELECT
   !
@@ -201,7 +209,6 @@ SUBROUTINE UBDSVA(IBDCHN,NCOL,NROW,J,I,K,Q,IBOUND,NLAY)
   !
   USE, INTRINSIC:: ISO_FORTRAN_ENV, ONLY: REAL32, REAL64
   USE GLOBAL,                       ONLY: BIN_REAL_KIND
-  USE UTIL_INTERFACE,               ONLY: TO_SNGL
   IMPLICIT NONE
   !
   REAL,                               INTENT(IN):: Q
@@ -209,9 +216,10 @@ SUBROUTINE UBDSVA(IBDCHN,NCOL,NROW,J,I,K,Q,IBOUND,NLAY)
   INTEGER, DIMENSION(NCOL,NROW,NLAY), INTENT(IN):: IBOUND
   INTEGER,                            INTENT(IN):: IBDCHN,J,I,K
   INTEGER:: ICRL
+  REAL(REAL32):: rQ
   !
   !1------CALCULATE CELL NUMBER
-  ICRL= (K-1)*NROW*NCOL + (I-1)*NCOL + J
+  ICRL = (K-1)*NROW*NCOL + (I-1)*NCOL + J
   !
   !2------WRITE CELL NUMBER AND FLOW RATE
   !
@@ -224,8 +232,10 @@ SUBROUTINE UBDSVA(IBDCHN,NCOL,NROW,J,I,K,Q,IBOUND,NLAY)
              
   CASE(REAL64)
              SELECT CASE(BIN_REAL_KIND)
-             CASE(REAL32); WRITE(IBDCHN) ICRL,TO_SNGL(Q)
-             CASE(REAL64); WRITE(IBDCHN) ICRL,Q
+             CASE(REAL32); 
+                           CALL COPY_SNGL(Q,  rQ)
+                           WRITE(IBDCHN) ICRL,rQ
+             CASE(REAL64); WRITE(IBDCHN) ICRL, Q
              END SELECT
   END SELECT
   !
@@ -239,7 +249,6 @@ SUBROUTINE UBDSV3(KSTP,KPER,TEXT,IBDCHN,BUF,IBUF,NOPT,NCOL,NROW,NLAY,IOUT,DELT,P
   !
   USE, INTRINSIC:: ISO_FORTRAN_ENV, ONLY: REAL32, REAL64
   USE GLOBAL,                       ONLY: BIN_REAL_KIND, RBUF
-  USE UTIL_INTERFACE,               ONLY: TO_SNGL
   USE NUM2STR_INTERFACE,            ONLY: NUM2STR
   IMPLICIT NONE
   !
@@ -251,6 +260,7 @@ SUBROUTINE UBDSV3(KSTP,KPER,TEXT,IBDCHN,BUF,IBUF,NOPT,NCOL,NROW,NLAY,IOUT,DELT,P
   INTEGER,                            INTENT(IN):: KSTP,KPER,NOPT,IOUT,IBDCHN
   REAL,                               INTENT(IN):: DELT,PERTIM,TOTIM
   INTEGER:: IMETH, I, J
+  REAL(REAL32):: rDELT, rPERTIM, rTOTIM
   !
   IMETH=3
   IF(NOPT.EQ.1) IMETH=4
@@ -302,18 +312,21 @@ SUBROUTINE UBDSV3(KSTP,KPER,TEXT,IBDCHN,BUF,IBUF,NOPT,NCOL,NROW,NLAY,IOUT,DELT,P
   CASE(REAL64)
              SELECT CASE(BIN_REAL_KIND)
              CASE(REAL32)
-                         WRITE(IBDCHN) IMETH,TO_SNGL(DELT),TO_SNGL(PERTIM),TO_SNGL(TOTIM)
+                         CALL COPY_SNGL(DELT,   rDELT)
+                         CALL COPY_SNGL(PERTIM, rPERTIM)
+                         CALL COPY_SNGL(TOTIM,  rTOTIM)
+                         WRITE(IBDCHN) IMETH, rDELT, rPERTIM, rTOTIM
                          IF(NOPT.EQ.1) THEN
-                             DO CONCURRENT(J=1:NCOL, I=1:NROW)
-                                                       RBUF(J,I,1) = TO_SNGL(BUF(J,I,1))
-                             END DO
+                             DO I=1,NROW;  DO J=1,NCOL
+                                                      CALL COPY_SNGL(BUF(J,I,1), RBUF(J,I,1))
+                             END DO; END DO
                              WRITE(IBDCHN) RBUF(:,:,1)
                          ELSE
                              WRITE(IBDCHN) IBUF
                              !
-                             DO CONCURRENT(J=1:NCOL, I=1:NROW)
-                                                       RBUF(J,I,1) = TO_SNGL(BUF(J,I,IBUF(J,I)))
-                             END DO
+                             DO I=1,NROW;  DO J=1,NCOL
+                                                      CALL COPY_SNGL(BUF(J,I,IBUF(J,I)), RBUF(J,I,1))
+                             END DO; END DO
                              WRITE(IBDCHN) RBUF(:,:,1)
                          END IF
              CASE(REAL64)
@@ -342,7 +355,6 @@ SUBROUTINE UBDSV4(KSTP,KPER,TEXT,NAUX,AUXTXT,IBDCHN,NCOL,NROW,NLAY,NLIST,IOUT,DE
   !
   USE, INTRINSIC:: ISO_FORTRAN_ENV, ONLY: REAL32, REAL64
   USE GLOBAL,                       ONLY: BIN_REAL_KIND
-  USE UTIL_INTERFACE,               ONLY: TO_SNGL
   USE NUM2STR_INTERFACE,            ONLY: NUM2STR
   IMPLICIT NONE
   !
@@ -352,6 +364,7 @@ SUBROUTINE UBDSV4(KSTP,KPER,TEXT,NAUX,AUXTXT,IBDCHN,NCOL,NROW,NLAY,NLIST,IOUT,DE
   CHARACTER(16), DIMENSION(*),        INTENT(IN):: AUXTXT
   INTEGER,                            INTENT(IN):: IBDCHN,KSTP,KPER,NAUX,NLIST,IOUT
   REAL,                               INTENT(IN):: DELT,PERTIM,TOTIM
+  REAL(REAL32):: rDELT, rPERTIM, rTOTIM
   !
   !1------WRITE UNFORMATTED RECORDS IDENTIFYING DATA.
   IF(IOUT.NE.0) WRITE(IOUT,'(A)') ' UBDSV4 SAVING "'//TEXT//'" ON UNIT '//NUM2STR(IBDCHN)//' AT TIME STEP '//NUM2STR(KSTP)//', STRESS PERIOD '//NUM2STR(KPER)
@@ -367,8 +380,12 @@ SUBROUTINE UBDSV4(KSTP,KPER,TEXT,NAUX,AUXTXT,IBDCHN,NCOL,NROW,NLAY,NLIST,IOUT,DE
              
   CASE(REAL64)
              SELECT CASE(BIN_REAL_KIND)
-             CASE(REAL32); WRITE(IBDCHN) 5,TO_SNGL(DELT),TO_SNGL(PERTIM),TO_SNGL(TOTIM)
-             CASE(REAL64); WRITE(IBDCHN) 5,DELT,PERTIM,TOTIM
+             CASE(REAL32)
+                           CALL COPY_SNGL(DELT,   rDELT)
+                           CALL COPY_SNGL(PERTIM, rPERTIM)
+                           CALL COPY_SNGL(TOTIM,  rTOTIM)
+                           WRITE(IBDCHN) 5, rDELT, rPERTIM, rTOTIM
+             CASE(REAL64); WRITE(IBDCHN) 5,  DELT,  PERTIM,  TOTIM
              END SELECT
   END SELECT
   !
@@ -389,7 +406,6 @@ SUBROUTINE UBDSVB(IBDCHN,NCOL,NROW,J,I,K,Q,VAL,NVL,NAUX,LAUX,IBOUND,NLAY)
   !
   USE, INTRINSIC:: ISO_FORTRAN_ENV, ONLY: REAL32, REAL64
   USE GLOBAL,                       ONLY: BIN_REAL_KIND
-  USE UTIL_INTERFACE,               ONLY: TO_SNGL
   IMPLICIT NONE
   !
   INTEGER,                            INTENT(IN):: NVL,NCOL,NROW,NLAY
@@ -397,10 +413,12 @@ SUBROUTINE UBDSVB(IBDCHN,NCOL,NROW,J,I,K,Q,VAL,NVL,NAUX,LAUX,IBOUND,NLAY)
   REAL,    DIMENSION(NVL),            INTENT(IN):: VAL
   INTEGER, DIMENSION(NCOL,NROW,NLAY), INTENT(IN):: IBOUND
   INTEGER,                            INTENT(IN):: IBDCHN,J,I,K,NAUX,LAUX
-  INTEGER:: ICRL, N2
+  INTEGER:: ICRL, N2, lp
+  REAL(REAL32):: rQ
+  REAL(REAL32), dimension(:), allocatable:: rVAL
   !
   !1------CALCULATE CELL NUMBER
-  ICRL= (K-1)*NROW*NCOL + (I-1)*NCOL + J
+  ICRL = (K-1)*NROW*NCOL + (I-1)*NCOL + J
   !
   !2------WRITE CELL NUMBER AND FLOW RATE
   !
@@ -426,11 +444,18 @@ SUBROUTINE UBDSVB(IBDCHN,NCOL,NROW,J,I,K,Q,VAL,NVL,NAUX,LAUX,IBOUND,NLAY)
   CASE(REAL64)
              SELECT CASE(BIN_REAL_KIND)
              CASE(REAL32)
+                         CALL COPY_SNGL(Q,  rQ)
                          IF(NAUX.GT.0) THEN
                             N2=LAUX+NAUX-1
-                            WRITE(IBDCHN) ICRL,TO_SNGL(Q),TO_SNGL(VAL(LAUX:N2))
+                            !
+                            allocate(rVAL(NVL))
+                            do lp=LAUX, N2
+                                         CALL COPY_SNGL(VAL(lp),  rVAL(lp))
+                            end do
+                            !
+                            WRITE(IBDCHN) ICRL, rQ, rVAL(LAUX:N2)
                          ELSE
-                            WRITE(IBDCHN) ICRL,TO_SNGL(Q)
+                            WRITE(IBDCHN) ICRL, rQ
                          END IF
              CASE(REAL64)
                          IF(NAUX.GT.0) THEN
@@ -449,9 +474,9 @@ SUBROUTINE UTILSAV2D(FL,COMPACT,BUF,TEXT,KSTP,KPER,PERTIM,TOTIM,NCOL,NROW,NLAY,D
   ! SAVE 1 LAYER ARRAY ON DISK
   ! ******************************************************************
   USE, INTRINSIC:: ISO_FORTRAN_ENV,    ONLY: REAL32, REAL64
-  USE CONSTANTS,                       ONLY: ONE, Z, NEG
+  USE CONSTANTS,                       ONLY: ONE, Z, NEG, NEGNEARZERO_30, NEARZERO_30
   USE GLOBAL,                          ONLY: BIN_REAL_KIND, RBUF
-  USE UTIL_INTERFACE,                  ONLY: TO_SNGL, NOT_NEAR_ZERO
+  USE UTIL_INTERFACE,                  ONLY: NOT_NEAR_ZERO
   USE NUM2STR_INTERFACE,               ONLY: NUM2STR
   USE GENERIC_OUTPUT_FILE_INSTRUCTION, ONLY: GENERIC_OUTPUT_FILE
   IMPLICIT NONE
@@ -464,40 +489,49 @@ SUBROUTINE UTILSAV2D(FL,COMPACT,BUF,TEXT,KSTP,KPER,PERTIM,TOTIM,NCOL,NROW,NLAY,D
   INTEGER,                            INTENT(IN):: KSTP,KPER
   REAL(REAL64),                       INTENT(IN):: PERTIM,TOTIM
   CHARACTER(10),                      INTENT(IN):: DATE
-  INTEGER:: I,J,IU,ICRL
+  INTEGER:: CNT,I,J,IU,ICRL
+  REAL(REAL32):: rPERTIM,rTOTIM, rB
   !
   IF(.NOT. FL%IS_OPEN) RETURN
+  !
+  SELECT CASE(KIND(PERTIM))
+  CASE(REAL32)
+              rPERTIM = PERTIM
+              rTOTIM  = TOTIM
+  CASE(REAL64)
+              CALL COPY_SNGL(PERTIM, rPERTIM)
+              CALL COPY_SNGL(TOTIM,  rTOTIM)
+  END SELECT
   !
   IU = FL%IU
   !
   IF(COMPACT) THEN
-    I = Z
-    DO CONCURRENT(J=ONE:NCOL, I=ONE:NROW, NOT_NEAR_ZERO(BUF(J,I)))
-          I = I + ONE
+    CNT = Z
+    DO I=ONE, NROW
+    DO J=ONE, NCOL
+            IF( NOT_NEAR_ZERO(BUF(J,I)) ) CNT = CNT + ONE
     END DO
-    !!!DO I=ONE, NROW
-    !!!DO J=ONE, NCOL
-    !!!        IF(.NOT. ( NEGNEARZERO_30 < BUF(J,I) .AND. BUF(J,I) < NEARZERO_30) ) I = I + ONE
-    !!!END DO
-    !!!END DO
+    END DO
     !
     IF(FL%BINARY) THEN
         !
         SELECT CASE(BIN_REAL_KIND)
         CASE(REAL32)
-                    WRITE(IU) I, KSTP,KPER,TO_SNGL(PERTIM),TO_SNGL(TOTIM),TEXT,NCOL,NROW,NLAY
+                    WRITE(IU) CNT, KSTP,KPER,rPERTIM,rTOTIM,TEXT,NCOL,NROW,NLAY
                     !
                     DO I=ONE, NROW
                     DO J=ONE, NCOL
                     IF(NOT_NEAR_ZERO(BUF(J,I))) THEN
                         !
                         ICRL= (I-1)*NCOL + J
-                        WRITE(IU) ICRL, TO_SNGL(BUF(J,I))
+                        CALL COPY_SNGL(BUF(J,I), rB)
+                        !
+                        WRITE(IU) ICRL, rB
                     END IF
                     END DO
                     END DO
         CASE(REAL64)
-                    WRITE(IU) I, KSTP,KPER,PERTIM,TOTIM,TEXT,NCOL,NROW,NLAY
+                    WRITE(IU) CNT, KSTP,KPER,PERTIM,TOTIM,TEXT,NCOL,NROW,NLAY
                     !
                     DO I=ONE, NROW
                     DO J=ONE, NCOL
@@ -510,7 +544,7 @@ SUBROUTINE UTILSAV2D(FL,COMPACT,BUF,TEXT,KSTP,KPER,PERTIM,TOTIM,NCOL,NROW,NLAY,D
                     END DO
         END SELECT
     ELSE
-        WRITE(IU,'(2I7,3(1x,A),3I7,3(1x,A))') KSTP,KPER,NUM2STR(PERTIM,10),NUM2STR(TOTIM,10),TEXT,NCOL,NROW,NLAY, DATE, ' NTERM ', NUM2STR(I)
+        WRITE(IU,'(2I7,3(1x,A),3I7,3(1x,A))') KSTP,KPER,NUM2STR(PERTIM,10),NUM2STR(TOTIM,10),TEXT,NCOL,NROW,NLAY, DATE, ' NTERM ', NUM2STR(CNT)
         !
         DO I=ONE, NROW
         DO J=ONE, NCOL
@@ -520,16 +554,16 @@ SUBROUTINE UTILSAV2D(FL,COMPACT,BUF,TEXT,KSTP,KPER,PERTIM,TOTIM,NCOL,NROW,NLAY,D
     END IF
   ELSE
     IF(FL%BINARY) THEN
-        I = NEG
+        CNT = NEG
         SELECT CASE(BIN_REAL_KIND)
         CASE(REAL32)
-                    WRITE(IU) I, KSTP,KPER,TO_SNGL(PERTIM),TO_SNGL(TOTIM),TEXT,NCOL,NROW,NLAY
-                    DO CONCURRENT(J=ONE:NCOL, I=ONE:NROW)
-                                                          RBUF(J,I,ONE) = TO_SNGL(BUF(J,I))
-                    END DO
+                    WRITE(IU) CNT, KSTP,KPER,rPERTIM,rTOTIM,TEXT,NCOL,NROW,NLAY
+                    DO I=1,NROW;  DO J=1,NCOL
+                                             CALL COPY_SNGL(BUF(J,I), RBUF(J,I,ONE))
+                    END DO; END DO
                     WRITE(IU) RBUF(:,:,ONE)
         CASE(REAL64)
-                    WRITE(IU) I, KSTP,KPER,PERTIM,TOTIM,TEXT,NCOL,NROW,NLAY
+                    WRITE(IU) CNT, KSTP,KPER,PERTIM,TOTIM,TEXT,NCOL,NROW,NLAY
                     WRITE(IU) BUF  
         END SELECT
     ELSE
@@ -539,6 +573,24 @@ SUBROUTINE UTILSAV2D(FL,COMPACT,BUF,TEXT,KSTP,KPER,PERTIM,TOTIM,NCOL,NROW,NLAY,D
                  WRITE(IU,'(*(ES15.7))') BUF(:,I)
         END DO
     END IF
+  END IF
+  !
+END SUBROUTINE
+!
+PURE SUBROUTINE COPY_SNGL(IN_VAL, OUT_VAL)
+  USE, INTRINSIC:: ISO_FORTRAN_ENV, ONLY: REAL32, REAL64
+  USE, INTRINSIC:: IEEE_ARITHMETIC, ONLY: IEEE_VALUE, IEEE_QUIET_NAN
+  REAL(REAL64), INTENT(IN ):: IN_VAL
+  REAL(REAL32), INTENT(OUT):: OUT_VAL
+  !
+  IF    (IN_VAL /= IN_VAL       ) THEN                ! Set to NaN
+                            OUT_VAL = IEEE_VALUE(OUT_VAL, IEEE_QUIET_NAN)
+  ELSEIF(IN_VAL < -3.4e38_real64) THEN                ! Lower limit of Single Precision
+                            OUT_VAL = -3.4E38_real32
+  ELSEIF(IN_VAL >  3.4e38_real64) THEN
+                            OUT_VAL =  3.4E38_real32  ! Upper limit of Single Precision
+  ELSE
+                            OUT_VAL = REAL(IN_VAL, REAL32)
   END IF
   !
 END SUBROUTINE
