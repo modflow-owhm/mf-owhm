@@ -4841,7 +4841,7 @@ C3------Read Number of Multiplier Arrays if Multiplier Option is active.
      +              LINE(ISTART:ISTOP) == 'EXPRESSION' ) THEN
                     READ (INMULT,'(A)') LINE
                ELSE
-                   CALL U2DDP(RMLT(:,:,1),ANAME,NROW,NCOL,0,INMULT,0)
+                   CALL U2DDBL(RMLT(:,:,1),ANAME,NROW,NCOL,0,INMULT,0)
                END IF
            END DO
            DEALLOCATE(RMLT)
@@ -4929,7 +4929,7 @@ C6D-----Define array using array reader.
 
              READ (INMULT,'(A)') LINE
              BACKSPACE(INMULT)
-             CALL U2DDP(RMLT(:,:,M),ANAME,NROW,NCOL,0,INMULT,IOUT)      !seb changed from U2DREL
+             CALL U2DDBL(RMLT(:,:,M),ANAME,NROW,NCOL,0,INMULT,IOUT)      !seb changed from U2DREL
              IF(MULTPRINT>0) THEN
                WRITE(IOUTM,29) MLTNAM(M)                                !seb ADDED PRINT OPTION FOR REGULAR MULT ARRAYS
    29          FORMAT(1X,/1X,'MULTIPLIER ARRAY: ',A)

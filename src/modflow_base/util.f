@@ -829,7 +829,7 @@ C     ******************************************************************
 C
 C        SPECIFICATIONS:
 C     ------------------------------------------------------------------
-      USE CONSTANTS,              ONLY: NL,BLN,TRUE,Z,ONE,NEG,TRUE,FALSE
+      USE CONSTANTS,              ONLY: NL,BLN,Z,ONE,NEG,TRUE,FALSE
       USE ERROR_INTERFACE,        ONLY: STOP_ERROR, WARNING_MESSAGE
       USE FILE_IO_INTERFACE,      ONLY: READ_TO_DATA, MOVE_TO_DATA
       USE NUM2STR_INTERFACE,      ONLY: NUM2STR
@@ -1500,6 +1500,364 @@ C8------CONTROL RECORD ERROR.
         END SUBROUTINE 
       END SUBROUTINE
       !
+      SUBROUTINE U2DDBL(A,ANAME,II,JJ,K,IN,IOUT)
+C     ******************************************************************
+C     ROUTINE TO INPUT 2-D REAL DATA MATRICES
+C       A IS ARRAY TO INPUT
+C       ANAME IS 24 CHARACTER DESCRIPTION OF A
+C       II IS NO. OF ROWS
+C       JJ IS NO. OF COLS
+C       K IS LAYER NO. (USED WITH NAME TO TITLE PRINTOUT --)
+C              IF K=0, NO LAYER IS PRINTED
+C              IF K<0, CROSS SECTION IS PRINTED)
+C       IN IS INPUT UNIT
+C       IOUT IS OUTPUT UNIT
+C     ******************************************************************
+C
+C        SPECIFICATIONS:
+C     ------------------------------------------------------------------
+      USE, INTRINSIC:: ISO_FORTRAN_ENV, ONLY: REAL32, REAL64
+      USE CONSTANTS,             ONLY: Z, ONE, NL, BLN, NEG, 
+     &                                 TRUE, FALSE
+      USE ERROR_INTERFACE,       ONLY: STOP_ERROR, WARNING_MESSAGE
+      USE FILE_IO_INTERFACE,     ONLY: READ_TO_DATA, MOVE_TO_DATA
+      USE STRINGS,               ONLY: GET_WORD, GET_NUMBER
+      USE NUM2STR_INTERFACE,     ONLY: NUM2STR
+      USE GENERIC_OPEN_INTERFACE,ONLY: GENERIC_OPEN
+      USE PARSE_WORD_INTERFACE,  ONLY: PARSE_WORD, PARSE_WORD_UP
+      USE STRINGS,               ONLY: GET_INTEGER, GET_NUMBER
+      USE UTIL_INTERFACE,        ONLY: TO_SNGL
+      USE OPENSPEC
+      IMPLICIT NONE
+      CHARACTER(24), INTENT(IN):: ANAME
+      INTEGER,       INTENT(IN):: II,JJ,K,IN,IOUT
+      REAL(REAL64), DIMENSION(JJ,II), INTENT(INOUT):: A
+      CHARACTER(20):: FMTIN
+      CHARACTER(16):: TEXT
+      CHARACTER(768):: CNTRL, FNAME
+      INTEGER:: IE, N, I, J
+      INTEGER:: ICOL, ISTART, ISTOP
+      INTEGER:: ICLOSE, IFREE, IPRN, LOCAT
+      LOGICAL:: FORMATTED, FAIL
+      REAL(REAL64):: SHFT, CNSTNT, ZERO
+C     ------------------------------------------------------------------
+      ZERO  = 0.0_real64
+      SHFT  = ZERO
+C
+C1------READ ARRAY CONTROL RECORD AS CHARACTER DATA.
+      CALL READ_TO_DATA(CNTRL,IN,IOUT,NOSHIFT=TRUE) !seb originally => READ(IN,'(A)') CNTRL
+      FORMATTED = TRUE
+C
+C2------LOOK FOR ALPHABETIC WORD THAT INDICATES THAT THE RECORD IS FREE
+C2------FORMAT.  SET A FLAG SPECIFYING IF FREE FORMAT OR FIXED FORMAT.
+      ICLOSE = Z
+      IFREE  = ONE
+      ICOL   = ONE
+      CALL PARSE_WORD_UP(CNTRL,ICOL,ISTART,ISTOP)
+      IF     (ISTOP < ISTART) THEN                   !Empty line read - Stop program
+                                  GOTO 500
+      ELSE IF(CNTRL(ISTART:ISTOP) == 'CONSTANT') THEN
+         LOCAT = Z
+      ELSE IF(CNTRL(ISTART:ISTOP) == 'INTERNAL') THEN
+         LOCAT = IN
+      ELSE IF(CNTRL(ISTART:ISTOP) == 'EXTERNAL') THEN
+         CALL GET_INTEGER(CNTRL,ICOL,ISTART,ISTOP,IOUT,IN,LOCAT,MSG=
+     &     'U2DDBL - FOUND EXTERNAL BUT FAILED TO READ THE UNIT NUMBER')
+      ELSE IF(CNTRL(ISTART:ISTOP) == 'OPEN/CLOSE') THEN
+         CALL PARSE_WORD(CNTRL,ICOL,ISTART,ISTOP)
+         FNAME = CNTRL(ISTART:ISTOP)
+         LOCAT = NEG
+         IF(IOUT /= Z) WRITE(IOUT,15) FNAME
+   15    FORMAT(1X,/1X,'OPENING FILE:',/1X,A)
+         ICLOSE = ONE
+      ELSE
+C
+C2A-----DID NOT FIND A RECOGNIZED WORD, SO NOT USING FREE FORMAT.
+C2A-----READ THE CONTROL RECORD THE ORIGINAL WAY.
+         IFREE = Z
+         READ(CNTRL,"(I10,F10.0)",IOSTAT=IE) N, SHFT
+         IF(IE /= Z) GO TO 60
+         !
+    1    FORMAT(I10,F10.0,A20,I10)
+         READ(CNTRL,1,IOSTAT=IE) LOCAT,CNSTNT,FMTIN,IPRN
+         IF(IE /= Z .AND. N == Z) THEN
+                                  IE     = Z
+                                  LOCAT  = N
+                                  CNSTNT = SHFT
+                                  FMTIN  = ""
+                                  IPRN   = Z
+         END IF
+         !
+   60    IF(IE /= Z) THEN
+           IF(K > Z) THEN
+             CALL BACKSPACE_STOP_MSG(IN, IOUT, 
+     +         'U2DDBL - ERROR READING FOR "'//ANAME//'"'//NL//
+     +         'WITH AN ARRAY CONTROL RECORD SPECIFIED AS: '//
+     +          '"'//TRIM(CNTRL)//'"'//NL//
+     +         'FOR LAYER '//NUM2STR(K))
+           ELSE
+             CALL BACKSPACE_STOP_MSG(IN, IOUT, 
+     +         'U2DDBL - ERROR READING FOR "'//ANAME//'"'//NL//
+     +         'WITH AN ARRAY CONTROL RECORD SPECIFIED AS: '//
+     +          '"'//TRIM(CNTRL)//'"')
+           END IF
+         END IF
+         !
+         SHFT = ZERO
+      END IF
+C
+C3------FOR FREE FORMAT CONTROL RECORD, READ REMAINING FIELDS.
+      IF(IFREE /= Z) THEN
+         CALL NEXT_WORD_CHECK_SHIFT(CNTRL,ICOL,ISTART,ISTOP,SHFT)
+         !
+         CALL GET_NUMBER(CNTRL,ICOL,ISTART,ISTOP,IOUT,IN,CNSTNT,
+     +                            NO_PARSE_WORD=TRUE, HAS_ERROR=FAIL)
+         IF(LOCAT == Z .AND. FAIL) THEN
+           CALL STOP_ERROR(CNTRL, IN, IOUT, 
+     +                     MSG='U2DDBL - FAILED TO READ CNSTNT')
+         ELSEIF(FAIL) THEN
+             CNSTNT=1.0
+             CALL WARNING_MESSAGE(LINE=CNTRL, INFILE=IN, OUTPUT=IOUT,
+     +       MSG= 'U2DDBL - Failed to identify CNSTNT for "'//
+     +       TRIM(ADJUSTL(ANAME))//
+     +       '". Program will contine with CNSTNT = 1.0', inline=TRUE)
+            IF(ISTOP < ISTART) THEN
+                   CONTINUE
+            ELSEIF(CNTRL(ISTART:ISTART) == '#') THEN
+                   ICOL = LEN(CNTRL) + 1
+                   ISTART = ICOL   - 1
+                   ISTOP  = ISTART - 1
+            ELSE
+                   ICOL = ISTART
+            END IF
+         END IF
+         !
+         IF(LOCAT /= Z) THEN
+            CALL NEXT_WORD_CHECK_SHIFT(CNTRL,ICOL,ISTART,ISTOP,SHFT)
+            !
+            IF(ISTOP < ISTART) THEN
+                   FMTIN = '(FREE)'
+            ELSEIF(CNTRL(ISTART:ISTART) == '#') THEN
+                   FMTIN = '(FREE)'
+                   ICOL = LEN(CNTRL) + 1
+                   ISTART = ICOL   - 1
+                   ISTOP  = ISTART - 1
+            ELSE
+                   FMTIN=CNTRL(ISTART:ISTOP)
+            END IF
+            !
+            IF(ICLOSE /= Z) THEN
+               IF(LOCAT == NEG) LOCAT = Z
+               IF(FMTIN == '(BINARY)') THEN
+                  FORMATTED = FALSE
+                  CALL GENERIC_OPEN(FNAME, LOCAT, IOUT, ACTION(1), FORM,
+     +                           ACCESS, 'OLD', BUFFER_BLOCKSIZE=16384, !Buffer = 16kB*2
+     +                           LINE=CNTRL, INFILE=IN)
+               ELSE
+               CALL GENERIC_OPEN(FNAME,LOCAT,IOUT,ACTION(1),'FORMATTED',
+     +                           ACCESS, 'OLD', BUFFER_BLOCKSIZE=16384, !Buffer = 16kB*2
+     +                           LINE=CNTRL, INFILE=IN)
+               END IF
+            END IF
+            IF(LOCAT /= Z .AND. FMTIN == '(BINARY)') FORMATTED=FALSE !LOCAT=-LOCAT
+            !
+            CALL NEXT_WORD_CHECK_SHIFT(CNTRL,ICOL,ISTART,ISTOP,SHFT)
+            CALL GET_INTEGER(CNTRL,ICOL,ISTART,ISTOP,IOUT,IN,IPRN,
+     +                         NO_PARSE_WORD=TRUE, HAS_ERROR=FAIL)
+            IF(FAIL) THEN
+              IPRN=-1
+              CALL WARNING_MESSAGE(LINE=CNTRL, INFILE=IN, OUTPUT=IOUT,
+     +        MSG= 'U2DDBL - Failed to identify IPRN for "'//
+     +        TRIM(ADJUSTL(ANAME))//
+     +        '". Program will contine with IPRN = -1', inline=TRUE)
+            END IF
+         END IF
+         !
+         CALL NEXT_WORD_CHECK_SHIFT(CNTRL,ICOL,ISTART,ISTOP,SHFT)
+      END IF
+C
+C4------TEST LOCAT TO SEE HOW TO DEFINE ARRAY VALUES.
+      IF(LOCAT == Z) THEN
+C
+C4A-----LOCAT=0; SET ALL ARRAY VALUES EQUAL TO CNSTNT. RETURN.
+        DO I=1,II
+        DO J=1,JJ
+                A(J,I)=CNSTNT
+        END DO
+        END DO
+        IF(SHFT /= ZERO) A = A + SHFT
+        IF(IOUT /= Z) THEN
+            IF(K > Z) WRITE(IOUT,2) ANAME,CNSTNT,K
+            IF(K <= Z) WRITE(IOUT,3) ANAME,CNSTNT
+        END IF
+    2   FORMAT(1X,/1X,A,' =',1P,G14.6,' FOR LAYER',I4)
+    3   FORMAT(1X,/1X,A,' =',1P,G14.6)
+        RETURN
+      ELSE IF(LOCAT /= Z .AND. FORMATTED) THEN
+C
+C4B-----LOCAT>0; READ FORMATTED RECORDS USING FORMAT FMTIN.
+        IF(IOUT /= Z) THEN
+           IF(K > Z) THEN
+                WRITE(IOUT,94) ANAME,K,LOCAT,FMTIN
+           ELSE IF(K == Z) THEN
+                WRITE(IOUT,95) ANAME,LOCAT,FMTIN
+           ELSE
+                WRITE(IOUT,96) ANAME,LOCAT,FMTIN
+           END IF
+   94      FORMAT(1X,///11X,A,' FOR LAYER',I4,/1X,
+     +      'READING ON UNIT ',I4,' WITH FORMAT: ',A)
+   95      FORMAT(1X,///11X,A,/1X,
+     +      'READING ON UNIT ',I4,' WITH FORMAT: ',A)
+   96      FORMAT(1X,///11X,A,' FOR CROSS SECTION',/1X,
+     +      'READING ON UNIT ',I4,' WITH FORMAT: ',A)
+        END IF
+        DO 100 I=1,II
+        CALL MOVE_TO_DATA(CNTRL,LOCAT,IOUT)
+        IF(FMTIN == '(FREE)') THEN
+           READ(LOCAT,*,IOSTAT=IE) A(1:JJ,I)  !(A(J,I),J=1,JJ)
+        ELSE
+           READ(LOCAT,FMTIN,IOSTAT=IE) A(1:JJ,I)  !(A(J,I),J=1,JJ)
+        END IF
+           !
+           IF(IE /= Z) CALL BACKSPACE_IO_STOP_MSG(LOCAT, IOUT, IE,
+     +     'U2DDBL - ERROR READING ON CURRENT INPUT LINE A SET OF '//
+     +     'NUMBERS FOR "'//TRIM(ADJUSTL(ANAME))//'"'//BLN//
+     +     '**NOTE ERROR LINE IS THE BEST GUESS FOR ERROR LOCATION.')
+  100   CONTINUE
+      ELSE
+C
+C4C-----LOCAT<0; READ UNFORMATTED ARRAY VALUES.
+        IF(K > Z) THEN
+             WRITE(IOUT,201) ANAME,K,LOCAT
+  201      FORMAT(1X,///11X,A,' FOR LAYER',I4,/
+     1      1X,'READING BINARY ON UNIT ',I4)
+        ELSE IF(K == Z) THEN
+             WRITE(IOUT,202) ANAME,LOCAT
+  202      FORMAT(1X,///1X,A,/
+     1      1X,'READING BINARY ON UNIT ',I4)
+        ELSE
+             WRITE(IOUT,203) ANAME,LOCAT
+  203      FORMAT(1X,///1X,A,' FOR CROSS SECTION',/
+     1      1X,'READING BINARY ON UNIT ',I4)
+        END IF
+        CALL WARNING_MESSAGE(LINE=CNTRL, INFILE=IN, OUTPUT=IOUT,
+     +       MSG= 'U2DDBL - Found "BINARY" flag for '//
+     + '"'//TRIM(ADJUSTL(ANAME))//'" on unit # '//NUM2STR(LOCAT)//
+     + '. For portability it is recommended to only use text '//
+     +'formatted data only.'//NL//'U2DDBL will guess the binary '//
+     +'sturcture of the file.'//NL//
+     +'1st attempt will assume 4 byte per floating point number'//
+     +         '(Single Precision).'//NL//
+     +'2nd attempt will assume 8 byte per floating point number'//
+     +         '(Double Precision).', inline=TRUE)
+        BLOCK
+           INTEGER:: NCOL,NROW,ILAY
+           REAL(REAL32), DIMENSION(:,:), ALLOCATABLE:: dat32
+           REAL(REAL64), DIMENSION(:,:), ALLOCATABLE:: dat64
+           CHARACTER(52):: HEAD
+           HEAD = ''
+           READ(LOCAT) HEAD(1:44) ! KSTP,KPER,PERTIM,TOTIM,TEXT,NCOL,NROW,ILAY
+           NCOL = TRANSFER( HEAD(33:36), NCOL )
+           NROW = TRANSFER( HEAD(37:40), NROW )
+           ILAY = TRANSFER( HEAD(41:44), ILAY )
+           IF(II == NROW .and. JJ == NCOL) THEN
+              ALLOCATE(dat32(NCOL, NROW))
+              READ(LOCAT) dat32
+              IF(PRECISION(A) < 7) THEN
+                 A = dat32
+              ELSE
+                 DO I=1,II
+                 DO J=1,JJ
+                       A(J,I)=REAL(dat32(J,I), real64)
+                 END DO
+                 END DO
+              END IF
+              DEALLOCATE(dat32)
+           ELSE
+              READ(LOCAT) HEAD(45:52) 
+              NCOL = TRANSFER( HEAD(41:44), NCOL )
+              NROW = TRANSFER( HEAD(45:48), NROW )
+              ILAY = TRANSFER( HEAD(49:52), ILAY )
+              IF(II == NROW .and. JJ == NCOL) THEN
+                 ALLOCATE(dat64(NCOL, NROW))
+                 READ(LOCAT) dat64
+                 IF(PRECISION(A) < 7) THEN
+                    DO I=1,II
+                    DO J=1,JJ
+                          A(J,I) = TO_SNGL(dat64(J,I))
+                    END DO
+                    END DO
+                 ELSE
+                    A = dat64
+                 END IF
+                 DEALLOCATE(dat64)
+              ELSE
+                 CALL STOP_ERROR(CNTRL, IN, IOUT, MSG=
+     +           'U2DDBL - Error reading current input for'//NL//
+     +            '"'//TRIM(ADJUSTL(ANAME))//'"'//NL//
+     +            'The reader failed to identify the input struture '//
+     +            'in the "(BINARY)" formatted file.'//NL//
+     +            'Please change input file to formatted text.')
+              END IF
+           END IF
+        END BLOCK
+      END IF
+C
+C5------IF CNSTNT NOT ZERO THEN MULTIPLY ARRAY VALUES BY CNSTNT.
+      IF(ICLOSE /= Z) CLOSE(UNIT=LOCAT)
+      IF(CNSTNT /= ZERO .AND. CNSTNT /= 1.0) THEN
+        DO I=1,II
+        DO J=1,JJ
+              A(J,I)=A(J,I)*CNSTNT
+        END DO
+        END DO
+      END IF
+      !
+      IF(SHFT /= ZERO) A = A + SHFT
+      !
+C
+C6------IF PRINT CODE (IPRN) >0 OR =0 THEN PRINT ARRAY VALUES.
+  320 IF(IPRN >= Z) CALL ULAPRW_DBL(A,ANAME,0,0,JJ,II,0,IPRN,IOUT)
+C
+C7------RETURN
+      RETURN
+C
+C8------CONTROL RECORD ERROR.
+  500 IF(K > Z) THEN
+          FNAME = 'ERROR READING ARRAY CONTROL RECORD FOR "'//
+     +            TRIM(ADJUSTL(ANAME))//'" FOR LAYER '//NUM2STR(K)
+      ELSE
+          FNAME = 'ERROR READING ARRAY CONTROL RECORD FOR "'//
+     +            TRIM(ADJUSTL(ANAME))//'"'
+      END IF
+      !CALL USTOP(' ')
+      CALL STOP_ERROR(CNTRL, IN, IOUT, MSG=FNAME)
+      !
+      CONTAINS
+        SUBROUTINE NEXT_WORD_CHECK_SHIFT(CNTRL,ICOL,ISTART,ISTOP,SHFT)
+          CHARACTER(*), INTENT(INOUT):: CNTRL
+          INTEGER,      INTENT(INOUT):: ICOL,ISTART,ISTOP
+          REAL,         INTENT(INOUT):: SHFT
+          REAL:: VAL
+          !
+          CALL PARSE_WORD_UP(CNTRL,ICOL,ISTART,ISTOP)
+          DO WHILE(ISTART <= ISTOP)
+             IF(CNTRL(ISTART:ISTART) == '#') THEN
+                   ICOL = LEN(CNTRL) + 1
+                   ISTART = ICOL   - 1
+                   ISTOP  = ISTART - 1
+                   EXIT
+             END IF
+             IF(CNTRL(ISTART:ISTOP) /= "SHIFT") EXIT
+             !
+             CALL GET_NUMBER(CNTRL,ICOL,ISTART,ISTOP,IOUT,IN,VAL,MSG=
+     +'U2DDBL FOUND KEYWORD "SHIFT", BUT ERROR READING THE SHFT FACTOR')
+             SHFT = SHFT + VAL
+             CALL PARSE_WORD_UP(CNTRL,ICOL,ISTART,ISTOP)
+          END DO
+        END SUBROUTINE 
+      END SUBROUTINE
+      !
       SUBROUTINE UCOLNO(NLBL1,NLBL2,NSPACE,NCPL,NDIG,IOUT)
 C     ******************************************************************
 C     OUTPUT COLUMN NUMBERS ABOVE A MATRIX PRINTOUT
@@ -1773,6 +2131,160 @@ C     ------------------------------------------------------------------
       USE CONSTANTS, ONLY: Z
       CHARACTER(16):: TEXT
       DIMENSION BUF(NCOL,NROW)
+C     ------------------------------------------------------------------
+C
+C0------SKIP PRINTING IF IOUT IS NEGATIVE seb
+      IF(IOUT == Z) RETURN
+C1------PRINT A HEADER DEPENDING ON ILAY
+      IF(ILAY > Z) THEN
+           WRITE(IOUT,1) TEXT,ILAY,KSTP,KPER
+    1    FORMAT('1',/2X,A,' IN LAYER ',I3,' AT END OF TIME STEP ',I3,
+     1     ' IN STRESS PERIOD ',I4/2X,75('-'))
+      ELSE IF(ILAY < Z) THEN
+           WRITE(IOUT,2) TEXT,KSTP,KPER
+    2    FORMAT('1',/1X,A,' FOR CROSS SECTION AT END OF TIME STEP',I3,
+     1     ' IN STRESS PERIOD ',I4/1X,79('-'))
+      END IF
+C
+C2------MAKE SURE THE FORMAT CODE (IP OR IPRN) IS
+C2------BETWEEN 1 AND 21.
+    5 IP=IPRN
+      IF(IP < 1 .OR. IP > 21) IP=12
+C
+C3------CALL THE UTILITY MODULE UCOLNO TO PRINT COLUMN NUMBERS.
+      IF(IP == 1) CALL UCOLNO(1,NCOL,0,11,11,IOUT)
+      IF(IP == 2) CALL UCOLNO(1,NCOL,0,9,14,IOUT)
+      IF(IP >= 3 .AND. IP <= 6) CALL UCOLNO(1,NCOL,3,15,8,IOUT)
+      IF(IP >= 7 .AND. IP <= 11) CALL UCOLNO(1,NCOL,3,20,6,IOUT)
+      IF(IP == 12) CALL UCOLNO(1,NCOL,0,10,12,IOUT)
+      IF(IP >= 13 .AND. IP <= 18) CALL UCOLNO(1,NCOL,3,10,7,IOUT)
+      IF(IP == 19) CALL UCOLNO(1,NCOL,0,5,13,IOUT)
+      IF(IP == 20) CALL UCOLNO(1,NCOL,0,6,12,IOUT)
+      IF(IP == 21) CALL UCOLNO(1,NCOL,0,7,10,IOUT)
+C
+C4------LOOP THROUGH THE ROWS PRINTING EACH ONE IN ITS ENTIRETY.
+      DO 1000 I=1,NROW
+      GO TO(10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,
+     1      180,190,200,210), IP
+C
+C------------ FORMAT 11G10.3
+   10 WRITE(IOUT,11) I,(BUF(J,I),J=1,NCOL)
+   11 FORMAT(1X,I3,2X,G10.3,10(1X,G10.3):/(5X,11(1X,G10.3)))
+      GO TO 1000
+C
+C------------ FORMAT 9G13.6
+   20 WRITE(IOUT,21) I,(BUF(J,I),J=1,NCOL)
+   21 FORMAT(1X,I3,2X,G13.6,8(1X,G13.6):/(5X,9(1X,G13.6)))
+      GO TO 1000
+C
+C------------ FORMAT 15F7.1
+   30 WRITE(IOUT,31) I,(BUF(J,I),J=1,NCOL)
+   31 FORMAT(1X,I3,1X,15(1X,F7.1):/(5X,15(1X,F7.1)))
+      GO TO 1000
+C
+C------------ FORMAT 15F7.2
+   40 WRITE(IOUT,41) I,(BUF(J,I),J=1,NCOL)
+   41 FORMAT(1X,I3,1X,15(1X,F7.2):/(5X,15(1X,F7.2)))
+      GO TO 1000
+C
+C------------ FORMAT 15F7.3
+   50 WRITE(IOUT,51) I,(BUF(J,I),J=1,NCOL)
+   51 FORMAT(1X,I3,1X,15(1X,F7.3):/(5X,15(1X,F7.3)))
+      GO TO 1000
+C
+C------------ FORMAT 15F7.4
+   60 WRITE(IOUT,61) I,(BUF(J,I),J=1,NCOL)
+   61 FORMAT(1X,I3,1X,15(1X,F7.4):/(5X,15(1X,F7.4)))
+      GO TO 1000
+C
+C------------ FORMAT 20F5.0
+   70 WRITE(IOUT,71) I,(BUF(J,I),J=1,NCOL)
+   71 FORMAT(1X,I3,1X,20(1X,F5.0):/(5X,20(1X,F5.0)))
+      GO TO 1000
+C
+C------------ FORMAT 20F5.1
+   80 WRITE(IOUT,81) I,(BUF(J,I),J=1,NCOL)
+   81 FORMAT(1X,I3,1X,20(1X,F5.1):/(5X,20(1X,F5.1)))
+      GO TO 1000
+C
+C------------ FORMAT 20F5.2
+   90 WRITE(IOUT,91) I,(BUF(J,I),J=1,NCOL)
+   91 FORMAT(1X,I3,1X,20(1X,F5.2):/(5X,20(1X,F5.2)))
+      GO TO 1000
+C
+C------------ FORMAT 20F5.3
+  100 WRITE(IOUT,101) I,(BUF(J,I),J=1,NCOL)
+  101 FORMAT(1X,I3,1X,20(1X,F5.3):/(5X,20(1X,F5.3)))
+      GO TO 1000
+C
+C------------ FORMAT 20F5.4
+  110 WRITE(IOUT,111) I,(BUF(J,I),J=1,NCOL)
+  111 FORMAT(1X,I3,1X,20(1X,F5.4):/(5X,20(1X,F5.4)))
+      GO TO 1000
+C
+C------------ FORMAT 10G11.4
+  120 WRITE(IOUT,121) I,(BUF(J,I),J=1,NCOL)
+  121 FORMAT(1X,I3,2X,G11.4,9(1X,G11.4):/(5X,10(1X,G11.4)))
+      GO TO 1000
+C
+C------------ FORMAT 10F6.0
+  130 WRITE(IOUT,131) I,(BUF(J,I),J=1,NCOL)
+  131 FORMAT(1X,I3,1X,10(1X,F6.0):/(5X,10(1X,F6.0)))
+      GO TO 1000
+C
+C------------ FORMAT 10F6.1
+  140 WRITE(IOUT,141) I,(BUF(J,I),J=1,NCOL)
+  141 FORMAT(1X,I3,1X,10(1X,F6.1):/(5X,10(1X,F6.1)))
+      GO TO 1000
+C
+C------------ FORMAT 10F6.2
+  150 WRITE(IOUT,151) I,(BUF(J,I),J=1,NCOL)
+  151 FORMAT(1X,I3,1X,10(1X,F6.2):/(5X,10(1X,F6.2)))
+      GO TO 1000
+C
+C------------ FORMAT 10F6.3
+  160 WRITE(IOUT,161) I,(BUF(J,I),J=1,NCOL)
+  161 FORMAT(1X,I3,1X,10(1X,F6.3):/(5X,10(1X,F6.3)))
+      GO TO 1000
+C
+C------------ FORMAT 10F6.4
+  170 WRITE(IOUT,171) I,(BUF(J,I),J=1,NCOL)
+  171 FORMAT(1X,I3,1X,10(1X,F6.4):/(5X,10(1X,F6.4)))
+      GO TO 1000
+C
+C------------ FORMAT 10F6.5
+  180 WRITE(IOUT,181) I,(BUF(J,I),J=1,NCOL)
+  181 FORMAT(1X,I3,1X,10(1X,F6.5):/(5X,10(1X,F6.5)))
+      GO TO 1000
+C
+C------------FORMAT 5G12.5
+  190 WRITE(IOUT,191) I,(BUF(J,I),J=1,NCOL)
+  191 FORMAT(1X,I3,2X,G12.5,4(1X,G12.5):/(5X,5(1X,G12.5)))
+      GO TO 1000
+C
+C------------FORMAT 6G11.4
+  200 WRITE(IOUT,201) I,(BUF(J,I),J=1,NCOL)
+  201 FORMAT(1X,I3,2X,G11.4,5(1X,G11.4):/(5X,6(1X,G11.4)))
+      GO TO 1000
+C
+C------------FORMAT 7G9.2
+  210 WRITE(IOUT,211) I,(BUF(J,I),J=1,NCOL)
+  211 FORMAT(1X,I3,2X,G9.2,6(1X,G9.2):/(5X,7(1X,G9.2)))
+C
+ 1000 CONTINUE
+C
+C5------RETURN
+      RETURN
+      END SUBROUTINE
+      !
+      SUBROUTINE ULAPRW_DBL(BUF,TEXT,KSTP,KPER,NCOL,NROW,ILAY,IPRN,IOUT)
+C     ******************************************************************
+C     PRINT 1 LAYER ARRAY
+C     ******************************************************************
+      USE, INTRINSIC:: ISO_FORTRAN_ENV, ONLY: REAL32, REAL64
+      USE CONSTANTS, ONLY: Z
+      CHARACTER(16):: TEXT
+      REAL(REAL64), DIMENSION(NCOL,NROW):: BUF
 C     ------------------------------------------------------------------
 C
 C0------SKIP PRINTING IF IOUT IS NEGATIVE seb
@@ -2933,228 +3445,228 @@ C
 !!!      CALL STOP_ERROR(CNTRL, IN, IOUT, MSG=FNAME)
 !!!C
 !!!C9===== END ==============================================================================================      
+!!!!!!      END SUBROUTINE
+!!!      SUBROUTINE U2DDP(A,ANAME,II,JJ,K,IN,IOUT)
+!!!C     ******************************************************************
+!!!C     ROUTINE TO INPUT 2-D REAL DATA MATRICES
+!!!C       A IS ARRAY TO INPUT
+!!!C       ANAME IS 24 CHARACTER DESCRIPTION OF A
+!!!C       II IS NO. OF ROWS
+!!!C       JJ IS NO. OF COLS
+!!!C       K IS LAYER NO. (USED WITH NAME TO TITLE PRINTOUT --)
+!!!C              IF K=0, NO LAYER IS PRINTED
+!!!C              IF K<0, CROSS SECTION IS PRINTED)
+!!!C       IN IS INPUT UNIT
+!!!C       IOUT IS OUTPUT UNIT
+!!!C     ******************************************************************
+!!!C
+!!!C        SPECIFICATIONS:
+!!!C     ------------------------------------------------------------------
+!!!      USE CONSTANTS,             ONLY: Z, ONE, NL, BLN, NEG, 
+!!!     &                                 TRUE, FALSE, DZ, UNO
+!!!      USE ERROR_INTERFACE,       ONLY: STOP_ERROR
+!!!      USE FILE_IO_INTERFACE,     ONLY: READ_TO_DATA, MOVE_TO_DATA
+!!!      USE STRINGS,               ONLY: GET_WORD, GET_NUMBER
+!!!      USE NUM2STR_INTERFACE,     ONLY: NUM2STR
+!!!      USE GENERIC_OPEN_INTERFACE,ONLY: GENERIC_OPEN
+!!!      USE PARSE_WORD_INTERFACE,  ONLY: PARSE_WORD, PARSE_WORD_UP
+!!!      USE STRINGS,               ONLY: GET_INTEGER, GET_NUMBER
+!!!      USE OPENSPEC
+!!!      IMPLICIT NONE
+!!!      CHARACTER(24), INTENT(IN):: ANAME
+!!!      INTEGER,       INTENT(IN):: II,JJ,K,IN,IOUT
+!!!      DOUBLE PRECISION, DIMENSION(JJ,II), INTENT(INOUT):: A
+!!!      CHARACTER(20):: FMTIN
+!!!      CHARACTER(16):: TEXT
+!!!      CHARACTER(768):: CNTRL, FNAME
+!!!      LOGICAL:: FORMATTED
+!!!      CHARACTER(5):: SHIFT
+!!!      DOUBLE PRECISION:: SHFT, CNSTNT
+!!!      INTEGER:: ICLOSE, IFREE, ICOL, ISTART, ISTOP, LOCAT
+!!!      INTEGER:: N, IE, IPRN, I, J
+!!!C     ------------------------------------------------------------------
+!!!      SHFT  = DZ
+!!!      SHIFT = ""
+!!!C
+!!!C1------READ ARRAY CONTROL RECORD AS CHARACTER DATA.
+!!!      CALL READ_TO_DATA(CNTRL,IN,IOUT,NOSHIFT=TRUE) !seb originally => READ(IN,'(A)') CNTRL
+!!!      FORMATTED = TRUE
+!!!C
+!!!C2------LOOK FOR ALPHABETIC WORD THAT INDICATES THAT THE RECORD IS FREE
+!!!C2------FORMAT.  SET A FLAG SPECIFYING IF FREE FORMAT OR FIXED FORMAT.
+!!!      ICLOSE = Z
+!!!      IFREE  = ONE
+!!!      ICOL   = ONE
+!!!      CALL PARSE_WORD_UP(CNTRL,ICOL,ISTART,ISTOP)
+!!!      IF     (ISTOP < ISTART) THEN                   !Empty line read - Stop program
+!!!                                  GOTO 500
+!!!      ELSE IF(CNTRL(ISTART:ISTOP) == 'CONSTANT') THEN
+!!!         LOCAT = Z
+!!!      ELSE IF(CNTRL(ISTART:ISTOP) == 'INTERNAL') THEN
+!!!         LOCAT = IN
+!!!      ELSE IF(CNTRL(ISTART:ISTOP) == 'EXTERNAL') THEN
+!!!         CALL GET_INTEGER(CNTRL,ICOL,ISTART,ISTOP,IOUT,IN,LOCAT,MSG=
+!!!     &     'U2DREL - FOUND EXTERNAL BUT FAILED TO READ THE UNIT NUMBER')
+!!!      ELSE IF(CNTRL(ISTART:ISTOP) == 'OPEN/CLOSE') THEN
+!!!         CALL PARSE_WORD(CNTRL,ICOL,ISTART,ISTOP)
+!!!         FNAME = CNTRL(ISTART:ISTOP)
+!!!         LOCAT = NEG
+!!!         IF( IOUT /= Z ) WRITE(IOUT,15) FNAME
+!!!   15    FORMAT(1X,/1X,'OPENING FILE:',/1X,A)
+!!!         ICLOSE = ONE
+!!!      ELSE
+!!!C
+!!!C2A-----DID NOT FIND A RECOGNIZED WORD, SO NOT USING FREE FORMAT.
+!!!C2A-----READ THE CONTROL RECORD THE ORIGINAL WAY.
+!!!         IFREE = Z
+!!!         READ(CNTRL,"(I10,F10.0)",IOSTAT=IE) N, SHFT
+!!!         IF(IE /= Z) GO TO 60
+!!!         !
+!!!    1    FORMAT(I10,F10.0,A20,I10)
+!!!         READ(CNTRL,1,IOSTAT=IE) LOCAT,CNSTNT,FMTIN,IPRN
+!!!         IF(IE /= Z .AND. N == Z) THEN
+!!!                                  IE     = Z
+!!!                                  LOCAT  = N
+!!!                                  CNSTNT = SHFT
+!!!                                  FMTIN  = ""
+!!!                                  IPRN   = Z
+!!!         END IF
+!!!         SHFT = DZ
+!!!         !
+!!!   60    IF(IE /= Z) THEN
+!!!           IF(K > Z) THEN
+!!!             CALL BACKSPACE_STOP_MSG(IN, IOUT, 
+!!!     +         'U2DREL - ERROR READING FOR "'//ANAME//'"'//NL//
+!!!     +         'WITH AN ARRAY CONTROL RECORD SPECIFIED AS: '//
+!!!     +          '"'//TRIM(CNTRL)//'"'//NL//
+!!!     +         'FOR LAYER '//NUM2STR(K))
+!!!           ELSE
+!!!             CALL BACKSPACE_STOP_MSG(IN, IOUT, 
+!!!     +         'U2DREL - ERROR READING FOR "'//ANAME//'"'//NL//
+!!!     +         'WITH AN ARRAY CONTROL RECORD SPECIFIED AS: '//
+!!!     +          '"'//TRIM(CNTRL)//'"')
+!!!           END IF
+!!!         END IF
+!!!         !
+!!!      END IF
+!!!C
+!!!C3------FOR FREE FORMAT CONTROL RECORD, READ REMAINING FIELDS.
+!!!      IF(IFREE /= Z) THEN
+!!!         CALL GET_NUMBER(CNTRL,ICOL,ISTART,ISTOP,IOUT,IN,CNSTNT,
+!!!     &                      MSG='U2DREL - FAILED TO READ CNSTNT NUMBER')
+!!!         IF(LOCAT /= Z) THEN
+!!!            CALL PARSE_WORD_UP(CNTRL,ICOL,ISTART,ISTOP)
+!!!            FMTIN=CNTRL(ISTART:ISTOP)
+!!!            IF(ICLOSE /= Z) THEN
+!!!               IF(LOCAT == NEG) LOCAT = Z
+!!!               IF(FMTIN == '(BINARY)') THEN
+!!!                  FORMATTED = FALSE
+!!!                  CALL GENERIC_OPEN(FNAME, LOCAT, IOUT, ACTION(1), FORM,
+!!!     +                           ACCESS, 'OLD', BUFFER_BLOCKSIZE=16384, !Buffer = 16kB*2
+!!!     +                           LINE=CNTRL, INFILE=IN)
+!!!               ELSE
+!!!               CALL GENERIC_OPEN(FNAME,LOCAT,IOUT,ACTION(1),'FORMATTED',
+!!!     +                           ACCESS, 'OLD', BUFFER_BLOCKSIZE=16384, !Buffer = 16kB*2
+!!!     +                           LINE=CNTRL, INFILE=IN)
+!!!               END IF
+!!!            END IF
+!!!            IF(LOCAT /= Z .AND. FMTIN == '(BINARY)') FORMATTED=FALSE !LOCAT=-LOCAT
+!!!            CALL GET_INTEGER(CNTRL,ICOL,ISTART,ISTOP,IOUT,IN,IPRN,MSG=
+!!!     &                                  'U2DREL - FAILED TO READ IPRN')
+!!!         END IF
+!!!         !
+!!!         CALL GET_WORD(CNTRL,ICOL,ISTART,ISTOP,SHIFT)
+!!!         IF(SHIFT == "SHIFT") THEN
+!!!            CALL GET_NUMBER(CNTRL,ICOL,ISTART,ISTOP,IOUT,IN,SHFT,MSG=
+!!!     +'U2DREL FOUND KEYWORD "SHIFT", BUT ERROR READING THE SHFT FACTOR')
+!!!         END IF
+!!!      END IF
+!!!C
+!!!C4------TEST LOCAT TO SEE HOW TO DEFINE ARRAY VALUES.
+!!!      IF(LOCAT == Z) THEN
+!!!C
+!!!C4A-----LOCAT=0; SET ALL ARRAY VALUES EQUAL TO CNSTNT. RETURN.
+!!!        DO I=1,II
+!!!        DO J=1,JJ
+!!!                A(J,I)=CNSTNT
+!!!        END DO
+!!!        END DO
+!!!        IF(SHFT /= 0.0) A = A + SHFT
+!!!        IF( IOUT /= Z ) THEN
+!!!            IF(K >  Z ) WRITE(IOUT,2) ANAME,CNSTNT,K
+!!!            IF(K <= Z ) WRITE(IOUT,3) ANAME,CNSTNT
+!!!        END IF
+!!!    2   FORMAT(1X,/1X,A,' =',1P,G14.6,' FOR LAYER',I4)
+!!!    3   FORMAT(1X,/1X,A,' =',1P,G14.6)
+!!!        RETURN
+!!!      ELSE IF(LOCAT /= Z .AND. FORMATTED) THEN
+!!!C
+!!!C4B-----LOCAT>0; READ FORMATTED RECORDS USING FORMAT FMTIN.
+!!!        IF( IOUT /= Z ) THEN
+!!!          IF(K > Z) THEN
+!!!               WRITE(IOUT,94) ANAME,K,LOCAT,FMTIN
+!!!          ELSE IF(K == Z) THEN
+!!!               WRITE(IOUT,95) ANAME,LOCAT,FMTIN
+!!!          ELSE
+!!!               WRITE(IOUT,96) ANAME,LOCAT,FMTIN
+!!!          END IF
+!!!   94     FORMAT(1X,///11X,A,' FOR LAYER',I4,/1X,
+!!!     +     'READING ON UNIT ',I4,' WITH FORMAT: ',A)
+!!!   95     FORMAT(1X,///11X,A,/1X,
+!!!     +     'READING ON UNIT ',I4,' WITH FORMAT: ',A)
+!!!   96     FORMAT(1X,///11X,A,' FOR CROSS SECTION',/1X,
+!!!     +     'READING ON UNIT ',I4,' WITH FORMAT: ',A)
+!!!        END IF
+!!!        DO 100 I=1,II
+!!!        CALL MOVE_TO_DATA(CNTRL,LOCAT,IOUT)
+!!!        IF(FMTIN == '(FREE)') THEN
+!!!           READ(LOCAT,*,IOSTAT=IE) A(1:JJ,I)  !(A(J,I),J=1,JJ)
+!!!        ELSE
+!!!           READ(LOCAT,FMTIN,IOSTAT=IE) A(1:JJ,I)  !(A(J,I),J=1,JJ)
+!!!        END IF
+!!!           !
+!!!           IF(IE /= Z) CALL BACKSPACE_IO_STOP_MSG(LOCAT, IOUT, IE,
+!!!     +     'U2DREL - ERROR READING ON CURRENT INPUT LINE A SET OF '//
+!!!     +     'NUMBERS FOR "'//TRIM(ADJUSTL(ANAME))//'"'//BLN//
+!!!     +     '**NOTE ERROR LINE IS THE BEST GUESS FOR ERROR LOCATION.')
+!!!  100   CONTINUE
+!!!      ELSE
+!!!C
+!!!C4C-----LOCAT<0; READ UNFORMATTED ARRAY VALUES.
+!!!        CALL STOP_ERROR(CNTRL, IN, IOUT, MSG=
+!!!     +   'U2DREL - ERROR READING CURRENT INPUT FOR'//NL//
+!!!     +   '"'//TRIM(ADJUSTL(ANAME))//'"'//BLN//
+!!!     +   'THE INPUT DOES NOT ALLOW READING "(BINARY)" FORMATTED DATA.')
+!!!      END IF
+!!!C
+!!!C5------IF CNSTNT NOT ZERO THEN MULTIPLY ARRAY VALUES BY CNSTNT.
+!!!      IF(ICLOSE /= Z) CLOSE(UNIT=LOCAT)
+!!!      IF(CNSTNT /= DZ .AND. CNSTNT /= UNO) THEN
+!!!        DO I=1,II
+!!!        DO J=1,JJ
+!!!              A(J,I)=A(J,I)*CNSTNT
+!!!        END DO
+!!!        END DO
+!!!      END IF
+!!!      !
+!!!      IF(SHFT /= 0.0) A = A + SHFT
+!!!      !
+!!!C
+!!!C6------IF PRINT CODE (IPRN) >0 OR =0 THEN PRINT ARRAY VALUES.
+!!!  320 IF(IPRN >= Z) CALL ULAPRW(A,ANAME,0,0,JJ,II,0,IPRN,IOUT)
+!!!C
+!!!C7------RETURN
+!!!      RETURN
+!!!C
+!!!C8------CONTROL RECORD ERROR.
+!!!  500 IF(K > Z) THEN
+!!!          FNAME = 'ERROR READING ARRAY CONTROL RECORD FOR "'//
+!!!     +            TRIM(ADJUSTL(ANAME))//'" FOR LAYER '//NUM2STR(K)
+!!!      ELSE
+!!!          FNAME = 'ERROR READING ARRAY CONTROL RECORD FOR "'//
+!!!     +            TRIM(ADJUSTL(ANAME))//'"'
+!!!      END IF
+!!!      !CALL USTOP(' ')
+!!!      CALL STOP_ERROR(CNTRL, IN, IOUT, MSG=FNAME)
 !!!      END SUBROUTINE
-      SUBROUTINE U2DDP(A,ANAME,II,JJ,K,IN,IOUT)
-C     ******************************************************************
-C     ROUTINE TO INPUT 2-D REAL DATA MATRICES
-C       A IS ARRAY TO INPUT
-C       ANAME IS 24 CHARACTER DESCRIPTION OF A
-C       II IS NO. OF ROWS
-C       JJ IS NO. OF COLS
-C       K IS LAYER NO. (USED WITH NAME TO TITLE PRINTOUT --)
-C              IF K=0, NO LAYER IS PRINTED
-C              IF K<0, CROSS SECTION IS PRINTED)
-C       IN IS INPUT UNIT
-C       IOUT IS OUTPUT UNIT
-C     ******************************************************************
-C
-C        SPECIFICATIONS:
-C     ------------------------------------------------------------------
-      USE CONSTANTS,             ONLY: Z, ONE, NL, BLN, NEG, 
-     &                                 TRUE, FALSE, DZ, UNO
-      USE ERROR_INTERFACE,       ONLY: STOP_ERROR
-      USE FILE_IO_INTERFACE,     ONLY: READ_TO_DATA, MOVE_TO_DATA
-      USE STRINGS,               ONLY: GET_WORD, GET_NUMBER
-      USE NUM2STR_INTERFACE,     ONLY: NUM2STR
-      USE GENERIC_OPEN_INTERFACE,ONLY: GENERIC_OPEN
-      USE PARSE_WORD_INTERFACE,  ONLY: PARSE_WORD, PARSE_WORD_UP
-      USE STRINGS,               ONLY: GET_INTEGER, GET_NUMBER
-      USE OPENSPEC
-      IMPLICIT NONE
-      CHARACTER(24), INTENT(IN):: ANAME
-      INTEGER,       INTENT(IN):: II,JJ,K,IN,IOUT
-      DOUBLE PRECISION, DIMENSION(JJ,II), INTENT(INOUT):: A
-      CHARACTER(20):: FMTIN
-      CHARACTER(16):: TEXT
-      CHARACTER(768):: CNTRL, FNAME
-      LOGICAL:: FORMATTED
-      CHARACTER(5):: SHIFT
-      DOUBLE PRECISION:: SHFT, CNSTNT
-      INTEGER:: ICLOSE, IFREE, ICOL, ISTART, ISTOP, LOCAT
-      INTEGER:: N, IE, IPRN, I, J
-C     ------------------------------------------------------------------
-      SHFT  = DZ
-      SHIFT = ""
-C
-C1------READ ARRAY CONTROL RECORD AS CHARACTER DATA.
-      CALL READ_TO_DATA(CNTRL,IN,IOUT,NOSHIFT=TRUE) !seb originally => READ(IN,'(A)') CNTRL
-      FORMATTED = TRUE
-C
-C2------LOOK FOR ALPHABETIC WORD THAT INDICATES THAT THE RECORD IS FREE
-C2------FORMAT.  SET A FLAG SPECIFYING IF FREE FORMAT OR FIXED FORMAT.
-      ICLOSE = Z
-      IFREE  = ONE
-      ICOL   = ONE
-      CALL PARSE_WORD_UP(CNTRL,ICOL,ISTART,ISTOP)
-      IF     (ISTOP < ISTART) THEN                   !Empty line read - Stop program
-                                  GOTO 500
-      ELSE IF(CNTRL(ISTART:ISTOP) == 'CONSTANT') THEN
-         LOCAT = Z
-      ELSE IF(CNTRL(ISTART:ISTOP) == 'INTERNAL') THEN
-         LOCAT = IN
-      ELSE IF(CNTRL(ISTART:ISTOP) == 'EXTERNAL') THEN
-         CALL GET_INTEGER(CNTRL,ICOL,ISTART,ISTOP,IOUT,IN,LOCAT,MSG=
-     &     'U2DREL - FOUND EXTERNAL BUT FAILED TO READ THE UNIT NUMBER')
-      ELSE IF(CNTRL(ISTART:ISTOP) == 'OPEN/CLOSE') THEN
-         CALL PARSE_WORD(CNTRL,ICOL,ISTART,ISTOP)
-         FNAME = CNTRL(ISTART:ISTOP)
-         LOCAT = NEG
-         IF( IOUT /= Z ) WRITE(IOUT,15) FNAME
-   15    FORMAT(1X,/1X,'OPENING FILE:',/1X,A)
-         ICLOSE = ONE
-      ELSE
-C
-C2A-----DID NOT FIND A RECOGNIZED WORD, SO NOT USING FREE FORMAT.
-C2A-----READ THE CONTROL RECORD THE ORIGINAL WAY.
-         IFREE = Z
-         READ(CNTRL,"(I10,F10.0)",IOSTAT=IE) N, SHFT
-         IF(IE /= Z) GO TO 60
-         !
-    1    FORMAT(I10,F10.0,A20,I10)
-         READ(CNTRL,1,IOSTAT=IE) LOCAT,CNSTNT,FMTIN,IPRN
-         IF(IE /= Z .AND. N == Z) THEN
-                                  IE     = Z
-                                  LOCAT  = N
-                                  CNSTNT = SHFT
-                                  FMTIN  = ""
-                                  IPRN   = Z
-         END IF
-         SHFT = DZ
-         !
-   60    IF(IE /= Z) THEN
-           IF(K > Z) THEN
-             CALL BACKSPACE_STOP_MSG(IN, IOUT, 
-     +         'U2DREL - ERROR READING FOR "'//ANAME//'"'//NL//
-     +         'WITH AN ARRAY CONTROL RECORD SPECIFIED AS: '//
-     +          '"'//TRIM(CNTRL)//'"'//NL//
-     +         'FOR LAYER '//NUM2STR(K))
-           ELSE
-             CALL BACKSPACE_STOP_MSG(IN, IOUT, 
-     +         'U2DREL - ERROR READING FOR "'//ANAME//'"'//NL//
-     +         'WITH AN ARRAY CONTROL RECORD SPECIFIED AS: '//
-     +          '"'//TRIM(CNTRL)//'"')
-           END IF
-         END IF
-         !
-      END IF
-C
-C3------FOR FREE FORMAT CONTROL RECORD, READ REMAINING FIELDS.
-      IF(IFREE /= Z) THEN
-         CALL GET_NUMBER(CNTRL,ICOL,ISTART,ISTOP,IOUT,IN,CNSTNT,
-     &                      MSG='U2DREL - FAILED TO READ CNSTNT NUMBER')
-         IF(LOCAT /= Z) THEN
-            CALL PARSE_WORD_UP(CNTRL,ICOL,ISTART,ISTOP)
-            FMTIN=CNTRL(ISTART:ISTOP)
-            IF(ICLOSE /= Z) THEN
-               IF(LOCAT == NEG) LOCAT = Z
-               IF(FMTIN == '(BINARY)') THEN
-                  FORMATTED = FALSE
-                  CALL GENERIC_OPEN(FNAME, LOCAT, IOUT, ACTION(1), FORM,
-     +                           ACCESS, 'OLD', BUFFER_BLOCKSIZE=16384, !Buffer = 16kB*2
-     +                           LINE=CNTRL, INFILE=IN)
-               ELSE
-               CALL GENERIC_OPEN(FNAME,LOCAT,IOUT,ACTION(1),'FORMATTED',
-     +                           ACCESS, 'OLD', BUFFER_BLOCKSIZE=16384, !Buffer = 16kB*2
-     +                           LINE=CNTRL, INFILE=IN)
-               END IF
-            END IF
-            IF(LOCAT /= Z .AND. FMTIN == '(BINARY)') FORMATTED=FALSE !LOCAT=-LOCAT
-            CALL GET_INTEGER(CNTRL,ICOL,ISTART,ISTOP,IOUT,IN,IPRN,MSG=
-     &                                  'U2DREL - FAILED TO READ IPRN')
-         END IF
-         !
-         CALL GET_WORD(CNTRL,ICOL,ISTART,ISTOP,SHIFT)
-         IF(SHIFT == "SHIFT") THEN
-            CALL GET_NUMBER(CNTRL,ICOL,ISTART,ISTOP,IOUT,IN,SHFT,MSG=
-     +'U2DREL FOUND KEYWORD "SHIFT", BUT ERROR READING THE SHFT FACTOR')
-         END IF
-      END IF
-C
-C4------TEST LOCAT TO SEE HOW TO DEFINE ARRAY VALUES.
-      IF(LOCAT == Z) THEN
-C
-C4A-----LOCAT=0; SET ALL ARRAY VALUES EQUAL TO CNSTNT. RETURN.
-        DO I=1,II
-        DO J=1,JJ
-                A(J,I)=CNSTNT
-        END DO
-        END DO
-        IF(SHFT /= 0.0) A = A + SHFT
-        IF( IOUT /= Z ) THEN
-            IF(K >  Z ) WRITE(IOUT,2) ANAME,CNSTNT,K
-            IF(K <= Z ) WRITE(IOUT,3) ANAME,CNSTNT
-        END IF
-    2   FORMAT(1X,/1X,A,' =',1P,G14.6,' FOR LAYER',I4)
-    3   FORMAT(1X,/1X,A,' =',1P,G14.6)
-        RETURN
-      ELSE IF(LOCAT /= Z .AND. FORMATTED) THEN
-C
-C4B-----LOCAT>0; READ FORMATTED RECORDS USING FORMAT FMTIN.
-        IF( IOUT /= Z ) THEN
-          IF(K > Z) THEN
-               WRITE(IOUT,94) ANAME,K,LOCAT,FMTIN
-          ELSE IF(K == Z) THEN
-               WRITE(IOUT,95) ANAME,LOCAT,FMTIN
-          ELSE
-               WRITE(IOUT,96) ANAME,LOCAT,FMTIN
-          END IF
-   94     FORMAT(1X,///11X,A,' FOR LAYER',I4,/1X,
-     +     'READING ON UNIT ',I4,' WITH FORMAT: ',A)
-   95     FORMAT(1X,///11X,A,/1X,
-     +     'READING ON UNIT ',I4,' WITH FORMAT: ',A)
-   96     FORMAT(1X,///11X,A,' FOR CROSS SECTION',/1X,
-     +     'READING ON UNIT ',I4,' WITH FORMAT: ',A)
-        END IF
-        DO 100 I=1,II
-        CALL MOVE_TO_DATA(CNTRL,LOCAT,IOUT)
-        IF(FMTIN == '(FREE)') THEN
-           READ(LOCAT,*,IOSTAT=IE) A(1:JJ,I)  !(A(J,I),J=1,JJ)
-        ELSE
-           READ(LOCAT,FMTIN,IOSTAT=IE) A(1:JJ,I)  !(A(J,I),J=1,JJ)
-        END IF
-           !
-           IF(IE /= Z) CALL BACKSPACE_IO_STOP_MSG(LOCAT, IOUT, IE,
-     +     'U2DREL - ERROR READING ON CURRENT INPUT LINE A SET OF '//
-     +     'NUMBERS FOR "'//TRIM(ADJUSTL(ANAME))//'"'//BLN//
-     +     '**NOTE ERROR LINE IS THE BEST GUESS FOR ERROR LOCATION.')
-  100   CONTINUE
-      ELSE
-C
-C4C-----LOCAT<0; READ UNFORMATTED ARRAY VALUES.
-        CALL STOP_ERROR(CNTRL, IN, IOUT, MSG=
-     +   'U2DREL - ERROR READING CURRENT INPUT FOR'//NL//
-     +   '"'//TRIM(ADJUSTL(ANAME))//'"'//BLN//
-     +   'THE INPUT DOES NOT ALLOW READING "(BINARY)" FORMATTED DATA.')
-      END IF
-C
-C5------IF CNSTNT NOT ZERO THEN MULTIPLY ARRAY VALUES BY CNSTNT.
-      IF(ICLOSE /= Z) CLOSE(UNIT=LOCAT)
-      IF(CNSTNT /= DZ .AND. CNSTNT /= UNO) THEN
-        DO I=1,II
-        DO J=1,JJ
-              A(J,I)=A(J,I)*CNSTNT
-        END DO
-        END DO
-      END IF
-      !
-      IF(SHFT /= 0.0) A = A + SHFT
-      !
-C
-C6------IF PRINT CODE (IPRN) >0 OR =0 THEN PRINT ARRAY VALUES.
-  320 IF(IPRN >= Z) CALL ULAPRW(A,ANAME,0,0,JJ,II,0,IPRN,IOUT)
-C
-C7------RETURN
-      RETURN
-C
-C8------CONTROL RECORD ERROR.
-  500 IF(K > Z) THEN
-          FNAME = 'ERROR READING ARRAY CONTROL RECORD FOR "'//
-     +            TRIM(ADJUSTL(ANAME))//'" FOR LAYER '//NUM2STR(K)
-      ELSE
-          FNAME = 'ERROR READING ARRAY CONTROL RECORD FOR "'//
-     +            TRIM(ADJUSTL(ANAME))//'"'
-      END IF
-      !CALL USTOP(' ')
-      CALL STOP_ERROR(CNTRL, IN, IOUT, MSG=FNAME)
-      END SUBROUTINE
       
