@@ -674,7 +674,8 @@ CONTAINS
   !
   ! LOCAL VARIABLES
   CHARACTER(256)::LINE
-  INTEGER::I,J,IERR,NACT,INFEED
+  INTEGER:: I, J, IERR, NACT, INFEED
+  LOGICAL:: EOF
   !
   IF(FEED%NFEED.LE.Z) RETURN
   !
@@ -683,14 +684,18 @@ CONTAINS
   IF(FEED%BINARY) LINE='UNREADABLE BINARY DATA -- NO LINE TO RETURN'
   !
   NACT=Z
+  EOF = FALSE
   !
   IF( .NOT. FEED%INT_DAT .AND. .NOT. FEED%BINARY ) THEN  !DBLE AND ASCII
       DO I=1, FEED%NFEED
         INFEED=FEED%FD(I)%FL%IU
-        CALL READ_TO_DATA(LINE,INFEED)
-        BACKSPACE(INFEED)
+        CALL READ_TO_DATA(LINE, INFEED, EOF=EOF, BACK_UP=TRUE) !Read until first uncommented line, then backspace so that READ() will read the next uncommented line
         !
-        READ(INFEED,*,IOSTAT=IERR) FEED%FD(I)%DAT
+        IF(EOF) THEN
+            IERR = NEG
+        ELSE
+            READ(INFEED,*,IOSTAT=IERR) FEED%FD(I)%DAT
+        END IF
         IF(IERR.NE.Z) EXIT
         !
         IF(FEED%FD(I)%FL%SCALE.NE.UNO) THEN
@@ -703,10 +708,13 @@ CONTAINS
   ELSEIF(   FEED%INT_DAT .AND. .NOT. FEED%BINARY ) THEN  !INT AND ASCII
       DO I=1, FEED%NFEED
         INFEED=FEED%FD(I)%FL%IU
-        CALL READ_TO_DATA(LINE,INFEED)
-        BACKSPACE(INFEED)
+        CALL READ_TO_DATA(LINE, INFEED, EOF=EOF, BACK_UP=TRUE) !Read until first uncommented line, then backspace so that READ() will read the next uncommented line
         !
-        READ(INFEED,*,IOSTAT=IERR) FEED%FD(I)%IDAT
+        IF(EOF) THEN
+            IERR = NEG
+        ELSE
+            READ(INFEED,*,IOSTAT=IERR) FEED%FD(I)%IDAT
+        END IF
         IF(IERR.NE.Z) EXIT
         !
         NACT = NACT + COUNT(FEED%FD(I)%IDAT .NE. Z)                      !IF ZERO THEN ASSUMED INACTIVE
@@ -1015,10 +1023,12 @@ CONTAINS
   CHARACTER(*), INTENT(IN   ):: LABEL
   CONTIGUOUS:: PAK
   ! LOCAL VARIABLES
-  INTEGER:: I, J, IOUT, ISEG
+  INTEGER:: I, J, IOUT, ISEG, NSEG
   CHARACTER(16),DIMENSION(1):: CAUX
   !
   IF (FEED%NFEED .LE. Z) RETURN
+  !
+  NSEG = SIZE(PAK, 2) + 1  !Expects passed array to be correct dimension; +1 isfor < rather than <= with checks
   !
   IOUT = FEED%IOUT
   WRITE(IOUT,*)                                       !CARRAGE RETURN WHEN USING LINE FEED
@@ -1027,22 +1037,40 @@ CONTAINS
   IF(FEED%IPRT.EQ.1) THEN
      WRITE(IOUT,'(A/)') TRIM(FEED%PAK)//' LINEFEED STRESS PERIOD INFORMATION'
      CALL ULSTLB(IOUT,LABEL,CAUX,1,Z)
+  ELSE
+     WRITE(IOUT,'(A/)') TRIM(FEED%PAK)//' LINEFEED STRESS PERIOD INFORMATION NOW BEING APPLIED'
   END IF
   !
   DO I=1, FEED%NFEED
-    IF(FEED%IPRT.EQ.1) WRITE(IOUT,'(A,I2)')'FEED NUMBER ',I
-    !
     DO J=1, FEED%FD(I)%NDAT
       IF( FEED%FD(I)%DAT(J) .NE. FEED%FD(I)%DAT(J) ) FEED%FD(I)%DAT(J)=0D0          !NaN VALUES ARE SET TO ZERO
       !
       ISEG = FEED%FD(I)%NUMIDX(1,J)
-      PAK(IPVL,ISEG) = FEED%FD(I)%DAT(J)
-      !
-      IF(FEED%IPRT.EQ.1)THEN
-        WRITE(IOUT,'(1X,I7,1x,G16.8)') ISEG, PAK(IPVL,ISEG)
-      END IF
+      IF(0 < ISEG .AND. ISEG < NSEG) PAK(IPVL,ISEG) = 0.0
     END DO
   END DO
+  !
+  DO I=1, FEED%NFEED
+    DO J=1, FEED%FD(I)%NDAT
+      ISEG = FEED%FD(I)%NUMIDX(1,J)
+      IF(0 < ISEG .AND. ISEG < NSEG) PAK(IPVL,ISEG) = PAK(IPVL,ISEG) + FEED%FD(I)%DAT(J)
+    END DO
+  END DO
+  !
+  IF(FEED%IPRT.EQ.1) THEN
+     DO I=1, FEED%NFEED
+       WRITE(IOUT,'(A,I2)')'FEED NUMBER ',I
+       DO J=1, FEED%FD(I)%NDAT
+         !
+         ISEG = FEED%FD(I)%NUMIDX(1,J)
+         IF(0 < ISEG .AND. ISEG < NSEG) THEN
+           WRITE(IOUT,'(1X,I7,1x,G16.8)') ISEG, PAK(IPVL,ISEG)
+         ELSE
+           WRITE(IOUT,'(1X,I7,1x,G16.8,2x,A)') ISEG, PAK(IPVL,ISEG), '<-- WARNING BAD SEGMENT NUMBER, SKIPPING THIS ASSIGNMENT'
+         END IF
+       END DO
+     END DO
+  END IF
   !
  END SUBROUTINE
   !
