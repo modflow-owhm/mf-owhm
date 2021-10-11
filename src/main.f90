@@ -29,7 +29,7 @@ SUBROUTINE PRINT_MAIN_HEADER(IU)  ! Set to 6 for cmd prompt or use output_unit f
   CHARACTER(:),ALLOCATABLE:: Revision
   !
   VERSION_OWHM='2.1'                                 ! "Psyduck After Advil" 
-  Revision    ='1a'
+  Revision    ='1b'
   VERSION_MF  ='1.12'        
   VERSION_FMP ='4.1'       
   VERSION_SWR ='1.04'       
@@ -874,7 +874,7 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
                          !
                          CALL MNW2_GET_COND(KPER,IGRID,IUNIT(50),IUNIT(1),IUNIT(23),IUNIT(62),IUNIT(37))
                          !
-                         CALL GWF2MNW27FM(KKITER,kkstp,kkper,IGRID)
+                         CALL GWF2MNW27FM(KKITER,kkstp,kkper,mxiter,IGRID)
                    END IF
                    !
                    IF(IUNIT(52) /= Z) CALL GWF2MNW17FM(KKITER,IUNIT(1),IUNIT(23),IUNIT(37),IUNIT(62),IGRID)

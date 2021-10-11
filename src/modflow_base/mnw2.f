@@ -104,7 +104,7 @@ C     ------------------------------------------------------------------
      1                       NODTOT,INTTOT,MNWAUX,MNW2,MNWNOD,MNWINT,
      2                    CapTable,SMALL,NTOTNOD,WELLID,LIMQ,
      3               MNW2TABFILE, MNW_FEED,MNW2BUD, GRPNODE,IOUT,
-     4               MNW_FMP_LINK, HAS_FMP_WELLS,SOLV_FLG,
+     4               MNW_FMP_LINK, HAS_FMP_WELLS,SOLV_FLG,SOLV_BY_HCOF,
      5               HCOF_ONLY_ITER,HCOF_RHS_FLIP, QDES_OLD,
      6               HAS_NWT,MIN_PERF,PP_CON_ITER_LIM,MXNODE,LEN_WELLID,
      7               MNW2_WARN, SMNW2COND_WARN,
@@ -141,7 +141,7 @@ C1------grids to be defined.
       ALLOCATE(MNW2BUD,IOUT,MNW2_WARN,SMNW2COND_WARN)
       ALLOCATE(SOLV_FLG,HCOF_ONLY_ITER,HCOF_RHS_FLIP,MIN_PERF)
       ALLOCATE(PRNT_MNW2, PRNT_MNW2_Q_NODE,PRNT_MNW2_Q_INOUT)
-      ALLOCATE(PRNT_MNW2_NODE)
+      ALLOCATE(PRNT_MNW2_NODE, SOLV_BY_HCOF)
       !
       ALLOCATE(HAS_NWT, PP_CON_ITER_LIM,MXNODE,LEN_WELLID)
       HAS_NWT = IUNWT.ne.Z
@@ -149,8 +149,9 @@ C1------grids to be defined.
       MXNODE=Z
       LEN_WELLID = 12
       !
-      IOUT = LIST_OUT
+      IOUT     = LIST_OUT
       MIN_PERF = 0.01D0  !Default is to not allow perf if less than 1% of cell thickness
+      SOLV_BY_HCOF = FALSE
       !
 C
 C2------IDENTIFY PACKAGE AND INITIALIZE NMNW2.
@@ -3016,7 +3017,7 @@ c
       RETURN
       END SUBROUTINE
 C
-      SUBROUTINE GWF2MNW27FM(KITER,kstp,kper,IGRID)
+      SUBROUTINE GWF2MNW27FM(KITER,kstp,kper,mxiter,IGRID)
 C     ******************************************************************
 C     ADD MNW2 TERMS TO RHS AND HCOF
 C     ******************************************************************
@@ -3031,14 +3032,14 @@ C     ------------------------------------------------------------------
      1                       NODTOT,INTTOT,MNWAUX,MNW2,MNWNOD,MNWINT,
 C-LFK     2                       CapTable,SMALL,WELLID
      2                       CapTable,SMALL,WELLID,LIMQ,
-     3                       IOUT,MNW2_WARN,SOLV_FLG,
+     3                       IOUT,MNW2_WARN,SOLV_FLG,SOLV_BY_HCOF,
      4                       HCOF_ONLY_ITER,HCOF_RHS_FLIP,HAS_NWT
       USE GWFMNW2MODULE, ONLY: SGWF2MNW2PNT
       USE CONSTANTS,     ONLY: HALF, DZ, UNO, Z, ONE, TWO, NEARZERO_20
 C     ------------------------------------------------------------------
       IMPLICIT NONE
       !
-      INTEGER, INTENT(IN):: KITER,kstp,kper,IGRID
+      INTEGER, INTENT(IN):: KITER,kstp,kper,mxiter,IGRID
       !
       INTEGER:: NNODES, INODE
       INTEGER:: IQSLV
@@ -3238,13 +3239,19 @@ c     & change less than HWtol for well   ',WELLID(iw)
           end if
         end if
       end do
-c
+      !
+      iw = -10                   ! Temp use as a subtractor to determine how close kitter is close to mxiter
+      if(mxiter < 11) iw = -5
+      iw = mxiter + iw           ! Is either 10 or 5 less than mxiter
+      !
       IF    (KITER==1   ) THEN    !RHS ONLY
                           iqslv = Z
       ELSEIF(SOLV_FLG==1) THEN    !RHS ONLY
                           iqslv = Z
       ELSEIF(SOLV_FLG==2) THEN    !HCOF ONLY
                           iqslv = ONE
+      ELSEIF(KITER  > iw) THEN    !RHS ONLY - Close to mxiter so stop using HCOF to stabilize budgets
+                          iqslv = Z
       ELSEIF( EVEN_ITER ) THEN    !HCOF SOLVE
                           iqslv = ONE           
       ELSE                        !RHS SOLVE
@@ -3289,7 +3296,7 @@ c   Loop over nodes in well
             !
             Hcell = HNEW(IC,IR,IL)
             !
-            IF(iqslv /= Z .and. kiter > ONE) qact = (hwell - Hcell)*cond
+            IF(iqslv /= Z) qact = (hwell - Hcell)*cond    ! .and. kiter > ONE <- implied
             !
             HasQ = abs(qact) > small
             !
@@ -3334,9 +3341,11 @@ cdebug              if(iqslv.ne.0.and.kiter.gt.1.and.kiter.lt.NoMoIter) then
                  !
                  hcof(ic,ir,il) = hcof(ic,ir,il) - cond
                  rhs(ic,ir,il)  = rhs(ic,ir,il)  - cond * hwell
+                 SOLV_BY_HCOF = .TRUE.
               else
                  ! Specify Q and solve for head;  add Q to RHS accumulator.
                  rhs(ic,ir,il) = rhs(ic,ir,il) - qact
+                 SOLV_BY_HCOF = .FALSE.
               endif
               !
               MNWNOD(4,INODE) = qact
@@ -3366,7 +3375,7 @@ C-LFK     2                       SMALL,WELLID,NTOTNOD
      2                       SMALL,WELLID,NTOTNOD,LIMQ,MNW2BUD,GRPNODE,
      3                       IOUT,MNW2_WARN,SMNW2COND_WARN,HAS_NWT,
      4                       SOLV_FLG,HCOF_ONLY_ITER,MXNODE,LEN_WELLID,
-     7                       PRNT_MNW2, PRNT_MNW2_Q_NODE,
+     7                       PRNT_MNW2, PRNT_MNW2_Q_NODE,SOLV_BY_HCOF,
      +                       PRNT_MNW2_Q_INOUT,PRNT_MNW2_NODE
       USE GWFMNW2MODULE, ONLY: SGWF2MNW2PNT
       USE ERROR_INTERFACE,    ONLY: WARNING_MESSAGE
@@ -3397,6 +3406,8 @@ c-lfk  10/10/2012
       CHARACTER(15) ctext5
       CHARACTER(24) ctext6,CTEXT7
       LOGICAL:: ALLDRY, DRY_NODE, QLIMIT, Qextract
+      REAL:: ZERO, realQ  ! Using default REAL for passing to routines
+      ZERO = 0.0
 C
       CALL SGWF2MNW2PNT(IGRID)
 c             ----+----1----+-
@@ -3486,7 +3497,12 @@ c  active well check
             IC    = NINT( MNWNOD(3,INODE) ) 
             Hcell = HNEW(IC,IR,IL)
             !
-            IF ( (hwell - Hcell)*cond > DZ ) THEN
+            IF(SOLV_BY_HCOF) THEN
+               IF ( (hwell - Hcell)*cond > DZ ) THEN
+                                             MNWNOD(4, INODE) = DZ
+                                             MNWNOD(15,INODE) = Hcell
+               END IF
+            ELSEIF(MNWNOD(4, INODE) > DZ) THEN
                                              MNWNOD(4, INODE) = DZ
                                              MNWNOD(15,INODE) = Hcell
             END IF
@@ -3520,28 +3536,43 @@ c   Loop over nodes in well
             cond  = MNWNOD(14,INODE)
             hwell = MNWNOD(15,INODE)   ! Water level in wellbore, or bottom of cell if seepage face cell -> used for => qact = ( hlim - Hcell) * cond
             !
-            DRY_NODE = IBOUND(IC,IR,IL) == Z .OR. Hcell == Hdry
+            DRY_NODE = IBOUND(IC,IR,IL) == Z .OR. 
+     +                 Hcell == Hdry         .OR. 
+     +                 cond  < NEARZERO_20
             !
-            IF( LAYHDT(IL) > Z .AND. HAS_NWT .AND. 
-     +          Hcell.LE.BOTM(IC,IR,LBOTM(IL))    )  DRY_NODE = TRUE
+            IF( HAS_NWT .AND. .NOT. DRY_NODE ) THEN
+              IF( LAYHDT(IL) > Z .AND.
+     +            Hcell <= BOTM(IC,IR,LBOTM(IL))  )  DRY_NODE = TRUE
+            END IF
             !
             if(DRY_NODE) then
               if( MNWPRNT.gt.1 .AND. 
-     +            ABS(MNWNOD(4,INODE)) < NEARZERO_20 ) then
+     +            ABS(MNWNOD(4,INODE)) > NEARZERO_20 ) then
                     write(IOUT,'(5A)') 
      +                    'Well: ',WELLID(iw),' Node: ',NUM2STR(ND,-3),
      +                    ' is in a dry cell, Q set to 0.0'
               end if
               MNWNOD(4,INODE) = DZ
               q = DZ
+            elseif(SOLV_BY_HCOF) THEN  !Solved using HCOF so need to update qact to current HNEW since its not dry
+                q = cond*(hwell-Hcell)
+                !if (ABS(MNWNOD(4,INODE) - Q) > 20.0) THEN
+                !    CONTINUE
+                !end if
+                !if(ABS(Q) > 1e-10) then
+                !if (ABS((MNWNOD(4,INODE) - Q)/Q) > 1.0e-4) THEN
+                !    CONTINUE
+                !end if
+                !end if
+                MNWNOD(4, INODE) = q
             end if
 c
 c -----print the individual rates if requested(IWL2CB<0).
-              if( ioch.eq.1 .AND. MNWPRNT>-1) then
-                  write(iout,'(A20,4i6,1x,1P5e14.6)')
-     +              WELLID(iw),nd,il,ir,ic,totim,q,hwell,Hcell,
-     +              MNWNOD(15,INODE)
-              END IF
+            if( ioch.eq.1 .AND. MNWPRNT>-1) then
+                write(iout,'(A20,4i6,1x,1P5e14.6)')
+     +            WELLID(iw),nd,il,ir,ic,totim,q,hwell,Hcell,
+     +            MNWNOD(15,INODE)
+            END IF
             !
 c    Report all wells with production less than the desired rate......
             if(.NOT. DRY_NODE) then
@@ -3681,34 +3712,45 @@ c   Loop over all wells
         WELL_LOOP3: DO IDX=1, MNW2BUD%DIM(IG)
          IW = MNW2BUD%INDEX(IG,IDX)
 c   Loop over nodes in well
-              firstnode = NINT( MNW2(4,iw) )
-              lastnode  = NINT( MNW2(4,iw) + ABS(MNW2(2,iw)) - UNO )
+         firstnode = NINT( MNW2(4,iw) )
+         lastnode  = NINT( MNW2(4,iw) + ABS(MNW2(2,iw)) - UNO )
+         if(MNW2(1,iw) < HALF .or. NMNW2 == Z) THEN ! WELL IS INACTIVE
               do INODE=firstnode,lastnode
                 ic = NINT( MNWNOD(3,INODE) )
                 ir = NINT( MNWNOD(2,INODE) )
                 il = NINT( MNWNOD(1,INODE) )
-                Q  = MNWNOD(4,INODE)
-                IF ( HAS_NWT ) THEN                                  !seb ADDED BLOCK TO MATCH WHAT IS WRITTEN TO BUDGET
-                  hwell = MNWNOD(15,INODE)
-                  IF ( LAYHDT(IL) > Z .AND. INT(MNW2(6,iw)) /= Z) THEN
-                    hlim=mnw2(7,iw)
-                    IF ( hlim < BOTM(ic,ir,lbotm(il)) ) 
-     +                   hlim = BOTM(ic,ir,lbotm(il))
-                    if ( hwell < hlim ) hwell = hlim
-                  END IF
-                  Hcell = hnew(ic,ir,il)
-                  cond  = MNWNOD(14,INODE)
-                  q     = cond*(hwell-Hcell)
-                END IF
-c  lfk  active well check
-                if(MNW2(1,iw) < HALF) Q = DZ  !WELL IS INACTIVE
-                IF(NMNW2 == Z)        Q = DZ  !SET FLOW RATE TO 0 WHEN NOT MNW2 WELLS ARE IN USE
-c
-                call UBDSVB(ioc,ncol,nrow,IC,IR,IL,real(Q),
+                call UBDSVB(ioc,ncol,nrow,IC,IR,IL,ZERO,
      +                    real(mnw2(:,iw)),
      +                    NMNWVL,NAUX,31,IBOUND,NLAY)
               end do
-c            endif
+         else
+              do INODE=firstnode,lastnode
+                ic = NINT( MNWNOD(3,INODE) )
+                ir = NINT( MNWNOD(2,INODE) )
+                il = NINT( MNWNOD(1,INODE) )
+                !Q  = MNWNOD(4,INODE)
+                realQ = REAL(MNWNOD(4,INODE))
+!                IF ( HAS_NWT ) THEN                                  !seb ADDED BLOCK TO MATCH WHAT IS WRITTEN TO BUDGET
+!                  hwell = MNWNOD(15,INODE)
+!                  IF ( LAYHDT(IL) > Z .AND. INT(MNW2(6,iw)) /= Z) THEN
+!                    hlim=mnw2(7,iw)
+!                    IF ( hlim < BOTM(ic,ir,lbotm(il)) ) 
+!     +                   hlim = BOTM(ic,ir,lbotm(il))
+!                    if ( hwell < hlim ) hwell = hlim
+!                  END IF
+!                  Hcell = hnew(ic,ir,il)
+!                  cond  = MNWNOD(14,INODE)
+!                  q     = cond*(hwell-Hcell)
+!                  if (ABS(MNWNOD(4,INODE) - Q) > 1.0e-5) THEN
+!                      CONTINUE
+!                  END IF
+!                END IF
+c
+                call UBDSVB(ioc,ncol,nrow,IC,IR,IL,realQ,
+     +                    real(mnw2(:,iw)),
+     +                    NMNWVL,NAUX,31,IBOUND,NLAY)
+              end do
+             end if ! (MNW2(1,iw) < HALF .or. NMNW2 == Z)
             enddo WELL_LOOP3
           else                  !!  Write full 3D array                ! IBD==1 case
             IF(NMNW2 == Z) buff = DZ                                   ! SET FLOW RATE TO 0 WHEN NOT MNW2 WELLS ARE IN USE
