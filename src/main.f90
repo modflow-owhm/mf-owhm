@@ -29,7 +29,7 @@ SUBROUTINE PRINT_MAIN_HEADER(IU)  ! Set to 6 for cmd prompt or use output_unit f
   CHARACTER(:),ALLOCATABLE:: Revision
   !
   VERSION_OWHM='2.1'                                 ! "Psyduck After Advil" 
-  Revision    ='1b'
+  Revision    ='1c'
   VERSION_MF  ='1.12'        
   VERSION_FMP ='4.1'       
   VERSION_SWR ='1.04'       
@@ -659,7 +659,6 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
               IF(IUNIT(7)  /= Z) CALL GWF2GHB7AD(KKSTP,IGRID)                !seb added GHB and WEL AD
               IF(IUNIT(67) /= Z) CALL GWF2WEL7AD(KKSTP,IGRID)
               IF(IUNIT(2)  /= Z) CALL GWF2WEL8AD(KKSTP,IGRID)
-              IF(IUNIT(44) /= Z) CALL GWF2SFR7LAKE(IUNIT(22),KPER,KSTP,IGRID)
               !
               !--BARC**
               IF(IUNIT(58) /= Z) CALL GWF2CFP1AD(KKPER,KKSTP)               !TR: 2017 07 20 CFPv2

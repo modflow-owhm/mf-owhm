@@ -374,8 +374,8 @@ C     ******************************************************************
 C     SPECIFICATIONS:
 C     ------------------------------------------------------------------
       USE GWFSFRMODULE
-      USE GLOBAL,       ONLY: LIST_UNIT => IOUT, UPLAY, HNEW
-      USE GLOBAL,       ONLY: IBOUND, BOTM, STRT, DELR, DELC,LBOTM,
+      USE GLOBAL,       ONLY: LIST_UNIT => IOUT, UPLAY
+      USE GLOBAL,       ONLY: IBOUND, BOTM, DELR, DELC,LBOTM,
      +                        ITRSS,NLAY,NCOL,NROW,LAYHDT,IUNIT ! CJM added ncol and nrow
       USE GWFBASMODULE, ONLY: HAS_STARTDATE
       USE GWFLPFMODULE, ONLY: SC2LPF=>SC2
@@ -394,7 +394,6 @@ C     ------------------------------------------------------------------
       USE ULOAD_AND_SFAC_INTERFACE,         ONLY: ULOAD
       USE GENERIC_BLOCK_READER_INSTRUCTION, ONLY: GENERIC_BLOCK_READER
       USE WARNING_TYPE_INSTRUCTION,         ONLY: WARNING_TYPE
-      USE GENERIC_INPUT_FILE_INSTRUCTION,   ONLY: GENERIC_INPUT_FILE
       !USE TIME_SERIES_INSTRUCTION,          ONLY: LOAD_TIME_SERIES_BLOCK
       USE CONSTANTS, ONLY: TRUE, FALSE, Z, ONE, TWO, DZ, UNO,
      +                     NL, BLNK, BLN, inf_I, NINER
@@ -411,7 +410,6 @@ C     ------------------------------------------------------------------
 C     LOCAL VARIABLES
 C     ------------------------------------------------------------------
       CHARACTER(768):: LINE
-      CHARACTER(20 ):: TABNAM
 !IFACE
       CHARACTER(8):: face
       INTEGER:: iface,ndash
@@ -431,7 +429,6 @@ C     ------------------------------------------------------------------
       TYPE(WARNING_TYPE):: WRN,WRN2,ERR,ERR2
       DOUBLE PRECISION:: DTMP
       CHARACTER(:), ALLOCATABLE:: MX_STG, MX_FLO
-      TYPE(GENERIC_INPUT_FILE):: FL                      ! Used for File Checking for OPTIONS
       !USE ALLOC_INTERFACE, ONLY: ALLOC
       DOUBLE PRECISION, DIMENSION(:), ALLOCATABLE:: TMP_VEC
       !
@@ -2065,10 +2062,10 @@ C     Compute three new tables for lake outflow
 C     ******************************************************************
       USE GWFSFRMODULE
       USE GWFBASMODULE, ONLY: HDRY
-      USE GLOBAL,       ONLY: ISSFLG, IBOUND, BOTM, WTABLE, NLAY, GSE,
+      USE GLOBAL,       ONLY: ISSFLG, IBOUND, BOTM, GSE,
      +                        LAYHDT, IUNIT, SUBLNK, LBOTM, UPLAY, HNEW
       USE PARAMMODULE,  ONLY: MXPAR, PARTYP, IACTIVE, IPLOC
-      USE GWFSUBMODULE, ONLY: LPFLNK,DVZ,DVZC                    !wschmid added 
+      USE GWFSUBMODULE, ONLY: DVZ,DVZC                    !wschmid added 
       USE ICHKSTRBOT_MODULE
       USE ERROR_INTERFACE,           ONLY: STOP_ERROR
       USE WARNING_TYPE_INSTRUCTION,  ONLY: WARNING_TYPE
@@ -2100,7 +2097,7 @@ C     ------------------------------------------------------------------
      +        ipt, ir, irch, irp, isoptflg, iss, istep, istsg, iwvcnt,
      +        jj, jk, k5, k6, k7, kk, ksfropt, kss, ktot, l, lstbeg,
      +        nseg, nstrpts,krck,irck,jrck,ireachck, j, numval,iunitnum,
-     +        Ltyp,ILP,ierr,IFLG,LLOC,ISTART,ISTOP !WSCHMID/RTH
+     +        ILP,ierr,IFLG,LLOC,ISTART,ISTOP !WSCHMID/RTH
       LOGICAL:: HAS_ERROR
       CHARACTER(LEN=200)::LINE
       REAL TTIME,TRATE
@@ -3169,35 +3166,114 @@ C
 C
 C-------SUBROUTINE GWF2SFR7AD
       SUBROUTINE GWF2SFR7AD(In, Iunitlak, kstp, kper, Igrid)
+C     ******************************************************************
+C     DETERMINE SPECIFIED INFLOWS FOR TIME STEP BASED ON TABULAR VALUES
+C     ******************************************************************
+C
+C        SPECIFICATIONS:
+C     ------------------------------------------------------------------
+      USE GWFBASMODULE, ONLY: TOTIM, DATE_SP
+      USE GWFSFRMODULE, ONLY: NSS, NUMTAB, ISFRLIST,
+     +                        SEG, FXLKOT, IDIVAR, CLOSEZERO, 
+     +                        IOUT, SFRTABFILE, SFRFEED, TIME_SERIES
+      USE GLOBAL,              ONLY: SUBLNK
+      USE CONSTANTS,           ONLY: ONE, Z, YEARTOL
+      USE TABLEFILE_INTERFACE, ONLY: TABFILEUPDATE
+      IMPLICIT NONE
+C        ARGUMENTS
+      INTEGER, INTENT(IN) :: In, Iunitlak, IGRID, KSTP, KPER
+C     ------------------------------------------------------------------
+C        VARIABLES
+C     ------------------------------------------------------------------
+      INTEGER i, iseg, istsg, lk
+      DOUBLE PRECISION:: DVAL, DTIM0, DTIM1
+      EXTERNAL FLOWTERP
+      REAL FLOWTERP
+C     -----------------------------------------------------------------
+C
+C-------SET POINTERS FOR CURRENT GRID.
+      CALL SGWF2SFR7PNT(Igrid)
+      !
+      IF(SUBLNK) CALL GWF2SFR7SUBLINK(kstp)
+C
+C1------CALL LINEAR INTERPOLATION ROUTINE
+      IF ( NUMTAB.GT.0 ) THEN
+        DO i = 1, NUMTAB
+          iseg = ISFRLIST(1,i)
+          SEG(2,iseg) = FLOWTERP(TOTIM,i)  
+        END DO
+      END IF
+      !
+      !IF TABFILE OPTION IS USED UPDATE THE TABFILES AND APPLY FLOW TO SEGEMENTS
+      IF(SFRTABFILE%NTAB > 0) THEN
+         CALL TABFILEUPDATE( SFRTABFILE,'SFR',KSTP, SEG(2,:) )             !seb UPDATES THE FLOW FOR ALL SEGMENTS LINKED TO A TABFILE
+      END IF
+      !
+      ! APPLY THE NEW FEED DATA TO THE SFR PACKAGE ARRAY
+      !
+      CALL SFRFEED%FEED_SFR(SEG(:,:NSS),2,' SEGMENT            VALUE')
+      !
+      IF(TIME_SERIES%NFIL > 0) THEN
+          DTIM0 = DATE_SP(KPER)%TS(KSTP-1)%DYEAR! + YEARTOL
+          DTIM1 = DATE_SP(KPER)%TS(KSTP  )%DYEAR
+          !
+          DO I = 1, TIME_SERIES%NFIL
+                CALL TIME_SERIES%TSF(I)%GET( DTIM1, DVAL, DTIM0 )  !Interpolate to Time Step Ending
+                SEG(2,TIME_SERIES%ID(I)) = REAL(DVAL)
+          END DO
+      END IF
+C
+C DEP moved the from SFR7FM
+C DEP FXLKOT is now adjusted in LAK7FM for limiting to available lake water.
+C
+C2------COMPUTE INFLOW OF A STREAM SEGMENT EMANATING FROM A LAKE.
+      IF (Iunitlak.NE.0) THEN
+      DO istsg = 1, NSS
+        IF ( IDIVAR(1,istsg).LT.0 ) THEN
+          IF ( SEG(2,istsg).GT.CLOSEZERO ) THEN
+            lk = IABS(IDIVAR(1, istsg))
+C3------CHECK IF LAKE OUTFLOW IS SPECIFIED AT A FIXED RATE.
+             FXLKOT(istsg) = SEG(2, istsg)
+          ELSE IF ( SEG(2, istsg).LE.-CLOSEZERO ) THEN
+             WRITE (IOUT, 9001) istsg
+ 9001        FORMAT (/5X, '*** WARNING *** NEGATIVE LAKE OUTFLOW ',
+     +                  'NOT ALLOWED; SEG = ', I6, /10X, 
+     +                  'CODE WILL ASSUME FLOW = 0.0'/)
+             SEG(2, istsg) = 0.0
+             FXLKOT(istsg) = 0.0
+          END IF
+        END IF
+      END DO
+      END IF
+      !
+      END SUBROUTINE 
+C     ------------------------------------------------------------------C
+C
+C-------SUBROUTINE GWF2SFR7SUBLINK
+      SUBROUTINE GWF2SFR7SUBLINK(kstp)
 C     *****************************************************************
 C     APPLY EFFECTS OF SUBSIDENCE ON SW_GW INTERACTION AND CONVEYANCE
 C     *****************************************************************
       USE GWFSFRMODULE
-      USE GLOBAL,       ONLY: BOTM,LBOTM,SUBLNK
-      USE GLOBAL,       ONLY: SUBLNK
-      USE GWFBASMODULE, ONLY: TOTIM
+      !USE GLOBAL,       ONLY: BOTM,LBOTM
       USE GWFSUBMODULE, ONLY: DVZ,LPFLNK,DVZC
       IMPLICIT NONE
 C     -----------------------------------------------------------------
-      INTEGER, INTENT(IN) :: In, Iunitlak, IGRID, KSTP, KPER
+      INTEGER, INTENT(IN) :: kstp
 C     -----------------------------------------------------------------
 C     LOCAL VARIABLES
 C     -----------------------------------------------------------------
       DOUBLE PRECISION dz1, dz2, dz3, dz4, dslope, fminslope, dx3, dx4,
-     1                 fminelev, slopenew, dvzup, dvzrch, dvzdn, STRTOP
+     1                 fminelev, slopenew, dvzup, dvzrch, dvzdn
       INTEGER l, ic, ir, il, ilp, irp, icp, nreach, icu, iru, ilu
       INTEGER i,  istsg, lk
       EXTERNAL FLOWTERP
       REAL FLOWTERP
+      DOUBLE PRECISION, DIMENSION(:), ALLOCATABLE:: STRTOP
 C     -----------------------------------------------------------------
-      ALLOCATABLE STRTOP(:)
-      !
-      IF(SUBLNK)THEN
       !
       ALLOCATE(STRTOP(NSTRM))
 C
-C1------SET POINTERS FOR CURRENT GRID.
-      CALL SGWF2SFR7PNT(Igrid)
       fminslope = 1.0d-6 !--> small fminslope is a big problem for mannings: produces huge depths when sitting in the denominator of depth equation.
       fminelev = 1.0d-9  !--> not as critical as fminslope ... just need to be somewhat greater than zero.
 C
@@ -3378,41 +3454,10 @@ C
         ENDDO
       DEALLOCATE(STRTOP)
       !
-      END IF !SUBLNK
       !
-      ! --------------------------------------------------
+      END SUBROUTINE
       !
-      IF ( NUMTAB.GT.0 ) THEN
-        DO i = 1, NUMTAB
-          SEG(2, ISFRLIST(1,i) ) = FLOWTERP(TOTIM,i)  
-        END DO
-      END IF
-C
-C DEP moved the from SFR7FM
-C DEP FXLKOT is now adjusted in LAK7FM for limiting to available lake water.
-C
-C2------COMPUTE INFLOW OF A STREAM SEGMENT EMANATING FROM A LAKE.
-      IF (Iunitlak.NE.0) THEN
-      DO istsg = 1, NSS
-        IF ( IDIVAR(1,istsg).LT.0 ) THEN
-          IF ( SEG(2,istsg).GT.CLOSEZERO ) THEN
-            lk = IABS(IDIVAR(1, istsg))
-C3------CHECK IF LAKE OUTFLOW IS SPECIFIED AT A FIXED RATE.
-             FXLKOT(istsg) = SEG(2, istsg)
-          ELSE IF ( SEG(2, istsg).LE.-CLOSEZERO ) THEN
-             WRITE (IOUT, 9001) istsg
- 9001        FORMAT (/5X, '*** WARNING *** NEGATIVE LAKE OUTFLOW ',
-     +                  'NOT ALLOWED; SEG = ', I6, /10X, 
-     +                  'CODE WILL ASSUME FLOW = 0.0'/)
-             SEG(2, istsg) = 0.0
-             FXLKOT(istsg) = 0.0
-          END IF
-        END IF
-      END DO
-      END IF
       !
-      END SUBROUTINE 
-C     ------------------------------------------------------------------
 C-------SUBROUTINE GWF2SFR7FM
       SUBROUTINE GWF2SFR7FM(Kkiter, Kkper, Kkstp, Iunitlak, Iunitnwt,
      +           Iunitrch, Iunituzf,Ilgr, Lgriter, Ngrids, Igrid)
@@ -3727,8 +3772,7 @@ C
 C13-----FLOW FROM LAKE COMPUTED USING TABULATED VALUES.
                   ELSE IF ( dlkstr.GT.NEARZERO .AND. icalc.EQ.4 ) THEN
                     CALL GWF2SFR7TBF(flowin, dlkstr, width, 
-     +                           nstrpts, nreach, istsg, 
-     +                           Kkiter, 0)
+     +                           nstrpts, nreach, istsg)
                   ELSE IF ( dlkstr.LT.NEARZERO .AND. icalc.GT.0 ) THEN
                     flowin = 0.0D0
                   END IF
@@ -4078,7 +4122,7 @@ C         ICALC IS GREATER THAN OR EQUAL TO 2.
                 END IF
               ELSE IF ( icalc.EQ.4 ) THEN
                 CALL GWF2SFR7TBF(flwen2, enpt2, width2, nstrpts, 
-     +                           nreach, istsg, Kkiter, 0)
+     +                           nreach, istsg)
                 wetperm2 = width2
               END IF
 C
@@ -4321,17 +4365,17 @@ C45-----CALCULATE NEWTON VARIABLES FOR ICALC EQUAL TO 4.
                   depthd = depth2 + (deps*depth2)
                   IF ( depthd.LT.NEARZERO ) depthd = deps
                   CALL GWF2SFR7TBF(flwmdpta, deptha, widtha, 
-     +                         nstrpts, nreach, istsg, Kkiter, 0)
+     +                         nstrpts, nreach, istsg)
                   CALL GWF2SFR7TBF(flwmdptb, depthb, widthb, 
-     +                         nstrpts, nreach, istsg, Kkiter, 0)
+     +                         nstrpts, nreach, istsg)
                   CALL GWF2SFR7TBF(flwmdptc, depthc, widthc, 
-     +                         nstrpts, nreach, istsg, Kkiter, 0)
+     +                         nstrpts, nreach, istsg)
                   CALL GWF2SFR7TBF(flwmdptd, depthd, widthd, 
-     +                         nstrpts, nreach, istsg, Kkiter, 0)
+     +                         nstrpts, nreach, istsg)
                   CALL GWF2SFR7TBF(flwmdpt1, depth1, width1, 
-     +                         nstrpts, nreach, istsg, Kkiter, 0)
+     +                         nstrpts, nreach, istsg)
                   CALL GWF2SFR7TBF(flwmdpt2, depth2, width2, 
-     +                         nstrpts, nreach, istsg, Kkiter, 0)
+     +                         nstrpts, nreach, istsg)
                   wetperma = widtha
                   wetpermb = widthb
                   wetpermc = widthc
@@ -4407,7 +4451,7 @@ C49-----USE BISECTION WHEN LEAKAGE IS LIMITED BY FLOW IN CHANNEL.
                     END IF
                   ELSE IF ( icalc.EQ.4 ) THEN
                     CALL GWF2SFR7TBF(flwx, depthp, widthp,
-     +                          nstrpts, nreach, istsg, Kkiter, 0)
+     +                          nstrpts, nreach, istsg)
                     wetpermp = widthp
                   END IF
                   cstr1 = wetpermp*strleak/sbdthk
@@ -4544,8 +4588,7 @@ C         FLOBOTP.
                       END IF
                     ELSE IF ( icalc.EQ.4 ) THEN
                       CALL GWF2SFR7TBF(flwp, depthp, widthp, 
-     +                                 nstrpts, nreach, istsg,
-     +                                 Kkiter, 0)
+     +                                 nstrpts, nreach, istsg)
                       wetpermp = widthp
                     END IF
                     IF ( widthp.GT.NEARZERO ) THEN
@@ -4589,8 +4632,7 @@ C         OR EQUAL TO 2.
                         END IF
                       ELSE IF ( icalc.EQ.4 ) THEN
                         CALL GWF2SFR7TBF(flwp, depthp, widthp, 
-     +                                   nstrpts, nreach, istsg, 
-     +                                   Kkiter, 0)
+     +                                   nstrpts, nreach, istsg)
                         wetpermp = widthp
                       END IF
                       IF ( widthp.GT.NEARZERO ) THEN
@@ -6330,9 +6372,9 @@ C
 C4-----FLOW FROM LAKE COMPUTED USING TABULATED VALUES.
             ELSE IF ( icalc.EQ.4 ) THEN
               CALL GWF2SFR7TBF(flwdlk1, dlkstr1, wdthlk1,
-     +                         nstrpts, nreach, istsg, kkiter, 0)
+     +                         nstrpts, nreach, istsg)
               CALL GWF2SFR7TBF(flwdlk2, dlkstr2, wdthlk2,
-     +                         nstrpts, nreach, istsg, kkiter, 0)
+     +                         nstrpts, nreach, istsg)
               DLKOTFLW(lk, istsg) = (flwdlk1-flwdlk2)/(-delh)
               SLKOTFLW(lk, istsg) = flwdlk1
             END IF
@@ -6947,6 +6989,7 @@ C     -------------------------------------------------------------------
       DOUBLE PRECISION flwlw, flwhi, stglw, stghi, wthlw, wthhi, dflwlw,
      +                 dflwhi, dstglw, dstghi, dwthlw, dwthhi, dlgflw, 
      +                 dlgsls, dlgslw, dlgstg, dlgwth
+      Logical:: first_value_zero
 C     -------------------------------------------------------------------
       IF(Flow  < NEARZERO_30) THEN
                               Flow  = DZ
@@ -6956,12 +6999,22 @@ C     -------------------------------------------------------------------
       END IF
 C
 C1------DEFINE RANGE OF FLOW, DEPTH, AND WIDTH FROM RATING TABLE.
-      flwlw = QSTAGE(1, Istsg)
-      stglw = QSTAGE(1+Nstrpts, Istsg)
-      wthlw = QSTAGE(1+(2*Nstrpts), Istsg)
-      flwhi = QSTAGE(Nstrpts, Istsg)
-      stghi = QSTAGE(2*Nstrpts, Istsg)
-      wthhi = QSTAGE(3*Nstrpts, Istsg)
+      flwlw = QSTAGE(1, Istsg)             ! Only collect first two points, 
+      flwhi = QSTAGE(2, Istsg)             !   otherwise it will be overwritten by "DO WHILE ( Flow.GT.flwhi .AND. istp.LT.Nstrpts )" loop
+      stglw = QSTAGE(1+Nstrpts, Istsg)     ! Ditto
+      stghi = QSTAGE(2+Nstrpts, Istsg)     ! 
+      wthlw = QSTAGE(1+(2*Nstrpts), Istsg) ! Ditto
+      wthhi = QSTAGE(2+(2*Nstrpts), Istsg) ! 
+      !
+      first_value_zero = flwlw < NEARZERO_30 .or. 
+     +                   stglw < NEARZERO_30 .or. 
+     +                   wthlw < NEARZERO_30
+      !
+      !flwhi = QSTAGE(Nstrpts, Istsg)
+      !stglw = QSTAGE(1+Nstrpts, Istsg)
+      !stghi = QSTAGE(2*Nstrpts, Istsg)
+      !wthlw = QSTAGE(1+(2*Nstrpts), Istsg)
+      !wthhi = QSTAGE(3*Nstrpts, Istsg)
 C
 C2------USE A LINEAR INTERPOLATION TO ESTIMATE DEPTH AND WIDTH WHEN
 C         FLOW IS LESS THAN LOWEST VALUE IN TABLE.
@@ -6981,6 +7034,20 @@ C         FLOW IS LESS THAN LOWEST VALUE IN TABLE.
                                             Depth = DZ
             END IF
         END IF
+C
+C FLow interpolation includes a zero value which will fail for log interp
+      ELSE IF ( Flow.LE.flwhi .AND. first_value_zero) THEN
+            !
+            dflwlw = Flow  - flwlw
+            !
+            Depth = stglw + dflwlw * (stghi - stglw) / (flwhi - flwlw)
+            Width = wthlw + dflwlw * (wthhi - wthlw) / (flwhi - flwlw)
+            !
+            IF( Depth < DZ .OR. Width < DZ) THEN
+                                            Flow  = DZ
+                                            Width = DZ
+                                            Depth = DZ
+            END IF
 C
 C3------OTHERWISE USE A LOG INTERPOLATION TO ESTIMATE DEPTH AND WIDTH.
       ELSE! IF ( Flow.GT.flwlw ) THEN
@@ -7056,8 +7123,7 @@ C7------RETURN.
       END SUBROUTINE GWF2SFR7TBD
 C
 C-------SUBROUTINE GWF2SFR7TBF
-      SUBROUTINE GWF2SFR7TBF(Flow, Depth, Width, Nstrpts, Nreach, Istsg,
-     +                       Kkiter, Itb)
+      SUBROUTINE GWF2SFR7TBF(Flow, Depth, Width, Nstrpts, Nreach, Istsg)
 C     *******************************************************************
 C     COMPUTE FLOW AND WIDTH IN STREAM GIVEN DEPTH USING RATING TABLES.
 !--------REVISED FOR MODFLOW-2005 RELEASE 1.9, FEBRUARY 6, 2012
@@ -7080,6 +7146,7 @@ C     -------------------------------------------------------------------
       DOUBLE PRECISION flwlw, flwhi, stglw, stghi, wthlw, wthhi, dflwlw,
      +                 dflwhi, dstglw, dstghi, dwthlw, dwthhi, dlgflw, 
      +                 dlgslf, dlgslw, dlgstg, dlgwth
+      Logical:: first_value_zero
 !!      REAL dum, totdum
 C     -------------------------------------------------------------------
       IF(Depth < NEARZERO_30) THEN
@@ -7090,12 +7157,23 @@ C     -------------------------------------------------------------------
       END IF
 C
 C1------DEFINE RANGE OF FLOW, DEPTH, AND WIDTH FROM RATING TABLE.
-      flwlw = QSTAGE(1, Istsg)
-      stglw = QSTAGE(1+Nstrpts, Istsg)
-      wthlw = QSTAGE(1+(2*Nstrpts), Istsg)
-      flwhi = QSTAGE(Nstrpts, Istsg)
-      stghi = QSTAGE(2*Nstrpts, Istsg)
-      wthhi = QSTAGE(3*Nstrpts, Istsg)
+      flwlw = QSTAGE(1, Istsg)             ! Only collect first two points, 
+      flwhi = QSTAGE(2, Istsg)             !   otherwise it will be overwritten by "DO WHILE ( Flow.GT.flwhi .AND. istp.LT.Nstrpts )" loop
+      stglw = QSTAGE(1+Nstrpts, Istsg)     ! Ditto
+      stghi = QSTAGE(2+Nstrpts, Istsg)     ! 
+      wthlw = QSTAGE(1+(2*Nstrpts), Istsg) ! Ditto
+      wthhi = QSTAGE(2+(2*Nstrpts), Istsg) ! 
+      !
+      first_value_zero = flwlw < NEARZERO_30 .or. 
+     +                   stglw < NEARZERO_30 .or. 
+     +                   wthlw < NEARZERO_30
+      !
+      !flwlw = QSTAGE(1, Istsg)                  - seb redundant to being set bu 
+      !stglw = QSTAGE(1+Nstrpts, Istsg)
+      !wthlw = QSTAGE(1+(2*Nstrpts), Istsg)
+      !flwhi = QSTAGE(Nstrpts, Istsg)
+      !stghi = QSTAGE(2*Nstrpts, Istsg)
+      !wthhi = QSTAGE(3*Nstrpts, Istsg)
 C
 C2------USE A LINEAR INTERPOLATION TO ESTIMATE FLOW AND WIDTH WHEN
 C         DEPTH IS LESS THAN LOWEST VALUE IN TABLE.
@@ -7115,6 +7193,20 @@ C         DEPTH IS LESS THAN LOWEST VALUE IN TABLE.
                                             Depth = DZ
             END IF
         END IF
+C
+C FLow interpolation includes a zero value which will fail for log interp
+      ELSE IF ( Depth.LE.stghi .AND. first_value_zero) THEN
+            !
+            dstglw = Depth  - stglw
+            !
+            Flow  = flwlw + dstglw * (flwhi - flwlw) / (stghi - stglw)
+            Width = wthlw + dstglw * (wthhi - wthlw) / (stghi - stglw)
+            !
+            IF( Flow < DZ .OR. Width < DZ) THEN
+                                            Flow  = DZ
+                                            Width = DZ
+                                            Depth = DZ
+            END IF
 C
 C3------OTHERWISE USE A LOG INTERPOLATION TO ESTIMATE FLOW AND WIDTH.
       ELSE! IF ( Depth.GT.stglw ) THEN
@@ -7137,7 +7229,9 @@ C4------FIND NEAREST VALUES OF FLOW, DEPTH, AND WIDTH IN TABLE.
           stglw = QSTAGE(istglw, Istsg)
           wthlw = QSTAGE(iwthlw, Istsg)
           wthhi = QSTAGE(iwthhi, Istsg)
-        ELSE IF ( Depth.GT.stghi .AND. Itb.EQ.1 ) THEN
+        ELSE !IF ( Depth.GT.stghi .AND. Itb.EQ.1 ) THEN   ! Depth.GT.stghi is implied by the previous if and 
+                                                          ! Itb does not anything, it is always set to 0 in MODFLOW - 
+                                                          !    Maybe originally for: "WRITE (IOUT, 9001)" and later someone added setting the values (despite them being set earliar--which was then later commented by seb)
 C
 C5------PRINT WARNING IF COMPUTED DEPTH EXCEEDS HIGHEST DEPTH IN TABLE.
 !!!            WRITE (IOUT, 9001) Kkiter, Istsg, Nreach, Depth, stghi
@@ -10268,84 +10362,6 @@ C
       RETURN
       END FUNCTION CALC_XSA
 C
-C
-!     -----------------------------------------------------------------
-      SUBROUTINE GWF2SFR7LAKE(Iunitlak,KPER,KSTP,IGRID)
-C     ******************************************************************
-C     DETERMINE SPECIFIED INFLOWS FOR TIME STEP BASED ON TABULAR VALUES
-C     ******************************************************************
-C
-C        SPECIFICATIONS:
-C     ------------------------------------------------------------------
-      USE CONSTANTS, ONLY: ONE, Z, YEARTOL
-      USE TABLEFILE_INTERFACE,ONLY: TABFILEUPDATE                       !seb
-      USE GWFBASMODULE, ONLY: TOTIM, DATE_SP
-      USE GWFSFRMODULE, ONLY: NSS, TABFLOW, TABTIME, NUMTAB, ISFRLIST,
-     +                        SEG, FXLKOT, IDIVAR, CLOSEZERO,
-     +                        IPTFLG, SFRTABFILE, SFRFEED, IOUT,        !seb  ADDED IPTFLG, SFRTABFILE, SFRFEED
-     +                        TIME_SERIES
-      IMPLICIT NONE
-      EXTERNAL FLOWTERP
-      REAL FLOWTERP
-      DOUBLE PRECISION:: TSFAC, DVAL, DTIM0, DTIM1
-      INTEGER i, iseg, Iunitlak, istsg, lk,TABIDX,j,MX,LLOC,IGRID,KSTP
-     +         ,KPER
-C     ------------------------------------------------------------------
-C
-      CALL SGWF2SFR7PNT(Igrid)
-C1a------CALL LINEAR INTERPOLATION ROUTINE
-      IF ( NUMTAB.GT.0 ) THEN
-        DO i = 1, NUMTAB
-          iseg = ISFRLIST(1,i)
-          SEG(2,iseg) = FLOWTERP(TOTIM,i)  
-        END DO
-      END IF 
-C1a------CALL LINEAR INTERPOLATION ROUTINE
-      !IF TABFILE OPTION IS USED UPDATE THE TABFILES AND APPLY FLOW TO SEGEMENTS
-      IF(SFRTABFILE%NTAB > 0) THEN
-         CALL TABFILEUPDATE( SFRTABFILE,'SFR',KSTP, SEG(2,:) )             !seb UPDATES THE FLOW FOR ALL SEGMENTS LINKED TO A TABFILE
-      END IF
-      !
-      ! APPLY THE NEW FEED DATA TO THE SFR PACKAGE ARRAY
-      !
-      CALL SFRFEED%FEED_SFR(SEG,2,' SEGMENT            VALUE')
-      !
-      IF(TIME_SERIES%NFIL > 0) THEN
-          DTIM0 = DATE_SP(KPER)%TS(KSTP-1)%DYEAR! + YEARTOL
-          DTIM1 = DATE_SP(KPER)%TS(KSTP  )%DYEAR
-          !
-          DO I = 1, TIME_SERIES%NFIL
-                CALL TIME_SERIES%TSF(I)%GET( DTIM1, DVAL, DTIM0 )  !Interpolate to Time Step Ending
-                SEG(2,TIME_SERIES%ID(I)) = REAL(DVAL)
-          END DO
-      END IF
-C
-C DEP moved the from SFR7FM
-C DEP FXLKOT is now adjusted in LAK7FM for limiting to available lake water.
-C
-C2------COMPUTE INFLOW OF A STREAM SEGMENT EMANATING FROM A LAKE.
-      IF (Iunitlak.NE.0) THEN                                           !seb Moved outside of loop to improve speed
-       DO istsg = 1, NSS
-        !IF ( (Iunitlak.GT.0) .AND. (IDIVAR(1,istsg).LT.0) ) THEN
-        IF ( IDIVAR(1,istsg).LT.0 ) THEN
-          IF ( SEG(2,istsg).GT.CLOSEZERO ) THEN
-            lk = IABS(IDIVAR(1, istsg))
-C3------CHECK IF LAKE OUTFLOW IS SPECIFIED AT A FIXED RATE.
-             FXLKOT(istsg) = SEG(2, istsg)
-           ELSE IF ( SEG(2, istsg).LE.-CLOSEZERO ) THEN
-               WRITE (IOUT, 9001) istsg
- 9001        FORMAT (/5X, '*** WARNING *** NEGATIVE LAKE OUTFLOW ',
-     +                  'NOT ALLOWED; SEG = ', I6, /10X, 
-     +                  'CODE WILL ASSUME FLOW = 0.0'/)
-             SEG(2, istsg) = 0.0
-             FXLKOT(istsg) = 0.0
-           END IF
-         END IF
-       END DO
-      END IF
-      RETURN
-      END
-C
 C     ------------------------------------------------------------------
 C
       REAL FUNCTION FLOWTERP (TIME,INUM)
@@ -10353,8 +10369,6 @@ C     FUNCTION LINEARLY INTERPOLATES BETWEEN TWO VALUES
 C     OF TIME TO CALCULATE SPECIFIED INFLOW TO SEGMENTS.
       USE GWFSFRMODULE, ONLY: TABFLOW, TABTIME, ISFRLIST,
      +                        CLOSEZERO
-!!      USE GWFSFRMODULE, ONLY: TABFLOW, TABTIME, NUMTAB, ISFRLIST,
-!!     +                        CLOSEZERO
       USE GWFBASMODULE, ONLY: DELT
       IMPLICIT NONE
       REAL TIME, FLOW, TIMEBEG, TIMEND, TIMESTART, SUMFLOW, TOLF2
@@ -10535,6 +10549,8 @@ C     ------------------------------------------------------------------
       DEALLOCATE (GWFSFRDAT(IGRID)%TABFLOW)
       DEALLOCATE (GWFSFRDAT(IGRID)%TABTIME)
       DEALLOCATE (GWFSFRDAT(IGRID)%ISFRLIST)
+      DEALLOCATE (GWFSFRDAT(IGRID)%NINTOT   )   !Fixed so always allocated
+      DEALLOCATE (GWFSFRDAT(IGRID)%ITRFLG   )
       DEALLOCATE (GWFSFRDAT(IGRID)%FNETSEEP)
       DEALLOCATE (GWFSFRDAT(IGRID)%NSEGDIM)
       DEALLOCATE (GWFSFRDAT(IGRID)%factor)
@@ -10550,8 +10566,6 @@ C     ------------------------------------------------------------------
       DEALLOCATE (GWFSFRDAT(IGRID)%THETAB   )
       DEALLOCATE (GWFSFRDAT(IGRID)%FLUXB    )
       DEALLOCATE (GWFSFRDAT(IGRID)%FLUXHLD2 )
-      DEALLOCATE (GWFSFRDAT(IGRID)%NINTOT   )   !Fixed so always allocated
-      DEALLOCATE (GWFSFRDAT(IGRID)%ITRFLG   )
       DEALLOCATE (GWFSFRDAT(IGRID)%Nfoldflbt)
       DEALLOCATE (GWFSFRDAT(IGRID)%NUMTAB   )
       DEALLOCATE (GWFSFRDAT(IGRID)%ROWTAB   )
@@ -10709,6 +10723,8 @@ C NULLIFY THE LOCAL POINTERS
         TABFLOW         =>NULL()
         TABTIME         =>NULL()
         ISFRLIST        =>NULL()
+        NINTOT          =>NULL()
+        ITRFLG          =>NULL()
         FNETSEEP        =>NULL()
         NSEGDIM         =>NULL()
         factor          =>NULL()
@@ -10856,6 +10872,8 @@ C     ------------------------------------------------------------------
       TABFLOW=>GWFSFRDAT(IGRID)%TABFLOW
       TABTIME=>GWFSFRDAT(IGRID)%TABTIME
       ISFRLIST=>GWFSFRDAT(IGRID)%ISFRLIST
+      NINTOT  =>GWFSFRDAT(IGRID)%NINTOT
+      ITRFLG  =>GWFSFRDAT(IGRID)%ITRFLG
       FNETSEEP=>GWFSFRDAT(IGRID)%FNETSEEP
       NSEGDIM=>GWFSFRDAT(IGRID)%NSEGDIM
       factor=>GWFSFRDAT(IGRID)%factor
@@ -11006,6 +11024,8 @@ C     ------------------------------------------------------------------
       GWFSFRDAT(IGRID)%TABFLOW=>TABFLOW
       GWFSFRDAT(IGRID)%TABTIME=>TABTIME
       GWFSFRDAT(IGRID)%ISFRLIST=>ISFRLIST
+      GWFSFRDAT(IGRID)%NINTOT  =>NINTOT
+      GWFSFRDAT(IGRID)%ITRFLG  =>ITRFLG
       GWFSFRDAT(IGRID)%FNETSEEP=>FNETSEEP
       GWFSFRDAT(IGRID)%NSEGDIM=>NSEGDIM
       GWFSFRDAT(IGRID)%factor=>factor
