@@ -5,7 +5,9 @@
         INTEGER,SAVE,POINTER ::IIBSCB,ITMIN,NNDB,NDB,NMZ,NN,ND2,IDSAVE
 !        INTEGER,SAVE,POINTER ::ISUBLNK,ILPFLNK                         !SUB-Linkage rth 
         REAL,   SAVE,POINTER ::AC1,AC2
-        LOGICAL,SAVE,POINTER ::NDF,NNDF,LPFLNK                  ! SUB-Linkage rth seb MOVED SUBLINK TO BAS GLOBAL
+        LOGICAL,SAVE,POINTER ::HAS_DELAY_BED
+        LOGICAL,SAVE,POINTER ::HAS_INST_BED
+        LOGICAL,SAVE,POINTER ::LPFLNK                           ! SUB-Linkage rth seb MOVED SUBLINK TO BAS GLOBAL
         LOGICAL,SAVE,POINTER ::SEPARTE_FLOWS                    ! IF TRUE THEN KEEP INELASTIC/ELASTIC FLOWS SEPARATE
         REAL,   SAVE,POINTER ::NOCOMV                           ! value HC is set to when a cell goes dry
         INTEGER,SAVE, DIMENSION(:),     POINTER,CONTIGUOUS:: ISBOCF
@@ -45,7 +47,9 @@
         INTEGER, POINTER  ::IIBSCB,ITMIN,NNDB,NDB,NMZ,NN,ND2,IDSAVE
 !        INTEGER, POINTER  ::ISUBLNK,ILPFLNK                         
         REAL,    POINTER:: AC1,AC2
-        LOGICAL, POINTER:: NDF,NNDF,LPFLNK                            ! SUB-Linkage rth  seb removed ,SUBLNK it is now in global
+        LOGICAL, POINTER:: HAS_DELAY_BED
+        LOGICAL, POINTER:: HAS_INST_BED
+        LOGICAL, POINTER:: LPFLNK                            ! SUB-Linkage rth  seb removed ,SUBLNK it is now in global
         LOGICAL, POINTER:: SEPARTE_FLOWS
         INTEGER, DIMENSION(:),     POINTER,CONTIGUOUS:: ISBOCF
         INTEGER, DIMENSION(:),     POINTER,CONTIGUOUS:: ISBOCU
@@ -99,20 +103,23 @@ C     ------------------------------------------------------------------
       USE CONSTANTS,   ONLY: Z, TRUE, FALSE, SNGL_ninf, NewLine=>NL
       USE GLOBAL,      ONLY:IOUT,NCOL,NROW,NLAY,ISSFLG,NPER,NSTP,HNEW,
      1                      DELR,DELC,BOTM,LBOTM,SUBLNK,LAYCBD !,BUFF 
+      USE GWFBASMODULE,ONLY:HDRY
       USE GWFSUBMODULE,ONLY:IIBSCB,ITMIN,NNDB,NDB,NMZ,NN,ND2,IDSAVE,
-     1                      AC1,AC2,NDF,NNDF,ISBOCF,ISBOCU,
+     1                      AC1,AC2,ISBOCF,ISBOCU,
      2                      OCFLGS,OCLAY,ILSYS,NTSSUM,LN,LDN,NZ,RNB,
      3                      DH,DHP,DHC,DZ,HC,SCE,SCV,DCOM,DCOME,DCOMV,
      4                      A1,A2,BB,SUB,SUBE,SUBV,DP,DVB,
      5                      LPFLNK,DVZ,DELAY_HED,DELAY_HED_ID,
-     6                      DVZC,NOCOMV,SEPARTE_FLOWS
+     6                      DVZC,NOCOMV,SEPARTE_FLOWS,
+     7                      HAS_DELAY_BED,HAS_INST_BED
       USE ERROR_INTERFACE,      ONLY: STOP_ERROR, WARNING_MESSAGE
       USE FILE_IO_INTERFACE,    ONLY: READ_TO_DATA
       USE PARSE_WORD_INTERFACE, ONLY: PARSE_WORD, PARSE_WORD_UP
       USE STRINGS,              ONLY: GET_INTEGER
       USE GENERIC_BLOCK_READER_INSTRUCTION, ONLY: GENERIC_BLOCK_READER
 C
-      REAL, DIMENSION(NCOL,NROW)::BUFFER                               ! REPLACES GLOBAL MODULE BUFF(:,:,1) WITH BUFFER(:,:) - IF THIS CAUSES STACK OVERFLOW PROBLEMS THEN CAN CHANGE TO ALLOCATABLE ARRAY TO SWITCH USAGE TO HEAP
+      REAL,    DIMENSION(NCOL,NROW)::BUFFER                             ! REPLACES GLOBAL MODULE BUFF(:,:,1) WITH BUFFER(:,:) - IF THIS CAUSES STACK OVERFLOW PROBLEMS THEN CAN CHANGE TO ALLOCATABLE ARRAY TO SWITCH USAGE TO HEAP
+      LOGICAL, DIMENSION(NCOL,NROW)::PACK_MASK
       CHARACTER(4 )::PTYP
       TYPE SUBPARAM
         !SEQUENCE
@@ -127,7 +134,6 @@ C
       !CHARACTER(768) LINE
       TYPE(GENERIC_BLOCK_READER):: BL
       LOGICAL:: HAS_ERROR,FOUND_BEGIN
-      CHARACTER(:), ALLOCATABLE:: PROPPRINT
       !DATA ANAME(1) /'   PRECONSOLIDATION HEAD'/
       !DATA ANAME(2) /'ELASTIC INTERBED STORAGE'/
       !DATA ANAME(3) /' VIRGIN INTERBED STORAGE'/
@@ -144,9 +150,11 @@ C
 C     ------------------------------------------------------------------
       ALLOCATE (IIBSCB,ITMIN,NNDB,NDB,NMZ,NN,ND2,IDSAVE)                !SUB-Linkage rth
       ALLOCATE (AC1,AC2)
-      ALLOCATE (NDF,NNDF,LPFLNK)                                        !SUB-Linkage rth
+      ALLOCATE (HAS_DELAY_BED,HAS_INST_BED,LPFLNK)                      !SUB-Linkage rth
       ALLOCATE (SEPARTE_FLOWS)
       ALLOCATE (ISBOCF(10), ISBOCU(10))
+      !
+      ALLOCATE(NOCOMV, SOURCE=SNGL_ninf)                                !HC value set when no more inelastic compaction is capable
       !
       ANAME(1) = '   PRECONSOLIDATION HEAD'
       ANAME(2) = 'ELASTIC INTERBED STORAGE'
@@ -163,6 +171,12 @@ C     ------------------------------------------------------------------
       !
       ZERO=0.0
       SEPARTE_FLOWS = FALSE
+      !
+      DO I=1,NROW
+      DO J=1,NCOL
+             PACK_MASK(J,I) = TRUE
+      END DO
+      END DO
 C
 C1------IDENTIFY PACKAGE.
         WRITE(IOUT,1)IN
@@ -223,29 +237,6 @@ C4------CRITICAL HEAD ARRAYS.
                   CALL URWORD(BL%LINE,LLOC,ISTART,ISTOP,2,IPRNTFLG, ! IPRNTFLG is print flag for UPARARRSUB1
      +                        R,IOUT,IN)   
                  !
-             CASE('PROPPRINT', 'PROPERTY_PRINT', 'PRINT_PROPERTY')
-                 WRITE(IOUT,'(4x,A)') 'CHECKING IF FOLDER IS SPECIFIED.'
-                 !
-                 BL%LN(:) = BL%LINE
-                 CALL PARSE_WORD(BL%LN,LLOC,ISTART,ISTOP)
-                 DEALLOCATE(PROPPRINT, STAT=K)
-                 IF( BL%LN(ISTART:ISTOP)=='' ) THEN
-                          ALLOCATE(PROPPRINT, SOURCE='./')
-                 ELSE
-                     IF( BL%LN(ISTOP:ISTOP)=='/' .OR.
-     +                   BL%LN(ISTOP:ISTOP)=='\' ) THEN
-                         ALLOCATE(PROPPRINT, SOURCE=BL%LN(ISTART:ISTOP))
-                     ELSE
-                         ISTOP=ISTOP+1
-                         BL%LN(ISTOP:ISTOP)='/'
-                         ALLOCATE(PROPPRINT, SOURCE=BL%LN(ISTART:ISTOP))
-                     END IF
-                 END IF
-                 WRITE(IOUT,'(4x, 2A,/,4x, 3A, /)') 
-     +              'SUB PROPERTIES, AFTER PARAMETERS HAVE ',
-     +              'BEEN APPLIED, WILL BE WRITEN TO SEPARATE FILES.', 
-     +              'THESE FILES WILL BE PLACED IN: "'//PROPPRINT//'"'
-                    !
              CASE DEFAULT
                 CALL WARNING_MESSAGE(OUTPUT=BL%IOUT,MSG=
      +               'SUB OPTION BLOCK FAILED TO IDENTIFY'//
@@ -254,7 +245,8 @@ C4------CRITICAL HEAD ARRAYS.
              END SELECT
              !
              CALL BL%NEXT()
-          END DO
+          END DO               ! END CASE('OPTION','OPTIONS')
+          !
         CASE('PRINT_DELAY_HEAD')
           IF (BL%NLINE > Z)THEN
              N = BL%NLINE
@@ -348,23 +340,23 @@ C4------CRITICAL HEAD ARRAYS.
       CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,IDREST,R,IOUT,IN)
       !
       ! CHECK IF GLOBAL SHUTDOWN OF CBC IS IN EFFECT
-        CALL CHECK_CBC_GLOBAL_UNIT(IIBSCB)
+      CALL CHECK_CBC_GLOBAL_UNIT(IIBSCB)
       !
       IF(IGRID.EQ.1.AND.ISUBLNK.NE.1)
      +           CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,ISUBLNK,R,Z,IN) !SUB-Linkage rth  seb SUBLINK FLAG ONLY READ FOR PARENT GRID
 !      CALL URWORD(LINE,LLOC,ISTART,ISTOP,2,ILPFLNK,R,IOUT,IN)                !SUB-Linkage rth  seb commented out
       IF(AC2.EQ.ZERO) AC2=1.0
-      NDF  = TRUE
-      NNDF = TRUE
+      HAS_DELAY_BED  = TRUE
+      HAS_INST_BED = TRUE
       IF(NNDB < 1) THEN
-       NNDF = FALSE
-       NNDB = Z
+                   HAS_INST_BED = FALSE
+                   NNDB = Z
       ENDIF
       IF(NDB < 1) THEN
-       NDF = FALSE
-       NDB = Z
-       NMZ = Z
-       NN  = Z
+                  HAS_DELAY_BED = FALSE
+                  NDB = Z
+                  NMZ = Z
+                  NN  = Z
       ENDIF
 cc
       IF(IGRID.EQ.1.AND.ISUBLNK > Z)then                               !SUB-Linkage rth
@@ -411,17 +403,17 @@ cc
       ENDIF
 C
 C4A-----ABORT IF NO LAYERS ARE SPECIFIED FOR INTERBED STORAGE
-      IF(.NOT.NNDF.AND..NOT.NDF) THEN
+      IF(.NOT.HAS_INST_BED .AND. .NOT. HAS_DELAY_BED) THEN
        CALL USTOP('NO LAYERS WITH INTERBED STORAGE OF EITHER TYPE '//
      +            'WERE SPECIFIED IN INPUT.')
       ENDIF
 C4B-----ABORT IF NO PROPERTY ZONES ARE SPECIFIED
-      IF(NDF.AND.NMZ.LT.1) THEN
+      IF(HAS_DELAY_BED.AND.NMZ.LT.1) THEN
          CALL USTOP('SUB - At least one property zone must '//
      &                 'be specified for delay beds.')
       ENDIF
 C4C-----ABORT IF NOT ENOUGH NODES ARE SPECIFIED
-      IF(NDF.AND.NN.LT.2) THEN
+      IF(HAS_DELAY_BED.AND.NN.LT.2) THEN
          CALL USTOP('SUB - Number of nodes in strings for '//
      &                 'delay beds (NN) should be at least 2.')
       ENDIF
@@ -437,29 +429,29 @@ C5A-----IF OUTPUT CONTROL FOR PRINTING ARRAYS IS SELECTED PRINT MESSAGE.
 C
 C6------READ IN MODEL LAYER NUMBERS FOR EACH SYSTEM OF INTERBEDS,
 C6------FOR LAYERS WITHOUT DELAY.
-      IF(NNDF) THEN
-       ALLOCATE(LN(NNDB))
+      IF(HAS_INST_BED) THEN
+         ALLOCATE(LN(NNDB))
          WRITE(IOUT,100) NNDB
-  100  FORMAT(/,' MODEL LAYER ASSIGNMENTS FOR EACH OF',I3,' NO-DELAY',
+  100    FORMAT(/,' MODEL LAYER ASSIGNMENTS FOR EACH OF',I3,' NO-DELAY',
      1  ' SYSTEMS OF INTERBEDS:')
-       CALL READ_TO_DATA(TLINE,IN,IOUT, 
+         CALL READ_TO_DATA(TLINE,IN,IOUT, 
      +                          HED="-- READING SUB PACKAGE INPUT --")
-       BACKSPACE(IN)
-       READ(IN,*) (LN(N),N=1,NNDB)
+         BACKSPACE(IN)
+         READ(IN,*) (LN(N),N=1,NNDB)
          WRITE(IOUT,115) (LN(N),N=1,NNDB)
-  115  FORMAT(1X,25I4)
-       DO 120 N=1,NNDB
-       IF(LN(N).GE.1.AND.LN(N).LE.NLAY) GO TO 120
-       CALL USTOP('SUB - IMPROPER LAYER ASSIGNMENT FOR NO-DELAY '//
-     +            'SYSTEM OF INTERBEDS.')
-  120  CONTINUE
+  115    FORMAT(1X,25I4)
+         DO 120 N=1,NNDB
+         IF(LN(N).GE.1.AND.LN(N).LE.NLAY) GO TO 120
+         CALL USTOP('SUB - IMPROPER LAYER ASSIGNMENT FOR NO-DELAY '//
+     +              'SYSTEM OF INTERBEDS.')
+  120    CONTINUE
       ELSE
-       ALLOCATE(LN(1))
+         ALLOCATE(LN(1))
       ENDIF
 C
 C7------READ IN MODEL LAYER NUMBERS FOR EACH SYSTEM OF INTERBEDS,
 C7------FOR LAYERS WITH DELAY.
-      IF(NDF) THEN
+      IF(HAS_DELAY_BED) THEN
        ALLOCATE(LDN(NDB))
          WRITE(IOUT,135) NDB
   135  FORMAT(/,' MODEL LAYER ASSIGNMENTS FOR EACH OF',I3,' DELAY',
@@ -515,7 +507,7 @@ C8.5---READ PARAMETERS IF NSBP>0 FOR SYSTEMS OF INTERBEDS.
       END DO
       END IF
 C9-----READ IN ARRAY RNB TO SEE HOW MANY STRINGS OF NN CELLS ARE NEEDED.
-      IF(NDF) THEN
+      IF(HAS_DELAY_BED) THEN
        ALLOCATE(RNB(ND1))
        NNSUM=Z
        DO 190 KQ=1,NDB
@@ -533,7 +525,7 @@ C       CALL GWF2SUB72D1D(BUFF(:,:,1),NCOL,NROW,RNB,ND1,LOC1)           !seb REP
        ELSE
          CALL U2DREL(BUFFER,ANAME(12),NROW,NCOL,LAYNUM,IN,IOUT)         !seb TEMP STORAGE CHANGED TO BUFFER 
        END IF
-       RNB(LOC1:LOC2)=PACK(BUFFER,TRUE)                               !seb STORE SEQUENTIALLY EACH READ OF BUFFER IN VECTOR RNB
+       RNB(LOC1:LOC2)=PACK(BUFFER, PACK_MASK)                           !seb STORE SEQUENTIALLY EACH READ OF BUFFER IN VECTOR RNB
        DO 180 N=1,NCR
        IF(RNB(LOC1+N-1).GE.1.0) NNSUM=NNSUM+1
   180  CONTINUE
@@ -542,7 +534,7 @@ C       CALL GWF2SUB72D1D(BUFF(:,:,1),NCOL,NROW,RNB,ND1,LOC1)           !seb REP
       ELSE
        ALLOCATE(RNB(1))
       ENDIF
-      IF(ND2.LT.1.AND.NDF) THEN
+      IF(ND2.LT.1.AND.HAS_DELAY_BED) THEN
            WRITE(IOUT,*) 
          CALL USTOP('SUB - Delay beds were not found in '//
      +             'array specifying numbers of delay beds (RNB).')
@@ -551,14 +543,14 @@ C
 C10-----ALLOCATE MEMORY.
       ALLOCATE(OCFLGS(21,NSTPT))
       ALLOCATE(OCLAY(NLAY))
-      IF(NNDF) THEN
-         ALLOCATE(HC(NND1))
-         ALLOCATE(SCE(NND1))
-         ALLOCATE(SCV(NND1))
-         ALLOCATE(SUB(NND1))
-         ALLOCATE(SUBE(NND1))
-         ALLOCATE(SUBV(NND1))
-         ALLOCATE(ILSYS(NNDB))
+      IF(HAS_INST_BED) THEN
+         ALLOCATE(HC(NND1),   SOURCE=NOCOMV)
+         ALLOCATE(SCE(NND1),  SOURCE=zero)
+         ALLOCATE(SCV(NND1),  SOURCE=zero)
+         ALLOCATE(SUB(NND1),  SOURCE=zero)
+         ALLOCATE(SUBE(NND1), SOURCE=zero)
+         ALLOCATE(SUBV(NND1), SOURCE=zero)
+         ALLOCATE(ILSYS(NNDB),SOURCE=0)
       ELSE
          ALLOCATE(HC(1))
          ALLOCATE(SCE(1))
@@ -568,20 +560,20 @@ C10-----ALLOCATE MEMORY.
          ALLOCATE(SUBV(1))
          ALLOCATE(ILSYS(1))
       ENDIF
-      IF(NDF) THEN
-         ALLOCATE(NZ(ND1))
-         ALLOCATE(DZ(ND1))
-         ALLOCATE(DCOM(ND1))
-         ALLOCATE(DCOME(ND1))
-         ALLOCATE(DCOMV(ND1))
-         ALLOCATE(DHP(ND2))
-         ALLOCATE(DH(ND2))
-         ALLOCATE(DHC(ND2))
-         ALLOCATE(DP(NMZ,3))
-         ALLOCATE(DVB(NDB,4))
-         ALLOCATE(A1(NN))
-         ALLOCATE(A2(NN))
-         ALLOCATE(BB(NN))
+      IF(HAS_DELAY_BED) THEN
+         ALLOCATE(NZ(ND1),    SOURCE=0)
+         ALLOCATE(DZ(ND1),    SOURCE=zero)
+         ALLOCATE(DCOM(ND1),  SOURCE=zero)
+         ALLOCATE(DCOME(ND1), SOURCE=zero)
+         ALLOCATE(DCOMV(ND1), SOURCE=zero)
+         ALLOCATE(DHP(ND2),   SOURCE=HDRY)
+         ALLOCATE(DH(ND2),    SOURCE=HDRY)
+         ALLOCATE(DHC(ND2),   SOURCE=NOCOMV)
+         ALLOCATE(DP(NMZ,3),  SOURCE=zero)
+         ALLOCATE(DVB(NDB,4), SOURCE=zero)
+         ALLOCATE(A1(NN),     SOURCE=zero)
+         ALLOCATE(A2(NN),     SOURCE=zero)
+         ALLOCATE(BB(NN),     SOURCE=zero)
       ELSE
          ALLOCATE(NZ(1))
          ALLOCATE(DZ(1))
@@ -602,8 +594,6 @@ cc
       DVZ=0D0                                                           !wschmid
       ALLOCATE(DVZC(NCOL,NROW,NLAY))                                    !wschmid
       DVZC=0D0                                                          !wschmid
-      ALLOCATE(NOCOMV)                                                  !seb HC value set when no more inelastic compaction is capable
-      NOCOMV=SNGL_ninf
 cc   
 C
 C11-----READ ARRAYS.
@@ -612,7 +602,7 @@ C11-----READ ARRAYS.
 C
 C12-----READ RESTART RECORDS IF THIS SIMULATION CONTINUES FROM A
 C12-----PREVIOUS SIMULATION
-      IF(NDF) THEN
+      IF(HAS_DELAY_BED) THEN
        IF(IDREST.GT.Z) THEN
         READ(IDREST) NND2
         IF(NND2.EQ.ND2) THEN
@@ -632,12 +622,12 @@ C12-----PREVIOUS SIMULATION
       ENDIF
 C
 C13-----READ IN ARRAYS FOR SYSTEMS OF NO-DELAY INTERBEDS.
-      IF(NNDF) THEN
+      IF(HAS_INST_BED) THEN
        DO 260 KQ=1,NNDB
        K=LN(KQ)
        LOC1=1+(KQ-1)*NCR
        LOC2=KQ*NCR
-         WRITE(IOUT,256) KQ
+       WRITE(IOUT,256) KQ
   256  FORMAT(/,1X,' SYSTEM',I4,' OF NO-DELAY BEDS:')
 C       CALL U2DREL(HC(LOC1),ANAME(1),NROW,NCOL,K,IN,IOUT)
 C       CALL U2DREL(BUFF(:,:,1),ANAME(1),NROW,NCOL,K,IN,IOUT)           !seb REPLACED BY BUFFER ARRAY
@@ -648,7 +638,7 @@ C       CALL GWF2SUB72D1D(BUFF(:,:,1),NCOL,NROW,HC,NND1,LOC1)           !seb REP
        ELSE
          CALL U2DREL(BUFFER,ANAME(1),NROW,NCOL,K,IN,IOUT)               !seb TEMP STORAGE CHANGED TO BUFFER 
        END IF
-       HC(LOC1:LOC2)=PACK(BUFFER,TRUE)                                !seb STORE SEQUENTIALLY EACH READ OF BUFFER IN VECTOR HC
+       HC(LOC1:LOC2)=PACK(BUFFER,PACK_MASK)                             !seb STORE SEQUENTIALLY EACH READ OF BUFFER IN VECTOR HC
          WRITE(IOUT,256) KQ
 C       CALL U2DREL(SCE(LOC1),ANAME(2),NROW,NCOL,K,IN,IOUT)             
 C       CALL U2DREL(BUFF(:,:,1),ANAME(2),NROW,NCOL,K,IN,IOUT)           !seb REPLACED BY BUFFER ARRAY
@@ -659,7 +649,7 @@ C       CALL GWF2SUB72D1D(BUFF(:,:,1),NCOL,NROW,SCE,NND1,LOC1)          !seb REP
        ELSE
          CALL U2DREL(BUFFER,ANAME(2),NROW,NCOL,K,IN,IOUT)               !seb TEMP STORAGE CHANGED TO BUFFER 
        END IF
-       SCE(LOC1:LOC2)=PACK(BUFFER,TRUE)                               !seb STORE SEQUENTIALLY EACH READ OF BUFFER IN VECTOR SCE
+       SCE(LOC1:LOC2)=PACK(BUFFER,PACK_MASK)                            !seb STORE SEQUENTIALLY EACH READ OF BUFFER IN VECTOR SCE
          WRITE(IOUT,256) KQ
 C       CALL U2DREL(SCV(LOC1),ANAME(3),NROW,NCOL,K,IN,IOUT)
 C       CALL U2DREL(BUFF(:,:,1),ANAME(3),NROW,NCOL,K,IN,IOUT)           !seb REPLACED BY BUFFER ARRAY
@@ -670,7 +660,7 @@ C       CALL GWF2SUB72D1D(BUFF(:,:,1),NCOL,NROW,SCV,NND1,LOC1)          !seb REP
        ELSE
          CALL U2DREL(BUFFER,ANAME(3),NROW,NCOL,K,IN,IOUT)               !seb TEMP STORAGE CHANGED TO BUFFER 
        END IF
-       SCV(LOC1:LOC2)=PACK(BUFFER,TRUE)                               !seb STORE SEQUENTIALLY EACH READ OF BUFFER IN VECTOR SCV
+       SCV(LOC1:LOC2)=PACK(BUFFER,PACK_MASK)                            !seb STORE SEQUENTIALLY EACH READ OF BUFFER IN VECTOR SCV
          WRITE(IOUT,256) KQ
 C       CALL U2DREL(SUB(LOC1),ANAME(4),NROW,NCOL,K,IN,IOUT)
 C       CALL U2DREL(BUFF(:,:,1),ANAME(4),NROW,NCOL,K,IN,IOUT)           !seb REPLACED BY BUFFER ARRAY
@@ -681,7 +671,7 @@ C       CALL GWF2SUB72D1D(BUFF(:,:,1),NCOL,NROW,SUBE,NND1,LOC1)         !seb REP
        ELSE
          CALL U2DREL(BUFFER,ANAME(4),NROW,NCOL,K,IN,IOUT)               !seb TEMP STORAGE CHANGED TO BUFFER 
        END IF
-       SUBE(LOC1:LOC2)=PACK(BUFFER,TRUE)                              !seb STORE SEQUENTIALLY EACH READ OF BUFFER IN VECTOR SUBE
+       SUBE(LOC1:LOC2)=PACK(BUFFER,PACK_MASK)                           !seb STORE SEQUENTIALLY EACH READ OF BUFFER IN VECTOR SUBE
 C       CALL U2DREL(BUFF(:,:,1),ANAME(5),NROW,NCOL,K,IN,IOUT)           !seb REPLACED BY BUFFER ARRAY
 C       CALL GWF2SUB72D1D(BUFF(:,:,1),NCOL,NROW,SUBV,NND1,LOC1)         !seb REPLACED BY PACK COMMAND
        IF(SUBP%COMV==1)THEN                                             !seb IF TRUE SUBSITUTE IN PARAMETER VALUE
@@ -690,12 +680,13 @@ C       CALL GWF2SUB72D1D(BUFF(:,:,1),NCOL,NROW,SUBV,NND1,LOC1)         !seb REP
        ELSE
          CALL U2DREL(BUFFER,ANAME(5),NROW,NCOL,K,IN,IOUT)               !seb TEMP STORAGE CHANGED TO BUFFER 
        END IF
-       SUBV(LOC1:LOC2)=PACK(BUFFER,TRUE)                              !seb STORE SEQUENTIALLY EACH READ OF BUFFER IN VECTOR SUBV
+       SUBV(LOC1:LOC2)=PACK(BUFFER,PACK_MASK)                           !seb STORE SEQUENTIALLY EACH READ OF BUFFER IN VECTOR SUBV
   260  CONTINUE
 C
 C14-----INITIALIZE ARRAYS FOR SYSTEMS OF NO-DELAY INTERBEDS.
        DO 280 KQ=1,NNDB
-       K=LN(KQ)
+       K  = LN(KQ)
+       LB = LBOTM(K)
        NQ=(KQ-1)*NCR
 C       NK=(K-1)*NCR
        DO 270 IR=1,NROW
@@ -714,12 +705,12 @@ C15A----SET SUB=SUBE+SUBV (MAY, 2009) SAL
 C
 C16-----MAKE SURE THAT PRECONSOLIDATION HEAD VALUES
 C16-----ARE CONSISTANT WITH STARTING HEADS.
-       IF(HC(LOC2).GT.HNEW(IC,IR,K)) HC(LOC2)=HNEW(IC,IR,K)
-       IF(HC(LOC2).LT.BOTM(IC,IR,LBOTM(K))) HC(LOC2)=NOCOMV            !seb NO MORE POTENTIAL INELASTIC COMPACTION 
+       IF(HC(LOC2) > HNEW(IC,IR,K)) HC(LOC2)=HNEW(IC,IR,K)
+       IF(HC(LOC2) < BOTM(IC,IR,LB)) HC(LOC2)=NOCOMV            !seb NO MORE POTENTIAL INELASTIC COMPACTION 
   270  CONTINUE
   280  CONTINUE
       ENDIF
-      IF(NDF) THEN
+      IF(HAS_DELAY_BED) THEN
 C
 C17-----READ IN TABLE OF MATERIAL PROPERTIES: K, Sse, Ssv FOR EACH
 C17-----OF NMZ ZONES.
@@ -736,7 +727,8 @@ C17-----OF NMZ ZONES.
        LOC3=Z
        LOC4=Z
        DO 380 KQ=1,NDB
-       K=LDN(KQ)
+       K  = LDN(KQ)
+       LB = LBOTM(K)
        LOC1=1+(KQ-1)*NCR
 C
 C18-----READ IN ARRAYS FOR SYSTEMS OF DELAY INTERBEDS.
@@ -755,10 +747,14 @@ C18-----READ IN ARRAYS FOR SYSTEMS OF DELAY INTERBEDS.
         N1=N1+1
         LOC2=LOC1+N1-1
         IF(RNB(LOC2).LT.1.0) GO TO 320
+        !
+        HH = BUFFER(IC,IR)
+        IF(HH < BOTM(IC,IR,LB)) HH = BOTM(IC,IR,LB)
+        !
         DO 315 N2=1,NN
         LOC3=LOC3+1
-        DHP(LOC3)=BUFFER(IC,IR)                                         !seb CHANGED BUFF(IC,IR,1) TO BUFFER(IC,IR)
-        DH(LOC3)=BUFFER(IC,IR)                                          !seb CHANGED BUFF(IC,IR,1) TO BUFFER(IC,IR)
+        DHP(LOC3)= HH
+        DH(LOC3) = HH
   315   CONTINUE
   320   CONTINUE
           WRITE(IOUT,308) KQ
@@ -776,8 +772,11 @@ C18-----READ IN ARRAYS FOR SYSTEMS OF DELAY INTERBEDS.
         IF(RNB(LOC2).LT.1.0) GO TO 330
         DO 325 N2=1,NN
         LOC4=LOC4+1
-        DHC(LOC4)=BUFFER(IC,IR)                                         !seb CHANGED BUFF(IC,IR,1) TO BUFFER(IC,IR)
-        IF(DHC(LOC4).GT.DH(LOC4)) DHC(LOC4)=DH(LOC4)
+        DHC(LOC4)=BUFFER(IC,IR)  
+        !
+        IF(DHC(LOC4) > DH(LOC4)) DHC(LOC4)=DH(LOC4)
+        !
+        IF(DHC(LOC4) < BOTM(IC,IR,LB)) DHC(LOC4) = NOCOMV
   325   CONTINUE
   330   CONTINUE
        ENDIF
@@ -791,7 +790,7 @@ C       CALL GWF2SUB72D1D(BUFF(:,:,1),NCOL,NROW,DCOME,ND1,LOC1)         !seb REP
        ELSE
          CALL U2DREL(BUFFER,ANAME(8),NROW,NCOL,K,IN,IOUT)               !seb TEMP STORAGE CHANGED TO BUFFER 
        END IF
-       DCOME(LOC1:KQ*NCR)=PACK(BUFFER,TRUE)                           !seb STORE SEQUENTIALLY EACH READ OF BUFFER IN VECTOR DCOME  --VARIABLE LOC2=KQ*NCR IN USE ALREADY
+       DCOME(LOC1:KQ*NCR)=PACK(BUFFER,PACK_MASK)                        !seb STORE SEQUENTIALLY EACH READ OF BUFFER IN VECTOR DCOME  --VARIABLE LOC2=KQ*NCR IN USE ALREADY
          WRITE(IOUT,308) KQ
 C       CALL U2DREL(BUFF(:,:,1),ANAME(9),NROW,NCOL,K,IN,IOUT)           !seb REPLACED BY BUFFER ARRAY
 C       CALL GWF2SUB72D1D(BUFF(:,:,1),NCOL,NROW,DCOMV,ND1,LOC1)         !seb REPLACED BY PACK COMMAND
@@ -801,7 +800,7 @@ C       CALL GWF2SUB72D1D(BUFF(:,:,1),NCOL,NROW,DCOMV,ND1,LOC1)         !seb REP
        ELSE
          CALL U2DREL(BUFFER,ANAME(9),NROW,NCOL,K,IN,IOUT)               !seb TEMP STORAGE CHANGED TO BUFFER 
        END IF
-       DCOMV(LOC1:KQ*NCR)=PACK(BUFFER,TRUE)                           !seb STORE SEQUENTIALLY EACH READ OF BUFFER IN VECTOR DCOMV
+       DCOMV(LOC1:KQ*NCR)=PACK(BUFFER,PACK_MASK)                        !seb STORE SEQUENTIALLY EACH READ OF BUFFER IN VECTOR DCOMV
          WRITE(IOUT,308) KQ
 C       CALL U2DREL(DZ(LOC1),ANAME(8),NROW,NCOL,K,IN,IOUT)
 C       CALL U2DREL(BUFF(:,:,1),ANAME(10),NROW,NCOL,K,IN,IOUT)          !seb REPLACED BY BUFFER ARRAY
@@ -812,7 +811,7 @@ C       CALL GWF2SUB72D1D(BUFF(:,:,1),NCOL,NROW,DZ,ND1,LOC1)            !seb REP
        ELSE
          CALL U2DREL(BUFFER,ANAME(10),NROW,NCOL,K,IN,IOUT)              !seb TEMP STORAGE CHANGED TO BUFFER 
        END IF
-       DZ(LOC1:KQ*NCR)=PACK(BUFFER,TRUE)                              !seb STORE SEQUENTIALLY EACH READ OF BUFFER IN VECTOR DZ
+       DZ(LOC1:KQ*NCR)=PACK(BUFFER,PACK_MASK)                           !seb STORE SEQUENTIALLY EACH READ OF BUFFER IN VECTOR DZ
          WRITE(IOUT,308) KQ
 C       CALL U2DINT(NZ(LOC1),ANAME(9),NROW,NCOL,K,IN,IOUT)
        CALL U2DINT(IBUFF,ANAME(11),NROW,NCOL,K,IN,IOUT)                 !seb fixed bad ANAME reference. Switch to IBUFF
@@ -967,9 +966,6 @@ C
 C22-----RETURN
   500 CALL SGWF2SUB7PSV(IGRID)
       !
-      IF(ALLOCATED(PROPPRINT) .AND. IGRID==1) THEN
-          CALL SUB_PRINTARRAY(PROPPRINT,IOUT)
-      END IF
       !
       RETURN
       END SUBROUTINE
@@ -984,11 +980,12 @@ C        SPECIFICATIONS:
 C     ------------------------------------------------------------------
       USE GLOBAL,    ONLY:HNEW,NCOL,NROW,ISSFLG,BOTM,LBOTM,IBOUND
       USE GWFSUBMODULE ,ONLY: RNB,LN,LDN,HC,DHP,DH,DHC,NZ,DZ,
-     1                        NDF,NNDF,NNDB,NDB,NN,NOCOMV
+     1                        NNDB,NDB,NN,NOCOMV,
+     2                        HAS_DELAY_BED,HAS_INST_BED
 C
       IMPLICIT NONE
       INTEGER::KPER,IGRID
-      INTEGER::IR,IC,K,KQ,LOC,NCR
+      INTEGER::IR,IC,K,KQ,LOC,NCR,LB
       INTEGER::LOC2,LOC3,N1,N2,NQ
       DOUBLE PRECISION::HHNEW,BOT,HTMP
 C     ------------------------------------------------------------------
@@ -1001,9 +998,10 @@ C1------STRESS PERIOD WAS TRANSIENT.
 C2-----MAKE SURE THAT NO-DELAY PRECONSOLIDATION HEAD VALUES ARE CONSISTENT
 C2-----WITH STEADY-STATE HEADS.
       NCR=NROW*NCOL
-      IF(NNDF) THEN
+      IF(HAS_INST_BED) THEN
        DO 20 KQ=1,NNDB
-       K=LN(KQ)
+       K  = LN(KQ)
+       LB = LBOTM(K)
        LOC=(KQ-1)*NCR
 !seb       NQ=(KQ-1)*NCR
 C       NK=(K-1)*NCR
@@ -1015,7 +1013,7 @@ C       NKR=NK+(IR-1)*NCOL
 C       LOC2H=NKR+IC
        LOC=LOC+1                                                        !seb SET POINTER TO COORECT LOCATION FOR IC,IR IN HC
        HHNEW=HNEW(IC,IR,K)
-       BOT=DBLE(BOTM(IC,IR,LBOTM(K)))
+       BOT=BOTM(IC,IR,LB)
        IF(IBOUND(IC,IR,K).EQ.0) HC(LOC)=NOCOMV                          !seb NO MORE INELASTIC COMPACTION WHEN CELL IS DRY
        IF(HHNEW.LT.BOT)         HC(LOC)=NOCOMV                          !seb NO MORE INELASTIC COMPACTION WHEN CELL IS DRY
        IF(HC(LOC).GT.HHNEW)     HC(LOC)=REAL(HHNEW)
@@ -1025,7 +1023,7 @@ C       LOC2H=NKR+IC
 C3-----MAKE SURE THAT DELAY PRECONSOLIDATION HEAD VALUES ARE CONSISTENT
 C3-----WITH STEADY-STATE HEADS. ALSO, SET HEAD (DH) AND HEAD FOR
 C3-----PREVIOUS TIME STEP (DHP) EQUAL TO THE AQUIFER HEAD (HNEW).
-      IF(NDF) THEN
+      IF(HAS_DELAY_BED) THEN
        LOC3=0
        DO 40 KQ=1,NDB
        K=LDN(KQ)
@@ -1160,8 +1158,9 @@ C     ------------------------------------------------------------------
       USE GWFNWTMODULE, ONLY: ICELL
       USE GWFUPWMODULE, ONLY: Sn, LAYTYPUPW
       USE GWFSUBMODULE ,ONLY: RNB,LN,LDN,HC,SCE,SCV,DHP,DH,DHC,NZ,DZ,DP,
-     1                        BB,NDF,NNDF,AC1,AC2,ITMIN,NN,
-     1                        NDB,NNDB,NMZ,A1,A2
+     1                        BB,AC1,AC2,ITMIN,NN,
+     1                        NDB,NNDB,NMZ,A1,A2,
+     1                        HAS_DELAY_BED,HAS_INST_BED
       IMPLICIT NONE
       INTEGER::KPER,KITER,ISIP,IGRID
       !
@@ -1169,7 +1168,7 @@ C     ------------------------------------------------------------------
       DOUBLE PRECISION::HHNEW,HHOLD,BOT,HCTMP
       REAL::TLED,ZERO,RHO1,RHO2,RNB2,VV,DZZ,SSE,SSV,HHC
       REAL::CI,HAQ,AREA,STRGS,SBGN,SEND,STR1,RATES
-      INTEGER::IR,IC,K,NCR,LOC,LOC2,LOC3,LOC4,N
+      INTEGER::IR,IC,K,NCR,LOC,LOC2,LOC3,LOC4,N,LB
       INTEGER::KQ,NQ,NQR,NZONE,NEND
       INTEGER::L1,L2
 C
@@ -1185,10 +1184,11 @@ C1------INITIALIZE
       TLED=1./DELT
       NCR=NCOL*NROW
 C
-      IF(NNDF) THEN
+      IF(HAS_INST_BED) THEN
 C2------FIND LAYERS WITH INTERBED STORAGE
        DO KQ=1,NNDB   !110
-       K=LN(KQ)
+       K  = LN(KQ)
+       LB = LBOTM(K)
 !       LOCT=(KQ-1)*NCR
 !       N=0
        LOC=(KQ-1)*NCR
@@ -1202,21 +1202,27 @@ C
 C3------DETERMINE STORAGE CAPACITIES FOR CELL AT START AND END OF STEP
        RHO1=SCE(LOC)*TLED
        RHO2=RHO1
-       HCTMP=DBLE(HC(LOC))
-       HHNEW=HNEW(IC,IR,K)
-       IF(HHNEW.LT.HCTMP) RHO2=SCV(LOC)*TLED                            !seb if CELL EVER IS DRY HCTMP=-3E38 SO THIS WILL NEVER BE TRUE
+       HCTMP = HC(LOC)
+       HHNEW = HNEW(IC,IR,K)
+       HHOLD = HOLD(IC,IR,K)
+       BOT   = BOTM(IC,IR,LB)
+       !
+       IF(HHNEW.LE.BOT .AND. HHOLD.LE.BOT) CYCLE                       ! DO NOT MODIFY RHS AND HCOF IF HNEW ARE LESS THAN THE BOTTOM OF MODEL CELL
+       IF(HHOLD < BOT) HHOLD=BOT                                       ! ADDED CHECK FOR WHEN HOLD<BOT THEN SET TO BOT
+       !
+       IF(HHNEW < HCTMP) THEN
+           IF    (HHNEW >= BOT) THEN
+                                RHO2=SCV(LOC)*TLED
+           ELSEIF(BOT < HCTMP) THEN
+                                RHO2=SCV(LOC)*TLED
+           ELSE
+                                HCTMP = ZERO
+           END IF
+       ELSE
+           HCTMP = ZERO  ! Note that (RHO2-RHO1) = 0, so HCTMP*(RHO2-RHO1) -> 0*(0)
+       END IF
 C
 C4------ADD APPROPRIATE TERMS TO RHS AND HCOF
-       HHOLD=HOLD(IC,IR,K)
-       BOT=BOTM(IC,IR,LBOTM(K))
-       !
-       !!!IF(HHNEW.LE.BOT) CYCLE                                           !seb DO NOT MODIFY RHS AND HCOF IF HNEW ARE LESS THAN THE BOTTOM OF MODEL CELL
-       !!!IF(HHOLD.LE.BOT) HHOLD=BOT                                       !seb ADDED CHECK FOR WHEN HOLD<BOT THEN SET TO BOT
-       !!!RHS(IC,IR,K)=RHS(IC,IR,K)-HCTMP*(RHO2-RHO1)-RHO1*HHOLD
-       !!!HCOF(IC,IR,K)=HCOF(IC,IR,K)-RHO2
-       !
-       IF(HHNEW.LE.BOT .AND. HHOLD.LE.BOT) CYCLE                        !seb DO NOT MODIFY RHS AND HCOF IF HNEW ARE LESS THAN THE BOTTOM OF MODEL CELL
-       IF(HHOLD.LE.BOT) HHOLD=BOT                                       !seb ADDED CHECK FOR WHEN HOLD<BOT THEN SET TO BOT
        !
        IF(HHNEW < BOT) THEN                                             !seb cell is going dry...account for water released as a result from HOLD traveling to bottom of cell
            !
@@ -1233,10 +1239,12 @@ C4------ADD APPROPRIATE TERMS TO RHS AND HCOF
        END DO
   110  END DO
       ENDIF
-      IF(NDF) THEN
+      !
+      IF(HAS_DELAY_BED) THEN
        LOC3=1-NN
        DO 420 KQ=1,NDB
-       K=LDN(KQ)
+       K  = LDN(KQ)
+       LB = LBOTM(K)
        NQ=(KQ-1)*NCR
        DO 410 IR=1,NROW
        NQR=NQ+(IR-1)*NCOL
@@ -1246,15 +1254,14 @@ C4------ADD APPROPRIATE TERMS TO RHS AND HCOF
        IF(RNB2.LT.1.0) GO TO 410
        LOC3=LOC3+NN
        IF(IBOUND(IC,IR,K).LE.0) GO TO 410
-       HHNEW=HNEW(IC,IR,K)
-       BOT=BOTM(IC,IR,LBOTM(K))
-       IF(HHNEW.LT.BOT) CYCLE                                           !seb DO NOT MODIFY RHS AND HCOF IF HNEW ARE LESS THAN THE BOTTOM OF MODEL CELL
+       !
        IF(ISIP.NE.0.AND.ICHK) THEN
         VV=V(IC,IR,K)
        ELSE
         VV=ZERO
         ICHK=.TRUE.
        ENDIF
+       !
        NZONE=NZ(LOC2)
        DZZ=DZ(LOC2)
        CI=DP(NZONE,1)/DZZ
@@ -1263,9 +1270,18 @@ C4------ADD APPROPRIATE TERMS TO RHS AND HCOF
        END IF
 C
 C5------ASSEMBLE COEFFICIENTS FOR DIRECT SOLUTION OF HEAD IN INTERBED
-       HAQ=REAL(HNEW(IC,IR,K),KIND(HAQ))+VV*AC1
-       SSE=DP(NZONE,2)
-       SSV=DP(NZONE,3)
+       !
+       HHNEW = HNEW(IC,IR,K)
+       BOT   = BOTM(IC,IR,LB)
+       !
+       IF(HHNEW < BOT) THEN
+           HAQ = BOT  +VV*AC1
+       ELSE
+           HAQ = HHNEW+VV*AC1
+       END IF
+       !
+       SSE = DP(NZONE,2)
+       SSV = DP(NZONE,3)
        NEND=LOC3+NN-1                                                   !line added by wschmid to be consistent with mf2005_1.8
        CALL SGWF2SUB7A(HAQ,TLED,CI,SSE,SSV,DZZ,
      1      DH(LOC3:NEND),DHP(LOC3:NEND),DHC(LOC3:NEND),NN)             !:NEND added  by wschmid to be consistent with mf2005_1.8
@@ -1274,9 +1290,12 @@ C6------SOLVE FOR HEAD CHANGES IN STRING USING GAUSSIAN ELIMINATION.
 C6------ADD CHANGES TO HEAD VALUES TO GET HEAD AT CURRENT ITERATION.
        !CALL SGWF2SUB7S(NN)
        CALL SGWF2SUB7S_FAST(NN,A1,A2,BB)
-       DO 200 N=1,NN
-       DH(LOC3+N-1)=DH(LOC3+N-1)+BB(N)*AC2
-  200  CONTINUE
+       !
+       L1 = LOC3-1   ! Formerly: LOC3+N-1
+       DO N=1, NN
+          L1 = L1 + 1
+          DH(L1) = DH(L1)+BB(N)*AC2
+       END DO
 C
 C7------CALCULATE STORAGE CHANGE IN INTERBEDS
   205  AREA=DELR(IC)*DELC(IR)
@@ -1284,14 +1303,30 @@ C7------CALCULATE STORAGE CHANGE IN INTERBEDS
        L1=LOC3
        L2=LOC3+NN-1
        DO 210 LOC4=L1,L2
-       HHOLD=DHP(LOC4)
-       HHNEW=DH(LOC4)
-       HHC=DHC(LOC4)
+       HHOLD = DHP(LOC4)
+       HHNEW = DH(LOC4)
+       HHC   = DHC(LOC4)
+       !
+       IF(HHNEW.LE.BOT .AND. HHOLD.LE.BOT) GO TO 210
 C
 C8------GET STORAGE CAPACITIES AT BEGINNING AND END OF TIME STEP.
        SBGN=DP(NZ(LOC2),2)
        SEND=SBGN
-       IF(HHNEW.LT.HHC) SEND=DP(NZ(LOC2),3)
+       !
+       IF(HHNEW < HHC) THEN
+           IF    (HHNEW >= BOT) THEN
+                                SEND=DP(NZ(LOC2),3)
+           ELSEIF(BOT < HHC) THEN
+                                SEND=DP(NZ(LOC2),3)
+           ELSE
+                                HHC = ZERO
+           END IF
+       ELSE
+           HHC = ZERO  !Note that (SEND-SBGN) = 0, so HHC*(SEND-SBGN) -> 0*(0)
+       END IF
+       !
+       IF(HHOLD < BOT) HHOLD=BOT
+       IF(HHNEW < BOT) HHNEW=BOT
 C
 C9------CALCULATE VOLUME CHANGE IN INTERBED STORAGE FOR TIME STEP.
        STR1=(HHC*(SEND-SBGN)+SBGN*HHOLD-
@@ -1323,9 +1358,10 @@ C     ------------------------------------------------------------------
       USE GWFBASMODULE, ONLY: VBVL,VBNM,MSUM,ICBCFL,DELT
       USE GWFBASMODULE, ONLY: PERTIM,TOTIM
       USE GWFSUBMODULE ,ONLY: RNB,LN,LDN,HC,SCE,SCV,SUB,SUBE,SUBV,DHP,
-     1                        DH,DHC,NZ,DZ,DCOM,DCOME,DCOMV,DP,DVB,NDF,
-     2                        NNDF,NN,ND2,NDB,NNDB,NMZ,IIBSCB,
-     3                        LPFLNK,DVZ,NOCOMV,SEPARTE_FLOWS          !SUB-Linkage rth 
+     1                        DH,DHC,NZ,DZ,DCOM,DCOME,DCOMV,DP,DVB,
+     2                        NN,ND2,NDB,NNDB,NMZ,IIBSCB,
+     3                        LPFLNK,DVZ,NOCOMV,SEPARTE_FLOWS,          !SUB-Linkage rth 
+     4                        HAS_DELAY_BED,HAS_INST_BED
       USE GWFNWTMODULE, ONLY: ICELL
       USE GWFUPWMODULE, ONLY: Sn, LAYTYPUPW
       CHARACTER(16) TEXT(4)
@@ -1374,7 +1410,7 @@ ccrth INITIALIZE Vertical Displacement Array
         enddo                                                           !SUB-Linkage rth
 C
 C2------RUN THROUGH EVERY CELL IN THE GRID WITH INTERBED STORAGE.
-      IF(NNDF) THEN
+      IF(HAS_INST_BED) THEN
 C
 C3-------CELL-BY-CELL FLOW TERMS ARE NEEDED SET IBD AND CLEAR BUFFER.
        IF(IBD.EQ.1) THEN
@@ -1392,7 +1428,8 @@ C4------IF THIS IS A STEADY-STATE STRESS PERIOD, SKIP CALCULATIONS
 C
 C5------CALCULATE NO-DELAY INTERBED STORAGE CHANGE FOR EACH CELL
        DO KQ=1,NNDB  !110
-       K=LN(KQ)
+       K  = LN(KQ)
+       LB = LBOTM(K)
        NQ=(KQ-1)*NCR
        LOC=(KQ-1)*NCR                                                   !seb
        DO IR=1,NROW  !100
@@ -1403,31 +1440,32 @@ C5------CALCULATE NO-DELAY INTERBED STORAGE CHANGE FOR EACH CELL
 C
 C6------CALCULATE FLOW FROM STORAGE (VARIABLE HEAD CELLS ONLY)
        IF(IBOUND(IC,IR,K).LE.0) CYCLE !GO TO 100       
-       HHOLD=HOLD(IC,IR,K)
-       HHNEW=HNEW(IC,IR,K)
-       BOT=DBLE( BOTM(IC,IR,LBOTM(K)) )
-       IF(HHNEW.LE.BOT) CYCLE                                           !seb DO CALCULATE BUDGET FOR DRY CELLS
-       !IF(HHNEW.LT.BOT) HHNEW=BOT
-       IF(HHOLD.LT.BOT) HHOLD=BOT                                       !seb ADDED CHECK FOR WHEN HOLD<BOT THEN SET TO BOT
+       !
+       HHOLD = HOLD(IC,IR,K)
+       HHNEW = HNEW(IC,IR,K)
+       BOT   = BOTM(IC,IR,LB)
+       !
+       IF(HHNEW.LE.BOT .AND. HHOLD.LE.BOT) CYCLE                        !seb DO NOT MODIFY RHS AND HCOF IF HNEW ARE LESS THAN THE BOTTOM OF MODEL CELL
+       !
+       IF( HHNEW < BOT ) HHNEW = BOT 
+       IF( HHOLD < BOT ) HHOLD = BOT  
+       !
        HHC=HC(LOC)
 C
 C7------GET STORAGE CAPACITIES AT BEGINNING AND END OF TIME STEP.
        SBGN=SCE(LOC)
        SEND=SBGN
-       IF(HHNEW.LT.DBLE(HHC)) SEND=SCV(LOC)
-C
-C8------CALCULATE VOLUME CHANGE IN INTERBED STORAGE FOR TIME STEP.
-!       IF ( IUNITUPW.EQ.0 ) THEN
-       STRG =HHC*(SEND-SBGN)+SBGN*HHOLD-SEND*HHNEW
-!       ELSEIF ( LAYTYPUPW(K).EQ.0 ) THEN
-!         STRG=HHC*(SEND-SBGN)+SBGN*HHOLD-SEND*HHNEW
-!       ELSE
-!         ij = ICELL(IC,IR,K)
-!         STRG=Sn(ij)*(HHC*(SEND-SBGN)+SBGN*HHOLD-SEND*HHNEW)
-!       END IF
-       STRGV=0.0
-       IF(HHNEW.LT.HHC) STRGV=SCV(LOC)*(HHC-HHNEW)
-       STRGE=STRG-STRGV
+       !
+       IF(HHNEW < HHC) THEN
+                  SEND  = SCV(LOC)
+                  STRG  = HHC*(SEND-SBGN)+SBGN*HHOLD-SEND*HHNEW
+                  STRGV = SCV(LOC)*(HHC-HHNEW)
+                  STRGE = STRG - STRGV
+       ELSE
+                  STRG  = SBGN*(HHOLD-HHNEW)
+                  STRGV = Zero
+                  STRGE = STRG
+       END IF
 C
 C9------ACCUMULATE SUBSIDENCE ASSOCIATED WITH CHANGE IN STORAGE
        AREA=DELR(IC)*DELC(IR)
@@ -1515,7 +1553,8 @@ C14-----INCREMENT BUDGET TERM COUNTER
 C
 C15-----UPDATE PRECONSOLIDATION HEAD ARRAY
        DO KQ=1,NNDB   !310
-       K=LN(KQ)
+       K  = LN(KQ)
+       LB = LBOTM(K)
        LOC=(KQ-1)*NCR
 !       LOCT=(KQ-1)*NCR
 !       N=0
@@ -1524,28 +1563,22 @@ C15-----UPDATE PRECONSOLIDATION HEAD ARRAY
        LOC=LOC+1
 !       N=N+1
 !       LOC2=LOCT+N
-       HHNEW=HNEW(IC,IR,K)
-       BOT=DBLE(BOTM(IC,IR,LBOTM(K)))
+       HHNEW = HNEW(IC,IR,K)
+       BOT   = BOTM(IC,IR,LB)
        IF(IBOUND(IC,IR,K).LE.0 .OR. HHNEW.LE.BOT) THEN !GO TO 300
          HC(LOC)=NOCOMV                                                 !seb NO MORE INELASTIC COMPACTION WHEN CELL IS DRY
          CYCLE
        END IF          
-       IF(HHNEW.LT.HC(LOC)) HC(LOC)=REAL(HHNEW)
+       IF(HHNEW < HC(LOC)) HC(LOC) = HHNEW
   300  END DO
        END DO
   310  END DO
       ENDIF
-      IF(NDF) THEN
+      !
+      IF(HAS_DELAY_BED) THEN
        IF(IBD.EQ.1) THEN
-            DO CONCURRENT(K=1:NLAY,IR=1:NROW,IC=1:NCOL) 
-                                             BUFF(IC,IR,K)=ZERO
-            END DO
-            !
-            IF(SEPARTE_FLOWS) THEN
-               DO CONCURRENT(K=1:NLAY,IR=1:NROW,IC=1:NCOL) 
-                                                BUF2(IC,IR,K) = ZERO
-               END DO
-            END IF
+            BUFF=ZERO
+            IF(SEPARTE_FLOWS) BUF2 = ZERO
        ENDIF
        !
        STORIN_ELAS = ZERO 
@@ -1556,11 +1589,12 @@ C
 C16-----IF THIS IS A STEADY-STATE STRESS PERIOD, SKIP CALCULATIONS
        IF(ISSFLG(KPER).EQ.1) GO TO 421
 C
-C17-----CALCULATE NO-DELAY INTERBED STORAGE CHANGE FOR EACH CELL  SCOTT WHY IS THIS USING DELAYED BED STORAGE PARAMETERS
+C17-----CALCULATE DELAY INTERBED STORAGE CHANGE FOR EACH CELL
        LOC3=1-NN
        DO 420 KQ=1,NDB
-       K=LDN(KQ)
-       NQ=(KQ-1)*NCR
+       K  = LDN(KQ)
+       LB = LBOTM(K)
+       NQ = (KQ-1)*NCR
        STRGT=ZERO
        RATBSM=ZERO
        DO 410 IR=1,NROW
@@ -1572,10 +1606,8 @@ C17-----CALCULATE NO-DELAY INTERBED STORAGE CHANGE FOR EACH CELL  SCOTT WHY IS T
        IF(RNB2.LT.1.0) GO TO 410
        LOC3=LOC3+NN
        IF(IBOUND(IC,IR,K).LE.0) GO TO 410
-       HD1=DH(LOC3)
-       HHNEW=HNEW(IC,IR,K)
-       BOT=BOTM(IC,IR,LBOTM(K))
-       IF(HHNEW.LT.BOT) GO TO 410                                       !seb DO NOT MODIFY RHS AND HCOF IF HNEW ARE LESS THAN THE BOTTOM OF MODEL CELL
+       HD1 = DH(LOC3)
+       BOT = BOTM(IC,IR,LB)
 C
 C18-----CALCULATE CONDUCTANCE BETWEEN AQUIFER AND FIRST CELL IN INTERBED
 C18-----ACCOUNTING FOR BOTH HALVES OF RNB(LOC2) BEDS IN SYSTEM
@@ -1586,28 +1618,48 @@ C19-----CALCULATE THE FLOW RATE INTO THE CELL
        STRGS=ZERO
        STR1VTOT=ZERO 
        STR1ETOT=ZERO
+       DZ_RNB = DZ(LOC2)*RNB(LOC2)
        L1=LOC3
        L2=LOC3+NN-1
        DO 401 LOC4=L1,L2
-       HHOLD=DHP(LOC4)
-       HHNEW=DH(LOC4)
-       HHC=DHC(LOC4)
+       HHOLD = DHP(LOC4)
+       HHNEW = DH(LOC4)
+       HHC   = DHC(LOC4)
+       !
+       IF(HHNEW.LE.BOT .AND. HHOLD.LE.BOT) GO TO 401 
+       !
+       IF( HHNEW < BOT ) HHNEW = BOT 
+       IF( HHOLD < BOT ) HHOLD = BOT 
 C
 C20-----GET STORAGE CAPACITIES AT BEGINNING AND END OF TIME STEP.
        SBGN=DP(NZ(LOC2),2)
        SEND=SBGN
-       IF(HHNEW.LT.HHC) SEND=DP(NZ(LOC2),3)
-C
-C21-----CALCULATE VOLUME CHANGE IN INTERBED STORAGE FOR TIME STEP.
-       STR1=(HHC*(SEND-SBGN)+SBGN*HHOLD-
-     1                        SEND*HHNEW)*DZ(LOC2)*RNB(LOC2)*2.
-       IF(LOC4.EQ.L2) STR1=STR1*.5
+!
+!21-----CALCULATE VOLUME CHANGE IN INTERBED STORAGE FOR TIME STEP.
+!      IF(HHNEW.LT.HHC) SEND=DP(NZ(LOC2),3)
+!      STR1=(HHC*(SEND-SBGN)+SBGN*HHOLD-
+!    1                        SEND*HHNEW)*DZ(LOC2)*RNB(LOC2)*2.
+!      IF(LOC4.EQ.L2) STR1=STR1*.5
+       !
+       IF(HHNEW < HHC) THEN
+                  SEND  = DP(NZ(LOC2),3)
+                  STR1  = (HHC*(SEND-SBGN)+SBGN*HHOLD-SEND*HHNEW)*DZ_RNB
+                  STR1V = SEND*(HHC-HHNEW)*DZ_RNB
+                  STR1E = STR1 - STR1V
+       ELSE
+                  STR1  = SBGN*(HHOLD-HHNEW)*DZ_RNB
+                  STR1V = Zero
+                  STR1E = STR1
+       END IF
+       !
+       IF(LOC4 < L2) THEN
+                  STR1  = STR1*2.
+                  STR1E = STR1E*2.
+                  STR1V = STR1V*2.
+       END IF
+       !
        STRGS=STRGS+STR1
-       STRGV=0.0
-       STR1V=0.0                                                       !seb ADDED INITIALIZATION TO PREVENT BAD REFERENCE
-       IF(HHNEW.LT.HHC) STR1V=(SEND*(HHC-HHNEW))*DZ(LOC2)*RNB(LOC2)*2.
-       IF(LOC4.EQ.L2) STR1V=STR1V*.5
-       STR1E=STR1-STR1V
+       !
        STR1VTOT = STR1VTOT + STR1V
        STR1ETOT = STR1ETOT + STR1E
 C
@@ -1652,6 +1704,12 @@ C22A----ACCUMULATE ELASTIC AND INELASTIC COMPACTION SEPARATELY (May, 2009)
        !ELSE
        ! RATIN=RATIN+RATS
        !ENDIF
+       !
+C------- If cell has gone dry, then all in-elastic compaction has been relesed
+       DO LOC4=L1, L2
+           IF ( DH(LOC4).LE.BOT ) DHC(LOC4)=NOCOMV   ! NO MORE INELASTIC COMPACTION WHEN CELL IS DRY
+       END DO 
+       ! 
   410  CONTINUE
        DVB(KQ,1)=DVB(KQ,1)+STRGT
        DVB(KQ,2)=DVB(KQ,2)+RATBSM*DELT
@@ -1737,10 +1795,11 @@ C     ------------------------------------------------------------------
       USE GWFBASMODULE, ONLY:PERTIM,TOTIM,HDRY,DELT,
      +                       DATE_SP,HAS_STARTDATE
       USE GWFSUBMODULE ,ONLY: LN,LDN,SUB,SUBE,SUBV,HC,RNB,DCOM,DCOME,
-     &                        DCOMV,DHC,DVB,NDF,NNDF,NTSSUM,OCFLGS,
+     &                        DCOMV,DHC,DVB,NTSSUM,OCFLGS,
      &                        OCLAY,ILSYS,ISBOCF,ISBOCU,NN,NNDB,NDB,
      &                        LPFLNK,DVZ,                               !SUB-Linkage rth 
-     &                        DVZC,DH,DELAY_HED,DELAY_HED_ID               !WSCHMID
+     &                        DVZC,DH,DELAY_HED,DELAY_HED_ID,
+     &                        HAS_DELAY_BED,HAS_INST_BED
       USE NUM2STR_INTERFACE, ONLY: NUM2STR
       CHARACTER(16):: TEXT(13)
       CHARACTER(20):: DATE
@@ -1794,29 +1853,30 @@ C3------PRINT AND STORE SUBSIDENCE, FIRST, CLEAR OUT BUFF.
    30  CONTINUE
 C
 C4-------SUM COMPACTION IN ALL LAYERS TO GET SUBSIDENCE.
-       IF(NNDF) THEN
+       IF(HAS_INST_BED) THEN
         DO KQ=1,NNDB       !50 
 !        LOCT=(KQ-1)*NCR
 !        N=0
-        K=LN(KQ)
+        K  = LN(KQ)
+        !LB = LBOTM(K)
         LOC=(KQ-1)*NCR
         DO IR=1,NROW       !40
         DO IC=1,NCOL       !40
 !        N=N+1
 !        LOC2=LOCT+N
         LOC=LOC+1
-        HHOLD=HOLD(IC,IR,K)
-        HHNEW=HNEW(IC,IR,K)
-        BOT=DBLE(BOTM(IC,IR,LBOTM(K)))
-        IF(IBOUND(IC,IR,K).LE.0) CYCLE
-        IF(HHNEW.LE.BOT.AND.HHOLD.LE.BOT) CYCLE
+        !HHOLD = HOLD(IC,IR,K)
+        !HHNEW = HNEW(IC,IR,K)
+        !BOT   = BOTM(IC,IR,LB)
+        !IF(IBOUND(IC,IR,K).LE.0) CYCLE
+        !IF(HHNEW.LE.BOT.AND.HHOLD.LE.BOT) CYCLE
         !
         BUFF(IC,IR,1)=BUFF(IC,IR,1)+SUB(LOC)
    40   END DO
         END DO
    50   END DO
        ENDIF
-       IF(NDF) THEN
+       IF(HAS_DELAY_BED) THEN
         DO KQ=1,NDB     !70 
 !        LOCT=(KQ-1)*NCR
 !        N=0
@@ -1829,8 +1889,8 @@ C4-------SUM COMPACTION IN ALL LAYERS TO GET SUBSIDENCE.
         LOC=LOC+1
         HHNEW=HNEW(IC,IR,K)
         BOT=DBLE(BOTM(IC,IR,LBOTM(K)))
-        IF(IBOUND(IC,IR,K).LE.0) CYCLE
-        IF(HHNEW.LE.BOT) CYCLE
+        !IF(IBOUND(IC,IR,K).LE.0) CYCLE
+        !IF(HHNEW.LE.BOT) CYCLE
         BUFF(IC,IR,1)=BUFF(IC,IR,1)+DCOM(LOC)
    60   END DO
         END DO
@@ -1855,7 +1915,7 @@ C
 C7------PRINT AND STORE COMPACTION FOR EACH SYSTEM OF INTERBEDS,
 C7------INCLUDING DELAY AND NO-DELAY INTERBEDS.
       IF(OCFLGS(5,NNSTP).OR.OCFLGS(6,NNSTP)) THEN
-       IF(NNDF) THEN
+       IF(HAS_INST_BED) THEN
         DO 80 KQ=1,NNDB
         K=LN(KQ)
         LOC2=(KQ-1)*NCR+1
@@ -1874,7 +1934,7 @@ C7------INCLUDING DELAY AND NO-DELAY INTERBEDS.
         ENDIF
    80   CONTINUE
        ENDIF
-       IF(NDF) THEN
+       IF(HAS_DELAY_BED) THEN
         DO 90 KQ=1,NDB
         K=LDN(KQ)
         LOC2=(KQ-1)*NCR+1
@@ -1897,7 +1957,7 @@ C7------INCLUDING DELAY AND NO-DELAY INTERBEDS.
 C7A------PRINT AND STORE ELASTIC COMPACTION FOR EACH SYSTEM OF INTERBEDS,
 C7A------INCLUDING DELAY AND NO-DELAY INTERBEDS.
       IF(OCFLGS(18,NNSTP).OR.OCFLGS(19,NNSTP)) THEN
-       IF(NNDF) THEN
+       IF(HAS_INST_BED) THEN
         DO 410 KQ=1,NNDB
         K=LN(KQ)
         !LOC2=(KQ-1)*NCR+1                                               !seb CHANGED DEFINITION FROM LOC2 TO LOC1
@@ -1916,7 +1976,7 @@ C7A------INCLUDING DELAY AND NO-DELAY INTERBEDS.
         ENDIF
   410   CONTINUE
        ENDIF
-       IF(NDF) THEN
+       IF(HAS_DELAY_BED) THEN
         DO 420 KQ=1,NDB
         K=LDN(KQ)
         !LOC2=(KQ-1)*NCR+1                                               !seb CHANGED DEFINITION FROM LOC2 TO LOC1
@@ -1940,7 +2000,7 @@ C7B------PRINT AND STORE INELASTIC COMPACTION FOR EACH SYSTEM OF INTERBEDS,
 C7B------INCLUDING DELAY AND NO-DELAY INTERBEDS.
 C*****WORK HERE... change ocflgs and isbocf numbers
       IF(OCFLGS(20,NNSTP).OR.OCFLGS(21,NNSTP)) THEN
-       IF(NNDF) THEN
+       IF(HAS_INST_BED) THEN
         DO 430 KQ=1,NNDB
         K=LN(KQ)
         !LOC2=(KQ-1)*NCR+1                                               !seb CHANGED DEFINITION FROM LOC2 TO LOC1
@@ -1959,7 +2019,7 @@ C*****WORK HERE... change ocflgs and isbocf numbers
         ENDIF
   430   CONTINUE
        ENDIF
-       IF(NDF) THEN
+       IF(HAS_DELAY_BED) THEN
         DO 440 KQ=1,NDB
         K=LDN(KQ)
         !LOC2=(KQ-1)*NCR+1                                               !seb CHANGED DEFINITION FROM LOC2 TO LOC1
@@ -1998,9 +2058,10 @@ C8------LAYER. FIRST, CLEAR OUT BUFF.
        ENDDO
 C
 C9-------SUM NO-DELAY COMPACTION IN ALL MODEL LAYERS.
-       IF(NNDF) THEN
+       IF(HAS_INST_BED) THEN
         DO KQ=1,NNDB
-        K=LN(KQ)
+        K  = LN(KQ)
+        !LB = LBOTM(K)
         OCLAY(K)=.TRUE.
 !        LOCT=(KQ-1)*NCR
 !        N=0
@@ -2010,11 +2071,11 @@ C9-------SUM NO-DELAY COMPACTION IN ALL MODEL LAYERS.
 !        N=N+1
 !        LOC2=LOCT+N
         LOC=LOC+1
-        HHOLD=HOLD(IC,IR,K)
-        HHNEW=HNEW(IC,IR,K)
-        BOT=DBLE(BOTM(IC,IR,LBOTM(K)))
-        IF(IBOUND(IC,IR,K).LE.0) CYCLE
-        IF(HHNEW.LE.BOT.AND.HHOLD.LE.BOT) CYCLE
+        !HHOLD = HOLD(IC,IR,K)
+        !HHNEW = HNEW(IC,IR,K)
+        !BOT   = BOTM(IC,IR,LB)
+        !IF(IBOUND(IC,IR,K).LE.0) CYCLE
+        !IF(HHNEW.LE.BOT.AND.HHOLD.LE.BOT) CYCLE
         BUFF(IC,IR,K)=BUFF(IC,IR,K)+SUB(LOC)
         ENDDO
         ENDDO
@@ -2022,7 +2083,7 @@ C9-------SUM NO-DELAY COMPACTION IN ALL MODEL LAYERS.
        ENDIF
 C
 C10------SUM DELAY COMPACTION IN ALL MODEL LAYERS.
-       IF(NDF) THEN
+       IF(HAS_DELAY_BED) THEN
         DO KQ=1,NDB
         K=LDN(KQ)
         OCLAY(K)=.TRUE.
@@ -2034,10 +2095,10 @@ C10------SUM DELAY COMPACTION IN ALL MODEL LAYERS.
 !        N=N+1
 !        LOC2=LOCT+N
         LOC=LOC+1
-        HHNEW=HNEW(IC,IR,K)
-        BOT=DBLE(BOTM(IC,IR,LBOTM(K)))
-        IF(IBOUND(IC,IR,K).LE.0) CYCLE
-        IF(HHNEW.LE.BOT) CYCLE
+        !HHNEW=HNEW(IC,IR,K)
+        !BOT=DBLE(BOTM(IC,IR,LBOTM(K)))
+        !IF(IBOUND(IC,IR,K).LE.0) CYCLE
+        !IF(HHNEW.LE.BOT) CYCLE
         BUFF(IC,IR,K)=BUFF(IC,IR,K)+DCOM(LOC)
         ENDDO
         ENDDO
@@ -2118,7 +2179,7 @@ C
 C16-----PRINT CRITICAL HEAD FOR SYSTEMS OF NO-DELAY INTERBEDS.
 C16-----STORAGE.
       IF(OCFLGS(9,NNSTP).OR.OCFLGS(10,NNSTP)) THEN
-       IF(NNDF) THEN
+       IF(HAS_INST_BED) THEN
        DO 155 NL=1,NLAY
        OCLAY(NL)=.TRUE.
   155  CONTINUE
@@ -2158,7 +2219,7 @@ C16-----STORAGE.
 C
 C17-----PRINT CRITICAL HEAD FOR ALL SYSTEMS OF DELAY INTERBED.
       IF(OCFLGS(11,NNSTP).OR.OCFLGS(12,NNSTP)) THEN
-       IF(NDF) THEN
+       IF(HAS_DELAY_BED) THEN
         LOC4=0
         DO 190 KQ=1,NDB
         K=LDN(KQ)
@@ -2189,7 +2250,7 @@ C17-----PRINT CRITICAL HEAD FOR ALL SYSTEMS OF DELAY INTERBED.
       ENDIF
 C
 C18-----PRINT VOLUMETRIC BUDGET FOR SYSTEMS OF DELAY INTERBEDS
-      IF(NDF.AND.IBDPR) THEN
+      IF(HAS_DELAY_BED.AND.IBDPR) THEN
          WRITE(IOUT,230) KSTP,KPER
        SUMSV=ZERO
        SUMBV=ZERO
@@ -2237,7 +2298,7 @@ C19------FIRST, CLEAR OUT BUFF.
        ENDDO
 C
 C20-------SUM NO-DELAY ELASTIC COMPACTION IN ALL MODEL LAYERS.
-       IF(NNDF) THEN
+       IF(HAS_INST_BED) THEN
         DO KQ=1,NNDB
         K=LN(KQ)
         OCLAY(K)=.TRUE.
@@ -2254,7 +2315,7 @@ C20-------SUM NO-DELAY ELASTIC COMPACTION IN ALL MODEL LAYERS.
        ENDIF
 C
 C21------SUM DELAY ELASTIC COMPACTION IN ALL MODEL LAYERS.
-       IF(NDF) THEN
+       IF(HAS_DELAY_BED) THEN
         DO KQ=1,NDB
         K=LDN(KQ)
         OCLAY(K)=.TRUE.
@@ -2309,7 +2370,7 @@ C24------FIRST, CLEAR OUT BUFF.
        ENDDO
 C
 C25-------SUM NO-DELAY INELASTIC COMPACTION IN ALL MODEL LAYERS.
-       IF(NNDF) THEN
+       IF(HAS_INST_BED) THEN
         DO KQ=1,NNDB
         K=LN(KQ)
         OCLAY(K)=.TRUE.
@@ -2321,11 +2382,11 @@ C25-------SUM NO-DELAY INELASTIC COMPACTION IN ALL MODEL LAYERS.
 !        N=N+1
 !        LOC2=LOCT+N
         LOC=LOC+1
-        HHOLD=HOLD(IC,IR,K)
-        HHNEW=HNEW(IC,IR,K)
-        BOT=DBLE(BOTM(IC,IR,LBOTM(K)))
-        IF(IBOUND(IC,IR,K).LE.0) CYCLE
-        IF(HHNEW.LE.BOT.AND.HHOLD.LE.BOT) CYCLE
+        !HHOLD=HOLD(IC,IR,K)
+        !HHNEW=HNEW(IC,IR,K)
+        !BOT=DBLE(BOTM(IC,IR,LBOTM(K)))
+        !IF(IBOUND(IC,IR,K).LE.0) CYCLE
+        !IF(HHNEW.LE.BOT.AND.HHOLD.LE.BOT) CYCLE
         BUFF(IC,IR,K)=BUFF(IC,IR,K)+SUBV(LOC)
         ENDDO
         ENDDO
@@ -2333,7 +2394,7 @@ C25-------SUM NO-DELAY INELASTIC COMPACTION IN ALL MODEL LAYERS.
        ENDIF
 C
 C26------SUM DELAY INELASTIC COMPACTION IN ALL MODEL LAYERS.
-       IF(NDF) THEN
+       IF(HAS_DELAY_BED) THEN
         DO KQ=1,NDB
         K=LDN(KQ)
         OCLAY(K)=.TRUE.
@@ -2400,7 +2461,7 @@ C29 WRITE OUT ANY Delay Heads
                    LOC2=LOCT+N
                    IF(RNB(LOC2).GE.1.0) THEN
                       LOC4=LOC4+NN
-                      BUFF(IC,IR,1)=DHC(LOC4)
+                      BUFF(IC,IR,1)=DH(LOC4)
                    END IF
                 END DO
                 END DO
@@ -2446,7 +2507,7 @@ C29 WRITE OUT ANY Delay Heads
                    LOC2=LOCT+N
                    IF(RNB(LOC2).GE.1.0) THEN
                       LOC4=LOC4+NN
-                      IF(KQ==KQ_PRNT) BUFF(IC,IR,1)=DHC(LOC4)
+                      IF(KQ==KQ_PRNT) BUFF(IC,IR,1)=DH(LOC4)
                    END IF
                 END DO
                 END DO
@@ -2634,8 +2695,8 @@ C1------TRIANGULARIZE LEFT-HAND SIDE MATRIX
       BB(NN)=BB(NN)/A1(NN)
 C
 C2------BACK SUBSTITE FOR SOLUTION
-      DO CONCURRENT (N=NN1:1:-1)
-          BB(N)=BB(N)-A2(N)*BB(N+1)
+      DO N=NN1, 1, -1
+                     BB(N)=BB(N)-A2(N)*BB(N+1)
       END DO
       !
       END SUBROUTINE
@@ -2693,12 +2754,12 @@ C     ******************************************************************
 C
 C        SPECIFICATIONS:
 C     ------------------------------------------------------------------
-      USE GWFSUBMODULE ,ONLY: DH,DHC,NDF,ND2,IDSAVE
+      USE GWFSUBMODULE ,ONLY: DH,DHC,HAS_DELAY_BED,ND2,IDSAVE
 C     ------------------------------------------------------------------
       CALL SGWF2SUB7PNT(IGRID)
 C
 C1-----PROCESS IF SAVE OPTION SELECTED AND DELAY INTERBEDS EXIST
-      IF(IDSAVE.GT.0.AND.NDF) THEN
+      IF(IDSAVE.GT.0.AND.HAS_DELAY_BED) THEN
 C2-----WRITE OUT NUMBER OF NODAL HEAD AND PRECONSOLIDATION HEAD VALUES
 C2-----THAT ARE BEING SAVED TO DISK
        WRITE(IDSAVE) ND2
@@ -2731,8 +2792,8 @@ C
       DEALLOCATE (GWFSUBDAT(IGRID)%IDSAVE)
       DEALLOCATE (GWFSUBDAT(IGRID)%AC1)
       DEALLOCATE (GWFSUBDAT(IGRID)%AC2)
-      DEALLOCATE (GWFSUBDAT(IGRID)%NDF)
-      DEALLOCATE (GWFSUBDAT(IGRID)%NNDF)
+      DEALLOCATE (GWFSUBDAT(IGRID)%HAS_DELAY_BED)
+      DEALLOCATE (GWFSUBDAT(IGRID)%HAS_INST_BED)
       DEALLOCATE (GWFSUBDAT(IGRID)%ISBOCF)
       DEALLOCATE (GWFSUBDAT(IGRID)%ISBOCU)
       DEALLOCATE (GWFSUBDAT(IGRID)%OCFLGS)
@@ -2780,8 +2841,8 @@ C NULLIFY THE LOCAL POINTERS
         IDSAVE  =>NULL()
         AC1     =>NULL()
         AC2     =>NULL()
-        NDF     =>NULL()
-        NNDF    =>NULL()
+        HAS_DELAY_BED     =>NULL()
+        HAS_INST_BED    =>NULL()
         ISBOCF  =>NULL()
         ISBOCU  =>NULL()
         OCFLGS  =>NULL()
@@ -2833,8 +2894,8 @@ C
       IDSAVE=>GWFSUBDAT(IGRID)%IDSAVE
       AC1=>GWFSUBDAT(IGRID)%AC1
       AC2=>GWFSUBDAT(IGRID)%AC2
-      NDF=>GWFSUBDAT(IGRID)%NDF
-      NNDF=>GWFSUBDAT(IGRID)%NNDF
+      HAS_DELAY_BED=>GWFSUBDAT(IGRID)%HAS_DELAY_BED
+      HAS_INST_BED=>GWFSUBDAT(IGRID)%HAS_INST_BED
       ISBOCF=>GWFSUBDAT(IGRID)%ISBOCF
       ISBOCU=>GWFSUBDAT(IGRID)%ISBOCU
       OCFLGS=>GWFSUBDAT(IGRID)%OCFLGS
@@ -2889,8 +2950,8 @@ C
       GWFSUBDAT(IGRID)%IDSAVE=>IDSAVE
       GWFSUBDAT(IGRID)%AC1=>AC1
       GWFSUBDAT(IGRID)%AC2=>AC2
-      GWFSUBDAT(IGRID)%NDF=>NDF
-      GWFSUBDAT(IGRID)%NNDF=>NNDF
+      GWFSUBDAT(IGRID)%HAS_DELAY_BED=>HAS_DELAY_BED
+      GWFSUBDAT(IGRID)%HAS_INST_BED=>HAS_INST_BED
       GWFSUBDAT(IGRID)%ISBOCF=>ISBOCF
       GWFSUBDAT(IGRID)%ISBOCU=>ISBOCU
       GWFSUBDAT(IGRID)%OCFLGS=>OCFLGS
@@ -2931,205 +2992,3 @@ C
 C
       RETURN
       END SUBROUTINE
-
-      SUBROUTINE SUB_PRINTARRAY(DIROUT,IOUT)
-      USE, INTRINSIC:: IEEE_ARITHMETIC, ONLY: IEEE_VALUE, IEEE_QUIET_NAN
-      USE GWFSUBMODULE,ONLY:IIBSCB,ITMIN,NNDB,NDB,NMZ,NN,ND2,IDSAVE,
-     1                      AC1,AC2,NDF,NNDF,ISBOCF,ISBOCU,
-     2                      OCFLGS,OCLAY,ILSYS,NTSSUM,LN,LDN,NZ,RNB,
-     3                      DH,DHP,DHC,DZ,HC,SCE,SCV,DCOM,DCOME,DCOMV,
-     4                      A1,A2,BB,SUB,SUBE,SUBV,DP,DVB,
-     5                      LPFLNK,DVZ,DELAY_HED,DELAY_HED_ID,
-     6                      DVZC,NOCOMV,SEPARTE_FLOWS
-      IMPLICIT NONE
-      CHARACTER(*), INTENT(IN):: DIROUT
-      INTEGER,      INTENT(IN):: IOUT
-      
-
-!      CHARACTER(:),ALLOCATABLE::DIR                                    ! DIRECTORY TO PRINT TOO
-!      INTEGER:: IU                                                     ! TEMPORAY UNIT NUMBER
-!      INTEGER::I,J,K,N,KHANI
-!      !PRINTING VARIABLES
-!      REAL,ALLOCATABLE, DIMENSION(:,:,:) ::BUFF
-!      REAL:: NaN
-!
-!      CHARACTER(256)::FN
-!      CHARACTER(32)::SGRID,SLAY,SCOL,SFMT
-!      
-!      ALLOCATE(BUFF(NCOL,NROW,NLAY))
-!      NaN = IEEE_VALUE(NaN, IEEE_QUIET_NAN)
-!      !
-!      DIR=TRIM(ADJUSTL(DIROUT))//'PARAM_'                              ! ADDED FIRST PART OF FILE NAME TO KEEP ALL FILES IN SAME ALPHABETICAL LOCATION
-!      !
-!      WRITE(SGRID,'(I32)')IGRID
-!      WRITE(SFMT,'(I32)')NCOL
-!      SGRID=ADJUSTL(SGRID)
-!      SFMT='('//TRIM(ADJUSTL(SFMT))//'ES20.10)'
-!      !-------------------------------------------------------------- HKR
-!      DO K=1, NLAY
-!      DO I=1, NROW
-!      DO J=1, NCOL
-!      IF(IBOUND(J,I,K) /= Z) THEN
-!                             BUFF(J,I,K) = T_HK(J,I,K)
-!      ELSE
-!                             BUFF(J,I,K) = NaN
-!      END IF
-!      END DO
-!      END DO
-!      END DO
-!      !
-!      DO K=1, NLAY
-!        WRITE(SLAY,'(I32)')K
-!        FN=DIR//'HKR_G'//TRIM(SGRID)//'_L'//TRIM(ADJUSTL(SLAY))//'.txt'
-!        IU = 0
-!        CALL GENERIC_OPEN(FN, IU, IOUT,
-!     +           ACTION='WRITE', FORM='FORMATTED',
-!     +           ACCESS='SEQUENTIAL', STATUS='REPLACE',
-!     +           BUFFER_BLOCKSIZE=16384, BUFFER_COUNT=1)
-!!        OPEN(NEWUNIT=IU,FILE=FN,WARN=
-!!     +         STATUS='REPLACE',POSITION='REWIND',ACTION='WRITE') 
-!        WRITE(IU,'(4I10,A,10x,A)')NROW,NCOL,K,IGRID,'  HKR',
-!     +                         'NROW,NCOL,LAY,IGRID' !HEADER INFORMATION
-!        DO I=1,NROW
-!          WRITE(IU,SFMT) BUFF(:,I,K)                  !REPLACES(HK(J,I,K),J=1,NCOL) !PRINT OUT ARRAYS
-!        END DO
-!        CLOSE(IU)
-!      END DO
-!      !-------------------------------------------------------------- HKC
-!      DO K=1, NLAY
-!        WRITE(SLAY,'(I32)')K
-!        FN=DIR//'HKC_G'//TRIM(SGRID)//'_L'//TRIM(ADJUSTL(SLAY))//'.txt'
-!        OPEN(NEWUNIT=IU,FILE=FN,
-!     +         STATUS='REPLACE',POSITION='REWIND',ACTION='WRITE') 
-!        WRITE(IU,'(4I10,A,10x,A)')NROW,NCOL,K,IGRID,'  HKC',
-!     +                         'NROW,NCOL,LAY,IGRID' !HEADER INFORMATION
-!        IF(T_CHANI(K) <= 0.0) THEN
-!          KHANI=-T_CHANI(K)
-!          DO I=1,NROW
-!            WRITE(IU,SFMT) BUFF(:,I,K)*T_HANI(:,I,KHANI)
-!          END DO
-!        ELSE
-!          DO I=1,NROW
-!            WRITE(IU,SFMT) BUFF(:,I,K)*T_CHANI(K)
-!          END DO
-!        END IF
-!        CLOSE(IU)
-!      END DO
-!      !-------------------------------------------------------------- VKA
-!      !BUFF = VKA or NaN
-!      DO K=1, NLAY
-!      DO I=1, NROW
-!      DO J=1, NCOL
-!      IF(IBOUND(J,I,K) /= Z) THEN
-!        IF(T_LAYVKA(K) == 0) THEN
-!                             BUFF(J,I,K) = T_VKA(J,I,K)
-!        ELSE                                           ! THERE WILL BE VKA=HK/HANI
-!            IF(T_VKA(J,I,K) > 0.0) THEN
-!                             BUFF(J,I,K) = T_HK(J,I,K)/T_VKA(J,I,K)
-!            ELSE
-!                             BUFF(J,I,K) = 0.0
-!            END IF
-!        END IF
-!      END IF
-!      END DO
-!      END DO
-!      END DO
-!      !
-!      DO K=1, NLAY
-!        WRITE(SLAY,'(I32)')K
-!        FN=DIR//'VKA_G'//TRIM(SGRID)//'_L'//TRIM(ADJUSTL(SLAY))//'.txt'
-!        OPEN(NEWUNIT=IU,FILE=FN,
-!     +         STATUS='REPLACE',POSITION='REWIND',ACTION='WRITE') 
-!        WRITE(IU,'(4I10,A,10x,A)')NROW,NCOL,K,IGRID,'  VKA',
-!     +                         'NROW,NCOL,LAY,IGRID' !HEADER INFORMATION
-!        DO I=1,NROW
-!          WRITE(IU,SFMT)BUFF(:,I,K)  !BUFF IS CALCULATED BEFORE LOOP
-!        END DO
-!        CLOSE(IU)
-!      END DO
-!      !      
-!      IF(ANY(ISSFLG == Z))THEN
-!      !-------------------------------------------------------------- SC1 
-!      !BUFF = SC1 or NaN
-!       WHERE(IBOUND /= Z)        !SET BUFFER TO STORACE COEFICIENT 1
-!                       BUFF=T_SC1
-!       END WHERE
-!       IF    (ORIGIN == 1) THEN                                         !USING LPF
-!!         FORALL(I=1:NROW,J=1:NCOL,K=1:NLAY,IBOUND(J,I,K) /= Z)          !Ss=SC/(dr*dc*thick)       
-!!     +     BUFF(J,I,K)=BUFF(J,I,K)/( DELR(J)*DELC(I)            
-!!     +                    *(BOTM(J,I,LBOTM(K)-1)-BOTM(J,I,LBOTM(K))) )
-!         DO K=1,NLAY
-!         DO I=1,NROW
-!         DO J=1,NCOL
-!           IF(IBOUND(J,I,K) /= Z) THEN
-!          BUFF(J,I,K)=BUFF(J,I,K)/( DELR(J)*DELC(I)                     !Ss=SC/(dr*dc*thick)   
-!     +                    *(BOTM(J,I,LBOTM(K)-1)-BOTM(J,I,LBOTM(K))) )
-!          END IF
-!         END DO
-!         END DO
-!         END DO
-!       ELSEIF(ORIGIN == 2) THEN                                         !USING UPW
-!!         FORALL(I=1:NROW,J=1:NCOL,K=1:NLAY,IBOUND(J,I,K) /= Z)          !Ss=SC/(dr*dc)
-!!     +     BUFF(J,I,K)=BUFF(J,I,K)/( DELR(J)*DELC(I) )
-!         DO K=1,NLAY
-!         DO I=1,NROW
-!         DO J=1,NCOL
-!           IF(IBOUND(J,I,K) /= Z) THEN                                  !Ss=SC/(dr*dc)
-!            BUFF(J,I,K)=BUFF(J,I,K)/( DELR(J)*DELC(I) )
-!          END IF
-!         END DO
-!         END DO
-!         END DO
-!       END IF
-!       !-------------------------------------------------------------- SC2 
-!       !
-!       DO K=1, NLAY
-!         WRITE(SLAY,'(I32)')K
-!         FN=DIR//'Ss_G'//TRIM(SGRID)//'_L'//TRIM(ADJUSTL(SLAY))//'.txt'
-!         OPEN(NEWUNIT=IU,FILE=FN,
-!     +          STATUS='REPLACE',POSITION='REWIND',ACTION='WRITE') 
-!         WRITE(IU,'(4I10,A,10x,A)')NROW,NCOL,K,IGRID,'  Ss ',
-!     +                          'NROW,NCOL,LAY,IGRID' !HEADER INFORMATION
-!         DO I=1,NROW
-!           WRITE(IU,SFMT)BUFF(:,I,K)
-!         END DO
-!         CLOSE(IU)
-!       END DO
-!       !
-!       IF(ANY(LAYHDT /= Z)) THEN                                        !THERE IS ATLEAST ONE CONVERTABLE LAYER
-!        DO K=1,NLAY
-!          N = T_LAYTYP(K)
-!          IF(N > 0) THEN
-!             DO I=1,NROW
-!             DO J=1,NCOL
-!               IF(IBOUND(J,I,K) /= Z) THEN                              !Sy=SC/(dr*dc)
-!                    BUFF(J,I,K) = T_SC2(J,I,N)/( DELR(J)*DELC(I) )
-!               END IF
-!             END DO
-!             END DO
-!          END IF
-!        END DO
-!        !
-!        DO K=1, NLAY
-!         N = T_LAYTYP(K)
-!         IF(N > 0) THEN
-!          WRITE(SLAY,'(I32)')K
-!          FN=DIR//'Sy_G'//TRIM(SGRID)//'_L'//TRIM(ADJUSTL(SLAY))//'.txt'
-!          OPEN(NEWUNIT=IU,FILE=FN,
-!     +           STATUS='REPLACE',POSITION='REWIND',ACTION='WRITE') 
-!          WRITE(IU,'(4I10,A,10x,A)')NROW,NCOL,K,IGRID,'  Sy ',
-!     +                           'NROW,NCOL,LAY,IGRID' !HEADER INFORMATION
-!          DO I=1,NROW
-!            WRITE(IU,SFMT)BUFF(:,I,N)
-!          END DO
-!          CLOSE(IU)
-!         END IF
-!        END DO
-!       END IF
-!      END IF
-!      
-!      DEALLOCATE(BUFF)
-!      IF(ALLOCATED(DIR)) DEALLOCATE(DIR)
-      END SUBROUTINE
-      
-      
