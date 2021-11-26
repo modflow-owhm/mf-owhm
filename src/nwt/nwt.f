@@ -17,7 +17,7 @@
       USE ERROR_INTERFACE,          ONLY: WARNING_MESSAGE, STOP_ERROR
       USE FILE_IO_INTERFACE,        ONLY: READ_TO_DATA
       USE PARSE_WORD_INTERFACE,     ONLY: PARSE_WORD_UP
-      USE STRINGS,                  ONLY: GET_NUMBER 
+      USE STRINGS,                  ONLY: GET_NUMBER, GET_INTEGER 
       USE ULOAD_AND_SFAC_INTERFACE, ONLY: ULOAD
       USE WARNING_TYPE_INSTRUCTION, ONLY: WARNING_TYPE
       IMPLICIT NONE
@@ -34,14 +34,14 @@
 !     ------------------------------------------------------------------
 !     LOCAL VARIABLES
 !     ------------------------------------------------------------------
-      INTEGER lloc, LLOCSAVE, istart, istop, i, j, ic, ir, il, jj
-      CHARACTER(LEN=768) line
-      REAL r, toldum, ftoldum, thetadum, amomentdum
-      REAL akappadum, gammadum, Breducdum, Btoldum, Thickdum!,ZERO
-      INTEGER IANAME,KHANI!,N,KK,nc,nr,nl,j,k,NCNVRT,NHANI,NWETD
+      INTEGER:: lloc, LLOCSAVE, istart, istop, i, ic, ir, il, jj
+      CHARACTER(768):: line
+      REAL:: r, toldum, ftoldum, thetadum, amomentdum
+      REAL:: akappadum, gammadum, Breducdum, Btoldum, Thickdum!,ZERO
+      INTEGER:: IANAME,KHANI!,N,KK,nc,nr,nl,j,k,NCNVRT,NHANI,NWETD
 ! Memory use variables
-      INTEGER lrwrk,liwrk,NODES,MBLACK,NJAF
-      REAL Memuse1,Memuse2
+      INTEGER:: lrwrk,liwrk,NODES,MBLACK,NJAF
+      REAL:: Memuse1,Memuse2
       DOUBLE PRECISION:: THK,MXTHCK                                     !seb ADDED VARIABLES
       LOGICAL:: THIN_CHECK, ADJUST_MXIter
       TYPE(WARNING_TYPE):: WRN
@@ -55,8 +55,6 @@
       !
       CALL WRN%INIT()
       !
-      CALL READ_TO_DATA(LINE,IN,IOUT,IOUT)
-      lloc = 1
       ALLOCATE (Tol, Ftol, RMS2, RMS1, Iierr,IFDPARAM,ICNVGFLG)
       ALLOCATE (ITER1,THETA,THICKFACT,BTOL,Numtrack)
       ALLOCATE (RMSAVE,ADAMP,Breduc_Reset,HED_LIM,GSE_LIM(1,1))
@@ -87,7 +85,6 @@
       Linmeth   = TWO      ! Linmeth=1 GMRES; Linmeth=2 XMD; Linmeth=3 SAMG 
       IPRNWT    = ONE      ! Iteration stats (>0 prints)
       IBOTAV    = ONE      ! Doesn't reset to bottom
-      LLOC      = ONE
       Numtrack  = Z
       Btoldum   = UNO
       Breducdum = UNO
@@ -98,37 +95,63 @@
       GSE_LIM(1,1)  = IEEE_VALUE(THK, IEEE_QUIET_NAN)
       ADJUST_MXIter = TRUE
       !
+      CALL READ_TO_DATA(LINE,IN,IOUT,IOUT)
       DO
+        lloc = ONE
         CALL PARSE_WORD_UP(line, lloc, istart, istop)    !Check for these keywords at start of solver input. Note MAX_HEAD_CHANGE can also appear in the normal options line
         !
         SELECT CASE(line(istart:istop))
+        CASE('THIN_CELL_CHECK')
+           THIN_CHECK = TRUE
+           WRITE(IOUT,'(A)')
+     1               ' THIN CELL CHECK THAT SETS IBOUND=0 IS ENABLED'
         CASE('MAX_HEAD_CHANGE')
             CALL GET_NUMBER(line, lloc, istart, istop,IOUT,IN,HED_LIM,
      1      MSG='"MAX_HEAD_CHANGE" failed to read the HED_LIM value.')
             IF(HED_LIM <=   0D0 ) HED_LIM=IEEE_VALUE(THK,IEEE_QUIET_NAN)
             IF(HED_LIM >= 0.9D30) HED_LIM=IEEE_VALUE(THK,IEEE_QUIET_NAN)
             IF(HED_LIM <  0.5D0 ) HED_LIM=0.5D0
-            !
-            CALL READ_TO_DATA(LINE,IN,IOUT)
-            lloc = ONE
         CASE('HEAD_DISTANCE_ABOVE_GSE_LIMIT')
             DEALLOCATE(GSE_LIM)
             ALLOCATE(GSE_LIM(NCOL,NROW))
             !
             jj = Z
             CALL ULOAD(GSE_LIM, LLOC, line, IOUT, IN, jj, MSG=
-     1         '"HEAD_DISTANCE_ABOVE_GSE_LIMIT" failed to read the '//
-     2         'NROW by NCOL array of GSE_LIM values.')
-            !
-            CALL READ_TO_DATA(LINE,IN,IOUT)
-            lloc = ONE
-            !
+     +         '"HEAD_DISTANCE_ABOVE_GSE_LIMIT" failed to read the '//
+     +         'NROW by NCOL array of GSE_LIM values.')
+        CASE('KEEP_MXITER')
+            ADJUST_MXIter = FALSE
+        CASE('SIMPLE')
+            IFDPARAM=1
+            WRITE(IOUT,21)
+        CASE('MODERATE')
+            IFDPARAM=2
+            WRITE(IOUT,23)
+        CASE('COMPLEX')
+            IFDPARAM=3
+            WRITE(IOUT,25)
+        CASE('SPECIFIED')
+            IFDPARAM=4
+            WRITE(IOUT,26)
+            CALL READ_SPECIFIED_PROPERTIES(LINE,LLOC,IN,IOUT)
+        CASE('CONTINUE', 
+     +       'NO_CONVERGENCE_STOP', 'NO_FAILED_CONVERGENCE_STOP')
+           ICNVGFLG = 1
+           IF( STOPER>0.0) THEN
+               CALL WARNING_MESSAGE('',0,IOUT,
+     +              'NWT "CONTINUE" KEYWORD FOUND,'//NL//
+     +              'IT WILL OVERRIDE BAS OPTION "STOPERROR"'//NL//
+     +              'AND SIMULATION WILL ALWAYS CONTINUE DESPITE '//
+     +              'FAILED CONVERGENCE'//NL, TRUE)
+           END IF
+           STOPER = 1E30
         CASE DEFAULT
-          lloc = ONE
           EXIT
         END SELECT
+        CALL READ_TO_DATA(LINE,IN,IOUT)
       END DO
       !
+      lloc = ONE
       CALL URWORD(line, lloc, istart, istop, 3, i, toldum, Iout, In)
       CALL URWORD(line, lloc, istart, istop, 3, i, ftoldum, Iout, In)
       CALL URWORD(line, lloc, istart, istop, 2, Mxiter, r, Iout, In)
@@ -142,8 +165,20 @@
      + MSG='NWT-LGR ERROR: THE NWT SOLVER PACKAGE USING THE XMD '//
      + '(LINEMETH=2) SOLVER DOES NOT WORK WITH LGR.'//NL//
      + 'PLEASE CHANGE THE SOLVER TO GMRES (LINEMETH=1) TO CONTINUE.')
+      !
+      NJAF = lloc   ! Temp backup of the start of the options part of the line
 C
 C3B-----GET OPTIONS.
+      
+   21 FORMAT(1X,'SIMPLE OPTION:',/,
+     1     1X,'DEFAULT SOLVER INPUT VALUES REFLECT NEARLY LINEAR MODEL')
+   23 FORMAT(1X,'MODERATE OPTION:',/,1X,'DEFAULT SOLVER',
+     1         ' INPUT VALUES REFLECT MODERETELY NONLINEAR MODEL')
+   25 FORMAT(1X,'COMPLEX OPTION:',/,1X,'DEFAULT SOLVER',
+     1 ' INPUT VALUES REFLECT STRONGLY NONLINEAR MODEL')
+   26 FORMAT(1X,'SPECIFIED OPTION:',/,1X,'SOLVER INPUT',
+     1 ' VALUES ARE SPECIFIED BY USER')
+      
       IFDPARAM = Z
       DO
         LLOCSAVE = LLOC
@@ -152,113 +187,70 @@ C3B-----GET OPTIONS.
         CASE('SIMPLE')
            IFDPARAM=1
            WRITE(IOUT,21)
-   21    FORMAT(1X,'SIMPLE OPTION:',/,
-     1     1X,'DEFAULT SOLVER INPUT VALUES REFLECT NEARLY LINEAR MODEL')
         CASE('MODERATE')
            IFDPARAM=2
            WRITE(IOUT,23)
-   23    FORMAT(1X,'MODERATE OPTION:',/,1X,'DEFAULT SOLVER',
-     1         ' INPUT VALUES REFLECT MODERETELY NONLINEAR MODEL')
         CASE('COMPLEX')
-         IFDPARAM=3
+           IFDPARAM=3
            WRITE(IOUT,25)
-   25    FORMAT(1X,'COMPLEX OPTION:',/,1X,'DEFAULT SOLVER',
-     1 ' INPUT VALUES REFLECT STRONGLY NONLINEAR MODEL')
         CASE('SPECIFIED')
-         IFDPARAM=4
+           IFDPARAM=4
            WRITE(IOUT,26)
-   26    FORMAT(1X,'SPECIFIED OPTION:',/,1X,'SOLVER INPUT',
-     1 ' VALUES ARE SPECIFIED BY USER')
-        CASE('CONTINUE')
-        ICNVGFLG = 1
-        IF( STOPER>0.0) THEN
-            CALL WARNING_MESSAGE('',0,IOUT,
-     +           'NWT "CONTINUE" KEYWORD FOUND,'//NL//
-     +           'IT WILL OVERRIDE BAS OPTION "STOPERROR"'//NL//
-     +           'AND SIMULATION WILL ALWAYS CONTINUE DESPITE '//
-     +           'FAILED CONVERGENCE'//NL, TRUE)
-        END IF
-        STOPER = 1E30
+           CALL READ_SPECIFIED_PROPERTIES(LINE,LLOC,IN,IOUT)
+        CASE('CONTINUE', 
+     +       'NO_CONVERGENCE_STOP', 'NO_FAILED_CONVERGENCE_STOP')
+           ICNVGFLG = 1
+           IF( STOPER>0.0) THEN
+               CALL WARNING_MESSAGE('',0,IOUT,
+     +              'NWT "CONTINUE" KEYWORD FOUND,'//NL//
+     +              'IT WILL OVERRIDE BAS OPTION "STOPERROR"'//NL//
+     +              'AND SIMULATION WILL ALWAYS CONTINUE DESPITE '//
+     +              'FAILED CONVERGENCE'//NL, TRUE)
+           END IF
+           STOPER = 1E30
         CASE('THIN_CELL_CHECK')
            THIN_CHECK = TRUE
            WRITE(IOUT,'(A)')
      1               ' THIN CELL CHECK THAT SETS IBOUND=0 IS ENABLED'
-        !
+           !
         CASE('MAX_HEAD_CHANGE')
-            CALL GET_NUMBER(line, lloc, istart, istop,IOUT,IN,HED_LIM,
-     1      MSG='"MAX_HEAD_CHANGE" failed to read the HED_LIM value.')
-            IF(HED_LIM <=   0D0 ) HED_LIM=IEEE_VALUE(THK,IEEE_QUIET_NAN)
-            IF(HED_LIM >= 0.9D30) HED_LIM=IEEE_VALUE(THK,IEEE_QUIET_NAN)
-            IF(HED_LIM <  0.5D0 ) HED_LIM=0.5D0
-        !
+           CALL GET_NUMBER(line, lloc, istart, istop,IOUT,IN,HED_LIM,
+     1     MSG='"MAX_HEAD_CHANGE" failed to read the HED_LIM value.')
+           IF(HED_LIM <=   0D0 ) HED_LIM=IEEE_VALUE(THK,IEEE_QUIET_NAN)
+           IF(HED_LIM >= 0.9D30) HED_LIM=IEEE_VALUE(THK,IEEE_QUIET_NAN)
+           IF(HED_LIM <  0.5D0 ) HED_LIM=0.5D0
+           !
         CASE('KEEP_MXITER')
-            ADJUST_MXIter = FALSE
+           ADJUST_MXIter = FALSE
         CASE DEFAULT
                     LLOC = LLOCSAVE
                     EXIT
         END SELECT
       END DO
-!   20 CALL URWORD(LINE,LLOC,ISTART,ISTOP,1,I,R,IOUT,IN)
-!      IF(LINE(ISTART:ISTOP).EQ.'SIMPLE') THEN
-!         IFDPARAM=1
-!           WRITE(IOUT,21)
-!   21    FORMAT(1X,'SIMPLE OPTION:',/,
-!     1     1X,'DEFAULT SOLVER INPUT VALUES REFLECT NEARLY LINEAR MODEL')
-!      ELSE IF(LINE(ISTART:ISTOP).EQ.'MODERATE') THEN
-!         IFDPARAM=2
-!           WRITE(IOUT,23)
-!   23    FORMAT(1X,'MODERATE OPTION:',/,1X,'DEFAULT SOLVER',
-!     1         ' INPUT VALUES REFLECT MODERETELY NONLINEAR MODEL')
-!      ELSE IF(LINE(ISTART:ISTOP).EQ.'COMPLEX') THEN
-!         IFDPARAM=3
-!           WRITE(IOUT,25)
-!   25    FORMAT(1X,'COMPLEX OPTION:',/,1X,'DEFAULT SOLVER',
-!     1 ' INPUT VALUES REFLECT STRONGLY NONLINEAR MODEL')
-!      ELSE IF(LINE(ISTART:ISTOP).EQ.'SPECIFIED') THEN
-!         IFDPARAM=4
-!           WRITE(IOUT,26)
-!   26    FORMAT(1X,'SPECIFIED OPTION:',/,1X,'SOLVER INPUT',
-!     1 ' VALUES ARE SPECIFIED BY USER')
-!      ELSE IF(LINE(ISTART:ISTOP).EQ.'ALLOW_THIN_CELL') THEN
-!           THIN_CHECK = .FALSE.
-!           WRITE(IOUT,'(A)')
-!     1               ' THIN CELL CHECK THAT SETS IBOUND=0 IS DISABLED'
-!      END IF
-!      LLOCSAVE = LLOC
-!      CALL URWORD(LINE,LLOC,ISTART,ISTOP,1,I,R,IOUT,IN)
-!      IF(LINE(ISTART:ISTOP).EQ.'CONTINUE') THEN
-!        ICNVGFLG = 1
-!        IF( STOPER>0.0) THEN
-!            LN = NEW_LINE(LN)
-!            CALL WARNING_MESSAGE('',0,IOUT,
-!     +           'NWT "CONTINUE" KEYWORD FOUND,'//LN//
-!     +           'IT WILL OVERRIDE BAS OPTION "STOPERROR"'//LN//
-!     +           'AND SIMULATION WILL ALWAYS CONTINUE DESPITE '//
-!     +           'FAILED CONVERGENCE'//LN, .TRUE.)
-!        END IF
-!        STOPER = 1E30
-!      ELSE
-!        LLOC = LLOCSAVE
-!      END IF
-        
-      
-!      IF(LLOC.LT.200) GO TO 20    
 !
 ! Don't need to read these when using default Options.
       IF ( IFDPARAM.EQ.4 ) THEN
-        IF(Mxiter < 500 .AND. ADJUST_MXIter) Mxiter = 500
-      CALL URWORD(line, lloc, istart, istop, 3, i, thetadum, Iout, In)
-      CALL URWORD(line, lloc, istart, istop, 3, i, akappadum, Iout, In)
-      CALL URWORD(line, lloc, istart, istop, 3, i, gammadum, Iout, In)
-      CALL URWORD(line, lloc, istart, istop, 3, i, amomentdum, Iout, In)
-      CALL URWORD(line, lloc, istart, istop, 2, Btrack, r, Iout, In)
-      IF ( BTRACK.GT.0 .AND. ILGR.EQ.0) THEN
-      CALL URWORD(line, lloc, istart, istop, 2, Numtrack, r, Iout, In)
-      CALL URWORD(line, lloc, istart, istop, 3, i, Btoldum, Iout, In)
-      CALL URWORD(line, lloc, istart, istop, 3, i, Breducdum, Iout, In)
-      END IF
+        IF(Mxiter < 500 .AND. ADJUST_MXIter)  THEN
+           Mxiter = 500
+           CALL ITER_WARN(LINE, IN, IOUT, 'SPECIFIED', '500', NJAF)
+        END IF
+        !
+        !CALL URWORD(line,lloc,istart,istop, 3, i, thetadum,  Iout,In)  -- Replaced by "CALL READ_SPECIFIED_PROPERTIES(LINE,LLOC,IN,IOUT)"
+        !CALL URWORD(line,lloc,istart,istop, 3, i, akappadum, Iout,In)
+        !CALL URWORD(line,lloc,istart,istop, 3, i, gammadum,  Iout,In)
+        !CALL URWORD(line,lloc,istart,istop, 3, i, amomentdum,Iout,In)
+        !CALL URWORD(line,lloc,istart,istop, 2, Btrack, r, Iout,In)
+        !IF ( BTRACK.GT.0 .AND. ILGR.EQ.0) THEN
+        !   CALL URWORD(line,lloc,istart,istop, 2, Numtrack, r, Iout,In)
+        !   CALL URWORD(line,lloc,istart,istop, 3, i, Btoldum,  Iout,In)
+        !   CALL URWORD(line,lloc,istart,istop, 3, i, Breducdum,Iout,In)
+        !END IF
       ELSEIF ( IFDPARAM.EQ.1 ) THEN  ! SIMPLE
-        IF(Mxiter < 200 .AND. ADJUST_MXIter) Mxiter = 200
+        IF(Mxiter < 200 .AND. ADJUST_MXIter) THEN
+           Mxiter = 200
+           CALL ITER_WARN(LINE, IN, IOUT, 'SIMPLE', '200', NJAF)
+        END IF
+        !
         thetadum   = 0.97
         akappadum  = 0.0001
         gammadum   = 0.0
@@ -268,7 +260,11 @@ C3B-----GET OPTIONS.
         Btoldum    = 1.5
         Breducdum  = 0.97
       ELSEIF ( IFDPARAM.EQ.2 ) THEN  ! MODERATE
-        IF(Mxiter < 300 .AND. ADJUST_MXIter) Mxiter = 300
+        IF(Mxiter < 300 .AND. ADJUST_MXIter)  THEN
+           Mxiter = 300
+           CALL ITER_WARN(LINE, IN, IOUT, 'MODERATE', '300', NJAF)
+        END IF
+        !
         thetadum   = 0.90
         akappadum  = 0.0005 !0.00001
         gammadum   = 0.00
@@ -278,7 +274,11 @@ C3B-----GET OPTIONS.
         Btoldum    = 1.1
         Breducdum  = 0.9
       ELSEIF ( IFDPARAM.EQ.3 ) THEN  ! COMPLEX
-        IF(Mxiter < 500 .AND. ADJUST_MXIter) Mxiter = 500
+        IF(Mxiter < 500 .AND. ADJUST_MXIter)  THEN
+           Mxiter = 500
+           CALL ITER_WARN(LINE, IN, IOUT, 'COMPLEX', '500', NJAF)
+        END IF
+        !
         thetadum   = 0.85
         akappadum  = 0.005 !0.00001  0.0005
         gammadum   = 0.0
@@ -549,7 +549,56 @@ C Allocage PCG if requested
       CALL SGWF2NWT1PSV(Igrid)
       CALL GMRESPSV(IGRID)
       CALL XMDPSV(IGRID)
-!
+      !
+      CONTAINS
+         SUBROUTINE ITER_WARN(LINE, IN, IOUT, OPT, ITER, IOPT)
+           IMPLICIT NONE
+           CHARACTER(*), INTENT(IN):: LINE, OPT, ITER
+           INTEGER,      INTENT(IN):: IN, IOUT, IOPT
+           !
+           CALL WARNING_MESSAGE(LINE=LINE, INFILE=In, OUTPUT=IOUT, MSG=
+     +      'NWT solver with '//OPT//
+     +      ' option requires MXITER >= '//ITER//NL//NL//
+     +      'Setting: MXITER = '//ITER//NL//NL//
+     +      'If you want to override this warning and use your '//
+     +      'specified MXITER'//NL//'add the option KEEP_MXITER '//
+     +      'before specifying '//OPT//NL//NL//
+     +      'For example: '//NL//NL//
+     +      LINE(:IOPT-1)//" KEEP_MXITER "//ADJUSTL(LINE(IOPT:)) )
+           !
+         END SUBROUTINE
+         !
+         SUBROUTINE READ_SPECIFIED_PROPERTIES(LINE,LOC,IN,IOUT)
+           IMPLICIT NONE
+           CHARACTER(*), INTENT(IN   ):: LINE
+           INTEGER,      INTENT(INOUT):: LOC
+           INTEGER,      INTENT(IN   ):: IN, IOUT
+           INTEGER:: I,J
+           CHARACTER(44):: ER
+           CHARACTER(64):: E1, E2, E3, E4, E5, E6, E7, E8
+           ER='Found option SPECIFIED, but failed to load: '    ! Lame way of doing error messages, but most compact method for fixed formatting
+           E1 = ER // 'DBDTHETA'
+           E2 = ER // 'DBDKAPPA'
+           E3 = ER // 'DBDGAMMA'
+           E4 = ER // 'MOMFACT'
+           E5 = ER // 'BACKFLAG'
+           E6 = ER // 'MAXBACKITER'
+           E7 = ER // 'BACKTOL'
+           E8 = ER // 'BACKREDUCE'
+           CALL GET_NUMBER (LINE,LOC,I,J,IOUT,IN,   thetadum, MSG=E1)  ! thetadum is pulled as global from parent subroutine, ditto for other dum variables
+           CALL GET_NUMBER (LINE,LOC,I,J,IOUT,IN,  akappadum, MSG=E2)
+           CALL GET_NUMBER (LINE,LOC,I,J,IOUT,IN,   gammadum, MSG=E3)
+           CALL GET_NUMBER (LINE,LOC,I,J,IOUT,IN, amomentdum, MSG=E4)
+           CALL GET_INTEGER(LINE,LOC,I,J,IOUT,IN,     Btrack, MSG=E5)
+           !
+           IF ( BTRACK > 0 .AND. ILGR == 0) THEN
+              CALL GET_INTEGER(LINE,LOC,I,J,IOUT,IN,  Numtrack, MSG=E6)
+              CALL GET_NUMBER (LINE,LOC,I,J,IOUT,IN,   Btoldum, MSG=E7)
+              CALL GET_NUMBER (LINE,LOC,I,J,IOUT,IN, Breducdum, MSG=E8)
+           END IF
+           !
+         END SUBROUTINE
+         !
       END SUBROUTINE GWF2NWT1AR
       !
       SUBROUTINE SETUP_NWT_GSE_LIM()
