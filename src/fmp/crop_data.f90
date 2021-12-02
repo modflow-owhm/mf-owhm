@@ -2124,8 +2124,6 @@ MODULE CROP_DATA_FMP_MODULE
     CHARACTER(17):: DT
     CHARACTER(20):: BARE
     !
-    IF(.not. CLIM%HAS_REF_ET) CALL CDAT%OUT_ET%CLOSE()
-    !
     IF(.not. CDAT%OUT_ET%IS_OPEN) RETURN
     !
     DT = NUM2STR(DELT)
@@ -2141,7 +2139,6 @@ MODULE CROP_DATA_FMP_MODULE
     allocate( ETpot(0:ncrop, nfarm) )
     allocate( ETact(0:ncrop, nfarm) )
     allocate(  Area(0:ncrop, nfarm) )
-    Etref = DZ
     ETpot = DZ
     ETact = DZ
     Area  = DZ
@@ -2159,15 +2156,33 @@ MODULE CROP_DATA_FMP_MODULE
     DO K=ONE, CDAT%CROP(I)%N
         F = CDAT%CROP(I)%FID(K) 
         IF( F < ONE .OR. WBS%NFARM < F) CYCLE
-        R = CDAT%CROP(I)%RC(ONE,K)
-        C = CDAT%CROP(I)%RC(TWO,K)
         !
          Area(I,F) =  Area(I,F) + CDAT%CROP(I)%AREA(K)
-        ETref(I,F) = ETref(I,F) + CDAT%CROP(I)%AREA(K) * CLIM%REF_ET(C,R)
         ETpot(I,F) = ETpot(I,F) + CDAT%CROP(I)%CU(K)
         ETact(I,F) = ETact(I,F) + CDAT%CROP(I)%TI(K)*(UNO + CDAT%CROP(I)%CECT(K)) + CDAT%CROP(I)%TP(K) + CDAT%CROP(I)%EP(K) + CDAT%CROP(I)%TGWA(K) + CDAT%CROP(I)%EGWA(K)
     END DO 
     END DO
+    !
+    IF(.NOT. CLIM%HAS_REF_ET) THEN
+       BLOCK
+           DOUBLE PRECISION:: DTMP, NaN
+           NaN = IEEE_VALUE(DTMP, IEEE_QUIET_NAN)
+           ETref = NaN
+       END BLOCK
+    ELSE
+       Etref = DZ
+       DO I=ONE, ncrop    
+       DO K=ONE, CDAT%CROP(I)%N
+           F = CDAT%CROP(I)%FID(K) 
+           IF( Z < F .and. F <= WBS%NFARM ) THEN
+               R = CDAT%CROP(I)%RC(ONE,K)
+               C = CDAT%CROP(I)%RC(TWO,K)
+               !
+               ETref(I,F) = ETref(I,F) + CDAT%CROP(I)%AREA(K) * CLIM%REF_ET(C,R)
+           END IF
+       END DO 
+       END DO
+    END IF
     !
     IF(CDAT%CHECK_BARE) THEN
        DO R=ONE, CDAT%NROW
@@ -2178,13 +2193,23 @@ MODULE CROP_DATA_FMP_MODULE
           !
           IF(CDAT%BARE_FRAC(C,R) > DZ)  THEN
                                          Area(Z,F) =  Area(Z,F) + CDAT%BARE_FRAC(C,R) * WBS%AREA(C,R)
-                                        ETref(Z,F) = ETref(Z,F) + CDAT%BARE_FRAC(C,R) * WBS%AREA(C,R) * CLIM%REF_ET(C,R)
                                         ETpot(Z,F) = ETpot(Z,F) + CDAT%BARE_POT_EVAP(C,R)
                                         ETact(Z,F) = ETact(Z,F) + CDAT%BARE_EVAP(C,R)
           END IF
-        END DO 
-        END DO
+       END DO 
+       END DO
+       !
+       IF(CLIM%HAS_REF_ET) THEN
+          DO R=ONE, CDAT%NROW
+          DO C=ONE, CDAT%NCOL
+             F = WBS%FID_ARRAY(C,R)
+             !
+             IF( Z < F .and. F <= WBS%NFARM .and. CDAT%BARE_FRAC(C,R) > DZ ) ETref(Z,F) = ETref(Z,F) + CDAT%BARE_FRAC(C,R) * WBS%AREA(C,R) * CLIM%REF_ET(C,R)
+          END DO 
+          END DO
+       END IF
     END IF
+    !
     !
     DO F=ONE, WBS%NFARM
        !
