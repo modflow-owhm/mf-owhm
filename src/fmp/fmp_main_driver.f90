@@ -390,6 +390,9 @@ MODULE FMP_MAIN_DRIVER
     !
     !4P-----Allocate space for the double precision lists of Unranked (UNRD), Ranked (RNRD), & actually used (NRD)
     !       Non-Routed Delivery Lists and initialize
+    !
+    ALLOCATE( SWFL%NRD(FDIM%NFARM) )
+    !
     IF(.NOT.SWFL%HAS_NRD) THEN
                         ALLOCATE(UNRD(4,FDIM%NFARM)  , SOURCE=DZ)                                      !DUMMY 4       !DP
                         ALLOCATE(RNRD(2,1,FDIM%NFARM), SOURCE=DZ)                                      !DUMMY 2,1     !DP
@@ -402,6 +405,8 @@ MODULE FMP_MAIN_DRIVER
                         ALLOCATE(RNRD(2,SWFL%MXNRD,FDIM%NFARM)    , SOURCE=DZ)                         !DP (2 per ranked type = NRD-vol., NRD-use-flag)
                         ENDIF
                         ALLOCATE(NRD(2,FDIM%NFARM)                , SOURCE=DZ)                         !DP (2: NRD-new, NRD-old)
+                        !
+                        CALL SWFL%NRD%INIT(SWFL%MXNRD)
     ENDIF
     !
     IF(WBS%HAS_SFR) THEN
@@ -467,7 +472,7 @@ MODULE FMP_MAIN_DRIVER
     CHARACTER(11):: LABEL
     INTEGER:: N,NF,IT, & !FORMERLY IMPLICIT INTEGER
      IRT, F
-    DOUBLE PRECISION:: SP_LENGTH
+    DOUBLE PRECISION:: SP_LENGTH, DTMP
     !
     INTEGER:: I, J, K, IOUT
     !TYPE(GENERIC_OUTPUT_FILE):: FL
@@ -634,16 +639,23 @@ MODULE FMP_MAIN_DRIVER
     ENDIF
     !
     !7A-----READ LIST OF YET UNRANKED NON-ROUTED DELIVERIES TO FARMS (VOLUME, RANK, USE-FLAG)
-    IF(SWFL%HAS_NRD) THEN
+    IF(SWFL%HAS_NRD .AND. (KPER==1 .OR. SWFL%NRD_TFR%TRANSIENT) ) THEN
         !
         !CALL FMP3DPLSTRD(UNRD,MXNRDT*3+1,FDIM%NFARM,IN,IOUT,0,0,MXNRDT*3+1)
-        CALL SWFL%SET_NRD_ARRAY(UNRD,KPER==1)
+        !
+        CALL SWFL%SET_NRD_ARRAY(UNRD, KPER==1)
+        !
+        DTMP = UNO
+        IF(.NOT. SWFL%NRD_IS_RAT) DTMP = UNO / SP_LENGTH
+        DO J=ONE, FDIM%NFARM
+                       CALL SWFL%NRD(J)%SETUP( UNRD(:,J), DTMP )
+        END DO
         !
         IF(SWFL%NRD_IS_RAT) THEN
             IT = SWFL%MXNRD*3 + 1
             !
             DO CONCURRENT (J=ONE:FDIM%NFARM, I=2:IT:3)
-                                                      UNRD(I,J) = UNRD(I,J) * SP_LENGTH
+                                             UNRD(I,J) = UNRD(I,J) * SP_LENGTH
             END DO
         END IF
         !
@@ -1104,6 +1116,8 @@ MODULE FMP_MAIN_DRIVER
     !-----MNW2 LINK SET QDES AND QACT FOR KITER=1
     IF(WBS%HAS_WELL .AND. WBS%HAS_MNW2 .AND. KITER.EQ.1) CALL FWELL%MNW2_ZERO_Q()      !SET QACT and QDES for MNW2 on first interation
     !
+    IF(SWFL%HAS_NRD) CALL SWFL%NRD%INIT_CONSUME()
+    !
     ! INITIALIZE SUPPLY VARIABLES TO ZERO  --CALLED IN AD ROUTINE
     !      IF(KITER.EQ.1) THEN
     !          CALL WBS%SUPPLY%INIT()
@@ -1367,6 +1381,8 @@ MODULE FMP_MAIN_DRIVER
       SURPLUS2=DZ
       ND=DZ                                                           !seb ALWAYS INITIALIZE TO ZERO
       IF(SWFL%HAS_NRD .AND. WBS%H2OSOURCE%NRD(NF)) THEN                  ! seb H2OSRC(1,:)=FID; H2OSRC(2,:)=GW; H2OSRC(3,:)=SW; H2OSRC(4,:)=NRD  
+         !
+         CALL SWFL%NRD(NF)%CONSUME(TF, ND)
          !
          !     FOR LGR, SCALE RANKED NON-ROUTED DELIVERIES TO PARENT OR CHILD MODEL FARM
          !     BY RATIO BETWEEN PARENT OR CHILD FARM DEMAND AND JOINT PARENT+CHILD DEMAND
