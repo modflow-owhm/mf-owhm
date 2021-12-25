@@ -93,10 +93,11 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
       LOGICAL:: ALWAYS_BUILD_FULLY_ROUTED_RETURN = FALSE
       LOGICAL:: BUILD_FULLY_ROUTED_RETURN = FALSE  ! = ANY(BUILD_FRR)
       LOGICAL:: CMD_RUNOFF_PRNT = TRUE
-      LOGICAL, DIMENSION(:),   ALLOCATABLE:: RUNOFF_PRNT   !0 = Printed Before, 1 = Not Printed Yet
+      LOGICAL, DIMENSION(:),   ALLOCATABLE:: RUNOFF_PRNT   ! 0: Printed Before, 1: Not Printed Yet
       LOGICAL, DIMENSION(:),   ALLOCATABLE:: BUILD_FRR
       INTEGER, DIMENSION(:,:), ALLOCATABLE:: H2ORETURN
       LOGICAL, DIMENSION(:),   ALLOCATABLE:: HAS_SRD_WBS
+      INTEGER:: NORETURNFLOW_TFR_FLAG = Z                  !0: Not InUse,  1:All Set to NORETURNFLOW, 2:Some WBS set to 1
       !
       DOUBLE PRECISION:: SRD_TOL     = UNO
       INTEGER::          SRD_TOL_CNT = Z
@@ -138,6 +139,7 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
       !!!PROCEDURE, PASS(SWF):: SET_SFR_SRD_FLOW
       PROCEDURE, PASS(SWF):: BUILD_SRD_LOC_FLOW
       PROCEDURE, PASS(SWF):: ADD_SRD_TO_SFR_DELIV!(SFR_DELIV)
+      PROCEDURE, PASS(SWF):: SET_DEMAND_INI      !(F, DEMAND)                  ->  Note this sets TOT_DMD_INI and zeros out TOT_DMD_MET
       PROCEDURE, PASS(SWF):: APPLY_SRD_DEMAND    !(F, DEMAND, SFR_DELIV)
       PROCEDURE, PASS(SWF):: APPLY_SRD_SURPLUS   !(F, SURPLUS, STRM)
       PROCEDURE, PASS(SWF):: APPLY_RUNOFF_TO_SFR !(RUNOFF, STRM)
@@ -210,6 +212,7 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
     SWF%MXNRD= FDIM%MXNRD
     !
     SWF%NORETURNFLOW = TRUE
+    SWF%NORETURNFLOW_TFR_FLAG = Z
     !
     ALLOCATE(SWF%H2ORETURN(TWO,SWF%NFARM), SOURCE=Z)
     ALLOCATE(SWF%SRDLOC(SWF%NFARM))
@@ -269,6 +272,7 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
     SWF%NSFR_RETURN= FDIM%NSFR_RETURN
     SWF%NSEG = NSEG
     SWF%SRD_TOL = 0.02D0  !DIVERIES BETWEEN SOLVER ITERATIONS MUST BE WITHIN 2% OF EACH OTHER
+    SWF%NORETURNFLOW_TFR_FLAG = Z
     !
     RET_SET = Z
     ERROR='ERROR'
@@ -330,6 +334,13 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
                         CASE("STATIC","TRANSIENT","LIST")
                                    LLOC = ISTART
                                    CALL SWF%NORETURNFLOW_TFR%INIT('NORETURNFLOW', LLOC, LINE, BL%IOUT, BL%IU, SWF%NFARM, ONE, Z, Z, SCRATCH=BL%SCRATCH)
+                                   !
+                                   IF( .NOT. SWF%NORETURNFLOW_TFR%TRANSIENT  ) THEN
+                                     IF( ALL(SWF%NORETURNFLOW_TFR%LIST == 1) ) THEN
+                                                                              CALL SWF%NORETURNFLOW_TFR%DESTROY()
+                                                                              SWF%NORETURNFLOW = TRUE
+                                     END IF
+                                   END IF
                         CASE DEFAULT
                                    SWF%NORETURNFLOW = TRUE
                         END SELECT
@@ -696,32 +707,34 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
             END IF
         END DO
         !
-        DO F=ONE, SWF%NFARM
-          J = COUNT(SWF%ISRR_TFR%WBS == F)
-          I = Z
-          DO K=ONE, SWF%NSFR_RETURN
-            IF( SWF%ISRR_TFR%WBS(K) == F .AND. SWF%ISRR_TFR%SR(ONE,K) == Z ) THEN
-                I = K
-                EXIT
-            END IF
-          END DO
-          !
-          IF(I > Z .AND. J > ONE) THEN ! NO FLOW OPTION IS ON, BUT WBS DEFINED MORE THEN ONCE
-              DO CONCURRENT (K=ONE:SWF%NSFR_RETURN, SWF%ISRR_TFR%WBS(K) == F .AND. I.NE.K)
-                IF    (SWF%ISRR_TFR%SR(ONE,K) > Z ) THEN
-                    !
-                    CALL WRN%ADD( NUM2STR(F,-5)//BLNK//NUM2STR(SWF%ISRR_TFR%SR(1,K),-5)//'   '//NUM2STR(SWF%ISRR_TFR%SR(2,K),-5)//'  Semi-Routed RETURN - WBS had a record with SEGMENT = 0 to indicate flow leaves model, but found additional records with SEGMENT > 0 -- This record is Disabled/Ignored'//NL )
-                    !
-                ELSEIF(SWF%ISRR_TFR%SR(ONE,K) == Z) THEN
-                    !
-                    CALL WRN%ADD( NUM2STR(F,-5)//BLNK//NUM2STR(SWF%ISRR_TFR%SR(1,K),-5)//'   '//NUM2STR(SWF%ISRR_TFR%SR(2,K),-5)//'  Semi-Routed RETURN - WBS has multiple entires defining SEGMENT = 0 to indicate flow leaves model -- This record is Disabled/Ignored'//NL )
-                END IF
-                SWF%ISRR_TFR%WBS(K)  = Z
-                SWF%ISRR_TFR%SR(:,K) = Z
-                SWF%ISRR_TFR%WT(K)   = DZ
-              END DO
-          END IF
-        END DO
+        !!!DO F=ONE, SWF%NFARM
+        !!!  J = COUNT(SWF%ISRR_TFR%WBS == F)
+        !!!  IF( J > ONE ) THEN              ! More than 1 SRR defined for WBS
+        !!!    I = Z
+        !!!    DO K=ONE, SWF%NSFR_RETURN
+        !!!      IF( SWF%ISRR_TFR%WBS(K) == F .AND. SWF%ISRR_TFR%SR(ONE,K) == Z ) THEN
+        !!!          I = K
+        !!!          EXIT
+        !!!      END IF
+        !!!    END DO
+        !!!    !
+        !!!    IF( I > Z ) THEN ! NO FLOW OPTION IS ON, BUT WBS DEFINED MORE THEN ONCE
+        !!!        DO CONCURRENT (K=ONE:SWF%NSFR_RETURN, SWF%ISRR_TFR%WBS(K) == F .AND. I.NE.K)
+        !!!          IF    (SWF%ISRR_TFR%SR(ONE,K) > Z ) THEN
+        !!!              !
+        !!!              CALL WRN%ADD( NUM2STR(F,-5)//BLNK//NUM2STR(SWF%ISRR_TFR%SR(1,K),-5)//'   '//NUM2STR(SWF%ISRR_TFR%SR(2,K),-5)//'  Semi-Routed RETURN - WBS had a record with SEGMENT = 0 to indicate flow leaves model, but found additional records with SEGMENT > 0 -- This record is Disabled/Ignored'//NL )
+        !!!              !
+        !!!          ELSEIF(SWF%ISRR_TFR%SR(ONE,K) == Z) THEN
+        !!!              !
+        !!!              CALL WRN%ADD( NUM2STR(F,-5)//BLNK//NUM2STR(SWF%ISRR_TFR%SR(1,K),-5)//'   '//NUM2STR(SWF%ISRR_TFR%SR(2,K),-5)//'  Semi-Routed RETURN - WBS has multiple entires defining SEGMENT = 0 to indicate flow leaves model -- This record is Disabled/Ignored'//NL )
+        !!!          END IF
+        !!!          SWF%ISRR_TFR%WBS(K)  = Z
+        !!!          SWF%ISRR_TFR%SR(:,K) = Z
+        !!!          SWF%ISRR_TFR%WT(K)   = DZ
+        !!!        END DO
+        !!!    END IF
+        !!!  END IF
+        !!!END DO
         !
     END IF
     !
@@ -773,7 +786,18 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
           END DO
     END IF
     !
-    IF(.NOT. SWF%NORETURNFLOW .AND. (UPDATE .OR. SWF%CHOICE%TRANSIENT) ) THEN
+    IF(SWF%NORETURNFLOW_TFR%INUSE .AND. (UPDATE .OR. SWF%NORETURNFLOW_TFR%TRANSIENT) ) THEN
+        !
+        SWF%NORETURNFLOW_TFR_FLAG = Z
+        !
+        IF    ( ALL(SWF%NORETURNFLOW_TFR%LIST == ONE) ) THEN
+                                                        SWF%NORETURNFLOW_TFR_FLAG = ONE
+        ELSEIF( ANY(SWF%NORETURNFLOW_TFR%LIST == ONE) ) THEN
+                                                        SWF%NORETURNFLOW_TFR_FLAG = TWO
+        END IF
+    END IF
+    !
+    IF(.NOT. SWF%NORETURNFLOW .AND. (UPDATE .OR. SWF%CHOICE%TRANSIENT .OR. SWF%NORETURNFLOW_TFR%TRANSIENT) ) THEN
         !
         !DO CONCURRENT(J=ONE:SWF%NFARM)
         DO J=ONE, SWF%NFARM
@@ -861,7 +885,7 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
           NO_RETURN       = FALSE
           IS_FULLY_RETURN = FALSE
           !
-          IF(ALL(SWF%H2ORETURN(:,F)==Z)) THEN ! NO RETURN FLOW
+          IF(SWF%H2ORETURN(1,F) == Z .AND. SWF%H2ORETURN(2,F) == Z) THEN ! NO RETURN FLOW
               !
               NO_RETURN = TRUE
               !
@@ -1061,18 +1085,36 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
     !
   END SUBROUTINE
   !
+  SUBROUTINE SET_DEMAND_INI(SWF, F, DEMAND) ! Note this sets TOT_DMD_INI and zeros out TOT_DMD_MET
+    CLASS(SURFACE_WATER_DATA), INTENT(INOUT):: SWF
+    INTEGER,                   INTENT(IN   ):: F
+    DOUBLE PRECISION,          INTENT(IN   ):: DEMAND
+    IF(DEMAND > NEARZERO_29) THEN
+        SWF%SRDLOC(F)%TOT_DMD_INI = DEMAND
+    ELSE
+        SWF%SRDLOC(F)%TOT_DMD_INI = DZ
+    END IF
+    SWF%SRDLOC(F)%TOT_DMD_MET = DZ
+  END SUBROUTINE
+  !
   SUBROUTINE APPLY_SRD_DEMAND(SWF, F, DEMAND, SFR_DELIV)
     !
     CLASS(SURFACE_WATER_DATA), INTENT(INOUT):: SWF
     INTEGER,                   INTENT(IN   ):: F
-    TYPE(FMP_FLOW_REMOVE_SFR), INTENT(INOUT):: SFR_DELIV
     DOUBLE PRECISION,          INTENT(IN   ):: DEMAND
+    TYPE(FMP_FLOW_REMOVE_SFR), INTENT(INOUT):: SFR_DELIV
     INTEGER:: K
     DOUBLE PRECISION:: DMD,SUP,DTMP,TOT_FLOW
     !
+    IF(DEMAND < NEARZERO_29 .OR. SWF%SRDLOC(F)%N < ONE) THEN     ! Demand too small to account for or no SRD to supply demand
+                       DO K=ONE, SWF%SRDLOC(F)%N
+                                 SWF%SRDLOC(F)%FLOW(K) = DZ
+                       END DO
+                       RETURN
+    END IF
+    !
     ASSOCIATE(         DIM => SWF%SRDLOC(F)%N,           &
                       NO_WT=> SWF%SRDLOC(F)%NO_WT,       &
-               TOT_DMD_INI => SWF%SRDLOC(F)%TOT_DMD_INI, &
                TOT_DMD_MET => SWF%SRDLOC(F)%TOT_DMD_MET, &
                       FLOW => SWF%SRDLOC(F)%FLOW,        &
                       LLIM => SWF%SRDLOC(F)%LLIM,        &
@@ -1080,11 +1122,7 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
                     MAXDEL => SWF%SRDLOC(F)%MAXDEL,      &
                      ISTRM => SWF%SRDLOC(F)%ISTRM,       &
                         WT => SWF%SRDLOC(F)%WT)
-      ! 
       DMD = DEMAND
-      TOT_DMD_INI = DMD
-      TOT_DMD_MET = DZ
-      !
       IF    (DIM == ONE) THEN
                                CALL SFR_DELIV%APPLY_DMD(ISTRM(ONE), DMD, TOT_DMD_MET, LLIM(ONE), ULIM(ONE), MAXDEL(ONE))
                                FLOW(ONE) = TOT_DMD_MET
@@ -1101,7 +1139,7 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
              TOT_FLOW = TOT_FLOW + DTMP
           END DO
           !
-          IF(TOT_DMD_INI > TOT_FLOW) THEN  !SRD WILL NEVER MEET DEMAND
+          IF(DEMAND > TOT_FLOW) THEN  !SRD WILL NEVER MEET DEMAND
               !
               DO K=ONE, DIM
                   !
@@ -1111,7 +1149,6 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
                   TOT_DMD_MET = TOT_DMD_MET + SUP
                   !
                   DMD = DMD - SUP
-                  !
               END DO
               !
           ELSEIF(NO_WT) THEN !REMOVE DEMAND IN ORDER
@@ -1124,13 +1161,12 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
                   TOT_DMD_MET = TOT_DMD_MET + SUP
                   !
                   DMD = DMD - SUP
-                  IF(DMD < NEARZERO_29) EXIT
                   !
               END DO
           ELSE
               DO K=ONE, DIM !FIRST PASS
                   !
-                  DTMP = TOT_DMD_INI * WT(K)
+                  DTMP = DEMAND * WT(K)
                   !
                   CALL SFR_DELIV%APPLY_DMD(ISTRM(K), DTMP, SUP, LLIM(K), ULIM(K), MAXDEL(K))
                   !
@@ -1138,11 +1174,9 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
                   TOT_DMD_MET = TOT_DMD_MET + SUP
                   !
                   DMD = DMD - SUP
-                  IF(DMD < NEARZERO_29) EXIT
-                  !
               END DO
               !
-              IF(TOT_DMD_INI - TOT_DMD_MET > NEARZERO_29) THEN  !NOT FULL MET, UPDATE AVAILIBLE FLOW
+              IF(DEMAND - TOT_DMD_MET > NEARZERO_29) THEN  !NOT FULL MET, UPDATE AVAILIBLE FLOW
                   !
                   TOT_FLOW = DZ
                   DO K=ONE, DIM
@@ -1549,6 +1583,12 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
              CALL LST(F)%TOARRAY(SWF%SRRLOC(F)%ISTRM)
              CALL LST(F)%DESTROY()                   !NO LONGER NEEDED
              !
+             DO K=ONE, SWF%SRRLOC(F)%N                                    ! Assign Segnent and Reach that is used (only really used for output files).
+                        I = SWF%SRRLOC(F)%ISTRM(K)
+                            SWF%SRRLOC(F)%SR(1,K) = ISTRM(4, I)  ! SEG
+                            SWF%SRRLOC(F)%SR(2,K) = ISTRM(5, I)  ! RCH
+             END DO
+             !
              IF(SWF%SRRLOC(F)%N > ONE) THEN !LENGTH PRORATED
                     !
                     ASSOCIATE(  DIM=>SWF%SRRLOC(F)%N,         &
@@ -1557,11 +1597,6 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
                             TOT_LEN=>SWF%SRRLOC(F)%TOTLENGTH, &
                                  WT=>SWF%SRRLOC(F)%WT         )
                                  !
-                        DO K=ONE, DIM
-                                    SR(ONE,K) = ISTRM(4, IST(K))  !SEG
-                                    SR(TWO,K) = ISTRM(5, IST(K))  !RCH
-                        END DO
-                        !
                         DO K=ONE, DIM
                                   TOT_LEN = TOT_LEN + STRM( 1, IST(K) )
                         END DO
@@ -2273,15 +2308,15 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
       !
       IF(SWF%SRDLOC(F)%N == Z) THEN
           IF(SWF%OUT_SFR_SRD_BYWBS%BINARY) THEN
-                                 WRITE(IU) DATE,DYEAR,DELT,KPER,KSTP,F,DZ, DZ, DZ, DZ, DZ, DZ, DZ
+                                 WRITE(IU) DATE,DYEAR,DELT,KPER,KSTP,F,DZ, DZ, DZ, DZ, DZ, SWF%SRDLOC(F)%TOT_DMD_INI, DZ
           ELSE
-                  WRITE(IU, '(3I7, 8A17, 2x,F13.7, 2x,A)') KPER, KSTP, F, ZER,ZER,ZER,ZER,ZER,ZER,ZER, DT, DYEAR, DATE
+                  WRITE(IU, '(3I7, 8A17, 2x,F13.7, 2x,A)') KPER, KSTP, F, NUM2STR(SWF%SRDLOC(F)%TOT_DMD_INI),ZER,ZER,ZER,ZER,ZER,ZER, DT, DYEAR, DATE
           END IF
       ELSEIF(ALL(SWF%SRDLOC(F)%ISTRM < ONE)) THEN
           IF(SWF%OUT_SFR_SRD_BYWBS%BINARY) THEN
-                                 WRITE(IU) DATE,DYEAR,DELT,KPER,KSTP,F,DZ, DZ, DZ, DZ, DZ, DZ, DZ
+                                 WRITE(IU) DATE,DYEAR,DELT,KPER,KSTP,F,DZ, DZ, DZ, DZ, DZ, SWF%SRDLOC(F)%TOT_DMD_INI, DZ
           ELSE
-                  WRITE(IU, '(3I7, 8A17, 2x,F13.7, 2x,A)') KPER, KSTP, F, ZER,ZER,ZER,ZER,ZER,ZER,ZER, DT, DYEAR, DATE
+                  WRITE(IU, '(3I7, 8A17, 2x,F13.7, 2x,A)') KPER, KSTP, F, NUM2STR(SWF%SRDLOC(F)%TOT_DMD_INI),ZER,ZER,ZER,ZER,ZER,ZER, DT, DYEAR, DATE
           END IF
       ELSE
           INFLOW    = DZ

@@ -1492,9 +1492,10 @@ MODULE FMP_MAIN_DRIVER
       !
       IF(WBS%H2OSOURCE%SW(NF)) THEN
          !
+         RDEL=TF-ND-QR
+         CALL SWFL%SET_DEMAND_INI(NF, RDEL)  ! Note negative demand is set to zero
+         !
          IF(ND.LE.TF) THEN
-             !
-             RDEL=TF-ND-QR
              !
              IF(ALLOT%HAS_SW_ALLOTMENT) THEN
                  IF(RDEL > ALLOT%SW_RATE_LIM(NF)) THEN
@@ -1511,13 +1512,11 @@ MODULE FMP_MAIN_DRIVER
          ELSE
              RDEL=-SURPLUS1       !recharge cumulative surplus of nrd (if desired to be sent to SW) into canal
              CALL SWFL%APPLY_SRD_SURPLUS(NF,SURPLUS1,STRM)
-             SWFL%SRDLOC(NF)%TOT_DMD_INI = DZ
-             SWFL%SRDLOC(NF)%TOT_DMD_MET = DZ
          END IF
          !
       ELSE
-            SWFL%SRDLOC(NF)%TOT_DMD_INI = DZ
-            SWFL%SRDLOC(NF)%TOT_DMD_MET = DZ
+         RDEL = DZ
+         CALL SWFL%SET_DEMAND_INI(NF, RDEL) 
       END IF
       !
       CALL WBS%SUPPLY(NF)%SET_SFR(SWFL%SRDLOC(NF)%TOT_DMD_MET)
@@ -1625,16 +1624,15 @@ MODULE FMP_MAIN_DRIVER
            !
        END DO 
        !
-   ELSEIF(SWFL%NORETURNFLOW_TFR%INUSE) THEN
-       !
-       IF(ALL(SWFL%NORETURNFLOW_TFR%LIST==1)) THEN
+   ELSEIF( SWFL%NORETURNFLOW_TFR_FLAG == 1 ) THEN  ! True if: ALL( SWFL%NORETURNFLOW_TFR%LIST == 1 )
+                                        !
                                         DO CONCURRENT ( IC=1:NCOL, IR=1:NROW, WBS%RUNOFF(IC,IR) > DZ)
                                             !
                                             WBS%DPERC (IC,IR) = WBS%DPERC(IC,IR) + WBS%RUNOFF(IC,IR)
                                             WBS%RUNOFF(IC,IR) = DZ
                                             !
                                         END DO 
-       ELSEIF(ANY(SWFL%NORETURNFLOW_TFR%LIST==1)) THEN
+   ELSEIF( SWFL%NORETURNFLOW_TFR_FLAG == 2 ) THEN  ! True if: ANY( SWFL%NORETURNFLOW_TFR%LIST == 1 )
                                         !
                                         DO NF=1, WBS%NFARM
                                         IF(SWFL%NORETURNFLOW_TFR%LIST(NF)==1) THEN
@@ -1652,7 +1650,6 @@ MODULE FMP_MAIN_DRIVER
                                             END DO
                                         END IF
                                         END DO
-       END IF
    END IF
    !
    IF(CLIMATE%HAS_RECHARGE) THEN
