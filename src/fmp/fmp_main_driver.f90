@@ -2179,6 +2179,13 @@ MODULE FMP_MAIN_DRIVER
              IF(SWFL%OUT_SFR_RET      %IS_OPEN ) CALL SWFL%PRINT_OUT_SFR_RET      (STRM, KPER, KSTP, DELT, TIM, DATETIME)
     END IF
     !
+    !  NON-ROUTED DELIVERY OUTPUT----------------------------------------------------------------
+    !
+    IF(SWFL%HAS_NRD) THEN
+             IF(SWFL%OUT_NRD_BUD_WBS%IS_OPEN ) CALL SWFL%PRINT_OUT_NRD_BUD_BYWBS(KPER, KSTP, DELT, TIM, DATETIME)
+             IF(SWFL%OUT_NRD_BUD    %IS_OPEN ) CALL SWFL%PRINT_OUT_NRD_BUD      (KPER, KSTP, DELT, TIM, DATETIME)
+    END IF
+    !
     !  Layer Based Output-----------------------------------------------------------------------
     !
     IF(FMPOUT%DPERC%IS_OPEN) THEN
