@@ -42,6 +42,7 @@ C     ------------------------------------------------------------------
      +                      PRNT_FRES_LRC,PRNT_FRES_DIF,
      +                      PRNT_VERR_OUTER, PRNT_VERR_NTERM, PRNT_VERR,
      +                      PRNT_VERR_LRC,PRNT_VERR_DIF,
+     +                      SAVE_HEAD,SAVE_HEAD_FLAG,
      +                      PRINT_HEAD,PRINT_HEAD_FLAG,
      +                      PRINT_WTAB,PRINT_WTAB_FLAG,
      +                      PRINT_WDEP,PRINT_WDEP_FLAG,
@@ -126,10 +127,12 @@ C1------grids to be defined.
       ALLOCATE(ABOVE_GSE_PRT)
       ALLOCATE(BACKTRACKING, SOURCE=.FALSE.)
       !
-      ALLOCATE(PRINT_HEAD_FLAG, SOURCE=0)   ! 0: not in use, 1 in use and SP specified, 2, print last time step, 3 print every timestep
+      ALLOCATE(SAVE_HEAD_FLAG,  SOURCE=0)   ! 0: not in use, 1 in use and SP specified, 2, print last time step, 3 print every timestep
+      ALLOCATE(PRINT_HEAD_FLAG, SOURCE=0) 
       ALLOCATE(PRINT_WTAB_FLAG, SOURCE=0)
       ALLOCATE(PRINT_WDEP_FLAG, SOURCE=0)
       !
+      ALLOCATE(SAVE_HEAD)
       ALLOCATE(PRINT_HEAD(1))
       ALLOCATE(PRINT_WTAB(1))
       ALLOCATE(PRINT_WDEP(1))
@@ -241,7 +244,7 @@ C6------Allocate space for global arrays except discretization data.
       ALLOCATE (UPLAY(NCOL,NROW), SOURCE=Z) ! UPLAY = upper most active layer, set to zero if all IBOUND=0, set to NLAY if last layer IBOUND/=0 but H<BOT
       !ALLOCATE (WTLAY(NCOL,NROW), SOURCE=Z) ! WTLAY = upper most active layer with H > BOT, set to zero for all other cases
       ALLOCATE (UPLAY_IDX)
-      ALLOCATE (WTABLE(NCOL,NROW), WTABLE_OLD(NCOL,NROW))
+      ALLOCATE (WTABLE(NCOL,NROW), WTABLE_OLD(NCOL,NROW))  ! Set via call set_adv_global_arrays(igrid) in subroutine modflow_owhm_run(name)
       !
 C
 C7------Initialize head-dependent thickness indicator to code that
@@ -1856,9 +1859,11 @@ C
 C        SPECIFICATIONS:
 C     ------------------------------------------------------------------
       USE, INTRINSIC:: IEEE_ARITHMETIC, ONLY: IEEE_VALUE, IEEE_QUIET_NAN
+      USE, INTRINSIC:: ISO_FORTRAN_ENV, ONLY: REAL32, REAL64
       USE GLOBAL,      ONLY:IOUT,NLAY,NSTP,IXSEC,IFREFM,NOCBC
       USE GWFBASMODULE,ONLY:IHDDFL,IBUDFL,ICBCFL,IPEROC,ITSOC,IBDOPT,
-     1                      IOFLG,IUBGT,PRNT_CNVG, PRINT_HEAD_FLAG
+     1                      IOFLG,IUBGT,PRNT_CNVG, 
+     2                      SAVE_HEAD_FLAG, PRINT_HEAD_FLAG
 C
 C     ------------------------------------------------------------------
       CALL SGWF2BAS7PNT(IGRID)
@@ -1870,6 +1875,7 @@ C1------OUTPUT CONTROL IS ACTIVE.  IF NOT, SET DEFAULTS AND RETURN.
       IF(INOC == 0) THEN
          IHDDFL=0
          IF(ICNVG == 0 .OR. KSTP == NSTP(KPER))IHDDFL=1
+         IF( SAVE_HEAD_FLAG /= 0 ) IHDDFL=0           ! Head output requested through the BAS - Use that output instead
          IF(PRINT_HEAD_FLAG /= 0 ) IHDDFL=0           ! Head output requested through the BAS - Use that output instead
          IBUDFL=0
          IF(ICNVG == 0 .OR. KSTP == NSTP(KPER))IBUDFL=1
@@ -1993,14 +1999,16 @@ C     ------------------------------------------------------------------
       USE CONSTANTS,   ONLY: BLNK, BLN, NL, TRUE, FALSE, DZ, D10, Z, ONE
       USE GLOBAL,      ONLY:ITMUNI,IOUT,NCOL,NROW,NLAY,HNEW,STRT,DDREF,
      1                      INPUT_CHECK,WORST_CELL_MASS_BALANCE,IBOUND,
-     2                      MAX_RELATIVE_VOL_ERROR,NPER, NSTP, RBUF,GSE,
-     +                      CELL_MASS_BALANCE, HOLD, ALLOC_DDREF, WTABLE
+     2                      MAX_RELATIVE_VOL_ERROR,NPER,NSTP,BUFF,RBUF,
+     +                      GSE,CELL_MASS_BALANCE, HOLD, ALLOC_DDREF, 
+     +                      WTABLE, IXSEC
       USE GWFBASMODULE,ONLY:DELT,PERTIM,TOTIM,IHDDFL,IBUDFL,BUDGETDB,
      +                     MSUM,VBVL,VBNM,IDDREF,IUBGT,PDIFFPRT,DATE_SP,
      +                     MAX_REL_VOL_ERROR,MAX_REL_VOL_INVOKED,
      +                     INTER_INFO,PVOL_ERR, HAS_STARTDATE,
      +                     PRNT_RES, PRNT_RES_LIM, PRNT_RES_CUM,
      +                     PRNT_RES_CUM_ARR,
+     +                     SAVE_HEAD,SAVE_HEAD_FLAG,
      +                     PRINT_HEAD,PRINT_HEAD_FLAG,
      +                     PRINT_WTAB,PRINT_WTAB_FLAG,
      +                     PRINT_WDEP,PRINT_WDEP_FLAG,
@@ -2288,6 +2296,106 @@ C4------PRINT TOTAL BUDGET IF REQUESTED
        END ASSOCIATE
       END IF
       !
+      ! Print Head Arrays if Requested - Use Same Format as OC "SAVE HEAD" would produce ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      !
+      IF(SAVE_HEAD_FLAG /= 0) THEN 
+        !
+        n  = 0
+        !
+        IF ( SAVE_HEAD_FLAG == 1 ) THEN
+          BLOCK
+              CHARACTER(8):: SPTS
+              SPTS(1:4) = TRANSFER( KPER, SPTS(1:4) )     !  I = TRANSFER(c, I)  !GET SP
+              SPTS(5:8) = TRANSFER( KSTP, SPTS(5:8) )     !  J = TRANSFER(PRINT_HEAD(n)%EXTRA(5:8), J)  !GET TS
+              DO I=1, SIZE(PRINT_HEAD)
+                 IF( SPTS == PRINT_HEAD(I)%EXTRA ) THEN
+                                                   n = I
+                                                   EXIT                ! Only one file per SP/TS
+                 END IF
+              END DO
+          END BLOCK
+        ELSEIF(SAVE_HEAD_FLAG == 2) THEN  ! Last Time Step
+                 if(kstp==nstp(kper))  n = 1
+        ELSEIF(SAVE_HEAD_FLAG == 3) THEN  ! Every Time Step
+                                       n = 1
+        END IF
+        !
+        IF ( n > 0 ) THEN
+          !
+          CALL SAVE_HEAD%SIZE_CHECK()
+          !
+          IF(IS_REAL64(BUFF(1,1,1))) THEN
+              DO K=1, NLAY
+              DO I=1, NROW
+              DO J=1, NCOL
+                  IF(IBOUND(J,I,K)==0 .or.HNEW(J,I,K)== HDRY) THEN
+                                          BUFF(J,I,K) = NaN
+                  ELSEIF(HNEW(J,I,K) > 1.d100) THEN
+                                          BUFF(J,I,K) = inf
+                  ELSEIF(HNEW(J,I,K) < -1.d100) THEN
+                                          BUFF(J,I,K) = ninf
+                  ELSE
+                      BUFF(J,I,K) = HNEW(J,I,K)
+                  END IF
+              END DO
+              END DO
+              END DO
+          ELSE
+              BLOCK
+                  REAL:: NaNr, infr, ninfr
+                  NaNr = IEEE_VALUE(NaN, IEEE_QUIET_NAN   )
+                  infr = IEEE_VALUE(NaN, IEEE_POSITIVE_INF)
+                  ninfr= IEEE_VALUE(NaN, IEEE_NEGATIVE_INF)
+                  DO K=1, NLAY
+                  DO I=1, NROW
+                  DO J=1, NCOL
+                      IF(IBOUND(J,I,K)==0 .or.HNEW(J,I,K)== HDRY) THEN
+                                              BUFF(J,I,K) = NaNr
+                      ELSEIF(HNEW(J,I,K) > 3.4d38) THEN
+                                              BUFF(J,I,K) = infr
+                      ELSEIF(HNEW(J,I,K) < -3.4d38) THEN
+                                              BUFF(J,I,K) = ninfr
+                      ELSE
+                          BUFF(J,I,K) = REAL(HNEW(J,I,K), real32)
+                      END IF
+                  END DO
+                  END DO
+                  END DO
+              END BLOCK
+          END IF
+          !
+          BLOCK
+          INTEGER:: IHEDUN
+          CHARACTER(16):: TEXT
+          CHARACTER(20):: CHEDFM
+          IHEDUN = SAVE_HEAD%IU
+          CHEDFM = SAVE_HEAD%FMT
+          TEXT = '            HEAD'
+          IF(IXSEC == 0) THEN
+            IF(CHEDFM == ' ') THEN
+               DO K=1,NLAY
+                  CALL ULASAV(BUFF(:,:,K),TEXT,KSTP,KPER,PERTIM,TOTIM,
+     1                       NCOL,NROW,K,IHEDUN)
+               END DO
+            ELSE
+               DO K=1,NLAY
+                  CALL ULASV2(BUFF(:,:,K),TEXT,KSTP,KPER,PERTIM,TOTIM,
+     1                       NCOL,NROW,K,IHEDUN,CHEDFM,1,IBOUND(:,:,K))
+               END DO
+            END IF
+          ELSE
+            IF(CHEDFM == ' ') THEN
+               CALL ULASAV(BUFF,TEXT,KSTP,KPER,PERTIM,TOTIM,NCOL,
+     1                  NLAY,-1,IHEDUN)
+            ELSE
+               CALL ULASV2(BUFF,TEXT,KSTP,KPER,PERTIM,TOTIM,NCOL,
+     1                    NLAY,-1,IHEDUN,CHEDFM,1,IBOUND)
+            END IF
+          END IF
+          END BLOCK
+        END IF
+      END IF
+      !
       ! Print Head Arrays if Requested ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       !
       IF(PRINT_HEAD_FLAG /= 0) THEN !R, C, L, I, J, K
@@ -2342,9 +2450,9 @@ C4------PRINT TOTAL BUDGET IF REQUESTED
                 !
                 HD(1:NCOL) = HNEW(1:NCOL,I,K)
                 DO J=1, NCOL
-                   IF    (HD(J) >=  1D100) THEN
+                   IF    (HD(J) >=  1.D100) THEN
                                              HD(J) = inf
-                   ELSEIF(HD(J) <= -1D100) THEN
+                   ELSEIF(HD(J) <= -1.D100) THEN
                                              HD(J) = ninf
                    ELSEIF(HD(J) == HDRY  .OR.
      +                    HD(J) /= HD(J) .OR. IBOUND(J,I,K) == Z) THEN
@@ -2554,7 +2662,21 @@ C5------WILL BE PRODUCED.
       END IF
       !
       IF(ALLOCATED(HD)) DEALLOCATE(HD, stat=i)  !Clean up the tmp array if allocated
-C
+      !
+      CONTAINS
+      !
+      PURE FUNCTION IS_REAL64(x) RESULT(ANS)                  ! Could just do KIND(x)==REAL64
+        USE, INTRINSIC:: ISO_FORTRAN_ENV, ONLY: REAL32, REAL64
+        CLASS(*), INTENT(IN):: x
+        LOGICAL:: ANS
+        !
+        ANS = FALSE
+        SELECT TYPE(x)
+        TYPE IS(REAL(REAL64)); ANS = TRUE
+        END SELECT
+        !
+      END FUNCTION
+      !
       END SUBROUTINE
       !
       SUBROUTINE SGWF2BAS7ARDIS(LINE,IUDIS,IOUT,STARTING_DATE)
@@ -5646,6 +5768,8 @@ C
       DEALLOCATE( GWFBASDAT(IGRID)% PRNT_VERR            , STAT=J)
       DEALLOCATE( GWFBASDAT(IGRID)% PRNT_VERR_LRC        , STAT=J)
       DEALLOCATE( GWFBASDAT(IGRID)% PRNT_VERR_DIF        , STAT=J)
+      DEALLOCATE( GWFBASDAT(IGRID)% SAVE_HEAD            , STAT=J)
+      DEALLOCATE( GWFBASDAT(IGRID)% SAVE_HEAD_FLAG       , STAT=J)
       DEALLOCATE( GWFBASDAT(IGRID)% PRINT_HEAD           , STAT=J)
       DEALLOCATE( GWFBASDAT(IGRID)% PRINT_HEAD_FLAG      , STAT=J)
       DEALLOCATE( GWFBASDAT(IGRID)% PRINT_WTAB_FLAG      , STAT=J)
@@ -5744,6 +5868,8 @@ C
       NULLIFY( GWFBASDAT(IGRID)% PRNT_VERR            )
       NULLIFY( GWFBASDAT(IGRID)% PRNT_VERR_LRC        )
       NULLIFY( GWFBASDAT(IGRID)% PRNT_VERR_DIF        )
+      NULLIFY( GWFBASDAT(IGRID)% SAVE_HEAD            )
+      NULLIFY( GWFBASDAT(IGRID)% SAVE_HEAD_FLAG       )
       NULLIFY( GWFBASDAT(IGRID)% PRINT_HEAD           )
       NULLIFY( GWFBASDAT(IGRID)% PRINT_HEAD_FLAG      )
       NULLIFY( GWFBASDAT(IGRID)% PRINT_WTAB_FLAG      )
@@ -5843,6 +5969,8 @@ C
          NULLIFY( PRNT_VERR            )
          NULLIFY( PRNT_VERR_LRC        )
          NULLIFY( PRNT_VERR_DIF        )
+         NULLIFY( SAVE_HEAD            )
+         NULLIFY( SAVE_HEAD_FLAG       )
          NULLIFY( PRINT_HEAD           )
          NULLIFY( PRINT_HEAD_FLAG      )
          NULLIFY( PRINT_WTAB_FLAG      )
@@ -6076,6 +6204,8 @@ C
       PRNT_VERR            => GWFBASDAT(IGRID)% PRNT_VERR
       PRNT_VERR_LRC        => GWFBASDAT(IGRID)% PRNT_VERR_LRC
       PRNT_VERR_DIF        => GWFBASDAT(IGRID)% PRNT_VERR_DIF
+      SAVE_HEAD            => GWFBASDAT(IGRID)% SAVE_HEAD
+      SAVE_HEAD_FLAG       => GWFBASDAT(IGRID)% SAVE_HEAD_FLAG
       PRINT_HEAD           => GWFBASDAT(IGRID)% PRINT_HEAD
       PRINT_HEAD_FLAG      => GWFBASDAT(IGRID)% PRINT_HEAD_FLAG
       PRINT_WTAB_FLAG      => GWFBASDAT(IGRID)% PRINT_WTAB_FLAG
@@ -6264,6 +6394,8 @@ C  Save global data for a grid.
       GWFBASDAT(IGRID)% PRNT_VERR            => PRNT_VERR
       GWFBASDAT(IGRID)% PRNT_VERR_LRC        => PRNT_VERR_LRC
       GWFBASDAT(IGRID)% PRNT_VERR_DIF        => PRNT_VERR_DIF
+      GWFBASDAT(IGRID)% SAVE_HEAD            => SAVE_HEAD
+      GWFBASDAT(IGRID)% SAVE_HEAD_FLAG       => SAVE_HEAD_FLAG
       GWFBASDAT(IGRID)% PRINT_HEAD           => PRINT_HEAD
       GWFBASDAT(IGRID)% PRINT_HEAD_FLAG      => PRINT_HEAD_FLAG
       GWFBASDAT(IGRID)% PRINT_WTAB_FLAG      => PRINT_WTAB_FLAG

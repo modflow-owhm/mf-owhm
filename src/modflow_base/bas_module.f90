@@ -79,6 +79,9 @@ MODULE GWFBASMODULE
   INTEGER,DIMENSION(:),           POINTER,SAVE, CONTIGUOUS:: PRNT_VERR_LRC
   DOUBLE PRECISION,DIMENSION(:),  POINTER,SAVE, CONTIGUOUS:: PRNT_VERR_DIF
   !
+  TYPE(GENERIC_OUTPUT_FILE),               POINTER, SAVE            :: SAVE_HEAD
+  INTEGER,                                 POINTER, SAVE            :: SAVE_HEAD_FLAG  ! 0: not in use, 1 in use and SP specified, 2, print last time step, 3 print every timestep
+  !
   TYPE(GENERIC_OUTPUT_FILE), DIMENSION(:), POINTER, SAVE, CONTIGUOUS:: PRINT_HEAD
   INTEGER,                                 POINTER, SAVE            :: PRINT_HEAD_FLAG  ! 0: not in use, 1 in use and SP specified, 2, print last time step, 3 print every timestep
   !
@@ -177,6 +180,9 @@ MODULE GWFBASMODULE
     INTEGER,DIMENSION(:),           POINTER, CONTIGUOUS:: PRNT_VERR_LRC
     DOUBLE PRECISION,DIMENSION(:),  POINTER, CONTIGUOUS:: PRNT_VERR_DIF
     !
+    TYPE(GENERIC_OUTPUT_FILE),               POINTER            :: SAVE_HEAD
+    INTEGER,                                 POINTER            :: SAVE_HEAD_FLAG    ! 0: not in use, 1 in use and SP specified, 2, print last time step, 3 print every timestep
+    !                                        
     TYPE(GENERIC_OUTPUT_FILE), DIMENSION(:), POINTER, CONTIGUOUS:: PRINT_HEAD
     INTEGER,                                 POINTER            :: PRINT_HEAD_FLAG    ! 0: not in use, 1 in use and SP specified, 2, print last time step, 3 print every timestep
     !

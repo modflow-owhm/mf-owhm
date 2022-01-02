@@ -984,7 +984,7 @@ MODULE BUDGET_DATEBASE_WRITER
   !
   CONTAINS
   !
-  SUBROUTINE WRITE_DATEBASE(DB, MSUM,VBNM,VBVL,KSTP,KPER,TOTIM,DELT,DATE)
+  SUBROUTINE WRITE_DATEBASE(DB, MSUM, VBNM, VBVL, KSTP, KPER, TOTIM, DELT, DATE)
     INTEGER,                         INTENT(IN   ):: MSUM
     TYPE(GENERIC_OUTPUT_FILE),       INTENT(INOUT):: DB
     REAL,          DIMENSION(4,MSUM),INTENT(IN   ):: VBVL
@@ -1428,7 +1428,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
   USE ERROR_INTERFACE,                  ONLY: STOP_ERROR, WARNING_MESSAGE
   USE FILE_IO_INTERFACE,                ONLY: READ_TO_DATA, COMMENT_INDEX
   USE PARSE_WORD_INTERFACE,             ONLY: PARSE_WORD, PARSE_WORD_UP, FIND_NONBLANK
-  USE STRINGS,                          ONLY: GET_WORD, GET_INTEGER, GET_NUMBER
+  USE STRINGS,                          ONLY: GET_WORD, GET_INTEGER, GET_NUMBER, GET_DATE
   USE NUM2STR_INTERFACE,                ONLY: NUM2STR
   USE ULOAD_AND_SFAC_INTERFACE,         ONLY: ULOAD
   USE WARNING_TYPE_INSTRUCTION,         ONLY: WARNING_TYPE
@@ -1445,6 +1445,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
                           MAX_REL_VOL_ERROR, OSCIL_DMP_LRC, OSCIL_DMP_DIF, OSCIL_DMP_OUTER,                      &
                           DAMPEN_START, DAMPEN_START_ITR, DAMPEN_START_DMP,                                      &
                           ABOVE_GSE_LIM, ABOVE_GSE_PRT_LIM, ABOVE_GSE_PRT,                                       &
+                          SAVE_HEAD,  SAVE_HEAD_FLAG,                                                            &
                           PRINT_HEAD, PRINT_HEAD_FLAG, PRINT_WTAB, PRINT_WTAB_FLAG, PRINT_WDEP, PRINT_WDEP_FLAG, &
                           DEALLOCATE_MULT, STOPER, PDIFFPRT, HAS_STARTDATE,PRNT_RES,                             &
                           INTER_INFO, BUDGETDB, DATE_SP, REALTIM, USE_LEAP_YR, REALTIM_PER, REALTIM,             &
@@ -1614,11 +1615,12 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
           !
           IF(NO_OPT_LINE) LLOC=1
           !
+          II = LLOC                                      ! Backup location for clearing out portion of opt line with START_DATE
           CALL GET_WORD(BL%LINE,LLOC,ISTART,ISTOP,KEY)
           !
           IF(KEY == 'PRINT') THEN
-              CALL PARSE_WORD_UP(BL%LINE,LLOC,ISTART,ISTOP)
-              KEY="PRINT_"//BL%LINE(ISTART:ISTOP)
+              CALL PARSE_WORD(BL%LINE,LLOC,ISTART,ISTOP)
+              CYCLE
           END IF
           !
           IF(KEY == 'START') THEN
@@ -1631,21 +1633,37 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
              !
              WRITE(IOUT,'(1x, A, 1x, A)') 'FOUND OPTION:', TRIM(KEY)
              !
-             CALL FIND_NONBLANK(BL%LINE,LLOC)
+             CALL GET_DATE(BL%LINE,LLOC,ISTART,ISTOP,IOUT,INBAS,DATE,MSG='NOSTOP')
              !
-             CALL PARSE_WORD_UP(BL%LINE,LLOC,ISTART,ISTOP,TRUE)
-             CALL STARTING_DATE%INIT(BL%LINE(ISTART:ISTOP))  !EXPECTS 1/15/2015 or 2015-1-15
+             IF(DATE%NOT_SET()) CALL STOP_ERROR(BL%LINE,                                                               &
+                               INFILE=INBAS,OUTPUT=IOUT,MSG=                                                           &
+                               'Found BAS option  "'//TRIM(KEY)//'", but failed to parse a date after keyword.'//NL//  &
+                               'The accepted formats are:'//NL//            &
+                               'mm/dd/yyyy                                  (where mm = Month, dd = Day, yyyy = four digit year hh = hour in 24 hour format, MM = minute, ss = second, and T is a flag to indicate 24 hour clock time is specified)'//NL//  &
+                               'yyyy-mm-dd'//NL//                           &
+                               'mm/yyyy'//NL//                              &
+                               'mm/dd/yyyyThh:MM:ss'//NL//                  &
+                               'yyyy-mm-ddThh:MM:ss'//NL//                  &
+                               'OR A Decimal Year (e.g. 1979.3232)'         )
+                               !
+             IF    ( STARTING_DATE%NOT_SET()   ) THEN
+                                                 STARTING_DATE = DATE
+             ELSEIF(.not. STARTING_DATE == DATE) THEN
+                      CALL WARNING_MESSAGE(BL%LINE,INBAS,IOUT,                                                       &
+                                             'BAS option "'//TRIM(KEY)//'" found, but a starting date was already defined somewhere else with a different date.'//NL//   &
+                                             'Most likely it was previously set in the DIS package.'//NL//NL//       &
+                                             'MF-OWHM will assume that the existing starting date is correct'//NL//  &
+                                             'and ignore the starting date specified in teh bas options.',           &
+                                             CMD_PRINT=TRUE                                                          )
+                 
+             END IF
+             CALL DATE%DESTROY()
              !
-             IF(STARTING_DATE%NOT_SET()) CALL STOP_ERROR(BL%LINE,                                                                              &
-                                         INFILE=INBAS,OUTPUT=IOUT,MSG='FOUND BAS OPTION  "START_DATE", BULT FAILED TO PARSE A DATE AFTER KEYWORD.'//NL//  &
-                                         'THE ACCEPTED FORMATS ARE:'//NL//           &
-                                        'mm/dd/yyyy                                  (where mm = Month, dd = Day, yyyy = four digit year hh = hour in 24 hour format, MM = minute, ss = second, and T is a flag to indicate 24 hour clock time is specified)'//NL//  &
-                                        'yyyy-mm-dd'//NL//                           &
-                                        'mm/yyyy'//NL//                              &
-                                        'mm/dd/yyyyThh:MM:ss'//NL//                  &
-                                        'yyyy-mm-ddThh:MM:ss'//NL//                  &
-                                        'OR A Decimal Year (e.g. 1979.3232)')
-             CALL BL%DELETE_LINE()
+             IF(NO_OPT_LINE) THEN
+                             CALL BL%DELETE_LINE()
+             ELSE
+                             BL%LINE(II:ISTOP) = BLNK  ! Clear out opt line
+             END IF
              !
              WRITE(IOUT,'(4x, A, 1x, A, /, 5x, 2A,/)') 'SIMULATION STARTING DATE SET TO', STARTING_DATE%PRETTYPRINT(" AT "), &
                                                        'WHICH IS A STARTING DECIMAL YEAR', STARTING_DATE%STR_DYEAR(8)
@@ -1653,6 +1671,8 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
           CASE('LEAPYEARS','LEAPYEAR', 'STARTTIME')
              !
              WRITE(IOUT,'(1x, A, 1x, A)') 'FOUND OPTION:', TRIM(KEY)
+             !
+             IF(KEY == 'LEAPYEARS' .OR. KEY == 'LEAPYEAR') USE_LEAP_YR=TRUE
              !
              CALL PARSE_WORD_UP(BL%LINE,LLOC,ISTART,ISTOP,TRUE)
              !
@@ -1664,7 +1684,12 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
              CALL GET_NUMBER(BL%LINE,LLOC,ISTART,ISTOP,IOUT,INBAS,REALTIM,MSG='ERROR READING STARTTIME', NO_PARSE_WORD=TRUE)
              REALTIM_PER=REALTIM
              IF(USE_LEAP_YR) CALL STARTING_DATE%INIT(REALTIM)  !DATES CAN BE USED IF DECIMAL YEARS TAKE INTO ACCOUNT LEAP YEARS
-             CALL BL%DELETE_LINE()
+             !
+             IF(NO_OPT_LINE) THEN
+                             CALL BL%DELETE_LINE()
+             ELSE
+                             BL%LINE(II:ISTOP) = BLNK  ! Clear out opt line
+             END IF
              !
              IF(USE_LEAP_YR) THEN
                WRITE(IOUT,'(4x, A, 1x, A, /, 5x, 2A,/)') 'SIMULATION STARTING DATE SET TO', STARTING_DATE%PRETTYPRINT(" AT "), &
@@ -1694,7 +1719,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
           !
           CALL GET_WORD(BL%LINE,LLOC,ISTART,ISTOP,KEY)
           !
-          IF(HAS_OPT_LINE .AND. KEY == BLNK) EXIT  !Reached end of old Options Line
+          IF(HAS_OPT_LINE .AND. ISTOP < ISTART) EXIT  ! Options along single line and reached the end of the line
           !
           IF(KEY == 'PRINT') THEN
             CALL GET_WORD(BL%LINE,LLOC,ISTART,ISTOP,KEY)
@@ -1725,7 +1750,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
                                 CALL GET_INTEGER(BL%LINE,LLOC,ISTART,ISTOP,IOUT,INBAS, CMD_ITER_INFO,ERROR_VAL=-4590077)
                                 !IF(Z < CMD_ITER_INFO .AND. CMD_ITER_INFO <  TEN) CMD_ITER_INFO = TEN
                                 !IF(Z > CMD_ITER_INFO .AND. CMD_ITER_INFO > -TEN) CMD_ITER_INFO = -TEN
-                         !
+                                !
           CASE('NOSHOWPROGRESS','NO_SHOWPROGRESS','NO_SHOW_PROGRESS')  !Supress Pringint of "Solver Iter: IJ"
                                 CMD_ITER_INFO = Z
           CASE('FREE')
@@ -1739,6 +1764,34 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
               !
           CASE('PRINTTIME','PRINT_TIME')
               IPRTIM=1
+              !
+          CASE('SAVE_HEAD', 'HEAD_SAVE') ! OUTER_START NTERM FILE
+              !
+              CALL PARSE_WORD_UP(BL%LINE,LLOC,ISTART,ISTOP)
+              !
+              IF(    BL%LINE(ISTART:ISTOP) == "LAST_TIMESTEP" ) THEN
+                                                                SAVE_HEAD_FLAG = 2
+              ELSEIF(BL%LINE(ISTART:ISTOP) == "EVERY_TIMESTEP") THEN
+                                                                SAVE_HEAD_FLAG = 3
+              ELSE
+                  CALL STOP_ERROR(BL%LINE,INBAS,IOUT,                                                                          &
+                                 'BAS Option "SAVE_HEAD" found, but failed to read the second keyword, which must be either "LAST_TIMESTEP" or "EVERY_TIMESTEP".'//NL//                &
+                                 'This is required to indicate the frequency to write the heads')
+              END IF
+              !
+              WRITE(IOUT,'(4x, A/)')' SAVE_HEAD '//BL%LINE(ISTART:ISTOP)//' OPTION FOUND'
+              !
+              CALL SAVE_HEAD%OPEN(BL%LINE,LLOC,BL%IOUT,BL%IU,NO_INTERNAL=TRUE)
+              !
+              IF    (SAVE_HEAD%BINARY) THEN
+                               SAVE_HEAD%FMT = ' '
+              ELSEIF(ALLOCATED(SAVE_HEAD%FMT)) THEN
+                           READ(SAVE_HEAD%FMT,*) J
+                           J = J+7
+                           SAVE_HEAD%FMT = "(*(ES"//NUM2STR(J)//"."//SAVE_HEAD%FMT//", :, 1x))"
+              ELSE
+                           SAVE_HEAD%FMT = "(*(ES12.5, :, 1x))"
+              END IF
               !
           CASE('PRINT_HEAD') ! OUTER_START NTERM FILE
               !
@@ -1973,7 +2026,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
               NOCBC=-1
               WRITE(IOUT,'(4x, A/)')'THE CELL-BY-CELL WILL BE WRITTEN AT THE END OF EVERY TIME STEP.'
           CASE('CBC_LAST_TIMESTEP')
-              NOCBC=-1
+              NOCBC=-2
               WRITE(IOUT,'(4x, A/)')'THE CELL-BY-CELL WILL BE WRITTEN AT THE END OF EVERY STRESS PERIOD (ie END OF LAST TIME STEP).'
               !
           CASE('NO_DIM_CHECK', 'NODIMCHECK')
@@ -2099,8 +2152,11 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
                     '     THE ENDING   STRESS PERIOD WILL BE: ', NUM2STR(SPEND),   &
                     REPEAT('#',104)
           CASE DEFAULT
-                     !
-                     CALL WRN%ADD(BL%LINE//BLN)
+                     IF(NO_OPT_LINE) THEN
+                               CALL WRN%ADD(BL%LINE//BLN)
+                     ELSE     
+                               CALL WRN%ADD(KEY//BLN)
+                     END IF
           END SELECT
           !
           IF(NO_OPT_LINE) CALL BL%NEXT()
