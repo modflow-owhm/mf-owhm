@@ -1459,9 +1459,167 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
   IMPLICIT NONE
   !
   PRIVATE
-  PUBLIC:: GET_BAS_OPTIONS
+  PUBLIC:: GET_BAS_OPTIONS, GET_BAS_START_DATE_OPTION
   !
   CONTAINS
+  !  
+  SUBROUTINE GET_BAS_START_DATE_OPTION(LINE, INBAS, IOUT, STARTING_DATE)
+    CHARACTER(*),        INTENT(INOUT):: LINE
+    INTEGER,             INTENT(IN   ):: INBAS, IOUT
+    TYPE(DATE_OPERATOR), INTENT(INOUT):: STARTING_DATE
+    !
+    INTEGER:: LLOC, ISTART, ISTOP
+    INTEGER:: I, J, K
+    LOGICAL:: SKIP_OPT_LINE, HAS_OPT_LINE, NO_OPT_LINE, FOUND_BEGIN
+    CHARACTER(32):: KEY
+    TYPE(GENERIC_BLOCK_READER):: BL
+    TYPE(DATE_OPERATOR):: DATE
+    !
+    !Scan BAS Package Options for START_DATE
+    !
+    REWIND(INBAS)
+    CALL READ_TO_DATA(LINE,INBAS,IOUT)
+    !
+    ! CHECK FOR OPTIONS BLOCK
+    LLOC=1
+    CALL GET_WORD(LINE,LLOC,ISTART,ISTOP,KEY)
+    SKIP_OPT_LINE= FALSE
+    HAS_OPT_LINE = FALSE
+    !
+    SELECT CASE(KEY)
+    CASE('BEGIN')
+                                                      CONTINUE
+                                                    ! SKIP_OPT_LINE = FALSE <-- IMPLIED
+                                                    ! HAS_OPT_LINE  = FALSE 
+    CASE('INTERNAL','EXTERNAL','OPEN/CLOSE','CONSTANT')
+                                                      SKIP_OPT_LINE = TRUE
+                                                      HAS_OPT_LINE  = TRUE
+    CASE('FREE', 'NOFREE', 'XSECTION', 'CHTOCH', 'PRINTTIME', 'PAUSE', 'BUDGETDB',                     &
+         'SHOWPROGRESS', 'SHOW_PROGRESS', 'NOSHOWPROGRESS', 'NO_SHOWPROGRESS', 'NO_SHOW_PROGRESS',     &
+         'TIME_INFO', 'PRINT_TIME_INFO',                                                               &
+         'INPUT_CHECK', 'INPUTCHECK', 'FASTFORWARD',                                                   &
+         'PRINT', 'PRINT_HEAD', 'PRINT_WATER_TABLE', 'PRINT_WATER_DEPTH',                              &
+         'PRINT_CONVERGENCE', 'PRINT_FLOW_RESIDUAL', 'PRINT_RELATIVE_VOLUME_ERROR', 'PRINT_RELATIVE_VOL_ERROR', &
+         'START', 'STARTDATE', 'START_DATE', 'DATE_START', 'DATESTART',                                &
+         'LEAPYEARS', 'LEAPYEAR', 'STARTTIME',                                                         &
+         'MAX_RELATIVE_VOLUME_ERROR', 'MAX_RELATIVE_VOL_ERROR',                                        &
+         'MIN_SOLVER_ITERATION', 'MIN_SOLVER_ITER',                                                    &
+         'DAMPEN_START', 'DAMPEN_OSCILLATION', 'DAMPEN_OSCILLATIONS',                                  &
+         'DEALLOCATE_MULT', 'NO_DIM_CHECK', 'NODIMCHECK', 'COMPACT', 'COMPACT_BUDGET',                 &
+         'MAXBUDGET', 'MAXPARAM',                                                                      &
+         'PROPPRINT', 'PROPERTY_PRINT', 'PRINT_PROPERTY',                                              &
+         'HEAD_DISTANCE_ABOVE_GSE_LIMIT', 'ABOVE_GSE_LIM',                                             &
+         'PRINT_HEAD_DISTANCE_ABOVE_GSE', 'HEAD_DISTANCE_ABOVE_GSE_PRINT',                             &
+         'CBC', 'CBC_UNIT', 'NOCBC', 'NOCBCPACK',                                                      &
+         'CBC_EVERY_TIMESTEP', 'CBC_LAST_TIMESTEP', 'DOUBLE_PRECISION_CBC',                            &
+         'STOPERROR', 'STOP_ERROR', 'PERCENTERROR', 'PERCENT_ERROR',                                   &
+         'RESIDUAL_ERROR_ARRAY_THRESHOLD', 'RESIDUAL_ERROR_ARRAY', 'CUMULATIVE_RESIDUAL_ERROR_ARRAY',  &
+         'PRINT_ITERATION_INFO', 'ITERATION_INFO', 'INTERATION_INFO',                                  &
+         'SHIFT_STRT', 'SHIFT_START', 'SHIFTSTRT', 'SHIFTSTART',   'CUMULATIVE_HEAD_CHANGE',           &
+         'SUPER_NAMES', 'SUPERNAMES',                                                                  &
+         'WATER_TABLE_DISTANCE_ABOVE_GSE_LIMIT', 'WATER_TABLE_ABOVE_GSE_PRINT')        
+         !
+         HAS_OPT_LINE = TRUE
+    CASE DEFAULT
+         IF( IS_INTEGER(KEY) ) THEN  !Think it found U2DREL without a recognized word, so not using free format and instead using a control record (the original way)
+                               SKIP_OPT_LINE= TRUE
+                               HAS_OPT_LINE = FALSE
+         END IF
+    END SELECT
+    !
+    NO_OPT_LINE = .NOT. HAS_OPT_LINE
+    IF(SKIP_OPT_LINE) THEN
+        REWIND(INBAS)  ! NO OPTIONS SPECIFIED RETURN
+        RETURN
+    ELSEIF(HAS_OPT_LINE) THEN
+        CALL BL%INIT()
+        BL%NAME = 'OPTION'
+        !
+        I = COMMENT_INDEX(LINE)
+        !
+        CALL BL%ADD_LINE(LINE(1:I))  !Add trimmed line to be parsed
+        !
+        BL%NLINE = Z  !estimate number of loops
+        LLOC=1
+        CALL GET_WORD(BL%LINE,LLOC,ISTART,ISTOP,KEY)
+        DO WHILE( KEY .NE. BLNK )
+          !
+          BL%NLINE = BL%NLINE + 1
+          !
+          CALL GET_WORD(BL%LINE,LLOC,ISTART,ISTOP,KEY,NO_UPCASE=FALSE)
+        END DO
+        !
+        ! Set for use in OPTIONS Block loop
+        LLOC=1
+    ELSE
+          CALL BL%LOAD(INBAS,IOUT,LINE=LINE,FOUND_BEGIN=FOUND_BEGIN)
+          IF(FOUND_BEGIN) BACKSPACE(INBAS)                   ! BLOCK LOADER AUTO-MOVES FORWARD A LINE WHEN BLOCK IS FOUND, BUT U2INT READS A LINE RATHER THEN PROCESSING LINE
+    END IF
+    !
+    ! Pre-Check for Options that must be read first
+    !
+    IF((BL%NAME == 'OPTION' .OR. BL%NAME == 'OPTIONS') .AND. BL%NLINE>Z) THEN
+       !
+       K = LLOC
+       CALL BL%START()
+       DO J=1, BL%NLINE
+          IF(  BL%LINE=='ERROR' ) EXIT
+          !
+          IF(NO_OPT_LINE) LLOC=1
+          !
+          CALL GET_WORD(BL%LINE,LLOC,ISTART,ISTOP,KEY)
+          !
+          IF(KEY == 'START') THEN
+              CALL PARSE_WORD_UP(BL%LINE,LLOC,ISTART,ISTOP)
+              KEY="START_"//BL%LINE(ISTART:ISTOP)
+          END IF
+          !
+          SELECT CASE (KEY)
+          CASE('STARTDATE','START_DATE','DATE_START','DATESTART' )
+             !
+             CALL GET_DATE(BL%LINE,LLOC,ISTART,ISTOP,IOUT,INBAS,DATE,MSG='NOSTOP')
+             !
+             IF(DATE%NOT_SET()) CALL STOP_ERROR(BL%LINE,                                                               &
+                               INFILE=INBAS,OUTPUT=IOUT,MSG=                                                           &
+                               'Found BAS option  "'//TRIM(KEY)//'", but failed to parse a date after keyword.'//NL//  &
+                               'The accepted formats are:'//NL//            &
+                               'mm/dd/yyyy                                  (where mm = Month, dd = Day, yyyy = four digit year hh = hour in 24 hour format, MM = minute, ss = second, and T is a flag to indicate 24 hour clock time is specified)'//NL//  &
+                               'yyyy-mm-dd'//NL//                           &
+                               'mm/yyyy'//NL//                              &
+                               'mm/dd/yyyyThh:MM:ss'//NL//                  &
+                               'yyyy-mm-ddThh:MM:ss'//NL//                  &
+                               'OR A Decimal Year (e.g. 1979.3232)'         )
+                               !
+             STARTING_DATE = DATE
+             !
+             EXIT
+             !
+          CASE('LEAPYEARS','LEAPYEAR', 'STARTTIME')
+             !
+             IF(KEY == 'LEAPYEARS' .OR. KEY == 'LEAPYEAR') USE_LEAP_YR=TRUE
+             !
+             CALL PARSE_WORD_UP(BL%LINE,LLOC,ISTART,ISTOP,TRUE)
+             !
+             IF(LINE(ISTART:ISTOP) == 'LEAPYEARS' .OR. LINE(ISTART:ISTOP) == 'LEAPYEAR' .OR. LINE(ISTART:ISTOP) == 'STARTTIME') THEN
+                 USE_LEAP_YR=TRUE
+                 CALL PARSE_WORD_UP(BL%LINE,LLOC,ISTART,ISTOP,TRUE)
+             END IF
+             !
+             CALL GET_NUMBER(BL%LINE,LLOC,ISTART,ISTOP,IOUT,INBAS,REALTIM,MSG='ERROR READING BAS OPTION STARTTIME DECIMAL YEAR', NO_PARSE_WORD=TRUE)
+             REALTIM_PER=REALTIM
+             IF(USE_LEAP_YR) CALL STARTING_DATE%INIT(REALTIM)  !DATES CAN BE USED IF DECIMAL YEARS TAKE INTO ACCOUNT LEAP YEARS
+             !
+             EXIT
+             !
+          END SELECT
+          !
+          IF(NO_OPT_LINE) CALL BL%NEXT()
+       END DO
+    END IF
+    !
+    REWIND(INBAS)  ! Only scanned to check for date- rewind to read full options later
+    !
+  END SUBROUTINE
   !  
   SUBROUTINE GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHFLG, IPRTIM, MXBUD, HSHIFT, WARN_DIM, USE_PAUSE, TIME_INFO, SUPER_NAMES_IN, STARTING_DATE)
     CHARACTER(*),                    INTENT(INOUT):: LINE

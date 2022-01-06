@@ -74,7 +74,8 @@ C     ------------------------------------------------------------------
       USE GENERIC_INPUT_FILE_INSTRUCTION,  ONLY: GENERIC_INPUT_FILE
       USE ULOAD_AND_SFAC_INTERFACE,      ONLY: ULOAD
       USE LOAD_SUPER_NAMES_INTERFACE,    ONLY: LOAD_SUPER_NAMES
-      USE BAS_OPTIONS_AND_STARTDATE,     ONLY: GET_BAS_OPTIONS
+      USE BAS_OPTIONS_AND_STARTDATE,     ONLY: GET_BAS_OPTIONS, 
+     +                                         GET_BAS_START_DATE_OPTION
       !
       TYPE(DATE_OPERATOR):: STARTING_DATE
       TYPE(DATE_OPERATOR):: DATE
@@ -103,6 +104,8 @@ C     ------------------------------------------------------------------
       ANAME(2) = '            INITIAL HEAD'
       !
       NaN = IEEE_VALUE(NaN, IEEE_QUIET_NAN)
+      !
+      CALL STARTING_DATE%INIT() ! SETS IT TO 'NO_DATE' CAUSE NO ARG PASSED
       !
 C1------Allocate scalar variables, which makes it possible for multiple
 C1------grids to be defined.
@@ -166,6 +169,8 @@ C1------grids to be defined.
       ALLOCATE(PDIFFPRT,REALTIM,USE_LEAP_YR)
       ALLOCATE(PROPPRINT, SOURCE=' ')
       ALLOCATE(SIMTIM_PER, REALTIM_PER, TOTPERTIM, SIMTIME)
+      ALLOCATE(HAS_STARTDATE, SOURCE=FALSE)
+      !
       PDIFFPRT = 5                                                     ! IF PERCENT ERROR GOES ABOVE 5% THEN PRINT TO CMD PROMPT
       IF(IGRID == ONE)THEN
         ALLOCATE(SUBLNK,INPUT_CHECK,BIN_REAL_KIND)
@@ -215,6 +220,9 @@ C3A-----SHOW PRECISION OF VARIABLES
      +             'Precision of REAL and DOUBLE PRECISION variables: ',
      +              NUM2STR(IPBUFF)
       END IF
+C
+C4------Scan BAS options to see if a starting date was specified
+      CALL GET_BAS_START_DATE_OPTION(LINE, INBAS, IOUT, STARTING_DATE)
 C
 C5------Allocate and read discretization data.
       CALL SGWF2BAS7ARDIS(LINE,IUDIS,IOUT,STARTING_DATE)
@@ -378,13 +386,17 @@ C
       !WETCEL=IBOUND /= 0                                                !seb establish logical variable that is TRUE for wet cells and false for dry cells
 C
 C8F-----READ AND PRINT HEAD VALUE TO BE PRINTED FOR NO-FLOW CELLS.
+      CALL READ_TO_DATA(LINE, INBAS, NOSHIFT=IFREFM.EQ.Z)
+      !
+      LLOC = ONE
       IF(IFREFM == Z) THEN
-         READ(INBAS,'(F10.0)') HNF
+         CALL GET_NUMBER(LINE(1:10),LLOC,ISTART,ISTOP,IOUT,INBAS,HNF,
+     +                          MSG='BAS Package failed to read HNOFLO')
       ELSE
-         READ(INBAS,*) HNF
+         CALL GET_NUMBER(LINE,LLOC,ISTART,ISTOP,IOUT,INBAS,HNF,
+     +                          MSG='BAS Package failed to read HNOFLO')
       END IF
-      !HNF=HNOFLO
-      HNOFLO = HNF
+      HNOFLO = REAL(HNF, kind(HNOFLO))
       WRITE(IOUT,3) NUM2STR(HNOFLO)
     3 FORMAT(1X,/1X,'AQUIFER HEAD WILL BE SET TO ',A,
      1       ' AT ALL NO-FLOW NODES (IBOUND=0).',/)
@@ -2690,20 +2702,21 @@ C     ------------------------------------------------------------------
      1                     LENUNI,IUNIT,LBOTM,LAYCBD,ITRSS, SPTIM,
      3                     PERLEN,NSTP,TSMULT,ISSFLG,DELR,DELC,BOTM,
      +                     XY_GRID_COODINATES,XYGRID,AREA,GSE     !seb XY_GRID_COODINATES IS REQUIRED TO CALL ITS ALLOCATION FUNCTION
-      USE GWFBASMODULE,ONLY:REALTIM, USE_LEAP_YR,DATE_SP,HAS_STARTDATE,
+      USE GWFBASMODULE,ONLY:REALTIM, USE_LEAP_YR,DATE_SP,
      +                      SIMTIM_PER, REALTIM_PER, TOTPERTIM
       USE BAS_UTIL,    ONLY: DELT_TO_DAY
       USE CONSTANTS,   ONLY: NL,TRUE,FALSE,UNO,SET_NAN, NEG, NEARZERO_5,
      +                       Z,ONE,TWO,THREE,FOUR,FIVE,DEGREE_SIGN,
-     +                       DNEG, DZ, UNO
+     +                       DNEG, DZ, UNO, BLN
       USE ERROR_INTERFACE,      ONLY: STOP_ERROR, WARNING_MESSAGE
       USE FILE_IO_INTERFACE,    ONLY: READ_TO_DATA
       USE PARSE_WORD_INTERFACE, ONLY: PARSE_WORD, PARSE_WORD_UP
       USE UTIL_INTERFACE,       ONLY: NEAR_ZERO
-      USE STRINGS,              ONLY: GET_INTEGER, GET_NUMBER
+      USE STRINGS,              ONLY: GET_INTEGER, GET_NUMBER, GET_DATE
       USE NUM2STR_INTERFACE,         ONLY: NUM2STR
       USE ULOAD_AND_SFAC_INTERFACE,  ONLY: ULOAD
       USE DATE_OPERATOR_INSTRUCTION, ONLY: DATE_OPERATOR
+      USE STRINGS,                   ONLY: UPPER
 C
       TYPE(DATE_OPERATOR), INTENT(INOUT):: STARTING_DATE
       CHARACTER(*), INTENT(INOUT):: LINE
@@ -2712,6 +2725,8 @@ C
       LOGICAL:: PRINTCOORD,LLCOODRINATE,CORNERCOORD
       DOUBLE PRECISION:: SP_LEN, TS_MULT
       REAL:: ONE_SNG
+      LOGICAL:: ERROR, FOUND_KEYWORD
+      TYPE(DATE_OPERATOR):: DATE
 C     ------------------------------------------------------------------
       ANAME(1) = '                    DELR'
       ANAME(2) = '                    DELC'
@@ -2720,11 +2735,6 @@ C     ------------------------------------------------------------------
       ANAME(5) = 'BOT. EL. OF QUASI-3D BED'
       ONE_SNG  = 1.0
 C
-      CALL STARTING_DATE%INIT() !SETS IT TO 'NO_DATE' CAUSE NO ARG PASSED
-      !
-      ALLOCATE(HAS_STARTDATE)
-      HAS_STARTDATE = FALSE
-      !
 C1------Check for existence of discretization file
       INDIS=IUNIT(IUDIS)
       IF(INDIS == Z) THEN
@@ -3111,9 +3121,10 @@ C14-----TIME STEP MULTIPLIER, AND STEADY-STATE FLAG..
      +      LINE(ISTART:ISTOP) == 'DATE_START' .OR.
      +      LINE(ISTART:ISTOP) == 'DATESTART'     ) THEN
             !
-            CALL PARSE_WORD_UP(LINE,LLOC,ISTART,ISTOP,TRUE)
-            CALL STARTING_DATE%INIT(LINE(ISTART:ISTOP))  !EXPECTS 1/15/2015 or 2015-1-15
-            !
+            CALL GET_DATE(LINE,LLOC,ISTART,ISTOP,IOUT,INDIS,
+     +                  STARTING_DATE,MSG=
+     +        'DIS PACKAGE FOUND "START_DATE" KEYWORD, '//
+     +        'BUT FAILED TO READ THE STARTING DATE AFTER THE KEYWORD.')
         END IF
         IF(LINE(ISTART:ISTOP) == 'LEAPYEARS' .OR.
      +     LINE(ISTART:ISTOP) == 'LEAPYEAR') THEN
