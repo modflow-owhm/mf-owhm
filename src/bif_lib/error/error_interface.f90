@@ -153,7 +153,7 @@ MODULE ERROR_INTERFACE
         END IF
         IF(PRESENT(LINE)) THEN; IF(LINE /= BLNK) WARN = WARN//NL//'THE GUESSED LINE THAT THE WARNING OCCURED ON IS:'//NL//'"'//TRIM(LINE)//'"'//NL
         END IF
-        IF(PRESENT(MSG )) THEN; IF(MSG  /= BLNK) WARN = WARN//NL//'THE DESRIPTION OF THE WARNING IS:'//BLN//TRIM(MSG)//NL
+        IF(PRESENT(MSG )) THEN; IF(MSG  /= BLNK) WARN = WARN//NL//'THE DESCRIPTION OF THE WARNING IS:'//BLN//TRIM(MSG)//NL
         END IF
         !
         WARN = BLN//REPEAT('#',104)//WARN//NL//REPEAT('#',104)//BLN
@@ -323,7 +323,7 @@ MODULE ERROR_INTERFACE
     !    
     IF(WARN_IU /= Z .AND. WARN_IU /= IOUT) THEN
                                            WRITE(WARN_IU,'(/A/)') ERR
-                                           CALL EPIC_FAIL(IOUT)
+                                           CALL EPIC_FAIL(WARN_IU)
     END IF
     !
     IF(IOUT /= Z) WRITE(IOUT,'(A/)') ERR
