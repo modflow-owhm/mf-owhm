@@ -89,9 +89,9 @@
       TYPE(GWFSUBTYPE), SAVE  ::GWFSUBDAT(10)
 
       END MODULE GWFSUBMODULE
-
-
-
+      !
+      !
+      !
       SUBROUTINE GWF2SUB7AR(IN,IGRID)
 C     ******************************************************************
 C     ALLOCATE ARRAY STORAGE FOR SUBSIDENCE PACKAGE.
@@ -116,6 +116,7 @@ C     ------------------------------------------------------------------
       USE FILE_IO_INTERFACE,    ONLY: READ_TO_DATA
       USE PARSE_WORD_INTERFACE, ONLY: PARSE_WORD, PARSE_WORD_UP
       USE STRINGS,              ONLY: GET_INTEGER
+      USE PATH_INTERFACE,       ONLY: ADD_DIR_SLASH_ALLOC
       USE GENERIC_BLOCK_READER_INSTRUCTION, ONLY: GENERIC_BLOCK_READER
 C
       REAL,    DIMENSION(NCOL,NROW)::BUFFER                             ! REPLACES GLOBAL MODULE BUFF(:,:,1) WITH BUFFER(:,:) - IF THIS CAUSES STACK OVERFLOW PROBLEMS THEN CAN CHANGE TO ALLOCATABLE ARRAY TO SWITCH USAGE TO HEAP
@@ -134,6 +135,7 @@ C
       !CHARACTER(768) LINE
       TYPE(GENERIC_BLOCK_READER):: BL
       LOGICAL:: HAS_ERROR,FOUND_BEGIN
+      CHARACTER(:), ALLOCATABLE:: PNT_INI_CRIT
       !DATA ANAME(1) /'   PRECONSOLIDATION HEAD'/
       !DATA ANAME(2) /'ELASTIC INTERBED STORAGE'/
       !DATA ANAME(3) /' VIRGIN INTERBED STORAGE'/
@@ -236,6 +238,11 @@ C4------CRITICAL HEAD ARRAYS.
      +                        R,IOUT,IN)        
                   CALL URWORD(BL%LINE,LLOC,ISTART,ISTOP,2,IPRNTFLG, ! IPRNTFLG is print flag for UPARARRSUB1
      +                        R,IOUT,IN)   
+             CASE('PRINT_INITIAL_CRITICAL_HEAD')
+                  CALL PARSE_WORD(BL%LINE,LLOC,ISTART,ISTOP)
+                  !
+                  PNT_INI_CRIT = BL%LINE(ISTART:ISTOP)
+                  CALL ADD_DIR_SLASH_ALLOC(PNT_INI_CRIT, OS_SLASH=TRUE)
                  !
              CASE DEFAULT
                 CALL WARNING_MESSAGE(OUTPUT=BL%IOUT,MSG=
@@ -966,6 +973,9 @@ C
 C22-----RETURN
   500 CALL SGWF2SUB7PSV(IGRID)
       !
+      IF(ALLOCATED(PNT_INI_CRIT) .AND. IGRID==1) THEN
+          CALL SUB_PRINT_INI_CRIT_HEAD(PNT_INI_CRIT, IN, IOUT, BUFFER)
+      END IF
       !
       RETURN
       END SUBROUTINE
@@ -1049,7 +1059,7 @@ C       LOC2H=NK+N1
 C4-----RETURN.
       RETURN
       END SUBROUTINE
-cc========================================================================rth
+      !
       SUBROUTINE GWF2SUB7AD(KPER,KSTP,Iunitsub,IGRID)
 C     ******************************************************************
 C     Adjust layer bottoms if Subsidence and Sub-Link used
@@ -1142,7 +1152,7 @@ cc
 C4------RETURN
       RETURN
       END SUBROUTINE
-cc================================================================rth
+      !
       SUBROUTINE GWF2SUB7FM(KPER,KITER,ISIP,IGRID)
 C     ******************************************************************
 C        ADD INTERBED STORAGE TERMS TO RHS AND HCOF
@@ -1345,6 +1355,7 @@ C
 C11-----RETURN
       RETURN
       END SUBROUTINE
+      !
       SUBROUTINE GWF2SUB7BD(KSTP,KPER,IGRID)
 C     ******************************************************************
 C     CALCULATE VOLUMETRIC BUDGET FOR INTERBED STORAGE
@@ -1783,6 +1794,7 @@ C
 C27----RETURN
       RETURN
       END SUBROUTINE
+      !
       SUBROUTINE GWF2SUB7OT(KSTP,KPER,IN,IGRID)
 C     ******************************************************************
 C     PRINT AND STORE SUBSIDENCE, COMPACTION AND CRITICAL HEAD.
@@ -2614,6 +2626,7 @@ C
      1 4G15.5,4G15.5)
 C
       END SUBROUTINE
+      !
       SUBROUTINE SGWF2SUB7A(HAQ,TLED,CI,SSE,SSV,DZ,DH,DHP,DHC,NN)
 C     ******************************************************************
 C        ASSEMBLE COEFFICIENTS FOR SOLVING FOR HEAD DISTRIBUTION
@@ -2666,6 +2679,7 @@ C4------SET COEFFICIENTS FOR CELL BORDERING MIDPLANE OF INTERBED
 C5------RETURN
       RETURN
       END SUBROUTINE
+      !
       PURE SUBROUTINE SGWF2SUB7S_FAST(NN,A1,A2,BB)
 C     ******************************************************************
 C        SOLVE SYSTEM OF EQUATIONS WITH A SYMMETRICAL TRI-DIAGONAL
@@ -2700,6 +2714,7 @@ C2------BACK SUBSTITE FOR SOLUTION
       END DO
       !
       END SUBROUTINE
+      !
       SUBROUTINE SGWF2SUB7S(NN)
 C     ******************************************************************
 C        SOLVE SYSTEM OF EQUATIONS WITH A SYMMETRICAL TRI-DIAGONAL
@@ -2730,6 +2745,7 @@ C2------BACK SUBSTITE FOR SOLUTION
    40 CONTINUE
       RETURN
       END SUBROUTINE
+      !
       SUBROUTINE GWF2SUB72D1D(BUFF,NCOL,NROW,D,ND,LOC)
 C     ******************************************************************
 C     Move 2-D array into 1-D array
@@ -2747,6 +2763,7 @@ C     ------------------------------------------------------------------
    10 CONTINUE
       RETURN
       END SUBROUTINE
+      !
       SUBROUTINE GWF2SUB7SV(IGRID)
 C     ******************************************************************
 C     SAVE INTERBED STORAGE DATA FOR FUTURE RESTART
@@ -2770,7 +2787,7 @@ C3-----WRITE ARRAYS FOR EACH SYSTEM OF INTERBEDS
 C4-----RETURN
       RETURN
       END SUBROUTINE
-C
+      !
       SUBROUTINE GWF2SUB7DA(IGRID)
 C
 C     ******************************************************************
@@ -2880,6 +2897,7 @@ C NULLIFY THE LOCAL POINTERS
 C2-----RETURN
       RETURN
       END SUBROUTINE
+      !
       SUBROUTINE SGWF2SUB7PNT(IGRID)
 C  Change SUB data to a different grid.
       USE GWFSUBMODULE
@@ -2936,6 +2954,7 @@ C
 C
       RETURN 
       END SUBROUTINE
+      !
       SUBROUTINE SGWF2SUB7PSV(IGRID)
 C  Save SUB data for a grid.
       USE GWFSUBMODULE
@@ -2991,4 +3010,84 @@ C
       GWFSUBDAT(IGRID)%DELAY_HED_ID  => DELAY_HED_ID
 C
       RETURN
+      END SUBROUTINE
+      !
+      SUBROUTINE SUB_PRINT_INI_CRIT_HEAD(BASE, INFILE, IOUT, BUFF)
+      USE, INTRINSIC:: IEEE_ARITHMETIC, ONLY: IEEE_VALUE, IEEE_QUIET_NAN
+      USE GLOBAL,                       ONLY: NROW, NCOL
+      USE GWFSUBMODULE,                 ONLY: NOCOMV, NNDB, HC ,LN,
+     +                                        RNB, DHC, NDB, NN, LDN
+      USE NUM2STR_INTERFACE,            ONLY: NUM2STR
+      USE GENERIC_OUTPUT_FILE_INSTRUCTION, ONLY: GENERIC_OUTPUT_FILE
+      IMPLICIT NONE
+      CHARACTER(*),               INTENT(IN   ):: BASE
+      INTEGER,                    INTENT(IN   ):: INFILE, IOUT
+      REAL, DIMENSION(NCOL,NROW), INTENT(INOUT):: BUFF 
+      !
+      TYPE(GENERIC_OUTPUT_FILE):: FL
+      CHARACTER(:), ALLOCATABLE:: NAM
+      INTEGER:: NCR
+      INTEGER:: IR, IC, K, KQ, N
+      INTEGER:: LOC, LOC2, LOC4, LOCT
+      !
+      NCR=NROW*NCOL
+      !
+      DO KQ=1,NNDB
+         K  = LN(KQ)
+         LOC=(KQ-1)*NCR
+         !
+         NAM = BASE//'INST_CRIT_HEAD_LAY'//NUM2STR(K ,2,.TRUE.)//
+     +                             '_BED'//NUM2STR(KQ,2,.TRUE.)//'.txt'
+         !
+         CALL FL%OPEN(NAM, OUTPUT=IOUT, INFILE=INFILE)
+         !
+         DO IR=1,NROW
+         DO IC=1,NCOL
+            LOC=LOC+1
+            BUFF(IC,IR) = HC(LOC)
+         END DO
+         END DO
+         !
+         DO IR=1,NROW
+           WRITE(FL%IU,'(*(1x,ES15.7))') BUFF(:,IR)
+         END DO
+         !
+         CALL FL%CLOSE()
+      END DO
+      !
+      LOC4=0
+      DO KQ=1,NDB
+         K=LDN(KQ)
+         !
+         NAM = BASE//'DBED_CRIT_HEAD_LAY'//NUM2STR(K ,2,.TRUE.)//
+     +                             '_BED'//NUM2STR(KQ,2,.TRUE.)//'.txt'
+         !
+         CALL FL%OPEN(NAM, OUTPUT=IOUT, INFILE=INFILE)
+         !
+         DO IR=1, NROW
+         DO IC=1, NCOL
+                  BUFF(IC,IR) = NOCOMV
+         END DO
+         END DO
+         !
+         LOCT=(KQ-1)*NCR
+         N=0
+         DO IR=1,NROW
+         DO IC=1,NCOL
+            N=N+1
+            LOC2=LOCT+N
+            IF(RNB(LOC2).GE.1.0) THEN
+               LOC4=LOC4+NN
+               BUFF(IC,IR)=DHC(LOC4)
+            END IF
+         END DO
+         END DO
+         !
+         DO IR=1,NROW
+           WRITE(FL%IU,'(*(1x,ES15.7))') BUFF(:,IR)
+         END DO
+         !
+         CALL FL%CLOSE()
+      END DO
+      ! 
       END SUBROUTINE
