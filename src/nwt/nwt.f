@@ -20,6 +20,7 @@
       USE STRINGS,                  ONLY: GET_NUMBER, GET_INTEGER 
       USE ULOAD_AND_SFAC_INTERFACE, ONLY: ULOAD
       USE WARNING_TYPE_INSTRUCTION, ONLY: WARNING_TYPE
+      USE POST_KEY_SUB,             ONLY: FILE_AND_POST_KEY_PARSE
       IMPLICIT NONE
 !     ------------------------------------------------------------------
 !     SPECIFICATIONS:
@@ -219,6 +220,18 @@ C3B-----GET OPTIONS.
            IF(HED_LIM <=   0D0 ) HED_LIM=IEEE_VALUE(THK,IEEE_QUIET_NAN)
            IF(HED_LIM >= 0.9D30) HED_LIM=IEEE_VALUE(THK,IEEE_QUIET_NAN)
            IF(HED_LIM <  0.5D0 ) HED_LIM=0.5D0
+           !
+        CASE('HEAD_DISTANCE_ABOVE_GSE_LIMIT')
+           DEALLOCATE(GSE_LIM)
+           ALLOCATE(GSE_LIM(NCOL,NROW))
+           !
+           CALL FILE_AND_POST_KEY_PARSE(LLOC, line, istart, istop)
+           i  = 1  ! surrogate for lloc
+           jj = Z  ! surrogate for IU
+           CALL ULOAD(GSE_LIM, i, line(istart:istop), IOUT, IN, jj, 
+     +        NO_INTERNAL=TRUE, MSG=
+     +        '"HEAD_DISTANCE_ABOVE_GSE_LIMIT" failed to read the '//
+     +        'NROW by NCOL array of GSE_LIM values.')
            !
         CASE('KEEP_MXITER')
            ADJUST_MXIter = FALSE
