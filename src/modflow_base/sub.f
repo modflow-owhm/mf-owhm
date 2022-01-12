@@ -115,7 +115,7 @@ C     ------------------------------------------------------------------
       USE ERROR_INTERFACE,      ONLY: STOP_ERROR, WARNING_MESSAGE
       USE FILE_IO_INTERFACE,    ONLY: READ_TO_DATA
       USE PARSE_WORD_INTERFACE, ONLY: PARSE_WORD, PARSE_WORD_UP
-      USE STRINGS,              ONLY: GET_INTEGER
+      USE STRINGS,              ONLY: GET_INTEGER, GET_NUMBER
       USE PATH_INTERFACE,       ONLY: ADD_DIR_SLASH_ALLOC
       USE GENERIC_BLOCK_READER_INSTRUCTION, ONLY: GENERIC_BLOCK_READER
 C
@@ -220,8 +220,10 @@ C4------CRITICAL HEAD ARRAYS.
         SELECT CASE(BL%NAME)
         CASE('PARAMETER')
            LLOC = 10
-           CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,NSBP,R,IOUT,IN)       ! NSBP is the number subsidence parameters
-           CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,IPRNTFLG,R,IOUT,IN)   ! IPRNTFLG is print flag for UPARARRSUB1
+           CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,NSBP,        ! NSBP is the number subsidence parameters
+     +                      MSG='SUB - Failed to read: NSBP')
+           CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,IPRNTFLG,    ! IPRNTFLG is print flag for UPARARRSUB1
+     +                      MSG='SUB - Failed to read: IPRNTFLG')
         CASE('OPTION','OPTIONS')
           CALL BL%START()
           DO I=1,BL%NLINE
@@ -234,10 +236,10 @@ C4------CRITICAL HEAD ARRAYS.
                                       SEPARTE_FLOWS = TRUE
              CASE('PARAMETER')
                   LLOC = 10
-                  CALL URWORD(BL%LINE,LLOC,ISTART,ISTOP,2,NSBP,     ! NSBP is the number subsidence parameters
-     +                        R,IOUT,IN)        
-                  CALL URWORD(BL%LINE,LLOC,ISTART,ISTOP,2,IPRNTFLG, ! IPRNTFLG is print flag for UPARARRSUB1
-     +                        R,IOUT,IN)   
+           CALL GET_INTEGER(BL%LINE,LLOC,ISTART,ISTOP,IOUT,IN,NSBP,             ! NSBP is the number subsidence parameters
+     +                      MSG='SUB - Failed to read: NSBP')
+           CALL GET_INTEGER(BL%LINE,LLOC,ISTART,ISTOP,IOUT,IN,IPRNTFLG,         ! IPRNTFLG is print flag for UPARARRSUB1
+     +                      MSG='SUB - Failed to read: IPRNTFLG')
              CASE('PRINT_INITIAL_CRITICAL_HEAD')
                   CALL PARSE_WORD(BL%LINE,LLOC,ISTART,ISTOP)
                   !
@@ -332,26 +334,48 @@ C4------CRITICAL HEAD ARRAYS.
           ALLOCATE(DELAY_HED_ID(1,1))
           ALLOCATE(DELAY_HED(1)     )
       END IF
-      !
+      !Read -> ISUBCB ISUBOC NNDB NDB NMZ NN AC1 AC2 ITMIN IDSAVE IDREST SUBLNK
       LLOC=1
-      CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,IIBSCB,R,IOUT,IN)
-      CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,ISUBOC,R,IOUT,IN)
-      CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,NNDB,  R,IOUT,IN)
-      CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,NDB,   R,IOUT,IN)
-      CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,NMZ,   R,IOUT,IN)
-      CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,NN,    R,IOUT,IN)
-      CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,3,I,   AC1,IOUT,IN)
-      CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,3,I,   AC2,IOUT,IN)
-      CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,ITMIN, R,IOUT,IN)
-      CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,IDSAVE,R,IOUT,IN)
-      CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,IDREST,R,IOUT,IN)
+      CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,IIBSCB, 
+     +      MSG='SUB - Failed to read 1st number: ISUBCB')
+      
+      CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,ISUBOC, 
+     +      MSG='SUB - Failed to read 2nd number: ISUBOC')
+      
+      CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,NNDB, 
+     +      MSG='SUB - Failed to read 3rd number: NNDB')
+      
+      CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,NDB, 
+     +      MSG='SUB - Failed to read 4th number: NDB')
+      
+      CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,NMZ, 
+     +      MSG='SUB - Failed to read 5th number: NMZ')
+      
+      CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,NN, 
+     +      MSG='SUB - Failed to read 6th number: NN')
+      
+      CALL GET_NUMBER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,AC1, 
+     +      MSG='SUB - Failed to read 7th number: AC1')
+      
+      CALL GET_NUMBER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,AC2, 
+     +      MSG='SUB - Failed to read 8th number: AC2')
+      
+      CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,ITMIN, 
+     +      MSG='SUB - Failed to read 9th number: ITMIN')
+      
+      CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,IDSAVE, 
+     +      MSG='SUB - Failed to read 10th number: IDSAVE')
+      
+      CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,IDREST, 
+     +      MSG='SUB - Failed to read 11th number: IDREST')
+      
+      IF(IGRID.EQ.1.AND.ISUBLNK.NE.1)
+     + CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,ISUBLNK, 
+     +      ERROR_VAL=Z)
       !
       ! CHECK IF GLOBAL SHUTDOWN OF CBC IS IN EFFECT
       CALL CHECK_CBC_GLOBAL_UNIT(IIBSCB)
       !
-      IF(IGRID.EQ.1.AND.ISUBLNK.NE.1)
-     +           CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,ISUBLNK,R,Z,IN) !SUB-Linkage rth  seb SUBLINK FLAG ONLY READ FOR PARENT GRID
-!      CALL URWORD(LINE,LLOC,ISTART,ISTOP,2,ILPFLNK,R,IOUT,IN)                !SUB-Linkage rth  seb commented out
       IF(AC2.EQ.ZERO) AC2=1.0
       HAS_DELAY_BED  = TRUE
       HAS_INST_BED = TRUE
@@ -726,10 +750,20 @@ C17-----OF NMZ ZONES.
      1 ,//,'   ZONE        HYDRAULIC           ELASTIC            INEL',
      2 'ASTIC       ',/,'  NUMBER      CONDUCTIVITY     SPECIFIC STORA',
      3 'GE    SPECIFIC STORAGE   ',/,' ',69('-'))
-       DO 300 N=1,NMZ
-       READ(IN,*) (DP(N,NP),NP=1,3)
-  300  CONTINUE
-         WRITE(IOUT,305) (N,(DP(N,NP),NP=1,3),N=1,NMZ)
+       DO N=1, NMZ
+          CALL READ_TO_DATA(BL%LN,IN,IOUT)
+          LLOC = 1
+          CALL GET_NUMBER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,DP(N,1),
+     +                    MSG='SUB - Failed to read 1st DP number: '//
+     +                        'Vertical Hydraulic Conductivity')
+          CALL GET_NUMBER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,DP(N,2),
+     +                    MSG='SUB - Failed to read 2nd DP number: '//
+     +                        'Elastic Specific Storage')
+          CALL GET_NUMBER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,DP(N,3),
+     +                    MSG='SUB - Failed to read 3rd DP number: '//
+     +                        'Inelastic Specific Storage')
+          WRITE(IOUT,305) N, DP(N,1), DP(N,2), DP(N,3)
+       END DO
   305  FORMAT(I5,4X,G15.5,5X,G15.5,5X,G15.5)
        LOC3=Z
        LOC4=Z
@@ -871,26 +905,46 @@ C21-----READ FORMATS AND UNIT NUMBERS OUTPUT FLAGS.
       IF(ISUBOC.GT.Z) THEN
        CALL READ_TO_DATA(BL%LN,IN,IOUT)
        LLOC=1
-       CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,ISBOCF(1),R,IOUT,IN)
-       CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,ISBOCU(1),R,IOUT,IN)
-       CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,ISBOCF(2),R,IOUT,IN)
-       CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,ISBOCU(2),R,IOUT,IN)
-       CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,ISBOCF(3),R,IOUT,IN)
-       CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,ISBOCU(3),R,IOUT,IN)
-       CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,ISBOCF(4),R,IOUT,IN)
-       CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,ISBOCU(4),R,IOUT,IN)
-       CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,ISBOCF(5),R,IOUT,IN)
-       CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,ISBOCU(5),R,IOUT,IN)
-       CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,ISBOCF(6),R,IOUT,IN)
-       CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,ISBOCU(6),R,IOUT,IN)
-       CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,ISBOCF(7),R,IOUT,IN)
-       CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,ISBOCU(7),R,IOUT,IN)
-       CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,ISBOCF(8),R,IOUT,IN)
-       CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,ISBOCU(8),R,IOUT,IN)
-       CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,ISBOCF(9),R,IOUT,IN)
-       CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,ISBOCU(9),R,IOUT,IN)
-       CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,ISBOCF(10),R,IOUT,IN)
-       CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,ISBOCU(10),R,IOUT,IN)
+       CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,ISBOCF(1),
+     +            MSG='SUB - Failed to read 1st number: Ifm1')
+       CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,ISBOCU(1),
+     +            MSG='SUB - Failed to read 2nd number: Iun1')
+       CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,ISBOCF(2),
+     +            MSG='SUB - Failed to read 3rd number: Ifm2')
+       CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,ISBOCU(2),
+     +            MSG='SUB - Failed to read 4th number: Iun2')
+       CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,ISBOCF(3),
+     +            MSG='SUB - Failed to read 5th number: Ifm3')
+       CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,ISBOCU(3),
+     +            MSG='SUB - Failed to read 6th number: Iun3')
+       CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,ISBOCF(4),
+     +            MSG='SUB - Failed to read 7th number: Ifm4')
+       CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,ISBOCU(4),
+     +            MSG='SUB - Failed to read 8th number: Iun4')
+       CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,ISBOCF(5),
+     +            MSG='SUB - Failed to read 9th number: Ifm5')
+       CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,ISBOCU(5),
+     +            MSG='SUB - Failed to read 10th number: Iun5')
+       CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,ISBOCF(6),
+     +            MSG='SUB - Failed to read 11th number: Ifm6')
+       CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,ISBOCU(6),
+     +            MSG='SUB - Failed to read 12th number: Iun6')
+       CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,ISBOCF(7),
+     +            MSG='SUB - Failed to read 13th number: Ifm7')
+       CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,ISBOCU(7),
+     +            MSG='SUB - Failed to read 14th number: Iun7')
+       CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,ISBOCF(8),
+     +            MSG='SUB - Failed to read 15th number: Ifm8')
+       CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,ISBOCU(8),
+     +            MSG='SUB - Failed to read 16th number: Iun8')
+       CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,ISBOCF(9),
+     +            MSG='SUB - Failed to read 17th number: Ifm9')
+       CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,ISBOCU(9),
+     +            MSG='SUB - Failed to read 18th number: Iun9')
+       CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,ISBOCF(10),
+     +            MSG='SUB - Failed to read 19th number: Ifm10')
+       CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,ISBOCU(10),
+     +            MSG='SUB - Failed to read 20th number: Iun10')
          WRITE(IOUT,410) (ISBOCF(N),ISBOCU(N),N=1,10)
   410  FORMAT(/,'             SUBSIDENCE PRINT FORMAT IS NUMBER',I4/
      &            '                 UNIT FOR SAVING SUBSIDENCE IS',I4/
@@ -921,31 +975,56 @@ C21-----READ FORMATS AND UNIT NUMBERS OUTPUT FLAGS.
        DO 450 NOCLIN=1,ISUBOC
        CALL READ_TO_DATA(BL%LN,IN,IOUT)
        LLOC=1
-       CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,ISP1,R,IOUT,IN)
-       CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,ISP2,R,IOUT,IN)
-       CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,JTS1,R,IOUT,IN)
-       CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,JTS2,R,IOUT,IN)
-       CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,IFL(1),R,IOUT,IN)
-       CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,IFL(2),R,IOUT,IN)
-       CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,IFL(3),R,IOUT,IN)
-       CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,IFL(4),R,IOUT,IN)
-       CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,IFL(5),R,IOUT,IN)
-       CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,IFL(6),R,IOUT,IN)
-       CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,IFL(7),R,IOUT,IN)
-       CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,IFL(8),R,IOUT,IN)
-       CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,IFL(9),R,IOUT,IN)
-       CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,IFL(10),R,IOUT,IN)
-       CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,IFL(11),R,IOUT,IN)
-       CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,IFL(12),R,IOUT,IN)
-       CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,IFL(13),R,IOUT,IN)
-       CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,IFL(14),R,IOUT,IN)
-       CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,IFL(15),R,IOUT,IN)
-       CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,IFL(16),R,IOUT,IN)
-       CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,IFL(17),R,IOUT,IN)
-       CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,IFL(18),R,IOUT,IN)
-       CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,IFL(19),R,IOUT,IN)
-       CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,IFL(20),R,IOUT,IN)
-       CALL URWORD(BL%LN,LLOC,ISTART,ISTOP,2,IFL(21),R,IOUT,IN)
+       CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,ISP1,
+     +            MSG='SUB - Failed to read 1st number: ISP1')
+       CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,ISP2,
+     +            MSG='SUB - Failed to read 2nd number: ISP2')
+       CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,JTS1,
+     +            MSG='SUB - Failed to read 3rd number: JTS1')
+       CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,JTS2,
+     +            MSG='SUB - Failed to read 4th number: JTS2')
+       CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,IFL(1),
+     +            MSG='SUB - Failed to read 5th number: IFL1')
+       CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,IFL(2),
+     +            MSG='SUB - Failed to read 6th number: IFL2')
+       CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,IFL(3),
+     +            MSG='SUB - Failed to read 7th number: IFL3')
+       CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,IFL(4),
+     +            MSG='SUB - Failed to read 8th number: IFL4')
+       CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,IFL(5),
+     +            MSG='SUB - Failed to read 9th number: IFL5')
+       CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,IFL(6),
+     +            MSG='SUB - Failed to read 10th number: IFL6')
+       CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,IFL(7),
+     +            MSG='SUB - Failed to read 11th number: IFL7')
+       CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,IFL(8),
+     +            MSG='SUB - Failed to read 12th number: IFL8')
+       CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,IFL(9),
+     +            MSG='SUB - Failed to read 13th number: IFL9')
+       CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,IFL(10),
+     +            MSG='SUB - Failed to read 14th number: IFL10')
+       CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,IFL(11),
+     +            MSG='SUB - Failed to read 15th number: IFL11')
+       CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,IFL(12),
+     +            MSG='SUB - Failed to read 16th number: IFL12')
+       CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,IFL(13),
+     +            MSG='SUB - Failed to read 17th number: IFL13')
+       CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,IFL(14),
+     +            MSG='SUB - Failed to read 18th number: IFL14')
+       CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,IFL(15),
+     +            MSG='SUB - Failed to read 19th number: IFL15')
+       CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,IFL(16),
+     +            MSG='SUB - Failed to read 20th number: IFL16')
+       CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,IFL(17),
+     +            MSG='SUB - Failed to read 21th number: IFL17')
+       CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,IFL(18),
+     +            MSG='SUB - Failed to read 22th number: IFL18')
+       CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,IFL(19),
+     +            MSG='SUB - Failed to read 23th number: IFL19')
+       CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,IFL(20),
+     +            MSG='SUB - Failed to read 24th number: IFL20')
+       CALL GET_INTEGER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,IFL(21),
+     +            MSG='SUB - Failed to read 25th number: IFL21')
        IF(ISP1.LT.1) ISP1=1
        IF(ISP1.GT.NPER) ISP1=NPER
        IF(ISP2.LT.1) ISP2=1
