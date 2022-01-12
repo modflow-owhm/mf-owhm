@@ -3034,8 +3034,188 @@ C14-----TIME STEP MULTIPLIER, AND STEADY-STATE FLAG..
       SIMTIM_PER  = DZ
       REALTIM_PER = DNEG
       USE_LEAP_YR = FALSE
-      DO N=1,NPER
+      !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       CALL READ_TO_DATA(LINE,INDIS,IOUT,IOUT)
+      LLOC = ONE
+      CALL PARSE_WORD_UP(LINE,LLOC,ISTART,ISTOP,TRUE)
+      FOUND_KEYWORD = FALSE
+      IF( LINE(ISTART:ISTOP) == 'DAILY'      ) THEN
+          !
+          FOUND_KEYWORD = TRUE
+          TSMULT(:) = ONE_SNG
+          !
+          IF(ITMUNI == 1) THEN  ! SECONDS
+               PERLEN(:) = 86400.
+          ELSE IF(ITMUNI == 2) THEN  ! MINUTES
+               PERLEN(:) = 1440.
+          ELSE IF(ITMUNI == 3) THEN  ! HOURS
+               PERLEN(:) = 24.
+          ELSE IF(ITMUNI == 4) THEN  ! DAYS
+               PERLEN(:) = 1.
+          ELSE
+               CALL STOP_ERROR(LINE,INDIS,IOUT,'FOUND KEYWORD '//
+     +         '"DAILY", WHICH IS ONLY SUPPORTED FOR ITMUNI = 1, '//
+     +         '2, 3, and 4.'//NL//
+     +         'It does not supoport ITMUNI = 0 or 5 (years).')
+          END IF
+          !
+          CALL GET_INTEGER(LINE,LLOC,ISTART,ISTOP,IOUT,INDIS, N,
+     +                     HAS_ERROR=ERROR)
+          IF(ERROR) THEN
+               N = 1
+               IF( ISTART < ISTOP ) CALL UPPER(LINE(ISTART:ISTOP))
+          ELSE
+              CALL PARSE_WORD_UP(LINE,LLOC,ISTART,ISTOP,TRUE)
+          END IF
+          !
+          NSTP(:) = N
+          ISSFLG(:) = Z
+          IF( LINE(ISTART:ISTOP) == 'SS' ) THEN
+                ISSFLG(1) = ONE
+                ISS       = ONE
+                IF(NPER > 1) ITR = ONE
+          ELSE
+                ITR       = ONE
+          END IF
+          !
+         WRITE (IOUT,'(9X,A21,I7,F25.5)',ADVANCE='NO') 'DAILY ',N,1.0
+      ELSEIF( LINE(ISTART:ISTOP) == 'MONTHLY') THEN
+          !
+          FOUND_KEYWORD = TRUE
+          !
+          IF(ITMUNI < 1 .OR. ITMUNI > 4) THEN
+             CALL STOP_ERROR(LINE,INDIS,IOUT,'FOUND KEYWORD '//
+     +       '"MONTHLY", WHICH IS ONLY SUPPORTED FOR ITMUNI = 1, '//
+     +       '2, 3, and 4.'//NL//
+     +       'It does not supoport ITMUNI = 0 or 5 (years).')
+          END IF
+          !
+          CALL GET_INTEGER(LINE,LLOC,ISTART,ISTOP,IOUT,INDIS, N,
+     +          MSG='DIS found MONTHLY keyword but failed to load NSTP')
+          !
+          SPTIM(:)%SPECIFY_DELT = N < 0
+          NSTP(:) = ABS(N)
+          TSMULT(:) = ONE_SNG
+          !
+          CALL PARSE_WORD_UP(LINE,LLOC,ISTART,ISTOP,TRUE)
+          IF( .NOT. LINE(ISTART:ISTOP) == 'SS' .AND.
+     +        .NOT. LINE(ISTART:ISTOP) == 'TR' ) LLOC = ISTART
+          !
+          CALL GET_DATE(LINE,LLOC,I,J,IOUT,INDIS, DATE, HAS_ERROR=ERROR)        ! I and J are place holders for ISTART and ISTOP
+          !
+          IF(STARTING_DATE%NOT_SET() ) THEN
+             IF( ERROR ) THEN
+               CALL STOP_ERROR(LINE,INDIS,IOUT, MSG=
+     +        'DIS package found "MONTHLY" keyword, '//NL//
+     +'but had no starting date to determine month lengths.'//BLN//
+     +'You must define a simulation starting date as one '//
+     +'of the following:'//NL//
+     +'  BAS "START_DATE" option followed by the starting date or'//NL//
+     +'  Specifying a starting date after the MONTHLY keyword.'//BLN//
+     +'For Example, add to the BAS package:'//BLN//
+     +'BEGIN OPTIONS'//NL//'    START_DATE 4/23/1979'//NL//
+     +'END OPTIONS'//BLN//'or'//BLN//
+     +'MONTHLY  4/23/1979   2'//BLN//
+     +'where 4/23/1979 represents the start of the simulation'//NL//
+     +'(that is, simulation time = 0)'//BLN//
+     +'Note, the date must contain either a "/" or "-"' )
+             END IF
+             STARTING_DATE = DATE
+          END IF
+          !
+          IF( .NOT. LINE(ISTART:ISTOP) == 'SS' .AND.
+     +        .NOT. LINE(ISTART:ISTOP) == 'TR' ) 
+     +              CALL PARSE_WORD_UP(LINE,LLOC,ISTART,ISTOP,TRUE)
+          !
+          ISSFLG(:) = Z
+          IF( LINE(ISTART:ISTOP) == 'SS' ) THEN
+                ISSFLG(1) = ONE
+                ISS       = ONE
+                IF(NPER > 1) ITR = ONE
+          ELSE
+                ITR       = ONE
+          END IF
+          !
+          WRITE (IOUT,'(9X,A21,I7,F25.5)',ADVANCE='NO') 'MONTHLY ',N,1.0
+          !
+          BLOCK
+             TYPE(DATE_OPERATOR):: DSTP
+             !
+             DSTP       = STARTING_DATE
+             DSTP%FRAC  = DZ
+             CALL DSTP%SET_DAY(1)
+             CALL DSTP%ADD_MONTH(1)
+             !
+             SP_LEN = DSTP - STARTING_DATE ! Fix first period to match month, so if started on 1/15/2000,
+             !                                              then first period is 16 days to get to Feb 1
+             IF(ITMUNI == 1) THEN  ! SECONDS
+                  PERLEN(1) = 86400. * SP_LEN
+             ELSE IF(ITMUNI == 2) THEN  ! MINUTES
+                  PERLEN(1) = 1440. * SP_LEN
+             ELSE IF(ITMUNI == 3) THEN  ! HOURS
+                  PERLEN(1) = 24. * SP_LEN
+             ELSE IF(ITMUNI == 4) THEN  ! DAYS
+                  PERLEN(1) = SP_LEN
+             END IF
+             !
+             DO N=2,NPER
+                    SP_LEN = DSTP%MONTHDAYS()
+                    !
+                    IF(ITMUNI == 1) THEN  ! SECONDS
+                         PERLEN(N) = 86400. * SP_LEN
+                    ELSE IF(ITMUNI == 2) THEN  ! MINUTES
+                         PERLEN(N) = 1440. * SP_LEN
+                    ELSE IF(ITMUNI == 3) THEN  ! HOURS
+                         PERLEN(N) = 24. * SP_LEN
+                    ELSE IF(ITMUNI == 4) THEN  ! DAYS
+                         PERLEN(N) = SP_LEN
+                    END IF
+                    !
+                    CALL DSTP%ADD_MONTH(1)
+             END DO
+          END BLOCK
+      END IF
+      !
+      IF(FOUND_KEYWORD) THEN
+!        IF( ITMUNI /= FOUR ) CALL STOP_ERROR(LINE,INDIS,IOUT,
+!     +      'DIS PACKAGE FOUND MONTHLY OR DAILY KEYWORD, BUT '//
+!     +      'THESE ONLY WORK WITH ITMUNI=4 (DAYS).')
+        IF(ISS == Z .AND. ITR /= Z) THEN
+                                     WRITE (IOUT,'(A)') ' TR'
+        ELSE IF(ISS /= Z .AND. ITR == Z) THEN
+                                     WRITE (IOUT,'(A)') ' SS'
+        ELSE
+                      WRITE (IOUT,'(A)') ' First SS, then TR'
+        END IF
+        !
+        FOUND_KEYWORD = N < 1  ! Now use as flag to indicate if time steps should try to be int numbers
+        !
+        DO N=1,NPER
+          ALLOCATE( SPTIM(N)%DT( NSTP(N) ) )
+        END DO
+        !
+        if(NSTP(1) == 1) then
+                DO N=1,NPER
+                       SPTIM(N)%DT(1) = DBLE(PERLEN(N))
+                END DO
+        elseif(SPTIM(1)%SPECIFY_DELT) then
+            DO N=1,NPER
+               SPTIM(N)%DT    = DZ
+               SPTIM(N)%DT(1) = DBLE(PERLEN(N))
+               CALL REDISTRIBUTE_SUM_TO_NATURAL_NUMBERS( SPTIM(N)%DT )
+            END DO
+        else
+              DO N=1,NPER
+                     SPTIM(N)%DT = DBLE(PERLEN(N)) / DBLE(NSTP(N))
+              END DO
+        end if
+        !
+        GO TO 999  ! Skip past regular DIS input read
+      END IF
+      !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      !
+      DO N=1,NPER
+      IF(N>1) CALL READ_TO_DATA(LINE,INDIS,IOUT,IOUT)
       LLOC = ONE
       CALL GET_NUMBER(LINE,LLOC,ISTART,ISTOP,IOUT,INDIS, SP_LEN,
      +                 MSG='DIS FAILED TO LOAD PERLEN')
@@ -3176,7 +3356,7 @@ C15-----TSMULT LE 0, OR PERLEN LT 0.
       END DO
 C
 C16-----Assign ITRSS.
-      IF(ISS == Z .AND. ITR /= Z) THEN
+  999 IF(ISS == Z .AND. ITR /= Z) THEN
          ITRSS = ONE
            WRITE(IOUT,270)
   270    FORMAT(/,1X,'TRANSIENT SIMULATION')
@@ -3199,6 +3379,39 @@ C--------------ALLOCATE AND BUILD COORDINATE SYSTEM OF MODEL AND OPTIONALLY PRIN
       !
       IF(PRINTCOORD) CALL XYGRID%PRINT(IOUT)
 C
+      CONTAINS
+         PURE SUBROUTINE REDISTRIBUTE_SUM_TO_NATURAL_NUMBERS(val)
+           implicit none
+           double precision, dimension(:), intent(inout):: val
+           double precision:: tot, div, N
+           integer:: i, dim
+           !
+           dim = size(val)
+           N   = REAL(dim, kind(N))
+           tot = sum(val)
+           !
+           if ( tot <= N ) then           ! Sum is too small for whole number split
+                           val = tot/N
+                           return
+           end if
+           !
+           div = tot/N
+           div = AINT(div, kind(div))
+           val(1) = div
+           !
+           tot = tot - div
+           N   = N - 1.0d0
+           do i=2, dim-1
+                         div = tot/N
+                         div = AINT(div, kind(div))
+                         val(i) = div
+                         !
+                         tot = tot - div
+                         N   = N - 1.0d0
+           end do
+           val(dim) = tot
+           !  
+         END SUBROUTINE
       END SUBROUTINE
       !
       SUBROUTINE SGWF2BAS7D(KSTP,KPER,IPFLG,ISA)

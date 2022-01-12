@@ -14,6 +14,143 @@ Boyce, S.E., Hanson, R.T., Ferguson, I., Schmid, W., Henson, W., Reimann, T., Me
 
 [[_TOC_]]
 
+
+## 2.2.0
+
+TBA
+
+### Merge ⯬ BiF v1.0.2
+
+- Batteries Included Fortran (BiF) version 1.0.2 source code merged.
+    - https://code.usgs.gov/fortran/bif/-/tags/1.0.2
+
+### Fixed
+
+* `NWT` Bug Fixes
+
+    * NWT considers the MODFLOW Outer Iteration (`1` to `mxiter`) to be each time it solves for the Jacobian, and does not include iterations solved with Backtracking (residual control). This causes a disconnect with the other MODFLOW packages that assume an outer iteration occurs every time the aquifer flow equations are formulated (package's  `FM` routines). To fix this issue, the number of MODFLOW Outer Iterations is always accounted for as the  number f times the `FM` routines are called.  
+
+        As a result of this, previous models may need to increase their maximum number of `NWT` iterations (`MAXITEROUT`) to allow for convergence. Previously, the number of outer iterations was under-reported such that a model that said it converged in `XX` iterations, really converged in `YY` iterations, where `YY >> XX`.  
+
+        Please see the [CHANGELOG_Features.md section 2.1.1 Section NWT Improvements for detailed information about this](CHANGELOG_Features.md#2.1.1).
+
+    * `NWT` thin cell check is disabled. 
+
+        * By default, the `NWT` solver would check all model cells vertical thickness (`thick`) against the largest/thickest cell (`mxthick`). Any cell that had it's `thick < 0.01*mxthick` was changed to `IBOUND=0` (removed from the simulation/assumed impermeable rock). This caused models that had a few very model cells to drop out smaller ones, which might be thin clay layers in the middle of the model. Users were no aware that part of their model was not being simulated. To prevent this situation from occurring, this check is disabled by default.
+
+        * To enable the thin cell check, add the option `THIN_CELL_CHECK`.  
+            All cells removed from the simulation are written to the LIST file.
+
+- `SFR` Modifications
+    * The flow-depth-width lookup table, `ICALC = 4`, use `log10` interpolation,  
+        except when the flow rate is less than the first point, then it uses linear interpolation.  
+        If the first point is lookup point is `<1.0E-30`, then SFR uses linear interpolation for the first two points.
+        * This prevents a floating point overflows from doing `log10(0.0)`.
+
+* `FMP` Bug Fixes
+
+    - `EVAPORATION_IRRIGATION_FRACTION  BY_IRRIGATE  LIST`  keyword changed to read a list of `NIRRIGATE` fractions instead of the incorrect `NCROP` fractions. 
+        - The keyword `EVAPORATION_IRRIGATION_FRACTION  BY_CROP  LIST` is how to read `NCROP` fractions.  
+
+    * Fixed issue when defining `NON_ROUTED_DELIVERY  VOLUME  STATIC` and `NON_ROUTED_DELIVERY  STATIC` that would continue to reduce for each stress period the available NRD water.
+        * FMP would read the NRD volumes once, divide the volume by the stress period time to get a rate, then for each subsequent stress period divide the previous rate by the next stress period's time. Now, the rate is determined using the original volume defined.  
+
+    - Added checks for when `NCROP = 0` to allowing running FMP without any land use/crops defined.
+
+
+- `MNW2` Bug Fixes
+
+    - Reported the well head (`hwel`) as the cell head for wells that went were dry  
+      (that is, when pumping that exceeded the well capacity).
+      - This affects the actual pumping if the well has partial penetration (PP) enabled and was in a convertible layer.  
+        Because it would apply the PP correction to what is a seepage face rather than a pumping well.  
+
+    * `MNW2` now only does the `RHS` formulation for the last 10 solver iterations in a time step that does not converge.
+      - That is, if the solver has `MXITER = 200 ` iteration,  
+        then `MNW2` solves for odd iterations by modifying the `RHS` (WEL-like action)  
+         and even iterations modifies `HCOF`  (GHB-like action) ,  
+        then only modifies RHS for solver iterations `≥190` ,
+      - This improves the mass error for time steps that fail to converge,  
+        but have an option to continue to the simulation.  
+        For example, `BAS` option `NO_FAILED_CONVERGENCE_STOP` or `NWT` `CONTINUE` option.  
+
+    - `MNW2` recalculates the node flows if the time step converges on an even iteration.  
+      On odd iterations MNW2 specifies the node flow rate directly by modifying the `RHS`, but  
+      for even iterations it uses the previous iterations `HNEW` to modify `HCOF`  
+      and make the node flow a function of the next iterations `HNEW`.  
+      - The difference between the last two iterations of `HNEW` can significantly change the reported node flows.  
+
+    * `MNW2` and `NWT` fixed issue when writing to the cell-by-cell for nodes that have gone dry.  
+
+* `SWT` now zeros out the `BUF`fer array before using it fixing an issue during Stead State stress periods.
+  - Previously, `SWT` would write what the previous package had stored in `BUF` causing it to report flows that did not exist.  
+
+- `SUB` fixes
+  * Inelastic compaction is assumed to be complete if the head falls below the cell bottom.
+    * That is, if the critical head fallows below the cell bottom, then it is set to `-3.40E+38` to represent `-inf`.  
+
+  - Compaction (inelastic and elastic) and expansion (elastic) only occurs  
+    when the cell head is greater than the cell's  bottom elevation. 
+    - Assume `HOLD` is the time step starting head, `HNEW` time step's ending head, `BOT` is the cell bottom:   
+      if a time step has `HOLD>BOT` and `HNEW<BOT`, then compaction occurs but solves with `HNEW=BOT`.  
+      if a time step has `HOLD<BOT` and `HNEW>BOT`, then expansion&nbsp; &nbsp; occurs but solves with `HOLD=BOT`.  
+      if a time step has `HOLD<BOT` and `HNEW<BOT`, then nothing happens.  
+
+  - Changed the use of the PACK function to to use a mask array that is the same dimensions as BUFFER array. Previously, the mask was set to the scalar variable TRUE. This can have different meanings on different compilers.  
+    An example of the changed code is:  
+    `RNB(LOC1:LOC2) = PACK(BUFFER, TRUE)` was changed to:  
+    `RNB(LOC1:LOC2) = PACK(BUFFER, PACK_MASK)`  
+    where
+    `real, dimension(NCOL,NROW):: BUFFER`  
+    `logical:: TRUE = .true.`  
+    `logical, dimension(NCOL,NROW):: PACK_MASK = .true.`  
+
+* `CHOB` now works when using the `UPW` flow package and `NWT` solver.  
+
+- `U2DREL` with "`BINARY`" input option now raises a warning instead of stopping with an error.
+    - When the "`BINARY`"  option is found, MF-OWHM attempts to identify the binary input structure.  
+      If it succeeds, a warning is raised about the portability of binary-unformatted files.  
+      If it fails, then the program stops with an error message.  
+
+* `expression_parser.f90` improved error message that is raised when a variable name is similar to a reserved keyword.  
+
+- `linefeed.f90` now raises an error if the end of a FeedFile is reached before the end of the simulation.
+  - A proper FeedFile should have one line of input per stress period simulated.  
+    Previously, if the end of the file was reached, then the last lines input would be reused.
+
+* Removed from the visual studio solution (`ide/visual_studio/OneWater_Project.sln`) the key entry:`GenAlternateCodePaths="codeForAVX"`
+    * `AVX` acceleration resulted floating point truncation that resulted in model results that were not repeatable. That is, the same model input would produce different numbers after the tenth digit. Results are now identical when running the multiple times with the same input.  
+
+
+### Refactoring
+
+* `SFR` merged `SUBROUTINE GWF2SFR7LAKE` into `SUBROUTINE GWF2SFR7AD`.
+  * Routines were redundant and called at the start of the time step.  
+    Combining the two routines as one improves the readability of the code and has no affect on simulation results.
+
+* Added newly supported keywords to `doc/Option_Block_Cheatsheets`
+  * `BAS_Options_All.bas`
+  * `BAS_Options_Recommended.bas`
+
+- Added newly supported keywords to `doc/Notepadpp_Syntax_Highlighting/userDefineLangs`
+  * `BAS-DIS.xml`
+  * `MF-Flow-Packages.xml`
+  * `MF-Packages.xml`
+
+* Changed `DO CONCURRENT` loops to a regular `DO` loops for code with multiple branches (`IF`-`ElSE`).  
+  The current Fortran compilers seem to have issues with numerical accuracy  
+  for complicated statements in a `DO CONCCURENT` loops.
+
+- `fmp_main_driver.f90` changed `.NE.` to `/=` 
+
+* `surface_water_data.f90` changed the `NON_ROUTED_DELIVERY` code from procedural to object oriented.  
+  The new object is `TYPE NRD_VALUES` and keeps track of consumed and available imported water based on assigned demand. 
+
+- `SUBROUTINE FMP3WELBD(KSTP,KPER,DELT,DATE,IGRID)` for the FB_DETAILS and FB_COMPACT output files rearranged the code for clarity and execution speed.  
+  Changes occurred in `IF(FMPOUT%FB_COMPACT%IS_OPEN .OR. FMPOUT%FB_DETAILS%IS_OPEN) THEN` statement block.
+
+&nbsp; 
+
 ------
 
 ## 2.1.0 ⯬ MODFLOW Surface Water Operations (`SWO`)
@@ -107,19 +244,6 @@ Initial release of MODFLOW Surface Water Operations (`SWO`) in MF-OWHM
     - It is recommended to use `FMP` instead of the `AG` package.
     - Obtained from: https://water.usgs.gov/water-resources/software/MODFLOW-NWT/MODFLOW-NWT_1.2.0.zip
 
-### Refactoring
-
-* Source code organized and renamed for clarity and  
-    for some of the source code the package main module was moved to a separate file.
-    * `gwf2ghb7_OWHM.f` is now `ghb.f`
-    * `gwf2mnw27.f` is now `mnw2.f` and `mnw2_module.f90`
-
-- Minor spelling corrections in warning and error messages.
-
-* Added `path_interface.f90`, which provides subroutines for building Windows and Unix Paths and allows creating directories.
-
-- The modules in `all_util.f90` were split into 48 separate files. The file name pertains to the util module it contains.
-
 ### Fixed
 
 * `BCF` was not recognized as one of the supported packages.  
@@ -135,6 +259,19 @@ Initial release of MODFLOW Surface Water Operations (`SWO`) in MF-OWHM
 * `UPW`/`NWT` packages with convertible layers kept releasing water from storage after a model cell was dry.
 
 - `HydMod` issue with `HD` (head) interpolation used the same four points for all observation points, which resulted in an extrapolation. Fixed such that head observations are interpolated by creating a four point finite element from the four closest cells to interpolate for the requested `X,Y` head location. (this is similar to how Hob operates).
+
+### Refactoring
+
+* Source code organized and renamed for clarity and  
+    for some of the source code the package main module was moved to a separate file.
+    * `gwf2ghb7_OWHM.f` is now `ghb.f`
+    * `gwf2mnw27.f` is now `mnw2.f` and `mnw2_module.f90`
+
+- Minor spelling corrections in warning and error messages.
+
+* Added `path_interface.f90`, which provides subroutines for building Windows and Unix Paths and allows creating directories.
+
+- The modules in `all_util.f90` were split into 48 separate files. The file name pertains to the util module it contains.
 
 &nbsp; 
 

@@ -2,8 +2,8 @@
 
 ![MF-OWHM_banner_v2b](img/MF-OWHM_banner_v2b.png)
 
-&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; **IPDS No.**&nbsp; `NA`
-# Version 2.1.1a
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; **IPDS No.**&nbsp; `IP-136416`
+# Version 2.2.0a
 
 MODFLOW One-Water Hydrologic Flow Model (MF-OWHM) Conjunctive Use and Integrated Hydrologic Flow Modeling Software.
 
@@ -63,7 +63,7 @@ The difference between the two release types are:
    - `"status": "Preliminary"` for a  *Preliminary Release*  
       &nbsp; 
 1. If the code version is registered in the USGS Information Product Data System (`IPDS`).  
-   -> A *Production Release* is registered in `IPDS` and includes a *git tag* with the message "production release".  
+   ➥ A *Production Release* is registered in `IPDS` and includes a *git tag* with the message "production release".  
    Any other commit (or *git tag*) is considered a *Preliminary Release*.
     - All code changes, including bug fixes, start as a *Preliminary Release*;  
       when the code version is registered with `IPDS` it becomes a *Production Release*.
@@ -100,11 +100,11 @@ To obtain this repository via git run:
 
 ## Code Citation
 
-> Boyce, S.E., 2021, MODFLOW One-Water Hydrologic Flow Model (MF-OWHM) Conjunctive Use and Integrated Hydrologic Flow Modeling Software, version 2.1.0: U.S. Geological Survey Software Release, https://doi.org/10.5066/P9P8I8GS
+> Boyce, S.E., 2022, MODFLOW One-Water Hydrologic Flow Model (MF-OWHM) Conjunctive Use and Integrated Hydrologic Flow Modeling Software, version 2.2.0: U.S. Geological Survey Software Release, https://doi.org/10.5066/P9P8I8GS
 
 And if you use Surface Water Operations (`SWO`)  in your project:
 
-> Boyce, S.E. and Ferguson, I.M., 2021, MODFLOW One-Water Hydrologic Flow Model (MF-OWHM) Conjunctive Use and Integrated Hydrologic Flow Modeling Software with Surface Water Operations, version 2.1.0: U.S. Geological Survey Software Release, https://doi.org/10.5066/P9P8I8GS
+> Boyce, S.E. and Ferguson, I.M., 2022, MODFLOW One-Water Hydrologic Flow Model (MF-OWHM) Conjunctive Use and Integrated Hydrologic Flow Modeling Software with Surface Water Operations, version 2.2.0: U.S. Geological Survey Software Release, https://doi.org/10.5066/P9P8I8GS
 
 ## Documentation Citation
 

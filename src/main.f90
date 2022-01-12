@@ -28,8 +28,8 @@ SUBROUTINE PRINT_MAIN_HEADER(IU)  ! Set to 6 for cmd prompt or use output_unit f
   CHARACTER(:),ALLOCATABLE:: VERSION_SWO                            !TR: 2017 09 13 CFP
   CHARACTER(:),ALLOCATABLE:: Revision
   !
-  VERSION_OWHM='2.1'                                 ! "Psyduck After Advil" 
-  Revision    ='1c'
+  VERSION_OWHM='2.2'                                 ! "Psyduck After Advil" 
+  Revision    ='0a'
   VERSION_MF  ='1.12'        
   VERSION_FMP ='4.1'       
   VERSION_SWR ='1.04'       
