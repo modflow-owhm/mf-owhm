@@ -21,7 +21,7 @@ C     ------------------------------------------------------------------
      6                     IUNITSTART,SPSTART,SPEND,NOCBC,RBUF,
      7                     INPUT_CHECK,BIN_REAL_KIND,HNEW_OLD,SPTIM,
      8                     BACKTRACKING, CBC_GLOBAL_UNIT, ALLOC_DDREF
-      USE GLOBAL,     ONLY:SUBLNK, UPLAY, UPLAY_IDX,
+      USE GLOBAL,     ONLY:NO_CONST_HEAD, SUBLNK, UPLAY, UPLAY_IDX,
      +                     WTABLE, WTABLE_OLD
       USE GLOBAL,     ONLY: SUPER_NAMES
       USE PARAMMODULE,ONLY:MXPAR,MXCLST,MXINST,ICLSUM,IPSUM,
@@ -173,7 +173,8 @@ C1------grids to be defined.
       !
       PDIFFPRT = 5                                                     ! IF PERCENT ERROR GOES ABOVE 5% THEN PRINT TO CMD PROMPT
       IF(IGRID == ONE)THEN
-        ALLOCATE(SUBLNK,INPUT_CHECK,BIN_REAL_KIND)
+        ALLOCATE(NO_CONST_HEAD, SUBLNK,INPUT_CHECK,BIN_REAL_KIND)
+        NO_CONST_HEAD = FALSE
         SUBLNK      = FALSE
         INPUT_CHECK = FALSE
         BIN_REAL_KIND = REAL32  !SINGLE PRECISION BINARY OUTPUT
@@ -456,6 +457,25 @@ C13-----READ PARAMETER VALUES FILE.
       IF(SUPER_NAMES_IN%IU /= Z) THEN
        CALL LOAD_SUPER_NAMES(LINE, SUPER_NAMES_IN%IU, IOUT, SUPER_NAMES)
       END IF
+      !
+      ! Check if there are constant heads
+      !
+      IF(NO_CONST_HEAD) NO_CONST_HEAD = IUNIT(16) == Z   ! FHB Package in use
+      IF(NO_CONST_HEAD) NO_CONST_HEAD = IUNIT(38) == Z   ! CHD Package in use
+      IF(NO_CONST_HEAD) THEN
+         LAY_LOOP: 
+     +   DO K=1, NLAY
+         DO I=1, NROW
+         DO J=1, NCOL
+         IF(IBOUND(J,I,K) < Z) THEN 
+                               NO_CONST_HEAD = FALSE
+                               EXIT LAY_LOOP
+         END IF
+         END DO
+         END DO
+         END DO LAY_LOOP
+      END IF
+         
 C
 C14-----SAVE POINTERS TO DATA AND RETURN.
       CALL SGWF2BAS7PSV(IGRID)

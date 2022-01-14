@@ -147,6 +147,11 @@ MONTHLY  -4   SS        # MONTHLY input with 4 time steps, and first stress peri
 
 ### `BAS` — Options Block — Improvements
 
+* `CONSTANT_HEAD_BUDGET_OPTIONAL`
+  * If present and there are no constant heads in the model (`IBOUND < 0`, `CHD`, or `FHB`), then the `'   CONSTANT HEAD'` array is not written to the CBC file. This reduces the CBC size by about 5%.
+  * ZoneBudget `v3.2` or newer is required for a CBC made with this option,  
+    &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; which is part of MF-OWHM `v2.1.1` or newer.
+
 - `PRINT_HEAD         SPTS  GENERIC_OUTPUT   [SIGFIG  NDIG]`  
      `PRINT_WATER_TABLE  SPTS   Generic_Output  [SIGFIG  NDIG]`  
      `PRINT_WATER_DEPTH  SPTS   Generic_Output  [SIGFIG  NDIG]`

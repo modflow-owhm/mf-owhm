@@ -56,7 +56,8 @@ MODULE GLOBAL
   INTEGER,                                   POINTER:: ITMUNI,LENUNI,IXSEC,ITRSS,INBAS
   INTEGER,                                   POINTER:: IFREFM,NODES,IOUT,MXITER,IRESTART
   INTEGER,                                   POINTER:: KPERSTART,KSTPSTART,IUNITSTART
-  LOGICAL,                                   POINTER:: SUBLNK                              !seb VARIABLE THAT INDICATES THAT SUBLINK IS ACTIVE. IT IS SET TO FALSE BY DEFAULT AND ALTERED BY SUBPACKAGE
+  LOGICAL,                                   POINTER:: NO_CONST_HEAD                       ! Set to false if there is CHD pack or IBOUND<0
+  LOGICAL,                                   POINTER:: SUBLNK                              ! VARIABLE THAT INDICATES THAT SUBLINK IS ACTIVE. IT IS SET TO FALSE BY DEFAULT AND ALTERED BY SUBPACKAGE
   LOGICAL,                                   POINTER:: INPUT_CHECK
   LOGICAL,                                   POINTER:: BACKTRACKING
   INTEGER,                                   POINTER:: BIN_REAL_KIND                      !KIND VALUE TO USE FOR ULT BINARY WRITERS --DEFAULT IS SNGL/32bit/4byte

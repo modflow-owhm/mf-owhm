@@ -1452,7 +1452,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
                           PRNT_RES, PRNT_RES_LIM, PRNT_RES_CUM, PRNT_RES_CUM_ARR,                                &
                           PRNT_CUM_HEAD_CHNG, CUM_HEAD_CHNG, CUM_HEAD_CHNG_E10,IBDOPT
   USE GLOBAL,       ONLY: NOCBC, CBC_GLOBAL_UNIT, BIN_REAL_KIND, IXSEC, IFREFM, NLAY, NROW, NCOL, NPER,  &
-                          SPEND, SPSTART, INPUT_CHECK, CMD_ITER_INFO
+                          SPEND, SPSTART, INPUT_CHECK, CMD_ITER_INFO, NO_CONST_HEAD
   USE PARAMMODULE,  ONLY: MXPAR,MXCLST,MXINST,PROPPRINT
   !
   USE GLOBAL,       ONLY: ITMUNI, NSTP, SPTIM, PERLEN
@@ -1517,7 +1517,8 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
          'PRINT_ITERATION_INFO', 'ITERATION_INFO', 'INTERATION_INFO',                                  &
          'SHIFT_STRT', 'SHIFT_START', 'SHIFTSTRT', 'SHIFTSTART',   'CUMULATIVE_HEAD_CHANGE',           &
          'SUPER_NAMES', 'SUPERNAMES',                                                                  &
-         'WATER_TABLE_DISTANCE_ABOVE_GSE_LIMIT', 'WATER_TABLE_ABOVE_GSE_PRINT')        
+         'WATER_TABLE_DISTANCE_ABOVE_GSE_LIMIT', 'WATER_TABLE_ABOVE_GSE_PRINT',                        &
+         'CONSTANT_HEAD_BUDGET_ALWAYS', 'CONSTANT_HEAD_BUDGET_OPTIONAL')        
          !
          HAS_OPT_LINE = TRUE
     CASE DEFAULT
@@ -1696,7 +1697,8 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
          'PRINT_ITERATION_INFO', 'ITERATION_INFO', 'INTERATION_INFO',                                  &
          'SHIFT_STRT', 'SHIFT_START', 'SHIFTSTRT', 'SHIFTSTART',   'CUMULATIVE_HEAD_CHANGE',           &
          'SUPER_NAMES', 'SUPERNAMES',                                                                  &
-         'WATER_TABLE_DISTANCE_ABOVE_GSE_LIMIT', 'WATER_TABLE_ABOVE_GSE_PRINT')        
+         'WATER_TABLE_DISTANCE_ABOVE_GSE_LIMIT', 'WATER_TABLE_ABOVE_GSE_PRINT',                        &
+         'CONSTANT_HEAD_BUDGET_ALWAYS', 'CONSTANT_HEAD_BUDGET_OPTIONAL')        
          !
          HAS_OPT_LINE = TRUE
          CALL WARNING_MESSAGE(TRIM(LINE),INBAS,IOUT,                                                                                            &
@@ -1911,6 +1913,11 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
                                 !
           CASE('NOSHOWPROGRESS','NO_SHOWPROGRESS','NO_SHOW_PROGRESS')  !Supress Pringint of "Solver Iter: IJ"
                                 CMD_ITER_INFO = Z
+                                !
+          CASE('CONSTANT_HEAD_BUDGET_ALWAYS')
+                                NO_CONST_HEAD = FALSE
+          CASE('CONSTANT_HEAD_BUDGET_OPTIONAL')
+                                NO_CONST_HEAD = TRUE
           CASE('FREE')
               IFREFM=1
               WRITE(IOUT,'(4x, A )')'THE FREE FORMAT OPTION HAS BEEN SELECTED'
