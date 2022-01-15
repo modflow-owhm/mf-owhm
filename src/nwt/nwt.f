@@ -1135,8 +1135,7 @@ C
       USE CONSTANTS, ONLY: Z, ONE, NEG, DZ, UNO, TRUE, FALSE
       USE GLOBAL, ONLY:Ncol, Nrow, Nlay, Ibound, Hcof, Rhs, Iout,botm,
      +                 LBOTM, HOLD, HNEW, DELR, DELC, ISSFLG, 
-     +                 BACKTRACKING, 
-     +                 HCloseBAS, RCloseL2BAS
+     +                 BACKTRACKING
       USE NUM2STR_INTERFACE,   ONLY: NUM2STR
       USE SET_ARRAY_INTERFACE, ONLY: SET_ARRAY
       USE GWFNWTMODULE
@@ -1348,8 +1347,6 @@ C--Update heads.
 !  Calculate maximum head change and residuals
 !  Write head and flux residuals
 !  Write iteration header
-      HCloseBAS   = ABS(Fheadsave)
-      RCloseL2BAS = RMS1
       IF ( IPRNWT.GT.0 ) THEN
         n = Numtrack/2
         if(N<10) N=10

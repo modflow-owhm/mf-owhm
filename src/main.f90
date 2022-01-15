@@ -29,7 +29,7 @@ SUBROUTINE PRINT_MAIN_HEADER(IU)  ! Set to 6 for cmd prompt or use output_unit f
   CHARACTER(:),ALLOCATABLE:: Revision
   !
   VERSION_OWHM='2.2'                                 ! "Psyduck After Advil" 
-  Revision    ='0a'
+  Revision    ='0b'
   VERSION_MF  ='1.12'        
   VERSION_FMP ='4.1'       
   VERSION_SWR ='1.04'       

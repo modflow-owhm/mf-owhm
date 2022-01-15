@@ -20,7 +20,8 @@ C     ------------------------------------------------------------------
      5                     DDREF,IRESTART,KPERSTART,KSTPSTART,
      6                     IUNITSTART,SPSTART,SPEND,NOCBC,RBUF,
      7                     INPUT_CHECK,BIN_REAL_KIND,HNEW_OLD,SPTIM,
-     8                     BACKTRACKING, CBC_GLOBAL_UNIT, ALLOC_DDREF
+     8                     BACKTRACKING, CBC_GLOBAL_UNIT, ALLOC_DDREF,
+     9                     RCloseBAS, HCloseBAS, RCloseL2BAS
       USE GLOBAL,     ONLY:NO_CONST_HEAD, SUBLNK, UPLAY, UPLAY_IDX,
      +                     WTABLE, WTABLE_OLD
       USE GLOBAL,     ONLY: SUPER_NAMES
@@ -140,6 +141,12 @@ C1------grids to be defined.
       ALLOCATE(PRINT_WTAB(1))
       ALLOCATE(PRINT_WDEP(1))
       !PRINT_HEAD(1)%EXTRA = ""  ! Allocate as empty to indicate option not in use
+      !
+      ALLOCATE(RCloseBAS, HCloseBAS, RCloseL2BAS)
+      !
+      RCloseBAS            = DZ
+      HCloseBAS            = DZ
+      RCloseL2BAS          = DZ
       !
       BAS_ADAMP            = inf_I
       BAS_ADAMP_TOL        = DZ
@@ -1014,7 +1021,10 @@ C     ------------------------------------------------------------------
       USE GLOBAL,      ONLY:NCOL,NROW,NLAY,HNEW,HNEW_OLD,IBOUND,
      +                      BOTM,LBOTM,AREA,SPTIM,GSE, !BACKTRACKING,
      +                      CELL_MASS_BALANCE, RELATIVE_MASS_ERROR,
-     +                      MAX_RELATIVE_VOL_ERROR, CELL_VOL_ERROR
+     +                      MAX_RELATIVE_VOL_ERROR, CELL_VOL_ERROR,
+     +                      RCloseBAS, HCloseBAS, RCloseL2BAS,
+     +                      CALCULATE_MAX_HEAD_CHANGE,
+     +                      CALCULATE_RESIDUAL_MASS_ERROR, IOUT
       USE GWFBASMODULE,ONLY:PRNT_CNVG,PRNT_CNVG_OUTER,PRNT_CNVG_NTERM,
      +                      PRNT_CNVG_LRC, PRNT_CNVG_DIF,
      +                      PRNT_FRES,PRNT_FRES_OUTER,PRNT_FRES_NTERM,
@@ -1070,26 +1080,6 @@ C     ------------------------------------------------------------------
        ELSE
          DAMPEN_START = FALSE
        END IF
-      END IF
-      !
-      !--------------------------------------------------------------------
-      !
-      IF(ICNVG==ONE .OR. KITER>=MXITER) THEN
-        IF( MAX_REL_VOL_ERROR_CNT < TEN) THEN                !Can only stop convergences at most 10 times in a row
-          !DTMP =0.01D0
-          !CALL RELATIVE_MASS_ERROR(DIF, DTMP)
-          !
-          CALL MAX_RELATIVE_VOL_ERROR(DIF)
-          !WRITE(*,'(I4,F12.8)') Kiter, DIF
-          !
-          IF(DIF > MAX_REL_VOL_ERROR) THEN
-              ICNVG = Z
-              MAX_REL_VOL_INVOKED   = TRUE
-              MAX_REL_VOL_ERROR_CNT = MAX_REL_VOL_ERROR_CNT + ONE
-          END IF
-        END IF
-      ELSE
-              MAX_REL_VOL_ERROR_CNT = ONE
       END IF
       !
       !--------------------------------------------------------------------
@@ -1185,6 +1175,40 @@ C     ------------------------------------------------------------------
      +                          KPER, KSTP, ABOVE_GSE_PRT%IU, DT)
         !
       END IF
+      END IF
+      !
+      !--------------------------------------------------------------------
+      IF(ICNVG==ONE .OR. KITER>=MXITER) CALL MAX_RELATIVE_VOL_ERROR(DIF)
+      !--------------------------------------------------------------------
+      !
+      IF(ICNVG==ONE .OR. KITER>=MXITER) THEN
+        IF( MAX_REL_VOL_ERROR_CNT < TEN) THEN                ! Can only stop convergences at most 10 times in a row
+          !
+          !CALL MAX_RELATIVE_VOL_ERROR(DIF)
+          !
+          IF(DIF > MAX_REL_VOL_ERROR) THEN
+              ICNVG = Z
+              MAX_REL_VOL_INVOKED   = TRUE
+              MAX_REL_VOL_ERROR_CNT = MAX_REL_VOL_ERROR_CNT + ONE
+          END IF
+        END IF
+      ELSE
+              MAX_REL_VOL_ERROR_CNT = ONE
+      END IF
+      !
+      !--------------------------------------------------------------------
+      ! 
+      CALL CALCULATE_MAX_HEAD_CHANGE(HCloseBAS)
+      !
+      CALL CALCULATE_RESIDUAL_MASS_ERROR(RCloseBAS, RCloseL2BAS)
+      !
+      IF(ICNVG==ONE .OR. KITER>=MXITER) THEN 
+        WRITE(IOUT,'(/,/,A)')'Solver Convergence Information:'
+        WRITE(IOUT,'(25x,A, 2x,A)') "     HClose:", NUM2STR(HCloseBAS)
+        WRITE(IOUT,'(25x,A, 2x,A)') "     RClose:", NUM2STR(RCloseBAS)
+        WRITE(IOUT,'(25x,A, 2x,A)') "  L2-RClose:", NUM2STR(RCloseL2BAS)
+        WRITE(IOUT,'(25x,A, 2x,A)') "Rel-Vol-Err:", NUM2STR(DIF)
+        WRITE(IOUT,*)
       END IF
       !
       !--------------------------------------------------------------------
@@ -5699,6 +5723,7 @@ C
           !
           NGRIDS        = ONE
           CMD_ITER_INFO = Z
+          RCloseBAS     = DZ
           HCloseBAS     = DZ
           RCloseL2BAS   = DZ
           GW_SOLVER     = BLNK
@@ -5789,6 +5814,9 @@ C
       DEALLOCATE( GLOBALDAT(IGRID)% SPEND           , STAT=J)
       DEALLOCATE( GLOBALDAT(IGRID)% NOCBC           , STAT=J)
       DEALLOCATE( GLOBALDAT(IGRID)% CBC_GLOBAL_UNIT , STAT=J)
+      DEALLOCATE( GLOBALDAT(IGRID)% RCloseBAS       , STAT=J)
+      DEALLOCATE( GLOBALDAT(IGRID)% HCloseBAS       , STAT=J)
+      DEALLOCATE( GLOBALDAT(IGRID)% RCloseL2BAS     , STAT=J)
       !
       ! Nullify LGR Data Types
       !
@@ -5850,6 +5878,9 @@ C
       NULLIFY( GLOBALDAT(IGRID)% SPEND           )
       NULLIFY( GLOBALDAT(IGRID)% NOCBC           )
       NULLIFY( GLOBALDAT(IGRID)% CBC_GLOBAL_UNIT )
+      NULLIFY( GLOBALDAT(IGRID)% RCloseBAS       )
+      NULLIFY( GLOBALDAT(IGRID)% HCloseBAS       )
+      NULLIFY( GLOBALDAT(IGRID)% RCloseL2BAS     )
       !
       ! NULLIFY local pointers that are no longer used
       !
@@ -5912,6 +5943,9 @@ C
          NULLIFY( SPEND           )
          NULLIFY( NOCBC           )
          NULLIFY( CBC_GLOBAL_UNIT )
+         NULLIFY( RCloseBAS       )
+         NULLIFY( HCloseBAS       )
+         NULLIFY( RCloseL2BAS     )
       END IF
       !
       ! Deallocate the BAS Module Variables -------------------------------------------
@@ -6349,6 +6383,9 @@ C
       SPEND           => GLOBALDAT(IGRID)% SPEND
       NOCBC           => GLOBALDAT(IGRID)% NOCBC
       CBC_GLOBAL_UNIT => GLOBALDAT(IGRID)% CBC_GLOBAL_UNIT
+      RCloseBAS       => GLOBALDAT(IGRID)% RCloseBAS 
+      HCloseBAS       => GLOBALDAT(IGRID)% HCloseBAS 
+      RCloseL2BAS     => GLOBALDAT(IGRID)% RCloseL2BAS
       !
       ! Setup Pointers for the BAS Module Variables -------------------------------------------
       !
@@ -6539,6 +6576,9 @@ C  Save global data for a grid.
       GLOBALDAT(IGRID)% SPEND           => SPEND
       GLOBALDAT(IGRID)% NOCBC           => NOCBC
       GLOBALDAT(IGRID)% CBC_GLOBAL_UNIT => CBC_GLOBAL_UNIT
+      GLOBALDAT(IGRID)% RCloseBAS       => RCloseBAS 
+      GLOBALDAT(IGRID)% HCloseBAS       => HCloseBAS 
+      GLOBALDAT(IGRID)% RCloseL2BAS     => RCloseL2BAS
       !
       ! Setup Pointers for the BAS Module Variables -------------------------------------------
       !
