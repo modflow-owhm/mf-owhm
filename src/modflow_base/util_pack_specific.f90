@@ -1,16 +1,16 @@
 !
-! CODE DEVELOPED BY SCOTT E BOYCE 
+! CODE DEVELOPED BY SCOTT E BOYCE
 !                   CONTACT <seboyce@usgs.gov> or <Boyce@engineer.com>
 !
 ! MODULE LISTING:
-! 
+!
 !   BAS_UTIL
-! 
+!
 !   BUDGET_DATEBASE_WRITER
-! 
+!
 !   OWHM_HEADER_INTERFACE
-! 
-! 
+!
+!
 MODULE BAS_UTIL
   !
   !  GET_LOWEST_LAYER(IR,IC,IBOUND) RESULT(IL)
@@ -18,7 +18,7 @@ MODULE BAS_UTIL
   !  CVRT2DYEAR(ITMUNI,YEARTYPE)
   !  CHECK_FOR_VALID_DIMENSIONS(DIMTOL,IOUT,NROW,NCOL,NLAY,IBOUND,LBOTM,BOTM,DELR,DELC)
   !  DECIMAL_YEAR(DYEAR,DELT,ITMUNI,USE_LEAP)
-  !  DELT_TO_DAY(DELT,ITMUNI) RESULT(DAY)      
+  !  DELT_TO_DAY(DELT,ITMUNI) RESULT(DAY)
   !  GET_NAME_AND_LGR_CHECK(ILGR,NGRIDS,FNAME)
   !  OPEN_NAME_FILE(NAM_FILE,INAM,INFILE)
   !
@@ -51,7 +51,7 @@ MODULE BAS_UTIL
     INTEGER:: I
     !
     IL = Z
-    DO I = SIZE(IBOUND,THREE), ONE, NEG 
+    DO I = SIZE(IBOUND,THREE), ONE, NEG
         IF(IBOUND(IC,IR,I).NE.Z) THEN
             IL = I
             EXIT
@@ -69,7 +69,7 @@ MODULE BAS_UTIL
   !!!  INTEGER:: I
   !!!  !
   !!!  IL = Z
-  !!!  DO I = SIZE(IBOUND,THREE), ONE, NEG 
+  !!!  DO I = SIZE(IBOUND,THREE), ONE, NEG
   !!!      IF(IBOUND(IC,IR,I).NE.Z) THEN
   !!!          IL = I
   !!!          EXIT
@@ -125,7 +125,7 @@ MODULE BAS_UTIL
   !
   !-----VERSION 1.0 15FEBRUARY2006 GETNAMFILLGR
   !
-  SUBROUTINE GETNAMFILLGR(INLGR,FNAME,IGRID)   ! INLGR = LGR unit number 
+  SUBROUTINE GETNAMFILLGR(INLGR,FNAME,IGRID)   ! INLGR = LGR unit number
     ! ******************************************************************
     ! READ NAMES OF THE CORRESPONDING NAME FILES FROM LGR CONTROL FILE
     ! ******************************************************************
@@ -145,7 +145,7 @@ MODULE BAS_UTIL
        CALL READ_TO_DATA(LINE,INLGR,0)  !LGR FLAG
        CALL READ_TO_DATA(LINE,INLGR,0)  !NGRID SPEC
     END IF
-    !      
+    !
     CALL READ_TO_DATA(LINE,INLGR,0)     !NAME FILE NAME
     !
     LLOC=ONE
@@ -160,7 +160,7 @@ MODULE BAS_UTIL
   SUBROUTINE OPEN_NAME_FILE(NAM_FILE,INAM,INFILE)
     CHARACTER(*), INTENT(IN   ):: NAM_FILE  ! File location to open
     INTEGER,      INTENT(  OUT):: INAM      ! Name File Unit
-    INTEGER,      INTENT(IN   ):: INFILE    ! File unit of file that read NAM_FILE 
+    INTEGER,      INTENT(IN   ):: INFILE    ! File unit of file that read NAM_FILE
     !
     CHARACTER(LEN_TRIM(NAM_FILE)+6):: FNAME  !ADDED SPACE IS NEEDED FOR POTENTIAL OF ADDING .nam and 1 space for URWORD
     INTEGER:: ISTOP, ISTART, LLOC
@@ -172,7 +172,7 @@ MODULE BAS_UTIL
     CALL PARSE_WORD(FNAME,LLOC,ISTART,ISTOP,EOL=EXIST)
     !
     IF(FNAME(ISTART:ISTOP)==BLNK .OR. EXIST) CALL STOP_ERROR(LINE=NAM_FILE,INFILE=INFILE, MSG='ERROR OPENING NAME FILE OR LGR FILE THAT WAS SPECIFIED IN THE COMMAND PROMPT.'//NL//'NAME APPEARS TO BE BLANK, PLEASE SPECIFY THE NAME FILE AFTER THE THE NAME OF OneWater EXECUTABLE AT THE COMMAND PROMPT (e.g "OneWater.exe MyName.nam")')
-    !    
+    !
     INQUIRE(FILE=FNAME(ISTART:ISTOP), EXIST=EXIST)
     ! 'FILE.nam'
     !
@@ -208,15 +208,15 @@ MODULE BAS_UTIL
     INTEGER::YEAR
     LOGICAL::LEAPYR
     DOUBLE PRECISION:: B
-    
+
     YEAR=INT(DECYEAR)
     FRAC=DECYEAR - DBLE(YEAR)
     LEAPYR=FALSE
     B=0.00068  !yr = ~6 hours  --Correction factor, if new month is six hours away, print out that one.
-    
+
     IF( (MOD(YEAR,4).EQ.Z .AND. MOD(YEAR,100).NE.Z)  .OR.  MOD(YEAR,400).EQ.Z ) LEAPYR=TRUE  !LEAP YEAR IF YEAR IS DIVISABLE BY 4 AND NOT 100 OR IF YEAR IS DIVISABLE BY 400
-       
-!ASSUMES 28 days in feb      
+
+!ASSUMES 28 days in feb
     IF(LEAPYR)THEN
                   IF(FRAC < 0.084699454D0 - B)THEN
                       MONTH='January'
@@ -317,7 +317,7 @@ MODULE BAS_UTIL
                 R = NUM2STR(IR)
                 BAD_DELC=BAD_DELC//VAL//R//NL
             END IF
-            IF(DELC(IR) .LE. 0.0) KILLPROG=TRUE 
+            IF(DELC(IR) .LE. 0.0) KILLPROG=TRUE
         END DO
         !
         IF (BAD_DELC .NE. NL) THEN
@@ -332,7 +332,7 @@ MODULE BAS_UTIL
                 C = NUM2STR(IC)
                 BAD_DELR=BAD_DELR//VAL//C//NL
              END IF
-             IF(DELR(IC) .LE. 0.0) KILLPROG=TRUE 
+             IF(DELR(IC) .LE. 0.0) KILLPROG=TRUE
              !
         END DO
         !
@@ -341,7 +341,7 @@ MODULE BAS_UTIL
             BAD_DELR = NL//'A DELR HAS A LENGTH 5 ORDERS OF MAGNITUDE SMALLER THAN THE LARGEST DELR'//NL//'THE FOLLOWING ARE THE ROWS WITH THIS DELR'//BLN//'DELR(COL)       COL'//BAD_DELR
         END IF
         !
-        DO IL = ONE, NLAY 
+        DO IL = ONE, NLAY
         MINTHCK=DIMTOL*MAXVAL( BOTM(:,:,LBOTM(IL)-1) - BOTM(:,:,LBOTM(IL)), MASK=IBOUND(:,:,IL).NE.Z )
         DO IR = ONE, NROW
         DO IC = ONE, NCOL
@@ -481,7 +481,7 @@ MODULE BAS_UTIL
   !          END IF
   !          WRITE(IOUT,'(/ 5A)') 'WARNING: EXTREMELY SMALL DELC WITH LENGTH OF ', NUM2STR(DELC(IR)),', LOCATED AT ROW: ',NUM2STR(IR), '  (THIS IS 5 ORDERS OF MAGNITUDE SMALLER THAN THE LARGEST DELC)'
   !      END IF
-  !      IF(DELC(IR) .LE. 0.0) KILLPROG=TRUE 
+  !      IF(DELC(IR) .LE. 0.0) KILLPROG=TRUE
   !  END DO
   !  DO IC=ONE,NCOL
   !      IF(ALL(IBOUND(IC,:,:).EQ.Z)) CYCLE
@@ -492,7 +492,7 @@ MODULE BAS_UTIL
   !          END IF
   !          WRITE(IOUT,'(/ 5A)') 'WARNING: EXTREMELY SMALL DELR WIDTH LENGTH OF ', NUM2STR(DELR(IC)),', LOCATED AT COL: ',NUM2STR(IC), '  (THIS IS 5 ORDERS OF MAGNITUDE SMALLER THAN THE LARGEST DELR)'
   !       END IF
-  !       IF(DELR(IC) .LE. 0.0) KILLPROG=TRUE 
+  !       IF(DELR(IC) .LE. 0.0) KILLPROG=TRUE
   !       !
   !  END DO
   !  !
@@ -541,20 +541,20 @@ MODULE BAS_UTIL
                          CASE (3)                                !HOURS
                              DAY = DELT / 24D0
                          CASE (5)                                !YEARS  --NO WAY TO CORRECT FOR LEAP YEARS FOR THIS CASE
-                             DAY = DELT * 365.25D0                                  
+                             DAY = DELT * 365.25D0
                        END SELECT
   TYPE IS(REAL(REAL32))
                        SELECT CASE (ITMUNI)
                          CASE (0, 4)                             !DAYS
-                             DAY = DELT                          
+                             DAY = DELT
                          CASE (1)                                !SECONDS
-                             DAY = DELT * 1.15740740740741E-05   
+                             DAY = DELT * 1.15740740740741E-05
                          CASE (2)                                !MINUTES
-                             DAY = DELT * 6.94444444444444E-04   
+                             DAY = DELT * 6.94444444444444E-04
                          CASE (3)                                !HOURS
-                             DAY = DELT / 24E0                   
+                             DAY = DELT / 24E0
                          CASE (5)                                !YEARS  --NO WAY TO CORRECT FOR LEAP YEARS FOR THIS CASE
-                             DAY = DELT * 365.25                                    
+                             DAY = DELT * 365.25
                        END SELECT
   END SELECT
   !
@@ -587,7 +587,7 @@ MODULE BAS_UTIL
 !    END INTERFACE
     !
     ! YEAR_TRANSITION = 1 NO  LEAP AND NO TRANSITION TO NEW YEAR
-    !                   2 YES LEAP AND NO TRANSITION TO NEW YEAR 
+    !                   2 YES LEAP AND NO TRANSITION TO NEW YEAR
     !                   3 TRANSITION FROM NO LEAP TO LEAP YEAR
     !                   4 TRANSITION FROM LEAP YEAR TO NO LEAP
     !IF TIME STEP IS IN YEARS THEN LEAP YEAR DOES NOT MATTER AND RETURN
@@ -667,9 +667,9 @@ MODULE BAS_UTIL
           DYR_NEW = DBLE_YR_OLD + (DELT + DELTP)*CVRT2DYEAR(ITMUNI,2) !NOTE DELT<0 AND (DELT + DELTP) IS IN A LEAP YEAR
           !
     END SELECT
-    
+
     DYEAR=DYR_NEW
-    
+
   END SUBROUTINE
   !
   !#########################################################################################################################
@@ -678,7 +678,7 @@ MODULE BAS_UTIL
     INTEGER,INTENT(IN)::ITMUNI,YEARTYPE
     DOUBLE PRECISION::CVRT2DYEAR
     !
-    ! YEARTYPE =  0  365.2425 days to a year 
+    ! YEARTYPE =  0  365.2425 days to a year
     !             1  365     days to a year (NONLEAP YEAR)
     !             2  366     days to a year (   LEAP YEAR)
     !
@@ -698,7 +698,7 @@ MODULE BAS_UTIL
        END SELECT
        !
     ELSEIF(YEARTYPE .EQ. 1) THEN  ! 365 days to year
-       !  	   		
+       !
        SELECT CASE (ITMUNI)
          CASE (0, 4)                                                  !DAYS
              CVRT2DYEAR = 2.739726027397D-03
@@ -910,7 +910,7 @@ END MODULE
 !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-!  
+!
 
 !!!MODULE PACKAGE_LISTING_INTERFACE
 !!!    USE GENERIC_OUTPUT_FILE_INSTRUCTION, ONLY: GENERIC_OUTPUT_FILE
@@ -939,7 +939,7 @@ END MODULE
 !!!    !
 !!!    POUT%PRINT = TRUE
 !!!    POUT%IOUT = IOUT
-!!!    POUT%IU   = IOUT 
+!!!    POUT%IU   = IOUT
 !!!    !
 !!!    DIM = LEN_TRIM(LN)
 !!!    LLOC = ONE
@@ -965,7 +965,7 @@ END MODULE
 !!!    END DO
 !!!    !
 !!!  END SUBROUTINE
-!!!  !    
+!!!  !
 !!!END MODULE
 !
 !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -1102,17 +1102,17 @@ MODULE BUDGET_DATEBASE_WRITER
         !
     END IF
   END SUBROUTINE
-    
+
 END MODULE
 !
 !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-!  
+!
 MODULE OWHM_HEADER_INTERFACE
-  USE CONSTANTS, ONLY:NL   
+  USE CONSTANTS, ONLY:NL
   IMPLICIT NONE
-  PRIVATE:: NL   
+  PRIVATE:: NL
   !
   CONTAINS
   !
@@ -1129,7 +1129,7 @@ MODULE OWHM_HEADER_INTERFACE
          '   MM         MM   MM    M M   MM                     LM MM    NM MM   MM      MM     M      M         MM    MM'   //NL//  &
          '    MM       NM    MM     MM   MM                      M M      M M   MN        MM    M      M         MM     MM'  //NL//  &
          '     MMMMMMMMN     MM      M   MMMMMMMM                7MM      7MM  MN          MM   M      MMMMMMMM  MM      MM'
-  
+
   !   LINE=                                                                                                              &
   !        '      MMMMMMM      MM      MMM     MM   MM       MM   MMMI      IMMM                  MMMMMD'         //NL//  &
   !        '    MMM     MMM    LM     DMMM     MM   MM       MM   MMMM      MMMM                MM/   LMM'        //NL//  &
@@ -1192,7 +1192,7 @@ MODULE OWHM_HEADER_INTERFACE
           '                                          █░░░░░▀▄▄▀▀▄▄▀▀▄▄▄█░░░░░░░░░█'//NL//  &
           '                                          █░░░░░░░░░░░░░░░░░░░░░░░░░░░█'//NL//  &
           '                                          █████████████████████████████'//NL
-            
+
   END SUBROUTINE
   !
 END MODULE
@@ -1200,7 +1200,7 @@ END MODULE
 !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-!  
+!
 !MODULE ADAPTIVE_DAMPING
 !   TYPE ADAP_TYPE
 !       INTEGER:: NHEAD
@@ -1208,16 +1208,16 @@ END MODULE
 !   !
 !   TYPE(ADAP_TYPE):: ADAP
 !   !
-!   
+!
 !END MODULE
 !
 !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-!  
+!
 !!!MODULE DATE_STEPS_INTERFACE
 !!!  USE CONSTANTS
-!!!  USE DATE_OPERATOR_INSTRUCTION  
+!!!  USE DATE_OPERATOR_INSTRUCTION
 !!!  IMPLICIT NONE
 !!!  !
 !!!  TYPE DATE_TS
@@ -1232,8 +1232,8 @@ END MODULE
 !!!      !
 !!!      CONTAINS
 !!!      !
-!!!      PROCEDURE, PASS(DTS):: INIT     => INITIALIZE_DATE_STEPS!(N) 
-!!!      PROCEDURE, PASS(DTS):: ALLOC_TS => ALLOCATE_TIMESTEP_DATE_STEPS!(N,M) 
+!!!      PROCEDURE, PASS(DTS):: INIT     => INITIALIZE_DATE_STEPS!(N)
+!!!      PROCEDURE, PASS(DTS):: ALLOC_TS => ALLOCATE_TIMESTEP_DATE_STEPS!(N,M)
 !!!      PROCEDURE, PASS(DTS):: SET      => SET_TIMESTEP_DATE_STEPS!(N,M,DATE)
 !!!      PROCEDURE, PASS(DTS):: DESTROY  => DESTROY_DATE_STEPS
 !!!  END TYPE
@@ -1301,7 +1301,7 @@ MODULE LOAD_SUPER_NAMES_INTERFACE!, ONLY: LOAD_SUPER_NAMES
   USE GENERIC_OPEN_INTERFACE,   ONLY: UTF8_BOM_OFFSET_REWIND
   USE FILE_IO_INTERFACE,        ONLY: READ_TO_DATA
   USE PARSE_WORD_INTERFACE,     ONLY: PARSE_WORD_UP
-  USE STRINGS,                  ONLY: GET_INTEGER             
+  USE STRINGS,                  ONLY: GET_INTEGER
   USE NAME_ID_INTERFACE,        ONLY: NAME_ID
   USE WARNING_TYPE_INSTRUCTION, ONLY: WARNING_TYPE
   IMPLICIT NONE
@@ -1313,7 +1313,7 @@ MODULE LOAD_SUPER_NAMES_INTERFACE!, ONLY: LOAD_SUPER_NAMES
   CONTAINS
   !
   SUBROUTINE LOAD_SUPER_NAMES(LINE, IFIL, IOUT, SN)
-    CHARACTER(*),                            INTENT(INOUT):: LINE 
+    CHARACTER(*),                            INTENT(INOUT):: LINE
     INTEGER,                                 INTENT(IN   ):: IFIL, IOUT
     TYPE(NAME_ID), DIMENSION(:), CONTIGUOUS, INTENT(INOUT):: SN
     !
@@ -1424,9 +1424,9 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
   USE GENERIC_INPUT_FILE_INSTRUCTION,   ONLY: GENERIC_INPUT_FILE
   USE GENERIC_OUTPUT_FILE_INSTRUCTION,  ONLY: GENERIC_OUTPUT_FILE
   USE GENERIC_BLOCK_READER_INSTRUCTION, ONLY: GENERIC_BLOCK_READER
+  USE FILE_IO_INTERFACE,                ONLY: READ_TO_DATA, COMMENT_INDEX
   USE IS_ROUTINES,                      ONLY: IS_INTEGER
   USE ERROR_INTERFACE,                  ONLY: STOP_ERROR, WARNING_MESSAGE
-  USE FILE_IO_INTERFACE,                ONLY: READ_TO_DATA, COMMENT_INDEX
   USE PARSE_WORD_INTERFACE,             ONLY: PARSE_WORD, PARSE_WORD_UP, FIND_NONBLANK
   USE STRINGS,                          ONLY: GET_WORD, GET_INTEGER, GET_NUMBER, GET_DATE
   USE NUM2STR_INTERFACE,                ONLY: NUM2STR
@@ -1462,7 +1462,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
   PUBLIC:: GET_BAS_OPTIONS, GET_BAS_START_DATE_OPTION
   !
   CONTAINS
-  !  
+  !
   SUBROUTINE GET_BAS_START_DATE_OPTION(LINE, INBAS, IOUT, STARTING_DATE)
     CHARACTER(*),        INTENT(INOUT):: LINE
     INTEGER,             INTENT(IN   ):: INBAS, IOUT
@@ -1490,7 +1490,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
     CASE('BEGIN')
                                                       CONTINUE
                                                     ! SKIP_OPT_LINE = FALSE <-- IMPLIED
-                                                    ! HAS_OPT_LINE  = FALSE 
+                                                    ! HAS_OPT_LINE  = FALSE
     CASE('INTERNAL','EXTERNAL','OPEN/CLOSE','CONSTANT')
                                                       SKIP_OPT_LINE = TRUE
                                                       HAS_OPT_LINE  = TRUE
@@ -1518,7 +1518,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
          'SHIFT_STRT', 'SHIFT_START', 'SHIFTSTRT', 'SHIFTSTART',   'CUMULATIVE_HEAD_CHANGE',           &
          'SUPER_NAMES', 'SUPERNAMES',                                                                  &
          'WATER_TABLE_DISTANCE_ABOVE_GSE_LIMIT', 'WATER_TABLE_ABOVE_GSE_PRINT',                        &
-         'CONSTANT_HEAD_BUDGET_ALWAYS', 'CONSTANT_HEAD_BUDGET_OPTIONAL')        
+         'CONSTANT_HEAD_BUDGET_ALWAYS', 'CONSTANT_HEAD_BUDGET_OPTIONAL')
          !
          HAS_OPT_LINE = TRUE
     CASE DEFAULT
@@ -1621,7 +1621,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
     REWIND(INBAS)  ! Only scanned to check for date- rewind to read full options later
     !
   END SUBROUTINE
-  !  
+  !
   SUBROUTINE GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHFLG, IPRTIM, MXBUD, HSHIFT, WARN_DIM, USE_PAUSE, TIME_INFO, SUPER_NAMES_IN, STARTING_DATE)
     CHARACTER(*),                    INTENT(INOUT):: LINE
     INTEGER,                         INTENT(IN   ):: INBAS, IOUT
@@ -1633,7 +1633,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
     TYPE(DATE_OPERATOR),             INTENT(INOUT):: STARTING_DATE
     !
     INTEGER:: LLOC, ISTART, ISTOP
-    INTEGER:: I, J, K, N, II, JJ, DIM
+    INTEGER:: I, J, K, N, II, JJ, DIM, IFASTFORWARD
     LOGICAL:: SKIP_OPT_LINE, HAS_OPT_LINE, NO_OPT_LINE, FOUND_BEGIN, NO_CONVERGENCE_STOP
     CHARACTER(32):: KEY
     TYPE(GENERIC_BLOCK_READER):: BL
@@ -1650,6 +1650,8 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
     CALL PRINT_HEAD_LIST%INIT()
     CALL PRINT_WTAB_LIST%INIT()
     CALL PRINT_WDEP_LIST%INIT()
+    !
+    IFASTFORWARD = Z
     !
     NO_CONVERGENCE_STOP = FALSE
     !
@@ -1670,7 +1672,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
     CASE('BEGIN')
                                                       CONTINUE
                                                     ! SKIP_OPT_LINE = FALSE <-- IMPLIED
-                                                    ! HAS_OPT_LINE  = FALSE 
+                                                    ! HAS_OPT_LINE  = FALSE
     CASE('INTERNAL','EXTERNAL','OPEN/CLOSE','CONSTANT')
                                                       SKIP_OPT_LINE = TRUE
                                                       HAS_OPT_LINE  = TRUE
@@ -1698,7 +1700,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
          'SHIFT_STRT', 'SHIFT_START', 'SHIFTSTRT', 'SHIFTSTART',   'CUMULATIVE_HEAD_CHANGE',           &
          'SUPER_NAMES', 'SUPERNAMES',                                                                  &
          'WATER_TABLE_DISTANCE_ABOVE_GSE_LIMIT', 'WATER_TABLE_ABOVE_GSE_PRINT',                        &
-         'CONSTANT_HEAD_BUDGET_ALWAYS', 'CONSTANT_HEAD_BUDGET_OPTIONAL')        
+         'CONSTANT_HEAD_BUDGET_ALWAYS', 'CONSTANT_HEAD_BUDGET_OPTIONAL')
          !
          HAS_OPT_LINE = TRUE
          CALL WARNING_MESSAGE(TRIM(LINE),INBAS,IOUT,                                                                                            &
@@ -1723,7 +1725,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
                           '             - Note that "OPTIONS BLOCK" maybe empty or entirely not present,'//NL// &
                           '               nor is it required to specify an "OPTIONS LINE"'//BLN// &
                           '             - DO NOT specify both an "OPTIONS BLOCK" and "OPTIONS LINE" at the same time.' )
-    
+
     CASE DEFAULT
          IF( IS_INTEGER(KEY) ) THEN  !Think it found U2DREL without a recognized word, so not using free format and instead using a control record (the original way)
                                SKIP_OPT_LINE= TRUE
@@ -1791,7 +1793,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
           SELECT CASE (KEY)
           CASE('STARTDATE','START_DATE','DATE_START','DATESTART' )
              !
-             WRITE(IOUT,'(1x, A, 1x, A)') 'FOUND OPTION:', TRIM(KEY)
+             WRITE(IOUT,'(1x, A, 1x, A)') 'Found Option:', TRIM(KEY)
              !
              CALL GET_DATE(BL%LINE,LLOC,ISTART,ISTOP,IOUT,INBAS,DATE,MSG='NOSTOP')
              !
@@ -1815,7 +1817,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
                                              'MF-OWHM will assume that the existing starting date is correct'//NL//  &
                                              'and ignore the starting date specified in teh bas options.',           &
                                              CMD_PRINT=TRUE                                                          )
-                 
+
              END IF
              CALL DATE%DESTROY()
              !
@@ -1825,12 +1827,11 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
                              BL%LINE(II:ISTOP) = BLNK  ! Clear out opt line
              END IF
              !
-             WRITE(IOUT,'(4x, A, 1x, A, /, 5x, 2A,/)') 'SIMULATION STARTING DATE SET TO', STARTING_DATE%PRETTYPRINT(" AT "), &
-                                                       'WHICH IS A STARTING DECIMAL YEAR', STARTING_DATE%STR_DYEAR(8)
+             WRITE(IOUT,'(17x, 2A, 5x, 3A,/)') 'Simulation starting date set to ', STARTING_DATE%PRETTYPRINT(" AT "), '(decimal year: ', STARTING_DATE%STR_DYEAR(8),')'
              !
           CASE('LEAPYEARS','LEAPYEAR', 'STARTTIME')
              !
-             WRITE(IOUT,'(1x, A, 1x, A)') 'FOUND OPTION:', TRIM(KEY)
+             WRITE(IOUT,'(1x, A, 1x, A)') 'Found Option:', TRIM(KEY)
              !
              IF(KEY == 'LEAPYEARS' .OR. KEY == 'LEAPYEAR') USE_LEAP_YR=TRUE
              !
@@ -1852,10 +1853,9 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
              END IF
              !
              IF(USE_LEAP_YR) THEN
-               WRITE(IOUT,'(4x, A, 1x, A, /, 5x, 2A,/)') 'SIMULATION STARTING DATE SET TO', STARTING_DATE%PRETTYPRINT(" AT "), &
-                                                         'WHICH IS A STARTING DECIMAL YEAR', STARTING_DATE%STR_DYEAR(8)
+               WRITE(IOUT,'(17x, 2A, 5x, 3A,/)'  ) 'Simulation starting date set to ', STARTING_DATE%PRETTYPRINT(" AT "), '(decimal year: ', STARTING_DATE%STR_DYEAR(8),')'
              ELSE
-               WRITE(IOUT,'(4x, A, 1x, F13.8,/)'       ) 'SIMULATION STARTING DECIMAL YEAR (WITHOUT INCLUDING LEAP YEARS) SET TO', REALTIM
+               WRITE(IOUT,'(17x, A, 1x, F13.8,/)') 'Simulation starting decimal year (without including leap years) set to', REALTIM
              END IF
           END SELECT
           !
@@ -1892,10 +1892,10 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
           END IF
           !
           SELECT CASE (KEY)
-          CASE('STARTDATE','START_DATE','DATE_START','DATESTART', 'LEAPYEARS','LEAPYEAR', 'STARTTIME','PRINT_HEAD')
+          CASE('STARTDATE','START_DATE','DATE_START','DATESTART', 'LEAPYEARS','LEAPYEAR', 'STARTTIME')
               CONTINUE  !Previously loaded
           CASE DEFAULT
-               WRITE(IOUT,'(1x, A, 1x, A)') 'FOUND OPTION:', TRIM(KEY)
+               WRITE(IOUT,'(1x, A, 1x, A)') 'Found Option:', TRIM(KEY)
           END SELECT
           !
           SELECT CASE (KEY)
@@ -1920,12 +1920,12 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
                                 NO_CONST_HEAD = TRUE
           CASE('FREE')
               IFREFM=1
-              WRITE(IOUT,'(4x, A )')'THE FREE FORMAT OPTION HAS BEEN SELECTED'
-              WRITE(IOUT,'(9x, A/)')'-NOTE THIS NOW IS THE DEFAULT AND NOT NECESSARY.'
+              WRITE(IOUT,'(17x, A)')'THE FREE FORMAT OPTION HAS BEEN SELECTED'
+              WRITE(IOUT,'(20x, A)')'-NOTE THIS NOW IS THE DEFAULT AND NOT NECESSARY.'
               !
           CASE('NOFREE')
               IFREFM=Z
-              WRITE(IOUT,'(4x, A/)')' THE FREE FORMAT OPTION IS DISABLED (INPUT USES FIXED FORMATTED READ)'
+              WRITE(IOUT,'(17x, A)')'THE FREE FORMAT OPTION IS DISABLED (INPUT USES FIXED FORMATTED READ)'
               !
           CASE('PRINTTIME','PRINT_TIME')
               IPRTIM=1
@@ -1944,7 +1944,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
                                  'This is required to indicate the frequency to write the heads')
               END IF
               !
-              WRITE(IOUT,'(4x, A/)')' SAVE_HEAD '//BL%LINE(ISTART:ISTOP)//' OPTION FOUND'
+              WRITE(IOUT,'(17x, A)') 'Head results are written for '//BL%LINE(ISTART:ISTOP)//' to '//TRIM(ADJUSTL(BL%LINE(ISTOP+1:)))
               !
               CALL SAVE_HEAD%OPEN(BL%LINE,LLOC,BL%IOUT,BL%IU,NO_INTERNAL=TRUE)
               !
@@ -1959,6 +1959,8 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
               END IF
               !
           CASE('PRINT_HEAD') ! OUTER_START NTERM FILE
+              !
+              WRITE(IOUT,'(17x, A)') TRIM(ADJUSTL(BL%LINE(LLOC:)))
               !
               CALL PRINT_HEAD_LIST%ADD(ADJUSTL(BL%LINE(LLOC:)))
               !
@@ -2018,9 +2020,19 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
               !
               CALL GET_INTEGER(BL%LINE,LLOC,ISTART,ISTOP,IOUT,INBAS,PRNT_CNVG_OUTER,MSG='FOUND BAS OPTION "PRINT_CONVERGENCE"'//NL//'BUT FAILED TO LOAD THE STARTING OUTER ITERATION (OUTER_START)')
               !
+              IF(PRNT_CNVG_NTERM < ONE) PRNT_CNVG_NTERM = ONE
+              II = LLOC
               CALL PRNT_CNVG%OPEN(BL%LINE,LLOC,BL%IOUT,BL%IU,NO_INTERNAL=TRUE)
               !
               IF(.NOT. PRNT_CNVG%BINARY)CALL PRNT_CNVG%SET_HEADER('   SP   TS  ITER  LAY  ROW  COL           HEAD     CHNG_HEAD   DATE      CELL_ID')
+              !
+              IF(PRNT_CNVG_OUTER > Z) THEN
+                 WRITE(IOUT,'(17x, *(A))') 'After solver iteration ',             num2str(PRNT_CNVG_OUTER),", the change in head between iterations (head convergence, Δh<HCLOSE) for the ",                              num2str(PRNT_CNVG_NTERM), ' largest cells and are written to ', TRIM(ADJUSTL(BL%LINE(II:)))
+              ELSEIF(PRNT_CNVG_OUTER == Z) THEN
+                 WRITE(IOUT,'(17x, *(A))') 'At the end of each time step'                                 ,", the change in head between the final and previous solver iteration (head convergence, Δh<HCLOSE) for the ", num2str(PRNT_CNVG_NTERM), ' largest cells and are written to ', TRIM(ADJUSTL(BL%LINE(II:)))
+              ELSE
+                 WRITE(IOUT,'(17x, *(A))') 'After solver iteration MXITER-', num2str(ABS(PRNT_CNVG_OUTER)),", the change in head between iterations (head convergence, Δh<HCLOSE) for the ",                              num2str(PRNT_CNVG_NTERM), ' largest cells and are written to ', TRIM(ADJUSTL(BL%LINE(II:)))
+              END IF
               !
               ALLOCATE(PRNT_CNVG_LRC(PRNT_CNVG_NTERM), PRNT_CNVG_DIF(PRNT_CNVG_NTERM)  )
               !
@@ -2030,9 +2042,19 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
               !
               CALL GET_INTEGER(BL%LINE,LLOC,ISTART,ISTOP,IOUT,INBAS,PRNT_FRES_OUTER,MSG='FOUND BAS OPTION "PRINT_FLOW_RESIDUAL"'//NL//'BUT FAILED TO LOAD THE STARTING OUTER ITERATION (OUTER_START)')
               !
+              IF(PRNT_FRES_NTERM < ONE) PRNT_FRES_NTERM = ONE
+              II = LLOC
               CALL PRNT_FRES%OPEN(BL%LINE,LLOC,BL%IOUT,BL%IU,NO_INTERNAL=TRUE)
               !
               IF(.NOT. PRNT_FRES%BINARY) CALL PRNT_FRES%SET_HEADER('   SP   TS  ITER  LAY  ROW  COL           HEAD    FLOW_RESIDUAL    VOL_RESIDUAL     CELL_VOLUME      DATE  CELL_ID')
+              !
+              IF(PRNT_FRES_OUTER > Z) THEN
+                 WRITE(IOUT,'(17x, *(A))') 'After solver iteration ',             num2str(PRNT_FRES_OUTER),", the model's residual error (r = Ah - RHS < RCLOSE) for the ", num2str(PRNT_FRES_NTERM), ' largest cells and are written to ', TRIM(ADJUSTL(BL%LINE(II:)))
+              ELSEIF(PRNT_FRES_OUTER == Z) THEN
+                 WRITE(IOUT,'(17x, *(A))') 'At the end of each time step'                                 ,", the model's residual error (r = Ah - RHS < RCLOSE) for the ", num2str(PRNT_FRES_NTERM), ' largest cells and are written to ', TRIM(ADJUSTL(BL%LINE(II:)))
+              ELSE
+                 WRITE(IOUT,'(17x, *(A))') 'After solver iteration MXITER-', num2str(ABS(PRNT_FRES_OUTER)),", the model's residual error (r = Ah - RHS < RCLOSE) for the ", num2str(PRNT_FRES_NTERM), ' largest cells and are written to ', TRIM(ADJUSTL(BL%LINE(II:)))
+              END IF
               !
               ALLOCATE(PRNT_FRES_LRC(PRNT_FRES_NTERM), PRNT_FRES_DIF(PRNT_FRES_NTERM))
               !
@@ -2042,9 +2064,19 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
               !
               CALL GET_INTEGER(BL%LINE,LLOC,ISTART,ISTOP,IOUT,INBAS,PRNT_VERR_OUTER,MSG='FOUND BAS OPTION "PRINT_RELATIVE_VOLUME_ERROR"'//NL//'BUT FAILED TO LOAD THE STARTING OUTER ITERATION (OUTER_START)')
               !
+              IF(PRNT_VERR_NTERM < ONE) PRNT_VERR_NTERM = ONE
+              II = LLOC
               CALL PRNT_VERR%OPEN(BL%LINE,LLOC,BL%IOUT,BL%IU,NO_INTERNAL=TRUE)
               !
               IF(.NOT. PRNT_VERR%BINARY) CALL PRNT_VERR%SET_HEADER('   SP   TS  ITER  LAY  ROW  COL           HEAD  REL_VOL_ERR    VOL_RESIDUAL'//'   FLOW_RESIDUAL  DATE      CELL_ID')
+              !
+              IF(PRNT_VERR_OUTER > Z) THEN
+                 WRITE(IOUT,'(17x, *(A))') 'After solver iteration ',             num2str(PRNT_VERR_OUTER),", the model's relative volume error (re = (Ah - RHS)/vol < MxRE) for the ", num2str(PRNT_VERR_NTERM), ' largest cells and are written to ', TRIM(ADJUSTL(BL%LINE(II:)))
+              ELSEIF(PRNT_VERR_OUTER == Z) THEN
+                 WRITE(IOUT,'(17x, *(A))') 'At the end of each time step'                                 ,", the model's relative volume error (re = (Ah - RHS)/vol < MxRE) for the ", num2str(PRNT_VERR_NTERM), ' largest cells and are written to ', TRIM(ADJUSTL(BL%LINE(II:)))
+              ELSE
+                 WRITE(IOUT,'(17x, *(A))') 'After solver iteration MXITER-', num2str(ABS(PRNT_VERR_OUTER)),", the model's relative volume error (re = (Ah - RHS)/vol < MxRE) for the ", num2str(PRNT_VERR_NTERM), ' largest cells and are written to ', TRIM(ADJUSTL(BL%LINE(II:)))
+              END IF
               !
               ALLOCATE(PRNT_VERR_LRC(PRNT_VERR_NTERM), PRNT_VERR_DIF(PRNT_VERR_NTERM)  )
               !
@@ -2075,8 +2107,8 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
               OSCIL_DMP_DIF = DZ
               !
               CALL GET_INTEGER(BL%LINE,LLOC,ISTART,ISTOP,IOUT,INBAS,OSCIL_DMP_OUTER,MSG='FOUND BAS OPTION "DAMPEN_OSCILLATION"'//NL//'BUT FAILED TO LOAD THE NUMER OF ITERATIONS AT START TO CHECK IF OSCILLATIONS OCCUR.')
-              WRITE(IOUT,'(4x, 3A, /)')' HEAD OCCILLATIONS WILL BE DAMPEN BY 50% AFTER ',NUM2STR(OSCIL_DMP_OUTER),' ITERATIONS.'
-              ! 
+              WRITE(IOUT,'(17x, 3A)') 'Head occillations get 50% dampening after ',NUM2STR(OSCIL_DMP_OUTER),' iterations.'
+              !
           CASE('DAMPEN_START')
               !
               !
@@ -2091,7 +2123,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
           CASE('DOUBLE_PRECISION_CBC');  BIN_REAL_KIND = REAL64
               !
           CASE('SHIFT_STRT', 'SHIFT_START', 'SHIFTSTRT', 'SHIFTSTART')
-              WRITE(IOUT,'(4x, A/)')' NOW READING WITH ULOAD LIST STYLE NLAY NUMBERS THAT ARE ADDED TO STRT'
+              WRITE(IOUT,'(17x, A)') 'ULOAD List Style will now read NLAY shift values to add to STRT'
               ALLOCATE(HSHIFT(NLAY))
               !
               CALL ULOAD(HSHIFT, LLOC, BL)
@@ -2100,7 +2132,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
               !CALL GET_WORD(BL%LINE,LLOC,ISTART,ISTOP,KEY)  !CHECK IF THERE IS THE INTERNAL KEYWORD (ULOAD NEEDS A FILE TO READ INTERNAL FROM)
               !LLOC = I
               !!
-              !I = Z 
+              !I = Z
               !IF(KEY=='INTERNAL') THEN
               !    CALL BL%MAKE_SCRATCH_FILE(NLAY+1)
               !    CALL BL%READ_SCRATCH(LINE=LINE)
@@ -2111,7 +2143,6 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
               !END IF
               !
           CASE('PROPPRINT', 'PROPERTY_PRINT', 'PRINT_PROPERTY')
-              WRITE(IOUT,'(4x, A)')'CHECKING IF FOLDER IS SPECIFIED.'
               !
               LINE = BL%LINE
               CALL PARSE_WORD(LINE,LLOC,ISTART,ISTOP)
@@ -2127,8 +2158,8 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
                                                                       ALLOCATE(PROPPRINT, SOURCE=LINE(ISTART:ISTOP))
                   END IF
               END IF
-              WRITE(IOUT,'(4x, A,/,4x, 3A, /)') 'AQUIFER PROPERTIES AFTER PARAMETERS HAVE BEEN APPLIED WILL BE WRITEN TO SEPARATE FILES.', &
-                                                'THESE FILES WILL BE PLACED IN: "'//PROPPRINT//'"'
+              WRITE(IOUT,'(17x, A,/,19x, 3A)') 'Aquifer properties after parameters have been applied will be writen to separate files.', &
+                                               'These files will be placed in: "'//PROPPRINT//'"'
               !
           !!!CASE('WATER_TABLE_DISTANCE_ABOVE_GSE_LIMIT')
           !!!    CALL GET_NUMBER(BL%LINE,LLOC,ISTART,ISTOP,IOUT,INBAS,WT_ABOVE_GSE_LIM,MSG='FOUND BAS OPTION "WATER_TABLE_DISTANCE_ABOVE_GSE_LIMIT"'//NL//'BUT FAILED TO LOAD THE ACTUAL LIMIT (WT_ABOVE_GSE_LIM)')
@@ -2139,19 +2170,20 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
           CASE('HEAD_DISTANCE_ABOVE_GSE_LIMIT','ABOVE_GSE_LIM')
               CALL GET_NUMBER(BL%LINE,LLOC,ISTART,ISTOP,IOUT,INBAS,ABOVE_GSE_LIM,MSG='FOUND BAS OPTION "HEAD_DISTANCE_ABOVE_GSE_LIMIT"'//NL//'BUT FAILED TO LOAD THE ACTUAL LIMIT (ABOVE_GSE_LIM)')
               !
-              WRITE(IOUT,'(4x,3A,/,4x,A,/,4x,A,/,9x,A,/)') 'HEAD VALUES GREATER THAN ', NUM2STR(ABOVE_GSE_LIM), ' L ABOVE THE GROUND SURFACE ELEVATION (GSE) ARE SET TO IT.', &
-                                                           'IF HEAD IS CHANGED, THEN SOLVER CONVERGENCE IS DISABLED FOR THAT ITERATION.',                                     &
-                                                           'NOTE THAT IF THE GSE IS NOT SPECIFIED BY THE DIS OR FMP,',                                                        &
-                                                           'THEN THE TOP OF THE UPPER MOST ACTIVE CELL IS USED.'
+              WRITE(IOUT,'(17x,3A,/,19x,A,/,19x,A,/,21x,A)') 'Head values greater than ', NUM2STR(ABOVE_GSE_LIM), ' L above the Ground Surface Elevation (GSE) are set to it.', &
+                                                             'If head is changed, then solver convergence is disabled for that iteration.',                                     &
+                                                             'Note that if the gse is not specified by the DIS or FMP,',                                                        &
+                                                             'then the top of the upper most active cell is used.'
               !
           CASE('PRINT_HEAD_DISTANCE_ABOVE_GSE', 'HEAD_DISTANCE_ABOVE_GSE_PRINT')
               !
               CALL GET_NUMBER(BL%LINE,LLOC,ISTART,ISTOP,IOUT,INBAS,ABOVE_GSE_PRT_LIM,MSG='FOUND BAS OPTION "HEAD_DISTANCE_ABOVE_GSE_PRINT"'//NL//'BUT FAILED TO LOAD THE SHIFT FACTOR (ABOVE_GSE_PRT_LIM)')
               !
+              II = LLOC
               CALL ABOVE_GSE_PRT%OPEN(BL%LINE,LLOC,IOUT,INBAS)
               CALL ABOVE_GSE_PRT%SET_HEADER('SP  TS   LAY ROW  COL   GSE            HEAD           DATE')
-              WRITE(IOUT,'(4x,3A,/,4x,A/)') 'AFTER TIME STEP CONVERGES ANY HEAD VALUES GREATER THAN ',NUM2STR(ABOVE_GSE_PRT_LIM), ' L', &
-                                             'ABOVE THE GROUND SURFACE ELEVATION (GSE) ARE PRINTED TO A GENERIC_OUTPUT FILE.'
+              WRITE(IOUT,'(17x,3A,/,19x,2A)') 'After time step converges any head values greater than ',NUM2STR(ABOVE_GSE_PRT_LIM), ' L', &
+                                              'above the Ground Surface Elevation (GSE) are wirtten to: ',TRIM(ADJUSTL(BL%LINE(II:)))
               !
           !!!CASE('WATER_TABLE_ABOVE_GSE_PRINT')
           !!!    WRITE(IOUT,'(1x 1A)') 'WATER_TABLE_ABOVE_GSE_PRINT OPTION FOUND.'
@@ -2164,7 +2196,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
           !!!    !
           !!!    CALL ABOVE_GSE_PRT%OPEN(BL%LINE,LLOC,IOUT,INBAS)
           !!!    CALL ABOVE_GSE_PRT%SET_HEADER('SP  TS   LAY ROW  COL   GSE            HEAD           DATE')
-          !!!    WRITE(IOUT,'(1x 1A/,1x 3A/,1x 2A/)') '"HEAD_DISTANCE_ABOVE_GSE_PRINT" OPTION FOUND.','AFTER TIME STEP CONVERGES ANY HEAD VALUES GREATER THAN ',NUM2STR(ABOVE_GSE_PRT_LIM), ' L', 'ABOVE THE GROUND ','SURFACE ELEVATION (GSE) ARE PRINTED TO A GENERIC_OUTPUT FILE.'
+          !!!    WRITE(IOUT,'(1x 1A/,1x 3A/,1x 2A)') '"HEAD_DISTANCE_ABOVE_GSE_PRINT" OPTION FOUND.','AFTER TIME STEP CONVERGES ANY HEAD VALUES GREATER THAN ',NUM2STR(ABOVE_GSE_PRT_LIM), ' L', 'ABOVE THE GROUND ','SURFACE ELEVATION (GSE) ARE PRINTED TO A GENERIC_OUTPUT FILE.'
           !!!    !
           CASE('DEALLOCATE_MULT')
               DEALLOCATE_MULT = TRUE
@@ -2174,25 +2206,25 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
               !
           CASE('CBC', 'CBC_UNIT')
               CALL GET_WORD(BL%LINE,LLOC,ISTART,ISTOP,KEY)
-              IF(KEY.NE.'UNIT') LLOC = ISTART
+              IF(KEY /= 'UNIT') LLOC = ISTART
               !
               CALL GET_INTEGER(BL%LINE,LLOC,ISTART,ISTOP,IOUT,INBAS,CBC_GLOBAL_UNIT,MSG='FOUND BAS OPTION "CBC_UNIT"'//NL//'BUT FAILED TO READ THE UNIT NUMBER TO ASSIGN TO ALL PACKAGES.')
               !
-              WRITE(IOUT,'(4x, A/)')' CBC_UNIT OPTION FOUND AND SPECIFIED FOR ALL PACKAGES THE UNIT NUMBER: '//NUM2STR(CBC_GLOBAL_UNIT)
+              WRITE(IOUT,'(17x, A)') 'All packages will automatically set the CELL-BY-CELL (CBC)  unit number to '//NUM2STR(CBC_GLOBAL_UNIT)
               !
           CASE('NOCBC')
               NOCBC=2
-              WRITE(IOUT,'(4x, A/)')'NO CELL-BY-CELL FLOWS WILL BE WRITTEN.'
+              WRITE(IOUT,'(17x, A)')'No Cell-By-Cell (CBC) flows are written for simulation.'
               !
           CASE('NOCBCPACK')
               NOCBC=1
-              WRITE(IOUT,'(4x, A/)')'ONLY FLOW PACKAGE CELL-BY-CELL FLOWS WILL BE WRITTEN.'
+              WRITE(IOUT,'(17x, A)')'Only flow package Cell-By-Cell (CBC) flows are written when requested during the simulation.'
           CASE('CBC_EVERY_TIMESTEP')
               NOCBC=-1
-              WRITE(IOUT,'(4x, A/)')'THE CELL-BY-CELL WILL BE WRITTEN AT THE END OF EVERY TIME STEP.'
+              WRITE(IOUT,'(17x, A)')'The Cell-By-Cell (CBC) flows are written at the end of every time step.'
           CASE('CBC_LAST_TIMESTEP')
               NOCBC=-2
-              WRITE(IOUT,'(4x, A/)')'THE CELL-BY-CELL WILL BE WRITTEN AT THE END OF EVERY STRESS PERIOD (ie END OF LAST TIME STEP).'
+              WRITE(IOUT,'(17x, A)')'TThe Cell-By-Cell (CBC) flows are written at the end of every stress period (the end of the last time step).'
               !
           CASE('NO_DIM_CHECK', 'NODIMCHECK')
                   WARN_DIM = FALSE
@@ -2200,15 +2232,15 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
                   NO_CONVERGENCE_STOP = TRUE
           CASE('STOPERROR','STOP_ERROR')
               CALL GET_NUMBER(BL%LINE,LLOC,ISTART,ISTOP,IOUT,INBAS,STOPER,MSG='FOUND BAS OPTION "STOPERROR"'//NL//'BUT FAILED TO LOAD ACCEPTIBLE BUDGET PERCENT ERROR')
-              WRITE(IOUT,'(4x, 2A/)') 'MAX ALLOWED BUDGET PERCENT ERROR: ',NUM2STR(STOPER)
+              WRITE(IOUT,'(17x, 2A)') 'Max allowed budget percent error: ',NUM2STR(STOPER)
               !
           CASE('PERCENTERROR', 'PERCENT_ERROR')
               CALL GET_INTEGER(BL%LINE,LLOC,ISTART,ISTOP,IOUT,INBAS,PDIFFPRT,MSG='FOUND BAS OPTION "PERCENTERROR"'//NL//'BUT FAILED TO LOAD ACTUAL PERECENT ERROR VALUE')
-              WRITE(IOUT,'(4x,3A/)') 'RATE PERCENT ERROR WILL BE PRINTED FOR EVERY TIME STEP THAT EXCEDES ',NUM2STR(PDIFFPRT),'%'
+              WRITE(IOUT,'(17x,3A)') 'Rate percent error will be printed for every time step that exceeds ',NUM2STR(PDIFFPRT),'%'
               !
           CASE('MAXBUDGET')
               CALL GET_INTEGER(BL%LINE,LLOC,ISTART,ISTOP,IOUT,INBAS,MXBUD,MSG='FOUND BAS OPTION "MAXBUDGET"'//NL//'BUT FAILED TO LOAD ACTUAL MAXIMUM BUDGET VALUE (MXBUD)')
-              WRITE(IOUT,'(4x, 2A/)')'MAXIMUM NUMBER OF BUDGET ENTRIES IS CHANGED FROM 100 TO ', NUM2STR(MXBUD)
+              WRITE(IOUT,'(17x, 2A)')'Maximum number of budget entries is changed from 100 to ', NUM2STR(MXBUD)
               !
           CASE('MAXPARAM')
               !
@@ -2227,7 +2259,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
                   CALL WRN%ADD(BLN//BL%LINE//BLN//'MXINST<1; VALUE CHANGED TO MXINST=1'//BLN)
                   MXINST=1
               END IF
-              WRITE(IOUT,'(4x, A, 3(1x, A),/)')'MXPAR, MXCLST, AND MXINST SET TO', NUM2STR(MXPAR), NUM2STR(MXCLST), NUM2STR(MXINST)
+              WRITE(IOUT,'(17x, A, 3(1x, A))')'MXPAR, MXCLST, and MXINST set to', NUM2STR(MXPAR), NUM2STR(MXCLST), NUM2STR(MXINST)
               !
           CASE('RESIDUAL_ERROR_ARRAY_THRESHOLD')
               CALL GET_NUMBER(BL%LINE,LLOC,ISTART,ISTOP,IOUT,INBAS,PRNT_RES_LIM,MSG='FAILED TO LOAD INTEGER AFTER RESIDUAL_ERROR_ARRAY_THRESHOLD KEYWORD. THIS INTEGER REPRESENTS THE PERCENT ERROR THRESHOLD BEFORE PRINTING RESIDUAL_ERROR_ARRAY')
@@ -2236,15 +2268,16 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
               CALL PRNT_RES%OPEN(BL%LINE,LLOC,IOUT,INBAS)
               !
           CASE('CUMULATIVE_HEAD_CHANGE')
-              WRITE(IOUT,'(4x,A/)') 'THIS OPTION IS ONLY USEFUL FOR MODEL RESULT COMPARISON WITH DIFFERENT CODE COMPARISONS.'
+              WRITE(IOUT,'(17x,A)') 'Cumulative sum of absolute head differences for the entire model.'
+              WRITE(IOUT,'(17x,A)') 'This is a diagnostic feature meant for comparing MF-OWHM code versions with the same model input (software unit test).'
               CUM_HEAD_CHNG     = DZ
               CUM_HEAD_CHNG_E10 = Z
               !
               CALL PRNT_CUM_HEAD_CHNG%OPEN(BL%LINE,LLOC,IOUT,INBAS,NOBINARY=TRUE, SPLITMAXCOUNT=Z, NO_INTERNAL=TRUE)
               !
-              WRITE(PRNT_CUM_HEAD_CHNG%IU, "(3A)", ADVANCE="NO")                                 &
-                  '# CUMULATIVE_HEAD_CHANGE FILE FOR COMPARING CODE VERSIONS WITH MODELS. ',       &
-                  'The sum of following two numbers represent the sum of all the absolute value of active cell head changes.', NL
+              WRITE(PRNT_CUM_HEAD_CHNG%IU, "(3A)", ADVANCE="NO")                                                 &
+                  '# CUMULATIVE_HEAD_CHANGE file for comparing code versions with the same model input. ',       &
+                  'The sum of the first number with second number multiplied by 1e10 represents the sum of all the absolute value of active cell head changes. For example, " 3.92    7 " represents 3.92 + 7e10).', NL
               FLUSH(PRNT_CUM_HEAD_CHNG%IU)  ! For some reason the record is lost unless it is flushed to the hard drive.
               !
           CASE('CUMULATIVE_RESIDUAL_ERROR_ARRAY')
@@ -2272,6 +2305,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
               SPSTART = NPER+1
               SPEND   = SPSTART
               INPUT_CHECK = TRUE
+              IFASTFORWARD = TWO
               !
           CASE('PAUSE')
               USE_PAUSE = TRUE
@@ -2310,28 +2344,27 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
                                              'SO IT WILL BE ASSUMED TO HAVE AN ENDING AT STRESSS PERIOD AT NPER')
                   END IF
               END IF
-              WRITE(IOUT,'(/,3A,/,/,33x,2A,/,33x,2A,/,/,A,/)')                     &
-                    REPEAT('#',35),                                                &
-                    '...FASTFORWARD OPTION TURNED ON...',REPEAT('#',35),           &
-                    '     THE STARTING STRESS PERIOD WILL BE: ', NUM2STR(SPSTART), &
-                    '     THE ENDING   STRESS PERIOD WILL BE: ', NUM2STR(SPEND),   &
-                    REPEAT('#',104)
+              IFASTFORWARD = ONE
           CASE DEFAULT
                      IF(NO_OPT_LINE) THEN
                                CALL WRN%ADD(BL%LINE//BLN)
-                     ELSE     
+                     ELSE
                                CALL WRN%ADD(KEY//BLN)
                      END IF
           END SELECT
           !
+          WRITE(IOUT, '(A)')
+          !
           IF(NO_OPT_LINE) CALL BL%NEXT()
     END DO
+    !
+    WRITE(IOUT, '(A)')
     !
     !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     !
     K = PRINT_HEAD_LIST%LEN()
     IF(K>Z) THEN
-          WRITE(IOUT,'(1x, A)', ADVANCE='NO') 'FOUND OPTION: PRINT_HEAD    '
+          WRITE(IOUT,'(1x, A)', ADVANCE='NO') 'Setting up PRINT_HEAD option for '
           !
           CALL PRINT_HEAD_LIST%FIRST_LINE()
           !
@@ -2372,7 +2405,8 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
           END DO
           !
           IF(PRINT_HEAD_FLAG == 1) THEN
-             WRITE(IOUT,'(A)') 'SP    TS   FILE'
+             WRITE(IOUT,'(A)')
+             WRITE(IOUT,'(A)') '    SP    TS   FILE'
              ALLOCATE(ITMP(2,K))
              CALL PRINT_HEAD_LIST%FIRST_LINE()
              N = 1
@@ -2418,7 +2452,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
                      !
                      J = LLOC
                      CALL PARSE_WORD(PRINT_HEAD_LIST%LN,LLOC,ISTART,ISTOP)                     !Capture File Name for output
-                     WRITE(IOUT,'(25x, 2I6, 3x, A)') ITMP(:,I), PRINT_HEAD_LIST%LN(ISTART:ISTOP)
+                     WRITE(IOUT,'(2I6, 3x, A)') ITMP(:,I), PRINT_HEAD_LIST%LN(ISTART:ISTOP)
                      LLOC = ISTART
                      !
                      IF (N>1) THEN
@@ -2482,7 +2516,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
     !
     K = PRINT_WTAB_LIST%LEN()
     IF(K>Z) THEN
-          WRITE(IOUT,'(1x, A)', ADVANCE='NO') 'FOUND OPTION: PRINT_WATER_TABLE    '
+          WRITE(IOUT,'(1x, A)', ADVANCE='NO') 'Setting up PRINT_WATER_TABLE option for '
           !
           CALL PRINT_WTAB_LIST%FIRST_LINE()
           !
@@ -2523,7 +2557,8 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
           END DO
           !
           IF(PRINT_WTAB_FLAG == 1) THEN
-             WRITE(IOUT,'(A)') 'SP    TS   FILE'
+             WRITE(IOUT,'(A)')
+             WRITE(IOUT,'(A)') '    SP    TS   FILE'
              ALLOCATE(ITMP(2,K))
              CALL PRINT_WTAB_LIST%FIRST_LINE()
              N = 1
@@ -2569,7 +2604,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
                      !
                      J = LLOC
                      CALL PARSE_WORD(PRINT_WTAB_LIST%LN,LLOC,ISTART,ISTOP)                     !Capture File Name for output
-                     WRITE(IOUT,'(25x, 2I6, 3x, A)') ITMP(:,I), PRINT_WTAB_LIST%LN(ISTART:ISTOP)
+                     WRITE(IOUT,'(2I6, 3x, A)') ITMP(:,I), PRINT_WTAB_LIST%LN(ISTART:ISTOP)
                      LLOC = ISTART
                      !
                      IF (N>1) THEN
@@ -2633,7 +2668,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
     !
     K = PRINT_WDEP_LIST%LEN()
     IF(K>Z) THEN
-          WRITE(IOUT,'(1x, A)', ADVANCE='NO') 'FOUND OPTION: PRINT_WATER_TABLE    '
+          WRITE(IOUT,'(1x, A)', ADVANCE='NO') 'Setting up PRINT_WATER_DEPTH option for '
           !
           CALL PRINT_WDEP_LIST%FIRST_LINE()
           !
@@ -2674,7 +2709,8 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
           END DO
           !
           IF(PRINT_WDEP_FLAG == 1) THEN
-             WRITE(IOUT,'(A)') 'SP    TS   FILE'
+             WRITE(IOUT,'(A)')
+             WRITE(IOUT,'(A)') '    SP    TS   FILE'
              ALLOCATE(ITMP(2,K))
              CALL PRINT_WDEP_LIST%FIRST_LINE()
              N = 1
@@ -2720,7 +2756,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
                      !
                      J = LLOC
                      CALL PARSE_WORD(PRINT_WDEP_LIST%LN,LLOC,ISTART,ISTOP)                     !Capture File Name for output
-                     WRITE(IOUT,'(25x, 2I6, 3x, A)') ITMP(:,I), PRINT_WDEP_LIST%LN(ISTART:ISTOP)
+                     WRITE(IOUT,'(2I6, 3x, A)') ITMP(:,I), PRINT_WDEP_LIST%LN(ISTART:ISTOP)
                      LLOC = ISTART
                      !
                      IF (N>1) THEN
@@ -2782,6 +2818,34 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
     !
     !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     !
+    IF    (IFASTFORWARD == ONE) THEN
+              WRITE(IOUT,'(/,3A,/,/,33x,2A,/,33x,2A,/,/,A,/)')                     &
+                    REPEAT('#',35),                                                &
+                    '...FASTFORWARD OPTION TURNED ON...',REPEAT('#',35),           &
+                    '     The starting stress period is: ', NUM2STR(SPSTART), &
+                    '     The ending   stress period is: ', NUM2STR(SPEND),   &
+                    REPEAT('#',104)
+    ELSEIF(IFASTFORWARD == TWO) THEN
+              WRITE(IOUT,'(/,3A,/,/,38x,2A,/,38x,2A,/,38x,2A,/,/,A,/)')                       &
+                    REPEAT('#',35),                                                           &
+                    '...INPUT_CHECK OPTION TURNED ON...',REPEAT('#',35),                      &
+                    'mf-owhm will read each stress period input and run each time step,',     &
+                    "  but will not solve the time step's head solution.",                    &
+                    'All output is meaningless, but this is useful for testing model set up before running.', &
+                    REPEAT('#',104)
+                    !
+                    !Input Check should disable writing to CBC
+                    NOCBC=2
+                    CBC_GLOBAL_UNIT = Z
+    END IF
+    !
+    !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    WRITE(IOUT,'(/,1x,A,3(/,5x,A,I10),/)') 'The total simulation limit for the number PARAMETERs defined is: ', &
+                                           'Max number of PARAMETERs (MXPAR)  is ', MXPAR,                      &
+                                           'Max number of INSTANCEs  (MXINST) is ', MXINST,                     &
+                                           'Max number of CLUSTERs   (MXCLST) is ', MXCLST
+    !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    !
     IF (WRN%RAISED) CALL WRN%CHECK('BAS OPTION WARNING.'//NL//                                                  &
                                    'FAILED TO APPLY SOME OF THE OPTIONS FOUND WITHIN THE OPTIONS BLOCK.'//NL//  &
                                    'THEY WERE NOT RECOGNIZED AS ONE OF THE BAS PACKAGE OPTIONS.'//NL//          &
@@ -2791,7 +2855,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
     !
     IF(NO_CONVERGENCE_STOP) STOPER = 1E30 !SET TO VERY LARGE VALUE SO CODE NEVER STOPS
   END SUBROUTINE
-  !  
+  !
   SUBROUTINE SETUP_STARTDATE(IOUT, STARTING_DATE)
     INTEGER,             INTENT(IN   ):: IOUT
     TYPE(DATE_OPERATOR), INTENT(INOUT):: STARTING_DATE
@@ -2809,11 +2873,6 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
           USE_LEAP_YR=TRUE
           REALTIM=STARTING_DATE%DYEAR
           REALTIM_PER=REALTIM
-          !
-          WRITE(IOUT,'(/A,/15x,A,/A,A)')'   "START_DATE" OPTION ACTIVATED',                                                                                          &
-                                        'A CALENDAR DATE WILL BE USED FOR TIME TRACKING AND DECIMAL YEAR CALCULATION AND PROPAGATED ALONG WITH THE SIMULATED TIME', &
-                                        'WITH A STARTING DATE AND TIME OF ', STARTING_DATE%STR(' ')
-          WRITE(IOUT,'(/A)') 'THE DECIMAL YEAR CALCULATION WILL TAKE INTO ACCOUNT LEAP YEARS AND MAKE A CORRECTION FOR THEM.'
           !REALTIM=STARTING_DATE%DYEAR
           !
           IF(ITMUNI==5)  CALL STOP_ERROR(OUTPUT=IOUT,MSG='DIS ERROR: "START_DATE" Option does not work with time units of years (ITMUNI=5).'//NL//'Instead use the "STARTTIME" option followed a starting decimal year. For example,'//NL//'"STARTIME '//NUM2STR(STARTING_DATE%DYEAR)//'"')
@@ -2839,24 +2898,13 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
                 I = NSTP(N)
                 DATE_SP(N)%TS(I) = DATE_SP(N)%TS(Z) + DELT_TO_DAY(PERLEN(N),ITMUNI)
           END DO
-          !
-    ELSEIF(REALTIM.GE.0D0)THEN
-          WRITE(IOUT,'(/A,/15x,A,/A,F9.4)')'   "STARTTIME" OPTION ACTIVATED',                                                    &
-                                        'A DECIMAL YEAR CALCULATION WILL BE MADE AND PROPAGATED ALONG WITH THE SIMULATED TIME',  &
-                                        'WITH A STARTING DECIMAL YEAR OF ', REALTIM
-          IF(USE_LEAP_YR)THEN
-                         WRITE(IOUT,'(/A)') 'THE DECIMAL YEAR CALCULATION WILL TAKE INTO ACCOUNT LEAP YEARS AND MAKE A CORRECTION FOR THEM.'
-          ELSE
-            WRITE(IOUT,'(/A,//2A/)') 'THE DECIMAL YEAR CALCULATION ASSUMES THERE ARE 365.2425 DAYS IN A YEAR.',                       &
-                                     '   NOTE THAT THIS NEGATES ANY CALENDAR DATE FEATURES BECAUSE LEAP YEARS ARE NOT ACCOUNTED FOR.'
-          END IF
     END IF
     !
   END SUBROUTINE
 END MODULE
 
 MODULE MNW2_OUPUT!, ONLY: PRNT_MNW2_SUB, PRNT_MNW2_INOUT_SUB, PRNT_MNW2_NODE_SUB
-  USE, INTRINSIC:: IEEE_ARITHMETIC, ONLY: IEEE_VALUE, IEEE_QUIET_NAN 
+  USE, INTRINSIC:: IEEE_ARITHMETIC, ONLY: IEEE_VALUE, IEEE_QUIET_NAN
   USE CONSTANTS
   USE GENERIC_OUTPUT_FILE_INSTRUCTION
   !USE GLOBAL,       ONLY:NCOL,NROW,NLAY,NBOTM,LBOTM,BOTM,IBOUND,HNEW,LAYHDT
@@ -2935,7 +2983,7 @@ MODULE MNW2_OUPUT!, ONLY: PRNT_MNW2_SUB, PRNT_MNW2_INOUT_SUB, PRNT_MNW2_NODE_SUB
     ZER = '0.0'; ZER = ADJUSTR(ZER)
     NaNc= 'NaN'; NaNc= ADJUSTR(ZER)
     NaN = IEEE_VALUE(Q, IEEE_QUIET_NAN)
-    ! 
+    !
     !        'WELLID   PUMPING_RATE_INI '// SEQ2STR('NOD_', MXNOD,20,PAD=I)
     DO I=ONE, MNWMAX
        !
@@ -3006,7 +3054,7 @@ MODULE MNW2_OUPUT!, ONLY: PRNT_MNW2_SUB, PRNT_MNW2_INOUT_SUB, PRNT_MNW2_NODE_SUB
            Q    = DZ
            Qin  = DZ
            Qout = DZ
-           DO J=FIRST_NODE, LAST_NODE;  
+           DO J=FIRST_NODE, LAST_NODE;
                                       Q = Q + MNWNOD(4,J)
                                       !
                                       IF(MNWNOD(4,J) > DZ) THEN
@@ -3041,14 +3089,14 @@ MODULE MNW2_OUPUT!, ONLY: PRNT_MNW2_SUB, PRNT_MNW2_INOUT_SUB, PRNT_MNW2_NODE_SUB
     CHARACTER(15):: DT, ZER, NaNc
     DOUBLE PRECISION :: H, Hw, BOT, Q, CND, NaN
     !
-    !'DATE_START             PER    STP           DELT  WELLID'//REPEAT(BLNK,LEN_WELLID-5)//             NODE             RATE        NODE_COND        CELL_HEAD        CELL_BOTM    LAY   ROW   COL' 
+    !'DATE_START             PER    STP           DELT  WELLID'//REPEAT(BLNK,LEN_WELLID-5)//             NODE             RATE        NODE_COND        CELL_HEAD        CELL_BOTM    LAY   ROW   COL'
     !
     DT = NUM2STR(DELT)
     DT = ADJUSTR(DT)
     ZER = '0.0'; ZER = ADJUSTR(ZER)
     NaNc= 'NaN'; NaNc= ADJUSTR(ZER)
     NaN = IEEE_VALUE(Q, IEEE_QUIET_NAN)
-    ! 
+    !
     DO I=ONE, MNWMAX
        !
        FIRST_NODE = NINT( MNW2(4,I) )
@@ -3059,8 +3107,8 @@ MODULE MNW2_OUPUT!, ONLY: PRNT_MNW2_SUB, PRNT_MNW2_INOUT_SUB, PRNT_MNW2_NODE_SUB
           !
           INOD = INOD + ONE
           !
-          IL = NINT( MNWNOD(1,J) )             
-          IR = NINT( MNWNOD(2,J) )             
+          IL = NINT( MNWNOD(1,J) )
+          IR = NINT( MNWNOD(2,J) )
           IC = NINT( MNWNOD(3,J) )
           !
           Q   = MNWNOD( 4,J)
@@ -3072,7 +3120,7 @@ MODULE MNW2_OUPUT!, ONLY: PRNT_MNW2_SUB, PRNT_MNW2_INOUT_SUB, PRNT_MNW2_NODE_SUB
           !
           IF(FL%BINARY) THEN
               WRITE(FL%IU                   ) DATE, PER, STP, DELT, WELLID(I), INOD, Q, Hw, H, BOT, CND, IL,IR,IC
-          ELSE!                                                                                             RATE        NODE_COND        CELL_HEAD        CELL_BOTM    LAY   ROW   COL' 
+          ELSE!                                                                                             RATE        NODE_COND        CELL_HEAD        CELL_BOTM    LAY   ROW   COL'
               WRITE(FL%IU,'(A, 2I7, A, 2x,A, 1x, I3, 5(2x,A15), 3I6)') DATE, PER, STP, DT, WELLID(I)(:LW), INOD, NUM2STR(Q), NUM2STR(Hw), NUM2STR(H), NUM2STR(BOT), NUM2STR(CND), IL,IR,IC
           END IF
        END DO
@@ -3114,8 +3162,8 @@ MODULE MNW2_FUNCT
         H = DZ
         DO I=F, L
             IF(MNWNOD(14,I) > NEARZERO_15) THEN
-                  IL = NINT( MNWNOD(1,I) )             
-                  IR = NINT( MNWNOD(2,I) )             
+                  IL = NINT( MNWNOD(1,I) )
+                  IR = NINT( MNWNOD(2,I) )
                   IC = NINT( MNWNOD(3,I) )
                   !
                   H  = H + HNEW(IC,IR,IL)*MNWNOD(14,I)*csum
@@ -3127,11 +3175,11 @@ MODULE MNW2_FUNCT
         ELSE
             H = -1E30
         END IF
-    END IF  
+    END IF
   END FUNCTION
 END MODULE
 !        CASE('ADVANCED_DAMPING') ! BY_STRESS_PERIOD InputFile or OUTER_START
-!           WRITE(IOUT,'(2A,/A)')' FOUND OPTION "ADVANCED_DAMPING" ',
+!           WRITE(IOUT,'(2A,/A)')' Found Option "ADVANCED_DAMPING" ',
 !     +     'NOW LOUDING DAMPING DIFFERENCE TOLERANCE,',
 !     +     'THEN STARTING OUTER ITERATION OR KEYWORD "BY_STRESS_PERIOD"'
 !           CALL GET_NUMBER(BL%LINE,LLOC,ISTART,ISTOP,IOUT,INBAS,
@@ -3159,8 +3207,8 @@ END MODULE
 !            CASE(0,2); BAS_ADAMP_TOL2 =  1.00D0 ! m
 !            CASE(3  ); BAS_ADAMP_TOL2 =  1.00D2 !cm
 !            END SELECT
-    
-    
+
+
 !        CALL URWORD(BL%LINE,LLOC,ISTART,ISTOP,1,I,R,IOUT,INBAS)
 !        !
 !        READ(BL%LINE(ISTART:ISTOP), INTFMT(BL%LINE(ISTART:ISTOP)),
@@ -3234,10 +3282,10 @@ END MODULE
 !        !   END DO
 !        !END IF
 !        !
-    
-    
-    
-    
+
+
+
+
           !
 !        CASE('LISTSPLIT')                   !seb ADD NEW OPTION TO SPECIFY PRINT OUT OF ERRORS THAT EXCEDE A MINIMUM PRECENT
 !             CALL URWORD(BL%LINE,LLOC,ISTART,ISTOP,2,N,R,IOUT,INBAS)
