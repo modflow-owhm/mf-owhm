@@ -1,0 +1,54 @@
+#
+# Listing of all available Options for the DRT package
+# 
+# The Option block is placed at the start of the DRT package input.
+# If there are additional input blocks, then the order the blocks does not matter
+#
+BEGIN OPTIONS
+    #
+    # RETURNFLOW keyword activates the return-flow option of the DRT Package. 
+    # This results in 
+    #
+    # If option is present, then the input expects LayR, RowR, ColR, and Rfprop to be read.
+    #
+    # --NOTE THAT IF THIS KEYWORD IS NOT PRESENT, THEN DRT IS EQUIVALENT TO DRN--
+    # ----and does not route drain flow to another cell or to another package----
+    RETURNFLOW
+    #
+    # General Options --------------------------------------------------------------------------------------------------------------------------
+    #
+    # Suppress writing to LIST file the DRT input information after it is read in.
+    NO_PRINT
+    #
+    # Read network for first stress period, then reuse for rest of simulation.
+    #   Use Time Series Input, TABFILEs, or LineFeed to specify segment FLOW
+    #
+    AUTOMATIC_NEGATIVE_ITMP
+    #
+    # Defines auxiliary values that are read with input.
+    #   AuxName is the specific auxiliary value that is read.
+    AUXILIARY  AuxName
+    AUX        AuxName
+    #
+    # Output Files ----------------------------------------------------------------------------------------------------------------------------------
+    #   Generic_Output is a place holder for the output file location.
+    #   The file name that is commented to the right is the recommended name.
+    #   Example use:
+    #               DBFILE   ./output/DRT_output.txt
+    #
+    # Print for each DRT cell, for all time steps, in a column based format, 
+    #   the drt cell properties (elevation, conductance), the cell's head, and
+    #   drt flow out of the cell, and its return location.
+    #
+    DBFILE                  Generic_Output                  # DRT_output.txt
+    #
+    # The following keyword provides summary information about each DRT file.
+    # This output file prints to either a binary file or text (ASCII) file, 
+    # 
+    # Each time step writes out a header with information about the time step
+    #   and the subsequent lines contain the drain information for that time step.
+    #
+    PRINTFILE               Generic_Output                  # DRT_drain_flows.txt
+    #
+END OPTIONS
+
