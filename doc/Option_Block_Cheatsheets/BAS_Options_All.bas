@@ -53,6 +53,11 @@ BEGIN OPTIONS
     # Overrides all the package Cell-By-Cell (CBC) unit numbers and sets them to IUCBC. Note that NOCBC is identical to " CBC_UNIT 0 "
     CBC_UNIT  IUCBC
     #
+    # If CONSTANT_HEAD_BUDGET_OPTIONAL is present and there are no constant heads in the model (IBOUND<0, CHD, or FHB), 
+    #   then the '   CONSTANT HEAD' array is not written to the CBC file. This reduces the CBC size by about 5%.
+    # If you use this option, you must use ZoneBudget version 3.2 or newer.
+    CONSTANT_HEAD_BUDGET_OPTIONAL
+    #
     # Indicates that the output written to the cell-by-cell (CBC) binary file should be double precision instead of single for all floating point numbers. This doubles its size and is not recommended.
     DOUBLE_PRECISION_CBC
     #
@@ -126,11 +131,15 @@ BEGIN OPTIONS
     #        can be set to NPER to get the last stress period, and optionally specify the time step afterwards
     #        if set to the keyword "LAST_TIMESTEP",  then will write the head for the last time step of every stress period -> For example, "PRINT_HEAD  LAST_TIMESTEP  ./output/head.txt" will write to head.txt the head arrays at the end of the last time step for each stress period.
     #        if set to the keyword "EVERY_TIMESTEP", then will write the head for    every time step
+    #   
     #   Generic_Output is the location to write the output head.
+    #        The post-keyword SIGFIG specifies the number of significant figure digits to write out (NDIG).
+    #        That is, "SIGFIG 11" will produce output that contains 11 significant digits.
+    #        If not specified, then the default is 5 digits.
     #   
     #   PRINT_HEAD can be repeated, one per line, to output head for different "SPTS" time steps 
     #                                             --Note only one PRINT_HEAD can be specified if SPTS is "LAST_TIMESTEP" or "EVERY_TIMESTEP".
-    PRINT_HEAD  SPTS  Generic_Output
+    PRINT_HEAD  SPTS  Generic_Output  [SIGFIG  NDIG]
     #
     # PRINT_WATER_TABLE and PRINT_WATER_DEPTH use the same input options as PRINT_HEAD, but 
     #   the output for:
@@ -139,9 +148,28 @@ BEGIN OPTIONS
     #           GSE is ether the top elevation of the upper most active cell
     #                  or specified in the DIS package with the SURFACE_ELEVATION option.
     #
-    PRINT_WATER_TABLE  SPTS  Generic_Output
+    PRINT_WATER_TABLE  SPTS  Generic_Output  [SIGFIG  NDIG]
+    # 
+    PRINT_WATER_DEPTH  SPTS  Generic_Output  [SIGFIG  NDIG]
     #
-    PRINT_WATER_DEPTH  SPTS  Generic_Output
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # Save entire model grid head value use the MODFLOW-2005 standard write utility.
+    #   This produces an equivalent output to OUTPUT CONTROL options "SAVE HEAD" or "PRINT HEAD"
+    #   Only one of the following can be selected:
+    #      "LAST_TIMESTEP",  then will write the head for the last time step of every stress period.
+    #      "EVERY_TIMESTEP", then will write the head for    every time step
+    #   
+    #   Generic_Output is the location to write the output head.
+    #      The post-keyword SIGFIG specifies the number of significant figure digits to write out (NDIG).
+    #         That is, "SIGFIG 11" will produce output that contains 11 significant digits.
+    #         If not specified, then the default is 5 digits.
+    #      The post-keyword BINARY indicates that the file should be a binary formatted file rather than a text file.
+    #         It is equivalent to DATA(BINARY) in the name file
+    #                --Note you can specify SAVE_HEAD only once.
+    #   
+    SAVE_HEAD  LAST_TIMESTEP   Generic_Output  [BINARY]  [SIGFIG  NDIG]
+    SAVE_HEAD  EVERY_TIMESTEP  Generic_Output  [BINARY]  [SIGFIG  NDIG]
+    #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #
     # Print the layer, row, column of any cell whose head value exceeds the ground surface elevation plus DstPrt.

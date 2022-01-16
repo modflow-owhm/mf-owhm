@@ -34,6 +34,17 @@ BEGIN OPTIONS
     #
     SEPARATE_FLOWS
     #
+    # Write to the directory, OUT_DIR, a the instantaneous and delay critical heads 
+    #   at the start of simulation. 
+    # 
+    # Note, that if the  HC > STRT, then  HC = STRT
+    #       and  if the DHC > DH,   then DHC = DH 
+    # where, 
+    #       HC  is the instanteous crtical head; STRT is the aquifer is the model cell's starting head
+    #       DHC is the delay bed critical head;  DH   is the delay bed initial head
+    # 
+    PRINT_INITIAL_CRITICAL_HEAD       OUT_DIR              # for example set OUT_DIR = ./subCriticalHead/
+    #
     # Advanced Options ------------------------------------------------------------------------------------------------------------------------------
     #
     # If present than the subsidence link to the DIS and LPF/UPW packages is enabled. 
@@ -42,6 +53,3 @@ BEGIN OPTIONS
     #
 END OPTIONS
 
-# This feature has yet to be implemented
-    # Write to the directory, OUT_DIR, a set of files that contain the main SUB package properties
-    ##PRINT_PROPERTY              OUT_DIR              # ./subProperty/
