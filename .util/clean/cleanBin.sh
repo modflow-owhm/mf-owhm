@@ -5,13 +5,22 @@
 
 SHELLDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 #
-CWD=$(pwd)
+CWD="$(pwd)"
 #
 cd "$SHELLDIR"
 #
 #---- Get location of find  --------------------------------------------------------------
 #
 source ../findfind.sh
+#
+#---- Keep No File Warnings From Happening  ----------------------------------------------
+#
+if [ "$OS" = "Windows_NT" ]
+then
+  touch ../../bin/mf-owhm.exe
+else
+  touch ../../bin/mf-owhm.nix
+fi
 #
 #---- Run Script  ------------------------------------------------------------------------
 #

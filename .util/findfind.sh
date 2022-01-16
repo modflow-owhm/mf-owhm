@@ -6,7 +6,7 @@
 #   but want Bash "find" with no extension
 #
 FND="find"
-for FBIN in `which --all find`; do
+for FBIN in `which -a find`; do
    case "$FBIN" in
        *Win* | *WIN* | *win* ) continue ;;
        * ) 

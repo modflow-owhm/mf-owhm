@@ -10,16 +10,29 @@
 #
 # ---- Automatically determine extension based on OS  -----------------------------------------------------
 #
-if [[ $OS -eq "Windows_NT" ]]
+if [ "$OS" = "Windows_NT" ]
 then
   PROGRAM=mf-owhm.exe
 else
   PROGRAM=mf-owhm.nix
 fi
 #
+# ---- debug command arg given  ---------------------------------------------------------------------------
+#
+if [ "$1" = "debug" ]; then
+    if [ "$OS" = "Windows_NT" ]
+    then
+      PROGRAM=mf-owhm-debug.exe
+    else
+      PROGRAM=mf-owhm-debug.nix
+    fi
+fi
+#
 #
 # ---- Override and use specified PROGRAM. Uncomment and set to use  --------------------------------------
 #
+#PROGRAM=mf-owhm-gmg-debug.exe
+#PROGRAM=mf-owhm-gmg.exe
 #
 #PROGRAM=mf-owhm-debug.exe
 #PROGRAM=mf-owhm_debug.nix
@@ -27,17 +40,17 @@ fi
 #
 #---- Main shell script for determining paths  ------------------------------------------------------------
 #
-SHELLDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+CWD="$(pwd)"
 #
-CWD=$(pwd)
+SHELLDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 #
 cd "$SHELLDIR"
 cd ../../bin
 #
-BINPATH=$(pwd)
+BINPATH="$(pwd)"
 #
 #
-OWHM=$BINPATH/$PROGRAM
+OWHM="${BINPATH}/${PROGRAM}"
 #
 #
 # ---- Override the version and path for mf-owhm used by calling scripts  ---------------------------------
