@@ -1,3 +1,8 @@
+💧🧙💦🌊  <-These symbols help text editors identify file as Unicode UTF8.
+                    UTF8 is not necessary to view numerical results, but no UTF8 support can have artifacts where non-ascii symbols are used (such as the degree symbol).
+
+
+MODFLOW-OWHM v2.2.0
 
       MMMMMMM                                       MM      MMM     MM
     MMM     MMM    MM      M   MMMMMMMM             LM     DM M     ML     MM     MMMMMMMMM  MMMMMMMM  MMMMMMMM
@@ -10,30 +15,46 @@
      MMMMMMMMN     MM      M   MMMMMMMM                7MM      7MM  MN          MM   M      MMMMMMMM  MM      MM
 
 
- MODFLOW-OWHM v2.0.01  
-
-
                         MODFLOW
             ONE-WATER HYDROLOGIC-FLOW MODEL
 
-    U.S. GEOLOGICAL SURVEY MODULAR FINITE-DIFFERENCE 
-           CONJUNCTIVE USE SIMULATION PROGRAM
+    U.S. Geological Survey Modular Finite-Difference
+           Conjunctive Use Simulation Program
 
-                     Version 2.0
+                      Version 2.2
 
- Release: 01          4/23/2020
+ Release: 0
 
- Includes:
-          MODFLOW-2005 Version 1.12.0   02/03/2017
-          MODFLOW-FMP  Version 4.00.0   04/23/2017
-          MODFLOW-SWR  Version 1.04.0   09/15/2016
-          MODFLOW-SWI  Version 2.00.0   07/22/2013
-          MODFLOW-LGR  Version 2.00.0   09/19/2013
-          MODFLOW-NWT  Version 1.2.0    03/01/2020
-          MODFLOW-CFP  Version 1.09.57  09/12/2017
+ Includes the following base versions with enhancements:
 
+          MODFLOW-2005 Version 1.12
+          MODFLOW-FMP  Version 4.1
+          MODFLOW-SWR  Version 1.04
+          MODFLOW-SWI  Version 2.0
+          MODFLOW-LGR  Version 2.0
+          MODFLOW-NWT  Version 1.2
+          MODFLOW-CFP  Version 1.09.57
+                  SWO  Version 1.0
 
- OneWater Simulation Initiated at 
+------------------------------------------------------------------------------------
+USGS Software Disclaimer:                                                          |
+                                                                                   |
+   No warranty, expressed or implied, is made by the USGS or the U.S. Government   |
+   as to the functionality of the software and related material nor shall the      |
+   fact of release constitute any such warranty.                                   |
+                                                                                   |
+   The software is provided on the condition that neither the USGS nor             |
+   the U.S. Government shall be held liable for any damages resulting from the     |
+   authorized or unauthorized use of the software.                                 |
+                                                                                   |
+   Newer versions may be present at the official code and download repository:     |
+      https://code.usgs.gov/modflow/mf-owhm                                        |
+                                                                                   |
+------------------------------------------------------------------------------------
+
+∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙
+    OneWater Simulation Initiated at  
+∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙
 
 
  LIST FILE: ./output/testsfr2.lst
@@ -298,7 +319,7 @@ THE WARNING IS BELIEVED TO HAVE ORIGINATED FROM THE FOLLOWING FILE:
 THE GUESSED LINE THAT THE WARNING OCCURED ON IS:
 "FREE  BUDGETDB ./output/testsfr2_VolumetricBudget.txt  CUMULATIVE_HEAD_CHANGE ./output/testsfr2_CumHCHG.txt  PRINT_HEAD NPER ./output/testsfr2_Head.txt"
 
-THE DESRIPTION OF THE WARNING IS:
+THE DESCRIPTION OF THE WARNING IS:
 
 FOUND BAS PACKAGE OPTION KEYWORDS ALONG PACKAGE "OPTIONS LINE" (ie Data Set 1)
 
@@ -338,11 +359,11 @@ END OPTIONS
 
  NOW READING BAS OPTIONS
 
- FOUND OPTION: FREE
-    THE FREE FORMAT OPTION HAS BEEN SELECTED
-         -NOTE THIS NOW IS THE DEFAULT AND NOT NECESSARY.
+ Found Option: FREE
+                 THE FREE FORMAT OPTION HAS BEEN SELECTED
+                    -NOTE THIS NOW IS THE DEFAULT AND NOT NECESSARY.
 
- FOUND OPTION: BUDGETDB
+ Found Option: BUDGETDB
 
 
 ########################################################################################################
@@ -357,7 +378,7 @@ THE WARNING IS BELIEVED TO HAVE ORIGINATED FROM THE FOLLOWING FILE:
 THE GUESSED LINE THAT THE WARNING OCCURED ON IS:
 "FREE  BUDGETDB ./output/testsfr2_VolumetricBudget.txt  CUMULATIVE_HEAD_CHANGE ./output/testsfr2_CumHCHG.txt  PRINT_HEAD NPER ./output/testsfr2_Head.txt"
 
-THE DESRIPTION OF THE WARNING IS:
+THE DESCRIPTION OF THE WARNING IS:
 
 ...CHECK_FOR_POST_KEY WARNINGS...
  THE FOLLOWING MESSAGES WERE PASSED WHILE CHECKING FOR ANY ADDITIONAL KEYWORDS ON LOADED LINE.
@@ -374,9 +395,10 @@ TO SUPRESS THIS WARNING PLEASE PLACE A "#" SYMBOL TO THE LEFT OF THE WORD TO IND
 
 
 
- FOUND OPTION: CUMULATIVE_HEAD_CHANGE
-    THIS OPTION IS ONLY USEFUL FOR MODEL RESULT COMPARISON WITH DIFFERENT CODE COMPARISONS.
 
+ Found Option: CUMULATIVE_HEAD_CHANGE
+                 Cumulative sum of absolute head differences for the entire model.
+                 This is a diagnostic feature meant for comparing MF-OWHM code versions with the same model input (software unit test).
 
 
 ########################################################################################################
@@ -391,7 +413,7 @@ THE WARNING IS BELIEVED TO HAVE ORIGINATED FROM THE FOLLOWING FILE:
 THE GUESSED LINE THAT THE WARNING OCCURED ON IS:
 "FREE  BUDGETDB ./output/testsfr2_VolumetricBudget.txt  CUMULATIVE_HEAD_CHANGE ./output/testsfr2_CumHCHG.txt  PRINT_HEAD NPER ./output/testsfr2_Head.txt"
 
-THE DESRIPTION OF THE WARNING IS:
+THE DESCRIPTION OF THE WARNING IS:
 
 ...CHECK_FOR_POST_KEY WARNINGS...
  THE FOLLOWING MESSAGES WERE PASSED WHILE CHECKING FOR ANY ADDITIONAL KEYWORDS ON LOADED LINE.
@@ -408,13 +430,19 @@ TO SUPRESS THIS WARNING PLEASE PLACE A "#" SYMBOL TO THE LEFT OF THE WORD TO IND
 
 
 
- FOUND OPTION: PRINT_HEAD    SP    TS   FILE
-                             50    30   ./output/testsfr2_Head.txt
 
- THE MAX STORAGE FOR PROPERTIES DEFINED BY PARAMETERS IS: 
- MAX STORAGE OF PARAMETERS (MXPAR)  IS       2000
- MAX STORAGE OF INSTANCES  (MXINST) IS      50000
- MAX STORAGE OF CLUSTERS   (MXCLST) IS    2000000
+ Found Option: PRINT_HEAD
+                 NPER ./output/testsfr2_Head.txt
+
+
+ Setting up PRINT_HEAD option for 
+    SP    TS   FILE
+    50    30   ./output/testsfr2_Head.txt
+
+ The total simulation limit for the number PARAMETERs defined is: 
+     Max number of PARAMETERs (MXPAR)  is       2000
+     Max number of INSTANCEs  (MXINST) is      50000
+     Max number of CLUSTERs   (MXCLST) is    2000000
 
 
 
@@ -770,7 +798,7 @@ NSTRM<0 Indicates acts as surrogate to "REACHINPUT" Option in OPTIONS Block.Some
 
          THE FOLLOWING COMMENTS WERE PASSED TO THE WARNING ROUTINE
 
-THE DESRIPTION OF THE WARNING IS:
+THE DESCRIPTION OF THE WARNING IS:
 
 DIS PACKAGE: THE GROUND SURFACE ELEVATION WAS NOT SPECIFIED WITH THE KEYWORD "SURFACE_ELEVATION"
 
@@ -865,41 +893,121 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  5.3263661E-7
+                              RClose:  2.7011637E-8
+                           L2-RClose:  8.0904319E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP     1
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  2.2037355E-7
+                              RClose:  5.4088957E-8
+                           L2-RClose:  1.3748772E-7
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP     2
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  3.2821136E-7
+                              RClose:  1.2501744E-8
+                           L2-RClose:  4.2253392E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP     3
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  7.9357278E-8
+                              RClose:  2.2638744E-8
+                           L2-RClose:  5.9264108E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP     4
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  8.1668418E-8
+                              RClose:  2.4739109E-8
+                           L2-RClose:  6.4175202E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP     5
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  1.2155144E-7
+                              RClose:  2.9591718E-8
+                           L2-RClose:  7.4734497E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP     6
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  1.2585278E-7
+                              RClose:  2.8435863E-8
+                           L2-RClose:  7.1572202E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP     7
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  1.3141170E-7
+                              RClose:  2.7613169E-8
+                           L2-RClose:  6.9148848E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP     8
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  1.4651569E-7
+                              RClose:  2.6799057E-8
+                           L2-RClose:  6.6952481E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP     9
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  1.3510389E-7
+                              RClose:  6.5646191E-9
+                           L2-RClose:  2.2204231E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    10
     PRINT HEAD FOR ALL LAYERS
@@ -1175,81 +1283,241 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  1.9310237E-7
+                              RClose:  8.9106749E-9
+                           L2-RClose:  3.7097741E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    11
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  1.4186485E-7
+                              RClose:  2.2422796E-8
+                           L2-RClose:  5.5134947E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    12
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  1.4353068E-7
+                              RClose:  1.6654326E-8
+                           L2-RClose:  4.3325022E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    13
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  6.7558744E-8
+                              RClose:  8.7820808E-9
+                           L2-RClose:  2.3212925E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    14
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  1.1645247E-7
+                              RClose:  1.3057786E-8
+                           L2-RClose:  3.5439046E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    15
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  1.6207275E-7
+                              RClose:  1.7299499E-8
+                           L2-RClose:  4.2857983E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    16
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  1.7062411E-7
+                              RClose:  1.6741865E-8
+                           L2-RClose:  4.1541794E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    17
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  1.1280262E-7
+                              RClose:  9.7503516E-9
+                           L2-RClose:  2.4032669E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    18
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  9.3958747E-8
+                              RClose:  5.5809437E-9
+                           L2-RClose:  1.4386856E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    19
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  9.3478093E-8
+                              RClose:  6.2550498E-9
+                           L2-RClose:  1.6029058E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    20
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  1.2215942E-7
+                              RClose:  7.6573770E-9
+                           L2-RClose:  1.9274074E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    21
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  6.6554477E-8
+                              RClose:  5.0058020E-9
+                           L2-RClose:  1.2700215E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    22
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  1.0541162E-7
+                              RClose:  5.3328790E-9
+                           L2-RClose:  1.4809605E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    23
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  8.1349626E-8
+                              RClose:  4.0899977E-9
+                           L2-RClose:  9.8386269E-9
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    24
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  8.1730633E-8
+                              RClose:  4.0065515E-9
+                           L2-RClose:  9.7568508E-9
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    25
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  8.2362803E-8
+                              RClose:  3.9362931E-9
+                           L2-RClose:  9.7345236E-9
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    26
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  8.3037747E-8
+                              RClose:  3.8477879E-9
+                           L2-RClose:  9.7220226E-9
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    27
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  8.3882369E-8
+                              RClose:  3.7586574E-9
+                           L2-RClose:  9.7584215E-9
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    28
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  8.4997836E-8
+                              RClose:  3.6719712E-9
+                           L2-RClose:  9.8568745E-9
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    29
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  8.6576136E-8
+                              RClose:  3.5914809E-9
+                           L2-RClose:  1.0031483E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    30
     PRINT HEAD FOR ALL LAYERS
@@ -1583,121 +1851,361 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  8.3872507E-8
+                              RClose:  8.2489748E-10
+                           L2-RClose:  6.2506390E-9
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP     1
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  9.1329042E-8
+                              RClose:  8.2473406E-10
+                           L2-RClose:  6.2518003E-9
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP     2
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  9.9360946E-8
+                              RClose:  8.2525276E-10
+                           L2-RClose:  6.2642672E-9
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP     3
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  1.0787254E-7
+                              RClose:  8.2537355E-10
+                           L2-RClose:  6.2855747E-9
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP     4
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  1.1710053E-7
+                              RClose:  8.2729201E-10
+                           L2-RClose:  6.3323934E-9
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP     5
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  1.2697328E-7
+                              RClose:  8.7709395E-10
+                           L2-RClose:  6.4088545E-9
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP     6
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  1.3750913E-7
+                              RClose:  1.0182930E-9
+                           L2-RClose:  6.5262975E-9
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP     7
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  1.4871156E-7
+                              RClose:  1.1826842E-9
+                           L2-RClose:  6.7015391E-9
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP     8
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  1.6060228E-7
+                              RClose:  1.3732233E-9
+                           L2-RClose:  6.9519671E-9
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP     9
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  1.7317281E-7
+                              RClose:  1.5945147E-9
+                           L2-RClose:  7.3038267E-9
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    10
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  1.8641073E-7
+                              RClose:  1.8513333E-9
+                           L2-RClose:  7.7882087E-9
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    11
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  2.0029039E-7
+                              RClose:  2.1491928E-9
+                           L2-RClose:  8.4420551E-9
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    12
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  2.1476893E-7
+                              RClose:  2.4940050E-9
+                           L2-RClose:  9.3075218E-9
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    13
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  2.2978300E-7
+                              RClose:  2.8923068E-9
+                           L2-RClose:  1.0430818E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    14
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  2.4523608E-7
+                              RClose:  3.3511469E-9
+                           L2-RClose:  1.1860335E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    15
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  2.6100186E-7
+                              RClose:  3.8718326E-9
+                           L2-RClose:  1.3625891E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    16
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  2.8557776E-7
+                              RClose:  4.6655728E-9
+                           L2-RClose:  1.6329550E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    17
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  2.9305457E-7
+                              RClose:  6.6638677E-9
+                           L2-RClose:  2.4502748E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    18
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  4.9857489E-7
+                              RClose:  1.1442033E-8
+                           L2-RClose:  3.2118806E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    19
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  4.6596612E-7
+                              RClose:  5.6293175E-9
+                           L2-RClose:  2.1317165E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    20
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  5.4859419E-7
+                              RClose:  6.3162133E-9
+                           L2-RClose:  2.4455179E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    21
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  6.3297850E-7
+                              RClose:  7.0779151E-9
+                           L2-RClose:  2.7951109E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    22
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  7.1168431E-7
+                              RClose:  7.9158440E-9
+                           L2-RClose:  3.1775457E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    23
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  7.8114125E-7
+                              RClose:  8.7586614E-9
+                           L2-RClose:  3.5598804E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    24
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  8.3888777E-7
+                              RClose:  9.6924282E-9
+                           L2-RClose:  3.9893939E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    25
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  8.5567592E-7
+                              RClose:  1.0110391E-8
+                           L2-RClose:  4.1313223E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    26
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  8.9064820E-7
+                              RClose:  1.1502266E-8
+                           L2-RClose:  4.8279916E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    27
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  9.3245006E-7
+                              RClose:  1.3131888E-8
+                           L2-RClose:  5.3662223E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    28
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  9.6254126E-7
+                              RClose:  1.4849217E-8
+                           L2-RClose:  5.5576470E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    29
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  5.3855430E-8
+                              RClose:  1.7208528E-9
+                           L2-RClose:  6.3511662E-9
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    30
 
@@ -1926,121 +2434,361 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  2.0806067E-7
+                              RClose:  1.7493917E-9
+                           L2-RClose:  1.0506070E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP     1
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  2.1572579E-7
+                              RClose:  1.5498358E-9
+                           L2-RClose:  1.0313156E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP     2
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  2.2363878E-7
+                              RClose:  1.6534187E-9
+                           L2-RClose:  1.0195481E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP     3
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  2.3221683E-7
+                              RClose:  1.7790995E-9
+                           L2-RClose:  1.0085047E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP     4
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  2.4162240E-7
+                              RClose:  1.8506014E-9
+                           L2-RClose:  1.0046291E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP     5
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  2.5129083E-7
+                              RClose:  1.9705126E-9
+                           L2-RClose:  1.0040093E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP     6
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  2.6141788E-7
+                              RClose:  2.1089406E-9
+                           L2-RClose:  1.0127001E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP     7
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  2.7266751E-7
+                              RClose:  1.6349446E-9
+                           L2-RClose:  1.0238990E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP     8
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  2.8418458E-7
+                              RClose:  1.7776358E-9
+                           L2-RClose:  1.0463451E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP     9
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  2.9636095E-7
+                              RClose:  2.0467681E-9
+                           L2-RClose:  1.0790223E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    10
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  3.0925872E-7
+                              RClose:  2.2833575E-9
+                           L2-RClose:  1.1215575E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    11
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  3.2296178E-7
+                              RClose:  2.5394655E-9
+                           L2-RClose:  1.1730731E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    12
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  3.3747482E-7
+                              RClose:  2.8310296E-9
+                           L2-RClose:  1.2362488E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    13
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  3.5468449E-7
+                              RClose:  1.7705872E-9
+                           L2-RClose:  1.2516717E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    14
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  3.7149914E-7
+                              RClose:  2.1456259E-9
+                           L2-RClose:  1.3300544E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    15
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  4.0728644E-7
+                              RClose:  2.4037661E-9
+                           L2-RClose:  1.4265864E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    16
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  4.3597132E-7
+                              RClose:  2.4435352E-9
+                           L2-RClose:  1.5368816E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    17
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  4.4667502E-7
+                              RClose:  2.5857361E-9
+                           L2-RClose:  1.6604166E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    18
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  4.6820139E-7
+                              RClose:  3.1737386E-9
+                           L2-RClose:  1.8634049E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    19
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  4.8889734E-7
+                              RClose:  4.1102908E-9
+                           L2-RClose:  2.0961782E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    20
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  5.0735170E-7
+                              RClose:  5.1416578E-9
+                           L2-RClose:  2.3124203E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    21
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  5.2258551E-7
+                              RClose:  8.0029352E-9
+                           L2-RClose:  2.8951079E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    22
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  5.3962241E-7
+                              RClose:  9.8027897E-9
+                           L2-RClose:  3.2796330E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    23
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  5.8229070E-7
+                              RClose:  5.4202474E-9
+                           L2-RClose:  2.6400941E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    24
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  6.0452200E-7
+                              RClose:  6.2080403E-9
+                           L2-RClose:  2.8983617E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    25
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  6.2546661E-7
+                              RClose:  7.1594286E-9
+                           L2-RClose:  3.2177624E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    26
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  6.4569566E-7
+                              RClose:  8.3367127E-9
+                           L2-RClose:  3.6273842E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    27
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  6.7011146E-7
+                              RClose:  8.7733376E-9
+                           L2-RClose:  3.6695701E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    28
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  7.0403826E-7
+                              RClose:  1.0236963E-8
+                           L2-RClose:  4.0755073E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    29
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  7.7161944E-7
+                              RClose:  1.1826053E-8
+                           L2-RClose:  4.6170860E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    30
 
@@ -2269,121 +3017,361 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  1.5361570E-7
+                              RClose:  1.3431318E-9
+                           L2-RClose:  8.6620246E-9
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      4   TIME STEP     1
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  1.5904521E-7
+                              RClose:  1.1936194E-9
+                           L2-RClose:  8.4646980E-9
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      4   TIME STEP     2
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  1.6480141E-7
+                              RClose:  1.1156374E-9
+                           L2-RClose:  8.3034830E-9
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      4   TIME STEP     3
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  1.7092259E-7
+                              RClose:  1.1351347E-9
+                           L2-RClose:  8.1824176E-9
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      4   TIME STEP     4
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  1.7744725E-7
+                              RClose:  1.1539854E-9
+                           L2-RClose:  8.1056573E-9
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      4   TIME STEP     5
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  1.8441506E-7
+                              RClose:  1.1725163E-9
+                           L2-RClose:  8.0776997E-9
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      4   TIME STEP     6
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  1.9186703E-7
+                              RClose:  1.1909194E-9
+                           L2-RClose:  8.1029703E-9
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      4   TIME STEP     7
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  1.9984492E-7
+                              RClose:  1.2095569E-9
+                           L2-RClose:  8.1860765E-9
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      4   TIME STEP     8
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  2.0839104E-7
+                              RClose:  1.2286989E-9
+                           L2-RClose:  8.3315080E-9
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      4   TIME STEP     9
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  2.1754744E-7
+                              RClose:  1.2486794E-9
+                           L2-RClose:  8.5437674E-9
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      4   TIME STEP    10
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  2.2751085E-7
+                              RClose:  1.2594725E-9
+                           L2-RClose:  8.7912182E-9
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      4   TIME STEP    11
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  2.3764036E-7
+                              RClose:  1.8893118E-9
+                           L2-RClose:  9.4550315E-9
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      4   TIME STEP    12
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  3.0421023E-7
+                              RClose:  2.5920244E-9
+                           L2-RClose:  9.9226260E-9
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      4   TIME STEP    13
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  3.2403925E-7
+                              RClose:  2.7003964E-9
+                           L2-RClose:  1.1058909E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      4   TIME STEP    14
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  3.0513381E-7
+                              RClose:  2.2683011E-9
+                           L2-RClose:  1.1956238E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      4   TIME STEP    15
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  3.1665130E-7
+                              RClose:  1.8935324E-9
+                           L2-RClose:  1.2901072E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      4   TIME STEP    16
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  3.3235938E-7
+                              RClose:  1.7730812E-9
+                           L2-RClose:  1.4029484E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      4   TIME STEP    17
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  3.4661365E-7
+                              RClose:  2.0703297E-9
+                           L2-RClose:  1.5655462E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      4   TIME STEP    18
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  3.6298631E-7
+                              RClose:  2.1310385E-9
+                           L2-RClose:  1.6450281E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      4   TIME STEP    19
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  4.0596632E-7
+                              RClose:  5.4296336E-9
+                           L2-RClose:  2.0221912E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      4   TIME STEP    20
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  5.2340911E-7
+                              RClose:  7.1057613E-9
+                           L2-RClose:  2.3065359E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      4   TIME STEP    21
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  6.3628076E-7
+                              RClose:  1.1369359E-8
+                           L2-RClose:  3.3179280E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      4   TIME STEP    22
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  6.4826388E-7
+                              RClose:  1.1765891E-8
+                           L2-RClose:  3.7243762E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      4   TIME STEP    23
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  5.5873808E-7
+                              RClose:  6.4615833E-9
+                           L2-RClose:  3.6633712E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      4   TIME STEP    24
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  5.5537880E-7
+                              RClose:  1.1799685E-8
+                           L2-RClose:  4.9779065E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      4   TIME STEP    25
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  5.5911671E-7
+                              RClose:  1.7752249E-8
+                           L2-RClose:  6.0668135E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      4   TIME STEP    26
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  5.3942637E-7
+                              RClose:  2.9004781E-8
+                           L2-RClose:  8.0689389E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      4   TIME STEP    27
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  5.7966352E-7
+                              RClose:  2.9498530E-8
+                           L2-RClose:  7.9348112E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      4   TIME STEP    28
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  6.6120043E-7
+                              RClose:  7.5874382E-9
+                           L2-RClose:  5.1064280E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      4   TIME STEP    29
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  6.8056391E-7
+                              RClose:  9.5075663E-9
+                           L2-RClose:  5.7841770E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      4   TIME STEP    30
 
@@ -2523,7 +3511,18 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
 
 
  
+
+ NO OUTPUT CONTROL FOR STRESS PERIOD     45   TIME STEP    29
+ 
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  8.4475815E-8
+                              RClose:  6.0352434E-9
+                           L2-RClose:  2.0162941E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD     45   TIME STEP    30
     PRINT HEAD FOR ALL LAYERS
@@ -2849,121 +3848,361 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  2.5577735E-7
+                              RClose:  2.3173001E-9
+                           L2-RClose:  2.5285186E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     46   TIME STEP     1
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  2.6585266E-7
+                              RClose:  2.0707702E-9
+                           L2-RClose:  2.4728141E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     46   TIME STEP     2
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  2.7646780E-7
+                              RClose:  1.8214124E-9
+                           L2-RClose:  2.4342579E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     46   TIME STEP     3
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  2.8771026E-7
+                              RClose:  1.7956694E-9
+                           L2-RClose:  2.4088694E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     46   TIME STEP     4
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  2.9965670E-7
+                              RClose:  1.8374919E-9
+                           L2-RClose:  2.3974384E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     46   TIME STEP     5
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  3.1238632E-7
+                              RClose:  1.8798616E-9
+                           L2-RClose:  2.4015372E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     46   TIME STEP     6
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  3.2597978E-7
+                              RClose:  1.9234676E-9
+                           L2-RClose:  2.4228155E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     46   TIME STEP     7
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  3.4171815E-7
+                              RClose:  1.9642385E-9
+                           L2-RClose:  2.4607226E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     46   TIME STEP     8
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  3.5756112E-7
+                              RClose:  2.0109425E-9
+                           L2-RClose:  2.5264793E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     46   TIME STEP     9
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  3.7478443E-7
+                              RClose:  2.0710900E-9
+                           L2-RClose:  2.6094679E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     46   TIME STEP    10
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  3.9341167E-7
+                              RClose:  2.1375115E-9
+                           L2-RClose:  2.7178851E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     46   TIME STEP    11
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  4.1353091E-7
+                              RClose:  2.1906459E-9
+                           L2-RClose:  2.8461080E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     46   TIME STEP    12
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  4.3519242E-7
+                              RClose:  2.2495215E-9
+                           L2-RClose:  3.0031163E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     46   TIME STEP    13
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  4.5855823E-7
+                              RClose:  2.3365700E-9
+                           L2-RClose:  3.1885653E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     46   TIME STEP    14
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  4.8393147E-7
+                              RClose:  2.4485800E-9
+                           L2-RClose:  3.4058075E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     46   TIME STEP    15
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  5.1073307E-7
+                              RClose:  2.6216682E-9
+                           L2-RClose:  3.8053015E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     46   TIME STEP    16
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  6.2758333E-7
+                              RClose:  3.8839971E-9
+                           L2-RClose:  4.9503627E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     46   TIME STEP    17
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  7.5207460E-7
+                              RClose:  5.4138738E-9
+                           L2-RClose:  6.0926515E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     46   TIME STEP    18
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  8.5017840E-7
+                              RClose:  7.2725967E-9
+                           L2-RClose:  7.3324046E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     46   TIME STEP    19
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  9.3970861E-7
+                              RClose:  1.1354771E-8
+                           L2-RClose:  8.5879940E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     46   TIME STEP    20
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  7.6078862E-8
+                              RClose:  5.3427414E-9
+                           L2-RClose:  1.2673281E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     46   TIME STEP    21
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  8.8000078E-8
+                              RClose:  6.6933410E-9
+                           L2-RClose:  1.6488014E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     46   TIME STEP    22
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  7.9187856E-8
+                              RClose:  3.8533301E-9
+                           L2-RClose:  1.0850945E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     46   TIME STEP    23
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  1.0828944E-7
+                              RClose:  5.9731917E-9
+                           L2-RClose:  1.5259052E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     46   TIME STEP    24
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  1.3403276E-7
+                              RClose:  7.5005744E-9
+                           L2-RClose:  1.9270623E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     46   TIME STEP    25
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  1.5851998E-7
+                              RClose:  8.6712362E-9
+                           L2-RClose:  2.2660639E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     46   TIME STEP    26
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  1.8020204E-7
+                              RClose:  9.6853441E-9
+                           L2-RClose:  2.5790322E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     46   TIME STEP    27
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  2.0723496E-7
+                              RClose:  1.1183616E-8
+                           L2-RClose:  3.0345381E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     46   TIME STEP    28
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  1.3899415E-7
+                              RClose:  1.1760420E-8
+                           L2-RClose:  2.9497165E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     46   TIME STEP    29
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  1.5306979E-7
+                              RClose:  1.2666533E-8
+                           L2-RClose:  3.2278820E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     46   TIME STEP    30
 
@@ -3192,121 +4431,361 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  3.2549119E-7
+                              RClose:  2.5985685E-9
+                           L2-RClose:  3.8820786E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     47   TIME STEP     1
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  3.3978920E-7
+                              RClose:  2.6790445E-9
+                           L2-RClose:  3.8480991E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     47   TIME STEP     2
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  3.5525693E-7
+                              RClose:  2.7590659E-9
+                           L2-RClose:  3.8329542E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     47   TIME STEP     3
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  3.7311199E-7
+                              RClose:  2.8385898E-9
+                           L2-RClose:  3.8344086E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     47   TIME STEP     4
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  3.9114416E-7
+                              RClose:  2.9225049E-9
+                           L2-RClose:  3.8574034E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     47   TIME STEP     5
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  4.1864959E-7
+                              RClose:  3.0110314E-9
+                           L2-RClose:  3.9037777E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     47   TIME STEP     6
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  4.3995952E-7
+                              RClose:  3.1058818E-9
+                           L2-RClose:  3.9736834E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     47   TIME STEP     7
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  4.6294711E-7
+                              RClose:  3.2085410E-9
+                           L2-RClose:  4.0714244E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     47   TIME STEP     8
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  4.8766570E-7
+                              RClose:  3.3222420E-9
+                           L2-RClose:  4.1988873E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     47   TIME STEP     9
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  5.1415492E-7
+                              RClose:  3.4493510E-9
+                           L2-RClose:  4.3576958E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     47   TIME STEP    10
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  5.4270616E-7
+                              RClose:  3.5936409E-9
+                           L2-RClose:  4.5528255E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     47   TIME STEP    11
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  5.7403946E-7
+                              RClose:  3.7593466E-9
+                           L2-RClose:  4.7847001E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     47   TIME STEP    12
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  6.0565904E-7
+                              RClose:  3.9518966E-9
+                           L2-RClose:  5.0588955E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     47   TIME STEP    13
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  6.4626012E-7
+                              RClose:  4.1772381E-9
+                           L2-RClose:  5.3776396E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     47   TIME STEP    14
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  6.9076336E-7
+                              RClose:  4.4434572E-9
+                           L2-RClose:  5.7511385E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     47   TIME STEP    15
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  7.3860097E-7
+                              RClose:  6.9983273E-9
+                           L2-RClose:  6.2109972E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     47   TIME STEP    16
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  7.9182799E-7
+                              RClose:  8.8174303E-9
+                           L2-RClose:  6.7287888E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     47   TIME STEP    17
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  8.5023798E-7
+                              RClose:  1.1262500E-8
+                           L2-RClose:  7.3497374E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     47   TIME STEP    18
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  9.1425305E-7
+                              RClose:  1.4576820E-8
+                           L2-RClose:  8.1020855E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     47   TIME STEP    19
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  6.8862661E-8
+                              RClose:  4.3611053E-9
+                           L2-RClose:  1.0868175E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     47   TIME STEP    20
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  6.3927459E-8
+                              RClose:  4.2406896E-9
+                           L2-RClose:  1.0427336E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     47   TIME STEP    21
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  6.7955810E-8
+                              RClose:  4.8528648E-9
+                           L2-RClose:  1.1753632E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     47   TIME STEP    22
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  7.2128955E-8
+                              RClose:  5.3425353E-9
+                           L2-RClose:  1.2603875E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     47   TIME STEP    23
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  7.3243839E-8
+                              RClose:  4.7167674E-9
+                           L2-RClose:  1.2450402E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     47   TIME STEP    24
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  8.4734097E-8
+                              RClose:  5.0054183E-9
+                           L2-RClose:  1.3210102E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     47   TIME STEP    25
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  1.0170947E-7
+                              RClose:  6.0469461E-9
+                           L2-RClose:  1.5714028E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     47   TIME STEP    26
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  1.1816620E-7
+                              RClose:  6.6878911E-9
+                           L2-RClose:  1.7899655E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     47   TIME STEP    27
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  1.3365330E-7
+                              RClose:  7.3136306E-9
+                           L2-RClose:  1.9920209E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     47   TIME STEP    28
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  1.5272691E-7
+                              RClose:  7.9187288E-9
+                           L2-RClose:  2.2094638E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     47   TIME STEP    29
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  1.7478098E-7
+                              RClose:  9.4366399E-9
+                           L2-RClose:  2.6872708E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     47   TIME STEP    30
 
@@ -3535,121 +5014,361 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  2.8456064E-7
+                              RClose:  2.3523938E-9
+                           L2-RClose:  3.0787965E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     48   TIME STEP     1
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  2.9693462E-7
+                              RClose:  2.1094451E-9
+                           L2-RClose:  3.0283813E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     48   TIME STEP     2
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  3.1007795E-7
+                              RClose:  2.1608315E-9
+                           L2-RClose:  2.9997565E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     48   TIME STEP     3
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  3.2410324E-7
+                              RClose:  2.2083597E-9
+                           L2-RClose:  2.9818857E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     48   TIME STEP     4
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  3.3909977E-7
+                              RClose:  2.2618707E-9
+                           L2-RClose:  2.9869248E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     48   TIME STEP     5
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  3.5589191E-7
+                              RClose:  2.3142164E-9
+                           L2-RClose:  3.0048207E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     48   TIME STEP     6
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  3.7335232E-7
+                              RClose:  2.3651339E-9
+                           L2-RClose:  3.0483587E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     48   TIME STEP     7
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  3.9217943E-7
+                              RClose:  2.4174867E-9
+                           L2-RClose:  3.1104047E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     48   TIME STEP     8
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  4.1262095E-7
+                              RClose:  2.4693350E-9
+                           L2-RClose:  3.2018261E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     48   TIME STEP     9
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  4.3463326E-7
+                              RClose:  2.5354581E-9
+                           L2-RClose:  3.3158994E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     48   TIME STEP    10
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  4.5845599E-7
+                              RClose:  2.5959110E-9
+                           L2-RClose:  3.4598803E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     48   TIME STEP    11
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  4.8433353E-7
+                              RClose:  2.6611247E-9
+                           L2-RClose:  3.6353608E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     48   TIME STEP    12
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  5.1248695E-7
+                              RClose:  2.7426381E-9
+                           L2-RClose:  3.8373966E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     48   TIME STEP    13
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  5.4305838E-7
+                              RClose:  2.8197178E-9
+                           L2-RClose:  4.0835770E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     48   TIME STEP    14
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  5.7663050E-7
+                              RClose:  2.9130831E-9
+                           L2-RClose:  4.3604279E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     48   TIME STEP    15
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  6.1531165E-7
+                              RClose:  3.4208369E-9
+                           L2-RClose:  4.6414205E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     48   TIME STEP    16
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  6.5320606E-7
+                              RClose:  4.1901060E-9
+                           L2-RClose:  3.9114077E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     48   TIME STEP    17
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  6.8561918E-7
+                              RClose:  5.0018230E-9
+                           L2-RClose:  3.6694349E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     48   TIME STEP    18
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  6.8717189E-7
+                              RClose:  8.2791018E-9
+                           L2-RClose:  4.0559004E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     48   TIME STEP    19
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  6.1867443E-7
+                              RClose:  8.3340055E-9
+                           L2-RClose:  3.9327052E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     48   TIME STEP    20
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  5.1746886E-7
+                              RClose:  6.2243615E-9
+                           L2-RClose:  3.7698493E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     48   TIME STEP    21
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  5.6222136E-7
+                              RClose:  6.4733641E-9
+                           L2-RClose:  4.0241914E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     48   TIME STEP    22
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  5.9508501E-7
+                              RClose:  1.3458649E-8
+                           L2-RClose:  4.6858853E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     48   TIME STEP    23
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  6.4442563E-7
+                              RClose:  5.7373626E-9
+                           L2-RClose:  4.7465732E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     48   TIME STEP    24
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  7.3598342E-7
+                              RClose:  1.0619452E-8
+                           L2-RClose:  6.4244722E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     48   TIME STEP    25
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  7.4914026E-7
+                              RClose:  1.3307812E-8
+                           L2-RClose:  7.1371272E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     48   TIME STEP    26
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  7.9268335E-7
+                              RClose:  1.7746750E-8
+                           L2-RClose:  8.4989772E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     48   TIME STEP    27
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  8.5020142E-7
+                              RClose:  2.8878056E-8
+                           L2-RClose:  1.0414653E-7
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     48   TIME STEP    28
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  8.9196909E-7
+                              RClose:  4.8939349E-8
+                           L2-RClose:  1.3624041E-7
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     48   TIME STEP    29
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  9.1757215E-7
+                              RClose:  6.6936217E-8
+                           L2-RClose:  1.7631280E-7
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     48   TIME STEP    30
 
@@ -3878,121 +5597,361 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  1.7529428E-7
+                              RClose:  1.4759749E-9
+                           L2-RClose:  1.5668202E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     49   TIME STEP     1
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  1.8255481E-7
+                              RClose:  1.3016432E-9
+                           L2-RClose:  1.5375489E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     49   TIME STEP     2
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  1.9031349E-7
+                              RClose:  1.3380443E-9
+                           L2-RClose:  1.5219869E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     49   TIME STEP     3
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  1.9857930E-7
+                              RClose:  1.3707790E-9
+                           L2-RClose:  1.5102936E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     49   TIME STEP     4
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  2.0749198E-7
+                              RClose:  1.4042527E-9
+                           L2-RClose:  1.5085142E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     49   TIME STEP     5
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  2.1722113E-7
+                              RClose:  1.4390764E-9
+                           L2-RClose:  1.5167463E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     49   TIME STEP     6
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  2.2766096E-7
+                              RClose:  1.4755770E-9
+                           L2-RClose:  1.5373346E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     49   TIME STEP     7
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  2.3921598E-7
+                              RClose:  1.5173853E-9
+                           L2-RClose:  1.5665489E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     49   TIME STEP     8
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  2.5179986E-7
+                              RClose:  1.5647572E-9
+                           L2-RClose:  1.6100294E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     49   TIME STEP     9
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  2.6559417E-7
+                              RClose:  1.6201582E-9
+                           L2-RClose:  1.6677908E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     49   TIME STEP    10
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  2.7996980E-7
+                              RClose:  1.6836168E-9
+                           L2-RClose:  1.7365042E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     49   TIME STEP    11
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  2.9475693E-7
+                              RClose:  1.6726247E-9
+                           L2-RClose:  1.8201567E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     49   TIME STEP    12
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  3.1152950E-7
+                              RClose:  1.6999877E-9
+                           L2-RClose:  1.9213835E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     49   TIME STEP    13
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  3.2894154E-7
+                              RClose:  1.7566322E-9
+                           L2-RClose:  2.0410562E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     49   TIME STEP    14
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  3.4904737E-7
+                              RClose:  1.8165238E-9
+                           L2-RClose:  2.1919509E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     49   TIME STEP    15
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  4.3069238E-7
+                              RClose:  2.6527829E-9
+                           L2-RClose:  3.0993780E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     49   TIME STEP    16
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  5.8356048E-7
+                              RClose:  3.7267185E-9
+                           L2-RClose:  4.3701163E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     49   TIME STEP    17
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  6.7381195E-7
+                              RClose:  5.1356395E-9
+                           L2-RClose:  5.2672573E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     49   TIME STEP    18
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  8.0864741E-7
+                              RClose:  6.8568937E-9
+                           L2-RClose:  6.6943734E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     49   TIME STEP    19
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  9.4932078E-7
+                              RClose:  1.4679827E-8
+                           L2-RClose:  7.6571631E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     49   TIME STEP    20
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  9.8706441E-7
+                              RClose:  1.8149699E-8
+                           L2-RClose:  9.3767324E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     49   TIME STEP    21
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  7.2717171E-8
+                              RClose:  5.6720495E-9
+                           L2-RClose:  1.4021286E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     49   TIME STEP    22
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  7.2277757E-8
+                              RClose:  3.2157743E-9
+                           L2-RClose:  9.4627172E-9
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     49   TIME STEP    23
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  1.0089778E-7
+                              RClose:  4.8766537E-9
+                           L2-RClose:  1.2867073E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     49   TIME STEP    24
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  1.1772357E-7
+                              RClose:  6.3583059E-9
+                           L2-RClose:  1.7257980E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     49   TIME STEP    25
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  1.4358947E-7
+                              RClose:  7.7738491E-9
+                           L2-RClose:  2.0464939E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     49   TIME STEP    26
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  1.7072918E-7
+                              RClose:  8.8856993E-9
+                           L2-RClose:  2.3893820E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     49   TIME STEP    27
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  1.8809092E-7
+                              RClose:  9.9988711E-9
+                           L2-RClose:  2.7192412E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     49   TIME STEP    28
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  1.3339559E-7
+                              RClose:  1.1071243E-8
+                           L2-RClose:  2.7921688E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     49   TIME STEP    29
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  1.4649675E-7
+                              RClose:  1.1906380E-8
+                           L2-RClose:  3.0481335E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     49   TIME STEP    30
 
@@ -4221,121 +6180,361 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  3.1075483E-7
+                              RClose:  2.3911113E-9
+                           L2-RClose:  3.3756241E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     50   TIME STEP     1
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  3.0435598E-7
+                              RClose:  2.1024249E-9
+                           L2-RClose:  3.3259252E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     50   TIME STEP     2
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  3.2038768E-7
+                              RClose:  2.3157725E-9
+                           L2-RClose:  3.3276430E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     50   TIME STEP     3
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  3.3794133E-7
+                              RClose:  2.2952946E-9
+                           L2-RClose:  3.3405951E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     50   TIME STEP     4
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  3.5497189E-7
+                              RClose:  2.7670382E-9
+                           L2-RClose:  3.3772578E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     50   TIME STEP     5
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  3.8012723E-7
+                              RClose:  2.6686564E-9
+                           L2-RClose:  3.4330517E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     50   TIME STEP     6
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  3.9560427E-7
+                              RClose:  2.4660949E-9
+                           L2-RClose:  3.4916340E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     50   TIME STEP     7
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  4.1860095E-7
+                              RClose:  2.5604123E-9
+                           L2-RClose:  3.5773348E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     50   TIME STEP     8
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  4.6871156E-7
+                              RClose:  3.2353995E-9
+                           L2-RClose:  3.6938128E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     50   TIME STEP     9
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  4.6271043E-7
+                              RClose:  2.7876297E-9
+                           L2-RClose:  3.8034776E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     50   TIME STEP    10
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  5.0029803E-7
+                              RClose:  3.1679974E-9
+                           L2-RClose:  3.9610416E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     50   TIME STEP    11
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  5.4976449E-7
+                              RClose:  3.8313672E-9
+                           L2-RClose:  4.1517915E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     50   TIME STEP    12
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  5.9363948E-7
+                              RClose:  3.4507863E-9
+                           L2-RClose:  4.3659811E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     50   TIME STEP    13
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  6.1119148E-7
+                              RClose:  4.2485766E-9
+                           L2-RClose:  4.6149320E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     50   TIME STEP    14
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  6.3624547E-7
+                              RClose:  5.1129803E-9
+                           L2-RClose:  4.9125223E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     50   TIME STEP    15
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  6.8316980E-7
+                              RClose:  7.8863707E-9
+                           L2-RClose:  5.3062593E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     50   TIME STEP    16
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  7.4509380E-7
+                              RClose:  1.0123770E-8
+                           L2-RClose:  5.8035326E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     50   TIME STEP    17
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  7.9308987E-7
+                              RClose:  1.6327157E-8
+                           L2-RClose:  6.6383417E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     50   TIME STEP    18
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  8.4584909E-7
+                              RClose:  2.1030871E-8
+                           L2-RClose:  7.5022834E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     50   TIME STEP    19
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  9.6649190E-7
+                              RClose:  2.8209726E-8
+                           L2-RClose:  8.8242336E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     50   TIME STEP    20
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  6.0660057E-8
+                              RClose:  4.2684007E-9
+                           L2-RClose:  1.0205470E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     50   TIME STEP    21
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  6.4932266E-8
+                              RClose:  4.7576805E-9
+                           L2-RClose:  1.1425823E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     50   TIME STEP    22
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  8.6025921E-8
+                              RClose:  3.8346997E-9
+                           L2-RClose:  1.0136347E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     50   TIME STEP    23
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  1.0152345E-7
+                              RClose:  4.9788724E-9
+                           L2-RClose:  1.2930930E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     50   TIME STEP    24
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  1.2032233E-7
+                              RClose:  6.4540302E-9
+                           L2-RClose:  1.6506126E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     50   TIME STEP    25
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  1.3804180E-7
+                              RClose:  7.5466033E-9
+                           L2-RClose:  1.9425429E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     50   TIME STEP    26
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  1.5618771E-7
+                              RClose:  8.7328687E-9
+                           L2-RClose:  2.2820282E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     50   TIME STEP    27
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  1.7149620E-7
+                              RClose:  9.5811430E-9
+                           L2-RClose:  2.5481991E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD     50   TIME STEP    28
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  1.8633889E-7
+                              RClose:  1.0521802E-8
+                           L2-RClose:  2.8737622E-8
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD     50   TIME STEP    29
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  1.5067636E-7
+                              RClose:  1.1461395E-8
+                           L2-RClose:  2.8618744E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD     50   TIME STEP    30
     PRINT HEAD FOR ALL LAYERS

@@ -1,4 +1,4 @@
-SP TS  3  60  ITER 7  DELT 365.25  (NROW,NCOL,NLAY) = (20, 15, 4)   ERROR 5.5204897E-9 %  FORMAT "(*(ES12.5, :, 1x))"     LAY 1
+SP TS  3  60  ITER 7  DELT 365.25  (NROW,NCOL,NLAY) = (20, 15, 4)   ERROR 5.5080584E-9 %  FORMAT "(*(ES12.5, :, 1x))"     LAY 1
          NaN          NaN          NaN          NaN          NaN  1.30895E+02  1.31064E+02  1.31770E+02  1.30932E+02  1.30646E+02          NaN          NaN          NaN          NaN          NaN
          NaN          NaN          NaN          NaN  1.31626E+02  1.30803E+02  1.30757E+02  1.31333E+02  1.30600E+02  1.30413E+02  1.30580E+02  1.31488E+02          NaN          NaN          NaN
          NaN          NaN          NaN  1.31099E+02  1.30513E+02  1.30156E+02  1.30043E+02  1.30080E+02  1.29918E+02  1.29893E+02  1.30078E+02  1.30481E+02          NaN          NaN          NaN

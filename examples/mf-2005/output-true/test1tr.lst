@@ -1,3 +1,8 @@
+💧🧙💦🌊  <-These symbols help text editors identify file as Unicode UTF8.
+                    UTF8 is not necessary to view numerical results, but no UTF8 support can have artifacts where non-ascii symbols are used (such as the degree symbol).
+
+
+MODFLOW-OWHM v2.2.0
 
       MMMMMMM                                       MM      MMM     MM
     MMM     MMM    MM      M   MMMMMMMM             LM     DM M     ML     MM     MMMMMMMMM  MMMMMMMM  MMMMMMMM
@@ -10,30 +15,46 @@
      MMMMMMMMN     MM      M   MMMMMMMM                7MM      7MM  MN          MM   M      MMMMMMMM  MM      MM
 
 
- MODFLOW-OWHM v2.0.01  
-
-
                         MODFLOW
             ONE-WATER HYDROLOGIC-FLOW MODEL
 
-    U.S. GEOLOGICAL SURVEY MODULAR FINITE-DIFFERENCE 
-           CONJUNCTIVE USE SIMULATION PROGRAM
+    U.S. Geological Survey Modular Finite-Difference
+           Conjunctive Use Simulation Program
 
-                     Version 2.0
+                      Version 2.2
 
- Release: 01          4/23/2020
+ Release: 0
 
- Includes:
-          MODFLOW-2005 Version 1.12.0   02/03/2017
-          MODFLOW-FMP  Version 4.00.0   04/23/2017
-          MODFLOW-SWR  Version 1.04.0   09/15/2016
-          MODFLOW-SWI  Version 2.00.0   07/22/2013
-          MODFLOW-LGR  Version 2.00.0   09/19/2013
-          MODFLOW-NWT  Version 1.2.0    03/01/2020
-          MODFLOW-CFP  Version 1.09.57  09/12/2017
+ Includes the following base versions with enhancements:
 
+          MODFLOW-2005 Version 1.12
+          MODFLOW-FMP  Version 4.1
+          MODFLOW-SWR  Version 1.04
+          MODFLOW-SWI  Version 2.0
+          MODFLOW-LGR  Version 2.0
+          MODFLOW-NWT  Version 1.2
+          MODFLOW-CFP  Version 1.09.57
+                  SWO  Version 1.0
 
- OneWater Simulation Initiated at 
+------------------------------------------------------------------------------------
+USGS Software Disclaimer:                                                          |
+                                                                                   |
+   No warranty, expressed or implied, is made by the USGS or the U.S. Government   |
+   as to the functionality of the software and related material nor shall the      |
+   fact of release constitute any such warranty.                                   |
+                                                                                   |
+   The software is provided on the condition that neither the USGS nor             |
+   the U.S. Government shall be held liable for any damages resulting from the     |
+   authorized or unauthorized use of the software.                                 |
+                                                                                   |
+   Newer versions may be present at the official code and download repository:     |
+      https://code.usgs.gov/modflow/mf-owhm                                        |
+                                                                                   |
+------------------------------------------------------------------------------------
+
+∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙
+    OneWater Simulation Initiated at  
+∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙
 
 
  LIST FILE: ./output/test1tr.lst
@@ -207,7 +228,7 @@ THE WARNING IS BELIEVED TO HAVE ORIGINATED FROM THE FOLLOWING FILE:
 THE GUESSED LINE THAT THE WARNING OCCURED ON IS:
 "FREE  BUDGETDB ./output/test1tr_VolumetricBudget.txt  CUMULATIVE_HEAD_CHANGE ./output/test1tr_CumHCHG.txt  PRINT_HEAD NPER ./output/test1tr_Head.txt"
 
-THE DESRIPTION OF THE WARNING IS:
+THE DESCRIPTION OF THE WARNING IS:
 
 FOUND BAS PACKAGE OPTION KEYWORDS ALONG PACKAGE "OPTIONS LINE" (ie Data Set 1)
 
@@ -247,11 +268,11 @@ END OPTIONS
 
  NOW READING BAS OPTIONS
 
- FOUND OPTION: FREE
-    THE FREE FORMAT OPTION HAS BEEN SELECTED
-         -NOTE THIS NOW IS THE DEFAULT AND NOT NECESSARY.
+ Found Option: FREE
+                 THE FREE FORMAT OPTION HAS BEEN SELECTED
+                    -NOTE THIS NOW IS THE DEFAULT AND NOT NECESSARY.
 
- FOUND OPTION: BUDGETDB
+ Found Option: BUDGETDB
 
 
 ########################################################################################################
@@ -266,7 +287,7 @@ THE WARNING IS BELIEVED TO HAVE ORIGINATED FROM THE FOLLOWING FILE:
 THE GUESSED LINE THAT THE WARNING OCCURED ON IS:
 "FREE  BUDGETDB ./output/test1tr_VolumetricBudget.txt  CUMULATIVE_HEAD_CHANGE ./output/test1tr_CumHCHG.txt  PRINT_HEAD NPER ./output/test1tr_Head.txt"
 
-THE DESRIPTION OF THE WARNING IS:
+THE DESCRIPTION OF THE WARNING IS:
 
 ...CHECK_FOR_POST_KEY WARNINGS...
  THE FOLLOWING MESSAGES WERE PASSED WHILE CHECKING FOR ANY ADDITIONAL KEYWORDS ON LOADED LINE.
@@ -283,9 +304,10 @@ TO SUPRESS THIS WARNING PLEASE PLACE A "#" SYMBOL TO THE LEFT OF THE WORD TO IND
 
 
 
- FOUND OPTION: CUMULATIVE_HEAD_CHANGE
-    THIS OPTION IS ONLY USEFUL FOR MODEL RESULT COMPARISON WITH DIFFERENT CODE COMPARISONS.
 
+ Found Option: CUMULATIVE_HEAD_CHANGE
+                 Cumulative sum of absolute head differences for the entire model.
+                 This is a diagnostic feature meant for comparing MF-OWHM code versions with the same model input (software unit test).
 
 
 ########################################################################################################
@@ -300,7 +322,7 @@ THE WARNING IS BELIEVED TO HAVE ORIGINATED FROM THE FOLLOWING FILE:
 THE GUESSED LINE THAT THE WARNING OCCURED ON IS:
 "FREE  BUDGETDB ./output/test1tr_VolumetricBudget.txt  CUMULATIVE_HEAD_CHANGE ./output/test1tr_CumHCHG.txt  PRINT_HEAD NPER ./output/test1tr_Head.txt"
 
-THE DESRIPTION OF THE WARNING IS:
+THE DESCRIPTION OF THE WARNING IS:
 
 ...CHECK_FOR_POST_KEY WARNINGS...
  THE FOLLOWING MESSAGES WERE PASSED WHILE CHECKING FOR ANY ADDITIONAL KEYWORDS ON LOADED LINE.
@@ -317,13 +339,19 @@ TO SUPRESS THIS WARNING PLEASE PLACE A "#" SYMBOL TO THE LEFT OF THE WORD TO IND
 
 
 
- FOUND OPTION: PRINT_HEAD    SP    TS   FILE
-                              2    50   ./output/test1tr_Head.txt
 
- THE MAX STORAGE FOR PROPERTIES DEFINED BY PARAMETERS IS: 
- MAX STORAGE OF PARAMETERS (MXPAR)  IS       2000
- MAX STORAGE OF INSTANCES  (MXINST) IS      50000
- MAX STORAGE OF CLUSTERS   (MXCLST) IS    2000000
+ Found Option: PRINT_HEAD
+                 NPER ./output/test1tr_Head.txt
+
+
+ Setting up PRINT_HEAD option for 
+    SP    TS   FILE
+     2    50   ./output/test1tr_Head.txt
+
+ The total simulation limit for the number PARAMETERs defined is: 
+     Max number of PARAMETERs (MXPAR)  is       2000
+     Max number of INSTANCEs  (MXINST) is      50000
+     Max number of CLUSTERs   (MXCLST) is    2000000
 
 
 
@@ -731,7 +759,7 @@ CELL-BY-CELL FLOWS WILL BE PRINTED WHEN ICBCFL NOT 0
 
          THE FOLLOWING COMMENTS WERE PASSED TO THE WARNING ROUTINE
 
-THE DESRIPTION OF THE WARNING IS:
+THE DESCRIPTION OF THE WARNING IS:
 
 DIS PACKAGE: THE GROUND SURFACE ELEVATION WAS NOT SPECIFIED WITH THE KEYWORD "SURFACE_ELEVATION"
 
@@ -947,6 +975,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  1,  8,  5)
 
 
+
+Solver Convergence Information:
+                              HClose:  7.5588649E-4
+                              RClose:  0.0010005
+                           L2-RClose:  0.0027806
+                         Rel-Vol-Err:  0.0
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP     1
     PRINT BUDGET
     PRINT HEAD FOR ALL LAYERS
@@ -1097,6 +1133,14 @@ WELL         10   LAYER          1   ROW         10   COL          5   RATE -10.
   (  1,  8,  4)
 
 
+
+Solver Convergence Information:
+                              HClose:  7.2439652E-4
+                              RClose:  7.9616546E-4
+                           L2-RClose:  0.0024283
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP     2
  
  SOLVING FOR HEAD 
@@ -1112,6 +1156,14 @@ WELL         10   LAYER          1   ROW         10   COL          5   RATE -10.
     -0.7332E-03
   (  1,  8,  4)
 
+
+
+Solver Convergence Information:
+                              HClose:  7.3316044E-4
+                              RClose:  7.5877982E-4
+                           L2-RClose:  0.0022681
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP     3
  
@@ -1129,6 +1181,14 @@ WELL         10   LAYER          1   ROW         10   COL          5   RATE -10.
   (  1,  8,  4)
 
 
+
+Solver Convergence Information:
+                              HClose:  7.3881225E-4
+                              RClose:  7.2172172E-4
+                           L2-RClose:  0.0022185
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP     4
  
  SOLVING FOR HEAD 
@@ -1144,6 +1204,14 @@ WELL         10   LAYER          1   ROW         10   COL          5   RATE -10.
     -0.7423E-03
   (  1,  8,  4)
 
+
+
+Solver Convergence Information:
+                              HClose:  7.4234056E-4
+                              RClose:  6.7827110E-4
+                           L2-RClose:  0.0022026
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP     5
     PRINT BUDGET
@@ -1295,6 +1363,14 @@ WELL         10   LAYER          1   ROW         10   COL          5   RATE -10.
   (  1, 12,  7) (  1, 12,  7)
 
 
+
+Solver Convergence Information:
+                              HClose:  4.6143556E-4
+                              RClose:  5.3871730E-4
+                           L2-RClose:  7.5685631E-4
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP     6
  
  SOLVING FOR HEAD 
@@ -1310,6 +1386,14 @@ WELL         10   LAYER          1   ROW         10   COL          5   RATE -10.
     -0.1293E-02   -0.3300E-03
   (  1, 11,  7) (  1, 11,  7)
 
+
+
+Solver Convergence Information:
+                              HClose:  3.2998641E-4
+                              RClose:  3.5303028E-4
+                           L2-RClose:  6.4301807E-4
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP     7
  
@@ -1327,6 +1411,14 @@ WELL         10   LAYER          1   ROW         10   COL          5   RATE -10.
   (  1, 11,  7) (  1, 11,  7)
 
 
+
+Solver Convergence Information:
+                              HClose:  4.1179414E-4
+                              RClose:  4.2837440E-4
+                           L2-RClose:  7.3281111E-4
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP     8
  
  SOLVING FOR HEAD 
@@ -1343,6 +1435,14 @@ WELL         10   LAYER          1   ROW         10   COL          5   RATE -10.
   (  1, 11,  7) (  1, 11,  7)
 
 
+
+Solver Convergence Information:
+                              HClose:  2.9050870E-4
+                              RClose:  2.6729139E-4
+                           L2-RClose:  6.6559446E-4
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP     9
  
  SOLVING FOR HEAD 
@@ -1358,6 +1458,14 @@ WELL         10   LAYER          1   ROW         10   COL          5   RATE -10.
     -0.1175E-02   -0.3383E-03
   (  1, 10,  7) (  1, 10,  7)
 
+
+
+Solver Convergence Information:
+                              HClose:  3.3825604E-4
+                              RClose:  2.7742342E-4
+                           L2-RClose:  7.1891279E-4
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    10
     PRINT BUDGET
@@ -1509,6 +1617,14 @@ WELL         10   LAYER          1   ROW         10   COL          5   RATE -10.
   (  1, 10,  7) (  1, 10,  7)
 
 
+
+Solver Convergence Information:
+                              HClose:  4.4230859E-4
+                              RClose:  3.6923828E-4
+                           L2-RClose:  8.3722076E-4
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    11
  
  SOLVING FOR HEAD 
@@ -1525,6 +1641,14 @@ WELL         10   LAYER          1   ROW         10   COL          5   RATE -10.
   (  1, 10,  7) (  1, 10,  7)
 
 
+
+Solver Convergence Information:
+                              HClose:  4.4358618E-4
+                              RClose:  3.4180244E-4
+                           L2-RClose:  8.9465107E-4
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    12
  
  SOLVING FOR HEAD 
@@ -1540,6 +1664,14 @@ WELL         10   LAYER          1   ROW         10   COL          5   RATE -10.
     -0.1749E-02   -0.5277E-03
   (  1, 10,  7) (  1, 10,  7)
 
+
+
+Solver Convergence Information:
+                              HClose:  5.2774301E-4
+                              RClose:  3.9074221E-4
+                           L2-RClose:  0.0010159
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    13
     PRINT BUDGET
@@ -1691,6 +1823,14 @@ WELL         10   LAYER          1   ROW         10   COL          5   RATE -10.
   (  1, 10,  7) (  1, 10,  7)
 
 
+
+Solver Convergence Information:
+                              HClose:  7.0260975E-4
+                              RClose:  5.0058643E-4
+                           L2-RClose:  0.0012153
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    14
  
  SOLVING FOR HEAD 
@@ -1706,6 +1846,14 @@ WELL         10   LAYER          1   ROW         10   COL          5   RATE -10.
     -0.1553E-02   -0.6185E-03
   (  1, 10,  7) (  1,  7,  5)
 
+
+
+Solver Convergence Information:
+                              HClose:  6.1850042E-4
+                              RClose:  3.5171371E-4
+                           L2-RClose:  0.0012093
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    15
     PRINT BUDGET
@@ -1857,6 +2005,14 @@ WELL         10   LAYER          1   ROW         10   COL          5   RATE -10.
   (  1,  7,  5) (  1,  7,  5)
 
 
+
+Solver Convergence Information:
+                              HClose:  7.2008270E-4
+                              RClose:  4.0534409E-4
+                           L2-RClose:  0.0013124
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    16
  
  SOLVING FOR HEAD 
@@ -1872,6 +2028,14 @@ WELL         10   LAYER          1   ROW         10   COL          5   RATE -10.
     -0.2381E-02   -0.8712E-03   -0.3035E-03
   (  1,  6,  8) (  1,  7,  5) (  1,  7,  5)
 
+
+
+Solver Convergence Information:
+                              HClose:  3.0347954E-4
+                              RClose:  1.3714376E-4
+                           L2-RClose:  4.0116518E-4
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    17
  
@@ -1889,6 +2053,14 @@ WELL         10   LAYER          1   ROW         10   COL          5   RATE -10.
   (  1,  6,  8) (  1,  6,  6) (  1,  7,  5)
 
 
+
+Solver Convergence Information:
+                              HClose:  3.8823267E-4
+                              RClose:  1.7381189E-4
+                           L2-RClose:  5.0083092E-4
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    18
  
  SOLVING FOR HEAD 
@@ -1905,6 +2077,14 @@ WELL         10   LAYER          1   ROW         10   COL          5   RATE -10.
   (  1,  5,  8) (  1,  6,  6) (  1,  6,  6)
 
 
+
+Solver Convergence Information:
+                              HClose:  5.1021375E-4
+                              RClose:  2.0319005E-4
+                           L2-RClose:  5.6637602E-4
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    19
  
  SOLVING FOR HEAD 
@@ -1920,6 +2100,14 @@ WELL         10   LAYER          1   ROW         10   COL          5   RATE -10.
     -0.3474E-02   -0.1545E-02   -0.6113E-03
   (  1,  5,  8) (  1,  6,  6) (  1,  6,  6)
 
+
+
+Solver Convergence Information:
+                              HClose:  6.1131670E-4
+                              RClose:  2.3938186E-4
+                           L2-RClose:  6.5180168E-4
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    20
     PRINT BUDGET
@@ -2071,6 +2259,14 @@ WELL         10   LAYER          1   ROW         10   COL          5   RATE -10.
   (  1,  5,  8) (  1,  7,  5) (  1,  7,  5)
 
 
+
+Solver Convergence Information:
+                              HClose:  6.9300161E-4
+                              RClose:  1.8417648E-4
+                           L2-RClose:  7.1379130E-4
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    21
  
  SOLVING FOR HEAD 
@@ -2086,6 +2282,14 @@ WELL         10   LAYER          1   ROW         10   COL          5   RATE -10.
     -0.3327E-02   -0.1983E-02   -0.8407E-03   -0.2381E-03
   (  1,  7,  5) (  1,  7,  5) (  1,  7,  5) (  1,  7,  5)
 
+
+
+Solver Convergence Information:
+                              HClose:  2.3808575E-4
+                              RClose:  6.1000014E-5
+                           L2-RClose:  2.0708278E-4
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    22
  
@@ -2103,6 +2307,14 @@ WELL         10   LAYER          1   ROW         10   COL          5   RATE -10.
   (  1,  7,  5) (  1,  7,  5) (  1,  7,  5) (  1,  7,  5)
 
 
+
+Solver Convergence Information:
+                              HClose:  3.0081022E-4
+                              RClose:  7.2363615E-5
+                           L2-RClose:  2.4209471E-4
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    23
  
  SOLVING FOR HEAD 
@@ -2119,6 +2331,14 @@ WELL         10   LAYER          1   ROW         10   COL          5   RATE -10.
   (  1,  7,  8) (  1,  7,  5) (  1,  7,  5) (  1,  7,  5)
 
 
+
+Solver Convergence Information:
+                              HClose:  3.8693112E-4
+                              RClose:  9.0064225E-5
+                           L2-RClose:  2.9343216E-4
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    24
  
  SOLVING FOR HEAD 
@@ -2134,6 +2354,14 @@ WELL         10   LAYER          1   ROW         10   COL          5   RATE -10.
     -0.5058E-02   -0.3273E-02   -0.1593E-02   -0.4984E-03
   (  1,  7,  8) (  1,  7,  5) (  1,  7,  5) (  1,  7,  5)
 
+
+
+Solver Convergence Information:
+                              HClose:  4.9844510E-4
+                              RClose:  1.1204732E-4
+                           L2-RClose:  3.5637687E-4
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    25
     PRINT BUDGET
@@ -2285,6 +2513,14 @@ WELL         10   LAYER          1   ROW         10   COL          5   RATE -10.
   (  1,  7,  8) (  1,  7,  5) (  1,  7,  5) (  1,  7,  5)
 
 
+
+Solver Convergence Information:
+                              HClose:  6.4254310E-4
+                              RClose:  1.3918660E-4
+                           L2-RClose:  4.3356835E-4
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    26
  
  SOLVING FOR HEAD 
@@ -2295,11 +2531,19 @@ WELL         10   LAYER          1   ROW         10   COL          5   RATE -10.
     HEAD CHANGE   HEAD CHANGE   HEAD CHANGE   HEAD CHANGE   HEAD CHANGE
   LAYER,ROW,COL LAYER,ROW,COL LAYER,ROW,COL LAYER,ROW,COL LAYER,ROW,COL
  ----------------------------------------------------------------------
-     -2.155       -0.9445       -0.5400       -0.1843       -0.4643E-01
+     -2.155       -0.9445       -0.5400       -0.1843       -0.4644E-01
   (  1,  7,  1) (  1,  6,  5) (  1,  6,  5) (  1,  7,  5) (  1,  7,  5)
-    -0.6978E-02   -0.4580E-02   -0.2458E-02   -0.8275E-03   -0.2168E-03
+    -0.6977E-02   -0.4580E-02   -0.2458E-02   -0.8274E-03   -0.2168E-03
   (  1,  7,  8) (  1,  7,  5) (  1,  7,  5) (  1,  7,  5) (  1,  7,  5)
 
+
+
+Solver Convergence Information:
+                              HClose:  2.1679002E-4
+                              RClose:  7.5372214E-5
+                           L2-RClose:  1.6918341E-4
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    27
  
@@ -2311,11 +2555,19 @@ WELL         10   LAYER          1   ROW         10   COL          5   RATE -10.
     HEAD CHANGE   HEAD CHANGE   HEAD CHANGE   HEAD CHANGE   HEAD CHANGE
   LAYER,ROW,COL LAYER,ROW,COL LAYER,ROW,COL LAYER,ROW,COL LAYER,ROW,COL
  ----------------------------------------------------------------------
-     -2.260       -0.9863       -0.5942       -0.2096       -0.5401E-01
+     -2.260       -0.9864       -0.5942       -0.2096       -0.5401E-01
   (  1,  7,  1) (  1,  6,  5) (  1,  6,  5) (  1,  7,  5) (  1,  7,  5)
     -0.8167E-02   -0.5410E-02   -0.3038E-02   -0.1062E-02   -0.2836E-03
   (  1,  7,  8) (  1,  6,  5) (  1,  7,  5) (  1,  7,  5) (  1,  7,  5)
 
+
+
+Solver Convergence Information:
+                              HClose:  2.8364648E-4
+                              RClose:  9.6084827E-5
+                           L2-RClose:  2.1049559E-4
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    28
  
@@ -2333,6 +2585,14 @@ WELL         10   LAYER          1   ROW         10   COL          5   RATE -10.
   (  1,  7,  8) (  1,  6,  5) (  1,  7,  5) (  1,  7,  5) (  1,  7,  5)
 
 
+
+Solver Convergence Information:
+                              HClose:  3.6926641E-4
+                              RClose:  1.2198742E-4
+                           L2-RClose:  2.5438019E-4
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    29
  
  SOLVING FOR HEAD 
@@ -2348,6 +2608,14 @@ WELL         10   LAYER          1   ROW         10   COL          5   RATE -10.
     -0.1109E-01   -0.7541E-02   -0.4578E-02   -0.1742E-02   -0.4794E-03
   (  1,  7,  8) (  1,  6,  5) (  1,  7,  5) (  1,  6,  5) (  1,  7,  5)
 
+
+
+Solver Convergence Information:
+                              HClose:  4.7940084E-4
+                              RClose:  1.5328250E-4
+                           L2-RClose:  3.1393995E-4
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    30
     PRINT BUDGET
@@ -2450,29 +2718,29 @@ WELL         10   LAYER          1   ROW         10   COL          5   RATE -10.
 
            IN:                                      IN:
            ---                                      ---
-             STORAGE = 12163919290.2914               STORAGE =          38.5413
+             STORAGE = 12163919489.4241               STORAGE =          38.5413
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
                WELLS =           0.0000                 WELLS =           0.0000
                   ET =           0.0000                    ET =           0.0000
-     HEAD DEP BOUNDS =    48156021.8337       HEAD DEP BOUNDS =           0.2166
+     HEAD DEP BOUNDS =    48156021.8285       HEAD DEP BOUNDS =           0.2166
             RECHARGE =   400006599.2209              RECHARGE =           1.7938
-      STREAM LEAKAGE = 14269965571.6661        STREAM LEAKAGE =          76.0858
+      STREAM LEAKAGE = 14269965392.0371        STREAM LEAKAGE =          76.0858
 
-            TOTAL IN = 26882047483.0121              TOTAL IN =         116.6375
+            TOTAL IN = 26882047502.5106              TOTAL IN =         116.6375
 
           OUT:                                     OUT:
           ----                                     ----
              STORAGE =     1744804.4012               STORAGE =           0.0000
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
                WELLS = 22300019468.7622                 WELLS =         100.0000
-                  ET =  4097456592.8094                    ET =          15.9238
-     HEAD DEP BOUNDS =    53146144.8401       HEAD DEP BOUNDS =           0.2322
+                  ET =  4097456609.1394                    ET =          15.9238
+     HEAD DEP BOUNDS =    53146144.9062       HEAD DEP BOUNDS =           0.2322
             RECHARGE =           0.0000              RECHARGE =           0.0000
-      STREAM LEAKAGE =   430361360.2610        STREAM LEAKAGE =           0.4829
+      STREAM LEAKAGE =   430361362.5716        STREAM LEAKAGE =           0.4829
 
-           TOTAL OUT = 26882728371.0739             TOTAL OUT =         116.6390
+           TOTAL OUT = 26882728389.7807             TOTAL OUT =         116.6390
 
-            IN - OUT =     -680888.0618              IN - OUT =      -1.5216E-03
+            IN - OUT =     -680887.2701              IN - OUT =      -1.5216E-03
 
  PERCENT DISCREPANCY =          -0.00     PERCENT DISCREPANCY =          -0.00
 
@@ -2499,6 +2767,14 @@ WELL         10   LAYER          1   ROW         10   COL          5   RATE -10.
   (  1,  7,  8) (  1,  6,  5) (  1,  7,  5) (  1,  6,  5) (  1,  7,  5)
 
 
+
+Solver Convergence Information:
+                              HClose:  6.2537550E-4
+                              RClose:  1.9126011E-4
+                           L2-RClose:  3.8792369E-4
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    31
  
  SOLVING FOR HEAD 
@@ -2517,6 +2793,14 @@ WELL         10   LAYER          1   ROW         10   COL          5   RATE -10.
   (  1,  2,  3)
 
 
+
+Solver Convergence Information:
+                              HClose:  2.4866430E-4
+                              RClose:  6.0597335E-5
+                           L2-RClose:  2.2442379E-4
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    32
  
  SOLVING FOR HEAD 
@@ -2534,6 +2818,14 @@ WELL         10   LAYER          1   ROW         10   COL          5   RATE -10.
     -0.3077E-03
   (  1,  2,  3)
 
+
+
+Solver Convergence Information:
+                              HClose:  3.0765239E-4
+                              RClose:  7.1030067E-5
+                           L2-RClose:  2.7486204E-4
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    33
     PRINT BUDGET
@@ -2636,29 +2928,29 @@ WELL         10   LAYER          1   ROW         10   COL          5   RATE -10.
 
            IN:                                      IN:
            ---                                      ---
-             STORAGE = 14859601954.7954               STORAGE =          32.5321
+             STORAGE = 14859602287.0343               STORAGE =          32.5321
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
                WELLS =           0.0000                 WELLS =           0.0000
                   ET =           0.0000                    ET =           0.0000
-     HEAD DEP BOUNDS =    65138217.6935       HEAD DEP BOUNDS =           0.2170
+     HEAD DEP BOUNDS =    65138217.6794       HEAD DEP BOUNDS =           0.2170
             RECHARGE =   540457841.0411              RECHARGE =           1.7938
-      STREAM LEAKAGE = 20531420025.9323        STREAM LEAKAGE =          81.7547
+      STREAM LEAKAGE = 20531419720.7721        STREAM LEAKAGE =          81.7547
 
-            TOTAL IN = 35996618039.4624              TOTAL IN =         116.2976
+            TOTAL IN = 35996618066.5270              TOTAL IN =         116.2976
 
           OUT:                                     OUT:
           ----                                     ----
              STORAGE =     1744804.4012               STORAGE =           0.0000
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
                WELLS = 30130053855.9507                 WELLS =         100.0000
-                  ET =  5328637008.8980                    ET =          15.6311
-     HEAD DEP BOUNDS =    71183373.6299       HEAD DEP BOUNDS =           0.2295
+                  ET =  5328637031.7337                    ET =          15.6311
+     HEAD DEP BOUNDS =    71183373.7555       HEAD DEP BOUNDS =           0.2295
             RECHARGE =           0.0000              RECHARGE =           0.0000
-      STREAM LEAKAGE =   465811970.6170        STREAM LEAKAGE =           0.4388
+      STREAM LEAKAGE =   465811973.9562        STREAM LEAKAGE =           0.4388
 
-           TOTAL OUT = 35997431013.4967             TOTAL OUT =         116.2993
+           TOTAL OUT = 35997431039.7974             TOTAL OUT =         116.2993
 
-            IN - OUT =     -812974.0343              IN - OUT =      -1.7554E-03
+            IN - OUT =     -812973.2704              IN - OUT =      -1.7554E-03
 
  PERCENT DISCREPANCY =          -0.00     PERCENT DISCREPANCY =          -0.00
 
@@ -2687,6 +2979,14 @@ WELL         10   LAYER          1   ROW         10   COL          5   RATE -10.
   (  1,  2,  3)
 
 
+
+Solver Convergence Information:
+                              HClose:  3.9568743E-4
+                              RClose:  8.6970032E-5
+                           L2-RClose:  3.3988714E-4
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    34
  
  SOLVING FOR HEAD 
@@ -2704,6 +3004,14 @@ WELL         10   LAYER          1   ROW         10   COL          5   RATE -10.
     -0.5048E-03
   (  1,  2,  3)
 
+
+
+Solver Convergence Information:
+                              HClose:  5.0483705E-4
+                              RClose:  1.0742591E-4
+                           L2-RClose:  4.1672153E-4
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    35
     PRINT BUDGET
@@ -2806,29 +3114,29 @@ WELL         10   LAYER          1   ROW         10   COL          5   RATE -10.
 
            IN:                                      IN:
            ---                                      ---
-             STORAGE = 16804357434.3934               STORAGE =          28.4363
+             STORAGE = 16804357789.9663               STORAGE =          28.4363
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
                WELLS =           0.0000                 WELLS =           0.0000
                   ET =           0.0000                    ET =           0.0000
-     HEAD DEP BOUNDS =    79499656.1113       HEAD DEP BOUNDS =           0.2173
+     HEAD DEP BOUNDS =    79499656.0933       HEAD DEP BOUNDS =           0.2173
             RECHARGE =   659060640.4404              RECHARGE =           1.7938
-      STREAM LEAKAGE = 26131434974.6971        STREAM LEAKAGE =          85.6144
+      STREAM LEAKAGE = 26131434647.7112        STREAM LEAKAGE =          85.6144
 
-            TOTAL IN = 43674352705.6422              TOTAL IN =         116.0618
+            TOTAL IN = 43674352734.2111              TOTAL IN =         116.0618
 
           OUT:                                     OUT:
           ----                                     ----
              STORAGE =     1744804.4012               STORAGE =           0.0000
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
                WELLS = 36742056609.9176                 WELLS =         100.0000
-                  ET =  6351969257.2583                    ET =          15.4284
-     HEAD DEP BOUNDS =    86263068.8926       HEAD DEP BOUNDS =           0.2276
+                  ET =  6351969281.4097                    ET =          15.4284
+     HEAD DEP BOUNDS =    86263069.0327       HEAD DEP BOUNDS =           0.2276
             RECHARGE =           0.0000              RECHARGE =           0.0000
-      STREAM LEAKAGE =   493292835.1977        STREAM LEAKAGE =           0.4084
+      STREAM LEAKAGE =   493292838.7189        STREAM LEAKAGE =           0.4084
 
-           TOTAL OUT = 43675326575.6674             TOTAL OUT =         116.0644
+           TOTAL OUT = 43675326603.4801             TOTAL OUT =         116.0644
 
-            IN - OUT =     -973870.0252              IN - OUT =      -2.6693E-03
+            IN - OUT =     -973869.2690              IN - OUT =      -2.6693E-03
 
  PERCENT DISCREPANCY =          -0.00     PERCENT DISCREPANCY =          -0.00
 
@@ -2857,6 +3165,14 @@ WELL         10   LAYER          1   ROW         10   COL          5   RATE -10.
   (  1,  2,  3)
 
 
+
+Solver Convergence Information:
+                              HClose:  6.3937491E-4
+                              RClose:  1.3209194E-4
+                           L2-RClose:  5.0826981E-4
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    36
  
  SOLVING FOR HEAD 
@@ -2874,6 +3190,14 @@ WELL         10   LAYER          1   ROW         10   COL          5   RATE -10.
     -0.8034E-03   -0.2959E-03
   (  1,  2,  3) (  1,  4,  3)
 
+
+
+Solver Convergence Information:
+                              HClose:  2.9585438E-4
+                              RClose:  1.0093644E-4
+                           L2-RClose:  3.6660014E-4
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    37
  
@@ -2893,6 +3217,14 @@ WELL         10   LAYER          1   ROW         10   COL          5   RATE -10.
   (  1,  2,  3) (  1,  4,  3)
 
 
+
+Solver Convergence Information:
+                              HClose:  3.7129504E-4
+                              RClose:  1.2289544E-4
+                           L2-RClose:  4.5219711E-4
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    38
  
  SOLVING FOR HEAD 
@@ -2911,6 +3243,14 @@ WELL         10   LAYER          1   ROW         10   COL          5   RATE -10.
   (  1,  2,  3) (  1,  4,  3)
 
 
+
+Solver Convergence Information:
+                              HClose:  4.6044041E-4
+                              RClose:  1.4815860E-4
+                           L2-RClose:  5.5327373E-4
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    39
  
  SOLVING FOR HEAD 
@@ -2928,6 +3268,14 @@ WELL         10   LAYER          1   ROW         10   COL          5   RATE -10.
     -0.1514E-02   -0.5639E-03
   (  1,  2,  3) (  1,  4,  3)
 
+
+
+Solver Convergence Information:
+                              HClose:  5.6390803E-4
+                              RClose:  1.7677779E-4
+                           L2-RClose:  6.7098198E-4
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    40
     PRINT BUDGET
@@ -3030,29 +3378,29 @@ WELL         10   LAYER          1   ROW         10   COL          5   RATE -10.
 
            IN:                                      IN:
            ---                                      ---
-             STORAGE = 21924277508.6038               STORAGE =          18.4539
+             STORAGE = 21924277796.0382               STORAGE =          18.4539
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
                WELLS =           0.0000                 WELLS =           0.0000
                   ET =           0.0000                    ET =           0.0000
-     HEAD DEP BOUNDS =   130125684.0913       HEAD DEP BOUNDS =           0.2179
+     HEAD DEP BOUNDS =   130125684.0732       HEAD DEP BOUNDS =           0.2179
             RECHARGE =  1076269764.3648              RECHARGE =           1.7938
-      STREAM LEAKAGE = 47451622887.2461        STREAM LEAKAGE =          95.0165
+      STREAM LEAKAGE = 47451622624.7453        STREAM LEAKAGE =          95.0165
 
-            TOTAL IN = 70582295844.3060              TOTAL IN =         115.4821
+            TOTAL IN = 70582295869.2216              TOTAL IN =         115.4821
 
           OUT:                                     OUT:
           ----                                     ----
              STORAGE =     1744804.4012               STORAGE =           0.0000
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
                WELLS = 60001101846.1198                 WELLS =         100.0000
-                  ET =  9865557881.3589                    ET =          14.9296
-     HEAD DEP BOUNDS =   138496965.5773       HEAD DEP BOUNDS =           0.2229
+                  ET =  9865557902.3786                    ET =          14.9296
+     HEAD DEP BOUNDS =   138496965.6889       HEAD DEP BOUNDS =           0.2229
             RECHARGE =           0.0000              RECHARGE =           0.0000
-      STREAM LEAKAGE =   577148043.7146        STREAM LEAKAGE =           0.3340
+      STREAM LEAKAGE =   577148046.7424        STREAM LEAKAGE =           0.3340
 
-           TOTAL OUT = 70584049541.1718             TOTAL OUT =         115.4864
+           TOTAL OUT = 70584049565.3308             TOTAL OUT =         115.4864
 
-            IN - OUT =    -1753696.8658              IN - OUT =      -4.3360E-03
+            IN - OUT =    -1753696.1092              IN - OUT =      -4.3360E-03
 
  PERCENT DISCREPANCY =          -0.00     PERCENT DISCREPANCY =          -0.00
 
@@ -3081,6 +3429,14 @@ WELL         10   LAYER          1   ROW         10   COL          5   RATE -10.
   (  1,  2,  3) (  1,  4,  3)
 
 
+
+Solver Convergence Information:
+                              HClose:  6.8172062E-4
+                              RClose:  2.0866891E-4
+                           L2-RClose:  8.0612375E-4
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    41
  
  SOLVING FOR HEAD 
@@ -3098,6 +3454,14 @@ WELL         10   LAYER          1   ROW         10   COL          5   RATE -10.
     -0.2202E-02   -0.8238E-03   -0.9793E-03   -0.5299E-03
   (  1,  2,  3) (  1,  7,  5) (  1,  3,  4) (  1,  6,  5)
 
+
+
+Solver Convergence Information:
+                              HClose:  5.2989376E-4
+                              RClose:  8.4885164E-5
+                           L2-RClose:  1.9495905E-4
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    42
  
@@ -3117,6 +3481,14 @@ WELL         10   LAYER          1   ROW         10   COL          5   RATE -10.
   (  1,  2,  3) (  1,  6,  9) (  1,  3,  4) (  1,  6,  5)
 
 
+
+Solver Convergence Information:
+                              HClose:  6.8338790E-4
+                              RClose:  1.0641530E-4
+                           L2-RClose:  2.4167984E-4
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    43
  
  SOLVING FOR HEAD 
@@ -3135,6 +3507,14 @@ WELL         10   LAYER          1   ROW         10   COL          5   RATE -10.
   (  1,  2,  3) (  1,  6,  9) (  1,  3,  4) (  1,  6,  5) (  1,  2,  3)
 
 
+
+Solver Convergence Information:
+                              HClose:  4.5814436E-4
+                              RClose:  4.9937325E-5
+                           L2-RClose:  1.2229269E-4
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    44
  
  SOLVING FOR HEAD 
@@ -3152,6 +3532,14 @@ WELL         10   LAYER          1   ROW         10   COL          5   RATE -10.
     -0.3536E-02   -0.1519E-02   -0.1773E-02   -0.1086E-02   -0.5929E-03
   (  1,  2,  3) (  1,  6,  9) (  1,  3,  4) (  1,  6,  5) (  1,  2,  3)
 
+
+
+Solver Convergence Information:
+                              HClose:  5.9292318E-4
+                              RClose:  6.0621563E-5
+                           L2-RClose:  1.5243370E-4
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    45
     PRINT BUDGET
@@ -3254,29 +3642,29 @@ WELL         10   LAYER          1   ROW         10   COL          5   RATE -10.
 
            IN:                                      IN:
            ---                                      ---
-             STORAGE = 26721271846.7924               STORAGE =           9.8448
+             STORAGE = 26721272010.9403               STORAGE =           9.8448
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
                WELLS =           0.0000                 WELLS =           0.0000
                   ET =           0.0000                    ET =           0.0000
-     HEAD DEP BOUNDS =   211889938.4359       HEAD DEP BOUNDS =           0.2185
+     HEAD DEP BOUNDS =   211889938.4246       HEAD DEP BOUNDS =           0.2185
             RECHARGE =  1748189230.5362              RECHARGE =           1.7938
-      STREAM LEAKAGE = 85041814518.6243        STREAM LEAKAGE =         103.1448
+      STREAM LEAKAGE = 85041814372.4604        STREAM LEAKAGE =         103.1448
 
-            TOTAL IN =113723165534.3889              TOTAL IN =         115.0018
+            TOTAL IN =113723165552.3615              TOTAL IN =         115.0018
 
           OUT:                                     OUT:
           ----                                     ----
              STORAGE =     1744804.4012               STORAGE =           0.0000
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
                WELLS = 97460026789.4758                 WELLS =         100.0000
-                  ET = 15356459674.8308                    ET =          14.5146
-     HEAD DEP BOUNDS =   220914552.8127       HEAD DEP BOUNDS =           0.2185
+                  ET = 15356459689.8749                    ET =          14.5146
+     HEAD DEP BOUNDS =   220914552.8621       HEAD DEP BOUNDS =           0.2185
             RECHARGE =           0.0000              RECHARGE =           0.0000
-      STREAM LEAKAGE =   686386721.3683        STREAM LEAKAGE =           0.2694
+      STREAM LEAKAGE =   686386723.4784        STREAM LEAKAGE =           0.2694
 
-           TOTAL OUT =113725532542.8887             TOTAL OUT =         115.0025
+           TOTAL OUT =113725532560.0922             TOTAL OUT =         115.0025
 
-            IN - OUT =    -2367008.4998              IN - OUT =      -6.8072E-04
+            IN - OUT =    -2367007.7307              IN - OUT =      -6.8072E-04
 
  PERCENT DISCREPANCY =          -0.00     PERCENT DISCREPANCY =          -0.00
 
@@ -3305,6 +3693,14 @@ WELL         10   LAYER          1   ROW         10   COL          5   RATE -10.
   (  1,  2,  3) (  1,  6,  9) (  1,  3,  4) (  1,  6,  5) (  1,  2,  3)
 
 
+
+Solver Convergence Information:
+                              HClose:  7.5548799E-4
+                              RClose:  7.2366145E-5
+                           L2-RClose:  1.8750544E-4
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    46
  
  SOLVING FOR HEAD 
@@ -3324,6 +3720,14 @@ WELL         10   LAYER          1   ROW         10   COL          5   RATE -10.
     -0.3701E-03
   (  1,  6,  9)
 
+
+
+Solver Convergence Information:
+                              HClose:  3.7007192E-4
+                              RClose:  4.1385852E-5
+                           L2-RClose:  1.4325552E-4
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    47
  
@@ -3345,6 +3749,14 @@ WELL         10   LAYER          1   ROW         10   COL          5   RATE -10.
   (  1,  6,  9)
 
 
+
+Solver Convergence Information:
+                              HClose:  4.8215454E-4
+                              RClose:  5.0049310E-5
+                           L2-RClose:  1.7215009E-4
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    48
  
  SOLVING FOR HEAD 
@@ -3365,6 +3777,14 @@ WELL         10   LAYER          1   ROW         10   COL          5   RATE -10.
   (  1,  6,  9)
 
 
+
+Solver Convergence Information:
+                              HClose:  6.1199990E-4
+                              RClose:  5.9123602E-5
+                           L2-RClose:  2.0224940E-4
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    49
  
  SOLVING FOR HEAD 
@@ -3384,6 +3804,14 @@ WELL         10   LAYER          1   ROW         10   COL          5   RATE -10.
     -0.7538E-03
   (  1,  6,  9)
 
+
+
+Solver Convergence Information:
+                              HClose:  7.5375984E-4
+                              RClose:  6.8033038E-5
+                           L2-RClose:  2.3162721E-4
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    50
     PRINT BUDGET
@@ -3489,29 +3917,29 @@ WELL         10   LAYER          1   ROW         10   COL          5   RATE -10.
 
            IN:                                      IN:
            ---                                      ---
-             STORAGE = 30216336260.8508               STORAGE =           3.8645
+             STORAGE = 30216336326.4320               STORAGE =           3.8645
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
                WELLS =           0.0000                 WELLS =           0.0000
                   ET =           0.0000                    ET =           0.0000
-     HEAD DEP BOUNDS =   343852146.2204       HEAD DEP BOUNDS =           0.2189
+     HEAD DEP BOUNDS =   343852146.2153       HEAD DEP BOUNDS =           0.2189
             RECHARGE =  2830322250.0000              RECHARGE =           1.7938
-      STREAM LEAKAGE =149569770674.4256        STREAM LEAKAGE =         108.7784
+      STREAM LEAKAGE =149569770621.1227        STREAM LEAKAGE =         108.7784
 
-            TOTAL IN =182960281331.4968              TOTAL IN =         114.6554
+            TOTAL IN =182960281343.7701              TOTAL IN =         114.6554
 
           OUT:                                     OUT:
           ----                                     ----
              STORAGE =     1744804.4012               STORAGE =           0.0000
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
                WELLS =157788000000.0000                 WELLS =         100.0000
-                  ET = 23991541325.7162                    ET =          14.2169
-     HEAD DEP BOUNDS =   351439676.7897       HEAD DEP BOUNDS =           0.2153
+                  ET = 23991541335.8380                    ET =          14.2169
+     HEAD DEP BOUNDS =   351439676.7864       HEAD DEP BOUNDS =           0.2153
             RECHARGE =           0.0000              RECHARGE =           0.0000
-      STREAM LEAKAGE =   830564216.5939        STREAM LEAKAGE =           0.2245
+      STREAM LEAKAGE =   830564217.9647        STREAM LEAKAGE =           0.2245
 
-           TOTAL OUT =182963290023.5009             TOTAL OUT =         114.6568
+           TOTAL OUT =182963290034.9904             TOTAL OUT =         114.6568
 
-            IN - OUT =    -3008692.0041              IN - OUT =      -1.3406E-03
+            IN - OUT =    -3008691.2203              IN - OUT =      -1.3406E-03
 
  PERCENT DISCREPANCY =          -0.00     PERCENT DISCREPANCY =          -0.00
 
@@ -3566,6 +3994,14 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
      0.8081E-03    0.1770E-03
   (  1,  8,  4) (  1,  8,  4)
 
+
+
+Solver Convergence Information:
+                              HClose:  1.7695338E-4
+                              RClose:  1.8121499E-4
+                           L2-RClose:  5.2823643E-4
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP     1
     PRINT BUDGET
@@ -3656,29 +4092,29 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
 
            IN:                                      IN:
            ---                                      ---
-             STORAGE = 30218776355.5959               STORAGE =           1.7999
+             STORAGE = 30218776421.0971               STORAGE =           1.7999
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
                WELLS =           0.0000                 WELLS =           0.0000
                   ET =           0.0000                    ET =           0.0000
-     HEAD DEP BOUNDS =   344148855.7213       HEAD DEP BOUNDS =           0.2189
+     HEAD DEP BOUNDS =   344148855.7161       HEAD DEP BOUNDS =           0.2189
             RECHARGE =  2832753989.4194              RECHARGE =           1.7938
-      STREAM LEAKAGE =149717216872.6477        STREAM LEAKAGE =         108.7623
+      STREAM LEAKAGE =149717216819.4847        STREAM LEAKAGE =         108.7623
 
-            TOTAL IN =183112896073.3842              TOTAL IN =         112.5748
+            TOTAL IN =183112896085.7173              TOTAL IN =         112.5748
 
           OUT:                                     OUT:
           ----                                     ----
-             STORAGE =   134486198.2564               STORAGE =          97.9155
+             STORAGE =   134486198.3248               STORAGE =          97.9155
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
                WELLS =157788000000.0000                 WELLS =           0.0000
-                  ET = 24010816079.3721                    ET =          14.2178
-     HEAD DEP BOUNDS =   351731581.7642       HEAD DEP BOUNDS =           0.2153
+                  ET = 24010816089.4864                    ET =          14.2178
+     HEAD DEP BOUNDS =   351731581.7608       HEAD DEP BOUNDS =           0.2153
             RECHARGE =           0.0000              RECHARGE =           0.0000
-      STREAM LEAKAGE =   830868537.4220        STREAM LEAKAGE =           0.2245
+      STREAM LEAKAGE =   830868538.7918        STREAM LEAKAGE =           0.2245
 
-           TOTAL OUT =183115902396.8147             TOTAL OUT =         112.5731
+           TOTAL OUT =183115902408.3639             TOTAL OUT =         112.5731
 
-            IN - OUT =    -3006323.4305              IN - OUT =       1.7472E-03
+            IN - OUT =    -3006322.6467              IN - OUT =       1.7472E-03
 
  PERCENT DISCREPANCY =          -0.00     PERCENT DISCREPANCY =           0.00
 
@@ -3705,6 +4141,14 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
   (  1,  8,  4) (  1,  8,  4)
 
 
+
+Solver Convergence Information:
+                              HClose:  1.8577070E-4
+                              RClose:  1.7643836E-4
+                           L2-RClose:  4.8391632E-4
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP     2
  
  SOLVING FOR HEAD 
@@ -3720,6 +4164,14 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
      0.8638E-03    0.1930E-03
   (  1,  8,  4) (  1,  8,  4)
 
+
+
+Solver Convergence Information:
+                              HClose:  1.9302774E-4
+                              RClose:  1.6976511E-4
+                           L2-RClose:  4.6058508E-4
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP     3
  
@@ -3737,6 +4189,14 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
   (  1,  8,  4) (  1,  8,  4)
 
 
+
+Solver Convergence Information:
+                              HClose:  1.9931208E-4
+                              RClose:  1.6200313E-4
+                           L2-RClose:  4.5009426E-4
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP     4
  
  SOLVING FOR HEAD 
@@ -3752,6 +4212,14 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
      0.8877E-03    0.2054E-03
   (  1,  8,  4) (  1,  8,  4)
 
+
+
+Solver Convergence Information:
+                              HClose:  2.0541476E-4
+                              RClose:  1.5397707E-4
+                           L2-RClose:  4.4940540E-4
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP     5
     PRINT BUDGET
@@ -3842,29 +4310,29 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
 
            IN:                                      IN:
            ---                                      ---
-             STORAGE = 30226273880.6364               STORAGE =           0.8953
+             STORAGE = 30226273945.8762               STORAGE =           0.8953
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
                WELLS =           0.0000                 WELLS =           0.0000
                   ET =           0.0000                    ET =           0.0000
-     HEAD DEP BOUNDS =   345663597.8964       HEAD DEP BOUNDS =           0.2189
+     HEAD DEP BOUNDS =   345663597.8913       HEAD DEP BOUNDS =           0.2189
             RECHARGE =  2845168262.3291              RECHARGE =           1.7938
-      STREAM LEAKAGE =150466661318.5717        STREAM LEAKAGE =         107.8289
+      STREAM LEAKAGE =150466661266.1197        STREAM LEAKAGE =         107.8289
 
-            TOTAL IN =183883767059.4335              TOTAL IN =         110.7368
+            TOTAL IN =183883767072.2162              TOTAL IN =         110.7368
 
           OUT:                                     OUT:
           ----                                     ----
-             STORAGE =   803708243.5120               STORAGE =          96.0223
+             STORAGE =   803708244.0743               STORAGE =          96.0223
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
                WELLS =157788000000.0000                 WELLS =           0.0000
-                  ET = 24109395521.5654                    ET =          14.2689
-     HEAD DEP BOUNDS =   353222633.2724       HEAD DEP BOUNDS =           0.2156
+                  ET = 24109395531.6416                    ET =          14.2689
+     HEAD DEP BOUNDS =   353222633.2686       HEAD DEP BOUNDS =           0.2156
             RECHARGE =           0.0000              RECHARGE =           0.0000
-      STREAM LEAKAGE =   832432565.8181        STREAM LEAKAGE =           0.2278
+      STREAM LEAKAGE =   832432567.1822        STREAM LEAKAGE =           0.2278
 
-           TOTAL OUT =183886758964.1679             TOTAL OUT =         110.7345
+           TOTAL OUT =183886758976.1668             TOTAL OUT =         110.7345
 
-            IN - OUT =    -2991904.7344              IN - OUT =       2.3019E-03
+            IN - OUT =    -2991903.9506              IN - OUT =       2.3019E-03
 
  PERCENT DISCREPANCY =          -0.00     PERCENT DISCREPANCY =           0.00
 
@@ -3891,6 +4359,14 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
   (  1,  8,  4) (  1,  8,  4)
 
 
+
+Solver Convergence Information:
+                              HClose:  2.1225359E-4
+                              RClose:  1.4644984E-4
+                           L2-RClose:  4.5748663E-4
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP     6
  
  SOLVING FOR HEAD 
@@ -3906,6 +4382,14 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
      0.9042E-03    0.2208E-03
   (  1,  8,  4) (  1,  8,  4)
 
+
+
+Solver Convergence Information:
+                              HClose:  2.2080650E-4
+                              RClose:  1.4397066E-4
+                           L2-RClose:  4.7412409E-4
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP     7
  
@@ -3923,6 +4407,14 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
   (  1,  8,  4) (  1,  8,  5)
 
 
+
+Solver Convergence Information:
+                              HClose:  2.3568917E-4
+                              RClose:  1.4718239E-4
+                           L2-RClose:  4.9944071E-4
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP     8
  
  SOLVING FOR HEAD 
@@ -3939,6 +4431,14 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
   (  1,  8,  4) (  1,  8,  5)
 
 
+
+Solver Convergence Information:
+                              HClose:  2.5976245E-4
+                              RClose:  1.5265819E-4
+                           L2-RClose:  5.3382311E-4
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP     9
  
  SOLVING FOR HEAD 
@@ -3954,6 +4454,14 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
      0.9708E-03    0.2892E-03
   (  1,  8,  4) (  1,  8,  5)
 
+
+
+Solver Convergence Information:
+                              HClose:  2.8918827E-4
+                              RClose:  1.6068046E-4
+                           L2-RClose:  5.7793682E-4
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    10
     PRINT BUDGET
@@ -4044,29 +4552,29 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
 
            IN:                                      IN:
            ---                                      ---
-             STORAGE = 30233278545.8613               STORAGE =           0.3376
+             STORAGE = 30233278610.8114               STORAGE =           0.3376
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
                WELLS =           0.0000                 WELLS =           0.0000
                   ET =           0.0000                    ET =           0.0000
-     HEAD DEP BOUNDS =   348580905.5625       HEAD DEP BOUNDS =           0.2189
+     HEAD DEP BOUNDS =   348580905.5576       HEAD DEP BOUNDS =           0.2189
             RECHARGE =  2869077913.6453              RECHARGE =           1.7938
-      STREAM LEAKAGE =151871124788.4081        STREAM LEAKAGE =         103.5333
+      STREAM LEAKAGE =151871124737.3226        STREAM LEAKAGE =         103.5333
 
-            TOTAL IN =185322062153.4772              TOTAL IN =         105.8835
+            TOTAL IN =185322062167.3369              TOTAL IN =         105.8835
 
           OUT:                                     OUT:
           ----                                     ----
-             STORAGE =  2043900172.6753               STORAGE =          90.9114
+             STORAGE =  2043900174.3980               STORAGE =          90.9114
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
                WELLS =157788000000.0000                 WELLS =           0.0000
-                  ET = 24301353690.4085                    ET =          14.4985
-     HEAD DEP BOUNDS =   356109177.3460       HEAD DEP BOUNDS =           0.2173
+                  ET = 24301353700.4127                    ET =          14.4985
+     HEAD DEP BOUNDS =   356109177.3414       HEAD DEP BOUNDS =           0.2173
             RECHARGE =           0.0000              RECHARGE =           0.0000
-      STREAM LEAKAGE =   835649686.7467        STREAM LEAKAGE =           0.2526
+      STREAM LEAKAGE =   835649688.1000        STREAM LEAKAGE =           0.2526
 
-           TOTAL OUT =185325012727.1764             TOTAL OUT =         105.8799
+           TOTAL OUT =185325012740.2521             TOTAL OUT =         105.8799
 
-            IN - OUT =    -2950573.6992              IN - OUT =       3.6714E-03
+            IN - OUT =    -2950572.9153              IN - OUT =       3.6714E-03
 
  PERCENT DISCREPANCY =          -0.00     PERCENT DISCREPANCY =           0.00
 
@@ -4093,6 +4601,14 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
   (  1,  8,  4) (  1,  8,  5)
 
 
+
+Solver Convergence Information:
+                              HClose:  3.2514000E-4
+                              RClose:  1.7163079E-4
+                           L2-RClose:  6.3278662E-4
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    11
  
  SOLVING FOR HEAD 
@@ -4109,6 +4625,14 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
   (  1,  8,  5) (  1,  8,  5)
 
 
+
+Solver Convergence Information:
+                              HClose:  3.6898855E-4
+                              RClose:  1.8598359E-4
+                           L2-RClose:  6.9792307E-4
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    12
  
  SOLVING FOR HEAD 
@@ -4124,6 +4648,14 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
      0.1176E-02    0.4239E-03
   (  1,  7,  5) (  1,  7,  5)
 
+
+
+Solver Convergence Information:
+                              HClose:  4.2391056E-4
+                              RClose:  2.0431030E-4
+                           L2-RClose:  7.8088710E-4
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    13
     PRINT BUDGET
@@ -4214,29 +4746,29 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
 
            IN:                                      IN:
            ---                                      ---
-             STORAGE = 30235305466.4383               STORAGE =           0.1316
+             STORAGE = 30235305531.2750               STORAGE =           0.1316
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
                WELLS =           0.0000                 WELLS =           0.0000
                   ET =           0.0000                    ET =           0.0000
-     HEAD DEP BOUNDS =   351127799.6478       HEAD DEP BOUNDS =           0.2188
+     HEAD DEP BOUNDS =   351127799.6429       HEAD DEP BOUNDS =           0.2188
             RECHARGE =  2889955095.7899              RECHARGE =           1.7938
-      STREAM LEAKAGE =153043576520.4273        STREAM LEAKAGE =          99.3620
+      STREAM LEAKAGE =153043576470.5315        STREAM LEAKAGE =          99.3620
 
-            TOTAL IN =186519964882.3033              TOTAL IN =         101.5062
+            TOTAL IN =186519964897.2394              TOTAL IN =         101.5062
 
           OUT:                                     OUT:
           ----                                     ----
-             STORAGE =  3065595857.0248               STORAGE =          86.2846
+             STORAGE =  3065595859.8951               STORAGE =          86.2846
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
                WELLS =157788000000.0000                 WELLS =           0.0000
-                  ET = 24471798057.3035                    ET =          14.7156
-     HEAD DEP BOUNDS =   358653539.8138       HEAD DEP BOUNDS =           0.2192
+                  ET = 24471798067.2465                    ET =          14.7156
+     HEAD DEP BOUNDS =   358653539.8086       HEAD DEP BOUNDS =           0.2192
             RECHARGE =           0.0000              RECHARGE =           0.0000
-      STREAM LEAKAGE =   838814107.3971        STREAM LEAKAGE =           0.2816
+      STREAM LEAKAGE =   838814108.7410        STREAM LEAKAGE =           0.2816
 
-           TOTAL OUT =186522861561.5391             TOTAL OUT =         101.5011
+           TOTAL OUT =186522861575.6911             TOTAL OUT =         101.5011
 
-            IN - OUT =    -2896679.2357              IN - OUT =       5.1456E-03
+            IN - OUT =    -2896678.4517              IN - OUT =       5.1456E-03
 
  PERCENT DISCREPANCY =          -0.00     PERCENT DISCREPANCY =           0.01
 
@@ -4263,6 +4795,14 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
   (  1,  7,  5) (  1,  7,  5)
 
 
+
+Solver Convergence Information:
+                              HClose:  4.9426859E-4
+                              RClose:  2.2730322E-4
+                           L2-RClose:  8.7858760E-4
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    14
  
  SOLVING FOR HEAD 
@@ -4278,6 +4818,14 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
      0.1439E-02    0.5803E-03
   (  1,  7,  5) (  1,  7,  5)
 
+
+
+Solver Convergence Information:
+                              HClose:  5.8029301E-4
+                              RClose:  2.5579916E-4
+                           L2-RClose:  0.0009963
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    15
     PRINT BUDGET
@@ -4368,29 +4916,29 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
 
            IN:                                      IN:
            ---                                      ---
-             STORAGE = 30236091656.1491               STORAGE =       6.5802E-02
+             STORAGE = 30236091720.9379               STORAGE =       6.5802E-02
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
                WELLS =           0.0000                 WELLS =           0.0000
                   ET =           0.0000                    ET =           0.0000
-     HEAD DEP BOUNDS =   353277868.5136       HEAD DEP BOUNDS =           0.2187
+     HEAD DEP BOUNDS =   353277868.5087       HEAD DEP BOUNDS =           0.2187
             RECHARGE =  2907584646.1864              RECHARGE =           1.7938
-      STREAM LEAKAGE =153995754065.1058        STREAM LEAKAGE =          96.0789
+      STREAM LEAKAGE =153995754016.2082        STREAM LEAKAGE =          96.0789
 
-            TOTAL IN =187492708235.9550              TOTAL IN =          98.1572
+            TOTAL IN =187492708251.8412              TOTAL IN =          98.1572
 
           OUT:                                     OUT:
           ----                                     ----
-             STORAGE =  3887289606.8049               STORAGE =          82.7410
+             STORAGE =  3887289610.6842               STORAGE =          82.7410
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
                WELLS =157788000000.0000                 WELLS =           0.0000
-                  ET = 24617672716.3416                    ET =          14.8830
-     HEAD DEP BOUNDS =   360819969.9658       HEAD DEP BOUNDS =           0.2208
+                  ET = 24617672726.2341                    ET =          14.8830
+     HEAD DEP BOUNDS =   360819969.9601       HEAD DEP BOUNDS =           0.2208
             RECHARGE =           0.0000              RECHARGE =           0.0000
-      STREAM LEAKAGE =   841761340.6181        STREAM LEAKAGE =           0.3058
+      STREAM LEAKAGE =   841761341.9541        STREAM LEAKAGE =           0.3058
 
-           TOTAL OUT =187495543633.7303             TOTAL OUT =          98.1506
+           TOTAL OUT =187495543648.8325             TOTAL OUT =          98.1506
 
-            IN - OUT =    -2835397.7754              IN - OUT =       6.6147E-03
+            IN - OUT =    -2835396.9913              IN - OUT =       6.6147E-03
 
  PERCENT DISCREPANCY =          -0.00     PERCENT DISCREPANCY =           0.01
 
@@ -4417,6 +4965,14 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
   (  1,  7,  5) (  1,  7,  5)
 
 
+
+Solver Convergence Information:
+                              HClose:  6.8525709E-4
+                              RClose:  2.9081322E-4
+                           L2-RClose:  0.0011377
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    16
  
  SOLVING FOR HEAD 
@@ -4432,6 +4988,14 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
      0.1798E-02    0.8131E-03    0.2523E-03
   (  1,  7,  5) (  1,  7,  5) (  1,  7,  5)
 
+
+
+Solver Convergence Information:
+                              HClose:  2.5227412E-4
+                              RClose:  7.9855339E-5
+                           L2-RClose:  3.1259254E-4
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    17
  
@@ -4449,6 +5013,14 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
   (  1,  7,  5) (  1,  7,  5) (  1,  7,  5)
 
 
+
+Solver Convergence Information:
+                              HClose:  3.1456119E-4
+                              RClose:  9.5066107E-5
+                           L2-RClose:  3.6928410E-4
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    18
  
  SOLVING FOR HEAD 
@@ -4465,6 +5037,14 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
   (  1,  7,  8) (  1,  7,  5) (  1,  7,  5)
 
 
+
+Solver Convergence Information:
+                              HClose:  3.9424486E-4
+                              RClose:  1.1388992E-4
+                           L2-RClose:  4.3973980E-4
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    19
  
  SOLVING FOR HEAD 
@@ -4480,6 +5060,14 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
      0.2795E-02    0.1384E-02    0.4960E-03
   (  1,  7,  8) (  1,  7,  5) (  1,  7,  5)
 
+
+
+Solver Convergence Information:
+                              HClose:  4.9602648E-4
+                              RClose:  1.3719038E-4
+                           L2-RClose:  5.2723922E-4
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    20
     PRINT BUDGET
@@ -4570,29 +5158,29 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
 
            IN:                                      IN:
            ---                                      ---
-             STORAGE = 30236469898.4565               STORAGE =           0.0000
+             STORAGE = 30236469963.2107               STORAGE =           0.0000
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
                WELLS =           0.0000                 WELLS =           0.0000
                   ET =           0.0000                    ET =           0.0000
-     HEAD DEP BOUNDS =   360833817.0456       HEAD DEP BOUNDS =           0.2184
+     HEAD DEP BOUNDS =   360833817.0410       HEAD DEP BOUNDS =           0.2184
             RECHARGE =  2969600124.0113              RECHARGE =           1.7938
-      STREAM LEAKAGE =157114369767.6996        STREAM LEAKAGE =          86.7118
+      STREAM LEAKAGE =157114369722.2340        STREAM LEAKAGE =          86.7118
 
-            TOTAL IN =190681273607.2130              TOTAL IN =          88.7240
+            TOTAL IN =190681273626.4970              TOTAL IN =          88.7240
 
           OUT:                                     OUT:
           ----                                     ----
-             STORAGE =  6531229107.7554               STORAGE =          72.7715
+             STORAGE =  6531229115.2296               STORAGE =          72.7715
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
                WELLS =157788000000.0000                 WELLS =           0.0000
-                  ET = 25142327243.9356                    ET =          15.3465
-     HEAD DEP BOUNDS =   368553855.4451       HEAD DEP BOUNDS =           0.2254
+                  ET = 25142327253.6596                    ET =          15.3465
+     HEAD DEP BOUNDS =   368553855.4377       HEAD DEP BOUNDS =           0.2254
             RECHARGE =           0.0000              RECHARGE =           0.0000
-      STREAM LEAKAGE =   853875574.9761        STREAM LEAKAGE =           0.3771
+      STREAM LEAKAGE =   853875576.2852        STREAM LEAKAGE =           0.3771
 
-           TOTAL OUT =190683985782.1122             TOTAL OUT =          88.7205
+           TOTAL OUT =190683985800.6121             TOTAL OUT =          88.7205
 
-            IN - OUT =    -2712174.8992              IN - OUT =       3.4733E-03
+            IN - OUT =    -2712174.1151              IN - OUT =       3.4733E-03
 
  PERCENT DISCREPANCY =          -0.00     PERCENT DISCREPANCY =           0.00
 
@@ -4619,6 +5207,14 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
   (  1,  7,  8) (  1,  6,  5) (  1,  7,  5)
 
 
+
+Solver Convergence Information:
+                              HClose:  6.2565051E-4
+                              RClose:  1.6598254E-4
+                           L2-RClose:  6.3587969E-4
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    21
  
  SOLVING FOR HEAD 
@@ -4634,6 +5230,14 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
      0.3902E-02    0.2024E-02    0.7892E-03
   (  1,  7,  8) (  1,  6,  5) (  1,  7,  5)
 
+
+
+Solver Convergence Information:
+                              HClose:  7.8921392E-4
+                              RClose:  2.0133644E-4
+                           L2-RClose:  7.6778766E-4
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    22
  
@@ -4651,6 +5255,14 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
   (  1,  7,  8) (  1,  6,  5) (  1,  7,  5) (  1,  6,  5)
 
 
+
+Solver Convergence Information:
+                              HClose:  2.8654793E-4
+                              RClose:  6.9884990E-5
+                           L2-RClose:  2.3141028E-4
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    23
  
  SOLVING FOR HEAD 
@@ -4667,6 +5279,14 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
   (  1,  7,  8) (  1,  6,  5) (  1,  7,  5) (  1,  6,  5)
 
 
+
+Solver Convergence Information:
+                              HClose:  3.7633470E-4
+                              RClose:  8.7152796E-5
+                           L2-RClose:  2.8479298E-4
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    24
  
  SOLVING FOR HEAD 
@@ -4682,6 +5302,14 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
      0.6062E-02    0.3503E-02    0.1574E-02    0.4934E-03
   (  1,  7,  8) (  1,  6,  5) (  1,  7,  5) (  1,  6,  5)
 
+
+
+Solver Convergence Information:
+                              HClose:  4.9337176E-4
+                              RClose:  1.0810269E-4
+                           L2-RClose:  3.5012911E-4
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    25
     PRINT BUDGET
@@ -4772,29 +5400,29 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
 
            IN:                                      IN:
            ---                                      ---
-             STORAGE = 30236469898.4565               STORAGE =           0.0000
+             STORAGE = 30236469963.2107               STORAGE =           0.0000
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
                WELLS =           0.0000                 WELLS =           0.0000
                   ET =           0.0000                    ET =           0.0000
-     HEAD DEP BOUNDS =   372973941.7375       HEAD DEP BOUNDS =           0.2178
+     HEAD DEP BOUNDS =   372973941.7332       HEAD DEP BOUNDS =           0.2178
             RECHARGE =  3069476671.2031              RECHARGE =           1.7938
-      STREAM LEAKAGE =161576232441.1544        STREAM LEAKAGE =          76.2964
+      STREAM LEAKAGE =161576232400.8727        STREAM LEAKAGE =          76.2964
 
-            TOTAL IN =195255152952.5515              TOTAL IN =          78.3079
+            TOTAL IN =195255152977.0197              TOTAL IN =          78.3079
 
           OUT:                                     OUT:
           ----                                     ----
-             STORAGE = 10196457911.1850               STORAGE =          61.7777
+             STORAGE = 10196457924.1306               STORAGE =          61.7777
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
                WELLS =157788000000.0000                 WELLS =           0.0000
-                  ET = 26014284124.7179                    ET =          15.8405
-     HEAD DEP BOUNDS =   381289357.1904       HEAD DEP BOUNDS =           0.2306
+                  ET = 26014284134.1976                    ET =          15.8405
+     HEAD DEP BOUNDS =   381289357.1805       HEAD DEP BOUNDS =           0.2306
             RECHARGE =           0.0000              RECHARGE =           0.0000
-      STREAM LEAKAGE =   877679815.2694        STREAM LEAKAGE =           0.4569
+      STREAM LEAKAGE =   877679816.5379        STREAM LEAKAGE =           0.4569
 
-           TOTAL OUT =195257711208.3626             TOTAL OUT =          78.3058
+           TOTAL OUT =195257711232.0466             TOTAL OUT =          78.3058
 
-            IN - OUT =    -2558255.8111              IN - OUT =       2.1459E-03
+            IN - OUT =    -2558255.0269              IN - OUT =       2.1459E-03
 
  PERCENT DISCREPANCY =          -0.00     PERCENT DISCREPANCY =           0.00
 
@@ -4821,6 +5449,14 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
   (  1,  7,  8) (  1,  6,  5) (  1,  7,  5) (  1,  6,  5)
 
 
+
+Solver Convergence Information:
+                              HClose:  6.4503903E-4
+                              RClose:  1.3324406E-4
+                           L2-RClose:  4.2976942E-4
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    26
  
  SOLVING FOR HEAD 
@@ -4836,6 +5472,14 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
      0.7841E-02    0.4925E-02    0.2444E-02    0.8411E-03    0.1958E-03
   (  1,  7,  8) (  1,  6,  5) (  1,  7,  5) (  1,  6,  5) (  1,  7,  5)
 
+
+
+Solver Convergence Information:
+                              HClose:  1.9577269E-4
+                              RClose:  6.9069812E-5
+                           L2-RClose:  1.6669199E-4
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    27
  
@@ -4853,6 +5497,14 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
   (  1,  2,  3) (  1,  5,  5) (  1,  7,  5) (  1,  6,  5) (  1,  7,  5)
 
 
+
+Solver Convergence Information:
+                              HClose:  2.5529377E-4
+                              RClose:  9.2835661E-5
+                           L2-RClose:  2.1122621E-4
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    28
  
  SOLVING FOR HEAD 
@@ -4869,6 +5521,14 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
   (  1,  2,  3) (  1,  3,  4) (  1,  7,  5) (  1,  6,  5) (  1,  7,  5)
 
 
+
+Solver Convergence Information:
+                              HClose:  3.3228606E-4
+                              RClose:  1.2371380E-4
+                           L2-RClose:  2.6743545E-4
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    29
  
  SOLVING FOR HEAD 
@@ -4884,6 +5544,14 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
      0.1465E-01    0.8668E-02    0.4528E-02    0.1823E-02    0.4318E-03
   (  1,  2,  3) (  1,  3,  4) (  1,  7,  5) (  1,  6,  5) (  1,  7,  5)
 
+
+
+Solver Convergence Information:
+                              HClose:  4.3180962E-4
+                              RClose:  1.6348675E-4
+                           L2-RClose:  3.3819458E-4
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    30
     PRINT BUDGET
@@ -4974,29 +5642,29 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
 
            IN:                                      IN:
            ---                                      ---
-             STORAGE = 30236469898.4565               STORAGE =           0.0000
+             STORAGE = 30236469963.2107               STORAGE =           0.0000
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
                WELLS =           0.0000                 WELLS =           0.0000
                   ET =           0.0000                    ET =           0.0000
-     HEAD DEP BOUNDS =   392464943.5051       HEAD DEP BOUNDS =           0.2171
+     HEAD DEP BOUNDS =   392464943.5012       HEAD DEP BOUNDS =           0.2171
             RECHARGE =  3230328849.2209              RECHARGE =           1.7938
-      STREAM LEAKAGE =167795402839.9624        STREAM LEAKAGE =          65.4551
+      STREAM LEAKAGE =167795402806.6839        STREAM LEAKAGE =          65.4551
 
-            TOTAL IN =201654666531.1449              TOTAL IN =          67.4660
+            TOTAL IN =201654666562.6167              TOTAL IN =          67.4660
 
           OUT:                                     OUT:
           ----                                     ----
-             STORAGE = 15055010508.8382               STORAGE =          49.7495
+             STORAGE = 15055010529.6589               STORAGE =          49.7495
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
                WELLS =157788000000.0000                 WELLS =           0.0000
-                  ET = 27483024350.4227                    ET =          16.7741
-     HEAD DEP BOUNDS =   402273434.8667       HEAD DEP BOUNDS =           0.2359
+                  ET = 27483024359.2358                    ET =          16.7741
+     HEAD DEP BOUNDS =   402273434.8535       HEAD DEP BOUNDS =           0.2359
             RECHARGE =           0.0000              RECHARGE =           0.0000
-      STREAM LEAKAGE =   928786369.6870        STREAM LEAKAGE =           0.7049
+      STREAM LEAKAGE =   928786370.7537        STREAM LEAKAGE =           0.7049
 
-           TOTAL OUT =201657094663.8146             TOTAL OUT =          67.4644
+           TOTAL OUT =201657094694.5020             TOTAL OUT =          67.4644
 
-            IN - OUT =    -2428132.6697              IN - OUT =       1.6044E-03
+            IN - OUT =    -2428131.8853              IN - OUT =       1.6044E-03
 
  PERCENT DISCREPANCY =          -0.00     PERCENT DISCREPANCY =           0.00
 
@@ -5023,6 +5691,14 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
   (  1,  2,  3) (  1,  3,  4) (  1,  7,  5) (  1,  6,  5) (  1,  7,  5)
 
 
+
+Solver Convergence Information:
+                              HClose:  5.6132164E-4
+                              RClose:  2.1443516E-4
+                           L2-RClose:  4.2724053E-4
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    31
  
  SOLVING FOR HEAD 
@@ -5038,6 +5714,14 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
      0.2128E-01    0.1259E-01    0.6696E-02    0.3011E-02    0.7280E-03
   (  1,  2,  3) (  1,  3,  4) (  1,  7,  5) (  1,  6,  5) (  1,  7,  5)
 
+
+
+Solver Convergence Information:
+                              HClose:  7.2798621E-4
+                              RClose:  2.7914773E-4
+                           L2-RClose:  5.3763892E-4
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    32
  
@@ -5056,6 +5740,14 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
      0.4408E-03
   (  1,  2,  3)
 
+
+
+Solver Convergence Information:
+                              HClose:  4.4077803E-4
+                              RClose:  9.4699607E-5
+                           L2-RClose:  3.0791548E-4
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    33
     PRINT BUDGET
@@ -5146,29 +5838,29 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
 
            IN:                                      IN:
            ---                                      ---
-             STORAGE = 30236469898.4565               STORAGE =           0.0000
+             STORAGE = 30236469963.2107               STORAGE =           0.0000
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
                WELLS =           0.0000                 WELLS =           0.0000
                   ET =           0.0000                    ET =           0.0000
-     HEAD DEP BOUNDS =   409441523.9497       HEAD DEP BOUNDS =           0.2167
+     HEAD DEP BOUNDS =   409441523.9461       HEAD DEP BOUNDS =           0.2167
             RECHARGE =  3370780091.0411              RECHARGE =           1.7938
-      STREAM LEAKAGE =172600510935.7687        STREAM LEAKAGE =          59.6264
+      STREAM LEAKAGE =172600510906.8311        STREAM LEAKAGE =          59.6264
 
-            TOTAL IN =206617202449.2159              TOTAL IN =          61.6368
+            TOTAL IN =206617202485.0291              TOTAL IN =          61.6368
 
           OUT:                                     OUT:
           ----                                     ----
-             STORAGE = 18537006178.1672               STORAGE =          42.0071
+             STORAGE = 18537006205.0136               STORAGE =          42.0071
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
                WELLS =157788000000.0000                 WELLS =           0.0000
-                  ET = 28845017753.1672                    ET =          17.7638
-     HEAD DEP BOUNDS =   420907136.4704       HEAD DEP BOUNDS =           0.2389
+                  ET = 28845017761.1477                    ET =          17.7638
+     HEAD DEP BOUNDS =   420907136.4551       HEAD DEP BOUNDS =           0.2389
             RECHARGE =           0.0000              RECHARGE =           0.0000
-      STREAM LEAKAGE =  1028530845.5924        STREAM LEAKAGE =           1.6250
+      STREAM LEAKAGE =  1028530845.8092        STREAM LEAKAGE =           1.6250
 
-           TOTAL OUT =206619461913.3971             TOTAL OUT =          61.6348
+           TOTAL OUT =206619461948.4257             TOTAL OUT =          61.6348
 
-            IN - OUT =    -2259464.1812              IN - OUT =       1.9717E-03
+            IN - OUT =    -2259463.3966              IN - OUT =       1.9717E-03
 
  PERCENT DISCREPANCY =          -0.00     PERCENT DISCREPANCY =           0.00
 
@@ -5197,6 +5889,14 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
   (  1,  2,  3)
 
 
+
+Solver Convergence Information:
+                              HClose:  5.9565611E-4
+                              RClose:  1.2318645E-4
+                           L2-RClose:  3.9130700E-4
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    34
  
  SOLVING FOR HEAD 
@@ -5214,6 +5914,14 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
      0.7957E-03
   (  1,  2,  3)
 
+
+
+Solver Convergence Information:
+                              HClose:  7.9570660E-4
+                              RClose:  1.5853499E-4
+                           L2-RClose:  4.9471321E-4
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    35
     PRINT BUDGET
@@ -5304,29 +6012,29 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
 
            IN:                                      IN:
            ---                                      ---
-             STORAGE = 30236469898.4565               STORAGE =           0.0000
+             STORAGE = 30236469963.2107               STORAGE =           0.0000
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
                WELLS =           0.0000                 WELLS =           0.0000
                   ET =           0.0000                    ET =           0.0000
-     HEAD DEP BOUNDS =   423754784.8474       HEAD DEP BOUNDS =           0.2164
+     HEAD DEP BOUNDS =   423754784.8441       HEAD DEP BOUNDS =           0.2164
             RECHARGE =  3489382890.4404              RECHARGE =           1.7938
-      STREAM LEAKAGE =176361163893.2310        STREAM LEAKAGE =          56.0682
+      STREAM LEAKAGE =176361163866.9790        STREAM LEAKAGE =          56.0682
 
-            TOTAL IN =210510771466.9753              TOTAL IN =          58.0784
+            TOTAL IN =210510771505.4742              TOTAL IN =          58.0784
 
           OUT:                                     OUT:
           ----                                     ----
-             STORAGE = 21043594000.6934               STORAGE =          36.6041
+             STORAGE = 21043594032.1037               STORAGE =          36.6041
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
                WELLS =157788000000.0000                 WELLS =           0.0000
-                  ET = 30066080014.5912                    ET =          18.7242
-     HEAD DEP BOUNDS =   436800474.9879       HEAD DEP BOUNDS =           0.2408
+                  ET = 30066080021.6706                    ET =          18.7242
+     HEAD DEP BOUNDS =   436800474.9710       HEAD DEP BOUNDS =           0.2408
             RECHARGE =           0.0000              RECHARGE =           0.0000
-      STREAM LEAKAGE =  1178366213.6488        STREAM LEAKAGE =           2.5060
+      STREAM LEAKAGE =  1178366212.8894        STREAM LEAKAGE =           2.5060
 
-           TOTAL OUT =210512840703.9213             TOTAL OUT =          58.0752
+           TOTAL OUT =210512840741.6348             TOTAL OUT =          58.0752
 
-            IN - OUT =    -2069236.9460              IN - OUT =       3.2037E-03
+            IN - OUT =    -2069236.1606              IN - OUT =       3.2037E-03
 
  PERCENT DISCREPANCY =          -0.00     PERCENT DISCREPANCY =           0.01
 
@@ -5355,6 +6063,14 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
   (  1,  2,  3) (  1,  4,  3)
 
 
+
+Solver Convergence Information:
+                              HClose:  3.4298864E-4
+                              RClose:  1.3190782E-4
+                           L2-RClose:  3.8557055E-4
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    36
  
  SOLVING FOR HEAD 
@@ -5372,6 +6088,14 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
      0.1379E-02    0.4497E-03
   (  1,  2,  3) (  1,  4,  3)
 
+
+
+Solver Convergence Information:
+                              HClose:  4.4965138E-4
+                              RClose:  1.7256368E-4
+                           L2-RClose:  4.9874910E-4
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    37
  
@@ -5391,6 +6115,14 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
   (  1,  2,  3) (  1,  4,  3)
 
 
+
+Solver Convergence Information:
+                              HClose:  5.7893667E-4
+                              RClose:  2.2236860E-4
+                           L2-RClose:  6.3312372E-4
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    38
  
  SOLVING FOR HEAD 
@@ -5409,6 +6141,14 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
   (  1,  2,  3) (  1,  4,  3)
 
 
+
+Solver Convergence Information:
+                              HClose:  7.2325468E-4
+                              RClose:  2.7885015E-4
+                           L2-RClose:  7.8062402E-4
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    39
  
  SOLVING FOR HEAD 
@@ -5426,6 +6166,14 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
      0.3093E-02    0.1011E-02    0.1092E-02    0.4127E-03
   (  1,  2,  3) (  1,  3,  2) (  1,  2,  3) (  1,  6,  5)
 
+
+
+Solver Convergence Information:
+                              HClose:  4.1273077E-4
+                              RClose:  1.3446881E-4
+                           L2-RClose:  2.2842264E-4
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    40
     PRINT BUDGET
@@ -5516,29 +6264,29 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
 
            IN:                                      IN:
            ---                                      ---
-             STORAGE = 30236469898.4565               STORAGE =           0.0000
+             STORAGE = 30236469963.2107               STORAGE =           0.0000
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
                WELLS =           0.0000                 WELLS =           0.0000
                   ET =           0.0000                    ET =           0.0000
-     HEAD DEP BOUNDS =   473986747.2167       HEAD DEP BOUNDS =           0.2157
+     HEAD DEP BOUNDS =   473986747.2140       HEAD DEP BOUNDS =           0.2157
             RECHARGE =  3906592014.3648              RECHARGE =           1.7938
-      STREAM LEAKAGE =188395766190.6773        STREAM LEAKAGE =          49.6248
+      STREAM LEAKAGE =188395766169.9481        STREAM LEAKAGE =          49.6248
 
-            TOTAL IN =223012814850.7153              TOTAL IN =          51.6342
+            TOTAL IN =223012814894.7375              TOTAL IN =          51.6342
 
           OUT:                                     OUT:
           ----                                     ----
-             STORAGE = 27459275483.0491               STORAGE =          22.2145
+             STORAGE = 27459275527.6922               STORAGE =          22.2145
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
                WELLS =157788000000.0000                 WELLS =           0.0000
-                  ET = 34912628103.4532                    ET =          22.5340
-     HEAD DEP BOUNDS =   493483634.2422       HEAD DEP BOUNDS =           0.2452
+                  ET = 34912628106.5436                    ET =          22.5340
+     HEAD DEP BOUNDS =   493483634.2215       HEAD DEP BOUNDS =           0.2452
             RECHARGE =           0.0000              RECHARGE =           0.0000
-      STREAM LEAKAGE =  2360775229.9160        STREAM LEAKAGE =           6.6393
+      STREAM LEAKAGE =  2360775225.4385        STREAM LEAKAGE =           6.6393
 
-           TOTAL OUT =223014162450.6605             TOTAL OUT =          51.6330
+           TOTAL OUT =223014162493.8957             TOTAL OUT =          51.6330
 
-            IN - OUT =    -1347599.9452              IN - OUT =       1.2388E-03
+            IN - OUT =    -1347599.1581              IN - OUT =       1.2388E-03
 
  PERCENT DISCREPANCY =          -0.00     PERCENT DISCREPANCY =           0.00
 
@@ -5559,13 +6307,21 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
     HEAD CHANGE   HEAD CHANGE   HEAD CHANGE   HEAD CHANGE   HEAD CHANGE
   LAYER,ROW,COL LAYER,ROW,COL LAYER,ROW,COL LAYER,ROW,COL LAYER,ROW,COL
  ----------------------------------------------------------------------
-      3.198         1.523         1.480        0.7755        0.4526    
+      3.198         1.523         1.480        0.7755        0.4527    
   (  1,  2,  8) (  1,  5,  8) (  1,  3,  4) (  1,  5,  8) (  1,  2,  3)
-     0.1585        0.5323E-01    0.3754E-01    0.3088E-01    0.1343E-01
+     0.1585        0.5324E-01    0.3753E-01    0.3088E-01    0.1342E-01
   (  1,  6,  8) (  1,  3,  4) (  1,  6,  5) (  1,  3,  4) (  1,  6,  8)
      0.3533E-02    0.1841E-02    0.2101E-02    0.1177E-02    0.6343E-03
   (  1,  2,  3) (  1,  4,  3) (  1,  3,  4) (  1,  6,  8) (  1,  3,  4)
 
+
+
+Solver Convergence Information:
+                              HClose:  6.3427582E-4
+                              RClose:  1.6374160E-4
+                           L2-RClose:  3.0455873E-4
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    41
  
@@ -5584,6 +6340,14 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
      0.4700E-02    0.1907E-02    0.1147E-02    0.7344E-03
   (  1, 11,  7) (  1, 11,  7) (  1, 11,  7) (  1, 11,  7)
 
+
+
+Solver Convergence Information:
+                              HClose:  7.3436831E-4
+                              RClose:  5.2674117E-4
+                           L2-RClose:  6.0828945E-4
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    42
     PRINT BUDGET
@@ -5668,29 +6432,29 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
 
            IN:                                      IN:
            ---                                      ---
-             STORAGE = 30236469898.4565               STORAGE =           0.0000
+             STORAGE = 30236469963.2107               STORAGE =           0.0000
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
                WELLS =           0.0000                 WELLS =           0.0000
                   ET =           0.0000                    ET =           0.0000
-     HEAD DEP BOUNDS =   501759669.8538       HEAD DEP BOUNDS =           0.2155
+     HEAD DEP BOUNDS =   501759669.8513       HEAD DEP BOUNDS =           0.2155
             RECHARGE =  4137715317.6620              RECHARGE =           1.7938
-      STREAM LEAKAGE =194649088346.8828        STREAM LEAKAGE =          48.1538
+      STREAM LEAKAGE =194649088327.5345        STREAM LEAKAGE =          48.1538
 
-            TOTAL IN =229525033232.8550              TOTAL IN =          50.1630
+            TOTAL IN =229525033278.2585              TOTAL IN =          50.1630
 
           OUT:                                     OUT:
           ----                                     ----
-             STORAGE = 29467501907.5652               STORAGE =          12.7033
+             STORAGE = 29467501964.6911               STORAGE =          12.7033
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
                WELLS =157788000000.0000                 WELLS =           0.0000
-                  ET = 38354825968.8487                    ET =          28.8307
-     HEAD DEP BOUNDS =   525209595.3381       HEAD DEP BOUNDS =           0.2465
+                  ET = 38354825965.5100                    ET =          28.8307
+     HEAD DEP BOUNDS =   525209595.3166       HEAD DEP BOUNDS =           0.2465
             RECHARGE =           0.0000              RECHARGE =           0.0000
-      STREAM LEAKAGE =  3390662799.9650        STREAM LEAKAGE =           8.3807
+      STREAM LEAKAGE =  3390662794.3114        STREAM LEAKAGE =           8.3807
 
-           TOTAL OUT =229526200271.7170             TOTAL OUT =          50.1612
+           TOTAL OUT =229526200319.8292             TOTAL OUT =          50.1612
 
-            IN - OUT =    -1167038.8620              IN - OUT =       1.7744E-03
+            IN - OUT =    -1167041.5706              IN - OUT =       1.7744E-03
 
  PERCENT DISCREPANCY =          -0.00     PERCENT DISCREPANCY =           0.00
 
@@ -5717,6 +6481,14 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
   (  1, 10, 10) (  1,  2,  3) (  1,  4,  2) (  1,  3,  4) (  1,  4,  3)
 
 
+
+Solver Convergence Information:
+                              HClose:  4.9493567E-4
+                              RClose:  6.5011669E-4
+                           L2-RClose:  9.4446411E-4
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    43
  
  SOLVING FOR HEAD 
@@ -5733,6 +6505,14 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
   (  1, 10, 10) (  1,  2,  3) (  1,  6,  2) (  1,  3,  4) (  1,  4,  3)
 
 
+
+Solver Convergence Information:
+                              HClose:  2.0138936E-4
+                              RClose:  2.2019004E-4
+                           L2-RClose:  3.2932367E-4
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    44
  
  SOLVING FOR HEAD 
@@ -5748,6 +6528,14 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
      0.5826E-02    0.1793E-02    0.8465E-03    0.5370E-03
   (  1, 10, 10) (  1,  2,  3) (  1,  5,  2) (  1,  3,  4)
 
+
+
+Solver Convergence Information:
+                              HClose:  5.3703761E-4
+                              RClose:  1.3615724E-4
+                           L2-RClose:  2.7901594E-4
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    45
     PRINT BUDGET
@@ -5838,29 +6626,29 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
 
            IN:                                      IN:
            ---                                      ---
-             STORAGE = 30236469898.4565               STORAGE =           0.0000
+             STORAGE = 30236469963.2107               STORAGE =           0.0000
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
                WELLS =           0.0000                 WELLS =           0.0000
                   ET =           0.0000                    ET =           0.0000
-     HEAD DEP BOUNDS =   554672897.1894       HEAD DEP BOUNDS =           0.2153
+     HEAD DEP BOUNDS =   554672897.1870       HEAD DEP BOUNDS =           0.2153
             RECHARGE =  4578511480.5362              RECHARGE =           1.7938
-      STREAM LEAKAGE =205572438622.4860        STREAM LEAKAGE =          43.7164
+      STREAM LEAKAGE =205572438606.2000        STREAM LEAKAGE =          43.7164
 
-            TOTAL IN =240942092898.6681              TOTAL IN =          45.7255
+            TOTAL IN =240942092947.1339              TOTAL IN =          45.7255
 
           OUT:                                     OUT:
           ----                                     ----
-             STORAGE = 30167323215.1847               STORAGE =           0.9452
+             STORAGE = 30167323279.3702               STORAGE =           0.9452
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
                WELLS =157788000000.0000                 WELLS =           0.0000
-                  ET = 46786911805.6558                    ET =          35.3141
-     HEAD DEP BOUNDS =   586125180.2915       HEAD DEP BOUNDS =           0.2482
+                  ET = 46786911798.7354                    ET =          35.3141
+     HEAD DEP BOUNDS =   586125180.2690       HEAD DEP BOUNDS =           0.2482
             RECHARGE =           0.0000              RECHARGE =           0.0000
-      STREAM LEAKAGE =  5614583312.5928        STREAM LEAKAGE =           9.2172
+      STREAM LEAKAGE =  5614583306.5200        STREAM LEAKAGE =           9.2172
 
-           TOTAL OUT =240942943513.7247             TOTAL OUT =          45.7246
+           TOTAL OUT =240942943564.8946             TOTAL OUT =          45.7246
 
-            IN - OUT =     -850615.0566              IN - OUT =       8.8555E-04
+            IN - OUT =     -850617.7607              IN - OUT =       8.8555E-04
 
  PERCENT DISCREPANCY =          -0.00     PERCENT DISCREPANCY =           0.00
 
@@ -5886,6 +6674,14 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
      0.3408E-02    0.8348E-03    0.4215E-03
   (  1, 10, 10) (  1,  2,  3) (  1,  5,  2)
 
+
+
+Solver Convergence Information:
+                              HClose:  4.2154906E-4
+                              RClose:  2.0567701E-4
+                           L2-RClose:  3.5685112E-4
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    46
     PRINT BUDGET
@@ -5976,29 +6772,29 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
 
            IN:                                      IN:
            ---                                      ---
-             STORAGE = 30236469898.4565               STORAGE =           0.0000
+             STORAGE = 30236469963.2107               STORAGE =           0.0000
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
                WELLS =           0.0000                 WELLS =           0.0000
                   ET =           0.0000                    ET =           0.0000
-     HEAD DEP BOUNDS =   575944889.2878       HEAD DEP BOUNDS =           0.2153
+     HEAD DEP BOUNDS =   575944889.2854       HEAD DEP BOUNDS =           0.2153
             RECHARGE =  4755762143.0092              RECHARGE =           1.7938
-      STREAM LEAKAGE =209872184723.8362        STREAM LEAKAGE =          43.5128
+      STREAM LEAKAGE =209872184707.6711        STREAM LEAKAGE =          43.5128
 
-            TOTAL IN =245440361654.5897              TOTAL IN =          45.5218
+            TOTAL IN =245440361703.1764              TOTAL IN =          45.5218
 
           OUT:                                     OUT:
           ----                                     ----
-             STORAGE = 30205555838.8879               STORAGE =           0.3869
+             STORAGE = 30205555903.4029               STORAGE =           0.3869
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
                WELLS =157788000000.0000                 WELLS =           0.0000
-                  ET = 50306633295.5399                    ET =          35.6191
-     HEAD DEP BOUNDS =   610657379.4690       HEAD DEP BOUNDS =           0.2483
+                  ET = 50306633288.4381                    ET =          35.6191
+     HEAD DEP BOUNDS =   610657379.4464       HEAD DEP BOUNDS =           0.2483
             RECHARGE =           0.0000              RECHARGE =           0.0000
-      STREAM LEAKAGE =  6530188989.4729        STREAM LEAKAGE =           9.2658
+      STREAM LEAKAGE =  6530188983.3720        STREAM LEAKAGE =           9.2658
 
-           TOTAL OUT =245441035503.3698             TOTAL OUT =          45.5200
+           TOTAL OUT =245441035554.6594             TOTAL OUT =          45.5200
 
-            IN - OUT =     -673848.7801              IN - OUT =       1.7888E-03
+            IN - OUT =     -673851.4830              IN - OUT =       1.7888E-03
 
  PERCENT DISCREPANCY =          -0.00     PERCENT DISCREPANCY =           0.00
 
@@ -6024,6 +6820,14 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
      0.1905E-02    0.3873E-03
   (  1, 10, 10) (  1,  2,  3)
 
+
+
+Solver Convergence Information:
+                              HClose:  3.8726329E-4
+                              RClose:  1.2468035E-4
+                           L2-RClose:  2.7231229E-4
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    47
     PRINT BUDGET
@@ -6114,29 +6918,29 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
 
            IN:                                      IN:
            ---                                      ---
-             STORAGE = 30236469898.4565               STORAGE =           0.0000
+             STORAGE = 30236469963.2107               STORAGE =           0.0000
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
                WELLS =           0.0000                 WELLS =           0.0000
                   ET =           0.0000                    ET =           0.0000
-     HEAD DEP BOUNDS =   599343308.8000       HEAD DEP BOUNDS =           0.2153
+     HEAD DEP BOUNDS =   599343308.7976       HEAD DEP BOUNDS =           0.2153
             RECHARGE =  4950737871.7295              RECHARGE =           1.7938
-      STREAM LEAKAGE =214592787857.5856        STREAM LEAKAGE =          43.4289
+      STREAM LEAKAGE =214592787841.4723        STREAM LEAKAGE =          43.4289
 
-            TOTAL IN =250379338936.5715              TOTAL IN =          45.4379
+            TOTAL IN =250379338985.2100              TOTAL IN =          45.4379
 
           OUT:                                     OUT:
           ----                                     ----
-             STORAGE = 30222566026.2716               STORAGE =           0.1565
+             STORAGE = 30222566090.9271               STORAGE =           0.1565
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
                WELLS =157788000000.0000                 WELLS =           0.0000
-                  ET = 54192106724.9681                    ET =          35.7458
-     HEAD DEP BOUNDS =   637646604.4666       HEAD DEP BOUNDS =           0.2483
+                  ET = 54192106717.7878                    ET =          35.7458
+     HEAD DEP BOUNDS =   637646604.4439       HEAD DEP BOUNDS =           0.2483
             RECHARGE =           0.0000              RECHARGE =           0.0000
-      STREAM LEAKAGE =  7539502640.4731        STREAM LEAKAGE =           9.2855
+      STREAM LEAKAGE =  7539502634.3601        STREAM LEAKAGE =           9.2855
 
-           TOTAL OUT =250379821996.1793             TOTAL OUT =          45.4362
+           TOTAL OUT =250379822047.5189             TOTAL OUT =          45.4362
 
-            IN - OUT =     -483059.6078              IN - OUT =       1.7552E-03
+            IN - OUT =     -483062.3089              IN - OUT =       1.7552E-03
 
  PERCENT DISCREPANCY =          -0.00     PERCENT DISCREPANCY =           0.00
 
@@ -6162,6 +6966,14 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
      0.1011E-02    0.1986E-03
   (  1, 10, 10) (  1, 10, 10)
 
+
+
+Solver Convergence Information:
+                              HClose:  1.9863896E-4
+                              RClose:  5.4795188E-5
+                           L2-RClose:  1.2106225E-4
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    48
     PRINT BUDGET
@@ -6252,29 +7064,29 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
 
            IN:                                      IN:
            ---                                      ---
-             STORAGE = 30236469898.4565               STORAGE =           0.0000
+             STORAGE = 30236469963.2107               STORAGE =           0.0000
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
                WELLS =           0.0000                 WELLS =           0.0000
                   ET =           0.0000                    ET =           0.0000
-     HEAD DEP BOUNDS =   625081175.5635       HEAD DEP BOUNDS =           0.2153
+     HEAD DEP BOUNDS =   625081175.5611       HEAD DEP BOUNDS =           0.2153
             RECHARGE =  5165211173.3218              RECHARGE =           1.7938
-      STREAM LEAKAGE =219781300757.1744        STREAM LEAKAGE =          43.3942
+      STREAM LEAKAGE =219781300741.0832        STREAM LEAKAGE =          43.3942
 
-            TOTAL IN =255808063004.5161              TOTAL IN =          45.4032
+            TOTAL IN =255808063053.1768              TOTAL IN =          45.4032
 
           OUT:                                     OUT:
           ----                                     ----
-             STORAGE = 30229946667.9965               STORAGE =       6.1728E-02
+             STORAGE = 30229946732.7114               STORAGE =       6.1728E-02
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
                WELLS =157788000000.0000                 WELLS =           0.0000
-                  ET = 58472450441.4049                    ET =          35.7987
-     HEAD DEP BOUNDS =   667336497.3439       HEAD DEP BOUNDS =           0.2483
+                  ET = 58472450434.1912                    ET =          35.7987
+     HEAD DEP BOUNDS =   667336497.3212       HEAD DEP BOUNDS =           0.2483
             RECHARGE =           0.0000              RECHARGE =           0.0000
-      STREAM LEAKAGE =  8650719538.2181        STREAM LEAKAGE =           9.2937
+      STREAM LEAKAGE =  8650719532.1001        STREAM LEAKAGE =           9.2937
 
-           TOTAL OUT =255808453144.9633             TOTAL OUT =          45.4024
+           TOTAL OUT =255808453196.3240             TOTAL OUT =          45.4024
 
-            IN - OUT =     -390140.4472              IN - OUT =       7.7713E-04
+            IN - OUT =     -390143.1472              IN - OUT =       7.7713E-04
 
  PERCENT DISCREPANCY =          -0.00     PERCENT DISCREPANCY =           0.00
 
@@ -6298,6 +7110,14 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
      0.5836E-01    0.1731E-01    0.6402E-02    0.2067E-02    0.7451E-03
   (  1, 10, 10) (  1,  6,  1) (  1,  6,  1) (  1,  6,  1) (  1, 10, 10)
 
+
+
+Solver Convergence Information:
+                              HClose:  7.4512881E-4
+                              RClose:  1.3762783E-4
+                           L2-RClose:  3.1024372E-4
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    49
     PRINT BUDGET
@@ -6388,29 +7208,29 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
 
            IN:                                      IN:
            ---                                      ---
-             STORAGE = 30236469898.4565               STORAGE =           0.0000
+             STORAGE = 30236469963.2107               STORAGE =           0.0000
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
                WELLS =           0.0000                 WELLS =           0.0000
                   ET =           0.0000                    ET =           0.0000
-     HEAD DEP BOUNDS =   653392635.6192       HEAD DEP BOUNDS =           0.2153
+     HEAD DEP BOUNDS =   653392635.6168       HEAD DEP BOUNDS =           0.2153
             RECHARGE =  5401131805.0733              RECHARGE =           1.7938
-      STREAM LEAKAGE =225486814756.8875        STREAM LEAKAGE =          43.3801
+      STREAM LEAKAGE =225486814740.8047        STREAM LEAKAGE =          43.3801
 
-            TOTAL IN =261777809096.0364              TOTAL IN =          45.3891
+            TOTAL IN =261777809144.7056              TOTAL IN =          45.3891
 
           OUT:                                     OUT:
           ----                                     ----
-             STORAGE = 30233002765.8840               STORAGE =       2.3236E-02
+             STORAGE = 30233002830.6231               STORAGE =       2.3236E-02
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
                WELLS =157788000000.0000                 WELLS =           0.0000
-                  ET = 63183625961.1736                    ET =          35.8200
-     HEAD DEP BOUNDS =   699996079.3733       HEAD DEP BOUNDS =           0.2483
+                  ET = 63183625953.9463                    ET =          35.8200
+     HEAD DEP BOUNDS =   699996079.3506       HEAD DEP BOUNDS =           0.2483
             RECHARGE =           0.0000              RECHARGE =           0.0000
-      STREAM LEAKAGE =  9873483365.2256        STREAM LEAKAGE =           9.2969
+      STREAM LEAKAGE =  9873483359.1056        STREAM LEAKAGE =           9.2969
 
-           TOTAL OUT =261778108171.6564             TOTAL OUT =          45.3884
+           TOTAL OUT =261778108223.0257             TOTAL OUT =          45.3884
 
-            IN - OUT =     -299075.6200              IN - OUT =       6.9238E-04
+            IN - OUT =     -299078.3201              IN - OUT =       6.9238E-04
 
  PERCENT DISCREPANCY =          -0.00     PERCENT DISCREPANCY =           0.00
 
@@ -6434,6 +7254,14 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
      0.2594E-01    0.6967E-02    0.2630E-02    0.8599E-03    0.3408E-03
   (  1, 10, 10) (  1,  6,  1) (  1,  6,  1) (  1,  6,  1) (  1, 10, 10)
 
+
+
+Solver Convergence Information:
+                              HClose:  3.4080037E-4
+                              RClose:  5.7116358E-5
+                           L2-RClose:  1.2930793E-4
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    50
     PRINT BUDGET
@@ -6524,29 +7352,29 @@ WEL PACKAGE WARNING: CURRENT STRESS PERIOD DOES NOT CONTAIN ANY WELLS
 
            IN:                                      IN:
            ---                                      ---
-             STORAGE = 30236469898.4565               STORAGE =           0.0000
+             STORAGE = 30236469963.2107               STORAGE =           0.0000
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
                WELLS =           0.0000                 WELLS =           0.0000
                   ET =           0.0000                    ET =           0.0000
-     HEAD DEP BOUNDS =   684535151.0023       HEAD DEP BOUNDS =           0.2153
+     HEAD DEP BOUNDS =   684535151.0000       HEAD DEP BOUNDS =           0.2153
             RECHARGE =  5660644500.0000              RECHARGE =           1.7938
-      STREAM LEAKAGE =231762094067.8940        STREAM LEAKAGE =          43.3747
+      STREAM LEAKAGE =231762094051.8145        STREAM LEAKAGE =          43.3747
 
-            TOTAL IN =268343743617.3528              TOTAL IN =          45.3837
+            TOTAL IN =268343743666.0252              TOTAL IN =          45.3837
 
           OUT:                                     OUT:
           ----                                     ----
-             STORAGE = 30234231283.6251               STORAGE =       8.4915E-03
+             STORAGE = 30234231348.3739               STORAGE =       8.4915E-03
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
                WELLS =157788000000.0000                 WELLS =           0.0000
-                  ET = 68367139997.0593                    ET =          35.8284
-     HEAD DEP BOUNDS =   735921993.6790       HEAD DEP BOUNDS =           0.2483
+                  ET = 68367139989.8268                    ET =          35.8284
+     HEAD DEP BOUNDS =   735921993.6564       HEAD DEP BOUNDS =           0.2483
             RECHARGE =           0.0000              RECHARGE =           0.0000
-      STREAM LEAKAGE = 11218709445.6413        STREAM LEAKAGE =           9.2982
+      STREAM LEAKAGE = 11218709439.5205        STREAM LEAKAGE =           9.2982
 
-           TOTAL OUT =268344002720.0048             TOTAL OUT =          45.3834
+           TOTAL OUT =268344002771.3776             TOTAL OUT =          45.3834
 
-            IN - OUT =     -259102.6520              IN - OUT =       2.7629E-04
+            IN - OUT =     -259105.3524              IN - OUT =       2.7629E-04
 
  PERCENT DISCREPANCY =          -0.00     PERCENT DISCREPANCY =           0.00
 

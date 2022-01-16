@@ -1,3 +1,8 @@
+💧🧙💦🌊  <-These symbols help text editors identify file as Unicode UTF8.
+                    UTF8 is not necessary to view numerical results, but no UTF8 support can have artifacts where non-ascii symbols are used (such as the degree symbol).
+
+
+MODFLOW-OWHM v2.2.0
 
       MMMMMMM                                       MM      MMM     MM
     MMM     MMM    MM      M   MMMMMMMM             LM     DM M     ML     MM     MMMMMMMMM  MMMMMMMM  MMMMMMMM
@@ -10,30 +15,46 @@
      MMMMMMMMN     MM      M   MMMMMMMM                7MM      7MM  MN          MM   M      MMMMMMMM  MM      MM
 
 
- MODFLOW-OWHM v2.0.01  
-
-
                         MODFLOW
             ONE-WATER HYDROLOGIC-FLOW MODEL
 
-    U.S. GEOLOGICAL SURVEY MODULAR FINITE-DIFFERENCE 
-           CONJUNCTIVE USE SIMULATION PROGRAM
+    U.S. Geological Survey Modular Finite-Difference
+           Conjunctive Use Simulation Program
 
-                     Version 2.0
+                      Version 2.2
 
- Release: 01          4/23/2020
+ Release: 0
 
- Includes:
-          MODFLOW-2005 Version 1.12.0   02/03/2017
-          MODFLOW-FMP  Version 4.00.0   04/23/2017
-          MODFLOW-SWR  Version 1.04.0   09/15/2016
-          MODFLOW-SWI  Version 2.00.0   07/22/2013
-          MODFLOW-LGR  Version 2.00.0   09/19/2013
-          MODFLOW-NWT  Version 1.2.0    03/01/2020
-          MODFLOW-CFP  Version 1.09.57  09/12/2017
+ Includes the following base versions with enhancements:
 
+          MODFLOW-2005 Version 1.12
+          MODFLOW-FMP  Version 4.1
+          MODFLOW-SWR  Version 1.04
+          MODFLOW-SWI  Version 2.0
+          MODFLOW-LGR  Version 2.0
+          MODFLOW-NWT  Version 1.2
+          MODFLOW-CFP  Version 1.09.57
+                  SWO  Version 1.0
 
- OneWater Simulation Initiated at 
+------------------------------------------------------------------------------------
+USGS Software Disclaimer:                                                          |
+                                                                                   |
+   No warranty, expressed or implied, is made by the USGS or the U.S. Government   |
+   as to the functionality of the software and related material nor shall the      |
+   fact of release constitute any such warranty.                                   |
+                                                                                   |
+   The software is provided on the condition that neither the USGS nor             |
+   the U.S. Government shall be held liable for any damages resulting from the     |
+   authorized or unauthorized use of the software.                                 |
+                                                                                   |
+   Newer versions may be present at the official code and download repository:     |
+      https://code.usgs.gov/modflow/mf-owhm                                        |
+                                                                                   |
+------------------------------------------------------------------------------------
+
+∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙
+    OneWater Simulation Initiated at  
+∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙
 
 
  LIST FILE: ./output/mnw1.lst
@@ -158,7 +179,7 @@ THE WARNING IS BELIEVED TO HAVE ORIGINATED FROM THE FOLLOWING FILE:
 THE GUESSED LINE THAT THE WARNING OCCURED ON IS:
 "FREE  NOCBC  BUDGETDB ./output/mnw1_VolumetricBudget.txt  CUMULATIVE_HEAD_CHANGE ./output/mnw1_CumHCHG.txt  PRINT_HEAD NPER ./output/mnw1_Head.txt"
 
-THE DESRIPTION OF THE WARNING IS:
+THE DESCRIPTION OF THE WARNING IS:
 
 FOUND BAS PACKAGE OPTION KEYWORDS ALONG PACKAGE "OPTIONS LINE" (ie Data Set 1)
 
@@ -198,14 +219,14 @@ END OPTIONS
 
  NOW READING BAS OPTIONS
 
- FOUND OPTION: FREE
-    THE FREE FORMAT OPTION HAS BEEN SELECTED
-         -NOTE THIS NOW IS THE DEFAULT AND NOT NECESSARY.
+ Found Option: FREE
+                 THE FREE FORMAT OPTION HAS BEEN SELECTED
+                    -NOTE THIS NOW IS THE DEFAULT AND NOT NECESSARY.
 
- FOUND OPTION: NOCBC
-    NO CELL-BY-CELL FLOWS WILL BE WRITTEN.
+ Found Option: NOCBC
+                 No Cell-By-Cell (CBC) flows are written for simulation.
 
- FOUND OPTION: BUDGETDB
+ Found Option: BUDGETDB
 
 
 ########################################################################################################
@@ -220,7 +241,7 @@ THE WARNING IS BELIEVED TO HAVE ORIGINATED FROM THE FOLLOWING FILE:
 THE GUESSED LINE THAT THE WARNING OCCURED ON IS:
 "FREE  NOCBC  BUDGETDB ./output/mnw1_VolumetricBudget.txt  CUMULATIVE_HEAD_CHANGE ./output/mnw1_CumHCHG.txt  PRINT_HEAD NPER ./output/mnw1_Head.txt"
 
-THE DESRIPTION OF THE WARNING IS:
+THE DESCRIPTION OF THE WARNING IS:
 
 ...CHECK_FOR_POST_KEY WARNINGS...
  THE FOLLOWING MESSAGES WERE PASSED WHILE CHECKING FOR ANY ADDITIONAL KEYWORDS ON LOADED LINE.
@@ -237,9 +258,10 @@ TO SUPRESS THIS WARNING PLEASE PLACE A "#" SYMBOL TO THE LEFT OF THE WORD TO IND
 
 
 
- FOUND OPTION: CUMULATIVE_HEAD_CHANGE
-    THIS OPTION IS ONLY USEFUL FOR MODEL RESULT COMPARISON WITH DIFFERENT CODE COMPARISONS.
 
+ Found Option: CUMULATIVE_HEAD_CHANGE
+                 Cumulative sum of absolute head differences for the entire model.
+                 This is a diagnostic feature meant for comparing MF-OWHM code versions with the same model input (software unit test).
 
 
 ########################################################################################################
@@ -254,7 +276,7 @@ THE WARNING IS BELIEVED TO HAVE ORIGINATED FROM THE FOLLOWING FILE:
 THE GUESSED LINE THAT THE WARNING OCCURED ON IS:
 "FREE  NOCBC  BUDGETDB ./output/mnw1_VolumetricBudget.txt  CUMULATIVE_HEAD_CHANGE ./output/mnw1_CumHCHG.txt  PRINT_HEAD NPER ./output/mnw1_Head.txt"
 
-THE DESRIPTION OF THE WARNING IS:
+THE DESCRIPTION OF THE WARNING IS:
 
 ...CHECK_FOR_POST_KEY WARNINGS...
  THE FOLLOWING MESSAGES WERE PASSED WHILE CHECKING FOR ANY ADDITIONAL KEYWORDS ON LOADED LINE.
@@ -271,13 +293,19 @@ TO SUPRESS THIS WARNING PLEASE PLACE A "#" SYMBOL TO THE LEFT OF THE WORD TO IND
 
 
 
- FOUND OPTION: PRINT_HEAD    SP    TS   FILE
-                              5    50   ./output/mnw1_Head.txt
 
- THE MAX STORAGE FOR PROPERTIES DEFINED BY PARAMETERS IS: 
- MAX STORAGE OF PARAMETERS (MXPAR)  IS       2000
- MAX STORAGE OF INSTANCES  (MXINST) IS      50000
- MAX STORAGE OF CLUSTERS   (MXCLST) IS    2000000
+ Found Option: PRINT_HEAD
+                 NPER ./output/mnw1_Head.txt
+
+
+ Setting up PRINT_HEAD option for 
+    SP    TS   FILE
+     5    50   ./output/mnw1_Head.txt
+
+ The total simulation limit for the number PARAMETERs defined is: 
+     Max number of PARAMETERs (MXPAR)  is       2000
+     Max number of INSTANCEs  (MXINST) is      50000
+     Max number of CLUSTERs   (MXCLST) is    2000000
 
 
            BOUNDARY ARRAY =              1 FOR LAYER   1
@@ -462,7 +490,7 @@ TO SUPRESS THIS WARNING PLEASE PLACE A "#" SYMBOL TO THE LEFT OF THE WORD TO IND
 
          THE FOLLOWING COMMENTS WERE PASSED TO THE WARNING ROUTINE
 
-THE DESRIPTION OF THE WARNING IS:
+THE DESCRIPTION OF THE WARNING IS:
 
 DIS PACKAGE: THE GROUND SURFACE ELEVATION WAS NOT SPECIFIED WITH THE KEYWORD "SURFACE_ELEVATION"
 
@@ -568,6 +596,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  3.3864148E-5
+                              RClose:  0.3845788
+                           L2-RClose:  1.0066479
+                         Rel-Vol-Err:  1.0479567E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
 
@@ -583,6 +619,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  3.3869333E-5
+                              RClose:  0.3379086
+                           L2-RClose:  0.8507783
+                         Rel-Vol-Err:  1.0521177E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
  REUSING PREVIOUS VALUES OF IOFLG
@@ -590,6 +634,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
      1 TOTAL ITERATIONS
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  2.2501913E-5
+                              RClose:  0.3176240
+                           L2-RClose:  0.7586483
+                         Rel-Vol-Err:  1.0163968E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
@@ -599,6 +651,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  2.3051624E-5
+                              RClose:  0.2986530
+                           L2-RClose:  0.6660128
+                         Rel-Vol-Err:  9.5568964E-10
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
  REUSING PREVIOUS VALUES OF IOFLG
@@ -606,6 +666,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
      1 TOTAL ITERATIONS
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  1.7726699E-5
+                              RClose:  0.2654485
+                           L2-RClose:  0.6017649
+                         Rel-Vol-Err:  8.4943535E-10
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
@@ -615,6 +683,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  1.8058449E-5
+                              RClose:  0.2399185
+                           L2-RClose:  0.5273458
+                         Rel-Vol-Err:  7.6773909E-10
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
  REUSING PREVIOUS VALUES OF IOFLG
@@ -622,6 +698,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
      1 TOTAL ITERATIONS
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  1.4316659E-5
+                              RClose:  0.2103575
+                           L2-RClose:  0.4786835
+                         Rel-Vol-Err:  6.7314397E-10
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
@@ -631,6 +715,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  1.4371501E-5
+                              RClose:  0.1888326
+                           L2-RClose:  0.4189226
+                         Rel-Vol-Err:  6.0426426E-10
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
  REUSING PREVIOUS VALUES OF IOFLG
@@ -638,6 +730,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
      1 TOTAL ITERATIONS
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  1.1584333E-5
+                              RClose:  0.1652742
+                           L2-RClose:  0.3820751
+                         Rel-Vol-Err:  5.2887747E-10
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
@@ -647,6 +747,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  1.1509580E-5
+                              RClose:  0.1482027
+                           L2-RClose:  0.3340717
+                         Rel-Vol-Err:  4.7424877E-10
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
  REUSING PREVIOUS VALUES OF IOFLG
@@ -654,6 +762,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
      1 TOTAL ITERATIONS
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  9.3909898E-6
+                              RClose:  0.1297961
+                           L2-RClose:  0.3060270
+                         Rel-Vol-Err:  4.1534749E-10
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
@@ -663,6 +779,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  9.2544828E-6
+                              RClose:  0.1164334
+                           L2-RClose:  0.2673474
+                         Rel-Vol-Err:  3.7258688E-10
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
  REUSING PREVIOUS VALUES OF IOFLG
@@ -670,6 +794,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
      1 TOTAL ITERATIONS
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  7.6270294E-6
+                              RClose:  0.1021011
+                           L2-RClose:  0.2458663
+                         Rel-Vol-Err:  3.2672353E-10
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
@@ -679,6 +811,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  7.4633088E-6
+                              RClose:  0.0916676
+                           L2-RClose:  0.2145989
+                         Rel-Vol-Err:  2.9333635E-10
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
  REUSING PREVIOUS VALUES OF IOFLG
@@ -686,6 +826,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
      1 TOTAL ITERATIONS
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  6.2044326E-6
+                              RClose:  0.0804970
+                           L2-RClose:  0.1980459
+                         Rel-Vol-Err:  2.5759053E-10
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 1
  CELL-BY-CELL FLOW TERM FLAG = 1
@@ -877,11 +1025,21 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
 
 READING PCG SOLVER STRESS PERIOD INFORMATION
 
+
 ########################################################################################################################
-PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERIOD     2 REUSING PREVIOUSLY DEFINED CRITERIA FOR REMAINDER OF SIMULATION.
+PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERIOD     2
+ REUSING PREVIOUSLY DEFINED CRITERIA FOR REMAINDER OF SIMULATION.
 ########################################################################################################################
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  3.6765344E-5
+                              RClose:  0.6165227
+                           L2-RClose:  1.3727724
+                         Rel-Vol-Err:  1.9728726E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
@@ -893,6 +1051,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  2.5146573E-5
+                              RClose:  0.5119127
+                           L2-RClose:  1.2166859
+                         Rel-Vol-Err:  1.6381205E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
  REUSING PREVIOUS VALUES OF IOFLG
@@ -900,6 +1066,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
      1 TOTAL ITERATIONS
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  2.4844980E-5
+                              RClose:  0.4731677
+                           L2-RClose:  1.0591155
+                         Rel-Vol-Err:  1.5141365E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
@@ -909,6 +1083,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  2.1196804E-5
+                              RClose:  0.4277675
+                           L2-RClose:  0.9579877
+                         Rel-Vol-Err:  1.3688560E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
  REUSING PREVIOUS VALUES OF IOFLG
@@ -916,6 +1098,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
      1 TOTAL ITERATIONS
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  1.9704111E-5
+                              RClose:  0.3931721
+                           L2-RClose:  0.8422181
+                         Rel-Vol-Err:  1.2581508E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
@@ -925,6 +1115,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  1.7200917E-5
+                              RClose:  0.3538515
+                           L2-RClose:  0.7664569
+                         Rel-Vol-Err:  1.1323247E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
  REUSING PREVIOUS VALUES OF IOFLG
@@ -932,6 +1130,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
      1 TOTAL ITERATIONS
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  1.5908640E-5
+                              RClose:  0.3238796
+                           L2-RClose:  0.6755366
+                         Rel-Vol-Err:  1.0364148E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
@@ -941,6 +1147,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  1.3976699E-5
+                              RClose:  0.2907162
+                           L2-RClose:  0.6168803
+                         Rel-Vol-Err:  9.3029198E-10
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
  REUSING PREVIOUS VALUES OF IOFLG
@@ -948,6 +1162,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
      1 TOTAL ITERATIONS
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  1.2914332E-5
+                              RClose:  0.2653638
+                           L2-RClose:  0.5443069
+                         Rel-Vol-Err:  8.4916410E-10
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
@@ -957,6 +1179,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  1.1380440E-5
+                              RClose:  0.2377923
+                           L2-RClose:  0.4982511
+                         Rel-Vol-Err:  7.6093528E-10
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
  REUSING PREVIOUS VALUES OF IOFLG
@@ -964,6 +1194,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
      1 TOTAL ITERATIONS
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  1.0508719E-5
+                              RClose:  0.2166447
+                           L2-RClose:  0.4398807
+                         Rel-Vol-Err:  6.9326316E-10
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
@@ -973,6 +1211,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  9.2797358E-6
+                              RClose:  0.1939249
+                           L2-RClose:  0.4034137
+                         Rel-Vol-Err:  6.2055961E-10
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
  REUSING PREVIOUS VALUES OF IOFLG
@@ -980,6 +1226,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
      1 TOTAL ITERATIONS
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  8.5622921E-6
+                              RClose:  0.1764420
+                           L2-RClose:  0.3562471
+                         Rel-Vol-Err:  5.6461427E-10
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
@@ -989,6 +1243,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  7.5742239E-6
+                              RClose:  0.1578301
+                           L2-RClose:  0.3272071
+                         Rel-Vol-Err:  5.0505630E-10
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
  REUSING PREVIOUS VALUES OF IOFLG
@@ -996,6 +1258,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
      1 TOTAL ITERATIONS
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  6.9820898E-6
+                              RClose:  0.1434636
+                           L2-RClose:  0.2889755
+                         Rel-Vol-Err:  4.5908349E-10
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 1
  CELL-BY-CELL FLOW TERM FLAG = 1
@@ -1187,6 +1457,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  5.3204296E-6
+                              RClose:  0.0680093
+                           L2-RClose:  0.1010590
+                         Rel-Vol-Err:  6.5647775E-11
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
  REUSING PREVIOUS VALUES OF IOFLG
@@ -1197,6 +1475,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  5.9691071E-5
+                              RClose:  0.3476005
+                           L2-RClose:  0.7259564
+                         Rel-Vol-Err:  6.8483207E-10
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
  REUSING PREVIOUS VALUES OF IOFLG
@@ -1204,6 +1490,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
      7 TOTAL ITERATIONS
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  3.5734938E-5
+                              RClose:  0.1915525
+                           L2-RClose:  0.3806921
+                         Rel-Vol-Err:  4.2048410E-10
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
@@ -1213,6 +1507,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  1.6981542E-5
+                              RClose:  0.0980096
+                           L2-RClose:  0.2269423
+                         Rel-Vol-Err:  2.2550536E-10
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
  REUSING PREVIOUS VALUES OF IOFLG
@@ -1220,6 +1522,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
      9 TOTAL ITERATIONS
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  7.3247851E-6
+                              RClose:  0.0799103
+                           L2-RClose:  0.2556487
+                         Rel-Vol-Err:  2.3907120E-10
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
@@ -1229,6 +1539,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  1.0683987E-5
+                              RClose:  0.1350836
+                           L2-RClose:  0.4122854
+                         Rel-Vol-Err:  3.8054616E-10
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
  REUSING PREVIOUS VALUES OF IOFLG
@@ -1236,6 +1554,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
     10 TOTAL ITERATIONS
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  1.1737441E-5
+                              RClose:  0.2882906
+                           L2-RClose:  0.3776431
+                         Rel-Vol-Err:  1.2886173E-10
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
@@ -1245,6 +1571,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  2.1179559E-5
+                              RClose:  0.3993754
+                           L2-RClose:  0.5749754
+                         Rel-Vol-Err:  2.3617544E-10
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
  REUSING PREVIOUS VALUES OF IOFLG
@@ -1252,6 +1586,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
     12 TOTAL ITERATIONS
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  3.3180333E-5
+                              RClose:  0.5282858
+                           L2-RClose:  0.8455765
+                         Rel-Vol-Err:  4.0534397E-10
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
@@ -1261,6 +1603,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  4.9021987E-5
+                              RClose:  0.6756365
+                           L2-RClose:  1.2211238
+                         Rel-Vol-Err:  6.3473608E-10
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
  REUSING PREVIOUS VALUES OF IOFLG
@@ -1268,6 +1618,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
     12 TOTAL ITERATIONS
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  7.0808920E-5
+                              RClose:  0.8493203
+                           L2-RClose:  1.7533132
+                         Rel-Vol-Err:  9.3829818E-10
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
@@ -1277,6 +1635,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  8.3921023E-6
+                              RClose:  0.2280445
+                           L2-RClose:  0.3508694
+                         Rel-Vol-Err:  4.2014113E-10
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
  REUSING PREVIOUS VALUES OF IOFLG
@@ -1284,6 +1650,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
     14 TOTAL ITERATIONS
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  1.3031984E-5
+                              RClose:  0.2971747
+                           L2-RClose:  0.4334433
+                         Rel-Vol-Err:  5.7558494E-10
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
@@ -1293,6 +1667,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  1.9287962E-5
+                              RClose:  0.4536910
+                           L2-RClose:  0.6669912
+                         Rel-Vol-Err:  8.7114304E-10
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
  REUSING PREVIOUS VALUES OF IOFLG
@@ -1300,6 +1682,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
     16 TOTAL ITERATIONS
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  2.8980963E-5
+                              RClose:  0.7103364
+                           L2-RClose:  1.0479223
+                         Rel-Vol-Err:  1.2925487E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 1
  CELL-BY-CELL FLOW TERM FLAG = 1
@@ -1473,6 +1863,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  8.6580615E-5
+                              RClose:  0.4527247
+                           L2-RClose:  0.9686213
+                         Rel-Vol-Err:  1.0144065E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
  REUSING PREVIOUS VALUES OF IOFLG
@@ -1483,6 +1881,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  4.2436265E-5
+                              RClose:  0.2345892
+                           L2-RClose:  0.6967706
+                         Rel-Vol-Err:  5.8465382E-10
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
  REUSING PREVIOUS VALUES OF IOFLG
@@ -1490,6 +1896,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
      9 TOTAL ITERATIONS
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  2.8189741E-5
+                              RClose:  0.1832229
+                           L2-RClose:  0.4538465
+                         Rel-Vol-Err:  4.5048545E-10
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
@@ -1499,6 +1913,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  2.3231905E-5
+                              RClose:  0.2320944
+                           L2-RClose:  0.5436390
+                         Rel-Vol-Err:  4.1713232E-10
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
  REUSING PREVIOUS VALUES OF IOFLG
@@ -1506,6 +1928,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
     11 TOTAL ITERATIONS
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  1.9193020E-5
+                              RClose:  0.3604911
+                           L2-RClose:  0.7557215
+                         Rel-Vol-Err:  3.5307626E-10
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
@@ -1515,6 +1945,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  1.3355922E-5
+                              RClose:  0.5372850
+                           L2-RClose:  1.1041069
+                         Rel-Vol-Err:  4.5401489E-10
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
  REUSING PREVIOUS VALUES OF IOFLG
@@ -1522,6 +1960,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
     12 TOTAL ITERATIONS
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  2.0884691E-5
+                              RClose:  0.7772731
+                           L2-RClose:  1.6530864
+                         Rel-Vol-Err:  6.6725968E-10
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
@@ -1531,6 +1977,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  4.8738302E-5
+                              RClose:  0.3901429
+                           L2-RClose:  1.1600427
+                         Rel-Vol-Err:  7.3640295E-10
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
  REUSING PREVIOUS VALUES OF IOFLG
@@ -1538,6 +1992,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
     13 TOTAL ITERATIONS
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  1.2057434E-4
+                              RClose:  0.7907845
+                           L2-RClose:  2.3131489
+                         Rel-Vol-Err:  1.0974526E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
@@ -1547,6 +2009,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  1.6782908E-5
+                              RClose:  0.3672198
+                           L2-RClose:  0.5944605
+                         Rel-Vol-Err:  8.9757213E-10
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
  REUSING PREVIOUS VALUES OF IOFLG
@@ -1554,6 +2024,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
     16 TOTAL ITERATIONS
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  2.9697705E-5
+                              RClose:  0.7006700
+                           L2-RClose:  1.0916185
+                         Rel-Vol-Err:  1.4373734E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
@@ -1563,6 +2041,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  4.7477032E-5
+                              RClose:  0.5937547
+                           L2-RClose:  0.8759266
+                         Rel-Vol-Err:  7.4618484E-10
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
  REUSING PREVIOUS VALUES OF IOFLG
@@ -1570,6 +2056,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
     19 TOTAL ITERATIONS
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  9.7580782E-6
+                              RClose:  0.1346384
+                           L2-RClose:  0.2792582
+                         Rel-Vol-Err:  4.3084303E-10
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
@@ -1579,6 +2073,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  1.1224624E-4
+                              RClose:  0.8910613
+                           L2-RClose:  1.6313040
+                         Rel-Vol-Err:  2.8513961E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
  REUSING PREVIOUS VALUES OF IOFLG
@@ -1586,6 +2088,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
     27 TOTAL ITERATIONS
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  1.5755212E-5
+                              RClose:  0.4552140
+                           L2-RClose:  0.7335470
+                         Rel-Vol-Err:  1.4566849E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 1
  CELL-BY-CELL FLOW TERM FLAG = 1
@@ -1759,6 +2269,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  3.5051042E-5
+                              RClose:  0.4225618
+                           L2-RClose:  0.7084341
+                         Rel-Vol-Err:  1.3521979E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
  REUSING PREVIOUS VALUES OF IOFLG
@@ -1769,6 +2287,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  2.5530473E-5
+                              RClose:  0.3060770
+                           L2-RClose:  0.5067307
+                         Rel-Vol-Err:  9.7944647E-10
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
  REUSING PREVIOUS VALUES OF IOFLG
@@ -1776,6 +2302,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
     19 TOTAL ITERATIONS
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  2.1113919E-5
+                              RClose:  0.2539051
+                           L2-RClose:  0.4216810
+                         Rel-Vol-Err:  8.1249629E-10
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
@@ -1785,6 +2319,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  7.8528292E-5
+                              RClose:  0.5377261
+                           L2-RClose:  1.1057556
+                         Rel-Vol-Err:  1.7207234E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
  REUSING PREVIOUS VALUES OF IOFLG
@@ -1792,6 +2334,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
     25 TOTAL ITERATIONS
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  3.9530772E-5
+                              RClose:  0.4749673
+                           L2-RClose:  0.6541569
+                         Rel-Vol-Err:  3.3578495E-10
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
@@ -1801,6 +2351,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  4.1356269E-5
+                              RClose:  0.4914320
+                           L2-RClose:  0.6828394
+                         Rel-Vol-Err:  3.5407695E-10
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
  REUSING PREVIOUS VALUES OF IOFLG
@@ -1808,6 +2366,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
     17 TOTAL ITERATIONS
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  1.7718266E-5
+                              RClose:  0.3986424
+                           L2-RClose:  0.6855590
+                         Rel-Vol-Err:  1.0893186E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
@@ -1817,6 +2383,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  1.1637997E-4
+                              RClose:  0.7356205
+                           L2-RClose:  2.8051905
+                         Rel-Vol-Err:  1.8517629E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
  REUSING PREVIOUS VALUES OF IOFLG
@@ -1824,6 +2398,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
     14 TOTAL ITERATIONS
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  1.8451423E-5
+                              RClose:  0.4038408
+                           L2-RClose:  0.6893692
+                         Rel-Vol-Err:  1.0997617E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
@@ -1833,6 +2415,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  2.1802639E-5
+                              RClose:  0.4988970
+                           L2-RClose:  0.8016776
+                         Rel-Vol-Err:  1.1988278E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
  REUSING PREVIOUS VALUES OF IOFLG
@@ -1840,6 +2430,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
     16 TOTAL ITERATIONS
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  2.2501259E-5
+                              RClose:  0.5028622
+                           L2-RClose:  0.8203383
+                         Rel-Vol-Err:  1.2369000E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
@@ -1849,6 +2447,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  2.1772548E-5
+                              RClose:  0.4686475
+                           L2-RClose:  0.7883675
+                         Rel-Vol-Err:  1.2272988E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
  REUSING PREVIOUS VALUES OF IOFLG
@@ -1856,6 +2462,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
     16 TOTAL ITERATIONS
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  2.0308565E-5
+                              RClose:  0.4190984
+                           L2-RClose:  0.7319502
+                         Rel-Vol-Err:  1.1817832E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
@@ -1865,6 +2479,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  1.8472471E-5
+                              RClose:  0.3645800
+                           L2-RClose:  0.6649629
+                         Rel-Vol-Err:  1.1081674E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
  REUSING PREVIOUS VALUES OF IOFLG
@@ -1872,6 +2494,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
     16 TOTAL ITERATIONS
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  1.6458418E-5
+                              RClose:  0.3159334
+                           L2-RClose:  0.5948629
+                         Rel-Vol-Err:  1.0109869E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
@@ -1881,6 +2511,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  1.4380345E-5
+                              RClose:  0.2793052
+                           L2-RClose:  0.5259705
+                         Rel-Vol-Err:  8.9377661E-10
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
  REUSING PREVIOUS VALUES OF IOFLG
@@ -1888,6 +2526,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
     16 TOTAL ITERATIONS
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  1.2313122E-5
+                              RClose:  0.2376026
+                           L2-RClose:  0.4610437
+                         Rel-Vol-Err:  7.6032829E-10
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
@@ -1897,6 +2543,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  1.4221309E-4
+                              RClose:  0.8636199
+                           L2-RClose:  2.7086569
+                         Rel-Vol-Err:  2.7635836E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
  REUSING PREVIOUS VALUES OF IOFLG
@@ -1904,6 +2558,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
     14 TOTAL ITERATIONS
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  1.4414171E-4
+                              RClose:  0.7150179
+                           L2-RClose:  2.3270499
+                         Rel-Vol-Err:  2.2880574E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
@@ -1913,6 +2575,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  1.5075018E-4
+                              RClose:  0.5081803
+                           L2-RClose:  2.0127610
+                         Rel-Vol-Err:  1.6261770E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
  REUSING PREVIOUS VALUES OF IOFLG
@@ -1920,6 +2590,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
     14 TOTAL ITERATIONS
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  1.5607275E-4
+                              RClose:  0.3858114
+                           L2-RClose:  1.8100416
+                         Rel-Vol-Err:  1.0079075E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
@@ -1929,6 +2607,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  1.6003855E-4
+                              RClose:  0.3442708
+                           L2-RClose:  1.7320559
+                         Rel-Vol-Err:  9.9634128E-10
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
  REUSING PREVIOUS VALUES OF IOFLG
@@ -1936,6 +2622,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
     14 TOTAL ITERATIONS
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  5.5052670E-5
+                              RClose:  0.6575517
+                           L2-RClose:  0.9483936
+                         Rel-Vol-Err:  8.0382736E-10
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
@@ -1945,6 +2639,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  2.7420095E-5
+                              RClose:  0.5583789
+                           L2-RClose:  0.9239121
+                         Rel-Vol-Err:  1.3653975E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
  REUSING PREVIOUS VALUES OF IOFLG
@@ -1952,6 +2654,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
     16 TOTAL ITERATIONS
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  1.1508133E-5
+                              RClose:  0.2054742
+                           L2-RClose:  0.4183875
+                         Rel-Vol-Err:  6.5751741E-10
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
@@ -1961,6 +2671,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  1.0846651E-4
+                              RClose:  0.7292961
+                           L2-RClose:  1.4434344
+                         Rel-Vol-Err:  2.3337476E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
  REUSING PREVIOUS VALUES OF IOFLG
@@ -1968,6 +2686,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
     22 TOTAL ITERATIONS
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  2.5778458E-5
+                              RClose:  0.4322986
+                           L2-RClose:  0.7823955
+                         Rel-Vol-Err:  7.7417496E-10
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
@@ -1977,6 +2703,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  3.4310720E-5
+                              RClose:  0.5572408
+                           L2-RClose:  1.1503728
+                         Rel-Vol-Err:  1.0206488E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
  REUSING PREVIOUS VALUES OF IOFLG
@@ -1984,6 +2718,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
     15 TOTAL ITERATIONS
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  2.8997923E-5
+                              RClose:  0.5256895
+                           L2-RClose:  1.0352892
+                         Rel-Vol-Err:  1.1016716E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
@@ -1993,6 +2735,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  2.5792579E-5
+                              RClose:  0.5048977
+                           L2-RClose:  0.9679285
+                         Rel-Vol-Err:  1.1536193E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
  REUSING PREVIOUS VALUES OF IOFLG
@@ -2000,6 +2750,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
     15 TOTAL ITERATIONS
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  2.3773206E-5
+                              RClose:  0.4908679
+                           L2-RClose:  0.9260676
+                         Rel-Vol-Err:  1.1814950E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
@@ -2009,6 +2767,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  1.4544629E-5
+                              RClose:  0.5499503
+                           L2-RClose:  0.9745291
+                         Rel-Vol-Err:  6.7994999E-10
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
  REUSING PREVIOUS VALUES OF IOFLG
@@ -2016,6 +2782,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
     16 TOTAL ITERATIONS
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  2.4257701E-5
+                              RClose:  0.5419697
+                           L2-RClose:  0.8783023
+                         Rel-Vol-Err:  1.3507142E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
@@ -2025,6 +2799,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  2.3893102E-5
+                              RClose:  0.5288673
+                           L2-RClose:  0.8606102
+                         Rel-Vol-Err:  1.3404514E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
  REUSING PREVIOUS VALUES OF IOFLG
@@ -2032,6 +2814,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
     15 TOTAL ITERATIONS
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  4.3373086E-5
+                              RClose:  0.6430149
+                           L2-RClose:  1.0450314
+                         Rel-Vol-Err:  5.4182531E-10
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
@@ -2041,6 +2831,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  3.2458795E-5
+                              RClose:  0.4229909
+                           L2-RClose:  0.5868851
+                         Rel-Vol-Err:  4.8907214E-10
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
  REUSING PREVIOUS VALUES OF IOFLG
@@ -2048,6 +2846,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
     16 TOTAL ITERATIONS
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  3.1498323E-5
+                              RClose:  0.8266898
+                           L2-RClose:  1.1532647
+                         Rel-Vol-Err:  1.2374819E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
@@ -2057,6 +2863,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  3.1022799E-5
+                              RClose:  0.8085731
+                           L2-RClose:  1.1327485
+                         Rel-Vol-Err:  1.2307493E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
  REUSING PREVIOUS VALUES OF IOFLG
@@ -2064,6 +2878,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
     15 TOTAL ITERATIONS
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  3.0663558E-5
+                              RClose:  0.7946088
+                           L2-RClose:  1.1167238
+                         Rel-Vol-Err:  1.2253305E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
@@ -2073,6 +2895,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  3.0392792E-5
+                              RClose:  0.7838199
+                           L2-RClose:  1.1041458
+                         Rel-Vol-Err:  1.2209070E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
  REUSING PREVIOUS VALUES OF IOFLG
@@ -2080,6 +2910,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
     15 TOTAL ITERATIONS
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  3.0180157E-5
+                              RClose:  0.7751736
+                           L2-RClose:  1.0938951
+                         Rel-Vol-Err:  1.2171113E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
@@ -2089,6 +2927,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  3.0004340E-5
+                              RClose:  0.7679455
+                           L2-RClose:  1.0851821
+                         Rel-Vol-Err:  1.2136794E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
  REUSING PREVIOUS VALUES OF IOFLG
@@ -2096,6 +2942,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
     15 TOTAL ITERATIONS
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  2.9850859E-5
+                              RClose:  0.7616418
+                           L2-RClose:  1.0774661
+                         Rel-Vol-Err:  1.2104274E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
@@ -2105,6 +2959,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  2.9710017E-5
+                              RClose:  0.7559295
+                           L2-RClose:  1.0703804
+                         Rel-Vol-Err:  1.2072289E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
  REUSING PREVIOUS VALUES OF IOFLG
@@ -2112,6 +2974,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
     15 TOTAL ITERATIONS
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  2.9575365E-5
+                              RClose:  0.7505846
+                           L2-RClose:  1.0636770
+                         Rel-Vol-Err:  1.2039974E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
@@ -2121,6 +2991,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  2.9442620E-5
+                              RClose:  0.7454554
+                           L2-RClose:  1.0571872
+                         Rel-Vol-Err:  1.2006735E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
  REUSING PREVIOUS VALUES OF IOFLG
@@ -2128,6 +3006,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
     15 TOTAL ITERATIONS
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  2.9308943E-5
+                              RClose:  0.7404385
+                           L2-RClose:  1.0507954
+                         Rel-Vol-Err:  1.1972165E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
@@ -2137,6 +3023,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  2.9172456E-5
+                              RClose:  0.7354631
+                           L2-RClose:  1.0444220
+                         Rel-Vol-Err:  1.1935982E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
  REUSING PREVIOUS VALUES OF IOFLG
@@ -2145,6 +3039,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  6.7881164E-5
+                              RClose:  0.8675033
+                           L2-RClose:  1.4601275
+                         Rel-Vol-Err:  7.6446846E-10
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 0
  REUSING PREVIOUS VALUES OF IOFLG
@@ -2152,6 +3054,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
     17 TOTAL ITERATIONS
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  3.5964577E-5
+                              RClose:  0.4422274
+                           L2-RClose:  0.5965931
+                         Rel-Vol-Err:  3.0843786E-10
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 1
  CELL-BY-CELL FLOW TERM FLAG = 1

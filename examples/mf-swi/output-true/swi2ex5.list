@@ -1,3 +1,8 @@
+💧🧙💦🌊  <-These symbols help text editors identify file as Unicode UTF8.
+                    UTF8 is not necessary to view numerical results, but no UTF8 support can have artifacts where non-ascii symbols are used (such as the degree symbol).
+
+
+MODFLOW-OWHM v2.2.0
 
       MMMMMMM                                       MM      MMM     MM
     MMM     MMM    MM      M   MMMMMMMM             LM     DM M     ML     MM     MMMMMMMMM  MMMMMMMM  MMMMMMMM
@@ -10,30 +15,46 @@
      MMMMMMMMN     MM      M   MMMMMMMM                7MM      7MM  MN          MM   M      MMMMMMMM  MM      MM
 
 
- MODFLOW-OWHM v2.0.01  
-
-
                         MODFLOW
             ONE-WATER HYDROLOGIC-FLOW MODEL
 
-    U.S. GEOLOGICAL SURVEY MODULAR FINITE-DIFFERENCE 
-           CONJUNCTIVE USE SIMULATION PROGRAM
+    U.S. Geological Survey Modular Finite-Difference
+           Conjunctive Use Simulation Program
 
-                     Version 2.0
+                      Version 2.2
 
- Release: 01          4/23/2020
+ Release: 0
 
- Includes:
-          MODFLOW-2005 Version 1.12.0   02/03/2017
-          MODFLOW-FMP  Version 4.00.0   04/23/2017
-          MODFLOW-SWR  Version 1.04.0   09/15/2016
-          MODFLOW-SWI  Version 2.00.0   07/22/2013
-          MODFLOW-LGR  Version 2.00.0   09/19/2013
-          MODFLOW-NWT  Version 1.2.0    03/01/2020
-          MODFLOW-CFP  Version 1.09.57  09/12/2017
+ Includes the following base versions with enhancements:
 
+          MODFLOW-2005 Version 1.12
+          MODFLOW-FMP  Version 4.1
+          MODFLOW-SWR  Version 1.04
+          MODFLOW-SWI  Version 2.0
+          MODFLOW-LGR  Version 2.0
+          MODFLOW-NWT  Version 1.2
+          MODFLOW-CFP  Version 1.09.57
+                  SWO  Version 1.0
 
- OneWater Simulation Initiated at  
+------------------------------------------------------------------------------------
+USGS Software Disclaimer:                                                          |
+                                                                                   |
+   No warranty, expressed or implied, is made by the USGS or the U.S. Government   |
+   as to the functionality of the software and related material nor shall the      |
+   fact of release constitute any such warranty.                                   |
+                                                                                   |
+   The software is provided on the condition that neither the USGS nor             |
+   the U.S. Government shall be held liable for any damages resulting from the     |
+   authorized or unauthorized use of the software.                                 |
+                                                                                   |
+   Newer versions may be present at the official code and download repository:     |
+      https://code.usgs.gov/modflow/mf-owhm                                        |
+                                                                                   |
+------------------------------------------------------------------------------------
+
+∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙
+    OneWater Simulation Initiated at  
+∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙
 
 
  LIST FILE: ./output/swi2ex5.list
@@ -106,14 +127,19 @@ Y-COORDINATE:0.0
          0  1.000e+00           (5G13.0)         -1               # DELC(NROW)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
 
                      DELC =   1.00000    
- 
- SOLVING FOR HEAD 
-
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP  1457
  SOLVING FOR ZETA FOR LAYER     5 ZONE     2
  SOLVING FOR ZETA FOR LAYER     6 ZONE     2
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  8.6365902E-9
+                              RClose:  0.0021335
+                           L2-RClose:  0.0041706
+                         Rel-Vol-Err:  0.0
+ 
 
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP  1458
  SOLVING FOR ZETA FOR LAYER     5 ZONE     2
@@ -121,11 +147,27 @@ Y-COORDINATE:0.0
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  1.1951365E-8
+                              RClose:  0.0025442
+                           L2-RClose:  0.0053312
+                         Rel-Vol-Err:  0.0
+ 
+
  NO OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP  1459
  SOLVING FOR ZETA FOR LAYER     5 ZONE     2
  SOLVING FOR ZETA FOR LAYER     6 ZONE     2
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  1.3797457E-8
+                              RClose:  0.0024321
+                           L2-RClose:  0.0053154
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP  1460
     PRINT BUDGET
