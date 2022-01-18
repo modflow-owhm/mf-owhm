@@ -1,7 +1,10 @@
       MODULE ZONBUDMODULE
-        INTEGER IPREC
-        REAL, ALLOCATABLE, DIMENSION(:,:,:) ::BUFF
-        DOUBLE PRECISION,  ALLOCATABLE, DIMENSION(:,:,:) ::BUFFD
+        USE, INTRINSIC:: ISO_FORTRAN_ENV, ONLY: real32, real64
+        PRIVATE:: real32, real64
+        INTEGER:: IPREC
+        LOGICAL:: NO_CONST_HEAD
+        REAL(real32), DIMENSION(:,:,:), ALLOCATABLE:: BUFF
+        REAL(real64), DIMENSION(:,:,:), ALLOCATABLE:: BUFFD
       END MODULE
 C     ******************************************************************
 C     Program to compute and print volumetric budgets over subregions
@@ -18,10 +21,25 @@ C       can be read.  All computations are done in double precision.
 C
 C     Jan. 29, 2000 -- Updated to work with MODFLOW's COMPACT BUDGET
 C     option.
+C
+C     Jun. 19, 2021 -- Updated to work without 'CONSTANT HEAD'. 
+C                      Added a modified version of U2DINT to read input
+C                       This adds OPEN/CLOSE to file input option, but keeps ZoneBudget style EXTERNAL.
+C                      Added better error messages.
+C                      Minor refactoring to use newer fortran features.
+C
 C     ******************************************************************
-C        SPECIFICATIONS:
+C
+      PROGRAM ZONEBUDGET
+C
       USE ZONBUDMODULE
-      PARAMETER (NTRDIM=250,MXCOMP=999,MXZWCZ=50,MXZONE=999)
+      USE, INTRINSIC:: ISO_FORTRAN_ENV, ONLY: real32, real64
+      IMPLICIT NONE
+      !
+      INTEGER, PARAMETER:: NTRDIM = 512  ,
+     +                     MXCOMP = 1024 ,
+     +                     MXZWCZ = 64   ,
+     +                     MXZONE = 1024
 C-----   NTRDIM must be greater than or equal to the number of budget
 C-----          terms, other than flow between zones, that will appear
 C-----          the budget.  In the original model, there is a maximum
@@ -35,60 +53,136 @@ C-----   MXZWCZ is the maximum number of numeric zones within each
 C-----          composite zone.
 C-----   LSTZON is a list of all of the zones.
 C-----          used.
-      ALLOCATABLE IZONE(:,:,:),ICH(:,:,:),IBUFF(:,:,:),
-     1            VBVL(:,:,:),VBZNFL(:,:,:)
-
-      DOUBLE PRECISION VBVL,VBZNFL
-      DOUBLE PRECISION DELTD,PERTIMD,TOTIMD,VALD(20),DZERO,TOTIMDOLD
-      DIMENSION ICOMP(MXZWCZ,MXCOMP),NZWCZ(MXCOMP),LSTZON(0:MXZONE)
-      CHARACTER*10 NAMCOMP(MXCOMP)
-      DIMENSION ITIME(2,10)
-      CHARACTER*240 TITLE
-      CHARACTER*240 NAME,BASENAME
-      CHARACTER*16 VBNM(NTRDIM),TEXT,CTMP
-      CHARACTER*1 METHOD,IANS
-      CHARACTER*40 VERSON
-      DIMENSION VAL(20)
+      INTEGER,      DIMENSION(:,:,:), ALLOCATABLE:: IZONE ,
+     +                                              ICH   ,
+     +                                              IBUFF
+      REAL(real64), DIMENSION(:,:,:), ALLOCATABLE:: VBVL  ,        ! Equivalent to DOUBLE PRECISION
+     +                                              VBZNFL
+      !
+      REAL(real32), DIMENSION(20):: VAL
+      REAL(real32):: DELT, PERTIM, TOTIM
+      !
+      REAL(real64), DIMENSION(20):: VALD
+      REAL(real64):: DELTD, PERTIMD, TOTIMD, DZERO, TOTIMDOLD
+      !
+      INTEGER, DIMENSION(MXZWCZ,MXCOMP) :: ICOMP
+      INTEGER, DIMENSION(MXCOMP)        :: NZWCZ
+      INTEGER, DIMENSION(0:MXZONE)      :: LSTZON
+      INTEGER, DIMENSION(2,10)          :: ITIME
+      !
+      CHARACTER(10), DIMENSION(MXCOMP):: NAMCOMP
+      CHARACTER(16), DIMENSION(NTRDIM):: VBNM
+      !
+      CHARACTER(256):: LINE
+      CHARACTER(240):: TITLE, NAME, BASENAME
+      CHARACTER( 16):: TEXT, CTMP
+      CHARACTER(  1):: METHOD, IANS
+      CHARACTER( 40):: VERSON
+      !
+      INTEGER:: NROW, NCOL, NLAY, KPER, KSTP, ITYPE, ICALC
+      INTEGER:: INZN1, INZN2, INBUD, IOUT,
+     +          IUZBLST, IUCSV, IUCSV2,
+     +          I, J, K, K1, K2, N, MSUM, NLIST, NVAL,
+     +          NR, NC, NL, NZDIM, MSUMCH, NCOMP, NTIMES, 
+     +          LOC, LLOC, ISTART, ISTOP, istat
+      INTEGER:: IN
+      REAL:: R
+      !
+      CHARACTER,    PARAMETER:: LF = NEW_LINE(" ")
+      CHARACTER(*), PARAMETER:: ERRHED =  
+     +                             LF//LF//'Binary Read Failure: '//LF
+      CHARACTER(*), PARAMETER:: ERRAFT = 
+     +LF//LF//'ZoneBudget specific output files should be fine and '//
+     +LF//'contain any output written from before this error. '//LF//
+     +LF//'A possible cause for this is: '//LF//
+     +'1) The binary file is corrupt and needs to be remade. '//LF//
+     +'    - Recommended to delete the file manually before '//
+     +                                          'remaking it.'//LF//LF//
+     +'2) The NAME file did not include "REPLACE" or "WRITE" '//LF//
+     +'   when declaring the Cell-By-Cell binary file name. '//LF//
+     +'    - For example, you should have something like: '//LF//
+     +'          DATA(BINARY)  55  ./output/CBC.bin  WRITE '//LF//
+     +'      to indicate that "./output/CBC.bin" should be '//LF//
+     +'      deleted if it exists, then create the '//
+     +                                 'file for writing'//LF//LF//
+     +'    - Another example, is say you run the model once '//LF//
+     +'      and get a CBC file that is 63KB in size, then run '//LF//
+     +'      the model again but it writes only 50KB to the CBC'//LF//
+     +'      ZoneBudget reads the new model output (first 50KB)'//LF//
+     +'      and the older model output (last 13KB).'//LF//LF//
+     +'3) The binary is contains double precision numbers '//LF//
+     +'   but ZoneBudget thinks its single precision, '//LF//
+     +'   is single precision when is double, '//LF//
+     +'   or the binary contains a mixture of the two.'//LF//LF//
+     +'4) The binary is not compatible with ZoneBudget 3.2. '//LF//
+     +'    - Contact a developer for help'//LF//LF
+      CHARACTER(:), ALLOCATABLE:: ERRMSG
+      !
       INCLUDE 'openspec.inc'
 C     ------------------------------------------------------------------
-      VERSON='ZONEBUDGET version 3.01'
+      !
+      INTERFACE
+              PURE FUNCTION INT2STR(IVAL)
+                INTEGER,       INTENT(IN):: IVAL
+                CHARACTER(:), ALLOCATABLE:: INT2STR
+              END FUNCTION
+      END INTERFACE
+      
+      VERSON='ZONEBUDGET version 3.2'
 C
 C-----DEFINE INPUT AND OUTPUT UNITS AND INITIALIZE OTHER VARIABLES
-      INZN1=10
-      INZN2=11
-      INBUD=12
-      IOUT=0
-      IUZBLST=0
-      IUCSV=0
-      IUCSV2=0
-      K1=0
-      K2=0
-      MSUM=0
-      DZERO=0D0
-      NLIST=0
-      NVAL=1
-      TOTIMD=-1.0D0
-      TOTIMDOLD=-1.0D0
+      INZN1    = 10
+      INZN2    = 11
+      INBUD    = 12
+      NCOMP    = 0
+      IOUT     = 0
+      IUZBLST  = 0
+      IUCSV    = 0
+      IUCSV2   = 0
+      K1       = 0
+      K2       = 0
+      MSUM     = 0
+      DZERO    = 0.0_real64
+      NLIST    = 0
+      NVAL     = 1
+      TOTIMD   = -1.0_real64
+      TOTIMDOLD= -1.0_real64
+      NAMCOMP  = ''
+      VBNM     = ''
+      istat    = 0
 C
 C-----TELL THE USER WHAT THIS PROGRAM IS
       WRITE(*,*)
       WRITE(*,4) VERSON
-4     FORMAT(1X,A/
+4     FORMAT(1X,A,/,/,
      1' Program to compute a flow budget for subregions of a model using
-     2'/' budget data from MODFLOW, the USGS Modular Ground-Water Flow M
-     3odel.')
+     2'/' budget data from MODFLOW-2005 flavored models.')
+      WRITE(*,'(/,A)')' With enhancements for:'
+      WRITE(*,'(2(A,/), /, 2(A,/))')  
+     +'                       MODFLOW',
+     +'           ONE-WATER HYDROLOGIC-FLOW MODEL',
+     +'   The U.S. Geological Survey Modular Finite-Difference',
+     +'          Conjunctive Use Simulation Program'
+      WRITE(*,'(/,*(A,/))') 
+     +'This ZoneBudget code and compiled executable are located at:',
+     +'',
+     +'         https://code.usgs.gov/modflow/mf-owhm','',
+     +'For download info see the README.md or README.pdf',
+     +'For bug fixes and new features see the '//
+     +                     'CHANGELOG.md or CHANGELOG.pdf'
 C
 C-----OPEN LISTING FILE(S)
       WRITE(*,*)
-7     WRITE(*,*)' Enter a LISTING FILE for results',
+      WRITE(*,*)' Enter a LISTING FILE for results',
      1                     ' or a base name and file types:'
       READ(*,'(A)') NAME
-      !NAME='Test CSV2'  !seb
+      !
       LLOC=1
-      CALL URWORD(NAME,LLOC,ISTART,ISTOP,0,I,R,0,IN)
+      CALL PARSE_WORD(NAME, LLOC, ISTART, ISTOP)
       BASENAME=NAME(ISTART:ISTOP)
-      CALL URWORD(NAME,LLOC,ISTART,ISTOP,1,I,R,0,IN)
-      IF(NAME(ISTART:ISTOP).NE.' ') THEN
+      CALL PARSE_WORD_UP(NAME, LLOC, ISTART, ISTOP)
+      IF(ISTART <= ISTOP .and. NAME(ISTART:ISTOP).NE.' ' .and. 
+     +                         NAME(ISTART:ISTART).NE.'#') THEN
 8       IF(NAME(ISTART:ISTOP).EQ.'CSV') THEN
           IUCSV=14
           OPEN(UNIT=IUCSV,FILE=TRIM(BASENAME)//'.csv',ERR=7)
@@ -104,40 +198,72 @@ C-----OPEN LISTING FILE(S)
           WRITE(*,*) 'Standard Zonebudget output file: ',
      1           TRIM(BASENAME)//'.zblst'
         END IF
-        CALL URWORD(NAME,LLOC,ISTART,ISTOP,1,I,R,0,IN)
-        IF(NAME(ISTART:ISTOP).NE.' ') GO TO 8
+        CALL PARSE_WORD_UP(NAME, LLOC, ISTART, ISTOP)
+        IF(ISTART <= ISTOP .and. NAME(ISTART:ISTOP).NE.' ' .and. 
+     +                           NAME(ISTART:ISTART).NE.'#') GO TO 8
       ELSE
         IOUT=13
         IUZBLST=IOUT
         OPEN(UNIT=IOUT,FILE=BASENAME,ERR=7)
       END IF
+      !
       IF(IOUT.EQ.0) THEN
         IOUT=13
         OPEN(UNIT=IOUT,FILE=TRIM(BASENAME)//'.log',ERR=7)
         WRITE(*,*) 'Zonebudget log file: ',
      1         TRIM(BASENAME)//'.log'
       END IF
+      !
+      GO TO 9                                         ! Lame work-a-around to having ERR= go to the stop statement
+7     CALL STOP_ERROR(NAME, 0, 0, 'Failed to open '//
+     +       'one of the ZoneBudget output files.')
+9     CONTINUE
 C
 C-----WRITE OUTPUT FILE
+      !WRITE(IOUT,4) VERSON
       WRITE(IOUT,4) VERSON
+      WRITE(IOUT,'(/,A)')' With enhancements for:'
+      WRITE(IOUT,'(2(A,/), /, 2(A,/))')  
+     +'                       MODFLOW',
+     +'           ONE-WATER HYDROLOGIC-FLOW MODEL',
+     +'   The U.S. Geological Survey Modular Finite-Difference',
+     +'          Conjunctive Use Simulation Program'
+      WRITE(IOUT,'(/,*(A,/))') 
+     +'This ZoneBudget code and compiled executable are located at:','',
+     +'         https://code.usgs.gov/modflow/mf-owhm','',
+     +'Please read the README.md or README.pdf for download info.'
+C
+C-----OPEN LISTING FILE(S)
+      WRITE(*,*)
+      WRITE(*,*)' Enter a LISTING FILE for results',
+     1                     ' or a base name and file types:'
 C
 C-----OPEN THE CELL-BY-CELL BUDGET FILE
       WRITE(*,*)
-10    WRITE(*,*) ' Enter the name of the file containing CELL-BY-CELL BU
-     1DGET TERMS:'
+      WRITE(*,*) ' Enter the name of the file containing '//
+     +           'CELL-BY-CELL BUDGET TERMS:'
       READ(*,'(A)') NAME
-      !NAME = '..\..\One-Water_Sim\OUT_TR\SVIHM.cbc'  !seb
-      OPEN(UNIT=INBUD,FILE=NAME,STATUS='OLD',FORM=FORM,ACCESS=ACCESS,
-     1               ERR=10)
+      CALL GET_UNCOMMENT(NAME, ISTART, ISTOP)
+      !
+      OPEN(UNIT=INBUD,FILE=NAME(ISTART:ISTOP),STATUS='OLD',FORM=FORM,
+     1               ACCESS=ACCESS,ERR=10)
+      !
+      GO TO 11                                         ! Lame work-a-around to having ERR= go to the stop statement
+10    CALL STOP_ERROR(NAME, INBUD, IOUT, 'Failed to open the '//
+     +       'budget file/cell-by-cell file.'//LF//
+     +       'The file may not exist.')
+11    CONTINUE
+      !
       WRITE(IOUT,*)
       WRITE(IOUT,*) ' The cell-by-cell budget file is:'
-      WRITE(IOUT,*) NAME
+      WRITE(IOUT,*) NAME(ISTART:ISTOP)
 C
 C-----Check for valid budget file, and allocate memory
       CALL BUDGETPRECISION(INBUD,NCOL,NROW,NLAY)
       IF(IPREC.LT.1) THEN
-        WRITE(*,*) 'Stopping because budget file is invalid'
-        STOP
+        CALL STOP_ERROR(NAME, INBUD, IOUT, 'Failed to identify '//
+     +       'budget file/cell-by-cell file.'//LF//
+     +       'It may be corrupt or has an invalid structure.')
       ELSEIF(IPREC.EQ.1) THEN
         WRITE(IOUT,*) ' Single precision budget file'
       ELSE IF(IPREC.EQ.2) THEN
@@ -147,48 +273,69 @@ C-----Check for valid budget file, and allocate memory
       WRITE(*,14) NLAY,NROW,NCOL
       WRITE(IOUT,14) NLAY,NROW,NCOL
 14    FORMAT(1X,I10,' layers',I10,' rows',I10,' columns')
-      ALLOCATE (IZONE(NCOL,NROW,NLAY))
-      ALLOCATE (ICH(NCOL,NROW,NLAY))
-      ALLOCATE (IBUFF(NCOL,NROW,NLAY))
+      ALLOCATE (IZONE(NCOL,NROW,NLAY), SOURCE=-1)
+      ALLOCATE (ICH(NCOL,NROW,NLAY),   SOURCE=0)
+      ALLOCATE (IBUFF(NCOL,NROW,NLAY), SOURCE=0)
+      MSUMCH = 0
 C
 C-----READ A TITLE TO BE PRINTED IN THE LISTING
       WRITE(*,*)
       WRITE(*,*) ' Enter a TITLE to be printed in the listing:'
       READ(*,'(A)') TITLE
-      !TITLE = 'A Tittle'  !seb
-      WRITE(IOUT,*)
-      WRITE(IOUT,'(1X,A)') TITLE
+      CALL GET_UNCOMMENT(TITLE, ISTART, ISTOP)
+      !
+      IF(ISTART <= ISTOP) THEN
+                          WRITE(IOUT,'(/,1X,A)') TITLE(ISTART:ISTOP)
+                          TITLE = TITLE(ISTART:ISTOP)
+      ELSE
+                          TITLE = ''
+      END IF
 C
 C-----OPEN THE ZONE FILE IF IT EXISTS
-16    WRITE(*,*)
-      WRITE(*,*) ' Enter the name of your ZONE INPUT FILE (CR for intera
-     1ctive):'
+      WRITE(*,*)
+      WRITE(*,'(A,/,A)') 
+     +  ' Enter the name of your ZONE INPUT FILE ',
+     +  ' (Leave blank and press ENTER for interactive input):'
       READ(*,'(A)') NAME
-      !NAME ='..\6__WaterBudget\ZoneBudget\wbs_31zones.in'  !seb
+      CALL GET_UNCOMMENT(NAME, ISTART, ISTOP)
 C
 C-----IF NAME IS BLANK, INPUT ZONES INTERACTIVELY BY BLOCK
-      IF(NAME.EQ.' ') THEN
-         CALL BLOCK(IZONE,NLAY,NROW,NCOL,IOUT)
+      IF(ISTOP<ISTART .OR. NAME(ISTART:ISTOP) == '') THEN
+         CALL BLOCK_READ(IZONE,NLAY,NROW,NCOL,IOUT)
          NCOMP=0
       ELSE
 C
 C-----WHEN NAME IS NOT BLANK, OPEN ZONE FILE, AND CHECK GRID DIMENSIONS
-         OPEN(UNIT=INZN1,FILE=NAME,STATUS='OLD',ERR=16)
+         OPEN(UNIT=INZN1,FILE=NAME(ISTART:ISTOP),STATUS='OLD',ERR=16)
+         GO TO 17                                         ! Lame work-a-around to having ERR= go to the stop statement
+16       CALL STOP_ERROR(NAME(ISTART:ISTOP), 0, 0, 'Failed to open '//
+     +          'one of the ZoneBudget zone input file.')
+17       CONTINUE
+         !
          WRITE(IOUT,*)
          WRITE(IOUT,*) ' The zone file is:'
-         WRITE(IOUT,*) NAME
-         READ(INZN1,*) NL,NR,NC
+         WRITE(IOUT,*) NAME(ISTART:ISTOP)
+         !
+         CALL READ_TO_DATA(LINE,INZN1,IOUT)
+         LLOC = 1
+         CALL GET_INTEGER(LINE,LLOC,ISTART,ISTOP,IOUT,INZN1,NL,
+     +                                      'Error reading NLAY')
+         CALL GET_INTEGER(LINE,LLOC,ISTART,ISTOP,IOUT,INZN1,NR,
+     +                                      'Error reading NROW')
+         CALL GET_INTEGER(LINE,LLOC,ISTART,ISTOP,IOUT,INZN1,NC,
+     +                                      'Error reading NCOL')
          IF(NC.NE.NCOL .OR. NR.NE.NROW .OR. NL.NE.NLAY) THEN
-            WRITE(*,*) 'MISMATCH BETWEEN DIMENSIONS OF CELL-BY-CELL DATA
-     1 AND ZONE DATA:'
-            WRITE(*,*) 'LAYERS, ROWS, COLUMNS IN ZONE DATA:',NL,NR,NC
-            WRITE(*,*) 'LAYERS, ROWS, COLUMNS IN CELL-BY-CELL FILE:',
-     1                  NLAY,NROW,NCOL
-            STOP
+                CALL STOP_ERROR(LINE, INZN1, IOUT, 
+     +           'MISMATCH BETWEEN DIMENSIONS OF CELL-BY-CELL DATA '//
+     +           'AND ZONE INPUT FILE DATA:'//LF//
+     +           'LAY, ROW, COL IN ZONE INPUT   FILE: '//
+     +         INT2STR(NL)//', '//INT2STR(NR)//', '//INT2STR(NC)//LF//
+     +           'LAY, ROW, COL IN CELL-BY-CELL FILE: '//
+     +         INT2STR(NLAY)//', '//INT2STR(NROW)//', '//INT2STR(NCOL) )
          END IF
 C
 C-----READ ZONE ARRAY
-         CALL IZREAD(IZONE,NLAY,NROW,NCOL,NZDIM,INZN1,INZN2,IOUT)
+         CALL IZREAD(IZONE,NLAY,NROW,NCOL,INZN1,INZN2,IOUT)
       END IF
 C
 C-----DONE WITH ZONE DEFINITION.  Create the zone list, LSTZON.
@@ -204,15 +351,17 @@ C-----READ COMPOSITE ZONES
       END IF
 C
 C-----CHECK WHAT METHOD TO USE FOR SPECIFYING WHEN TO CALCULATE BUDGETS
-50    WRITE(*,*)
-      WRITE(*,*) ' Choose the option for specifying when budgets are cal
-     1culated:'
+      WRITE(*,*)
+      WRITE(*,*) ' Choose the option for specifying '//
+     1                 'when budgets are calculated:'
       WRITE(*,*) ' A = ALL times stored in the budget file.'
-      WRITE(*,*) ' P = For each time stored in the budget file, PROMPT u
-     1ser.'
+      WRITE(*,*) ' P = For each time stored in the budget file,'//
+     +                                            'PROMPT user.'
       WRITE(*,*) ' L = Enter a LIST of times.'
-      READ(*,'(A)') METHOD
-      !METHOD = 'A'  !seb
+      READ(*,'(A)') LINE
+      LINE = ADJUSTL(LINE)
+      METHOD = LINE(1:1)
+      !
       IF(METHOD.EQ.'A' .OR. METHOD.EQ.'a') THEN
          METHOD='A'
       ELSE IF(METHOD.EQ.'P' .OR. METHOD.EQ.'p') THEN
@@ -220,17 +369,18 @@ C-----CHECK WHAT METHOD TO USE FOR SPECIFYING WHEN TO CALCULATE BUDGETS
       ELSE IF(METHOD.EQ.'L' .OR. METHOD.EQ.'l') THEN
          METHOD='L'
          DO 60 I=1,10
-         WRITE(*,*) ' Enter a time step, stress period at which to calcu
-     1late budgets (0,0=done):'
+         WRITE(*,*) ' Enter a time step, stress period at which '//
+     +              'to calculate budgets (0,0=done):'
          READ(*,*) ITIME(1,I),ITIME(2,I)
          IF(ITIME(1,I).EQ.0 .AND. ITIME(2,I).EQ.0) GO TO 65
 60       CONTINUE
          I=11
 65       NTIMES=I-1
       ELSE
-         WRITE(*,*) 'Invalid choice; you must enter "A", "P", or "L"'
-         GO TO 50
+         CALL STOP_ERROR(LINE, 0, IOUT, 
+     +        'Invalid choice; you must enter "A", "P", or "L"')
       END IF
+      !
       WRITE(*,*)
       ICALC=0
 C
@@ -242,23 +392,24 @@ C-----WHEN TIME CHANGES, PRINT THE BUDGET, REINITIALIZE, AND START OVER
       IF(NL.LT.0) THEN
          TOTIMDOLD=TOTIMD
          IF(IPREC.EQ.1) THEN
-           READ(INBUD) ITYPE,DELT,PERTIM,TOTIM
+           READ(INBUD,END=5000,ERR=5000) ITYPE,DELT,PERTIM,TOTIM
            DELTD=DELT
            PERTIMD=PERTIM
            TOTIMD=TOTIM
          ELSE
-           READ(INBUD) ITYPE,DELTD,PERTIMD,TOTIMD
+           READ(INBUD,END=5000,ERR=5000) ITYPE,DELTD,PERTIMD,TOTIMD
          END IF
          NVAL=1
          IF(ITYPE.EQ.5) THEN
-            READ(INBUD) NVAL
+            READ(INBUD,END=6000,ERR=6000) NVAL
             IF(NVAL.GT.1) THEN
                DO 101 N=2,NVAL
-               READ(INBUD) CTMP
+               READ(INBUD,END=6000,ERR=6000) CTMP
 101            CONTINUE
             END IF
          END IF
-         IF(ITYPE.EQ. 2 .OR. ITYPE.EQ.5) READ(INBUD) NLIST
+         IF(ITYPE.EQ. 2 .OR. ITYPE.EQ.5) READ(INBUD,END=6000,ERR=6000) 
+     +                                                             NLIST
       END IF
 C
 C-----CHECK IF STARTING A NEW TIME STEP
@@ -347,23 +498,23 @@ C-----READ THE BUDGET TERM DATA UNDER THE FOLLOWING CONDITIONS:
       IF(ITYPE.EQ.0 .OR. ITYPE.EQ.1) THEN
 C  FULL 3-D ARRAY
          IF(IPREC.EQ.1) THEN
-           READ(INBUD) BUFF
+           READ(INBUD,END=7000,ERR=7000) BUFF
            BUFFD=BUFF
          ELSE
-           READ(INBUD) BUFFD
+           READ(INBUD,END=7001,ERR=7001) BUFFD
          END IF
       ELSE IF(ITYPE.EQ.3) THEN
 C  1-LAYER ARRAY WITH LAYER INDICATOR ARRAY
          BUFFD=DZERO
-         READ(INBUD) ((IBUFF(J,I,1),J=1,NCOL),I=1,NROW)
+         READ(INBUD,END=8002,ERR=8002) IBUFF(:,:,1) !((IBUFF(J,I,1),J=1,NCOL),I=1,NROW)
          IF(IPREC.EQ.1) THEN
-           READ(INBUD) ((BUFF(J,I,1),J=1,NCOL),I=1,NROW)
+           READ(INBUD,END=8000,ERR=8000) BUFF(:,:,1) !((BUFF(J,I,1),J=1,NCOL),I=1,NROW)
            DO 265 I=1,NROW
            DO 265 J=1,NCOL
            BUFFD(J,I,1)=BUFF(J,I,1)
 265        CONTINUE
          ELSE
-           READ(INBUD) ((BUFFD(J,I,1),J=1,NCOL),I=1,NROW)
+           READ(INBUD,END=8001,ERR=8001) BUFFD(:,:,1)  !((BUFFD(J,I,1),J=1,NCOL),I=1,NROW)
          END IF
          DO 270 I=1,NROW
          DO 270 J=1,NCOL
@@ -375,13 +526,13 @@ C  1-LAYER ARRAY WITH LAYER INDICATOR ARRAY
       ELSE IF(ITYPE.EQ.4) THEN
 C  1-LAYER ARRAY THAT DEFINES LAYER 1
          IF(IPREC.EQ.1) THEN
-           READ(INBUD) ((BUFF(J,I,1),J=1,NCOL),I=1,NROW)
+           READ(INBUD,END=8000,ERR=8000) BUFF(:,:,1) !((BUFF(J,I,1),J=1,NCOL),I=1,NROW)
            DO 275 I=1,NROW
            DO 275 J=1,NCOL
            BUFFD(J,I,1)=BUFF(J,I,1)
 275        CONTINUE
          ELSE
-           READ(INBUD) ((BUFFD(J,I,1),J=1,NCOL),I=1,NROW)
+           READ(INBUD,END=8001,ERR=8001) BUFFD(:,:,1) !((BUFFD(J,I,1),J=1,NCOL),I=1,NROW)
          END IF
          IF(NLAY.GT.1) THEN
             DO 280 K=2,NLAY
@@ -395,26 +546,26 @@ C  LIST -- READ ONLY IF THE VALUES NEED TO BE SKIPPED.
 C  ACCM will read the list if the budget is being computed this time step.
          DO 300 N=1,NLIST
          IF(IPREC.EQ.1) THEN
-           READ(INBUD) LOC,(VAL(I),I=1,NVAL)
+           READ(INBUD,END=9000,ERR=9000) LOC,(VAL(I),I=1,NVAL)
          ELSE
-           READ(INBUD) LOC,(VALD(I),I=1,NVAL)
+           READ(INBUD,END=9000,ERR=9000) LOC,(VALD(I),I=1,NVAL)
          END IF
 300      CONTINUE
       END IF
 C
 C-----BEFORE PROCESSING A BUDGET TERM, CHECK IF THERE IS ENOUGH SPACE
       IF(MSUM.GT.NTRDIM) THEN
-         WRITE(*,*) 'PROGRAM PARAMETER NTRDIM IS TOO SMALL'
-         WRITE(*,*) 'PARAMETER NTRDIM IS CURRENTLY',NTRDIM
-         WRITE(*,*) 'CHANGE NTRDIM TO BE EQUAL TO THE MAXIMUM NUMBER OF
-     1BUDGET TERMS'
-         STOP
+         CALL STOP_ERROR('', INBUD, IOUT, 
+     +   'Program array dimension parameter NTRDIM is too small.'//LF//
+     +   'The current maximum size is '//INT2STR(NTRDIM)//LF//
+     +   'ZoneBudget will need to be recompiled with a larger value.')
       END IF
 C
 C-----PROCESS A BUDGET TERM AND THEN START THE READ PROCESS OVER
       IF(ICALC.NE.0) CALL ACCM(IZONE,ICH,NCOL,NROW,NLAY,VBNM,VBVL,
      1           VBZNFL,MSUM,TEXT,NTRDIM,NZDIM,MSUMCH,
-     2           ITYPE,NLIST,INBUD,NVAL)
+     2           ITYPE,NLIST,INBUD,NVAL, istat)
+      if(istat /= 0) go to 9000
       GO TO 100
 C
 C  END OF FILE. PRINT FINAL BUDGET IF FLAG IS SET.
@@ -440,157 +591,328 @@ C-----FROM A TO B EXCEPT THAT INS AND OUTS ARE REVERSED
         IF(IUCSV2.GT.0) CALL CSVSUBPR2(K1,K2,VBNM,VBVL,
      1     VBZNFL,MSUM,IUCSV2,NTRDIM,NZDIM,TITLE,TOTIMD,LSTZON)
       END IF
-      STOP
 C
-C-----EMPTY BUDGET FILE
-2000  WRITE(*,*) 'CELL-BY-CELL FLOW TERM FILE WAS EMPTY'
-      STOP
+      WRITE(*,*)
+      GO TO 9009  ! Move to END PROGRAM
 C
-      END
-      SUBROUTINE IZREAD(IZONE,NLAY,NROW,NCOL,NZDIM,INZN1,INZN2,IOUT)
+      
+5000  ERRMSG=ERRHED//
+     +'For TEXT="'//TRIM(TEXT)//'" '//LF//
+     +'Failed to read "ITYPE,DELT,PERTIM,TOTIM" record. '//
+     +ERRAFT
+      GO TO 9999
+6000  ERRMSG=ERRHED//
+     +'For TEXT="'//TRIM(TEXT)//'" '//LF//
+     +'Failed to read "NVAL" or "CTMP" or "NLIST"'//
+     + ERRAFT
+      GO TO 9999
+7000  ERRMSG=ERRHED//
+     +'For TEXT="'//TRIM(TEXT)//'" '//LF//
+     + 'Failed to read "BUFF(nrow,ncol,nlay)" which is a '//
+     + 'single precision 3D array'//
+     + ERRAFT
+      GO TO 9999
+7001  ERRMSG=ERRHED//
+     +'For TEXT="'//TRIM(TEXT)//'" '//LF//
+     + 'Failed to read "BUFFD(nrow,ncol,nlay)" which is a '//
+     + 'double precision 3D array'//
+     + ERRAFT
+      GO TO 9999
+8000  ERRMSG=ERRHED//
+     +'For TEXT="'//TRIM(TEXT)//'" '//LF//
+     + 'Failed to read "BUFF(nrow,ncol)" which is a '//
+     + 'single precision 2D array'//
+     + ERRAFT
+      GO TO 9999
+8001  ERRMSG=ERRHED//
+     +'For TEXT="'//TRIM(TEXT)//'" '//LF//
+     + 'Failed to read "BUFFD(nrow,ncol)" which is a '//
+     + 'double precision 2D array'//
+     + ERRAFT
+      GO TO 9999
+8002  ERRMSG=ERRHED//
+     +'For TEXT="'//TRIM(TEXT)//'" '//LF//
+     + 'Failed to read "IBUFF(nrow,ncol)" which is an '//
+     + 'integer 2D array'//
+     + ERRAFT
+      GO TO 9999
+9000  ERRMSG=ERRHED//
+     +'For TEXT="'//TRIM(TEXT)//'" '//LF//
+     +'Failed to read list style record: "ICELL,(VAL(I),I=1,NVAL)"'//
+     + ERRAFT
+      !
+9999  WRITE(*,   '(A)') ERRMSG
+      WRITE(IOUT,'(A)') ERRMSG
+C
+9009  CONTINUE      
+      END PROGRAM
+C
+      SUBROUTINE IZREAD(IZONE,NLAY,NROW,NCOL,INZN1,INZN2,IOUT)
+      IMPLICIT NONE
 C     ******************************************************************
 C     ROUTINE TO INPUT 3-D ZONE MATRIX, IZONE
 C       INZN1 IS INPUT UNIT
 C       IOUT IS OUTPUT UNIT
 C     ******************************************************************
 C        SPECIFICATIONS:
-      DIMENSION IZONE(NCOL,NROW,NLAY)
-      CHARACTER*20 FMTIN
-      CHARACTER*80 NAME,NAMPRV,LINE
-      CHARACTER*10 LOCAT
-C     ------------------------------------------------------------------
-      NAMPRV=' '
-      DO 1000 K=1,NLAY
-C
-C-----READ ARRAY CONTROL RECORD.
-      READ(INZN1,'(A)') LINE
-      LLOC=1
-      CALL URWORD(LINE,LLOC,ISTART,ISTOP,1,I,R,0,INZN1)
-      LOCAT=LINE(ISTART:ISTOP)
-C
-C-----USE LOCAT TO SEE WHERE ARRAY VALUES COME FROM.
-      IF(LOCAT.NE.'CONSTANT') GO TO 90
-C
-C-----LOCAT='CONSTANT' -- SET ALL ARRAY VALUES EQUAL TO ICONST.
-      CALL URWORD(LINE,LLOC,ISTART,ISTOP,2,ICONST,R,0,INZN1)
-      DO 80 I=1,NROW
-      DO 80 J=1,NCOL
-80    IZONE(J,I,K)=ICONST
-      WRITE(IOUT,*)
-      WRITE(IOUT,83) ICONST,K
-83    FORMAT(13X,'Zone Array =',I4,' for layer',I4)
-      IF(ICONST.LT.0) THEN
-         WRITE(*,*) ' NEGATIVE ZONE NUMBER IS NOT ALLOWED'
-         STOP
+      INTEGER, INTENT(IN):: NLAY, NROW, NCOL, INZN1, INZN2, IOUT
+      INTEGER, DIMENSION(NCOL,NROW,NLAY), INTENT(INOUT):: IZONE
+      !
+      !
+      INTEGER:: I,J,K, IU, IERR, ICONST, IPRN
+      INTEGER:: ICOL, ISTART, ISTOP, OPEN_FLAG
+      CHARACTER(  1):: NL
+      CHARACTER(  2):: BLN
+      CHARACTER(  6):: FREE_FORM
+      CHARACTER( 16):: KEY
+      CHARACTER( 20):: FMTIN
+      CHARACTER(768):: CNTRL, FNAME
+      INTEGER:: Z, ONE
+      LOGICAL:: TRUE, FALSE, CHECK
+      INTEGER, DIMENSION(:), ALLOCATABLE:: EXT
+      !
+      INTERFACE
+              PURE FUNCTION INT2STR(IVAL)
+                INTEGER,       INTENT(IN):: IVAL
+                CHARACTER(:), ALLOCATABLE:: INT2STR
+              END FUNCTION
+              !
+              PURE SUBROUTINE Append_1D_Alloc(IA, VAL)
+                IMPLICIT NONE
+                INTEGER, DIMENSION(:), ALLOCATABLE, INTENT(INOUT):: IA
+                INTEGER,                            INTENT(IN   ):: VAL
+              END SUBROUTINE
+      END INTERFACE
+      !
+      NL  = NEW_LINE(' ')
+      BLN = NL//NL
+      FREE_FORM = '(FREE)'
+      Z   = 0
+      ONE = 1
+      TRUE  = .TRUE.
+      FALSE = .FALSE.
+      OPEN_FLAG = Z    ! 0:INTERNAL, 1:EXTERNAL, 2:OPEN/CLOSE
+      !                  0:EXTERNAL already open
+      LAY_LOOP: DO K=1,NLAY ! ------------------------------------------------------------------
+      !
+      !-READ ARRAY CONTROL RECORD AS CHARACTER DATA.
+      CALL READ_TO_DATA(CNTRL,INZN1,IOUT)
+      CALL GET_UNCOMMENT(CNTRL, ISTART, ISTOP)
+      CNTRL = CNTRL(ISTART:ISTOP)
+      !
+      !Get Array Control Directive
+      ICOL = ONE
+      CALL PARSE_WORD_UP(CNTRL,ICOL,ISTART,ISTOP)
+      !
+      IF(ISTOP < ISTART) THEN                   !Empty line read - Stop program
+              !
+              FNAME = 'ERROR READING ARRAY CONTROL RECORD FOR '//
+     +                '"ZONEBUDGET IZONE" FOR LAYER '//INT2STR(K)//BLN//
+     +                'PERHAPS THE END OF FILE WAS REACHED?'
+              CALL STOP_ERROR(CNTRL, INZN1, IOUT, FNAME)
       END IF
-      GO TO 1000
-C
-C-----Get FMTIN and IPRN -- there may be an unused value for ICONST
-C-----in columns 11-20 if the file is an old file.
-90    CALL URWORD(LINE,LLOC,ISTART,ISTOP,0,I,R,0,INZN1)
-      IF(LINE(ISTART:ISTART).NE.'(' ) THEN
-        CALL URWORD(LINE,LLOC,ISTART,ISTOP,0,I,R,0,INZN1)
-        IF(LINE(ISTART:ISTART).NE.'(' ) THEN
-          WRITE(*,91) LINE
-91        FORMAT(1X,
-     1   'Format for reading zone array does not contain "(":',/1X,A)
-          STOP
-        END IF
-      END IF
-      FMTIN=LINE(ISTART:ISTOP)
-C-----Blank inside parentheses indicates free format
-      NC=ISTOP-ISTART-1
-      IF(NC.LE.0) THEN
-         FMTIN=' '
-      ELSE
-        IF(LINE(ISTART+1:ISTOP-1).EQ.' ') FMTIN=' '
-      END IF
-C-----Get print flag
-      CALL URWORD(LINE,LLOC,ISTART,ISTOP,2,IPRN,R,0,INZN1)
-C
-C-----LOCAT SHOULD BE EITHER 'EXTERNAL' OR 'INTERNAL'
-C-----IF 'INTERNAL', READ ARRAY FROM SAME FILE
-      IF(LOCAT.EQ.'INTERNAL') THEN
-         INUNIT=INZN1
-         WRITE(IOUT,*)
+      !
+      KEY = CNTRL(ISTART:ISTOP)
+      !
+      IF(KEY == 'CONSTANT') THEN
+         !
+         CALL GET_INTEGER(CNTRL,ICOL,ISTART,ISTOP,IOUT,INZN1,ICONST,
+     +   'ZoneBudget found array control record/keyword "CONSTANT",'//
+     +   NL//'but failed to read the value, ICONST, after the keyword.')
+         !
+         CALL SET_ARRAY_0D2D_INT(NCOL, NROW, ICONST, IZONE(:,:,K))
+         !
+         OPEN_FLAG = -1
+         !
+         WRITE(IOUT,83) K, INT2STR(ICONST)
+83       FORMAT(/,1X,'Zone Array for layer',I4,
+     1      ' is set equal to: ',A,24x,'From "CONSTANT"')
+         !
+         CYCLE LAY_LOOP
+         !
+      ELSE IF(KEY == 'INTERNAL') THEN
+         !
+         IU = INZN1
+         OPEN_FLAG = Z
+         !
          WRITE(IOUT,92) K
-92       FORMAT(1X,'Zone Array for layer',I4,
-     1      ' will be read from the Zone File')
-C
-C-----IF 'EXTERNAL', OPEN A SEPARATE FILE
-      ELSE IF(LOCAT.EQ.'EXTERNAL') THEN
-         READ(INZN1,'(A)') NAME
-         INUNIT=INZN2
-         WRITE(IOUT,*)
-         WRITE(IOUT,93) K,NAME
+92       FORMAT(/,1X,'Zone Array for layer',I4,
+     1      ' will be read from the Zone File',24x,'From "INTERNAL"')
+         !
+      ELSE IF(KEY == 'EXTERNAL') THEN
+         !
+         CALL READ_TO_DATA(FNAME,INZN1,IOUT)
+         !
+         CALL GET_UNCOMMENT(FNAME, ISTART, ISTOP)
+         FNAME = FNAME(ISTART:ISTOP)
+         WRITE(IOUT,93) K,TRIM(ADJUSTL(FNAME)),'From "EXTERNAL"'
 93       FORMAT(1X,'Zone Array for layer',I4,
-     1         ' will be read from file:'/1X,A)
-         IF(NAME.NE.NAMPRV) THEN
-            IF(NAMPRV.NE.' ') CLOSE(UNIT=INUNIT)
-            OPEN(UNIT=INUNIT,FILE=NAME,STATUS='OLD')
-            WRITE(IOUT,96)
-96          FORMAT(1X,'The file was opened successfully.')
-            NAMPRV=NAME
+     1         ' will be read from file: ', A, 24x,A)
+         !
+         INQUIRE(FILE=FNAME, NUMBER=IU, OPENED=CHECK) 
+         !
+         IF(CHECK) THEN
+                   OPEN_FLAG = Z
          ELSE
-            WRITE(IOUT,97)
-97          FORMAT(1X,'This file is already open -- will continue readi
-     1ng from the current location.')
+                   OPEN_FLAG = ONE
+                   IU = Z
          END IF
-C
-C-----LOCAT IS INVALID
+         !
+      ELSE IF(KEY == 'OPEN/CLOSE') THEN
+         !
+         CALL READ_TO_DATA(FNAME,INZN1,IOUT)
+         !
+         IU = Z
+         CALL GET_UNCOMMENT(FNAME, ISTART, ISTOP)
+         FNAME = FNAME(ISTART:ISTOP)
+         WRITE(IOUT,93) K,TRIM(ADJUSTL(FNAME)),'From "OPEN/CLOSE"'
+         !
+         OPEN_FLAG = 2
       ELSE
-         WRITE(*,*) ' INVALID LOCAT IN ARRAY CONTROL RECORD:',LOCAT
-         STOP
+         CALL BACKSPACE_STOP_MSG(INZN1, INZN1, IOUT, Z, 
+     +   'IZREAD - ERROR READING THE "ZONEBUDGET IZONE" ARRAY '//
+     +   'CONTROL RECORD/KEYWORD.'//BLN//
+     +   'ACCEPTED KEYWORDS ARE:'//NL//
+     +   'CONSTANT'//NL//
+     +   'INTERNAL'//NL//
+     +   'EXTERNAL'//NL//
+     +   'OPEN/CLOSE'//BLN//
+     +   'BUT INSTEAD FOUND: "'//KEY//'"')
       END IF
-C
-C-----LOCAT>0 -- READ RECORDS USING FREE-FORMAT OR FMTIN.
-      IF(FMTIN.EQ.' ') THEN
-         WRITE(IOUT,98) K
-98       FORMAT(1X,'Zone Array for layer',I4,
-     1       ' will be read using free format.'/1X,55('-'))
-         DO 100 I=1,NROW
-         READ(INUNIT,*) (IZONE(J,I,K),J=1,NCOL)
-100      CONTINUE
+      !
+      IF(OPEN_FLAG > Z) THEN
+         OPEN(NEWUNIT=IU, FILE=FNAME, STATUS='OLD', IOSTAT=IERR)
+         IF(IERR == Z) THEN
+                       REWIND(IU)
+         ELSE
+             CNTRL = NL//TRIM(ADJUSTL(CNTRL))//NL//
+     +                   TRIM(ADJUSTL(FNAME))//NL
+             CALL STOP_ERROR(CNTRL,INZN1,IOUT, 
+     +'FAILED TO OPEN ZONE FILE SPECIFIED ON THE SECOND LINE.'//BLN//
+     +'File may not exist or the specified path is incorrect.'//BLN//
+     +'Note the expected input structure is over two lines.'//NL//
+     +'The expected input structure is:'//NL//
+     +TRIM(KEY)//'   FMTIN   IPRN'//NL//
+     +'FileName'//BLN//
+     +'where FMTIN is the Fortran Format, such as "('//
+     +INT2STR(NCOL)//'I4)" to read with a field of 4 spaces or '//
+     +'"(FREE)" to read with free formatting.'//NL//
+     +'IPRN is set to 0 or >0 to print the array read '//
+     +'in to the output log (LIST). If negative, then '//
+     +'printing is supressed.'//NL//
+     +'FileName is the name of the file that contains the zone array.'//
+     +BLN//'    --Note1: The input FMTIN and IPRN are optional, '//NL//
+     +     '             and when not present are set to '//
+     +                  '"(FREE)" and -1, respectively'//
+     +BLN//'    --Note2: Comments must be preceded by a #'//NL//
+     +     '             such as: '//NL//
+     +     '             OPEN/CLOSE   (FREE)  1  # Comments'//NL//
+     +     '             ./zones.txt             # Comments')
+         END IF
+      END IF
+      !
+      CALL PARSE_WORD_UP(CNTRL,ICOL,ISTART,ISTOP)
+      !
+      FMTIN = FREE_FORM              ! Default Options
+      IPRN  = -1
+      !
+      IF (ISTOP >=  ISTART) THEN  ! Valid word parsed
+          !
+          IF(CNTRL(ISTART:ISTART) == '(') THEN
+              IF(INDEX(CNTRL(ISTART:ISTOP),')') == Z) THEN
+                  WRITE(IOUT,'(/,A,I4,*(A))') 'Zone Array for layer',K,
+     +            ' Found an "(" but failed to locate matching ")".',
+     +            ' It will be ignored and instead use free format.',
+     +            ' Note, that it is best to enclose FMTIN in quotes,',
+     +            ' such as "(15I3)" or "( 25I6 )"'
+              ELSEIF(ISTART+2 < ISTOP             .AND.        ! NOT->  () or ( )
+     +           CNTRL(ISTART+1:ISTOP-1) /= '' .AND.        ! NOT->  (  )
+     +           INDEX(CNTRL(ISTART:ISTOP),'F') == Z) THEN  ! NOT->  (FREE)
+                       FMTIN = CNTRL(ISTART:ISTOP)
+              END IF
+          ELSE
+                 ICOL  = ISTART                             ! Failed to find format so assume its IPRN
+          END IF
+          !
+          CALL GET_INTEGER(CNTRL,ICOL,ISTART,ISTOP,IOUT,INZN1,IPRN,
+     +                                                 'NOSTOP')
+          IF(IPRN == HUGE(IPRN)) IPRN=-1
+          !
+      END IF
+      !
+      CALL MOVE_TO_DATA(CNTRL, IU, IOUT)     ! Load IZONE(NCOL,NROW) from file specifed in IU
+      !
+      IF(FMTIN == FREE_FORM) THEN
+         WRITE(IOUT,'(A,I4,A)') ' Zone Array for layer',K,
+     +                          ' will be read using free format.'
+         DO I=1, NROW
+             READ(IU,*, IOSTAT=IERR) IZONE(1:NCOL,I,K)
+             IF(IERR /= 0 ) THEN
+             CALL BACKSPACE_STOP_MSG(IU, INZN1, IOUT, IERR, 
+     +   'IZREAD - ERROR READING THE "ZONEBUDGET IZONE" ARRAY.'//NL//
+     +   'THE ERROR LINE IS THE BEST GUESS WHERE THE ERROR OCCURED')
+             ELSE IF( ANY( IZONE(1:NCOL,I,K)<0 ) ) THEN
+             CALL BACKSPACE_STOP_MSG(IU, INZN1, IOUT, Z,  
+     +     'NEGATIVE ZONE NUMBER NOT ALLOWED'//NL//
+     +     'Negative zone number found in layer '//INT2STR(K) )
+             END IF
+         END DO
       ELSE
-         WRITE(IOUT,104) K,FMTIN
-104      FORMAT(1X,'Zone Array for layer',I4,
-     1       ' will be read using format: ',A/1X,71('-'))
-         DO 110 I=1,NROW
-         READ (INUNIT,FMTIN) (IZONE(J,I,K),J=1,NCOL)
-110      CONTINUE
+         WRITE(IOUT,'(A,I4,2A)') ' Zone Array for layer',K,
+     +                           ' will be read using format: ', FMTIN
+         DO I=1, NROW
+             READ(IU,FMTIN, IOSTAT=IERR) IZONE(1:NCOL,I,K)
+             IF(IERR /= 0 ) THEN
+             CALL BACKSPACE_STOP_MSG(IU, INZN1, IOUT, IERR, 
+     +   'IZREAD - ERROR READING THE "ZONEBUDGET IZONE" ARRAY.'//NL//
+     +   'THE ERROR LINE IS THE BEST GUESS WHERE THE ERROR OCCURED')
+             ELSE IF( ANY( IZONE(1:NCOL,I,K)<0 ) ) THEN
+             CALL BACKSPACE_STOP_MSG(IU, INZN1, IOUT, Z,  
+     +     'NEGATIVE ZONE NUMBER NOT ALLOWED'//NL//
+     +     'Negative zone number found in layer '//INT2STR(K) )
+             END IF
+         END DO
       END IF
-C
-C-----CHECK FOR NEGATIVE IZONE VALUES
-320   DO 400 I=1,NROW
-      DO 400 J=1,NCOL
-      IF(IZONE(J,I,K).LT.0) THEN
-         WRITE(*,*) ' NEGATIVE ZONE AT (LAYER,ROW,COLUMN):',K,I,J
-         STOP
+      !
+      IF    (OPEN_FLAG == 1) THEN
+                          CALL Append_1D_Alloc(EXT, IU)
+      ELSEIF(OPEN_FLAG == 2) THEN
+                          CLOSE(IU, IOSTAT=IERR)
       END IF
-400   CONTINUE
-C
-C-----IF PRINT CODE (IPRN) =>0 THEN PRINT ARRAY VALUES.
-      IF(IPRN.LT.0) GO TO 1000
-C
-C-----PRINT COLUMN NUMBERS AT THE TOP OF THE PAGE
-      WRITE(IOUT,421) (I,I=1,NCOL)
-421   FORMAT(/,(5X,25I3))
-      WRITE(IOUT,422)
-422   FORMAT(1X,79('-'))
-C
-C-----PRINT EACH ROW IN THE ARRAY.
-      DO 430 I=1,NROW
-      WRITE(IOUT,423) I,(IZONE(J,I,K),J=1,NCOL)
-423   FORMAT(1X,I3,1X,25I3/(5X,25I3))
-430   CONTINUE
-C
-1000  CONTINUE
-      IF(NAMPRV.NE.' ') CLOSE(UNIT=INZN2)
+      !
+      !-IF PRINT CODE (IPRN) =>0 THEN PRINT ARRAY VALUES.
+      IF(IPRN >= 0) THEN
+             !-PRINT COLUMN NUMBERS AT THE TOP OF THE PAGE
+             WRITE(IOUT,*)
+             WRITE(IOUT,422)
+             WRITE(IOUT,421) (I,I=1,NCOL)
+421          FORMAT((5X,*(I4)))
+             WRITE(IOUT,422)
+422          FORMAT(1X,79('-'))
+             !
+             !-PRINT EACH ROW IN THE ARRAY.
+             DO I=1, NROW
+                WRITE(IOUT,423) I, IZONE(:,I,K)
+423             FORMAT(1X,I3,1X,*(I4))
+             END DO
+             WRITE(IOUT,*)
+             WRITE(IOUT,422)
+             WRITE(IOUT,*)
+      END IF
+      ! 
+      END DO LAY_LOOP       ! ------------------------------------------------------------------
+      !
+      IF(ALLOCATED(EXT)) THEN
+          DO I=1, SIZE(EXT)
+                  CLOSE(EXT(I), IOSTAT=IERR)
+          END DO
+      END IF
 C
 C-----RETURN
       RETURN
-      END
-      SUBROUTINE BLOCK(IZONE,NLAY,NROW,NCOL,IOUT)
+      END SUBROUTINE
+C
+      SUBROUTINE BLOCK_READ(IZONE,NLAY,NROW,NCOL,IOUT)
 C     ******************************************************************
 C     INPUT ZONE VALUES BY BLOCK
 C     ******************************************************************
@@ -645,14 +967,23 @@ C
 50    CONTINUE
       GO TO 10
 C
-      END
+      END SUBROUTINE
+C
       SUBROUTINE ZONCOUNT(NZDIM,LSTZON,MXZONE,IZONE,NLAY,NROW,NCOL,IOUT)
 C     ******************************************************************
 C     Create Zone list
 C     ******************************************************************
       DIMENSION LSTZON(0:MXZONE),IZONE(NCOL,NROW,NLAY)
+      !
+      INTERFACE
+              PURE FUNCTION INT2STR(IVAL)
+                INTEGER,       INTENT(IN):: IVAL
+                CHARACTER(:), ALLOCATABLE:: INT2STR
+              END FUNCTION
+      END INTERFACE
 C     ------------------------------------------------------------------
       LSTZON(0)=-1
+      LSTZON(1:)=0
       NZDIM=0
       DO 100 K=1,NLAY
       DO 100 I=1,NROW
@@ -684,15 +1015,13 @@ C  Found a new zone
       END IF
 100   CONTINUE
 C
-      WRITE(*,*)
-      WRITE(*,*) NZDIM,' zones.'
-      WRITE(IOUT,*) NZDIM,' zones.'
+      WRITE(*,   '(/,1x,2A)') INT2STR(NZDIM),' zone numbers defined:'
+      WRITE(IOUT,'(/,1x,2A)') INT2STR(NZDIM),' zone numbers defined:'
       IF(NZDIM.EQ.0) THEN
-         WRITE(*,*) ' Stopping because there are no zones'
-         STOP
+         CALL STOP_ERROR('', 0, IOUT, 'Error - No zones defined')
       END IF
       WRITE(*,195) (LSTZON(M),M=1,NZDIM)
-195   FORMAT(20I5)
+195   FORMAT(*(I5))
       WRITE(IOUT,195) (LSTZON(M),M=1,NZDIM)
 C
 C  Change IZONE to the zone index number
@@ -708,23 +1037,38 @@ C  Change IZONE to the zone index number
 300   CONTINUE
 C
       RETURN
-      END
+      END SUBROUTINE
+C
       SUBROUTINE INCOMP(ICOMP,NZWCZ,MXCOMP,MXZWCZ,NCOMP,INZN1,
      1                  LSTZON,NZDIM,IOUT,NAMCOMP)
 C     ******************************************************************
 C     READ COMPOSITE ZONES
 C     ******************************************************************
 C       SPECIFICATIONS:
-      DIMENSION ICOMP(MXZWCZ,MXCOMP),NZWCZ(MXCOMP),LSTZON(0:NZDIM)
-      CHARACTER*1000 LINE
-      CHARACTER*10 NAMCOMP(MXCOMP)
+      INTEGER, INTENT(IN   ):: MXCOMP,MXZWCZ,INZN1,NZDIM,IOUT
+      INTEGER, INTENT(INOUT):: NCOMP
+      INTEGER, DIMENSION(MXZWCZ,MXCOMP), INTENT(INOUT):: ICOMP
+      INTEGER, DIMENSION(MXCOMP),        INTENT(INOUT):: NZWCZ
+      INTEGER, DIMENSION(0:NZDIM),       INTENT(IN   ):: LSTZON
+      CHARACTER(10), DIMENSION(MXCOMP),  INTENT(INOUT):: NAMCOMP
+      !
+      CHARACTER(1024):: LINE
+      CHARACTER(1):: NL
+      INTEGER:: IC, IV, ERRNUM
 C     ------------------------------------------------------------------
+      NL = NEW_LINE(' ')
+      ERRNUM = HUGE(ERRNUM)
 C
 C-----READ THE COMPOSITE ZONES
+      IC = 1
       DO 10 I=1,MXCOMP
-      READ(INZN1,'(A)',END=20) LINE
+      !
+      CALL READ_TO_DATA(LINE,INZN1,IOUT)
+      IF(LINE == "") GO TO 20
+      !
       LLOC=1
-      CALL URWORD(LINE,LLOC,ISTART,ISTOP,0,IDUM,RDUM,IOUT,INZN1)
+      CALL PARSE_WORD(LINE,LLOC,ISTART,ISTOP)
+      !
       IF(LINE(ISTART:ISTART).GE.'0' .AND.
      1              LINE(ISTART:ISTART).LE.'9') THEN
         NAMCOMP(I)=' '
@@ -734,13 +1078,16 @@ C-----READ THE COMPOSITE ZONES
       ELSE
         NAMCOMP(I)=LINE(ISTART:ISTOP)
       END IF
-      DO 3 J=1,MXZWCZ
-      CALL URWORD(LINE,LLOC,ISTART,ISTOP,2,ICOMP(J,I),RDUM,IOUT,INZN1)
-      IF(ICOMP(J,I).LE.0) GO TO 10
-3     CONTINUE
+      !
+      DO J=1, MXZWCZ
+        CALL GET_INTEGER(LINE,LLOC,ISTART,ISTOP,IOUT,INZN1,IV,'NOSTOP')
+        IF ( IV <= 0 .or. IV == ERRNUM) EXIT
+        ICOMP(J,I) = IV
+      END DO
+      IC = IC + 1
 10    CONTINUE
-      I=MXCOMP+1
-20    NCOMP=I-1
+      IC=MXCOMP+1
+20    NCOMP=IC-1
       IF(NCOMP.EQ.0) RETURN
 C
 C-----FIND HOW MANY ZONES MAKE UP EACH COMPOSITE ZONE
@@ -770,20 +1117,22 @@ C
 C-----WRITE THE COMPOSITE ZONES
 50    WRITE(IOUT,*)
       WRITE(IOUT,52) NCOMP
-52    FORMAT(1X,I3,' Composite Zones:')
+52    FORMAT(1X,I3,' Composite Zones Defined:')
       DO 60 I=1,NCOMP
       WRITE(IOUT,54) NAMCOMP(I),(LSTZON(ICOMP(J,I)),J=1,NZWCZ(I))
-54    FORMAT(1X,'Composite Zone ',A,':',15I4/(27X,15I4))
+54    FORMAT(1X,'"',A,'" = ',15I4/(27X,15I4))
 60    CONTINUE
 C
       RETURN
-      END
+      END SUBROUTINE
+C
       SUBROUTINE ACCM(IZONE,ICH,NCOL,NROW,NLAY,VBNM,VBVL,VBZNFL,
      1                MSUM,TEXT,NTRDIM,NZDIM,MSUMCH,
-     2                ITYPE,NLIST,INBUD,NVAL)
+     2                ITYPE,NLIST,INBUD,NVAL, istat)
 C     ******************************************************************
 C     ACCUMULATE VOLUMETRIC BUDGET FOR ZONES
 C     ******************************************************************
+      USE, INTRINSIC:: ISO_FORTRAN_ENV, ONLY: real32, real64
       USE ZONBUDMODULE
       DIMENSION VBVL(2,NTRDIM,NZDIM),
      1  VBZNFL(2,0:NZDIM,0:NZDIM),IZONE(NCOL,NROW,NLAY),
@@ -793,7 +1142,7 @@ C     ******************************************************************
       DIMENSION VAL(20)
       DOUBLE PRECISION VALD(20),DZERO
 C     ------------------------------------------------------------------
-      DZERO=0D0
+      DZERO=0.0_real64
       NRC=NROW*NCOL
 C
 C-----CHECK FOR INTERNAL FLOW TERMS, WHICH ARE USED TO CALCULATE FLOW
@@ -810,12 +1159,14 @@ C  LIST
          IF(NLIST.GT.0) THEN
             DO 80 N=1,NLIST
             IF(IPREC.EQ.1) THEN
-              READ(INBUD) ICELL,(VAL(I),I=1,NVAL)
+              READ(INBUD, iostat=istat) ICELL,(VAL(I),I=1,NVAL)
+              if(istat /= 0) return
               DO 45 I=1,NVAL
               VALD(I)=VAL(I)
 45            CONTINUE
             ELSE
-              READ(INBUD) ICELL,(VALD(I),I=1,NVAL)
+              READ(INBUD, iostat=istat) ICELL,(VALD(I),I=1,NVAL)
+              if(istat /= 0) return
             END IF
             K= (ICELL-1)/NRC + 1
             I= ( (ICELL - (K-1)*NRC)-1 )/NCOL +1
@@ -867,9 +1218,11 @@ C-----FLOW.  STORE CONSTANT-HEAD LOCATIONS IN ICH ARRAY.
          IF(NLIST.GT.0) THEN
             DO 250 N=1,NLIST
             IF(IPREC.EQ.1) THEN
-              READ(INBUD) ICELL,(VAL(I),I=1,NVAL)
+              READ(INBUD, iostat=istat) ICELL,(VAL(I),I=1,NVAL)
+              if(istat /= 0) return
             ELSE
-              READ(INBUD) ICELL,(VALD(I),I=1,NVAL)
+              READ(INBUD, iostat=istat) ICELL,(VALD(I),I=1,NVAL)
+              if(istat /= 0) return
             END IF
             K= (ICELL-1)/NRC + 1
             I= ( (ICELL - (K-1)*NRC)-1 )/NCOL +1
@@ -931,6 +1284,9 @@ C  Don't include CH to CH flow (can occur if CHTOCH option is used)
   370 CONTINUE
 C
 C-----CALCULATE FLOW TO CONSTANT-HEAD CELLS IN THIS DIRECTION
+      !
+      IF(MSUMCH==0) RETURN  ! No need to compute constant head
+      !
       DO 395 K=1,NLAY
       DO 395 I=1,NROW
       DO 395 J=1,NCOL
@@ -997,6 +1353,9 @@ C  Don't include CH to CH flow (can occur if CHTOCH option is used)
   470 CONTINUE
 C
 C-----CALCULATE FLOW TO CONSTANT-HEAD CELLS IN THIS DIRECTION
+      !
+      IF(MSUMCH==0) RETURN  ! No need to compute constant head
+      !
       DO 495 K=1,NLAY
       DO 495 I=1,NROW
       DO 495 J=1,NCOL
@@ -1063,6 +1422,9 @@ C  Don't include CH to CH flow (can occur if CHTOCH option is used)
   570 CONTINUE
 C
 C-----CALCULATE FLOW TO CONSTANT-HEAD CELLS IN THIS DIRECTION
+      !
+      IF(MSUMCH==0) RETURN  ! No need to compute constant head
+      !
       DO 595 K=1,NLAY
       DO 595 I=1,NROW
       DO 595 J=1,NCOL
@@ -1090,7 +1452,8 @@ C-----CALCULATE FLOW TO CONSTANT-HEAD CELLS IN THIS DIRECTION
 595   CONTINUE
       RETURN
 C
-      END
+      END SUBROUTINE
+C
       SUBROUTINE SUBPR(KSTP,KPER,VBNM,VBVL,VBZNFL,MSUM,IOUT,
      1               NTRDIM,LSTZON,NZDIM,TITLE)
 C     ******************************************************************
@@ -1188,7 +1551,8 @@ C
   607 FORMAT(26X,'IN - OUT =',G14.5)
   608 FORMAT(15X,'Percent Discrepancy =',F20.2)
   609 FORMAT(19X,'Zone',I4,' to',I4,' =',G14.5)
-      END
+      END SUBROUTINE
+C
       SUBROUTINE COMPPR(KSTP,KPER,VBNM,VBVL,VBZNFL,MSUM,IOUT,NTRDIM,
      1   NZDIM,TITLE,ICOMP,NZWCZ,NCOMP,MXCOMP,MXZWCZ,LSTZON,NAMCOMP)
 C     ******************************************************************
@@ -1347,35 +1711,62 @@ C
   610 FORMAT(12X,A,' to Zone',I4,' =',G14.5)
   611 FORMAT(5X,'Composite Zone ',A,
      1      ' consists of the following numeric zones:'/(5X,15I4))
-      END
+      END SUBROUTINE
+C
       SUBROUTINE BUDGETPRECISION(IU,NCOL,NROW,NLAY)
 C     ******************************************************************
 C     Determine single or double precision file type for a MODFLOW
 C     budget file:  0=unrecognized, 1=single, 2=double.
 C     ******************************************************************
+      USE, INTRINSIC:: ISO_FORTRAN_ENV, ONLY: real32, real64
       USE ZONBUDMODULE
-      DOUBLE PRECISION DELTD,PERTIMD,TOTIMD,VALD
-      CHARACTER*16 TEXT1,TEXT2
+      IMPLICIT NONE
+      INTEGER, INTENT(IN   ):: IU
+      INTEGER, INTENT(INOUT):: NCOL,NROW,NLAY
+      !
+      INTEGER:: KSTP, KPER, NODES, NLST
+      INTEGER:: N,NC,NR,NL, ICELL, ICODE
+      REAL(real32):: DELT,  PERTIM,  TOTIM, VAL
+      REAL(real64):: DELTD, PERTIMD, TOTIMD, VALD
+      CHARACTER(16):: TEXT1, TEXT2
+      REAL(real32):: Zs
+      REAL(real64):: Zd
+      Zs = 0.0_real32
+      Zd = 0.0_real64
 C
 C  Default is unrecognized file
-      IPREC=0
+      IPREC  =0
+      TEXT1  = ''
+      TEXT2  = ''
+      DELT   = Zs
+      PERTIM = Zs
+      TOTIM  = Zs
+      DELTD  = Zd
+      PERTIMD= Zd
+      TOTIMD = Zd
 C
 C  SINGLE check
       READ(IU,ERR=100,END=100) KSTP,KPER,TEXT1,NCOL,NROW,NLAY
-      ICODE=0
-      IF(NLAY.LT.0) THEN
-        NLAY=-NLAY
-        READ(IU,ERR=50,END=50) ICODE,DELT,PERTIM,TOTIM
-      END IF
-14    FORMAT(1X,I10,' layers',I10,' rows',I10,' columns')
+      !
+      ICODE = NLAY
+      NLAY  = ABS(NLAY)
+      NODES = NCOL*NROW*NLAY
+      !
       IF(NCOL.LT.1 .OR. NROW.LT.1 .OR. NLAY.LT.1) GO TO 100
       IF(NCOL.GT.100000000 .OR.NROW.GT.100000000 .OR.
      1                     NLAY.GT.100000000) GO TO 100
       IF(NCOL*NROW.GT.100000000 .OR. NCOL*NLAY.GT.100000000 .OR.
      1                 NROW*NLAY.GT.100000000) GO TO 100
+      !
       ALLOCATE(BUFF(NCOL,NROW,NLAY))
       ALLOCATE (BUFFD(NCOL,NROW,NLAY))
-      NODES=NCOL*NROW*NLAY
+      !
+      IF(ICODE < 0) THEN
+          READ(IU,ERR=50,END=50) ICODE,DELT,PERTIM,TOTIM
+          !
+          IF(DELT < Zs .or.    PERTIM < Zs .or.    TOTIM < Zs .or. 
+     +       DELT > PERTIM .or. PERTIM > TOTIM) GO TO 50
+      END IF
 C
 C  Read data depending on ICODE.  ICODE 0,1, or 2 are the only allowed
 C  values because the first budget terms must be from the internal
@@ -1397,15 +1788,31 @@ C  flow package (BCF,LPF, or HUF).
 C
 C  Read 2nd header and check for valid type.
       READ(IU,ERR=50,END=50) KSTP,KPER,TEXT2
-      IF(TEXT1.EQ.'         STORAGE' .AND.
-     1   TEXT2.EQ.'   CONSTANT HEAD') THEN
-           IPREC=1
-           GO TO 100
-      ELSE IF(TEXT1.EQ.'   CONSTANT HEAD' .AND.
-     1        TEXT2.EQ.'FLOW RIGHT FACE ') THEN
-           IPREC=1
-           GO TO 100
+      IF(TEXT1.EQ.'         STORAGE') THEN
+          IF(TEXT2.EQ.'   CONSTANT HEAD' .OR.
+     +       TEXT2.EQ.'FLOW RIGHT FACE '     ) THEN
+                  IPREC=1
+                  GO TO 100
+          END IF
+      ELSEIF(TEXT1.EQ.'   CONSTANT HEAD') THEN
+          IF(TEXT2.EQ.'FLOW RIGHT FACE ') THEN
+                  IPREC=1
+                  GO TO 100
+          END IF
+      ELSEIF(TEXT1.EQ.'FLOW RIGHT FACE ' .AND.
+     +       TEXT2.EQ.'FLOW FRONT FACE '      ) THEN
+                  IPREC=1
+                  GO TO 100
       END IF
+!      IF(TEXT1.EQ.'         STORAGE' .AND.
+!     1   TEXT2.EQ.'   CONSTANT HEAD') THEN
+!           IPREC=1
+!           GO TO 100
+!      ELSE IF(TEXT1.EQ.'   CONSTANT HEAD' .AND.
+!     1        TEXT2.EQ.'FLOW RIGHT FACE ') THEN
+!           IPREC=1
+!           GO TO 100
+!      END IF
 C
 C  DOUBLE check
 50    REWIND(IU)
@@ -1414,6 +1821,8 @@ C  DOUBLE check
       IF(NL.LT.0) THEN
         NL=-NL
         READ(IU,ERR=100,END=100) ICODE,DELTD,PERTIMD,TOTIMD
+        IF(DELTD < Zd .or.      PERTIMD < Zd .or.    TOTIMD < Zd .or. 
+     +     DELTD > PERTIMD .or. PERTIMD > TOTIMD) GO TO 100
       END IF
 C
 C  Read data depending on ICODE.  ICODE 0,1, or 2 are the only allowed
@@ -1436,166 +1845,31 @@ C  flow package (BCF,LPF, or HUF).
 C
 C  Read 2nd header and check for valid type.
       READ(IU,ERR=100,END=100) KSTP,KPER,TEXT2
-      IF(TEXT1.EQ.'         STORAGE' .AND.
-     1   TEXT2.EQ.'   CONSTANT HEAD') THEN
-           IPREC=2
-      ELSE IF(TEXT1.EQ.'   CONSTANT HEAD' .AND.
-     1        TEXT2.EQ.'FLOW RIGHT FACE ') THEN
-           IPREC=2
+      IF(TEXT1.EQ.'         STORAGE') THEN
+          IF(TEXT2.EQ.'   CONSTANT HEAD' .OR.
+     +       TEXT2.EQ.'FLOW RIGHT FACE '     ) THEN
+                  IPREC=2
+          END IF
+      ELSEIF(TEXT1.EQ.'   CONSTANT HEAD') THEN
+          IF(TEXT2.EQ.'FLOW RIGHT FACE ') THEN
+                  IPREC=2
+          END IF
+      ELSEIF(TEXT1.EQ.'FLOW RIGHT FACE ' .AND.
+     +       TEXT2.EQ.'FLOW FRONT FACE '      ) THEN
+                  IPREC=2
       END IF
+!      IF(TEXT1.EQ.'         STORAGE' .AND.
+!     1   TEXT2.EQ.'   CONSTANT HEAD') THEN
+!           IPREC=2
+!      ELSE IF(TEXT1.EQ.'   CONSTANT HEAD' .AND.
+!     1        TEXT2.EQ.'FLOW RIGHT FACE ') THEN
+!           IPREC=2
+!      END IF
 C
 100   REWIND(IU)
       RETURN
-      END
-      SUBROUTINE URWORD(LINE,ICOL,ISTART,ISTOP,NCODE,N,R,IOUT,IN)
-C     ******************************************************************
-C     ROUTINE TO EXTRACT A WORD FROM A LINE OF TEXT, AND OPTIONALLY
-C     CONVERT THE WORD TO A NUMBER.
-C        ISTART AND ISTOP WILL BE RETURNED WITH THE STARTING AND
-C          ENDING CHARACTER POSITIONS OF THE WORD.
-C        THE LAST CHARACTER IN THE LINE IS SET TO BLANK SO THAT IF ANY
-C          PROBLEMS OCCUR WITH FINDING A WORD, ISTART AND ISTOP WILL
-C          POINT TO THIS BLANK CHARACTER.  THUS, A WORD WILL ALWAYS BE
-C          RETURNED UNLESS THERE IS A NUMERIC CONVERSION ERROR.  BE SURE
-C          THAT THE LAST CHARACTER IN LINE IS NOT AN IMPORTANT CHARACTER
-C          BECAUSE IT WILL ALWAYS BE SET TO BLANK.
-C        A WORD STARTS WITH THE FIRST CHARACTER THAT IS NOT A SPACE OR
-C          COMMA, AND ENDS WHEN A SUBSEQUENT CHARACTER THAT IS A SPACE
-C          OR COMMA.  NOTE THAT THESE PARSING RULES DO NOT TREAT TWO
-C          COMMAS SEPARATED BY ONE OR MORE SPACES AS A NULL WORD.
-C        FOR A WORD THAT BEGINS WITH "'", THE WORD STARTS WITH THE
-C          CHARACTER AFTER THE QUOTE AND ENDS WITH THE CHARACTER
-C          PRECEDING A SUBSEQUENT QUOTE.  THUS, A QUOTED WORD CAN
-C          INCLUDE SPACES AND COMMAS.  THE QUOTED WORD CANNOT CONTAIN
-C          A QUOTE CHARACTER.
-C        IF NCODE IS 1, THE WORD IS CONVERTED TO UPPER CASE.
-C        IF NCODE IS 2, THE WORD IS CONVERTED TO AN INTEGER.
-C        IF NCODE IS 3, THE WORD IS CONVERTED TO A REAL NUMBER.
-C        NUMBER CONVERSION ERROR IS WRITTEN TO UNIT IOUT IF IOUT IS
-C          POSITIVE; ERROR IS WRITTEN TO DEFAULT OUTPUT IF IOUT IS 0;
-C          NO ERROR MESSAGE IS WRITTEN IF IOUT IS NEGATIVE.
-C     ******************************************************************
+      END SUBROUTINE
 C
-C        SPECIFICATIONS:
-C     ------------------------------------------------------------------
-      CHARACTER*(*) LINE
-      CHARACTER*20 STRING
-      CHARACTER*30 RW
-      CHARACTER*1 TAB
-C     ------------------------------------------------------------------
-      TAB=CHAR(9)
-C
-C1------Set last char in LINE to blank and set ISTART and ISTOP to point
-C1------to this blank as a default situation when no word is found.  If
-C1------starting location in LINE is out of bounds, do not look for a
-C1------word.
-      LINLEN=LEN(LINE)
-      LINE(LINLEN:LINLEN)=' '
-      ISTART=LINLEN
-      ISTOP=LINLEN
-      LINLEN=LINLEN-1
-      IF(ICOL.LT.1 .OR. ICOL.GT.LINLEN) GO TO 100
-C
-C2------Find start of word, which is indicated by first character that
-C2------is not a blank, a comma, or a tab.
-      DO 10 I=ICOL,LINLEN
-      IF(LINE(I:I).NE.' ' .AND. LINE(I:I).NE.','
-     &    .AND. LINE(I:I).NE.TAB) GO TO 20
-10    CONTINUE
-      ICOL=LINLEN+1
-      GO TO 100
-C
-C3------Found start of word.  Look for end.
-C3A-----When word is quoted, only a quote can terminate it.
-20    IF(LINE(I:I).EQ.'''') THEN
-         I=I+1
-         IF(I.LE.LINLEN) THEN
-            DO 25 J=I,LINLEN
-            IF(LINE(J:J).EQ.'''') GO TO 40
-25          CONTINUE
-         END IF
-C
-C3B-----When word is not quoted, space, comma, or tab will terminate.
-      ELSE
-         DO 30 J=I,LINLEN
-         IF(LINE(J:J).EQ.' ' .OR. LINE(J:J).EQ.','
-     &    .OR. LINE(J:J).EQ.TAB) GO TO 40
-30       CONTINUE
-      END IF
-C
-C3C-----End of line without finding end of word; set end of word to
-C3C-----end of line.
-      J=LINLEN+1
-C
-C4------Found end of word; set J to point to last character in WORD and
-C-------set ICOL to point to location for scanning for another word.
-40    ICOL=J+1
-      J=J-1
-      IF(J.LT.I) GO TO 100
-      ISTART=I
-      ISTOP=J
-C
-C5------Convert word to upper case and RETURN if NCODE is 1.
-      IF(NCODE.EQ.1) THEN
-         IDIFF=ICHAR('a')-ICHAR('A')
-         DO 50 K=ISTART,ISTOP
-            IF(LINE(K:K).GE.'a' .AND. LINE(K:K).LE.'z')
-     1             LINE(K:K)=CHAR(ICHAR(LINE(K:K))-IDIFF)
-50       CONTINUE
-         RETURN
-      END IF
-C
-C6------Convert word to a number if requested.
-100   IF(NCODE.EQ.2 .OR. NCODE.EQ.3) THEN
-         RW=' '
-         L=30-ISTOP+ISTART
-         IF(L.LT.1) GO TO 200
-         RW(L:30)=LINE(ISTART:ISTOP)
-         IF(NCODE.EQ.2) READ(RW,'(I30)',ERR=200) N
-         IF(NCODE.EQ.3) READ(RW,'(F30.0)',ERR=200) R
-      END IF
-      RETURN
-C
-C7------Number conversion error.
-200   IF(NCODE.EQ.3) THEN
-         STRING= 'A REAL NUMBER'
-         L=13
-      ELSE
-         STRING= 'AN INTEGER'
-         L=10
-      END IF
-C
-C7A-----If output unit is negative, set last character of string to 'E'.
-      IF(IOUT.LT.0) THEN
-         N=0
-         R=0.
-         LINE(LINLEN+1:LINLEN+1)='E'
-         RETURN
-C
-C7B-----If output unit is positive; write a message to output unit.
-      ELSE IF(IOUT.GT.0) THEN
-         IF(IN.GT.0) THEN
-            WRITE(IOUT,201) IN,LINE(ISTART:ISTOP),STRING(1:L),LINE
-         ELSE
-            WRITE(IOUT,202) LINE(ISTART:ISTOP),STRING(1:L),LINE
-         END IF
-201      FORMAT(1X,/1X,'FILE UNIT ',I4,' : ERROR CONVERTING "',A,
-     1       '" TO ',A,' IN LINE:',/1X,A)
-202      FORMAT(1X,/1X,'KEYBOARD INPUT : ERROR CONVERTING "',A,
-     1       '" TO ',A,' IN LINE:',/1X,A)
-C
-C7C-----If output unit is 0; write a message to default output.
-      ELSE
-         IF(IN.GT.0) THEN
-            WRITE(*,201) IN,LINE(ISTART:ISTOP),STRING(1:L),LINE
-         ELSE
-            WRITE(*,202) LINE(ISTART:ISTOP),STRING(1:L),LINE
-         END IF
-      END IF
-C
-C7D-----STOP after writing message.
-      STOP
-      END
       SUBROUTINE CSVSUBPR(KSTP,KPER,VBNM,VBVL,VBZNFL,MSUM,IUCSV,
      1               NTRDIM,NZDIM,TITLE,TOTIMD,LSTZON)
 C     ******************************************************************
@@ -1733,7 +2007,8 @@ C-----Percent error
       WRITE(IUCSV,'(A)') ','
 C
       RETURN
-      END
+      END SUBROUTINE
+C
       SUBROUTINE CSVSUBPR2(KSTP,KPER,VBNM,VBVL,VBZNFL,MSUM,IUCSV,
      1               NTRDIM,NZDIM,TITLE,TOTIMD,LSTZON)
 C     ******************************************************************
@@ -1783,7 +2058,7 @@ C-----FROM A TO B EXCEPT THAT INS AND OUTS ARE REVERSED
 C
 C-----PRINT COLUMN HEADERS
         NFIELD=1
-        FIELD(NFIELD)='TOTIM'
+        FIELD(NFIELD)=' TOTIM'
         NFIELD=NFIELD+1
         FIELD(NFIELD)='  PERIOD'
         NFIELD=NFIELD+1
@@ -1839,7 +2114,7 @@ C  Put zone fields twice -- once for IN and once for OUT
         NFIELD=NFIELD+1
         FIELD(NFIELD)=ZONOUTNAM(K)
    75   CONTINUE
-        WRITE(IUCSV,7) (TRIM(FIELD(I)),I=1,NFIELD)
+        WRITE(IUCSV,7) (FIELD(I),I=1,NFIELD)
     7   FORMAT(1000(A,','))
       END IF
 C
@@ -1934,4 +2209,830 @@ C
   500 CONTINUE
 C
       RETURN
-      END
+      END SUBROUTINE
+C
+C~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
+C  The following routines originated from the main mf-owhm code.         |
+C    They have been simplified for use in ZoneBudget input structure.    |
+C~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
+C
+!      SUBROUTINE U2DINT(IA,ANAME,II,JJ,IN,IOUT,K)
+!C     ******************************************************************
+!C     Modified for use with ZoneBudget
+!C     ROUTINE TO INPUT 2-D INTEGER DATA MATRICES
+!C       IA IS ARRAY TO INPUT
+!C       ANAME IS 24 CHARACTER DESCRIPTION OF IA
+!C       II IS NO. OF ROWS
+!C       JJ IS NO. OF COLS
+!C       IN IS INPUT UNIT
+!C       IOUT IS OUTPUT UNIT
+!C     ******************************************************************
+!C
+!C        SPECIFICATIONS:
+!C     ------------------------------------------------------------------
+!      IMPLICIT NONE
+!      CHARACTER(24), INTENT(IN):: ANAME
+!      INTEGER,       INTENT(IN):: II,JJ,K,IN,IOUT
+!      INTEGER, DIMENSION(JJ,II), INTENT(INOUT):: IA
+!      CHARACTER(20):: FMTIN
+!      CHARACTER(768):: CNTRL, FNAME
+!      INTEGER:: IE, N, I, J, IERR
+!      INTEGER:: ICOL, ISTART, ISTOP
+!      INTEGER:: ICLOSE, IFREE, ICONST, IPRN, LOCAT
+!      LOGICAL:: FAIL
+!      INTEGER:: Z, ONE
+!      LOGICAL:: TRUE, FALSE
+!      CHARACTER   :: NL
+!      CHARACTER(2):: BLN
+!      CHARACTER(16):: cL
+!C     ------------------------------------------------------------------
+!      NL  = NEW_LINE(' ')
+!      BLN = NL//NL
+!      Z   = 0
+!      ONE = 1
+!      TRUE  = .TRUE.
+!      FALSE = .FALSE.
+!C
+!C1------READ ARRAY CONTROL RECORD AS CHARACTER DATA.
+!      CALL READ_TO_DATA(CNTRL,IN,IOUT)
+!C
+!C2------LOOK FOR ALPHABETIC WORD THAT INDICATES THAT THE RECORD IS FREE
+!C2------FORMAT.  SET A FLAG SPECIFYING IF FREE FORMAT OR FIXED FORMAT.
+!      ICLOSE = Z
+!      IFREE  = ONE
+!      ICOL   = ONE
+!      CALL PARSE_WORD_UP(CNTRL,ICOL,ISTART,ISTOP)
+!      IF     (ISTOP < ISTART) THEN                   !Empty line read - Stop program
+!                                  GOTO 600
+!      ELSE IF(CNTRL(ISTART:ISTOP) == 'CONSTANT') THEN
+!         CALL GET_INTEGER(CNTRL,ICOL,ISTART,ISTOP,IOUT,IN,ICONST,
+!     +  'ZoneBudget found input directive "CONSTANT", but'//NL//
+!     +  'failed to read the constant value, ICONST, after the keyword.')
+!         !
+!         IA = ICONST
+!         !
+!         IF(IOUT /= Z) THEN
+!           IF(K >  Z) WRITE(IOUT,82) ANAME,ICONST,K
+!           IF(K <= Z) WRITE(IOUT,83) ANAME,ICONST
+!         ENDIF
+!   82    FORMAT(1X,/1X,A,' =',I15,' FOR LAYER',I4)
+!   83    FORMAT(1X,/1X,A,' =',I15)
+!         RETURN
+!         !
+!      ELSE IF(CNTRL(ISTART:ISTOP) == 'INTERNAL') THEN
+!         LOCAT = IN
+!      ELSE IF(CNTRL(ISTART:ISTOP) == 'EXTERNAL') THEN
+!         LOCAT = 0
+!         CALL PARSE_WORD(CNTRL,ICOL,ISTART,ISTOP)
+!         FNAME = CNTRL(ISTART:ISTOP)
+!         INQUIRE(FILE=FNAME, NUMBER=LOCAT, OPENED=FAIL)  ! Fail is true when file already opened
+!         !
+!         IF(FAIL) LOCAT = -1 
+!         !
+!         IF(IOUT /= Z) THEN
+!            IF(FAIL) THEN
+!                     WRITE(IOUT,15) FNAME
+!            ELSE
+!                     WRITE(IOUT,14) FNAME
+!            END IF
+!         END IF
+!   14    FORMAT(1X,/1X,'CONTINUE READING FROM:',1X,A)
+!         !
+!      ELSE IF(CNTRL(ISTART:ISTOP) == 'OPEN/CLOSE') THEN
+!         CALL PARSE_WORD(CNTRL,ICOL,ISTART,ISTOP)
+!         FNAME = CNTRL(ISTART:ISTOP)
+!         LOCAT = -1 
+!         IF(IOUT /= Z) WRITE(IOUT,15) FNAME
+!   15    FORMAT(1X,/1X,'OPENING FILE :',1X,A)
+!         ICLOSE = ONE
+!      ELSE
+!C
+!C2A-----DID NOT FIND A RECOGNIZED WORD, SO NOT USING FREE FORMAT.
+!C2A-----READ THE CONTROL RECORD THE ORIGINAL WAY.
+!         IFREE = Z
+!         READ(CNTRL,"(I10,I10)",IOSTAT=IE) N, ICOL
+!         IF(IE /= Z) GO TO 60
+!         !
+!    1    FORMAT(I10,I10,A20,I10)
+!         READ(CNTRL,1,IOSTAT=IE) LOCAT,ICONST,FMTIN,IPRN
+!         IF(IE /= Z .AND. N == Z) THEN
+!                                  IE     = Z
+!                                  LOCAT  = N
+!                                  ICONST = ICOL
+!                                  FMTIN  = ""
+!                                  IPRN   = Z
+!         END IF
+!         !
+!   60    IF(IE /= Z) THEN
+!           IF(K > Z) THEN
+!             WRITE(cL,'(I16)') K
+!             cL = ADJUSTL(cL)
+!             CALL BACKSPACE_STOP_MSG(IN, IOUT, Z, 
+!     +              'U2DINT - ERROR READING FOR "'//ANAME//'"'//NL//
+!     +              'WITH AN ARRAY CONTROL RECORD SPECIFIED AS: '//
+!     +              '"'//TRIM(CNTRL)//'"'//NL//
+!     +              '"FOR LAYER '//TRIM(cL))
+!           ELSE
+!             CALL BACKSPACE_STOP_MSG(IN, IOUT, Z, 
+!     +              'U2DINT - ERROR READING FOR "'//ANAME//'"'//NL//
+!     +              'WITH AN ARRAY CONTROL RECORD SPECIFIED AS: '//
+!     +              '"'//TRIM(CNTRL)//'"')
+!           END IF
+!         END IF
+!      END IF
+!C
+!C3------FOR FREE FORMAT CONTROL RECORD, READ REMAINING FIELDS.
+!      IF(IFREE /= Z) THEN
+!         CALL GET_INTEGER(CNTRL,ICOL,ISTART,ISTOP,IOUT,IN,ICONST,
+!     +                                            'NOSTOP')
+!         FAIL = ICONST == HUGE(ICONST)
+!         IF(LOCAT == Z .AND. FAIL) THEN
+!           CALL STOP_ERROR(CNTRL, IN, IOUT, 
+!     +                     'U2DINT - FAILED TO READ ICONST')
+!         ELSEIF(FAIL) THEN
+!            ICONST=1
+!            IF(ISTOP < ISTART) THEN
+!                   CONTINUE
+!            ELSEIF(CNTRL(ISTART:ISTART) == '#') THEN
+!                   ICOL = LEN(CNTRL) + 1
+!                   ISTART = ICOL   - 1
+!                   ISTOP  = ISTART - 1
+!            ELSE
+!                   ICOL = ISTART
+!            END IF
+!         END IF
+!         !
+!         IF(LOCAT /= Z) THEN
+!            CALL PARSE_WORD_UP(CNTRL,ICOL,ISTART,ISTOP)
+!            !
+!            IF(ISTOP < ISTART) THEN
+!                   FMTIN = '(FREE)'
+!            ELSEIF(CNTRL(ISTART:ISTART) == '#') THEN
+!                   FMTIN = '(FREE)'
+!                   ICOL = LEN(CNTRL) + 1
+!                   ISTART = ICOL   - 1
+!                   ISTOP  = ISTART - 1
+!            ELSE
+!                   FMTIN=CNTRL(ISTART:ISTOP)
+!            END IF
+!            !
+!            IF(ICLOSE /= Z) THEN
+!             OPEN(NEWUNIT=LOCAT, FILE=FNAME, STATUS='OLD', IOSTAT=IERR)
+!             IF(IERR /= Z) CALL STOP_ERROR(CNTRL,IN,IOUT, 
+!     +                                    'Failed to open zone file')
+!            END IF
+!            CALL GET_INTEGER(CNTRL,ICOL,ISTART,ISTOP,IOUT,IN,IPRN,
+!     +                                             'NOSTOP')
+!            FAIL = IPRN == HUGE(IPRN)
+!            IF(FAIL) IPRN=-1
+!         END IF
+!      END IF
+!C
+!C4------TEST LOCAT TO SEE HOW TO DEFINE ARRAY VALUES.
+!      IF(LOCAT == Z) THEN
+!C
+!C4A-----LOCAT=0; SET ALL ARRAY VALUES EQUAL TO ICONST. RETURN.
+!        DO 80 I=1,II
+!        DO 80 J=1,JJ
+!   80   IA(J,I)=ICONST
+!        IF(IOUT /= Z) THEN
+!          IF(K >  Z) WRITE(IOUT,82) ANAME,ICONST,K
+!          IF(K <= Z) WRITE(IOUT,83) ANAME,ICONST
+!        ENDIF
+!   82   FORMAT(1X,/1X,A,' =',I15,' FOR LAYER',I4)
+!   83   FORMAT(1X,/1X,A,' =',I15)
+!        RETURN
+!      ELSE IF(LOCAT /= Z) THEN
+!C
+!C4B-----LOCAT>0; READ FORMATTED RECORDS USING FORMAT FMTIN.
+!        IF(IOUT /= Z) THEN
+!            IF(K > Z) THEN
+!                 WRITE(IOUT,94) ANAME,K,LOCAT,FMTIN
+!            ELSE IF(K == Z) THEN
+!                 WRITE(IOUT,95) ANAME,LOCAT,FMTIN
+!            ELSE
+!                 WRITE(IOUT,96) ANAME,LOCAT,FMTIN
+!            END IF
+!   94       FORMAT(1X,///11X,A,' FOR LAYER',I4,/1X,
+!     +       'READING ON UNIT ',I4,' WITH FORMAT: ',A)
+!   95       FORMAT(1X,///11X,A,/ 1X,
+!     +       'READING ON UNIT ',I4,' WITH FORMAT: ',A)
+!   96       FORMAT(1X,///11X,A,' FOR CROSS SECTION',/1X,
+!     +       'READING ON UNIT ',I4,' WITH FORMAT: ',A)
+!        END IF
+!        DO 100 I=1,II
+!        CALL MOVE_TO_DATA(CNTRL,LOCAT,IOUT)  !Bypass any comments and empty lines to move to next line to read input
+!        IF(FMTIN == '(FREE)') THEN
+!           READ(LOCAT,    *,IOSTAT=IE) IA(1:JJ,I)
+!        ELSE
+!           READ(LOCAT,FMTIN,IOSTAT=IE) IA(1:JJ,I)
+!        END IF
+!           IF(IE /= Z) CALL BACKSPACE_STOP_MSG(LOCAT, IOUT, IE,
+!     +     'U2DINT - ERROR READING ON CURRENT INPUT LINE A SET OF '//
+!     +     'INTEGERS FOR "'//TRIM(ADJUSTL(ANAME))//'"'//BLN//
+!     +     '**NOTE ERROR LINE IS THE BEST GUESS FOR ERROR LOCATION.')
+!  100   CONTINUE
+!      END IF
+!C
+!C5------IF ICONST NOT ZERO THEN MULTIPLY ARRAY VALUES BY ICONST.
+!      IF(ICLOSE /= Z) CLOSE(UNIT=LOCAT)
+!      IF(ICONST == Z .or. ICONST == 1) GO TO 320
+!      DO 310 I=1,II
+!      DO 310 J=1,JJ
+!      IA(J,I)=IA(J,I)*ICONST
+!  310 CONTINUE
+!C
+!C6------IF PRINT CODE (IPRN) <0 THEN RETURN.
+!  320 IF(IPRN < Z .OR. IOUT == Z) RETURN
+!C
+!C-----PRINT COLUMN NUMBERS AT THE TOP OF THE PAGE
+!      WRITE(IOUT,421) (I,I=1,JJ)
+!421   FORMAT(/,(5X,25I5))
+!      WRITE(IOUT,'(A)')REPEAT('-',MAX(4*JJ+4,79))
+!C
+!C-----PRINT EACH ROW IN THE ARRAY.
+!      DO 430 I=1,II
+!      WRITE(IOUT,423) I, IA(1:JJ,I)
+!423   FORMAT(1X,I3,1X,25I5/(5X,25I5))
+!430   CONTINUE
+!C
+!C9------RETURN
+!      RETURN
+!C
+!C10-----CONTROL RECORD ERROR.
+!  600 IF(K > Z) THEN
+!          WRITE(cL,'(I16)') K
+!          cL = ADJUSTL(cL)
+!          FNAME = 'ERROR READING ARRAY CONTROL RECORD FOR "'//
+!     +            TRIM(ADJUSTL(ANAME))//'" FOR LAYER '//TRIM(cL)
+!      ELSE
+!          FNAME = 'ERROR READING ARRAY CONTROL RECORD FOR "'//
+!     +            TRIM(ADJUSTL(ANAME))//'"'
+!      END IF
+!      !CALL USTOP(' ')
+!      CALL STOP_ERROR(CNTRL, IN, IOUT, FNAME)
+!      END SUBROUTINE
+      !
+      !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+      !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+      !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+      !
+      !  STOP_ERROR Routine
+      !
+      SUBROUTINE BACKSPACE_STOP_MSG(IU, IN, IOUT, IERR, MSG)
+      IMPLICIT NONE
+      INTEGER,      INTENT(IN):: IU, IN, IOUT, IERR
+      CHARACTER(*), INTENT(IN):: MSG
+      INTEGER:: I
+      CHARACTER(768):: LINE
+      !
+      BACKSPACE(IN)
+      READ(IN, '(A)', IOSTAT=I) LINE
+      !
+      IF(I == 0) THEN
+                 CALL FILE_IO_ERROR(IERR,IU,LINE,IN,IOUT,MSG)
+      ELSE
+                 CALL FILE_IO_ERROR(IERR,IU,'',IN,IOUT,MSG)
+      END IF
+      !
+      END SUBROUTINE
+      !
+      SUBROUTINE STOP_ERROR(LINE, INFILE, OUTPUT, MSG)
+        IMPLICIT NONE
+        CHARACTER(*), INTENT(IN):: LINE       ! Line that error occured on
+        INTEGER,      INTENT(IN):: INFILE     ! File Unit that error originated from
+        INTEGER,      INTENT(IN):: OUTPUT     ! File unit to write error too
+        CHARACTER(*), INTENT(IN):: MSG        ! Supplemental messages to write in error
+        !
+        CHARACTER(:), ALLOCATABLE:: FNAME
+        CHARACTER(:), ALLOCATABLE:: ERR
+        !
+        LOGICAL:: HAS_LINE, HAS_INFILE, HAS_OUTPUT, HAS_MSG
+        !
+        INTEGER:: IOUT, IE
+        INTEGER:: Z
+        CHARACTER   :: NL, BLNK
+        CHARACTER(2):: BLN
+        Z = 0
+        BLNK = ''
+        NL = NEW_LINE(' ')
+        BLN = NL//NL
+        !
+        ! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        !
+        HAS_LINE = LINE /= BLNK
+        !
+        HAS_INFILE = INFILE /= Z
+        !
+        HAS_OUTPUT = OUTPUT /= Z
+        !
+        HAS_MSG = MSG  /= BLNK
+        !
+        IF(HAS_INFILE) ALLOCATE(CHARACTER(768):: FNAME)
+        !
+        ! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        !
+        ERR=BLN//'                           ERROR'//BLN//
+     +           '         THE FOLLOWING COMMENTS WERE PASSED TO '//
+     +                                         'THE ERROR ROUTINE'//NL
+        !
+        IF(HAS_INFILE) THEN
+            INQUIRE(INFILE,NAME=FNAME)
+            ERR = ERR//NL//'THIS ERROR IS BELIEVED TO HAVE '//
+     +                     'ORIGINATED FROM THE FOLLOWING FILE:'//NL//
+     +                     '"'//TRIM(FNAME)//'"'//NL
+        END IF
+        !
+        IF(HAS_LINE) ERR = ERR//NL//'THE GUESSED LINE THAT THE '//
+     +                              'ERROR OCCURED ON IS:'//BLN//
+     +                              '"'//TRIM(LINE)//'"'//NL
+        !
+        IF(HAS_MSG)  ERR = ERR//NL//
+     +                    'THE DESCRIPTION OF THE ERROR IS:'//BLN//
+     +                    TRIM(MSG)//NL
+        !
+        IF( .NOT. (HAS_LINE.or.HAS_INFILE.or.HAS_MSG) ) ERR = ERR//BLN//
+     +                             ' --- SORRY UNKNOWN ERROR ---'//BLN
+        !
+        ! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        !
+        WRITE(*, '(A/)') ERR  ! WRITE TO CMD PROMPT FIRST
+        !
+        IF(HAS_OUTPUT) WRITE(OUTPUT,'(A/)') ERR
+        !
+        ! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        !
+        ERROR STOP ! :(
+        !
+      END SUBROUTINE
+      !
+      !#########################################################################################################################
+      !
+      SUBROUTINE FILE_IO_ERROR(IOSTAT,IU,LINE,INFILE,IOUT,MSG)
+      ! IOSTAT IS THE ASSOCIATED IOSTAT ERROR
+      ! IU     IS THE FILE THAT IS BEING OPENED, READ FROM, OR WRITTEN TOO
+      ! LINE   IS THE LINE THAT IS BEING PROCESSED EITHER FOR PARSING THE INPUT FILE, READING DATA, OR WRITING DATA
+      ! INFILE IS THE FILE FROM WHICH LINE ORIGINATED FROM. IT CAN BE THE SAME FILE AS FNAME
+      ! MSG    IS AN ADDITIONAL ERROR MESSAGE THAT IS APPEND TO THE END OF THE ERROR REPORT
+      !
+      INTEGER,      INTENT(IN):: IOSTAT, IU, INFILE, IOUT
+      CHARACTER(*), INTENT(IN):: LINE,MSG
+      !
+      INTEGER:: Z
+      LOGICAL:: ISOPEN
+      CHARACTER(  1):: BLNK, NL
+      CHARACTER(  2):: BLN
+      CHARACTER(512):: LN
+      CHARACTER(:), ALLOCATABLE:: ERRMSG, FN, ERRLINE, INLINE
+      CHARACTER(:), ALLOCATABLE:: MSGLINE, ERR_CODE
+      !
+      INTERFACE
+              PURE FUNCTION INT2STR(IVAL)
+                INTEGER,       INTENT(IN):: IVAL
+                CHARACTER(:), ALLOCATABLE:: INT2STR
+              END FUNCTION
+      END INTERFACE
+      !
+      Z = 0
+      BLNK = ''
+      NL  = NEW_LINE(' ')
+      BLN = NL//NL
+      !
+      INLINE='¿¿¿UNKOWN FILE???'
+      !
+      IF (INFILE /= Z) THEN
+         INQUIRE(INFILE,NAME=LN)
+         INLINE=TRIM(ADJUSTL(LN))
+      END IF
+      !
+      IF(LINE /= BLNK) THEN
+          ERRLINE=TRIM(ADJUSTL(LINE))
+      ELSE
+          ERRLINE='¿¿¿UNKOWN LINE???'
+      END IF
+      !
+      IF(IU /= Z)THEN
+          INQUIRE(IU,NAME=LN,OPENED=ISOPEN)
+          IF(ISOPEN) THEN
+              FN=TRIM(ADJUSTL(LN))
+          ELSE
+              FN=BLNK
+          END IF
+      ELSE
+          FN=BLNK
+          ISOPEN=FALSE
+      END IF
+      !
+      IF(MSG /= BLNK) THEN
+                      MSGLINE=TRIM(ADJUSTL(MSG))
+      ELSE
+                      MSGLINE=BLNK
+      END IF
+      !
+      IF(IOSTAT  /=  Z) THEN
+        ERR_CODE='AND HAS THE FOLLOWING IOSTAT ERROR CODE: '//
+     +                                         INT2STR(IOSTAT)
+        IF(ISOPEN) THEN
+          IF(IOSTAT<Z) THEN
+            ERR_CODE=ERR_CODE//BLN//
+     +'    ERROR<0 INDICATES THAT THE END OF FILE WAS REACHED'//NL//
+     +'    OR A END OF RECORD CONDITION OCCURED'//NL//
+     +'    OR YOU DID NOT HAVE ENOUGH INPUT VALUES SPECIFIED ON LINE.'//
+     +                                                              NL//
+     +'    NOTE THAT IF YOU MAY HAVE THE CORRECT NUMBER OF VALUES '//
+     +'ON THE LINE'//NL//
+     +'      BUT A BAD FORMAT DESCRIPTOR (FMTIN),'//NL//
+     +'      GENERALLY FMTIN = "(FREE)" IS THE SAFEST METHOD '//
+     +'TO LOAD DATA.'
+          ELSE
+            ERR_CODE=ERR_CODE//BLN//
+     +'    ERROR>0 INDICATES THAT YOU HAVE TO LOOK UP THE '//
+     +'SPECIFIC ERROR CONDITION SPECIFIED BY THE COMPILER.'//NL//
+     +'    TYPICALLY THIS INDICATES A BAD FORMAT DESCRIPTOR (FMTIN),'//
+     +                                                             NL//
+     +'      GENERALLY FMTIN = "(FREE)" IS THE SAFEST METHOD '//
+     +'TO LOAD DATA.'
+          END IF
+        END IF
+      ELSE
+          ERR_CODE=BLNK
+      END IF
+      !
+      IF(INFILE == Z) THEN
+         !
+         IF(ISOPEN) THEN
+          ERRMSG=NL//'FILE I/O ERROR:'                           //BLN//
+     +    'FOR FILE UNIT '//INT2STR(IU)                          //BLN//
+     +    'WHICH IS ASSOCIATED WITH FILE: '//FN                  //BLN//
+     +    'WHILE READING OR WRITING LINE '//NL//'"'//ERRLINE//'"'//BLN//
+     +     ERR_CODE
+         ELSEIF( .NOT. ISOPEN .AND. (IU /= Z .OR. FN /= BLNK) )THEN
+             IF(IU==Z) THEN
+                   ERRMSG=NL//'FILE I/O ERROR:'                 //BLN//
+     +            'FOR AN UNKNOWN FILE UNIT [POSSIBLE FAILURE TO '//
+     +                                       'OPEN/FIND FILE]'  //BLN//
+     +            'FOR THE REQUESTED FILE NAME: '//FN           //BLN//
+     +            ERR_CODE
+             ELSE
+                   ERRMSG=NL//'FILE I/O ERROR:'           //BLN//
+     +            'FOR FILE UNIT '//INT2STR(IU)//
+     +            ' [POSSIBLE FAILURE TO OPEN/FIND FILE]' //BLN//
+     +            'WITH UNKNOWN FILE NAME'                //BLN//
+     +            ERR_CODE
+             END IF          
+         ELSE
+           ERRMSG=NL//'FILE I/O ERROR:'  //BLN//  
+     +     'FOR AN UNKNOWN FILE UNIT AND FILE [POSSIBLE FAILURE TO  '//
+     +                                       'OPEN/FIND FILE]'  //BLN//
+     +      ERR_CODE          //NL// 
+     +     'FOR THE FOLLOWING LINE '//NL//'"'//ERRLINE//'"'
+         END IF
+         !
+         !
+      ELSE
+         !
+         !
+         IF(ISOPEN) THEN
+             ERRMSG=NL//'FILE I/O ERROR:'               //BLN//
+     +       'FOR FILE UNIT '//INT2STR(IU)              //BLN//
+     +       'WHICH IS ASSOCIATED WITH FILE: '//NL//FN  //BLN//
+     +       'WHILE UTILIZING THE FOLLOWING LINE: '//NL//
+     +       '"'//ERRLINE//'"'//BLN//
+     +       'THAT IS ASSOCIATED WITH INPUT FILE: '//NL//
+     +       '"'//INLINE//'"' //BLN//
+     +       ERR_CODE
+         ELSEIF( .NOT. ISOPEN .AND. (IU /= Z .OR. FN /= BLNK) )THEN
+             IF(IU.EQ.Z) THEN
+             ERRMSG=NL//'FILE I/O ERROR:'              //BLN//
+     +       'FOR AN UNKNOWN FILE UNIT [POSSIBLE FAILURE TO  '//
+     +                              'OPEN/FIND FILE]'  //BLN//
+     +       'FOR THE REQUESTED FILE NAME: '//NL//FN   //BLN//
+     +       ERR_CODE                                  //BLN//
+     +       'WHILE UTILIZING THE FOLLOWING LINE: '//NL//
+     +       '"'//ERRLINE//'"'    //BLN// 
+     +       'THAT IS ASSOCIATED WITH INPUT FILE: '//NL//
+     +       '"'//INLINE//'"'
+             ELSE
+             ERRMSG=NL//'FILE I/O ERROR:'                  //BLN//
+     +       'FOR FILE UNIT '//INT2STR(IU)//' [POSSIBLE FAILURE TO  '//
+     +                              'OPEN/FIND FILE]' //BLN// 
+     +       'WITH UNKNOWN FILE NAME'                 //BLN//
+     +       ERR_CODE                                 //BLN//
+     +       'WHILE UTILIZING THE FOLLOWING LINE: '//NL//
+     +       '"'//ERRLINE//'"' //BLN//
+     +       'THAT IS ASSOCIATED WITH INPUT FILE: '//NL//
+     +       '"'//INLINE//'"'
+             END IF          
+         ELSE
+           ERRMSG=NL//'FILE I/O ERROR:'                       //BLN//
+     +     'FOR AN UNKNOWN FILE UNIT AND FILE [POSSIBLE FAILURE TO  '//
+     +                            'OPEN/FIND FILE]' //BLN//
+     +     ERR_CODE                                 //BLN//
+     +     'WHILE UTILIZING THE FOLLOWING LINE: '   //NL//
+     +     '"'//ERRLINE//'"'//BLN//
+     +     'THAT IS ASSOCIATED WITH INPUT FILE: '//NL//
+     +     '"'//INLINE//'"'
+         END IF
+         !
+         !
+      END IF
+      !
+      IF(MSGLINE /= BLNK) ERRMSG=ERRMSG//BLN//
+     +                   'THE FOLLOWING IS AN ADDITIONAL COMMENT '//
+     +                   'INCLUDED WITH ERROR:'//BLN//MSGLINE
+      !
+      IF(IOUT /= Z) WRITE(IOUT,'(A)') ERRMSG
+                    WRITE(*,   '(A)') ERRMSG
+      !
+      ! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      !
+      ERROR STOP ! ;(
+      !
+      END SUBROUTINE
+      !
+      !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+      !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+      !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+      !
+      !  READ_TO_DATA Routine
+      !
+      SUBROUTINE READ_TO_DATA(LINE,INFILE,ERROR)
+        IMPLICIT NONE
+        CHARACTER(*),         INTENT(INOUT):: LINE    !LINE TO LOAD DATA TOO
+        INTEGER,              INTENT(IN   ):: INFILE  !UNIT OF FILE TO LOAD LINE FROM
+        INTEGER,              INTENT(IN   ):: ERROR   !UNIT TO WRITE ERROR MESSAGE TOO
+        INTEGER:: I, C, ERR
+        CHARACTER:: CR, LF, TAB
+        INTEGER:: Z
+        Z = 0
+        !
+        CR  = ACHAR(13)  !CARAGE RETURN (UNIX ENDING)
+        LF  = ACHAR(10)  !LINE   FEED (CRLF IS WINDOWNS ENDING)
+        TAB = ACHAR( 9)
+        !
+        READ_LOOP: DO
+              READ(INFILE,'(A)',IOSTAT=ERR) LINE
+              IF    (ERR > Z) THEN                                   !LINE FAILED TO READ, THIS IS MOST LIKELY DUE TO END OF FILE LINE,INFILE,OUTPUT,MSG
+                              CALL STOP_ERROR('', INFILE, ERROR, 
+     +                          'Failed to read from file. Error '//
+     +                          'occured in "SUBROUTINE READ_TO_DATA"')
+              ELSEIF(ERR < Z) THEN !EOF
+                                   LINE=''
+                                   C=1
+                                   BACKSPACE(INFILE) !NOTE THAT EOF COUNTS OF 1 READ, BUT MULTIPLE READS TO EOF WILL NOT MOVE ANY FURTHER, SO REPOSITION TO THE END OF THE FILE, BUT NOT ONE BEYOND TO KEEP N (THE READ COUNT) CORRET 
+                                   EXIT READ_LOOP
+              END IF
+              !
+              !----------------------------------------------------------------------------------------------------------
+              DO CONCURRENT (I=1:LEN_TRIM(LINE), LINE(I:I)==TAB .OR. 
+     +                                           LINE(I:I)==CR  .OR. 
+     +                                           LINE(I:I)==LF)  !TAB = CHAR(9) -> Fortran treates TAB as if it was character--make spaces to improve search --also remove dangling CR or LF  --> Note that this is identicaly to "CALL SPECIAL_BLANK_STRIP(LINE)"   
+                  LINE(I:I)=" "
+              END DO
+              !----------------------------------------------------------------------------------------------------------
+              !
+              C=INDEX(LINE,'#')-1
+              !
+              IF (C < Z) THEN
+                  C=LEN_TRIM(LINE)      ! NO # FOUND, SO USE ENTIRE STRING
+                  IF (C == Z) C=1     ! LINE IS BLANK, SET TO 1
+              END IF
+              IF (C == Z) C=1         !# IS ON FIRST COLUMN OR LINE IS BLANK, SET TO 1
+              !----------------------------------------------------------------------------------------------------------
+              !
+              IF(LINE(C:C) /= '#' .AND. LINE(1:C) /= " ") EXIT READ_LOOP         !Start of line is not COM and all char before COM are blank
+              !
+        END DO READ_LOOP
+        !
+      END SUBROUTINE
+      !
+      SUBROUTINE MOVE_TO_DATA(LINE,INFILE,ERROR)      !Moves to start of first uncommented line
+        IMPLICIT NONE
+        CHARACTER(*),         INTENT(INOUT):: LINE    !LINE TO LOAD DATA TOO
+        INTEGER,              INTENT(IN   ):: INFILE  !UNIT OF FILE TO LOAD LINE FROM
+        INTEGER,              INTENT(IN   ):: ERROR   !UNIT TO WRITE ERROR MESSAGE TOO
+        !
+        CALL READ_TO_DATA(LINE,INFILE,ERROR)
+        !
+        IF(LINE /= '') BACKSPACE(INFILE)
+        !
+      END SUBROUTINE
+      !
+      !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+      !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+      !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+      !
+      !  Parse Word Routines
+      !
+      SUBROUTINE PARSE_WORD_UP(LN, LOC, ISTART, ISTOP)
+        ! ASSUMES COMPILER CAN HANDEL LN(I:I-1) AND SETS IT TO BLANK STRING
+        IMPLICIT NONE
+        CHARACTER(*),      INTENT(INOUT):: LN
+        INTEGER,           INTENT(INOUT):: LOC,ISTART,ISTOP
+        CHARACTER(*), PARAMETER:: lowerCHAR="abcdefghijklmnopqrstuvwxyz"
+        CHARACTER(*), PARAMETER:: upperCHAR="ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        INTEGER:: I, N
+        !
+        CALL PARSE_WORD(LN, LOC, ISTART, ISTOP)
+        !
+        IF(ISTART <= ISTOP) THEN
+                   DO I=ISTART, ISTOP
+                                N = INDEX( lowerCHAR, LN(I:I))
+                                IF(N > 0) LN(I:I) = upperCHAR(N:N)
+                   END DO
+        END IF
+        !
+      END SUBROUTINE
+      !
+      !#########################################################################################################################
+      !
+      SUBROUTINE PARSE_WORD(LN, LOC, ISTART, ISTOP)
+        ! ASSUMES COMPILER CAN HANDEL LN(I:I-1) AND SETS IT TO BLANK STRING
+        IMPLICIT NONE
+        CHARACTER(*),      INTENT(IN   ):: LN
+        INTEGER,           INTENT(INOUT):: LOC,ISTART,ISTOP
+        INTEGER:: LINE_LEN, LINE_TRIM, LOC0
+        CHARACTER:: TAB
+        !
+        TAB = ACHAR( 9)
+        !
+        LOC0 = LEN_TRIM(LN)        !Temp use in case of COM_STOP
+        !
+        LINE_TRIM= LOC0 + 1
+        !
+        LOC0 = LOC  !Make backup of Loc
+        !
+        DO WHILE( LOC < LINE_TRIM )
+                  IF(LN(LOC:LOC).NE.TAB .AND. LN(LOC:LOC).NE.' ' .AND. 
+     +                                        LN(LOC:LOC).NE.',') EXIT
+                  IF(LN(LOC:LOC) == '#')  LOC = LINE_TRIM              ! Comment terminates parsing of line
+                  LOC = LOC+1
+        END DO
+        !
+        IF( LOC >= LINE_TRIM ) THEN
+                   LINE_LEN = LEN(LN)
+            LOC   =LINE_LEN+1
+            ISTART=LINE_LEN
+            ISTOP =LINE_LEN-1
+        ELSE
+            IF(LN(LOC:LOC)=='"') THEN
+                                    LOC = LOC+1
+                                    ISTART = LOC
+                                    DO WHILE( LOC < LINE_TRIM )
+                                        IF( LN(LOC:LOC) == '"' ) EXIT
+                                        LOC = LOC+1
+                                    END DO
+                                    ISTOP = LOC-1
+                                    LOC = LOC+1
+            ELSEIF(LN(LOC:LOC)=="'") THEN
+                                    LOC = LOC+1
+                                    ISTART = LOC
+                                    DO WHILE( LOC < LINE_TRIM )
+                                        IF( LN(LOC:LOC) == "'" ) EXIT
+                                        LOC = LOC+1
+                                    END DO
+                                    ISTOP = LOC-1
+                                    LOC = LOC+1
+            ELSE
+                                    ISTART = LOC
+                                    LOC = LOC+1
+                                    DO WHILE( LOC < LINE_TRIM )
+                                        IF( LN(LOC:LOC)==TAB .OR. 
+     +                                      LN(LOC:LOC)==' ' .OR. 
+     +                                      LN(LOC:LOC)==',' .OR.
+     +                                      LN(LOC:LOC)=='#') EXIT
+                                        LOC = LOC+1
+                                    END DO
+                                    ISTOP = LOC-1
+                                    IF(ISTOP<ISTART) ISTOP=ISTART
+            END IF
+        END IF
+        !
+      END SUBROUTINE
+      !
+      !#########################################################################################################################
+      !
+      PURE SUBROUTINE GET_UNCOMMENT(LN, ISTART, ISTOP)
+        !
+        IMPLICIT NONE
+        CHARACTER(*), INTENT(IN ):: LN
+        INTEGER,      INTENT(OUT):: ISTART, ISTOP
+        !
+        ISTART = 1
+        ISTOP  = INDEX(LN, '#')
+        !
+        IF    ( ISTOP <= 0 ) THEN
+                             ISTOP = MAX(ISTART, LEN_TRIM(LN))
+        ELSEIF( ISTOP >  1 ) THEN
+                             ISTOP  = ISTOP - 1
+        ELSE!IF( ISTOP == 1 ) THEN
+                             ISTART = 2
+                             ISTOP  = 1
+        END IF
+        !
+      END SUBROUTINE
+      !
+      !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+      !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+      !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+      !
+      !  GET Routines
+      !
+      SUBROUTINE GET_INTEGER(LN, LOC, ISTART, ISTOP, IOUT, IN, VAL, MSG)
+        IMPLICIT NONE
+        CHARACTER(*), INTENT(IN   ):: LN                ! LINE TO PARSE DOUBLE FROM
+        INTEGER,      INTENT(INOUT):: LOC,ISTART,ISTOP  ! LOC => STARTING LOCATION TO FIND NUMBER, NUMBER AT EXIT IS LOCATED AT LN(ISTART:ISTOP) AND LOC = ISTOP+1
+        INTEGER,      INTENT(IN   ):: IOUT, IN          ! ERROR UNIT TO WRITE TO, FILE UNIT THAT LN ORIGINATED FROM
+        INTEGER,      INTENT(OUT  ):: VAL               ! DOUBLE VALUE TO RETURN
+        CHARACTER(*), INTENT(IN   ):: MSG               ! ERROR MESSAGE PRINTED WHEN FAIL TO LOAD NUMBER AND STOP PROGRAM, IF "NOSTOP" THEN VAL IS SET TO inf_I = HUGE(VAL)
+        LOGICAL:: CHECK
+        INTEGER:: IERR
+        CHARACTER(:), ALLOCATABLE:: ERRMSG
+        CHARACTER(2):: BLN
+        !
+        BLN = NEW_LINE(' ')//NEW_LINE(' ')
+        !
+        CALL PARSE_WORD(LN,LOC,ISTART,ISTOP)
+        !
+        READ(LN(ISTART:ISTOP),*, IOSTAT=IERR) VAL
+        !
+        IF(IERR /= 0 .OR. LN(ISTART:ISTOP)=='') THEN
+          CHECK = .TRUE.
+          IF (MSG=='NOSTOP') THEN
+                   CHECK = .FALSE.
+                   VAL = HUGE(VAL)
+          END IF
+          !
+          IF(CHECK) THEN
+            ERRMSG = 'GET_INTEGER READ UTILITY ERROR: FAILED '//
+     +               'TO CONVERT TEXT TO INTEGER NUMBER.'//BLN//
+     +               'THE FOLLOWING IS THE TEXT ATTEMPTED TO BE '//
+     +               'CONVERTED "'//LN(ISTART:ISTOP)//'".'
+            !
+            IF(LN(ISTART:ISTOP)=='') 
+     +         ERRMSG = ERRMSG//BLN//
+     +         'THE POSSIBLE REASON FOR THIS ERROR IS DUE TO '//
+     +         'READING IN A BLANK/EMPTY LINE OR YOU DID NOT '//
+     +         'PROVIDE ENOUGH NUMBERS ON THE LINE.'
+            !
+            ERRMSG = ERRMSG//BLN//'THE FOLLOWING IS AN '//
+     +               'ADDITIONAL COMMENT PASSED TO GET_INTEGER:'//BLN//
+     +               TRIM(MSG)
+            !
+            CALL STOP_ERROR(LN, IN, IOUT, ERRMSG )
+          END IF
+        END IF
+        !
+      END SUBROUTINE
+      !
+      PURE SUBROUTINE Append_1D_Alloc(IA, VAL)
+      IMPLICIT NONE
+      INTEGER, DIMENSION(:), ALLOCATABLE, INTENT(INOUT):: IA
+      INTEGER,                            INTENT(IN   ):: VAL
+      INTEGER, DIMENSION(:), ALLOCATABLE:: TMP
+      INTEGER:: DIM
+      !
+      IF(.not. ALLOCATED(IA)) THEN
+          ALLOCATE(IA(1), SOURCE=VAL)
+      ELSE
+          DIM = SIZE(IA)
+          ALLOCATE(TMP(DIM+1))
+          TMP(1:DIM) = IA(1:DIM)
+          TMP(DIM+1) = VAL
+          DEALLOCATE(IA)
+          CALL MOVE_ALLOC(TMP,IA)
+      END IF
+      !
+      END SUBROUTINE
+      !
+      PURE FUNCTION INT2STR(IVAL)
+        INTEGER,       INTENT(IN):: IVAL
+        CHARACTER(:), ALLOCATABLE:: INT2STR
+        CHARACTER(32)::NUM
+        !
+        WRITE(NUM,'(I32)') IVAL
+        INT2STR = TRIM(ADJUSTL(NUM))
+        !
+      END FUNCTION
+      !
+      PURE SUBROUTINE SET_ARRAY_0D3D_INT(DIM1, DIM2, DIM3, VAL, ARR2)
+        INTEGER,                            INTENT(IN ):: DIM1,DIM2,DIM3
+        INTEGER,                            INTENT(IN ):: VAL
+        INTEGER, DIMENSION(DIM1,DIM2,DIM3), INTENT(OUT):: ARR2
+        INTEGER:: I,J,K
+        !
+        DO CONCURRENT(K=1:DIM3, J=1:DIM2, I=1:DIM1); ARR2(I,J,K) = VAL
+        END DO
+        !
+      END SUBROUTINE
+      !
+      PURE SUBROUTINE SET_ARRAY_0D2D_INT(DIM1, DIM2, VAL, ARR2)
+        INTEGER,                       INTENT(IN   ):: DIM1, DIM2
+        INTEGER,                       INTENT(IN   ):: VAL
+        INTEGER, DIMENSION(DIM1,DIM2), INTENT(  OUT):: ARR2
+        INTEGER:: I,J
+        !
+        DO CONCURRENT(J=1:DIM2, I=1:DIM1); ARR2(I,J) = VAL
+        END DO
+        !
+      END SUBROUTINE

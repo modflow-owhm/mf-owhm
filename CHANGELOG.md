@@ -17,7 +17,13 @@ Boyce, S.E., Hanson, R.T., Ferguson, I., Schmid, W., Henson, W., Reimann, T., Me
 
 ## 2.2.0
 
-TBA
+2022-01-17
+
+### ZoneBudget v3.2
+
+Update to ZoneBudget from `3.01` to `3.2`  
+The update includes the MF-OWHM read utilities, new options, and fixed minor bugs.  
+See [CHANGELOG_Features.md](CHANGELOG_Features.md#2.1.1) for a listing of new ZoneBudget features.
 
 ### Merge ⯬ BiF v1.0.2
 

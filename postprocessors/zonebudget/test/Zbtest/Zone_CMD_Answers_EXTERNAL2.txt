@@ -1,0 +1,5 @@
+../Zbtest-out/zbtest_EXTERNAL2     CSV2   ZBLST   #  <- The name of the LISTING File for results:
+zbtest.bud                                        #  <- The name of the file containing CELL-BY-CELL BUDGET TERMS:
+zbtest_EXTERNAL2                                  #  <- TITLE:
+zbtest_EXTERNAL2.zon                              #  <- The name of the ZONE INPUT FILE:
+A                                                 #  <- Option for specifying when budgets are calculated:

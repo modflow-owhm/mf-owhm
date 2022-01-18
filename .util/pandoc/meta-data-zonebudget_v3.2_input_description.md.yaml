@@ -1,0 +1,11 @@
+---
+title: MF-OWHM - ZoneBudget - Input\_Description.md
+subtitle: from https://code.usgs.gov/modflow/mf-owhm
+author: Scott E. Boyce <seboye@usgs.gov>
+abstract: |
+     
+  `zonebudget_v3.2_input_description.md` file from the [MODFLOW-OWHM code repository](https://code.usgs.gov/modflow/mf-owhm)
+  converted to pdf using [pandoc](https://pandoc.org/) and [LuaLaTex](http://www.luatex.org/) pdf-engine 
+  and package management with [MiKTeX](https://miktex.org/).
+lang: en-US
+...

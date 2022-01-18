@@ -12,7 +12,18 @@
 
 ## 2.2.0
 
-TBA
+2022-01-17
+
+### ZoneBudget version 3.2
+
+  * Added historical publications to `postprocessors/zonebudget/doc`
+    * [`postprocessors/zonebudget/doc/zonebudget_v3.2_input_description.md`](postprocessors/zonebudget/doc/zonebudget_v3.2_input_description.md) or  
+      `postprocessors/zonebudget/doc/zonebudget_v3.2_input_description.pdf`  
+      for the zonebudget input structure that includes new options.
+    * Added an `OPEN/CLOSE` array control record.
+    * Input can include blank lines and `# Comments`
+    * Improved error messages.
+    * Adds support for `BAS` option `CONSTANT_HEAD_BUDGET_OPTIONAL`
 
 ### `NWT` Improvements  
 

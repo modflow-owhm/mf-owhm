@@ -1,0 +1,10 @@
+LIST 1 zbtest.lst
+BAS6         2 ZBTEST.ba6
+BCF6        11 ZBTEST.bc6
+WEL 12 zbtest.wel
+DRN 13 zbtest.drn
+RCH 18 zbtest.rch
+SIP 19 zbtest.sip
+OC  22 zbtest.oc
+DATA(BINARY) 30 zbtest.bud
+DIS         10 ZBTEST.dis

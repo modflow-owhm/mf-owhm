@@ -1,0 +1,7 @@
+3 15 15
+EXTERNAL                # Keyword  [FMTIN]  [IPRN]  -> Default is FMTIN="(FREE)" and IPRN = -1
+izone_lay1_and_2.txt    
+EXTERNAL                # Continue reading from same file.
+izone_lay1_and_2.txt                
+CONSTANT           3
+A 1 2 3 4

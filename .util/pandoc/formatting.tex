@@ -97,11 +97,11 @@
 % To call unicode number: ^^^^00A0
 %    % &nbsp;   U+00A0
 %    \newunicodechar{ }{\FallBackSYM{ }}
-%    % &ensp;   U+2002
+%    % &ensp;   U+2002; -> ^^^^2002
 %    \newunicodechar{ }{\FallBackSYM{ }}
-%    % &emsp;   U+2003
+%    % &emsp;   U+2003; -> ^^^^2003
 %    \newunicodechar{ }{\FallBackSYM{ }}
-%    % &thinsp; U+2009
+%    % &thinsp; U+2009; -> ^^^^2009
 %    \newunicodechar{ }{\FallBackSYM{ }}
 %
     \newunicodechar{^^^^2002}{\small\FallBackDEJA{^^^^2002}}
@@ -131,7 +131,7 @@
    \setlistdepth{9}
 
 
-   \setlist[itemize,1]{label=•}
+   \setlist[itemize,1]{label=$\bullet$}
    \setlist[itemize,2]{label=➥}
    \setlist[itemize,3]{label=➝}
    \setlist[itemize,4]{label=◦}
