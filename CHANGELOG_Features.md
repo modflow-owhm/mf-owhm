@@ -12,7 +12,7 @@
 
 ## 2.2.0
 
-2022-01-17
+2022-01-20
 
 ### ZoneBudget version 3.2
 
@@ -105,7 +105,7 @@
      `NSTP = -3`  has the March time step lengths `= [10, 10, 11]` and April time step lengths `= [10, 10, 10]`  
      `NSTP = -4`  has the March time step lengths `= [7, 7, 7, 8]` and April time step lengths `= [7, 7, 8, 8]`  
      `NSTP = -5`  has the March time step lengths `= [6, 6, 6, 6, 7]` and April time step lengths `= [6, 6, 6, 6, 6]`  
-    `SS` is an optional keyword that indicates that the <u>first stress period</u> is solved using Steady State and the remaining stress periods are solved as Transient. If not present, than all stress periods are solved using Transient.
+    `SS` is an optional keyword that indicates that the <u>first stress period</u> is solved using Steady State and the remaining stress periods are solved as Transient. If not present, than all stress periods are solved using Transient.  
     `DATE` is only required if the BAS package does not include the `START_DATE` option keyword. 
 
 The following is a simplified example DIS file:

@@ -13,7 +13,7 @@ SUBROUTINE PRINT_MAIN_HEADER(IU)  ! Set to 6 for cmd prompt or use output_unit f
   USE, INTRINSIC:: ISO_FORTRAN_ENV, ONLY: stdout=>OUTPUT_UNIT
   USE CONSTANTS, ONLY: NL
   USE OWHM_HEADER_INTERFACE
-  !  
+  !
   IMPLICIT NONE
   !
   INTEGER, INTENT(IN)::IU
@@ -24,18 +24,18 @@ SUBROUTINE PRINT_MAIN_HEADER(IU)  ! Set to 6 for cmd prompt or use output_unit f
   CHARACTER(:),ALLOCATABLE:: VERSION_MF, VERSION_FMP
   CHARACTER(:),ALLOCATABLE:: VERSION_SWR,VERSION_LGR
   CHARACTER(:),ALLOCATABLE:: VERSION_SWI,VERSION_NWT
-  CHARACTER(:),ALLOCATABLE:: VERSION_CFP                            !TR: 2017 09 13 CFP
-  CHARACTER(:),ALLOCATABLE:: VERSION_SWO                            !TR: 2017 09 13 CFP
+  CHARACTER(:),ALLOCATABLE:: VERSION_CFP
+  CHARACTER(:),ALLOCATABLE:: VERSION_SWO
   CHARACTER(:),ALLOCATABLE:: Revision
   !
-  VERSION_OWHM='2.2'                                 ! "Psyduck After Advil" 
-  Revision    ='0b'
-  VERSION_MF  ='1.12'        
-  VERSION_FMP ='4.1'       
-  VERSION_SWR ='1.04'       
-  VERSION_SWI ='2.0'     
-  VERSION_LGR ='2.0'      
-  VERSION_NWT ='1.2'     
+  VERSION_OWHM='2.2'
+  Revision    ='0'
+  VERSION_MF  ='1.12'
+  VERSION_FMP ='4.1'
+  VERSION_SWR ='1.04'
+  VERSION_SWI ='2.0'
+  VERSION_LGR ='2.0'
+  VERSION_NWT ='1.2'
   VERSION_CFP ='1.09.57'
   VERSION_SWO ='1.0'
   !
@@ -52,12 +52,12 @@ SUBROUTINE PRINT_MAIN_HEADER(IU)  ! Set to 6 for cmd prompt or use output_unit f
   !
   WRITE (IU,'(/, A)')     '                        MODFLOW'
   WRITE (IU,'(A)')        '            ONE-WATER HYDROLOGIC-FLOW MODEL'
-  
+
   WRITE (IU,'(/, A)')     '    U.S. Geological Survey Modular Finite-Difference'
   WRITE (IU,'(A)')        '           Conjunctive Use Simulation Program'
-  
+
   WRITE (IU,'(/, 2A)')    '                      Version ', VERSION_OWHM
-  
+
   WRITE (IU,'(/, 2A)')    ' Release: ', Revision
   IF(IU /= stdout) THEN
      WRITE (IU,'(/,A,/)') ' Includes the following base versions with enhancements:'
@@ -73,19 +73,19 @@ SUBROUTINE PRINT_MAIN_HEADER(IU)  ! Set to 6 for cmd prompt or use output_unit f
   !
   WRITE (IU,'(/, *(A, /))')                                                                                  &
                     REPEAT('-',84),                                                                          &
-                    'USGS Software Disclaimer:                                                          |',  &                                                
-                    '                                                                                   |',  &                                                                         
+                    'USGS Software Disclaimer:                                                          |',  &
+                    '                                                                                   |',  &
                     '   No warranty, expressed or implied, is made by the USGS or the U.S. Government   |',  &
                     '   as to the functionality of the software and related material nor shall the      |',  &
-                    '   fact of release constitute any such warranty.                                   |',  &                            
-                    '                                                                                   |',  &                                                                         
-                    '   The software is provided on the condition that neither the USGS nor             |',  &      
+                    '   fact of release constitute any such warranty.                                   |',  &
+                    '                                                                                   |',  &
+                    '   The software is provided on the condition that neither the USGS nor             |',  &
                     '   the U.S. Government shall be held liable for any damages resulting from the     |',  &
                     '   authorized or unauthorized use of the software.                                 |',  &
-                    '                                                                                   |',  &                                                                         
+                    '                                                                                   |',  &
                     '   Newer versions may be present at the official code and download repository:     |',  &
                     '      https://code.usgs.gov/modflow/mf-owhm                                        |',  &
-                    '                                                                                   |',  &                                                                         
+                    '                                                                                   |',  &
                     REPEAT('-',84)
                     !
   !IF(IU /= stdout) WRITE(IU,'(A,/)') ''
@@ -169,7 +169,7 @@ PROGRAM MODFLOW_OWHM
   !CALL MODFLOW_OWHM_RUN( 'swi2ex6_3_1.000.nam' )
   !!
   !CONTINUE
-  !  
+  !
 END PROGRAM MODFLOW_OWHM
 !
 SUBROUTINE MODFLOW_OWHM_RUN(NAME)
@@ -213,7 +213,7 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
   !
   ! FMP Modules
   !
-  USE FMP_GLOBAL,      ONLY:FMP3DA, FMP_LGR_PNT                            
+  USE FMP_GLOBAL,      ONLY:FMP3DA, FMP_LGR_PNT
   USE FMP_MAIN_DRIVER, ONLY:FMP_AR, FMP_RP, FMP_AD, FMP_SUBLINK, FMP_FM, FMP_CNVG, FMP_BD
   !
   !swo USE SWO_INTERFACE, ONLY: SWO_DATA, SWO_AR
@@ -276,7 +276,7 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
   NAM_UNIT = Z
   LGR_UNIT = Z
   !
-  NGRIDS   = ONE 
+  NGRIDS   = ONE
   ILGR     = Z
   !
   NCVGERR  = Z
@@ -288,9 +288,6 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
   USE_PAUSE  = FALSE
   ITER_PRINT = FALSE
   ITER_SIZE  = Z
-  !
-  HCloseBAS   = NaN
-  RCloseL2BAS = NaN
   !
   IL1=ONE  !This was originally set this way at declaration...which would make it have implied SAVE
   !
@@ -448,7 +445,7 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
       IF(IUNIT(58) /= Z) CALL GWF2CFP1AR(IUNIT(58), IUNIT(59),IUNIT(60),CFPMODE)             !TR: 2017 07 20 CFPv2
       IF(IUNIT(49) /= Z) CALL LMT8BAS7AR(NAM_UNIT,CUNIT,IGRID)
       IF(IUNIT(66) /= Z) CALL GWF2AG7AR(IUNIT(66),IUNIT(44),IUNIT(63))
-      IF(IUNIT(50) /= Z) CALL GWF2MNW27AR2(IUNIT(50),KPER,IUNIT(9),IUNIT(10),0,IUNIT(13),0,IUNIT(42),IUNIT(70),IUNIT(15),IUNIT(63),IUNIT(61),IGRID)!SECOND CALL LOADS MNW2 WELLS...MOVED FROM RP UP  --KPER = 1 
+      IF(IUNIT(50) /= Z) CALL GWF2MNW27AR2(IUNIT(50),KPER,IUNIT(9),IUNIT(10),0,IUNIT(13),0,IUNIT(42),IUNIT(70),IUNIT(15),IUNIT(63),IUNIT(61),IGRID)!SECOND CALL LOADS MNW2 WELLS...MOVED FROM RP UP  --KPER = 1
       !
       !                                (IN_FMP,   IUNITSFR, IUNITMNW1,IUNITMNW2, IUNITUZF,  IUNITNWT, IUNITDRT,IGRID,ILGR,MXITER)
       IF(IUNIT(61) /= Z) CALL FMP_AR( IUNIT(61),IUNIT(44),IUNIT(52),IUNIT(50),IUNIT(55), IUNIT(63),IUNIT(40),IGRID,ILGR,MXITER )
@@ -513,7 +510,7 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
   ClockRate = Z
   I         = Z
   DO WHILE(ClockRate <= Z .AND. I < 1000)     !  -- Spin a milisecond to prevent mis-fire of subroutine (compiler bug)
-     CALL SYSTEM_CLOCK(COUNT_RATE=ClockRate) ! Find the rate  
+     CALL SYSTEM_CLOCK(COUNT_RATE=ClockRate) ! Find the rate
      I = I + ONE
   END DO
   IF(ClockRate <= Z) CALL SYSTEM_CLOCK(COUNT_RATE=ClockRate)
@@ -525,10 +522,10 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
       ! If simulation is too fast, then disable cmd iteration printing
       ! If ITER_PRINT = TRUE, then CALL CMD_PRINT_STOP(ITER_SIZE) else CALL CMD_PRINT_ITER(KITER, ITER_SIZE)
       IF(KPER == 3)  THEN
-         IF(CMD_ITER_INFO /= Z) ITER_PRINT = CPU_TIME >= 0. .AND. FINISH > Z .AND. START > Z  .AND. CPU_TIME < 0.2 
+         IF(CMD_ITER_INFO /= Z) ITER_PRINT = CPU_TIME >= 0. .AND. FINISH > Z .AND. START > Z  .AND. CPU_TIME < 0.2
       END IF
       !
-      CALL SYSTEM_CLOCK(COUNT=START)                  ! Start timing 
+      CALL SYSTEM_CLOCK(COUNT=START)                  ! Start timing
       I = Z
       DO WHILE(START <= Z .AND. I < 1000)
          CALL SYSTEM_CLOCK(COUNT=START)               ! Start timing  -- Spin a milisecond to prevent mis-fire of subroutine (compiler bug)
@@ -593,7 +590,7 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
             IF(KKPER == ONE) CALL GWF2MNW2I7RP(IUNIT(51), 0, IGRID)
         END IF
         !
-        IF(IUNIT(52) /= Z) CALL GWF2MNW17RP(IUNIT(52),IUNIT(1),IUNIT(23),IUNIT(37),IUNIT(62),KKPER,IGRID)     
+        IF(IUNIT(52) /= Z) CALL GWF2MNW17RP(IUNIT(52),IUNIT(1),IUNIT(23),IUNIT(37),IUNIT(62),KKPER,IGRID)
         !
         IF(IUNIT(66) /= Z) CALL GWF2AG7RP(IUNIT(66),IUNIT(44),KKPER)
         !
@@ -603,12 +600,12 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
         !
         IF(IUNIT(48) /= Z) CALL GWF2BFH2RP(IUNIT(48),KKPER,IGRID)
         !
-        IF(IUNIT(61) /= Z) CALL FMP_RP(KKPER,IGRID) 
+        IF(IUNIT(61) /= Z) CALL FMP_RP(KKPER,IGRID)
         !
         IF(IUNIT(40) /= Z) CALL GWF2DRT7RP(IUNIT(40),IGRID)             !DRT must be after FMP_RP
         IF(IUNIT(64) /= Z) CALL GWF2SWR7RP(IUNIT(64),KKPER,IGRID)       !SWR - JDH
         !
-        IF(IUNIT(66) /= Z) CALL GWF2AG7AD(IUNIT(66),KKPER)                   
+        IF(IUNIT(66) /= Z) CALL GWF2AG7AD(IUNIT(66),KKPER)
         !
         IF(IUNIT(63) /= Z) CALL GWF2NWT1RP(IUNIT(63),KPER,Mxiter,IGRID)
         IF(IUNIT(13) /= Z) CALL PCG7RP(IUNIT(13),KPER,Mxiter,IGRID)
@@ -639,7 +636,7 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
               IF(IUNIT(54) /= Z) CALL GWF2SUB7AD(KKPER,KKSTP,IUNIT(54),IGRID)
               !
               ! Update Drain Elevations if SUB-LINK active
-              IF( SUBLNK )THEN 
+              IF( SUBLNK )THEN
                   IF(IUNIT(3)  /= Z) CALL GWF2DRN7AD(KKSTP,IGRID)
                   IF(IUNIT(40) /= Z) CALL GWF2DRT7AD(KKSTP,IGRID)
               ENDIF
@@ -663,8 +660,8 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
               !--BARC**
               IF(IUNIT(58) /= Z) CALL GWF2CFP1AD(KKPER,KKSTP)               !TR: 2017 07 20 CFPv2
               !
-              !--BARC** DISTRIBUTE RECHARGE IN CONDUIT AND MATRIX SYSTEM      !TR: 2017 07 20 CFPv2          
-              IF (IUNIT(58) /= Z) CALL CFP1DCRCH(KKPER, KKSTP,IUNIT(8))     !TR: 2017 07 20 CFPv2          
+              !--BARC** DISTRIBUTE RECHARGE IN CONDUIT AND MATRIX SYSTEM      !TR: 2017 07 20 CFPv2
+              IF (IUNIT(58) /= Z) CALL CFP1DCRCH(KKPER, KKSTP,IUNIT(8))     !TR: 2017 07 20 CFPv2
               !
               IF(IUNIT(50) /= Z) THEN
                   !
@@ -676,7 +673,7 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
               IF(IUNIT(52) /= Z) CALL GWF2MNW17AD(IUNIT(1),IUNIT(23),IUNIT(37),IUNIT(62),IGRID)
               IF(IUNIT(48) /= Z) CALL GWF2BFH2AD(IUNIT(48),IGRID)
               !
-              IF(IUNIT(61) /= Z) THEN 
+              IF(IUNIT(61) /= Z) THEN
                   !
                   CALL FMP_AD(KKPER, KSTP, IGRID)
                   !
@@ -687,7 +684,7 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
               !
               IF(IUNIT(64) /= Z) CALL GWF2SWR7AD(KKPER,KSTP,IGRID,IUNIT(54))  !SWR - JDH
               !
-              IF(IUNIT(66) /= Z) CALL GWF2AG7AD(IUNIT(66),KKPER) 
+              IF(IUNIT(66) /= Z) CALL GWF2AG7AD(IUNIT(66),KKPER)
               !
               !slang IF(HAS_SLANG) THEN
               !slang               IF(KPER == ONE .AND. KSTP == ONE) CALL SLANG_SIM_EVAL(KPER, KSTP, IOUT)
@@ -725,8 +722,8 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
           !
           !---------BEGIN LOOP FOR ITERATING BETWEEN GRIDS (LGR ITERATIONS)
           !
-          LGRCNVG = Z            
-          LGRITER = Z 
+          LGRCNVG = Z
+          LGRITER = Z
           ICNVG   = Z
           !
           IF(INPUT_CHECK) THEN
@@ -769,7 +766,7 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
                     !
                     CALL SGWF2LGR2PNT(IGRID)
                     !
-                    !---------------CHECK IF PARENT OR CHILD GRID 
+                    !---------------CHECK IF PARENT OR CHILD GRID
                     !
                     IF(ISCHILD /= NEG)THEN
                         !
@@ -781,7 +778,7 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
                         ELSE
                             CALL GWF2LGR2DARCY(KKPER,KKSTP,LGRITER,1,IGRID)
                         END IF
-                    ENDIF          
+                    ENDIF
                 ENDIF
                 !
                 !7C2----ITERATIVELY FORMULATE AND SOLVE THE FLOW EQUATIONS.
@@ -794,7 +791,7 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
                 !ccrth                  IF ( KPER > KPERSTART ) THEN
                 !ccrth                    NOITER = ONE
                 !ccrth                  ELSE IF ( KPER == KPERSTART .AND. KSTP >= KSTPSTART ) THEN
-                !ccrth                    NOITER = ONE 
+                !ccrth                    NOITER = ONE
                 !ccrth                  END IF
                 !ccrth                END IF
                 !ccrth                DO WHILE (ITREAL2 < MXITER .AND. NOITER == 1)
@@ -807,7 +804,7 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
                    !
                    !IF ( IUNIT(63) == Z ) ITREAL2 = KITER
                    IF(IUNIT(62) /= Z) CALL GWF2UPWUPDATE(2,Igrid)
-                   ! 
+                   !
                    !7C2A---FORMULATE THE FINITE DIFFERENCE EQUATIONS.
                    !
                    CALL GWF2BAS7FM(IGRID)
@@ -883,19 +880,19 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
                    IF(IUNIT(66) /= Z) CALL GWF2AG7FM(Kkper, Kkstp, Kkiter, IUNIT(63))
                    IF(IUNIT(65) /= Z) CALL GWF2SWI2FM(KKSTP,KKPER,KKITER,IGRID)  !SWI - JDH
                    !
-                   IF(IUNIT(48) /= Z) CALL GWF2BFH2FM(KKPER,KKSTP,KKITER,IGRID) 
+                   IF(IUNIT(48) /= Z) CALL GWF2BFH2FM(KKPER,KKSTP,KKITER,IGRID)
                    !
                    !--BARC**SOLVE MODE 1 PIPE FLOW EQUATIONS
                    IF(IUNIT(58) /= Z) CALL GWF2CFP1M1FM(KKITER,KKPER,KKSTP,1)  !TR: 2017 07 20 CFPv2
-                   !            
+                   !
                    !-----------------ADJUST HCOF AND RHS IF LGR IS ACTIVE
                    !
                    IF(ILGR /= Z)THEN
-                        IF(IGRID == ONE)THEN  
+                        IF(IGRID == ONE)THEN
                              DO LG =2,NGRIDS
-                               IF(LGRDAT(IGRID)%IBPFLG(LG) /= Z) CALL GWF2LGR2PFM(KKPER,KKSTP,KKITER,LGRITER,IUNIT(1),IUNIT(23),IUNIT(37),IUNIT(62),LG) 
+                               IF(LGRDAT(IGRID)%IBPFLG(LG) /= Z) CALL GWF2LGR2PFM(KKPER,KKSTP,KKITER,LGRITER,IUNIT(1),IUNIT(23),IUNIT(37),IUNIT(62),LG)
                              ENDDO
-                        ELSEIF(ISCHILD >= Z)THEN    
+                        ELSEIF(ISCHILD >= Z)THEN
                              CALL GWF2LGR2CFM(KKITER,LGRITER,IUNIT(1),IUNIT(23),IUNIT(37),IUNIT(62),IGRID)
                         ENDIF
                    ENDIF
@@ -974,7 +971,7 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
                    !
                    !C-WSCHMID-END OF MODIFICATION
                    !
-                   !7C2C---IF CONVERGENCE CRITERION HAS BEEN MET STOP ITERATING.      
+                   !7C2C---IF CONVERGENCE CRITERION HAS BEEN MET STOP ITERATING.
                    !
                    IF(IUNIT(58) /= Z .AND. ICNVG == ONE) THEN                  !TR: 2017 07 20 CFOPv2
                        IF (CFPMODE == 2 .AND. CFP_ICFPCNVG /= ONE) ICNVG = Z     !TR: 2017 07 20 CFOPv2 !TR: 2011 10 14 JUST DO THIS FOR CFPM2
@@ -983,7 +980,7 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
                    IF (ICNVG == ONE) EXIT FM_LOOP
                    !
                    IF(CMD_ITER_INFO /= Z) THEN
-                                     ITER_PRINT = MODULO(KKITER, ABS(CMD_ITER_INFO)) == Z .OR. KKITER == ONE .OR. KKITER == FIVE .OR. KKITER == TEN 
+                                     ITER_PRINT = MODULO(KKITER, ABS(CMD_ITER_INFO)) == Z .OR. KKITER == ONE .OR. KKITER == FIVE .OR. KKITER == TEN
                                      !
                                      IF(ITER_PRINT) THEN
                                          CALL CMD_PRINT_ITER(KITER, ITER_SIZE)
@@ -1000,7 +997,7 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
                 !
                 !   33     CONTINUE
                 !crth          IF ( NOITER == 1 ) THEN
-                !  
+                !
                 !--BARC**CALL CONDUIT ONCE MORE
                 !  TO ADJUST THE CONDUIT HEADS TO THE HEADS IN THE FISSURED SYSTEM
                 !  AFTER THE LAST MODFLOW-ITERATION
@@ -1011,20 +1008,20 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
                 !
                 !
                 !-------------PREPARE THE NEXT GRID FOR LGR ITERATION
-                IF(ILGR /= Z)THEN 
+                IF(ILGR /= Z)THEN
                    IF(ISCHILD == NEG)THEN
                            DO LG =2,NGRIDS
-                           
+
                              CALL GWF2LGR2INITP(KKPER,KKSTP,LGRITER,                    &
                                                 LGRDAT(LG)%NPCBEG,LGRDAT(LG)%NPRBEG,    &
                                                 LGRDAT(LG)%NPLBEG,LGRDAT(LG)%NPCEND,    &
                                                 LGRDAT(LG)%NPREND,LGRDAT(LG)%NPLEND,    &
                                                 LGRDAT(LG)%ISHFLG,LGRDAT(LG)%MXLGRITER, &
-                                                IUNIT(5),IUNIT(8),IUNIT(17),LG,IGRID) 
+                                                IUNIT(5),IUNIT(8),IUNIT(17),LG,IGRID)
                            ENDDO
                            !
                    ELSEIF(IGRID /= ONE)THEN
-                                     ! CALCULATE FLUX ENTERING THE CHILD INTERFACE 
+                                     ! CALCULATE FLUX ENTERING THE CHILD INTERFACE
                                      !
                                      CALL GWF2LGR2FMBF(KKPER,KKSTP,LGRITER)
                    ENDIF
@@ -1165,7 +1162,7 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
                   !
                   IF(IUNIT(22) /= Z.AND.RCH_NRCHOP == 3) CALL GWF2LAK7ST(0,IGRID)
                   !
-                  CALL GWF2RCH7BD(KKSTP,KKPER,IGRID) 
+                  CALL GWF2RCH7BD(KKSTP,KKPER,IGRID)
                   !
                   IF(IUNIT(22) /= Z.AND.RCH_NRCHOP == 3) CALL GWF2LAK7ST(1,IGRID)
               END IF
@@ -1194,24 +1191,24 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
               IF(IUNIT(64) /= Z) CALL GWF2SWR7BD(KKSTP,KKPER,IGRID)  !SWR - JDH
               !
               ! FARM DEMAND AND SUPPLY, FARM WELLS, AND FARM NET-RECHARGE
-              !    FMP_FM is inserted to allow recalculating FMP-flowrates, which 
+              !    FMP_FM is inserted to allow recalculating FMP-flowrates, which
               !        may de a function of SFR & MNW flowrates: Q-fmp(h,Q-sfr,Q-mnw).
               !
               IF (IUNIT(61) /= Z)  CALL FMP_BD(KITER,KPER,KSTP,IGRID,NGRIDS,ILGR,LGRITER)
               !
               IF(IUNIT(48) /= Z) CALL GWF2BFH2BD(KKSTP,KKPER,IUNIT(1),IUNIT(23),IUNIT(37),IUNIT(62),IGRID)
               !
-              IF(ILGR /= Z)THEN 
+              IF(ILGR /= Z)THEN
                    IF(ISCHILD <= Z) CALL GWF2LGR2PBD(KKSTP,KKPER,IUNIT(1),IUNIT(23),IUNIT(37),IUNIT(62),NGRIDS)
                    IF(ISCHILD >  Z) CALL GWF2LGR2CBD(KKSTP,KKPER,IUNIT(1),IUNIT(23),IUNIT(37),IUNIT(62))
-              ENDIF  
+              ENDIF
               !
               IF(IUNIT(65) /= Z) CALL GWF2SWI2BD(KKSTP,KKPER,IGRID)  !SWI - JDH
               IF(IUNIT(66) /= Z) CALL GWF2AG7BD(KKSTP,KKPER,IUNIT(63))
               !BARC**ADD THESE
               !BIRK----EXCHANGE BUDGET OF CONDUIT AND FISSURED SYSTEM
               !
-              IF(IUNIT(58) /= Z) CALL GWF2CFP1BD(KKPER,KKSTP,IUNIT(59),MSUM) !TR: 2017 07 20 CFPv2          
+              IF(IUNIT(58) /= Z) CALL GWF2CFP1BD(KKPER,KKSTP,IUNIT(59),MSUM) !TR: 2017 07 20 CFPv2
               !LMT
               !LMT----CALL LINK-MT3DMS SUBROUTINES TO SAVE FLOW-TRANSPORT LINK FILE
               !LMT----FOR USE BY MT3DMS FOR TRANSPORT SIMULATION
@@ -1238,7 +1235,7 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
                                    IF(IUNIT(18) /= Z) CALL GWF2HYD7STR7SE(1,IGRID)
                                    IF(IUNIT(44) /= Z) CALL GWF2HYD7SFR7SE(1,IGRID)
               END IF
-              !             
+              !
               !7C5---PRINT AND/OR SAVE DATA.
               !
               IF(IUNIT(13) /= Z)                                         &
@@ -1255,7 +1252,7 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
               !
               IF(IUNIT(37) /= Z)THEN
                             IF(IOHUFHDS  /= Z .OR.IOHUFFLWS  /= Z) CALL GWF2HUF7OT(KKSTP,KKPER,ICNVG,1,IGRID)
-              ENDIF 
+              ENDIF
               !
               IF(IUNIT(51) /= Z) CALL GWF2MNW2I7OT(NSTP(KKPER),KKSTP,KKPER,IGRID)
               IF(IUNIT(54) /= Z) CALL GWF2SUB7OT(KKSTP,KKPER,IUNIT(54),IGRID)
@@ -1264,13 +1261,13 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
               !
               IF(ILGR  /= Z) THEN
                                IF(ISCHILD >= Z) CALL GWF2LGR2COT(KKSTP,KKPER,IGRID)
-              ENDIF 
+              ENDIF
               !
-              !------CHECK FOR CHANGES IN HEAD AND FLUX BOUNDARY CONDITIONS 
+              !------CHECK FOR CHANGES IN HEAD AND FLUX BOUNDARY CONDITIONS
               !
               IF(IUNIT(48) /= Z) CALL GWF2BFH2OT(KKSTP,KKPER,IGRID)
               !
-              !7C6---JUMP TO END OF PROGRAM IF CONVERGENCE WAS NOT ACHIEVED. 
+              !7C6---JUMP TO END OF PROGRAM IF CONVERGENCE WAS NOT ACHIEVED.
               !
               INTER = INTER//NUM2STR(KITER)//', '
               IF(KKSTP < NSTP(KPER)) THEN
@@ -1300,12 +1297,12 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
       !Stop Stress Period Timer and print clock time
       !
       I = Z
-      CALL SYSTEM_CLOCK(COUNT=FINISH)                    ! Stop timing 
+      CALL SYSTEM_CLOCK(COUNT=FINISH)                    ! Stop timing
       DO WHILE(FINISH <= Z .AND. I < 1000)
          CALL SYSTEM_CLOCK(COUNT=FINISH)
          I = I + ONE
       END DO
-      IF(FINISH <= Z) CALL SYSTEM_CLOCK(COUNT=FINISH)    ! Stop timing 
+      IF(FINISH <= Z) CALL SYSTEM_CLOCK(COUNT=FINISH)    ! Stop timing
       !
       CPU_TIME=REAL( (FINISH-START))/REAL(ClockRate*60)  ! in minutes
       !
@@ -1347,7 +1344,7 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
       !slang IF(HAS_SLANG) CALL SLANG_SIM_END_EVAL(KPER, KSTP, IOUT)
       !
   ENDDO GRID_OT
-  
+
   !
   !!!CALL GLO1BAS6ET(IOUT,IBDT,1)
   !
@@ -1374,7 +1371,7 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
       !
       IF(IUNIT(63) /= Z) THEN
           !
-          CALL SGWF2NWT1PNT(IGRID)  
+          CALL SGWF2NWT1PNT(IGRID)
           !
           IF    (LINMETH == ONE) THEN
                                CALL GMRES7DA(IGRID)
@@ -1435,10 +1432,10 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
   !
   CALL SIM_END%NOW()
   !
-  WRITE(STDOUT,'(/ 2x,2A )') 'Simulation finished at   ', SIM_END%STR('  ')  
+  WRITE(STDOUT,'(/ 2x,2A )') 'Simulation finished at   ', SIM_END%STR('  ')
   WRITE(STDOUT,'(/ 2x,2A/)') 'with an elapsed time of: ', SIM_END%STR_ELAPSED(SIM_START)
   !
-  WRITE(IOUT  ,'(/// 1x,2A/)') 'Simulation finished at  ', SIM_END%STR('  ')  
+  WRITE(IOUT  ,'(/// 1x,2A/)') 'Simulation finished at  ', SIM_END%STR('  ')
   WRITE(IOUT  ,'(/ 1x,2A/)') 'Which had an elapsed run time of: ', SIM_END%STR_ELAPSED(SIM_START)
   !WRITE(IOUT  ,'(/ 1x,2A/)') 'Elapsed run time: ', SIM_END%STR_ELAPSED(SIM_START)
   !
@@ -1546,7 +1543,7 @@ SUBROUTINE CMD_PRINT_ERROR(SIZ)
 END SUBROUTINE
 !
 !
-!!!SUBROUTINE GLO1BAS6ET(IOUT,IBDT,IPRTIM) 
+!!!SUBROUTINE GLO1BAS6ET(IOUT,IBDT,IPRTIM)
 !!!  ! ******************************************************************
 !!!  ! Get end time and calculate elapsed time
 !!!  ! ******************************************************************
@@ -1661,7 +1658,7 @@ END SUBROUTINE
 !!!      CHARACTER(24) ANAME(1)
 !!!      DATA ANAME(1) /'            RESTART HEAD'/
 !!!      !     SPECIFICATIONS:
-!!!      !  ------------------------------------------------------------------      
+!!!      !  ------------------------------------------------------------------
 !!!      !
 !!!      !8G-----READ INITIAL HEADS FOR RESTART.
 !!!      IF(IXSEC == 0) THEN
@@ -1681,7 +1678,7 @@ END SUBROUTINE
 !!!      HNEW(J,I,K)=STRT(J,I,K)
 !!!      IF(IBOUND(J,I,K) == 0) HNEW(J,I,K)=HNF
 !!!  400 CONTINUE
-!!!      RETURN 
+!!!      RETURN
 !!!END SUBROUTINE
 !
 !USE UTIL_INTERFACE, ONLY: WRITE_DATA
