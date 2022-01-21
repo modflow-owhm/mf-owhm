@@ -19,12 +19,17 @@
 *.nix   filter=lfs  diff=lfs  merge=lfs  -text
 *.so    filter=lfs  diff=lfs  merge=lfs  -text
 #
-README.pdf                    filter=lfs  diff=lfs  merge=lfs  -text
-CHANGELOG.pdf                 filter=lfs  diff=lfs  merge=lfs  -text
-Notepadpp_Syntax_Install.pdf  filter=lfs  diff=lfs  merge=lfs  -text
+# PDF files managed by LFS
 #
+README.pdf     filter=lfs  diff=lfs  merge=lfs  -text
+CHANGELOG.pdf  filter=lfs  diff=lfs  merge=lfs  -text
+#
+ofr90392.pdf                           filter=lfs  diff=lfs  merge=lfs  -text
+zonbud3.pdf                            filter=lfs  diff=lfs  merge=lfs  -text
+zonebudget_v3.2_input_description.pdf  filter=lfs  diff=lfs  merge=lfs  -text
+#
+Notepadpp_Syntax_Install.pdf                            filter=lfs  diff=lfs  merge=lfs  -text
 Visual_Studio_and_Intel_Fortran_Installation_Guide.pdf  filter=lfs  diff=lfs  merge=lfs  -text
-#
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
