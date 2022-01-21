@@ -1,3 +1,8 @@
+💧🧙💦🌊  <-These symbols help text editors identify file as Unicode UTF8.
+                    UTF8 is not necessary to view numerical results, but no UTF8 support can have artifacts where non-ascii symbols are used (such as the degree symbol).
+
+
+MODFLOW-OWHM v2.2.0
 
       MMMMMMM                                       MM      MMM     MM
     MMM     MMM    MM      M   MMMMMMMM             LM     DM M     ML     MM     MMMMMMMMM  MMMMMMMM  MMMMMMMM
@@ -10,30 +15,46 @@
      MMMMMMMMN     MM      M   MMMMMMMM                7MM      7MM  MN          MM   M      MMMMMMMM  MM      MM
 
 
- MODFLOW-OWHM v2.0.01  
-
-
                         MODFLOW
             ONE-WATER HYDROLOGIC-FLOW MODEL
 
-    U.S. GEOLOGICAL SURVEY MODULAR FINITE-DIFFERENCE 
-           CONJUNCTIVE USE SIMULATION PROGRAM
+    U.S. Geological Survey Modular Finite-Difference
+           Conjunctive Use Simulation Program
 
-                     Version 2.0
+                      Version 2.2
 
- Release: 01          4/23/2020
+ Release: 0
 
- Includes:
-          MODFLOW-2005 Version 1.12.0   02/03/2017
-          MODFLOW-FMP  Version 4.00.0   04/23/2017
-          MODFLOW-SWR  Version 1.04.0   09/15/2016
-          MODFLOW-SWI  Version 2.00.0   07/22/2013
-          MODFLOW-LGR  Version 2.00.0   09/19/2013
-          MODFLOW-NWT  Version 1.2.0    03/01/2020
-          MODFLOW-CFP  Version 1.09.57  09/12/2017
+ Includes the following base versions with enhancements:
 
+          MODFLOW-2005 Version 1.12
+          MODFLOW-FMP  Version 4.1
+          MODFLOW-SWR  Version 1.04
+          MODFLOW-SWI  Version 2.0
+          MODFLOW-LGR  Version 2.0
+          MODFLOW-NWT  Version 1.2
+          MODFLOW-CFP  Version 1.09.57
+                  SWO  Version 1.0
 
- OneWater Simulation Initiated at  
+------------------------------------------------------------------------------------
+USGS Software Disclaimer:                                                          |
+                                                                                   |
+   No warranty, expressed or implied, is made by the USGS or the U.S. Government   |
+   as to the functionality of the software and related material nor shall the      |
+   fact of release constitute any such warranty.                                   |
+                                                                                   |
+   The software is provided on the condition that neither the USGS nor             |
+   the U.S. Government shall be held liable for any damages resulting from the     |
+   authorized or unauthorized use of the software.                                 |
+                                                                                   |
+   Newer versions may be present at the official code and download repository:     |
+      https://code.usgs.gov/modflow/mf-owhm                                        |
+                                                                                   |
+------------------------------------------------------------------------------------
+
+∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙
+    OneWater Simulation Initiated at  
+∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙
 
 
  LIST FILE: ./output/swi2ex6_3_0.005.list
@@ -158,20 +179,27 @@ Y-COORDINATE:0.0
 
  NOW READING BAS OPTIONS
 
- FOUND OPTION: NOCBC
-    NO CELL-BY-CELL FLOWS WILL BE WRITTEN.
+ Found Option: NOCBC
+                 No Cell-By-Cell (CBC) flows are written for simulation.
 
- FOUND OPTION: BUDGETDB
- FOUND OPTION: CUMULATIVE_HEAD_CHANGE
-    THIS OPTION IS ONLY USEFUL FOR MODEL RESULT COMPARISON WITH DIFFERENT CODE COMPARISONS.
+ Found Option: BUDGETDB
 
- FOUND OPTION: PRINT_HEAD    SP    TS   FILE
-                              1   500   EXTERNAL
+ Found Option: PRINT_HEAD
+                 NPER       EXTERNAL 510
 
- THE MAX STORAGE FOR PROPERTIES DEFINED BY PARAMETERS IS: 
- MAX STORAGE OF PARAMETERS (MXPAR)  IS       2000
- MAX STORAGE OF INSTANCES  (MXINST) IS      50000
- MAX STORAGE OF CLUSTERS   (MXCLST) IS    2000000
+ Found Option: CUMULATIVE_HEAD_CHANGE
+                 Cumulative sum of absolute head differences for the entire model.
+                 This is a diagnostic feature meant for comparing MF-OWHM code versions with the same model input (software unit test).
+
+
+ Setting up PRINT_HEAD option for 
+    SP    TS   FILE
+     1   500   EXTERNAL
+
+ The total simulation limit for the number PARAMETERs defined is: 
+     Max number of PARAMETERs (MXPAR)  is       2000
+     Max number of INSTANCEs  (MXINST) is      50000
+     Max number of CLUSTERs   (MXCLST) is    2000000
 
 
 
@@ -473,7 +501,7 @@ MAXIMUM OF 2 ACTIVE WELLS AT ONE TIME
 
          THE FOLLOWING COMMENTS WERE PASSED TO THE WARNING ROUTINE
 
-THE DESRIPTION OF THE WARNING IS:
+THE DESCRIPTION OF THE WARNING IS:
 
 DIS PACKAGE: THE GROUND SURFACE ELEVATION WAS NOT SPECIFIED WITH THE KEYWORD "SURFACE_ELEVATION"
 
@@ -563,6 +591,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  2.6020787E-6
+                              RClose:  4.2603654E-7
+                           L2-RClose:  1.9515085E-6
+                         Rel-Vol-Err:  0.0
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -579,6 +615,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
  STRESS PERIOD=   1 TIMESTEP=    1 LAYER=   3 ZONE=   2 ACTIVE CELLS=   20 NUMBER OF EQUATIONS=      20
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  8.1122877E-7
+                              RClose:  1.1417512E-7
+                           L2-RClose:  1.8774911E-7
+                         Rel-Vol-Err:  0.0
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
@@ -603,6 +647,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  6.6739479E-7
+                              RClose:  6.5654660E-8
+                           L2-RClose:  1.4459556E-7
+                         Rel-Vol-Err:  0.0
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -623,6 +675,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
  STRESS PERIOD=   1 TIMESTEP=    3 LAYER=   3 ZONE=   2 ACTIVE CELLS=   23 NUMBER OF EQUATIONS=      23
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  5.8568450E-7
+                              RClose:  8.8667662E-8
+                           L2-RClose:  1.4114208E-7
+                         Rel-Vol-Err:  0.0
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
@@ -647,6 +707,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  3.7270649E-7
+                              RClose:  7.1735144E-8
+                           L2-RClose:  1.1771041E-7
+                         Rel-Vol-Err:  0.0
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -667,7 +735,6 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
 
       11 UPPER PART EQS.        12 LOWER PART EQS.    BAND WIDTH + 1 =      2
  STRESS PERIOD=   1 TIMESTEP=    5 LAYER=   3 ZONE=   2 ACTIVE CELLS=   23 NUMBER OF EQUATIONS=      23
- 
  HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -690,6 +757,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
  STRESS PERIOD=   1 TIMESTEP=  494 LAYER=   3 ZONE=   2 ACTIVE CELLS=   89 NUMBER OF EQUATIONS=      89
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  3.2009807E-6
+                              RClose:  1.0189201E-6
+                           L2-RClose:  1.4105430E-6
+                         Rel-Vol-Err:  0.0
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
@@ -714,6 +789,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  8.5612343E-7
+                              RClose:  5.2400651E-8
+                           L2-RClose:  1.2790835E-7
+                         Rel-Vol-Err:  0.0
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -736,6 +819,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
  STRESS PERIOD=   1 TIMESTEP=  496 LAYER=   3 ZONE=   2 ACTIVE CELLS=   89 NUMBER OF EQUATIONS=      89
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  5.0820979E-7
+                              RClose:  2.8383226E-8
+                           L2-RClose:  6.1536152E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
@@ -760,6 +851,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  3.1143431E-6
+                              RClose:  1.0166181E-6
+                           L2-RClose:  1.3914675E-6
+                         Rel-Vol-Err:  0.0
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -783,6 +882,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  8.5696107E-7
+                              RClose:  4.9327838E-8
+                           L2-RClose:  1.2977803E-7
+                         Rel-Vol-Err:  0.0
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -805,6 +912,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
  STRESS PERIOD=   1 TIMESTEP=  499 LAYER=   3 ZONE=   2 ACTIVE CELLS=   89 NUMBER OF EQUATIONS=      89
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  5.0991574E-7
+                              RClose:  2.5900675E-8
+                           L2-RClose:  6.0639513E-8
+                         Rel-Vol-Err:  0.0
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1

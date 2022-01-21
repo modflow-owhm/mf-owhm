@@ -1,0 +1,214 @@
+ ZONEBUDGET version 3.2                  
+
+ Program to compute a flow budget for subregions of a model using
+ budget data from MODFLOW-2005 flavored models.
+
+ With enhancements for:
+                       MODFLOW
+           ONE-WATER HYDROLOGIC-FLOW MODEL
+
+   The U.S. Geological Survey Modular Finite-Difference
+          Conjunctive Use Simulation Program
+
+
+This ZoneBudget code and compiled executable are located at:
+
+         https://code.usgs.gov/modflow/mf-owhm
+
+Please read the README.md or README.pdf for download info.
+
+ 
+  The cell-by-cell budget file is:
+ zbtest.bud                                      
+  Single precision budget file
+          3 layers        15 rows        15 columns
+
+ zbtest_EXTERNAL1                                
+ 
+  The zone file is:
+ zbtest_EXTERNAL1.zon                            
+ Zone Array for layer   1 will be read from file: izone_lay1_and_2.txt                        From "EXTERNAL"
+ Zone Array for layer   1 will be read using free format.
+ Zone Array for layer   2 will be read from file: izone_lay1_and_2.txt                        From "EXTERNAL"
+ Zone Array for layer   2 will be read using free format.
+
+ Zone Array for layer   3 is set equal to: 3                        From "CONSTANT"
+
+ 4 zone numbers defined:
+    1    2    3    4
+ 
+   1 Composite Zones Defined:
+ "A         " =    1   2   3   4
+1
+ zbtest_EXTERNAL1                                                                
+ 
+     Flow Budget for Zone  1 at Time Step   1 of Stress Period   1
+     -------------------------------------------------------------
+ 
+                       Budget Term     Flow (L**3/T)
+                       -----------------------------
+
+             IN:
+             ---
+                     CONSTANT HEAD =    0.0000    
+                             WELLS =    0.0000    
+                            DRAINS =    0.0000    
+                          RECHARGE =    157.50    
+                   Zone   2 to   1 =    7.5897    
+                   Zone   4 to   1 =    0.0000    
+ 
+                          Total IN =    165.09    
+ 
+             OUT:
+             ----
+                     CONSTANT HEAD =    0.0000    
+                             WELLS =    60.000    
+                            DRAINS =    32.420    
+                          RECHARGE =    0.0000    
+                   Zone   1 to   2 =    30.090    
+                   Zone   1 to   4 =    42.577    
+ 
+                         Total OUT =    165.09    
+ 
+                          IN - OUT =   0.23926E-02
+ 
+               Percent Discrepancy =                0.00
+1
+ zbtest_EXTERNAL1                                                                
+ 
+     Flow Budget for Zone  2 at Time Step   1 of Stress Period   1
+     -------------------------------------------------------------
+ 
+                       Budget Term     Flow (L**3/T)
+                       -----------------------------
+
+             IN:
+             ---
+                     CONSTANT HEAD =    0.0000    
+                             WELLS =    0.0000    
+                            DRAINS =    0.0000    
+                          RECHARGE =    0.0000    
+                   Zone   1 to   2 =    30.090    
+                   Zone   3 to   2 =    5.8438    
+                   Zone   4 to   2 =    0.0000    
+ 
+                          Total IN =    35.934    
+ 
+             OUT:
+             ----
+                     CONSTANT HEAD =    0.0000    
+                             WELLS =    10.000    
+                            DRAINS =    0.0000    
+                          RECHARGE =    0.0000    
+                   Zone   2 to   1 =    7.5897    
+                   Zone   2 to   3 =    15.694    
+                   Zone   2 to   4 =    2.6483    
+ 
+                         Total OUT =    35.932    
+ 
+                          IN - OUT =   0.20786E-02
+ 
+               Percent Discrepancy =                0.01
+1
+ zbtest_EXTERNAL1                                                                
+ 
+     Flow Budget for Zone  3 at Time Step   1 of Stress Period   1
+     -------------------------------------------------------------
+ 
+                       Budget Term     Flow (L**3/T)
+                       -----------------------------
+
+             IN:
+             ---
+                     CONSTANT HEAD =    0.0000    
+                             WELLS =    0.0000    
+                            DRAINS =    0.0000    
+                          RECHARGE =    0.0000    
+                   Zone   2 to   3 =    15.694    
+                   Zone   4 to   3 =    0.0000    
+ 
+                          Total IN =    15.694    
+ 
+             OUT:
+             ----
+                     CONSTANT HEAD =    0.0000    
+                             WELLS =    5.0000    
+                            DRAINS =    0.0000    
+                          RECHARGE =    0.0000    
+                   Zone   3 to   2 =    5.8438    
+                   Zone   3 to   4 =    4.8498    
+ 
+                         Total OUT =    15.694    
+ 
+                          IN - OUT =   0.12055E-03
+ 
+               Percent Discrepancy =                0.00
+1
+ zbtest_EXTERNAL1                                                                
+ 
+     Flow Budget for Zone  4 at Time Step   1 of Stress Period   1
+     -------------------------------------------------------------
+ 
+                       Budget Term     Flow (L**3/T)
+                       -----------------------------
+
+             IN:
+             ---
+                     CONSTANT HEAD =    0.0000    
+                             WELLS =    0.0000    
+                            DRAINS =    0.0000    
+                          RECHARGE =    0.0000    
+                   Zone   1 to   4 =    42.577    
+                   Zone   2 to   4 =    2.6483    
+                   Zone   3 to   4 =    4.8498    
+ 
+                          Total IN =    50.075    
+ 
+             OUT:
+             ----
+                     CONSTANT HEAD =    50.075    
+                             WELLS =    0.0000    
+                            DRAINS =    0.0000    
+                          RECHARGE =    0.0000    
+                   Zone   4 to   1 =    0.0000    
+                   Zone   4 to   2 =    0.0000    
+                   Zone   4 to   3 =    0.0000    
+ 
+                         Total OUT =    50.075    
+ 
+                          IN - OUT =    0.0000    
+ 
+               Percent Discrepancy =                0.00
+1
+ zbtest_EXTERNAL1                                                                
+ 
+     Flow Budget for Composite Zone A          at Time Step   1 of Stress Period   1
+     -------------------------------------------------------------------------------
+ 
+     Composite Zone A          consists of the following numeric zones:
+        1   2   3   4
+ 
+                       Budget Term     Flow (L**3/T)
+                       -----------------------------
+
+             IN:
+             ---
+                     CONSTANT HEAD =    0.0000    
+                             WELLS =    0.0000    
+                            DRAINS =    0.0000    
+                          RECHARGE =    157.50    
+ 
+                          Total IN =    157.50    
+ 
+             OUT:
+             ----
+                     CONSTANT HEAD =    50.075    
+                             WELLS =    75.000    
+                            DRAINS =    32.420    
+                          RECHARGE =    0.0000    
+ 
+                         Total OUT =    157.50    
+ 
+                          IN - OUT =   0.45917E-02
+ 
+               Percent Discrepancy =                0.00

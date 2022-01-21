@@ -1,3 +1,8 @@
+💧🧙💦🌊  <-These symbols help text editors identify file as Unicode UTF8.
+                    UTF8 is not necessary to view numerical results, but no UTF8 support can have artifacts where non-ascii symbols are used (such as the degree symbol).
+
+
+MODFLOW-OWHM v2.2.0
 
       MMMMMMM                                       MM      MMM     MM
     MMM     MMM    MM      M   MMMMMMMM             LM     DM M     ML     MM     MMMMMMMMM  MMMMMMMM  MMMMMMMM
@@ -10,30 +15,46 @@
      MMMMMMMMN     MM      M   MMMMMMMM                7MM      7MM  MN          MM   M      MMMMMMMM  MM      MM
 
 
- MODFLOW-OWHM v2.0.01  
-
-
                         MODFLOW
             ONE-WATER HYDROLOGIC-FLOW MODEL
 
-    U.S. GEOLOGICAL SURVEY MODULAR FINITE-DIFFERENCE 
-           CONJUNCTIVE USE SIMULATION PROGRAM
+    U.S. Geological Survey Modular Finite-Difference
+           Conjunctive Use Simulation Program
 
-                     Version 2.0
+                      Version 2.2
 
- Release: 01          4/23/2020
+ Release: 0
 
- Includes:
-          MODFLOW-2005 Version 1.12.0   02/03/2017
-          MODFLOW-FMP  Version 4.00.0   04/23/2017
-          MODFLOW-SWR  Version 1.04.0   09/15/2016
-          MODFLOW-SWI  Version 2.00.0   07/22/2013
-          MODFLOW-LGR  Version 2.00.0   09/19/2013
-          MODFLOW-NWT  Version 1.2.0    03/01/2020
-          MODFLOW-CFP  Version 1.09.57  09/12/2017
+ Includes the following base versions with enhancements:
 
+          MODFLOW-2005 Version 1.12
+          MODFLOW-FMP  Version 4.1
+          MODFLOW-SWR  Version 1.04
+          MODFLOW-SWI  Version 2.0
+          MODFLOW-LGR  Version 2.0
+          MODFLOW-NWT  Version 1.2
+          MODFLOW-CFP  Version 1.09.57
+                  SWO  Version 1.0
 
- OneWater Simulation Initiated at  
+------------------------------------------------------------------------------------
+USGS Software Disclaimer:                                                          |
+                                                                                   |
+   No warranty, expressed or implied, is made by the USGS or the U.S. Government   |
+   as to the functionality of the software and related material nor shall the      |
+   fact of release constitute any such warranty.                                   |
+                                                                                   |
+   The software is provided on the condition that neither the USGS nor             |
+   the U.S. Government shall be held liable for any damages resulting from the     |
+   authorized or unauthorized use of the software.                                 |
+                                                                                   |
+   Newer versions may be present at the official code and download repository:     |
+      https://code.usgs.gov/modflow/mf-owhm                                        |
+                                                                                   |
+------------------------------------------------------------------------------------
+
+∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙
+    OneWater Simulation Initiated at  
+∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙
 
 
  LIST FILE: ./output/swi2ex4_2d_sww.list
@@ -141,20 +162,27 @@ Y-COORDINATE:0.0
 
  NOW READING BAS OPTIONS
 
- FOUND OPTION: NOCBC
-    NO CELL-BY-CELL FLOWS WILL BE WRITTEN.
+ Found Option: NOCBC
+                 No Cell-By-Cell (CBC) flows are written for simulation.
 
- FOUND OPTION: BUDGETDB
- FOUND OPTION: CUMULATIVE_HEAD_CHANGE
-    THIS OPTION IS ONLY USEFUL FOR MODEL RESULT COMPARISON WITH DIFFERENT CODE COMPARISONS.
+ Found Option: BUDGETDB
 
- FOUND OPTION: PRINT_HEAD    SP    TS   FILE
-                              3   180   ./output/swi2ex4_2d_sww_Head.txt
+ Found Option: PRINT_HEAD
+                 NPER       ./output/swi2ex4_2d_sww_Head.txt
 
- THE MAX STORAGE FOR PROPERTIES DEFINED BY PARAMETERS IS: 
- MAX STORAGE OF PARAMETERS (MXPAR)  IS       2000
- MAX STORAGE OF INSTANCES  (MXINST) IS      50000
- MAX STORAGE OF CLUSTERS   (MXCLST) IS    2000000
+ Found Option: CUMULATIVE_HEAD_CHANGE
+                 Cumulative sum of absolute head differences for the entire model.
+                 This is a diagnostic feature meant for comparing MF-OWHM code versions with the same model input (software unit test).
+
+
+ Setting up PRINT_HEAD option for 
+    SP    TS   FILE
+     3   180   ./output/swi2ex4_2d_sww_Head.txt
+
+ The total simulation limit for the number PARAMETERs defined is: 
+     Max number of PARAMETERs (MXPAR)  is       2000
+     Max number of INSTANCEs  (MXINST) is      50000
+     Max number of CLUSTERs   (MXCLST) is    2000000
 
 
            BOUNDARY ARRAY =              1 FOR LAYER   1
@@ -402,7 +430,7 @@ MAXIMUM OF 1683 ACTIVE WELLS AT ONE TIME
 
          THE FOLLOWING COMMENTS WERE PASSED TO THE WARNING ROUTINE
 
-THE DESRIPTION OF THE WARNING IS:
+THE DESCRIPTION OF THE WARNING IS:
 
 DIS PACKAGE: THE GROUND SURFACE ELEVATION WAS NOT SPECIFIED WITH THE KEYWORD "SURFACE_ELEVATION"
 
@@ -446,6 +474,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
    2040 GHB CELLS
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  2.4883705E-7
+                              RClose:  4.6164428E-5
+                           L2-RClose:  5.7118119E-4
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP     1
     PRINT BUDGET
@@ -570,6 +606,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  5.7274391E-7
+                              RClose:  2.0119796E-4
+                           L2-RClose:  0.0011127
+                         Rel-Vol-Err:  0.0
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP     2
     PRINT BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -692,6 +736,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
  
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  6.6003467E-7
+                              RClose:  1.2869380E-4
+                           L2-RClose:  9.1354765E-4
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP     3
     PRINT BUDGET
@@ -816,6 +868,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  4.3314716E-7
+                              RClose:  1.6237004E-4
+                           L2-RClose:  8.9715479E-4
+                         Rel-Vol-Err:  0.0
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP     4
     PRINT BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -938,6 +998,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
  
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  2.4541281E-7
+                              RClose:  6.4054160E-5
+                           L2-RClose:  4.6414025E-4
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP     5
     PRINT BUDGET
@@ -1062,6 +1130,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  5.4988109E-7
+                              RClose:  1.6272905E-4
+                           L2-RClose:  8.7827313E-4
+                         Rel-Vol-Err:  0.0
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP     6
     PRINT BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -1184,6 +1260,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
  
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  5.0947624E-7
+                              RClose:  1.4637195E-4
+                           L2-RClose:  9.4484285E-4
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP     7
     PRINT BUDGET
@@ -1308,6 +1392,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  4.9486114E-7
+                              RClose:  1.5645317E-4
+                           L2-RClose:  8.3070001E-4
+                         Rel-Vol-Err:  0.0
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP     8
     PRINT BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -1430,6 +1522,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
  
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  5.5032085E-7
+                              RClose:  1.5989243E-4
+                           L2-RClose:  0.0010031
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP     9
     PRINT BUDGET
@@ -1554,6 +1654,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  4.3644504E-7
+                              RClose:  1.4644739E-4
+                           L2-RClose:  7.7881237E-4
+                         Rel-Vol-Err:  0.0
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    10
     PRINT BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -1675,9 +1783,6 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
          TOTAL TIME 6.30720E+07 1.05120E+06  17520.      730.00      1.9986    
  
  
- 
- SOLVING FOR HEAD 
-
  OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP  1000
     PRINT BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -1828,6 +1933,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  5.0902016E-7
+                              RClose:  3.4023933E-4
+                           L2-RClose:  0.0013394
+                         Rel-Vol-Err:  0.0
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP     1
     PRINT BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -1954,6 +2067,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  6.7319258E-7
+                              RClose:  1.9944076E-4
+                           L2-RClose:  0.0019309
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP     2
     PRINT BUDGET
@@ -2082,6 +2203,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  5.8013649E-7
+                              RClose:  1.8465235E-4
+                           L2-RClose:  0.0015303
+                         Rel-Vol-Err:  0.0
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP     3
     PRINT BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -2208,6 +2337,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  6.4460464E-7
+                              RClose:  2.2617274E-4
+                           L2-RClose:  0.0017239
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP     4
     PRINT BUDGET
@@ -2336,6 +2473,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  5.5773727E-7
+                              RClose:  2.4724466E-4
+                           L2-RClose:  0.0015492
+                         Rel-Vol-Err:  0.0
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP     5
     PRINT BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -2462,6 +2607,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  5.6364520E-7
+                              RClose:  1.8262745E-4
+                           L2-RClose:  0.0015016
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP     6
     PRINT BUDGET
@@ -2590,6 +2743,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  4.6463186E-7
+                              RClose:  1.6506583E-4
+                           L2-RClose:  0.0013998
+                         Rel-Vol-Err:  0.0
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP     7
     PRINT BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -2716,6 +2877,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  5.5258503E-7
+                              RClose:  1.9308261E-4
+                           L2-RClose:  0.0013763
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP     8
     PRINT BUDGET
@@ -2844,6 +3013,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  6.0340674E-7
+                              RClose:  2.1005104E-4
+                           L2-RClose:  0.0013543
+                         Rel-Vol-Err:  0.0
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP     9
     PRINT BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -2970,6 +3147,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  4.4209486E-7
+                              RClose:  2.2314436E-4
+                           L2-RClose:  0.0014651
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    10
     PRINT BUDGET
@@ -3098,6 +3283,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  
  SOLVING FOR HEAD 
 
+
+Solver Convergence Information:
+                              HClose:  3.8040669E-7
+                              RClose:  1.7034623E-4
+                           L2-RClose:  0.0011397
+                         Rel-Vol-Err:  0.0
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    11
     SAVE HEAD FOR ALL LAYERS
  SOLVING FOR ZETA FOR LAYER     1 ZONE     2
@@ -3129,6 +3322,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  HEAD WILL BE SAVED ON UNIT   51 AT END OF TIME STEP   119 IN STRESS PERIOD      2
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  3.6464922E-7
+                              RClose:  2.6578407E-4
+                           L2-RClose:  9.6808360E-4
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP   120
     PRINT BUDGET
@@ -3264,9 +3465,7 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
 
                             INITIAL TIME STEP SIZE =   36.50000    
 
- SOLVING FOR HEAD 
-
- OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP   179
+  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP   179
     SAVE HEAD FOR ALL LAYERS
  SOLVING FOR ZETA FOR LAYER     1 ZONE     2
 
@@ -3281,6 +3480,14 @@ PCG INPUT FILE STRESS PERIOD CONVERGENCE INFORMATION FAILED READ FOR STRESS PERI
  HEAD WILL BE SAVED ON UNIT   51 AT END OF TIME STEP   179 IN STRESS PERIOD      3
  
  SOLVING FOR HEAD 
+
+
+Solver Convergence Information:
+                              HClose:  4.4781342E-7
+                              RClose:  4.2246327E-4
+                           L2-RClose:  0.0015614
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP   180
     PRINT BUDGET

@@ -41,8 +41,6 @@ MODULE GLOBAL
   !
   INTEGER::   NGRIDS = 1
   INTEGER::   CMD_ITER_INFO = 0 !-4590077  !Print interval for command prompt
-  REAL(KND):: HCloseBAS   = 0D0  
-  REAL(KND):: RCloseL2BAS = 0D0
   REAL(KND):: NaN      = TRANSFER(-2251799813685248_INT64, 1._REAL64)   !Assumes IEEE x86_64 processor for TRANSFER
   !
   !GLOBAL VARIABLES ------------------------------------------------------------------------------------------------------
@@ -52,11 +50,16 @@ MODULE GLOBAL
          DOUBLE PRECISION,DIMENSION(:), ALLOCATABLE:: DT        !seb holes each time steps length
   END TYPE
   !
+  REAL(KND), POINTER:: RCloseBAS    
+  REAL(KND), POINTER:: HCloseBAS    
+  REAL(KND), POINTER:: RCloseL2BAS
+  !
   INTEGER,                                   POINTER:: NCOL,NROW,NLAY,NPER,NBOTM,NCNFBD
   INTEGER,                                   POINTER:: ITMUNI,LENUNI,IXSEC,ITRSS,INBAS
   INTEGER,                                   POINTER:: IFREFM,NODES,IOUT,MXITER,IRESTART
   INTEGER,                                   POINTER:: KPERSTART,KSTPSTART,IUNITSTART
-  LOGICAL,                                   POINTER:: SUBLNK                              !seb VARIABLE THAT INDICATES THAT SUBLINK IS ACTIVE. IT IS SET TO FALSE BY DEFAULT AND ALTERED BY SUBPACKAGE
+  LOGICAL,                                   POINTER:: NO_CONST_HEAD                       ! Set to false if there is CHD pack or IBOUND<0
+  LOGICAL,                                   POINTER:: SUBLNK                              ! VARIABLE THAT INDICATES THAT SUBLINK IS ACTIVE. IT IS SET TO FALSE BY DEFAULT AND ALTERED BY SUBPACKAGE
   LOGICAL,                                   POINTER:: INPUT_CHECK
   LOGICAL,                                   POINTER:: BACKTRACKING
   INTEGER,                                   POINTER:: BIN_REAL_KIND                      !KIND VALUE TO USE FOR ULT BINARY WRITERS --DEFAULT IS SNGL/32bit/4byte
@@ -102,6 +105,10 @@ MODULE GLOBAL
   !INTEGER,     DIMENSION(:,:,:), CONTIGUOUS,POINTER ::WETCEL
   !
   TYPE GLOBALTYPE
+     REAL(KND), POINTER:: RCloseBAS    
+     REAL(KND), POINTER:: HCloseBAS    
+     REAL(KND), POINTER:: RCloseL2BAS
+     !
      INTEGER,                                   POINTER:: NCOL,NROW,NLAY,NPER,NBOTM,NCNFBD
      INTEGER,                                   POINTER:: ITMUNI,LENUNI,IXSEC,ITRSS,INBAS
      INTEGER,                                   POINTER:: IFREFM,NODES,IOUT,MXITER,IRESTART
@@ -164,21 +171,21 @@ MODULE GLOBAL
     !
     IF(PRESENT(H)) THEN
       IF( H < BOTM(IC,IR,LBOTM(IL)) ) THEN
-          FRAC = 0D0
+          FRAC = 0.D0
       ELSEIF( H < BOTM(IC,IR,LBOTM(IL)-1) ) THEN
           FRAC = ( H                       - BOTM(IC,IR,LBOTM(IL)) ) /      &
                  ( BOTM(IC,IR,LBOTM(IL)-1) - BOTM(IC,IR,LBOTM(IL)) )
       ELSE
-          FRAC = 1D0
+          FRAC = 1.D0
       END IF
     ELSE
       IF( HNEW(IC,IR,IL) < BOTM(IC,IR,LBOTM(IL)) ) THEN
-          FRAC = 0D0
+          FRAC = 0.D0
       ELSEIF( HNEW(IC,IR,IL) < BOTM(IC,IR,LBOTM(IL)-1) ) THEN
           FRAC = ( HNEW(IC,IR,IL)          - BOTM(IC,IR,LBOTM(IL)) ) /      &
                  ( BOTM(IC,IR,LBOTM(IL)-1) - BOTM(IC,IR,LBOTM(IL)) )
       ELSE
-          FRAC = 1D0
+          FRAC = 1.D0
       END IF
     END IF
     !
@@ -208,7 +215,7 @@ MODULE GLOBAL
     IF(IBOUND(J,I,K)>0) THEN
         !
         !=================================================
-        DTMP = 0D0          ! HOLDS CELL CENTER CALC
+        DTMP = 0.D0         ! HOLDS CELL CENTER CALC
         DIF  = -RHS(J,I,K)  ! HOLDS RESIDUAL  
         !
         ! ... GET CONDUCTANCES TO NEIGHBORING CELLS
@@ -266,7 +273,7 @@ MODULE GLOBAL
         !
         DIF = DIF - DTMP*HNEW(J,I,K)
     ELSE
-        DIF = 0D0
+        DIF = 0.D0
     END IF
   END FUNCTION
   !
@@ -280,7 +287,7 @@ MODULE GLOBAL
     DOUBLE PRECISION:: DTMP
     INTEGER:: I,J,K
     !
-    ERR = 0D0
+    ERR = 0.D0
     R   = 0
     C   = 0
     L   = 0
@@ -299,6 +306,54 @@ MODULE GLOBAL
   !
   !------------------------------------------------------------------
   !
+  PURE SUBROUTINE CALCULATE_RESIDUAL_MASS_ERROR(RCLOSE, RCLOSE_L2)
+    !ASSUMES LGR POINTERS ARE CORRECT
+    DOUBLE PRECISION, INTENT(OUT):: RCLOSE, RCLOSE_L2
+    DOUBLE PRECISION:: DTMP, ERR, L2ERR
+    INTEGER:: I,J,K
+    !
+    ERR   = 0.D0
+    L2ERR = 0.D0
+    !
+    DO CONCURRENT(K=1:NLAY, I=1:NROW, J=1:NCOL, IBOUND(J,I,K)>0)
+          !
+          DTMP = CELL_MASS_BALANCE(I,J,K)
+          DTMP = ABS(DTMP)
+          !
+          L2ERR = L2ERR + DTMP*DTMP
+          !
+          IF(DTMP > ERR) ERR = DTMP
+    END DO
+    L2ERR = SQRT(L2ERR)
+    !
+    RCLOSE    = ERR  
+    RCLOSE_L2 = L2ERR
+    !
+  END SUBROUTINE
+  !
+  !------------------------------------------------------------------
+  !
+  PURE SUBROUTINE CALCULATE_MAX_HEAD_CHANGE(HCLOSE)
+    !ASSUMES LGR POINTERS ARE CORRECT
+    DOUBLE PRECISION, INTENT(OUT):: HCLOSE
+    DOUBLE PRECISION:: DTMP, HCNG
+    INTEGER:: I,J,K
+    !
+    HCNG   = 0.D0
+    !
+    DO CONCURRENT(K=1:NLAY, I=1:NROW, J=1:NCOL, IBOUND(J,I,K)>0)
+          !
+          DTMP = ABS( HNEW(J,I,K) - HNEW_OLD(J,I,K) )
+          !
+          IF(DTMP > HCNG) HCNG = DTMP
+    END DO
+    !
+    HCLOSE = HCNG  
+    !
+  END SUBROUTINE
+  !
+  !------------------------------------------------------------------
+  !
   PURE SUBROUTINE MASS_BALANCE_INOUT(RATIN, RATOUT, RATERR)
     !ASSUMES LGR POINTERS ARE CORRECT
     !USE GLOBAL, ONLY:NCOL,NROW,NLAY,HNEW,IBOUND,CC,CR,CV,HCOF,RHS
@@ -306,7 +361,7 @@ MODULE GLOBAL
     DOUBLE PRECISION:: Q, HD, DZ, ERR
     INTEGER:: I,J,K
     !
-    DZ = 0D0
+    DZ = 0.D0
     !    
     RATIN = DZ
     RATOUT= DZ
@@ -442,12 +497,12 @@ MODULE GLOBAL
     !
     ERR = CELL_MASS_BALANCE(I,J,K) !VOLUME/TIME ERROR
     !
-    IF(ERR < 0D0) ERR = -1D0 * ERR
+    IF(ERR < 0.D0) ERR = -1.D0 * ERR
     !
     IF( ERR  > 0.01D0 .AND. VOL > 0.01D0) THEN
         ERR = ERR/VOL !NORMALIZE BY CELL VOLUME
     ELSE
-        ERR = 0D0
+        ERR = 0.D0
     END IF
     !
   END FUNCTION
@@ -467,7 +522,7 @@ MODULE GLOBAL
     IF(HAS_RCL) THEN; R = 0; C = 0; L = 0
     END IF
     !
-    VOLERR= 0D0
+    VOLERR= 0.D0
     DO CONCURRENT(K=1:NLAY, I=1:NROW, J=1:NCOL, IBOUND(J,I,K)>0)
         !
         ERR = CELL_VOL_ERROR(I,J,K)
@@ -496,7 +551,7 @@ MODULE GLOBAL
 !    LOGICAL:: HAS_RCL
 !    !
 !    TOL    = 0.01D0
-!    VOLERR = 0D0
+!    VOLERR = 0.D0
 !    !
 !    HAS_RCL= PRESENT(R)
 !    IF(HAS_RCL) THEN
@@ -509,7 +564,7 @@ MODULE GLOBAL
 !        !
 !        ERR = CELL_MASS_BALANCE(I,J,K) * DT !VOLUME ERROR
 !        !
-!        IF(ERR < 0D0) ERR = -1D0 * ERR
+!        IF(ERR < 0.D0) ERR = -1.D0 * ERR
 !        !
 !        IF( ERR  > TOL .AND. VOL > TOL) THEN
 !            ERR = ERR/VOL
@@ -535,7 +590,7 @@ MODULE GLOBAL
 !    DOUBLE PRECISION:: RATIN, RATOUT, Q, HD, DZ, ERR, N
 !    INTEGER:: I,J,K
 !    !
-!    DZ = 0D0
+!    DZ = 0.D0
 !    !    
 !    RATERR= DZ
 !    DO CONCURRENT(K=1:NLAY, I=1:NROW, J=1:NCOL, IBOUND(J,I,K)>0)
@@ -678,12 +733,12 @@ MODULE GLOBAL
     !
     CALL MASS_BALANCE_INOUT(RATIN, RATOUT, RATERR)
     !
-    AVERAT = (RATIN + RATOUT) / 2D0
+    AVERAT = (RATIN + RATOUT) / 2.D0
     !
     IF(AVERAT > MINRAT) THEN                        
                        ERR = RATERR / AVERAT
     ELSE
-                       ERR = 0D0  !IF FLOWS ARE TOO SMALL JUST ASSUME ZERO ERROR OR PERCENT ERROR WILL BE HUGE
+                       ERR = 0.D0  !IF FLOWS ARE TOO SMALL JUST ASSUME ZERO ERROR OR PERCENT ERROR WILL BE HUGE
     END IF 
     !
   END SUBROUTINE

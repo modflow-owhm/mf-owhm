@@ -1,5 +1,5 @@
 LIST        7   ./output/owhm_v1_a_example.lst
-UPW         9   owhm_v1_example.lpf
+LPF         9   owhm_v1_example.lpf
 BAS         10  owhm_v1_example_a.bas
 DIS         11  owhm_v1_example.dis
 GHB         12  owhm_v1_example.ghb
@@ -12,8 +12,8 @@ MNW2        18  owhm_v1_example.mnw
 UZF         19  owhm_v1_example.uzf
 HYD         22  owhm_v1_example.hyd
 SUB         23  owhm_v1_example.sub
-# Solvers (NWT REQUIRES UPW, which has the same input as LPF)
-NWT         14  owhm_v1_example.nwt
+# Solvers
+PCG         14  owhm_v1_example.pcg
 #FMP Datafiles
 ###DATA        20  data_fmp/ofe.in       READ  BUFFER 16 # kilobyte file preload 
 ###DATA        30  data_fmp/root.in      READ  BUFFER 16 # kilobyte  

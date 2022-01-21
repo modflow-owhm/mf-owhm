@@ -1029,8 +1029,15 @@ SUBROUTINE KEYWORDCHECK(LIST)
     DO I=1,NLIST
        IF(FOUND(I)>0) WRITE(*,'(2(5x,A))') TRIM(LIST(I)), TRIM( KEYWORDLIST( FOUND(I) )  )
     END DO
-        WRITE(*,'(/A)') '***THIS IS NOT ALLOWED; PROGRAM WILL NOW TERMINATE***'
-        ERROR STOP
+    WRITE(*,'(/A)') 'Note: the start of a variable name cannot match a reserved.'
+    WRITE(*,'( A)') 'For example, a variable named "L10POROSITY"'
+    WRITE(*,'( A)') '       will match the keyword "L10", which solves a base 10 logrithm.'
+    WRITE(*,'(/A)') 'The folling is a list of all reserved words:'
+    DO J=1, NKEY
+       WRITE(*,'(A)') KEYWORDLIST(J)
+    END DO
+    WRITE(*,'(/A)') '***PROGRAM WILL NOW TERMINATE***'
+    ERROR STOP
   END IF
   !
 END SUBROUTINE

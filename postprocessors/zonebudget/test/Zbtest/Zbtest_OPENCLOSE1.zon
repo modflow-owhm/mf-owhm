@@ -1,0 +1,7 @@
+3 15 15
+OPEN/CLOSE                            # Keyword  [FMTIN]  [IPRN]  -> Default is FMTIN="(FREE)" and IPRN = -1
+izone_lay1.txt
+OPEN/CLOSE
+izone_lay2.txt
+CONSTANT           3
+A 1 2 3 4

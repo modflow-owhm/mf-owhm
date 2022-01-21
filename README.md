@@ -2,8 +2,8 @@
 
 ![MF-OWHM_banner_v2b](img/MF-OWHM_banner_v2b.png)
 
-&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; **IPDS No.**&nbsp; `IP-129524`
-# Version 2.1.0
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; **IPDS No.**&nbsp; `IP-136416`
+# Version 2.2.0
 
 MODFLOW One-Water Hydrologic Flow Model (MF-OWHM) Conjunctive Use and Integrated Hydrologic Flow Modeling Software.
 
@@ -25,18 +25,19 @@ Pronounced as Mod-Flow-Ohm (mäd flō ōm) or colloquially called OneWater.
 If new to git branching and tagging, please review the **[Git Branches Section](#git-branches-and-organization)**,  
 which describes the major branches in this repository.  
 &nbsp;  
-For help on how to download a specific version see the **[Git Tags Section](#gitlab-tags-page)**.   
+For help on how to download a specific version see the **[Git Tags Section](#gitlab-tags-page)**  
+which explains how the *Git Tags Page* works to download specific mf-owhm versions.  
 &nbsp;
 
 ------
 
 ## Downloads
 
-The following downloads the latest  64-bit executables for Windows (`.exe`) and Ubuntu Linux (`.nix`)  
-and includes the source code, examples, postprocessors, and  supplemental documentation (`~40MB` download).
+The following downloads the latest 64-bit executables for Windows (`.exe`) and Ubuntu Linux (`.nix`)  
+and includes the source code, examples, postprocessors, and supplemental documentation (`~40MB` download).
 
-- **[Full MF-OWHM Release Download](https://code.usgs.gov/modflow/mf-owhm/-/archive/release/mf-owhm-release.zip)** &nbsp; &nbsp; &nbsp; &nbsp; ➤ *Recommended option*
--  **[Git Tags Page Download Listing](https://code.usgs.gov/modflow/mf-owhm/-/tags)**
+- **[Current Release Version Download](https://code.usgs.gov/modflow/mf-owhm/-/archive/release/mf-owhm-release.zip)** &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ➤ *Recommended option*
+- **[Specific Version Downloads on Git Tags Page](https://code.usgs.gov/modflow/mf-owhm/-/tags)**
 
 The following downloads the latest Windows x64 executable only:
 
@@ -59,19 +60,25 @@ The difference between the two release types are:
    - The [USGS Software Disclaimers Section](#usgs-software-disclaimers) includes both disclaimers for comparison purposes.  
      &nbsp; 
 1. The text file [code.json](#code.json) will contain the following line:
-   - `"status": "Production"` &nbsp; for a  *Production Release* and  
-   - `"status": "Preliminary"` for a  *Preliminary Release*  
+   - `"status": "Production"` &nbsp; for a *Production Release* and  
+   - `"status": "Preliminary"` for a *Preliminary Release*  
       &nbsp; 
-1. A *Production Release* is a *git tag* registered with the USGS Information Product Data System (`IPDS`).  
-   Any other commit is considered a *Preliminary Release*.
-   - All code updates and bug fixes start as a *Preliminary Release*;   
-     after the code commit is registered with `IPDS` it becomes a *Production Release*.
-   - Typically the *Production Release*'s are kept in the `release` branch and all other branches are  *Preliminary Release*'s.
+1. If the code version is registered in the USGS Information Product Data System (`IPDS`).  
+   ➥ A *Production Release* is registered in `IPDS` and includes a *git tag* with the message "production release".  
+   Any other commit (or *git tag*) is considered a *Preliminary Release*.
+    - All code changes, including bug fixes, start as a *Preliminary Release*;  
+      when the code version is registered with `IPDS` it becomes a *Production Release*.
+    - A *Production Release* and its associated *git tag* are stable and guaranteed to remain in the code.usgs.gov repository.
+    - A *Preliminary Release* is semi-stable and may be replaced by a newer *Preliminary* or *Production Release*.
+        - The source code is stable and remains in the `main` branch,  
+          but the `release` branch commit that contains compiled executables may be removed.
+        - That is, the `main` branch is stable and the `release` branch may drop intermediate-preliminary releases.
 
 &nbsp;
 
 > :warning: **Note that it is possible for a *Production Release* and *Preliminary Release* to have the same version number.**  
-> &emsp;&emsp;That is, they are the same release but contain a different disclaimer.
+> &emsp;&emsp;That is, they are the same release but contain a different disclaimer in the `main` branch (source branch).  
+> &emsp;&emsp;However, the *Production Release* supersedes a *Preliminary Release* in the `release` branch (executable branch) .
 
 > :warning: **Contact a developer if you need to convert the current *Preliminary Release* to a *Production Release*.**  
 > &emsp;&emsp;Some publication sources—particularly USGS Scientific Investigations Report (SIR)—can only cite a *Production Release*.
@@ -82,7 +89,7 @@ Please see the [Git Branches Section](#git-branches-and-organization) for an ove
 
 To obtain this repository via git run: 
 
-- `git clone  --no-tags  https://code.usgs.gov/modflow/mf-owhm.git ` 
+- `git clone  --no-tags  https://code.usgs.gov/modflow/mf-owhm.git`
   + The `--no-tags` flag is optional  
     it prevents the repo from downloading all the git release tags, which can make the `git log` messy.
   + [Git Large File Storage (LFS) ](https://git-lfs.github.com/) pointer files are used for executable binaries and example output.
@@ -94,11 +101,11 @@ To obtain this repository via git run:
 
 ## Code Citation
 
-> Boyce, S.E., 2021, MODFLOW One-Water Hydrologic Flow Model (MF-OWHM) Conjunctive Use and Integrated Hydrologic Flow Modeling Software, version 2.1.0: U.S. Geological Survey Software Release, https://doi.org/10.5066/P9P8I8GS
+> Boyce, S.E., 2022, MODFLOW One-Water Hydrologic Flow Model (MF-OWHM) Conjunctive Use and Integrated Hydrologic Flow Modeling Software, version 2.2.0: U.S. Geological Survey Software Release, https://doi.org/10.5066/P9P8I8GS
 
-And if you use Surface Water Operations (`SWO`)  in your project:
+And if you use Surface Water Operations (`SWO`) in your project:
 
-> Boyce, S.E. and Ferguson, I.M., 2021, MODFLOW One-Water Hydrologic Flow Model (MF-OWHM) Conjunctive Use and Integrated Hydrologic Flow Modeling Software with Surface Water Operations, version 2.1.0: U.S. Geological Survey Software Release, https://doi.org/10.5066/2FP9C6F6C5
+> Boyce, S.E. and Ferguson, I.M., 2022, MODFLOW One-Water Hydrologic Flow Model (MF-OWHM) Conjunctive Use and Integrated Hydrologic Flow Modeling Software with Surface Water Operations, version 2.2.0: U.S. Geological Survey Software Release, https://doi.org/10.5066/P9P8I8GS
 
 ## Documentation Citation
 
@@ -106,7 +113,7 @@ And if you use Surface Water Operations (`SWO`)  in your project:
 
 &nbsp;
 
-## Let Us Know What  You Are Up To
+## Let Us Know What You Are Up To
 
 If you have questions and comments feel free to contact the developers.
 
@@ -119,7 +126,9 @@ Also share any publications that involve MF-OWHM so we can add them to our **[pu
 
 # Table of Contents
 
-[[_TOC_]]     
+[[_TOC_]]
+
+&nbsp;
 
 ------
 
@@ -129,12 +138,12 @@ Also share any publications that involve MF-OWHM so we can add them to our **[pu
 
 ## Markdown Files (.md)
 
-[Markdown](https://en.wikipedia.org/wiki/Markdown)   (`.md`) files are placed throughout the repository to describe different aspects of the repo or provide general information. Markdown files are simple text files with some additional formatting for fast rendering in html. 
+[Markdown](https://en.wikipedia.org/wiki/Markdown) (`.md`) files are placed throughout the repository to describe different aspects of the repo or provide general information. Markdown files are simple text files with some additional formatting for fast rendering in html. 
 
 Viewing a markdown file in a text editor can be difficult to follow due to the additional formatting (especially viewing tables).
 If you search for Markdown viewers you can find a number of tools that will render the final formatting of the `.md` files. 
 
-The **[readme.txt](readme.txt)** file includes an overview on markdown formatting and includes a list of markdown viewers that can be downloaded .
+The **[readme.txt](readme.txt)** file includes an overview on markdown formatting and includes a list of markdown viewers that can be downloaded.
 
 ## GMG Solver Information
 
@@ -147,7 +156,7 @@ For new models, it is recommended to use either the `PCGN` solver or `NWT` solve
 
 If your project does use the `GMG` solver, then use the executable binary named `mf-owhm-gmg.exe` instead. If you want to compile the binary yourself, then it is required to have both a Fortran and C compiler (e.g., `ifort` and `icc` or `gfortran` and `gcc`). To compile GMG use the provided `makefile` with the option `USEGMG = YES` or the Visual Studio Solution `OneWater_GMG_Project.sln`.
 
-> :warning: ​Note that the [Downloads](#downloads) links include in the `bin` directory `mf-owhm.exe` and  `mf-owhm-gmg.exe`. 
+> :warning: ​Note that the [Downloads](#downloads) links include in the `bin` directory `mf-owhm.exe` and `mf-owhm-gmg.exe`. 
 
 ## Code Versioning
 
@@ -155,12 +164,12 @@ MF-OWHM follows a modified [Semantic Versioning](https://semver.org/) system (`m
 
 For example, version `12.34.5` is major version `12`, minor version `34`, and patch version `5`. 
 
-Since major and minor versions rarely change, MF-OWHM informally calls a patch version a release number.   
+Since major and minor versions rarely change, MF-OWHM informally calls a patch version a release number.  
 For example, version `2.5.7`, is referred to as `Release 7` of version `2.5`.
 
 For code in development-beta stages the patch number will contain a letter, starting with `a`, positioned after the patch version number. Each subsequent development/beta release will increase the letter by 1. 
 
-For example, if version `2.5.7` is under development with bug fixes, it would be versioned as `2.5.8a`, `2.5.8b`,  `2.5.8c`, and so forth until the final version `2.5.8` is complete. Then the letter process starts over again for `2.5.9a`.
+For example, if version `2.5.7` is under development with bug fixes, it would be versioned as `2.5.8a`, `2.5.8b`, `2.5.8c`, and so forth until the final version `2.5.8` is complete. Then the letter process starts over again for `2.5.9a`.
 
 Since versions with a post-pended letter are an intermediate product, these versions will not have a *git tag* associated to them. Using this letter designation is meant to provide a way to provide rapid code releases with small changes without exhausting version numbers. Particularly when fixing a bug that is necessary for a project, but is not significant enough to immediately warrant a patch number increase.
 
@@ -170,11 +179,11 @@ Examples of newer versus older versions are:
 
 - `11.9.7` is newer than `8.9.7`
 - `8.9.7` is newer than `2.13.1` 
--  `2.13.1` is newer than `2.5.12`
+- `2.13.1` is newer than `2.5.12`
 - `2.5.12` is newer than `2.5.7`
 - `2.5.7` is newer than `2.5.7b` is newer than `2.5.7a` is newer than `2.5.6a`
 
-  
+&nbsp; 
 
 ## Code Versioning Citation
 
@@ -205,9 +214,9 @@ If you only have a compiled executable binary, such a `mf-owhm.exe`, the version
 
 The git repository for MF-OWHM will always contain the following branches:
 
-1. `main`  &emsp;&thinsp;&nbsp; ➢ &nbsp; Default branch with stable source code and no compiled binaries.
+1. `main` &emsp;&thinsp;&nbsp; ➢ &nbsp; Default branch with stable source code and no compiled binaries.
 1. `release`&nbsp; ➢ &nbsp; *Preliminary/Production Release* of code and binaries for Windows (`.exe`) and Ubuntu Linux (`.nix`)
-1. *Git Tags* that are pointers to specific versions (commits) of the code and compiled binaries.   
+1. *Git Tags* that are pointers to specific versions (commits) of the code and compiled binaries.  
    &emsp;&ensp;The **[GitLab Releases Page](https://code.usgs.gov/modflow/mf-owhm/-/releases)** contains the important releases (that is, highlighting important git tags).  
    &emsp;&ensp;The **[GitLab Tags Page](https://code.usgs.gov/modflow/mf-owhm/-/tags)** contains a listing of all version tags in the repository (recommended for old version downloads).
 
@@ -229,7 +238,7 @@ The general workflow for the branching model used here is:
 - Once the `develop` branch is stable, submit a merge request to the `main` branch&emsp;&emsp;&emsp;`develop ⤇ main`
 - Merge the `main` branch to the `release` branch and build the executable binaries&emsp;&ensp;&ensp;`main ⤇ release`
 
-  
+&nbsp; 
 
 To convert code from a *Preliminary Release* to *Production Release*:
 
@@ -256,7 +265,7 @@ Throughout `code.usgs.gov` repositories there are download buttons that looks li
 
 The download button—depending on where it is placed—can download the current commit shown on on the webpage (eg the `main` branch) , a specific folder in the repository, a specific file in the repository, or a *GitLab Tag*.
 
-The download has four options for how to compress the download: `zip`, `tar.gz`, `tar.bz` and `tar`.   
+The download has four options for how to compress the download: `zip`, `tar.gz`, `tar.bz` and `tar`.  
 It is recommended to use the `zip` download option.
 
 The following image shows the pull down menu that appears when you click on the download button:
@@ -319,7 +328,7 @@ For example, the url for the download of versions `2.0.3` is:
 
 ### GitLab Releases Page
 
-A *GitLab Releases* entry is created for important  *git tag*s that require additional meta-data. Generally, it is best to either download the most current *Preliminary Release* from the [Downloads  Section](#downloads) or search for a specific version in the *GitLab Tags* Page described in the previous section. However, if you want to only see major updates or have direct access to special uploads, then they will be placed in the *GitLab Releases* page. An entry in the *GitLab Releases* page is automatically made whenever a  *git tag*  includes release comments, but all this can be obtained directly from the GitLab Tags Page.
+A *GitLab Releases* entry is created for important *git tag*s that require additional meta-data. Generally, it is best to either download the most current *Preliminary Release* from the [Downloads Section](#downloads) or search for a specific version in the *GitLab Tags* Page described in the previous section. However, if you want to only see major updates or have direct access to special uploads, then they will be placed in the *GitLab Releases* page. An entry in the *GitLab Releases* page is automatically made whenever a *git tag* includes release comments, but all this can be obtained directly from the GitLab Tags Page.
 
 The following figure highlights in yellow where the *GitLab Releases* link is located. The "assets" are download links that download the *git tag* repository that the release was created from. For example, the `Version 2.0.0` "Source Code (zip)" download link downloads the *git tag* `2.0.0`, which be `code.usgs.gov/modflow/mf-owhm/-/archive/2.0.0/mf-owhm-2.0.0.zip`. (Note that this is the same url as the ones present the *GitLab Tags* page.) 
 
@@ -355,7 +364,7 @@ The example models are documented in:
 
 - Niswonger, R.G., Panday, Sorab, and Ibaraki, Motomu, 2011, MODFLOW-NWT, A Newton formulation for MODFLOW-2005: U.S. Geological Survey Techniques and Methods 6-A37, 44 p.
 
-- Hughes, J.D., Langevin, C.D., Chartier, K.L., and White, J.T., 2012, Documentation of the Surface-Water Routing (SWR1) Process for modeling surface-water flow with the U.S. Geological Survey Modular Ground-Water Model (MODFLOW-2005): U.S. Geological Survey Techniques and Methods, book 6, chap. A40 (Version 1.0), 113 p.
+- Hughes, J.D., Langevin, C.D., Chartier, K.L., and White, J.T., 2012, Documentation of the Surface-Water Routing (SWR1) Process for modeling surface-water flow with the U.S. Geological Survey Modular Ground-Water Model (MODFLOW-2005): U.S. Geological Survey Techniques and Methods, book 6, chap. A40 (Version 1.0), 113 p.  
   Additional information and resources on the SWR Process for MODFLOW
 
 - Bakker, Mark, Schaars, Frans, Hughes, J.D., Langevin, C.D., and Dausman, A.M., 2013, Documentation of the seawater intrusion (SWI2) package for MODFLOW: U.S. Geological Survey Techniques and Methods, book 6, chap. A46, 47 p.
@@ -386,7 +395,7 @@ The source code, makefile, and Visual Studio Project has been provided for compi
 
 - Harbaugh, A.W., 1990, [A computer program for calculating subregional water budgets using results from the U.S. Geological Survey modular three-dimensional ground-water flow model](https://pubs.er.usgs.gov/publication/ofr90392): U.S. Geological Survey Open-File Report 90-392, 46 p.
 
-  
+&nbsp; 
 
 - Hanson, R.T., and Leake, S.A., 1999, [Documentation for HYDMOD, a program for extracting and processing time-series data from the U.S. Geological Survey's modular three-dimensional finite-difference ground-water flow model](https://pubs.er.usgs.gov/publication/ofr98564): U.S. Geological Survey Open-File Report 98-564, 57 p.
 
@@ -415,12 +424,11 @@ The source code, makefile, and Visual Studio Project has been provided for compi
 
 | Directory         | Description                                                  |
 | ----------------- | ------------------------------------------------------------ |
-|                   |                                                              |
-|                   |                                                              |
-| bin               | May contains 64-bit executable binaries for Windows (`.exe`) and Ubuntu Linux (`.nix`). <br />Also, the location where the `makefile` and integrated development environments (ide) <br />are set to save compiled executable binaries at. |
-| .vscode           | Workspace `.json` files necessary for using the [vscode](https://code.visualstudio.com/) integrated develop environment for comping MF-OWHM with `gfortran`.<br />The vscode workspace is in `ide/vscode/mf-owhm.code-workspace` |
+| bin               | Location for 64-bit executable binaries for Windows (`mf-owhm.exe`) and Ubuntu Linux (`mf-owhm.nix`) |
+| .util             | Bash scripts for cleaning the repository (`clean`) and running pandoc to convert markdown files to pdf. |
+| .vscode           | Workspace `.json` files necessary for using the [vscode](https://code.visualstudio.com/) integrated develop environment <br />for comping MF-OWHM with `gfortran`.<br />The vscode workspace is in `ide/vscode/mf-owhm.code-workspace` |
 | doc               | General text documents that may assist in model building. <br />Contains `FMP_Template`, `Notepad++ Syntax Highlighting`, and `Option Block Cheatsheets` |
-| examples          | Example problems to illustrate model input and for unit testing for validating code changes. |
+| examples          | Example problems to illustrate model input and for unit testing for validating code changes.<br /><br />`examples/bash_example_run` contains Bash scripts for running the example problems.<br />It also contains the unit testing script `1_RunValidation.sh`, <br />which runs all the example problems and then compiles with<br />`gfortran` the file `validate_example_results.f90` to check the results of the example problems with the output-true directories. |
 | icon              | MF-OWHM icon in a different image formats (`png`, `svg`, `ai`, and `ico`).<br />Also, contains Windows Resource (`rc`) file for comping the ico with the executable binary. |
 | ide               | Integrated development environment (ide) files to assist with compiling. <br />The windows compiled executable uses Visual Studio 2019 Community Edition with Intel OneAPI-Fortran Compiler Classic. <br />Other IDEs are provided as is, but have not been tested. |
 | ide/visual_studio | [Visual Studio Community Edition](https://visualstudio.microsoft.com/) solution (`.sln`) and project files (`.vcxproj` and `.vfproj`)<br />The IDE is setup using Intel Fortran Compiler Classic 2021.1.1 that is part of the Intel OneAPI. |
@@ -445,7 +453,7 @@ The U.S. Geological Survey’s MODFLOW One-Water Hydrologic Flow Model (MF-OWHM 
 
 
 
-Ground-Water Flow Model (MODFLOW-2005) is a computer program that simulates through finite differences the groundwater-flow equation (Harbaugh, 2005). The MODFLOW-2005 framework employed a modular design that allows for the easy development and incorporation of new features called packages and processes that communicate with the groundwater flow equation. Packages are code features that relate to the groundwater-flow process, e.g. subsidence; a process may solve a separate flow equation or represent a non-groundwater-related process, e.g. surface-water routing. With the development of new packages and processes, the MODFLOW-2005 base framework began to diverge into multiple independent versions designed for specific simulation needs. This divergence limited each independent MODFLOW release to its specific designed purpose, such that there was no longer a single, comprehensive, general-purpose hydraulic-simulation framework. MF-OWHM is an integrated hydrologic flow model that “integrates” into one cohesive simulation software multiple MODFLOW-2005 variants; enhancements were added that take advantage of multiple capabilities within one code. This enhanced fusion of MODFLOW-2005 versions resulted in a simulation software capable of addressing and understanding a diverse type of conjunctive-use, water-management, water-food-security, and climate-crop-water scenario analyses. 
+A Ground-Water Flow Model (MODFLOW-2005) is a computer program that simulates through finite differences the groundwater-flow equation (Harbaugh, 2005). The MODFLOW-2005 framework employed a modular design that allows for the easy development and incorporation of new features called packages and processes that communicate with the groundwater flow equation. Packages are code features that relate to the groundwater-flow process, e.g. subsidence; a process may solve a separate flow equation or represent a non-groundwater-related process, e.g. surface-water routing. With the development of new packages and processes, the MODFLOW-2005 base framework began to diverge into multiple independent versions designed for specific simulation needs. This divergence limited each independent MODFLOW release to its specific designed purpose, such that there was no longer a single, comprehensive, general-purpose hydraulic-simulation framework. MF-OWHM is an integrated hydrologic flow model that “integrates” into one cohesive simulation software multiple MODFLOW-2005 variants; enhancements were added that take advantage of multiple capabilities within one code. This enhanced fusion of MODFLOW-2005 versions resulted in a simulation software capable of addressing and understanding a diverse type of conjunctive-use, water-management, water-food-security, and climate-crop-water scenario analyses. 
 
 While maintaining compatibility with existing MODFLOW-2005 versions, MF-OWHM includes:
 
@@ -595,10 +603,7 @@ Borden, John Carter; Gaur, Anju; Singh, Chabungbam Rajagopal, 2016, Water resour
 
   
 
-- Ferguson, I.M.., Llewellyn, D., Hanson, R.T., and Boyce S.E., 2016,
-User guide to the surface water operations process—An integrated approach to
-simulating large-scale surface water management in MODFLOW-based hydrologic models:
-Denver, Colo., Bureau of Reclamation Technical Memorandum no. 86-68210–2016-02, 96 p.
+- Ferguson, I.M.., Llewellyn, D., Hanson, R.T., and Boyce S.E., 2016, User guide to the surface water operations process—An integrated approach to simulating large-scale surface water management in MODFLOW-based hydrologic models: Denver, Colo., Bureau of Reclamation Technical Memorandum no. 86-68210–2016-02, 96 p.
 
   
 
@@ -837,14 +842,14 @@ The following is the text that is included in the two disclaimer types.
 > This software has been approved for release by the U.S. Geological Survey  
 > (USGS). Although the software has been subjected to rigorous review, the USGS  
 > reserves the right to update the software as needed pursuant to further analysis  
-> and review. 
+> and review.
 >
-> No warranty, expressed or implied, is made by the USGS or the U.S. Government   
-> as to the functionality of the software and related material nor shall the   
-> fact of release constitute any such warranty. 
+> No warranty, expressed or implied, is made by the USGS or the U.S. Government  
+> as to the functionality of the software and related material nor shall the  
+> fact of release constitute any such warranty.
 >
-> Furthermore, the software is released on condition that neither the USGS nor   
-> the U.S. Government shall be held liable for any damages resulting from its   
+> Furthermore, the software is released on condition that neither the USGS nor  
+> the U.S. Government shall be held liable for any damages resulting from its  
 > authorized or unauthorized use.
 
 &nbsp;
@@ -855,12 +860,12 @@ The following is the text that is included in the two disclaimer types.
 > being provided to meet the need for timely best science. The software has not  
 > received final approval by the U.S. Geological Survey (USGS). 
 >
-> No warranty, expressed or implied, is made by the USGS or the U.S. Government   
-> as to the functionality of the software and related material nor shall the   
+> No warranty, expressed or implied, is made by the USGS or the U.S. Government  
+> as to the functionality of the software and related material nor shall the  
 > fact of release constitute any such warranty. 
 >
-> The software is provided on the condition that neither the USGS nor   
-> the U.S. Government shall be held liable for any damages resulting from the   
+> The software is provided on the condition that neither the USGS nor  
+> the U.S. Government shall be held liable for any damages resulting from the  
 > authorized or unauthorized use of the software.
 
 &nbsp;

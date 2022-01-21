@@ -1,3 +1,8 @@
+💧🧙💦🌊  <-These symbols help text editors identify file as Unicode UTF8.
+                    UTF8 is not necessary to view numerical results, but no UTF8 support can have artifacts where non-ascii symbols are used (such as the degree symbol).
+
+
+MODFLOW-OWHM v2.2.0
 
       MMMMMMM                                       MM      MMM     MM
     MMM     MMM    MM      M   MMMMMMMM             LM     DM M     ML     MM     MMMMMMMMM  MMMMMMMM  MMMMMMMM
@@ -10,30 +15,46 @@
      MMMMMMMMN     MM      M   MMMMMMMM                7MM      7MM  MN          MM   M      MMMMMMMM  MM      MM
 
 
- MODFLOW-OWHM v2.0.01  
-
-
                         MODFLOW
             ONE-WATER HYDROLOGIC-FLOW MODEL
 
-    U.S. GEOLOGICAL SURVEY MODULAR FINITE-DIFFERENCE 
-           CONJUNCTIVE USE SIMULATION PROGRAM
+    U.S. Geological Survey Modular Finite-Difference
+           Conjunctive Use Simulation Program
 
-                     Version 2.0
+                      Version 2.2
 
- Release: 01          4/23/2020
+ Release: 0
 
- Includes:
-          MODFLOW-2005 Version 1.12.0   02/03/2017
-          MODFLOW-FMP  Version 4.00.0   04/23/2017
-          MODFLOW-SWR  Version 1.04.0   09/15/2016
-          MODFLOW-SWI  Version 2.00.0   07/22/2013
-          MODFLOW-LGR  Version 2.00.0   09/19/2013
-          MODFLOW-NWT  Version 1.2.0    03/01/2020
-          MODFLOW-CFP  Version 1.09.57  09/12/2017
+ Includes the following base versions with enhancements:
 
+          MODFLOW-2005 Version 1.12
+          MODFLOW-FMP  Version 4.1
+          MODFLOW-SWR  Version 1.04
+          MODFLOW-SWI  Version 2.0
+          MODFLOW-LGR  Version 2.0
+          MODFLOW-NWT  Version 1.2
+          MODFLOW-CFP  Version 1.09.57
+                  SWO  Version 1.0
 
- OneWater Simulation Initiated at 
+------------------------------------------------------------------------------------
+USGS Software Disclaimer:                                                          |
+                                                                                   |
+   No warranty, expressed or implied, is made by the USGS or the U.S. Government   |
+   as to the functionality of the software and related material nor shall the      |
+   fact of release constitute any such warranty.                                   |
+                                                                                   |
+   The software is provided on the condition that neither the USGS nor             |
+   the U.S. Government shall be held liable for any damages resulting from the     |
+   authorized or unauthorized use of the software.                                 |
+                                                                                   |
+   Newer versions may be present at the official code and download repository:     |
+      https://code.usgs.gov/modflow/mf-owhm                                        |
+                                                                                   |
+------------------------------------------------------------------------------------
+
+∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙
+    OneWater Simulation Initiated at  
+∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙
 
 
  LIST FILE: ./output/swtex4.lst
@@ -163,7 +184,7 @@ THE WARNING IS BELIEVED TO HAVE ORIGINATED FROM THE FOLLOWING FILE:
 THE GUESSED LINE THAT THE WARNING OCCURED ON IS:
 "FREE  BUDGETDB ./output/swtex4_VolumetricBudget.txt  CUMULATIVE_HEAD_CHANGE ./output/swtex4_CumHCHG.txt  PRINT_HEAD NPER ./output/swtex4_Head.txt"
 
-THE DESRIPTION OF THE WARNING IS:
+THE DESCRIPTION OF THE WARNING IS:
 
 FOUND BAS PACKAGE OPTION KEYWORDS ALONG PACKAGE "OPTIONS LINE" (ie Data Set 1)
 
@@ -203,11 +224,11 @@ END OPTIONS
 
  NOW READING BAS OPTIONS
 
- FOUND OPTION: FREE
-    THE FREE FORMAT OPTION HAS BEEN SELECTED
-         -NOTE THIS NOW IS THE DEFAULT AND NOT NECESSARY.
+ Found Option: FREE
+                 THE FREE FORMAT OPTION HAS BEEN SELECTED
+                    -NOTE THIS NOW IS THE DEFAULT AND NOT NECESSARY.
 
- FOUND OPTION: BUDGETDB
+ Found Option: BUDGETDB
 
 
 ########################################################################################################
@@ -222,7 +243,7 @@ THE WARNING IS BELIEVED TO HAVE ORIGINATED FROM THE FOLLOWING FILE:
 THE GUESSED LINE THAT THE WARNING OCCURED ON IS:
 "FREE  BUDGETDB ./output/swtex4_VolumetricBudget.txt  CUMULATIVE_HEAD_CHANGE ./output/swtex4_CumHCHG.txt  PRINT_HEAD NPER ./output/swtex4_Head.txt"
 
-THE DESRIPTION OF THE WARNING IS:
+THE DESCRIPTION OF THE WARNING IS:
 
 ...CHECK_FOR_POST_KEY WARNINGS...
  THE FOLLOWING MESSAGES WERE PASSED WHILE CHECKING FOR ANY ADDITIONAL KEYWORDS ON LOADED LINE.
@@ -239,9 +260,10 @@ TO SUPRESS THIS WARNING PLEASE PLACE A "#" SYMBOL TO THE LEFT OF THE WORD TO IND
 
 
 
- FOUND OPTION: CUMULATIVE_HEAD_CHANGE
-    THIS OPTION IS ONLY USEFUL FOR MODEL RESULT COMPARISON WITH DIFFERENT CODE COMPARISONS.
 
+ Found Option: CUMULATIVE_HEAD_CHANGE
+                 Cumulative sum of absolute head differences for the entire model.
+                 This is a diagnostic feature meant for comparing MF-OWHM code versions with the same model input (software unit test).
 
 
 ########################################################################################################
@@ -256,7 +278,7 @@ THE WARNING IS BELIEVED TO HAVE ORIGINATED FROM THE FOLLOWING FILE:
 THE GUESSED LINE THAT THE WARNING OCCURED ON IS:
 "FREE  BUDGETDB ./output/swtex4_VolumetricBudget.txt  CUMULATIVE_HEAD_CHANGE ./output/swtex4_CumHCHG.txt  PRINT_HEAD NPER ./output/swtex4_Head.txt"
 
-THE DESRIPTION OF THE WARNING IS:
+THE DESCRIPTION OF THE WARNING IS:
 
 ...CHECK_FOR_POST_KEY WARNINGS...
  THE FOLLOWING MESSAGES WERE PASSED WHILE CHECKING FOR ANY ADDITIONAL KEYWORDS ON LOADED LINE.
@@ -273,13 +295,19 @@ TO SUPRESS THIS WARNING PLEASE PLACE A "#" SYMBOL TO THE LEFT OF THE WORD TO IND
 
 
 
- FOUND OPTION: PRINT_HEAD    SP    TS   FILE
-                              3    60   ./output/swtex4_Head.txt
 
- THE MAX STORAGE FOR PROPERTIES DEFINED BY PARAMETERS IS: 
- MAX STORAGE OF PARAMETERS (MXPAR)  IS       2000
- MAX STORAGE OF INSTANCES  (MXINST) IS      50000
- MAX STORAGE OF CLUSTERS   (MXCLST) IS    2000000
+ Found Option: PRINT_HEAD
+                 NPER ./output/swtex4_Head.txt
+
+
+ Setting up PRINT_HEAD option for 
+    SP    TS   FILE
+     3    60   ./output/swtex4_Head.txt
+
+ The total simulation limit for the number PARAMETERs defined is: 
+     Max number of PARAMETERs (MXPAR)  is       2000
+     Max number of INSTANCEs  (MXINST) is      50000
+     Max number of CLUSTERs   (MXCLST) is    2000000
 
 
 
@@ -668,7 +696,7 @@ CHNGE IN GEOSTATIC STRS PRINT FORMAT IS NUMBER   4
 
          THE FOLLOWING COMMENTS WERE PASSED TO THE WARNING ROUTINE
 
-THE DESRIPTION OF THE WARNING IS:
+THE DESCRIPTION OF THE WARNING IS:
 
 DIS PACKAGE: THE GROUND SURFACE ELEVATION WAS NOT SPECIFIED WITH THE KEYWORD "SURFACE_ELEVATION"
 
@@ -898,6 +926,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
      0.1900E-03    0.9196E-04
   (  4,  5, 13) (  1, 10, 15)
 
+
+
+Solver Convergence Information:
+                              HClose:  9.1960937E-5
+                              RClose:  0.0624110
+                           L2-RClose:  0.3961945
+                         Rel-Vol-Err:  1.0401828E-10
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP     1
     SAVE BUDGET
@@ -1827,6 +1863,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4,  9,  9) (  3,  9,  8) (  3,  9,  9) (  4,  8, 10)
 
 
+
+Solver Convergence Information:
+                              HClose:  5.0817135E-5
+                              RClose:  0.0434804
+                           L2-RClose:  0.1277173
+                         Rel-Vol-Err:  5.4350517E-11
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP     1
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -1852,6 +1896,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.1501E-02   -0.2890E-03    0.5158E-04
   (  4,  8,  9) (  4,  8, 10) (  4,  9,  5)
 
+
+
+Solver Convergence Information:
+                              HClose:  5.1584003E-5
+                              RClose:  0.0381975
+                           L2-RClose:  0.1230320
+                         Rel-Vol-Err:  4.7746932E-11
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP     2
     SAVE BUDGET
@@ -1879,6 +1931,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4,  8,  9) (  3,  9, 10) (  4,  9,  5)
 
 
+
+Solver Convergence Information:
+                              HClose:  4.3396002E-5
+                              RClose:  0.0241503
+                           L2-RClose:  0.0877527
+                         Rel-Vol-Err:  3.0187855E-11
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP     3
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -1904,6 +1964,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.7781E-03   -0.1734E-03    0.3564E-04
   (  4, 14, 14) (  3, 14, 14) (  4,  9,  5)
 
+
+
+Solver Convergence Information:
+                              HClose:  3.5638005E-5
+                              RClose:  0.0192724
+                           L2-RClose:  0.0722273
+                         Rel-Vol-Err:  2.4090531E-11
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP     4
     SAVE BUDGET
@@ -1931,6 +1999,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4, 14, 14) (  3, 14, 14) (  4,  9,  5)
 
 
+
+Solver Convergence Information:
+                              HClose:  3.0663318E-5
+                              RClose:  0.0207469
+                           L2-RClose:  0.0670514
+                         Rel-Vol-Err:  2.5933648E-11
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP     5
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -1956,6 +2032,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.9194E-03   -0.2028E-03   -0.3341E-04
   (  4, 14, 14) (  3, 14, 14) (  4, 17, 13)
 
+
+
+Solver Convergence Information:
+                              HClose:  3.3412338E-5
+                              RClose:  0.0222041
+                           L2-RClose:  0.0656733
+                         Rel-Vol-Err:  2.7755075E-11
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP     6
     SAVE BUDGET
@@ -1983,6 +2067,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4, 14, 14) (  3, 14, 14) (  4, 17, 13)
 
 
+
+Solver Convergence Information:
+                              HClose:  3.7489037E-5
+                              RClose:  0.0236350
+                           L2-RClose:  0.0674985
+                         Rel-Vol-Err:  2.9543692E-11
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP     7
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -2008,6 +2100,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.1040E-02   -0.2274E-03   -0.4127E-04
   (  4, 14, 14) (  3, 14, 14) (  4, 17, 13)
 
+
+
+Solver Convergence Information:
+                              HClose:  4.1266911E-5
+                              RClose:  0.0249656
+                           L2-RClose:  0.0698970
+                         Rel-Vol-Err:  3.1207045E-11
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP     8
     SAVE BUDGET
@@ -2035,6 +2135,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4, 14, 14) (  3, 14, 14) (  4, 17, 13)
 
 
+
+Solver Convergence Information:
+                              HClose:  4.4737031E-5
+                              RClose:  0.0261824
+                           L2-RClose:  0.0724251
+                         Rel-Vol-Err:  3.2727978E-11
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP     9
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -2060,6 +2168,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.1137E-02   -0.2464E-03   -0.4790E-04
   (  4, 14, 14) (  3, 14, 14) (  4, 17, 13)
 
+
+
+Solver Convergence Information:
+                              HClose:  4.7901853E-5
+                              RClose:  0.0272806
+                           L2-RClose:  0.0748762
+                         Rel-Vol-Err:  3.4100796E-11
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    10
     SAVE BUDGET
@@ -2087,6 +2203,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4, 14, 14) (  3, 14, 14) (  4, 17, 13)
 
 
+
+Solver Convergence Information:
+                              HClose:  5.0771277E-5
+                              RClose:  0.0282617
+                           L2-RClose:  0.0771582
+                         Rel-Vol-Err:  3.5327076E-11
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    11
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -2112,6 +2236,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.1214E-02   -0.2603E-03   -0.5336E-04
   (  4, 14, 14) (  3, 14, 14) (  4, 17, 13)
 
+
+
+Solver Convergence Information:
+                              HClose:  5.3359759E-5
+                              RClose:  0.0291302
+                           L2-RClose:  0.0792344
+                         Rel-Vol-Err:  3.6412810E-11
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    12
     SAVE BUDGET
@@ -2139,6 +2271,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4, 14, 14) (  3, 14, 14) (  4, 17, 13)
 
 
+
+Solver Convergence Information:
+                              HClose:  5.5684316E-5
+                              RClose:  0.0298932
+                           L2-RClose:  0.0810952
+                         Rel-Vol-Err:  3.7366504E-11
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    13
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -2164,6 +2304,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.1273E-02   -0.2703E-03   -0.5776E-04
   (  4, 14, 14) (  3, 14, 14) (  4, 17, 13)
 
+
+
+Solver Convergence Information:
+                              HClose:  5.7763168E-5
+                              RClose:  0.0305583
+                           L2-RClose:  0.0827447
+                         Rel-Vol-Err:  3.8197920E-11
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    14
     SAVE BUDGET
@@ -2191,6 +2339,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4, 14, 14) (  3, 14, 14) (  4, 17, 13)
 
 
+
+Solver Convergence Information:
+                              HClose:  5.9614833E-5
+                              RClose:  0.0311338
+                           L2-RClose:  0.0841936
+                         Rel-Vol-Err:  3.8917268E-11
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    15
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -2216,6 +2372,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.1317E-02   -0.2796E-03   -0.6126E-04
   (  4, 14, 14) (  3, 16, 13) (  4, 17, 13)
 
+
+
+Solver Convergence Information:
+                              HClose:  6.1257534E-5
+                              RClose:  0.0316278
+                           L2-RClose:  0.0854556
+                         Rel-Vol-Err:  3.9534690E-11
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    16
     SAVE BUDGET
@@ -2243,6 +2407,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4, 14, 14) (  3, 16, 13) (  4, 17, 13)
 
 
+
+Solver Convergence Information:
+                              HClose:  6.2708818E-5
+                              RClose:  0.0320480
+                           L2-RClose:  0.0865455
+                         Rel-Vol-Err:  4.0059942E-11
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    17
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -2268,6 +2440,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.1349E-02   -0.2889E-03   -0.6399E-04
   (  4, 14, 14) (  3, 16, 13) (  4, 17, 13)
 
+
+
+Solver Convergence Information:
+                              HClose:  6.3985331E-5
+                              RClose:  0.0324018
+                           L2-RClose:  0.0874783
+                         Rel-Vol-Err:  4.0502219E-11
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    18
     SAVE BUDGET
@@ -2295,6 +2475,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4, 14, 14) (  3, 16, 13) (  4, 17, 13)
 
 
+
+Solver Convergence Information:
+                              HClose:  6.5102693E-5
+                              RClose:  0.0326960
+                           L2-RClose:  0.0882682
+                         Rel-Vol-Err:  4.0870053E-11
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    19
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -2320,6 +2508,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.1372E-02   -0.2957E-03   -0.6608E-04
   (  4, 14, 14) (  3, 16, 13) (  4, 17, 13)
 
+
+
+Solver Convergence Information:
+                              HClose:  6.6075443E-5
+                              RClose:  0.0329370
+                           L2-RClose:  0.0889290
+                         Rel-Vol-Err:  4.1171284E-11
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    20
     SAVE BUDGET
@@ -2347,6 +2543,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4, 14, 14) (  3, 16, 13) (  4, 17, 13)
 
 
+
+Solver Convergence Information:
+                              HClose:  6.6917028E-5
+                              RClose:  0.0331304
+                           L2-RClose:  0.0894732
+                         Rel-Vol-Err:  4.1413059E-11
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    21
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -2372,6 +2576,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.1387E-02   -0.3005E-03   -0.6763E-04
   (  4, 14, 14) (  3, 16, 13) (  4, 17, 13)
 
+
+
+Solver Convergence Information:
+                              HClose:  6.7629304E-5
+                              RClose:  0.0332558
+                           L2-RClose:  0.0897665
+                         Rel-Vol-Err:  4.1569696E-11
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    22
     SAVE BUDGET
@@ -2399,6 +2611,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4, 14, 14) (  3, 16, 13) (  4, 17, 13)
 
 
+
+Solver Convergence Information:
+                              HClose:  6.8266249E-5
+                              RClose:  0.0333916
+                           L2-RClose:  0.0901954
+                         Rel-Vol-Err:  4.1739544E-11
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    23
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -2424,6 +2644,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.1395E-02   -0.3038E-03   -0.6878E-04
   (  4, 14, 14) (  3, 16, 13) (  4, 17, 13)
 
+
+
+Solver Convergence Information:
+                              HClose:  6.8784216E-5
+                              RClose:  0.0334720
+                           L2-RClose:  0.0904614
+                         Rel-Vol-Err:  4.1839994E-11
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    24
     SAVE BUDGET
@@ -2451,6 +2679,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4, 14, 14) (  3, 16, 13) (  4, 17, 13)
 
 
+
+Solver Convergence Information:
+                              HClose:  6.9213981E-5
+                              RClose:  0.0335219
+                           L2-RClose:  0.0906489
+                         Rel-Vol-Err:  4.1902434E-11
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    25
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -2476,6 +2712,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.1399E-02   -0.3057E-03   -0.6956E-04
   (  4, 14, 14) (  3, 16, 13) (  4, 17, 13)
 
+
+
+Solver Convergence Information:
+                              HClose:  6.9564830E-5
+                              RClose:  0.0335455
+                           L2-RClose:  0.0907684
+                         Rel-Vol-Err:  4.1931903E-11
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    26
     SAVE BUDGET
@@ -2503,6 +2747,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4, 14, 14) (  3, 16, 13) (  4, 17, 13)
 
 
+
+Solver Convergence Information:
+                              HClose:  6.9844685E-5
+                              RClose:  0.0335458
+                           L2-RClose:  0.0908273
+                         Rel-Vol-Err:  4.1932283E-11
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    27
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -2528,6 +2780,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.1399E-02   -0.3066E-03   -0.7006E-04
   (  4, 14, 14) (  3, 16, 13) (  4, 17, 13)
 
+
+
+Solver Convergence Information:
+                              HClose:  7.0060681E-5
+                              RClose:  0.0335256
+                           L2-RClose:  0.0908325
+                         Rel-Vol-Err:  4.1906978E-11
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    28
     SAVE BUDGET
@@ -2555,6 +2815,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4, 14, 14) (  3, 16, 13) (  4, 17, 13)
 
 
+
+Solver Convergence Information:
+                              HClose:  7.0219281E-5
+                              RClose:  0.0334872
+                           L2-RClose:  0.0907897
+                         Rel-Vol-Err:  4.1859025E-11
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    29
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -2580,6 +2848,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.1396E-02   -0.3067E-03   -0.7033E-04
   (  4, 14, 14) (  3, 16, 13) (  4, 17, 13)
 
+
+
+Solver Convergence Information:
+                              HClose:  7.0326345E-5
+                              RClose:  0.0334329
+                           L2-RClose:  0.0907045
+                         Rel-Vol-Err:  4.1791134E-11
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    30
     SAVE BUDGET
@@ -2607,6 +2883,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4, 14, 14) (  3, 16, 13) (  4, 17, 13)
 
 
+
+Solver Convergence Information:
+                              HClose:  7.0387178E-5
+                              RClose:  0.0333646
+                           L2-RClose:  0.0905815
+                         Rel-Vol-Err:  4.1705724E-11
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    31
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -2632,6 +2916,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.1391E-02   -0.3061E-03   -0.7041E-04
   (  4, 14, 14) (  3, 16, 13) (  4, 17, 13)
 
+
+
+Solver Convergence Information:
+                              HClose:  7.0406586E-5
+                              RClose:  0.0332840
+                           L2-RClose:  0.0904252
+                         Rel-Vol-Err:  4.1604955E-11
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    32
     SAVE BUDGET
@@ -2659,6 +2951,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4, 14, 14) (  3, 16, 13) (  4, 17, 13)
 
 
+
+Solver Convergence Information:
+                              HClose:  7.0336585E-5
+                              RClose:  0.0330725
+                           L2-RClose:  0.0901807
+                         Rel-Vol-Err:  4.1340687E-11
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    33
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -2684,6 +2984,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.1384E-02   -0.3047E-03   -0.7029E-04
   (  4, 14, 14) (  3, 16, 13) (  4, 17, 13)
 
+
+
+Solver Convergence Information:
+                              HClose:  7.0285813E-5
+                              RClose:  0.0329620
+                           L2-RClose:  0.0900009
+                         Rel-Vol-Err:  4.1202554E-11
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    34
     SAVE BUDGET
@@ -2711,6 +3019,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4, 14, 14) (  3, 16, 13) (  4, 17, 13)
 
 
+
+Solver Convergence Information:
+                              HClose:  7.0207172E-5
+                              RClose:  0.0328556
+                           L2-RClose:  0.0897710
+                         Rel-Vol-Err:  4.1069554E-11
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    35
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -2736,6 +3052,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.1375E-02   -0.3033E-03   -0.7010E-04
   (  4, 14, 14) (  3, 16, 13) (  4, 17, 13)
 
+
+
+Solver Convergence Information:
+                              HClose:  7.0099905E-5
+                              RClose:  0.0327406
+                           L2-RClose:  0.0895157
+                         Rel-Vol-Err:  4.0925804E-11
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    36
     SAVE BUDGET
@@ -2763,6 +3087,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4, 14, 14) (  3, 16, 13) (  4, 17, 13)
 
 
+
+Solver Convergence Information:
+                              HClose:  6.9968996E-5
+                              RClose:  0.0326194
+                           L2-RClose:  0.0892428
+                         Rel-Vol-Err:  4.0774238E-11
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    37
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -2788,6 +3120,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.1366E-02   -0.3016E-03   -0.6982E-04
   (  4, 14, 14) (  3, 16, 13) (  4, 17, 13)
 
+
+
+Solver Convergence Information:
+                              HClose:  6.9817270E-5
+                              RClose:  0.0324929
+                           L2-RClose:  0.0889549
+                         Rel-Vol-Err:  4.0616106E-11
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    38
     SAVE BUDGET
@@ -2815,6 +3155,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4, 14, 14) (  3, 16, 13) (  4, 17, 13)
 
 
+
+Solver Convergence Information:
+                              HClose:  6.9662481E-5
+                              RClose:  0.0323839
+                           L2-RClose:  0.0887318
+                         Rel-Vol-Err:  4.0479835E-11
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    39
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -2840,6 +3188,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.1355E-02   -0.2995E-03   -0.6939E-04
   (  4, 14, 14) (  3, 16, 13) (  4, 17, 13)
 
+
+
+Solver Convergence Information:
+                              HClose:  6.9393553E-5
+                              RClose:  0.0321895
+                           L2-RClose:  0.0883673
+                         Rel-Vol-Err:  4.0236827E-11
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    40
     SAVE BUDGET
@@ -2867,6 +3223,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4, 14, 14) (  3, 16, 13) (  4, 17, 13)
 
 
+
+Solver Convergence Information:
+                              HClose:  6.9198079E-5
+                              RClose:  0.0320576
+                           L2-RClose:  0.0880641
+                         Rel-Vol-Err:  4.0071983E-11
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    41
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -2892,6 +3256,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.1344E-02   -0.2974E-03   -0.6899E-04
   (  4, 14, 14) (  3, 16, 13) (  4, 17, 13)
 
+
+
+Solver Convergence Information:
+                              HClose:  6.8985983E-5
+                              RClose:  0.0319183
+                           L2-RClose:  0.0877366
+                         Rel-Vol-Err:  3.9897901E-11
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    42
     SAVE BUDGET
@@ -2919,6 +3291,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4, 14, 14) (  3, 16, 13) (  4, 17, 13)
 
 
+
+Solver Convergence Information:
+                              HClose:  6.8761521E-5
+                              RClose:  0.0317761
+                           L2-RClose:  0.0874003
+                         Rel-Vol-Err:  3.9720077E-11
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    43
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -2944,6 +3324,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.1332E-02   -0.2952E-03   -0.6854E-04
   (  4, 14, 14) (  3, 16, 13) (  4, 17, 13)
 
+
+
+Solver Convergence Information:
+                              HClose:  6.8542422E-5
+                              RClose:  0.0316492
+                           L2-RClose:  0.0870548
+                         Rel-Vol-Err:  3.9561485E-11
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    44
     SAVE BUDGET
@@ -2971,6 +3359,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4, 14, 14) (  3, 16, 13) (  4, 17, 13)
 
 
+
+Solver Convergence Information:
+                              HClose:  6.8305876E-5
+                              RClose:  0.0315178
+                           L2-RClose:  0.0867253
+                         Rel-Vol-Err:  3.9397215E-11
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    45
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -2996,6 +3392,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.1320E-02   -0.2929E-03   -0.6805E-04
   (  4, 14, 14) (  3, 16, 13) (  4, 17, 13)
 
+
+
+Solver Convergence Information:
+                              HClose:  6.8050447E-5
+                              RClose:  0.0313608
+                           L2-RClose:  0.0863556
+                         Rel-Vol-Err:  3.9201000E-11
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    46
     SAVE BUDGET
@@ -3023,6 +3427,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4, 14, 14) (  3, 16, 13) (  4, 17, 13)
 
 
+
+Solver Convergence Information:
+                              HClose:  6.7766837E-5
+                              RClose:  0.0311631
+                           L2-RClose:  0.0858518
+                         Rel-Vol-Err:  3.8953847E-11
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    47
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -3048,6 +3460,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.1309E-02   -0.2902E-03   -0.6750E-04
   (  4, 14, 14) (  3, 16, 13) (  4, 17, 13)
 
+
+
+Solver Convergence Information:
+                              HClose:  6.7498059E-5
+                              RClose:  0.0310054
+                           L2-RClose:  0.0854806
+                         Rel-Vol-Err:  3.8756797E-11
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    48
     SAVE BUDGET
@@ -3075,6 +3495,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4, 14, 14) (  3, 16, 13) (  4, 17, 13)
 
 
+
+Solver Convergence Information:
+                              HClose:  6.7225220E-5
+                              RClose:  0.0308487
+                           L2-RClose:  0.0851201
+                         Rel-Vol-Err:  3.8560918E-11
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    49
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -3100,6 +3528,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.1297E-02   -0.2880E-03   -0.6700E-04
   (  4, 14, 14) (  3, 16, 13) (  4, 17, 13)
 
+
+
+Solver Convergence Information:
+                              HClose:  6.6995876E-5
+                              RClose:  0.0307015
+                           L2-RClose:  0.0848653
+                         Rel-Vol-Err:  3.8376859E-11
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    50
     SAVE BUDGET
@@ -3127,6 +3563,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4, 14, 14) (  3, 16, 13) (  4, 17, 13)
 
 
+
+Solver Convergence Information:
+                              HClose:  6.6672682E-5
+                              RClose:  0.0304798
+                           L2-RClose:  0.0844210
+                         Rel-Vol-Err:  3.8099700E-11
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    51
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -3152,6 +3596,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.1285E-02   -0.2852E-03   -0.6640E-04
   (  4, 14, 14) (  3, 16, 13) (  4, 17, 13)
 
+
+
+Solver Convergence Information:
+                              HClose:  6.6398277E-5
+                              RClose:  0.0303309
+                           L2-RClose:  0.0841038
+                         Rel-Vol-Err:  3.7913652E-11
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    52
     SAVE BUDGET
@@ -3179,6 +3631,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4, 14, 14) (  3, 16, 13) (  4, 17, 13)
 
 
+
+Solver Convergence Information:
+                              HClose:  6.6116604E-5
+                              RClose:  0.0302243
+                           L2-RClose:  0.0838063
+                         Rel-Vol-Err:  3.7780347E-11
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    53
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -3204,6 +3664,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.1273E-02   -0.2828E-03   -0.6584E-04
   (  4, 14, 14) (  3, 16, 13) (  4, 17, 13)
 
+
+
+Solver Convergence Information:
+                              HClose:  6.5836786E-5
+                              RClose:  0.0300531
+                           L2-RClose:  0.0834504
+                         Rel-Vol-Err:  3.7566422E-11
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    54
     SAVE BUDGET
@@ -3231,6 +3699,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4, 14, 14) (  3, 16, 13) (  4, 17, 13)
 
 
+
+Solver Convergence Information:
+                              HClose:  6.5537949E-5
+                              RClose:  0.0298919
+                           L2-RClose:  0.0831581
+                         Rel-Vol-Err:  3.7364922E-11
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    55
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -3256,6 +3732,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.1261E-02   -0.2802E-03   -0.6525E-04
   (  4, 14, 14) (  3, 16, 13) (  4, 17, 13)
 
+
+
+Solver Convergence Information:
+                              HClose:  6.5251460E-5
+                              RClose:  0.0297365
+                           L2-RClose:  0.0827949
+                         Rel-Vol-Err:  3.7170636E-11
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    56
     SAVE BUDGET
@@ -3283,6 +3767,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4, 14, 14) (  3, 16, 13) (  4, 17, 13)
 
 
+
+Solver Convergence Information:
+                              HClose:  6.4960517E-5
+                              RClose:  0.0296164
+                           L2-RClose:  0.0823106
+                         Rel-Vol-Err:  3.7020513E-11
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    57
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -3308,6 +3800,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.1249E-02   -0.2777E-03   -0.6468E-04
   (  4, 14, 14) (  3, 16, 13) (  4, 17, 13)
 
+
+
+Solver Convergence Information:
+                              HClose:  6.4675696E-5
+                              RClose:  0.0294737
+                           L2-RClose:  0.0819451
+                         Rel-Vol-Err:  3.6842167E-11
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    58
     SAVE BUDGET
@@ -3335,6 +3835,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4, 14, 14) (  3, 16, 13) (  4, 17, 13)
 
 
+
+Solver Convergence Information:
+                              HClose:  6.4385142E-5
+                              RClose:  0.0293430
+                           L2-RClose:  0.0815827
+                         Rel-Vol-Err:  3.6678754E-11
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    59
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -3360,6 +3868,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.1238E-02   -0.2753E-03   -0.6412E-04
   (  4, 14, 14) (  3, 16, 13) (  4, 17, 13)
 
+
+
+Solver Convergence Information:
+                              HClose:  6.4117105E-5
+                              RClose:  0.0291876
+                           L2-RClose:  0.0813361
+                         Rel-Vol-Err:  3.6484456E-11
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      2   TIME STEP    60
     PRINT BUDGET
@@ -4323,6 +4839,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4,  9,  9) (  3,  9,  8) (  3,  8, 10) (  4,  8, 10)
 
 
+
+Solver Convergence Information:
+                              HClose:  5.5500383E-5
+                              RClose:  0.0456971
+                           L2-RClose:  0.1311193
+                         Rel-Vol-Err:  5.7121320E-11
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP     1
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -4348,6 +4872,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
      0.1498E-02    0.3803E-03    0.5497E-04
   (  4,  8,  9) (  3,  8, 10) (  4,  9,  9)
 
+
+
+Solver Convergence Information:
+                              HClose:  5.4968445E-5
+                              RClose:  0.0452232
+                           L2-RClose:  0.1492922
+                         Rel-Vol-Err:  6.3098003E-11
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP     2
     SAVE BUDGET
@@ -4375,6 +4907,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4,  8,  9) (  3,  8, 10) (  4, 17, 13)
 
 
+
+Solver Convergence Information:
+                              HClose:  4.5616323E-5
+                              RClose:  0.0207576
+                           L2-RClose:  0.0961089
+                         Rel-Vol-Err:  2.5947015E-11
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP     3
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -4400,6 +4940,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.4901E-03    0.1566E-03   -0.4095E-04
   (  4, 14, 14) (  4,  8, 10) (  4, 18, 12)
 
+
+
+Solver Convergence Information:
+                              HClose:  4.0946393E-5
+                              RClose:  0.0131039
+                           L2-RClose:  0.0716492
+                         Rel-Vol-Err:  1.6379863E-11
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP     4
     SAVE BUDGET
@@ -4427,6 +4975,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4, 18, 12) (  4, 16, 13) (  4, 18, 12)
 
 
+
+Solver Convergence Information:
+                              HClose:  3.6587630E-5
+                              RClose:  0.0117647
+                           L2-RClose:  0.0577568
+                         Rel-Vol-Err:  1.4705815E-11
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP     5
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -4452,6 +5008,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.3805E-03   -0.1138E-03   -0.3239E-04
   (  4, 18, 12) (  4, 16, 13) (  4, 18, 12)
 
+
+
+Solver Convergence Information:
+                              HClose:  3.2386343E-5
+                              RClose:  0.0108839
+                           L2-RClose:  0.0484731
+                         Rel-Vol-Err:  1.3604863E-11
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP     6
     SAVE BUDGET
@@ -4479,6 +5043,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4, 18, 12) (  4, 17, 12)
 
 
+
+Solver Convergence Information:
+                              HClose:  9.9384158E-5
+                              RClose:  0.0241656
+                           L2-RClose:  0.1716964
+                         Rel-Vol-Err:  5.6068439E-11
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP     7
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -4504,6 +5076,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.3062E-03   -0.8864E-04
   (  4, 18, 12) (  3,  1,  9)
 
+
+
+Solver Convergence Information:
+                              HClose:  8.8636306E-5
+                              RClose:  0.0211769
+                           L2-RClose:  0.1518776
+                         Rel-Vol-Err:  5.3967697E-11
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP     8
     SAVE BUDGET
@@ -4531,6 +5111,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4,  1, 10) (  3,  1,  9)
 
 
+
+Solver Convergence Information:
+                              HClose:  8.3292206E-5
+                              RClose:  0.0183810
+                           L2-RClose:  0.1350101
+                         Rel-Vol-Err:  5.1945933E-11
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP     9
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -4556,6 +5144,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.2743E-03   -0.7864E-04
   (  4,  1, 10) (  3,  1,  9)
 
+
+
+Solver Convergence Information:
+                              HClose:  7.8641534E-5
+                              RClose:  0.0157805
+                           L2-RClose:  0.1206032
+                         Rel-Vol-Err:  1.9725620E-11
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    10
     SAVE BUDGET
@@ -4583,6 +5179,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4,  1, 10) (  3,  1,  9)
 
 
+
+Solver Convergence Information:
+                              HClose:  7.4489631E-5
+                              RClose:  0.0133721
+                           L2-RClose:  0.1083033
+                         Rel-Vol-Err:  1.6715135E-11
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    11
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -4608,6 +5212,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.2520E-03   -0.7071E-04
   (  4,  1, 10) (  3,  1,  9)
 
+
+
+Solver Convergence Information:
+                              HClose:  7.0707186E-5
+                              RClose:  0.0111496
+                           L2-RClose:  0.0978423
+                         Rel-Vol-Err:  1.3936985E-11
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    12
     SAVE BUDGET
@@ -4635,6 +5247,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4,  1, 10) (  3,  1,  9)
 
 
+
+Solver Convergence Information:
+                              HClose:  6.7208372E-5
+                              RClose:  0.0092679
+                           L2-RClose:  0.0890043
+                         Rel-Vol-Err:  0.0
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    13
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -4660,6 +5280,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.2312E-03   -0.6394E-04
   (  4,  1, 10) (  3,  1,  9)
 
+
+
+Solver Convergence Information:
+                              HClose:  6.3936040E-5
+                              RClose:  0.0088837
+                           L2-RClose:  0.0816063
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    14
     SAVE BUDGET
@@ -4687,6 +5315,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4,  1, 10) (  3,  1,  9)
 
 
+
+Solver Convergence Information:
+                              HClose:  6.0851839E-5
+                              RClose:  0.0084969
+                           L2-RClose:  0.0754847
+                         Rel-Vol-Err:  0.0
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    15
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -4712,6 +5348,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.2117E-03   -0.5793E-04
   (  4,  1, 10) (  3,  1,  9)
 
+
+
+Solver Convergence Information:
+                              HClose:  5.7929685E-5
+                              RClose:  0.0081123
+                           L2-RClose:  0.0704874
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    16
     SAVE BUDGET
@@ -4739,6 +5383,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4,  1, 10) (  3,  1,  9)
 
 
+
+Solver Convergence Information:
+                              HClose:  5.5151460E-5
+                              RClose:  0.0077334
+                           L2-RClose:  0.0664691
+                         Rel-Vol-Err:  0.0
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    17
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -4764,6 +5416,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.1934E-03   -0.5250E-04
   (  4,  1, 10) (  3,  1,  9)
 
+
+
+Solver Convergence Information:
+                              HClose:  5.2504217E-5
+                              RClose:  0.0075940
+                           L2-RClose:  0.0632899
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    18
     SAVE BUDGET
@@ -4791,6 +5451,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4, 12, 15) (  3, 14, 14)
 
 
+
+Solver Convergence Information:
+                              HClose:  5.0445836E-5
+                              RClose:  0.0084271
+                           L2-RClose:  0.0608161
+                         Rel-Vol-Err:  0.0
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    19
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -4816,6 +5484,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
      0.2013E-03    0.5255E-04
   (  4, 12, 15) (  3, 14, 14)
 
+
+
+Solver Convergence Information:
+                              HClose:  5.2545193E-5
+                              RClose:  0.0091421
+                           L2-RClose:  0.0589229
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    20
     SAVE BUDGET
@@ -4843,6 +5519,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4, 12, 15) (  3, 14, 14)
 
 
+
+Solver Convergence Information:
+                              HClose:  5.4264574E-5
+                              RClose:  0.0097521
+                           L2-RClose:  0.0574967
+                         Rel-Vol-Err:  0.0
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    21
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -4868,6 +5552,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
      0.2122E-03    0.5565E-04
   (  4, 12, 15) (  3, 14, 14)
 
+
+
+Solver Convergence Information:
+                              HClose:  5.5649811E-5
+                              RClose:  0.0102689
+                           L2-RClose:  0.0564371
+                         Rel-Vol-Err:  1.2836085E-11
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    22
     SAVE BUDGET
@@ -4895,6 +5587,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4, 12, 15) (  3, 14, 14)
 
 
+
+Solver Convergence Information:
+                              HClose:  5.6741534E-5
+                              RClose:  0.0107031
+                           L2-RClose:  0.0556580
+                         Rel-Vol-Err:  1.3378846E-11
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    23
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -4920,6 +5620,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
      0.2247E-03    0.5758E-04
   (  4, 14, 14) (  3, 14, 14)
 
+
+
+Solver Convergence Information:
+                              HClose:  5.7575744E-5
+                              RClose:  0.0110641
+                           L2-RClose:  0.0550877
+                         Rel-Vol-Err:  1.3830170E-11
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    24
     SAVE BUDGET
@@ -4947,6 +5655,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4, 14, 14) (  3, 14, 14)
 
 
+
+Solver Convergence Information:
+                              HClose:  5.8184330E-5
+                              RClose:  0.0113605
+                           L2-RClose:  0.0546677
+                         Rel-Vol-Err:  1.4200579E-11
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    25
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -4972,6 +5688,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
      0.2384E-03    0.5860E-04
   (  4, 14, 14) (  3, 14, 14)
 
+
+
+Solver Convergence Information:
+                              HClose:  5.8595540E-5
+                              RClose:  0.0115996
+                           L2-RClose:  0.0543517
+                         Rel-Vol-Err:  1.4499454E-11
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    26
     SAVE BUDGET
@@ -4999,6 +5723,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4, 14, 14) (  3, 14, 14)
 
 
+
+Solver Convergence Information:
+                              HClose:  5.8834395E-5
+                              RClose:  0.0117881
+                           L2-RClose:  0.0541033
+                         Rel-Vol-Err:  1.4735158E-11
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    27
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -5024,6 +5756,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
      0.2481E-03    0.5892E-04
   (  4, 14, 14) (  3, 14, 14)
 
+
+
+Solver Convergence Information:
+                              HClose:  5.8923058E-5
+                              RClose:  0.0119321
+                           L2-RClose:  0.0538950
+                         Rel-Vol-Err:  1.4915138E-11
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    28
     SAVE BUDGET
@@ -5051,6 +5791,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4, 14, 14) (  3, 14, 14)
 
 
+
+Solver Convergence Information:
+                              HClose:  5.8881162E-5
+                              RClose:  0.0120368
+                           L2-RClose:  0.0537059
+                         Rel-Vol-Err:  1.5046033E-11
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    29
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -5076,6 +5824,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
      0.2544E-03    0.5873E-04
   (  4, 14, 14) (  3, 14, 14)
 
+
+
+Solver Convergence Information:
+                              HClose:  5.8726101E-5
+                              RClose:  0.0121070
+                           L2-RClose:  0.0535207
+                         Rel-Vol-Err:  1.5133756E-11
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    30
     SAVE BUDGET
@@ -5103,6 +5859,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4, 14, 14) (  3, 14, 14)
 
 
+
+Solver Convergence Information:
+                              HClose:  5.8473281E-5
+                              RClose:  0.0121469
+                           L2-RClose:  0.0533287
+                         Rel-Vol-Err:  1.5183574E-11
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    31
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -5128,6 +5892,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
      0.2580E-03    0.5814E-04
   (  4, 14, 14) (  3, 14, 14)
 
+
+
+Solver Convergence Information:
+                              HClose:  5.8136344E-5
+                              RClose:  0.0121601
+                           L2-RClose:  0.0531223
+                         Rel-Vol-Err:  1.5200179E-11
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    32
     SAVE BUDGET
@@ -5155,6 +5927,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4, 14, 14) (  3, 14, 14)
 
 
+
+Solver Convergence Information:
+                              HClose:  5.7727373E-5
+                              RClose:  0.0121502
+                           L2-RClose:  0.0528965
+                         Rel-Vol-Err:  1.5187750E-11
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    33
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -5180,6 +5960,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
      0.2596E-03    0.5726E-04
   (  4, 14, 14) (  3, 14, 14)
 
+
+
+Solver Convergence Information:
+                              HClose:  5.7257063E-5
+                              RClose:  0.0121200
+                           L2-RClose:  0.0526483
+                         Rel-Vol-Err:  1.5150008E-11
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    34
     SAVE BUDGET
@@ -5207,6 +5995,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4, 14, 14) (  3, 14, 14)
 
 
+
+Solver Convergence Information:
+                              HClose:  5.6734873E-5
+                              RClose:  0.0120722
+                           L2-RClose:  0.0523764
+                         Rel-Vol-Err:  1.5090268E-11
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    35
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -5232,6 +6028,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
      0.2595E-03    0.5617E-04
   (  4, 14, 14) (  3, 14, 14)
 
+
+
+Solver Convergence Information:
+                              HClose:  5.6169173E-5
+                              RClose:  0.0120092
+                           L2-RClose:  0.0520802
+                         Rel-Vol-Err:  1.5011478E-11
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    36
     SAVE BUDGET
@@ -5259,6 +6063,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4, 14, 14) (  3, 16, 13)
 
 
+
+Solver Convergence Information:
+                              HClose:  5.5757077E-5
+                              RClose:  0.0119330
+                           L2-RClose:  0.0517601
+                         Rel-Vol-Err:  1.4916265E-11
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    37
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -5284,6 +6096,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
      0.2582E-03    0.5576E-04
   (  4, 14, 14) (  3, 16, 13)
 
+
+
+Solver Convergence Information:
+                              HClose:  5.5758499E-5
+                              RClose:  0.0118456
+                           L2-RClose:  0.0514170
+                         Rel-Vol-Err:  1.4806961E-11
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    38
     SAVE BUDGET
@@ -5311,6 +6131,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4, 14, 14) (  3, 16, 13)
 
 
+
+Solver Convergence Information:
+                              HClose:  5.5688967E-5
+                              RClose:  0.0117485
+                           L2-RClose:  0.0510523
+                         Rel-Vol-Err:  1.4685645E-11
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    39
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -5336,6 +6164,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
      0.2558E-03    0.5556E-04
   (  4, 14, 14) (  3, 16, 13)
 
+
+
+Solver Convergence Information:
+                              HClose:  5.5556484E-5
+                              RClose:  0.0116433
+                           L2-RClose:  0.0506675
+                         Rel-Vol-Err:  1.4554160E-11
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    40
     SAVE BUDGET
@@ -5363,6 +6199,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4, 14, 14) (  3, 16, 13)
 
 
+
+Solver Convergence Information:
+                              HClose:  5.5368269E-5
+                              RClose:  0.0115313
+                           L2-RClose:  0.0502644
+                         Rel-Vol-Err:  1.4414145E-11
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    41
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -5388,6 +6232,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
      0.2526E-03    0.5513E-04
   (  4, 14, 14) (  3, 16, 13)
 
+
+
+Solver Convergence Information:
+                              HClose:  5.5130835E-5
+                              RClose:  0.0114136
+                           L2-RClose:  0.0498446
+                         Rel-Vol-Err:  1.4267054E-11
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    42
     SAVE BUDGET
@@ -5415,6 +6267,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4, 14, 14) (  3, 16, 13)
 
 
+
+Solver Convergence Information:
+                              HClose:  5.4850059E-5
+                              RClose:  0.0112913
+                           L2-RClose:  0.0494101
+                         Rel-Vol-Err:  1.4114175E-11
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    43
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -5440,6 +6300,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
      0.2488E-03    0.5453E-04
   (  4, 14, 14) (  3, 16, 13)
 
+
+
+Solver Convergence Information:
+                              HClose:  5.4531242E-5
+                              RClose:  0.0111653
+                           L2-RClose:  0.0489626
+                         Rel-Vol-Err:  1.3956651E-11
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    44
     SAVE BUDGET
@@ -5467,6 +6335,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4, 14, 14) (  3, 16, 13)
 
 
+
+Solver Convergence Information:
+                              HClose:  5.4179167E-5
+                              RClose:  0.0110364
+                           L2-RClose:  0.0485038
+                         Rel-Vol-Err:  1.3795491E-11
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    45
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -5492,6 +6368,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
      0.2447E-03    0.5380E-04
   (  4, 14, 14) (  3, 16, 13)
 
+
+
+Solver Convergence Information:
+                              HClose:  5.3798146E-5
+                              RClose:  0.0109053
+                           L2-RClose:  0.0480355
+                         Rel-Vol-Err:  1.3631588E-11
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    46
     SAVE BUDGET
@@ -5519,6 +6403,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4, 14, 14) (  3, 16, 13)
 
 
+
+Solver Convergence Information:
+                              HClose:  5.3392071E-5
+                              RClose:  0.0107726
+                           L2-RClose:  0.0475591
+                         Rel-Vol-Err:  1.3465728E-11
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    47
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -5544,6 +6436,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
      0.2402E-03    0.5296E-04
   (  4, 14, 14) (  3, 16, 13)
 
+
+
+Solver Convergence Information:
+                              HClose:  5.2964448E-5
+                              RClose:  0.0106389
+                           L2-RClose:  0.0470761
+                         Rel-Vol-Err:  1.3298603E-11
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    48
     SAVE BUDGET
@@ -5571,6 +6471,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4, 14, 14) (  3, 16, 13)
 
 
+
+Solver Convergence Information:
+                              HClose:  5.2518438E-5
+                              RClose:  0.0105047
+                           L2-RClose:  0.0465881
+                         Rel-Vol-Err:  1.3130824E-11
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    49
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -5596,6 +6504,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
      0.2354E-03    0.5206E-04
   (  4, 14, 14) (  3, 16, 13)
 
+
+
+Solver Convergence Information:
+                              HClose:  5.2056889E-5
+                              RClose:  0.0103919
+                           L2-RClose:  0.0460961
+                         Rel-Vol-Err:  1.2989845E-11
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    50
     SAVE BUDGET
@@ -5623,6 +6539,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4, 14, 14) (  3, 16, 13)
 
 
+
+Solver Convergence Information:
+                              HClose:  5.1582365E-5
+                              RClose:  0.0102972
+                           L2-RClose:  0.0456016
+                         Rel-Vol-Err:  1.2871528E-11
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    51
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -5648,6 +6572,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
      0.2306E-03    0.5110E-04
   (  4, 14, 14) (  3, 16, 13)
 
+
+
+Solver Convergence Information:
+                              HClose:  5.1097174E-5
+                              RClose:  0.0102003
+                           L2-RClose:  0.0451055
+                         Rel-Vol-Err:  1.2750415E-11
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    52
     SAVE BUDGET
@@ -5675,6 +6607,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4, 14, 14) (  3, 16, 13)
 
 
+
+Solver Convergence Information:
+                              HClose:  5.0603391E-5
+                              RClose:  0.0101016
+                           L2-RClose:  0.0446088
+                         Rel-Vol-Err:  1.2627054E-11
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    53
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -5700,6 +6640,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
      0.2257E-03    0.5010E-04
   (  4, 14, 14) (  3, 16, 13)
 
+
+
+Solver Convergence Information:
+                              HClose:  5.0102883E-5
+                              RClose:  0.0100015
+                           L2-RClose:  0.0441125
+                         Rel-Vol-Err:  1.2501936E-11
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    54
     SAVE BUDGET
@@ -5727,6 +6675,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4, 14, 14) (  3, 16, 13)
 
 
+
+Solver Convergence Information:
+                              HClose:  4.9597323E-5
+                              RClose:  0.0099004
+                           L2-RClose:  0.0436175
+                         Rel-Vol-Err:  0.0
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    55
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -5752,6 +6708,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
      0.2207E-03    0.4909E-04
   (  4, 14, 14) (  3, 16, 13)
 
+
+
+Solver Convergence Information:
+                              HClose:  4.9088214E-5
+                              RClose:  0.0097985
+                           L2-RClose:  0.0431244
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    56
     SAVE BUDGET
@@ -5779,6 +6743,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4, 14, 14) (  3, 16, 13)
 
 
+
+Solver Convergence Information:
+                              HClose:  4.8576902E-5
+                              RClose:  0.0096962
+                           L2-RClose:  0.0426339
+                         Rel-Vol-Err:  0.0
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    57
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -5804,6 +6776,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
      0.2158E-03    0.4806E-04
   (  4, 14, 14) (  3, 16, 13)
 
+
+
+Solver Convergence Information:
+                              HClose:  4.8064592E-5
+                              RClose:  0.0095936
+                           L2-RClose:  0.0421468
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    58
     SAVE BUDGET
@@ -5831,6 +6811,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  4, 14, 14) (  3, 16, 13)
 
 
+
+Solver Convergence Information:
+                              HClose:  4.7552358E-5
+                              RClose:  0.0094911
+                           L2-RClose:  0.0416634
+                         Rel-Vol-Err:  0.0
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    59
     SAVE BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -5856,6 +6844,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
      0.2110E-03    0.4704E-04
   (  4, 14, 14) (  3, 16, 13)
 
+
+
+Solver Convergence Information:
+                              HClose:  4.7041160E-5
+                              RClose:  0.0093888
+                           L2-RClose:  0.0411844
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP    60
     PRINT BUDGET

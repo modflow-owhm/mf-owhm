@@ -1,0 +1,133 @@
+
+zonebudget(1)      U.S. Geological Survey (wrdapp)      zonebudget(1)
+
+
+NAME
+       zonebudget - Program for computing subregional water budgets
+                    for MODFLOW ground-water flow models
+
+ABSTRACT
+       Zonebudget (ZONBUD) is a computer program that computes
+       subregional water budgets using results from the MODFLOW ground-
+       water flow model.  The user designates the subregions by specifying
+       zone numbers.  A separate budget is computed for each zone.  The
+       budget for a zone includes a component of flow between each adjacent
+       zone.
+
+METHOD
+       ZONBUD reads a file of budget data that MODFLOW can write.  This
+       file must contain values for each flow component at every model
+       cell.  ZONBUD then accumulates each flow component for all the
+       cells in each specified zone.
+
+HISTORY
+       Version 3.2 1/15/2022 -- updated to improve error messages and
+          support MODFLOW-OWHM BAS keyword CONSTANT_HEAD_BUDGET_OPTIONAL.
+          This option indicates that the '   CONSTANT HEAD' array should not
+          be written to the CBC if there are not constant head cells.
+          Previously, Zonebudget required the '   CONSTANT HEAD' array.
+          
+       Version 3.01 12/18/2009 -- updated to fix a problem in the csv2
+          output file when a simulation has both transient and
+          steady-state stress periods.  In this situation, the STORAGE
+          column label was absent if the first stress period is steady
+          state; however, the storage values were written for the
+          transient time steps. The updated code always includes a
+          storage column label, and the storage value is 0 for the
+          steady-state time steps.  Also reduced the time needed to
+          determine that a budget file is double precision.
+
+       Version 3.0 9/19/2008 -- updated to automatically read single
+          precision and double precision cell-by-cell budget files.  The
+          ability to write data into a comma-delimited file for use by
+          a spreadsheet program was added also.  The input for the zone
+          file has been updated to allow free format.
+
+       Version 2.1 2000/04/18 - updated to allow specifiers for opening
+          unformatted files to be easily modified.  The personal computer
+          version of the code is being distributed using unstructured
+          unformatted files.
+
+       Version 2.0 2000/04/24 - updated to read compact budget files that
+          MODFLOW-96 and MODFLOW-2000 can optionally write.  Compact budget
+          files use less disk space.  They also include additional information
+          that allows multiple budget values of the same type at the same cell
+          (for eample, river seepage) to be differentiated.  In such
+          situations, ZONBUD did not tabulate the budget in the same
+          manner as MODFLOW (see USGS OFR 90-392, p. 3).  By using the Compact
+          budget files and version 2.0 of ZONBUD, the budget will always be
+          tabulated in the same manner by MODFLOW and ZONBUD.  Note further
+          that when the CHTOCH option is used in MODFLOW-2000, which is used
+          when simulating contaminant transport, then ZONBUD will produce
+          incorrect results in some situations unless the COMPACT budget
+          option is used.  (The incorrect results can occur if there is flow
+          between adjacent constant-head cells.)  For the above reasons, it
+          is recommended that the MODFLOW Compact budget option be used
+          whenever ZONBUD will be used to analyze the budget file.  This
+          assures correct and consistent results, and minimizes the amount
+          of disk space.
+
+       Version 1.0 1996/12/20 - version published in USGS OFR 90-392.  Note
+          that this version will not work with cell-by-cell budget files
+          that are written using the optional compact format available in
+          MODFLOW-96.  That is, to use ZONBUD version 1.0 with
+          MODFLOW-96, the compact cell-by-cell budget option must NOT be
+          used.
+
+DATA REQUIREMENTS
+       In order to use ZONBUD, all cell-by-cell budget terms for a
+       MODFLOW simulation must be saved in a file when MODFLOW is executed.
+       As described above in the HISTORY section, it is best to save the
+       cell-by-cell budget data using the COMPACT format, which is an option
+       that was added to MODFLOW-96 and further enhanced in MODFLOW-2000.
+       Depending on the specific zones that are desired, a zone file must
+       also be prepared.
+
+OUTPUT OPTIONS
+       The output is a listing file that contains a flow budget for each
+       zone.
+
+SYSTEM REQUIREMENTS
+       ZONBUD is written in Fortran 90.  Generally, the program is easily
+       installed on most computer systems. The code has been used on
+       UNIX-based and Microsoft Windows based computers.
+
+DOCUMENTATION
+       Harbaugh, A.W., 1990, A computer program for calculating subregional
+          water budgets using results from the U.S. Geological Survey
+          modular three-dimensional ground-water flow model: U.S.
+          Geological Survey Open-File Report 90-392, 46 p.
+          
+       Documentation about changes to the version 3 code changes are
+       contained in file zonbud3.pdf, which is distributed with the
+       Zonebudget Version 3 code.
+
+RELATED DOCUMENTATION
+       Harbaugh, A.W., 2005, MODFLOW-2005, the U.S. Geological Survey modular
+          ground-water model -- the Ground-Water Flow Process: U.S. Geological
+          Survey Techniques and Methods 6-A16, variously p.
+
+       McDonald, M.G., and Harbaugh, A.W., 1988, A modular three-
+          dimensional finite-difference ground-water flow model: U.S.
+          Geological Survey Techniques of Water-Resources Investigations,
+          book 6, chap. A1, 586 p.
+
+       Harbaugh, A.W., and McDonald, M.G., 1996, User's documentation for
+          MODFLOW-96, an update to the U.S. Geological Survey modular
+          finite-difference ground-water flow model: U.S. Geological Survey
+          Open-File Report 96-485, 56 p.
+
+       Harbaugh, A.W., Banta, E.R., Hill, M.C., and McDonald, M.G., 1996,
+          MODFLOW-2000, the U.S. Geological Survey modular ground-water
+          model -- user guide to modularization concepts and the ground-water
+          flow process: U.S. Geological Survey Open-File Report 00-92.
+
+CONTACTS
+       Operation:
+          U.S. Geological Survey
+          Office of Ground Water
+          Arlen Harbaugh
+          411 National Center
+          Reston, VA 20192
+
+          harbaugh@usgs.gov

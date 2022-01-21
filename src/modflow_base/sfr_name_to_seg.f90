@@ -976,7 +976,7 @@ MODULE SFR_INPUT_DATA_TYPES!, ONLY: SFR_NAMED_LOCATION, SFR_SEGRCH_TFR, SFR_SEG_
                         IF(MAXDEL < DZ) MAXDEL = DZ
     END IF
     !
-    IF    (INFLOW <= DZ) THEN
+    IF    (INFLOW < NEARZERO_29 .OR. DMD < NEARZERO_29) THEN  ! Values too small to be used
                                 FLOW = DZ
     ELSEIF(INFLOW <= DMD) THEN
                                 FLOW = INFLOW

@@ -12,7 +12,7 @@
 #
 SHELLDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 #
-CWD=$(pwd)
+CWD="$(pwd)"
 #
 cd "$SHELLDIR"
 #
@@ -71,17 +71,17 @@ fi
 
 #Clean out the object file output
 if [ $OBJ = $T ]; then
-             ./cleanObj.sh "nopause"
+             bash ./cleanObj.sh "nopause"
 fi
 
 #Clean out the object file output
 if [ $LIB = $T ]; then
-             ./cleanLib.sh "nopause"
+             bash ./cleanLib.sh "nopause"
 fi
 
 #Clean out the example problem output
 if [ $EX = $T ]; then
-             ./cleanExampleOutput.sh "nopause"
+             bash ./cleanExampleOutput.sh "nopause"
 fi
 #
 #---- Return to calling folder  ----------------------------------------------------------

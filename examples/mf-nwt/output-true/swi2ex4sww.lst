@@ -1,3 +1,8 @@
+💧🧙💦🌊  <-These symbols help text editors identify file as Unicode UTF8.
+                    UTF8 is not necessary to view numerical results, but no UTF8 support can have artifacts where non-ascii symbols are used (such as the degree symbol).
+
+
+MODFLOW-OWHM v2.2.0
 
       MMMMMMM                                       MM      MMM     MM
     MMM     MMM    MM      M   MMMMMMMM             LM     DM M     ML     MM     MMMMMMMMM  MMMMMMMM  MMMMMMMM
@@ -10,30 +15,46 @@
      MMMMMMMMN     MM      M   MMMMMMMM                7MM      7MM  MN          MM   M      MMMMMMMM  MM      MM
 
 
- MODFLOW-OWHM v2.0.01  
-
-
                         MODFLOW
             ONE-WATER HYDROLOGIC-FLOW MODEL
 
-    U.S. GEOLOGICAL SURVEY MODULAR FINITE-DIFFERENCE 
-           CONJUNCTIVE USE SIMULATION PROGRAM
+    U.S. Geological Survey Modular Finite-Difference
+           Conjunctive Use Simulation Program
 
-                     Version 2.0
+                      Version 2.2
 
- Release: 01          4/23/2020
+ Release: 0
 
- Includes:
-          MODFLOW-2005 Version 1.12.0   02/03/2017
-          MODFLOW-FMP  Version 4.00.0   04/23/2017
-          MODFLOW-SWR  Version 1.04.0   09/15/2016
-          MODFLOW-SWI  Version 2.00.0   07/22/2013
-          MODFLOW-LGR  Version 2.00.0   09/19/2013
-          MODFLOW-NWT  Version 1.2.0    03/01/2020
-          MODFLOW-CFP  Version 1.09.57  09/12/2017
+ Includes the following base versions with enhancements:
 
+          MODFLOW-2005 Version 1.12
+          MODFLOW-FMP  Version 4.1
+          MODFLOW-SWR  Version 1.04
+          MODFLOW-SWI  Version 2.0
+          MODFLOW-LGR  Version 2.0
+          MODFLOW-NWT  Version 1.2
+          MODFLOW-CFP  Version 1.09.57
+                  SWO  Version 1.0
 
- OneWater Simulation Initiated at  
+------------------------------------------------------------------------------------
+USGS Software Disclaimer:                                                          |
+                                                                                   |
+   No warranty, expressed or implied, is made by the USGS or the U.S. Government   |
+   as to the functionality of the software and related material nor shall the      |
+   fact of release constitute any such warranty.                                   |
+                                                                                   |
+   The software is provided on the condition that neither the USGS nor             |
+   the U.S. Government shall be held liable for any damages resulting from the     |
+   authorized or unauthorized use of the software.                                 |
+                                                                                   |
+   Newer versions may be present at the official code and download repository:     |
+      https://code.usgs.gov/modflow/mf-owhm                                        |
+                                                                                   |
+------------------------------------------------------------------------------------
+
+∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙
+    OneWater Simulation Initiated at  
+∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙
 
 
  LIST FILE: ./output/swi2ex4sww.lst
@@ -151,17 +172,24 @@ Y-COORDINATE:0.0
 
  NOW READING BAS OPTIONS
 
- FOUND OPTION: BUDGETDB
- FOUND OPTION: CUMULATIVE_HEAD_CHANGE
-    THIS OPTION IS ONLY USEFUL FOR MODEL RESULT COMPARISON WITH DIFFERENT CODE COMPARISONS.
+ Found Option: BUDGETDB
 
- FOUND OPTION: PRINT_HEAD    SP    TS   FILE
-                              3   180   ./output/swi2ex4sww_Head.txt
+ Found Option: PRINT_HEAD
+                 NPER       ./output/swi2ex4sww_Head.txt
 
- THE MAX STORAGE FOR PROPERTIES DEFINED BY PARAMETERS IS: 
- MAX STORAGE OF PARAMETERS (MXPAR)  IS       2000
- MAX STORAGE OF INSTANCES  (MXINST) IS      50000
- MAX STORAGE OF CLUSTERS   (MXCLST) IS    2000000
+ Found Option: CUMULATIVE_HEAD_CHANGE
+                 Cumulative sum of absolute head differences for the entire model.
+                 This is a diagnostic feature meant for comparing MF-OWHM code versions with the same model input (software unit test).
+
+
+ Setting up PRINT_HEAD option for 
+    SP    TS   FILE
+     3   180   ./output/swi2ex4sww_Head.txt
+
+ The total simulation limit for the number PARAMETERs defined is: 
+     Max number of PARAMETERs (MXPAR)  is       2000
+     Max number of INSTANCEs  (MXINST) is      50000
+     Max number of CLUSTERs   (MXCLST) is    2000000
 
 
 
@@ -202,6 +230,10 @@ Y-COORDINATE:0.0
  HEAD PRINT FORMAT CODE IS   0    DRAWDOWN PRINT FORMAT CODE IS   0
  HEADS WILL BE SAVED ON UNIT   51    DRAWDOWNS WILL BE SAVED ON UNIT    0  WATER BUDGETs WILL BE SAVED ON UNIT 
 
+ NWT1 -- Newton Solver, VERSION OWHM
+         INPUT READ FROM UNIT   27
+
+
 # swi2ex4sww
 # MODFLOW-NWT Example problem documented in:
 # Niswonger, R.G., Panday, Sorab, and Ibaraki, Motomu, 2011, MODFLOW-NWT, A Newton formulation for MODFLOW-2005: U.S. Geological Survey Techniques and Methods 6-A37, 44 p.
@@ -214,17 +246,13 @@ Y-COORDINATE:0.0
 # SWI2 example problem 4 for MODFLOW-NWT
 #HEADTOL  FLUXTOL MAXITEROUT THICKFACT LINMETH IPRNWT IBOTAV OPTIONS DBDREDUCE DBDINCREASE DBDGAMMA MOMFACT BACKFLAG MAXBACKITER BACKTOL BACKREDUCE
 
-
- NWT1 -- Newton Solver, VERSION OWHM
-         INPUT READ FROM UNIT   27
-
  SIMPLE OPTION:
  DEFAULT SOLVER INPUT VALUES REFLECT NEARLY LINEAR MODEL
  ***XMD linear solver will be used***
  
    CONVERGENCE CRITERION OF   0.100000E-04 FOR HEAD SOLUTION
    AND A TOLERANCE OF   0.500000E-01 FOR FLOW SOLUTION AND 
-   A MAXIMUM OF   200 OUTER ITERATIONS. 
+   A MAXIMUM OF  1000 OUTER ITERATIONS. 
 
 
    D-B-D REDUCTION FACTOR OF    0.970000E+00 AND 
@@ -441,7 +469,7 @@ WELLS WITH REDUCED PUMPING WILL NOT BE REPORTED TO SEPARATE FILE, BUT INSTEAD WR
 
          THE FOLLOWING COMMENTS WERE PASSED TO THE WARNING ROUTINE
 
-THE DESRIPTION OF THE WARNING IS:
+THE DESCRIPTION OF THE WARNING IS:
 
 DIS PACKAGE: THE GROUND SURFACE ELEVATION WAS NOT SPECIFIED WITH THE KEYWORD "SURFACE_ELEVATION"
 
@@ -4265,6 +4293,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
           0                34           2            31   30     1           1.280230E-05      36   21    1             5.873694E-04          1.047554E-02    34
           0                35           2            30   30     2           9.240391E-06      39   18    1             5.586837E-04          9.487638E-03    35
 
+
+Solver Convergence Information:
+                              HClose:  9.2403907E-6
+                              RClose:  4.8744748E-4
+                           L2-RClose:  0.0085866
+                         Rel-Vol-Err:  0.0
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP     1
     PRINT BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -4426,6 +4462,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
           0                25           2            35   31     2           1.107069E-05      41   32    1             7.361909E-04          1.339306E-02    25
           0                26           2            31   31     2           1.878879E-05      32   32    2             6.147884E-04          1.200389E-02    26
           0                27           2            35   31     2           8.885154E-06      41   32    1             6.103614E-04          1.075777E-02    27
+
+
+Solver Convergence Information:
+                              HClose:  8.8851537E-6
+                              RClose:  4.9697248E-4
+                           L2-RClose:  0.0096391
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP     2
     PRINT BUDGET
@@ -4597,6 +4641,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
           0                32           2            31   31     2           1.643949E-05      31   29    2             5.720321E-04          1.110462E-02    32
           0                33           2            34   30     2           8.676861E-06      39   34    1             5.606513E-04          9.983657E-03    33
 
+
+Solver Convergence Information:
+                              HClose:  8.6768610E-6
+                              RClose:  4.6511110E-4
+                           L2-RClose:  0.0089719
+                         Rel-Vol-Err:  0.0
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP     3
     PRINT BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -4756,6 +4808,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
           0                23           2            35   31     2           1.210303E-05      41   32    1             7.780117E-04          1.453149E-02    23
           0                24           2            31   31     2           2.013381E-05      32   32    2             6.643298E-04          1.304066E-02    24
           0                25           2            35   31     2           9.711708E-06      41   32    1             6.484798E-04          1.168957E-02    25
+
+
+Solver Convergence Information:
+                              HClose:  9.7117078E-6
+                              RClose:  5.3780306E-4
+                           L2-RClose:  0.0104848
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP     4
     PRINT BUDGET
@@ -4929,6 +4989,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
           0                34           2            31   31     2           1.391782E-05      38   30    2             5.455678E-04          1.051276E-02    34
           0                35           2            34   30     2           8.889617E-06      40   33    1             5.271332E-04          9.490990E-03    35
 
+
+Solver Convergence Information:
+                              HClose:  8.8896171E-6
+                              RClose:  4.4638237E-4
+                           L2-RClose:  0.0085703
+                         Rel-Vol-Err:  0.0
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP     5
     PRINT BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -5086,6 +5154,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
           0                21           2            34   30     2           1.202985E-05      47   30    1             7.639695E-04          1.457124E-02    21
           0                22           2            31   31     2           2.048819E-05      32   32    2             6.623196E-04          1.306964E-02    22
           0                23           2            35   31     2           9.605548E-06      41   32    1             6.388142E-04          1.170301E-02    23
+
+
+Solver Convergence Information:
+                              HClose:  9.6055483E-6
+                              RClose:  5.3519980E-4
+                           L2-RClose:  0.0104883
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP     6
     PRINT BUDGET
@@ -5259,6 +5335,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
           0                34           2            31   31     2           1.495469E-05      31   29    2             5.712116E-04          1.103171E-02    34
           0                35           2            34   30     2           9.156857E-06      40   33    1             5.582077E-04          9.952447E-03    35
 
+
+Solver Convergence Information:
+                              HClose:  9.1568571E-6
+                              RClose:  4.6745200E-4
+                           L2-RClose:  0.0089797
+                         Rel-Vol-Err:  0.0
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP     7
     PRINT BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -5412,6 +5496,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
           0                19           2            34   30     2           1.069785E-05      47   30    1             6.940049E-04          1.312177E-02    19
           0                20           2            31   31     2           1.885929E-05      32   32    2             5.929639E-04          1.176107E-02    20
           0                21           2            35   31     2           8.481239E-06      41   32    1             5.638344E-04          1.051441E-02    21
+
+
+Solver Convergence Information:
+                              HClose:  8.4812391E-6
+                              RClose:  4.7786448E-4
+                           L2-RClose:  0.0094115
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP     8
     PRINT BUDGET
@@ -5585,6 +5677,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
           0                34           2            31   31     2           1.615282E-05      31   29    2             5.964812E-04          1.152196E-02    34
           0                35           2            34   30     2           9.321173E-06      40   33    1             5.886227E-04          1.038299E-02    35
 
+
+Solver Convergence Information:
+                              HClose:  9.3211731E-6
+                              RClose:  4.8655762E-4
+                           L2-RClose:  0.0093559
+                         Rel-Vol-Err:  0.0
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP     9
     PRINT BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -5733,6 +5833,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
           0                14           2            31   31     2           1.970493E-05      31   29    2             6.183704E-04          1.251327E-02    14
           0                15           2            30   31     1           8.976335E-06      48   33    1             6.095373E-04          1.118561E-02    15
 
+
+Solver Convergence Information:
+                              HClose:  8.9763352E-6
+                              RClose:  4.9861512E-4
+                           L2-RClose:  0.0100168
+                         Rel-Vol-Err:  0.0
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      1   TIME STEP    10
     PRINT BUDGET
     SAVE HEAD FOR ALL LAYERS
@@ -5870,6 +5978,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
           0                 3           2            37   31     2          -1.791901E-05      37   31    2            -1.134413E-03          9.083558E-03    3
           0                 4           2            34   32     2          -9.394697E-06      39   29    2            -5.908525E-04          6.290276E-03    4
 
+
+Solver Convergence Information:
+                              HClose:  9.3946971E-6
+                              RClose:  5.2073008E-4
+                           L2-RClose:  0.0052239
+                         Rel-Vol-Err:  0.0
+ 
+
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP   179
     SAVE HEAD FOR ALL LAYERS
  SOLVING FOR ZETA FOR LAYER     1 ZONE     2
@@ -5899,6 +6015,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
           0                 4           2            34   32     2          -1.079206E-05      39   29    2            -7.405462E-04          7.956357E-03    4
           0                 5           2            37   31     2          -1.155593E-05      37   31    2            -6.246348E-04          6.521933E-03    5
           0                 6           2            34   32     2          -7.591670E-06      39   29    2            -4.670900E-04          5.634168E-03    6
+
+
+Solver Convergence Information:
+                              HClose:  7.5916699E-6
+                              RClose:  4.2995044E-4
+                           L2-RClose:  0.0049488
+                         Rel-Vol-Err:  0.0
+ 
 
  OUTPUT CONTROL FOR STRESS PERIOD      3   TIME STEP   180
     PRINT BUDGET

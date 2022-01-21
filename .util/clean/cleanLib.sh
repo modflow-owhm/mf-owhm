@@ -5,13 +5,17 @@
 
 SHELLDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 #
-CWD=$(pwd)
+CWD="$(pwd)"
 #
 cd "$SHELLDIR"
 #
 #---- Get location of find  --------------------------------------------------------------
 #
 source ../findfind.sh
+#
+#---- Keep No File Warnings From Happening  ----------------------------------------------
+#
+touch ../../lib/tmp.del.me
 #
 #---- Run Script  ------------------------------------------------------------------------
 #

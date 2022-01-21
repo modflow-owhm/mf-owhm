@@ -1034,6 +1034,10 @@ BEGIN SURFACE_WATER
    PRINT SFR_RETURN            GENERIC_OUTPUT_OptKey  # Runoff budget for all SFR segment/reaches that receive FMP runoff
    PRINT SFR_SRR_ONLY          GENERIC_OUTPUT_OptKey  # Runoff budget for the NSFR_RETURN SFR segment/reaches that receive FMP runoff
    #
+   # 
+   PRINT NRD                   GENERIC_OUTPUT_OptKey  # NON_ROUTED_DELIVERY output by WBS that specifies WBS water DEMAND, the NRD available water SUPPLY, and amount of NRD water CONSUMED
+   PRINT NRD_BY_WBS            GENERIC_OUTPUT_OptKey  # NON_ROUTED_DELIVERY output by NRD that specifies WBS water DEMAND, the NRD available water SUPPLY, and amount of NRD water CONSUMED
+   #
    # ------------------------------------------------------------------------------------------------------------------
    #
    # Delivery points are where a WBS can remove water from SFR to meet irrigation demand
@@ -1885,6 +1889,16 @@ BEGIN SALINITY_FLUSH_IRRIGATION
    #   ADMD    Sum of other Added Demands for the crop
    #
 END SALINITY
+#
+BEGIN SURFACE_WATER_OPERATIONS
+   #
+   # Due to the length of the Surface Water Operations input file,
+   # it is recommended to build the input data set in a separate file and use BLOCK_INCLUDE
+   # to insert the text into the FMP 
+   #
+   BLOCK_INCLUDE  SWO_Template.swo
+   #
+END SURFACE_WATER_OPERATIONS
 #
 #
 ##########################################################################################################################

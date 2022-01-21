@@ -6235,6 +6235,7 @@ C     ------------------------------------------------------------------
       FINFSAVE=>GWFUZFDAT(Igrid)%FINFSAVE
       ISAVEFINF=>GWFUZFDAT(Igrid)%ISAVEFINF
       ETOFH_FLAG=>GWFUZFDAT(Igrid)%ETOFH_FLAG
+      UZFRESTART=>GWFUZFDAT(Igrid)%UZFRESTART
       LANDLAYER=>GWFUZFDAT(Igrid)%LANDLAYER
       AIR_ENTRY=>GWFUZFDAT(Igrid)%AIR_ENTRY
       H_ROOT   =>GWFUZFDAT(Igrid)%H_ROOT
@@ -6342,6 +6343,7 @@ C     ------------------------------------------------------------------
       GWFUZFDAT(Igrid)%FINFSAVE=>FINFSAVE
       GWFUZFDAT(Igrid)%Isavefinf=>Isavefinf
       GWFUZFDAT(Igrid)%ETOFH_FLAG=>ETOFH_FLAG
+      GWFUZFDAT(Igrid)%UZFRESTART=>UZFRESTART
       GWFUZFDAT(Igrid)%LANDLAYER=>LANDLAYER
       GWFUZFDAT(Igrid)%AIR_ENTRY=>AIR_ENTRY
       GWFUZFDAT(Igrid)%H_ROOT   =>H_ROOT

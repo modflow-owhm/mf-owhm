@@ -49,12 +49,13 @@ C     ------------------------------------------------------------------
      1                   HCLOSEPCG,RCLOSEPCG,RELAXPCG,DAMPPCG,VPCG,SS,P,
      2                   HPCG,CD,HCSV,LHCH,HCHG,LRCHPCG,RCHG,IT1,
      3                   DAMPPCGT,BPOLY,
-     4                   IHCOFADD  !JDH 20110814
+     4                   IHCOFADD
       USE FILE_IO_INTERFACE, ONLY: READ_TO_DATA
-      USE STRINGS,           ONLY: GET_INTEGER
+      USE STRINGS,           ONLY: GET_INTEGER, GET_NUMBER
 C
       CHARACTER(768):: LINE
       INTEGER:: IN, MXITER
+      DOUBLE PRECISION:: DTMP
 C     ------------------------------------------------------------------
       ALLOCATE(ITER1,NPCOND,NBPOL,IPRPCG,MUTPCG,NITER)
       ALLOCATE(HCLOSEPCG,RCLOSEPCG,RELAXPCG,DAMPPCG,DAMPPCGT,BPOLY)
@@ -72,12 +73,16 @@ C-------READ AND PRINT COMMENTS, MXITER,ITER1 AND NPCOND
      +                          HED="-- READING PCG PACKAGE INPUT --")
       !
       LLOC=1
-      CALL URWORD(LINE,LLOC,ISTART,ISTOP,2,MXITER,R,IOUT,IN)
-      CALL URWORD(LINE,LLOC,ISTART,ISTOP,2,ITER1,R,IOUT,IN)
-      CALL URWORD(LINE,LLOC,ISTART,ISTOP,2,NPCOND,R,IOUT,IN)
-C  JDH 20110814 - ADDED IHCOFADD
-      CALL URWORD(LINE,LLOC,ISTART,ISTOP,2,IHCOFADD,R,0,IN)
-        WRITE (IOUT,509) MXITER, ITER1, NPCOND
+      CALL GET_INTEGER(LINE,LLOC,ISTART,ISTOP,IOUT,IN,MXITER, MSG=
+     +                  'PCG Solver failed to load MXITER')
+      CALL GET_INTEGER(LINE,LLOC,ISTART,ISTOP,IOUT,IN,ITER1, MSG=
+     +                  'PCG Solver failed to load ITER1')
+      CALL GET_INTEGER(LINE,LLOC,ISTART,ISTOP,IOUT,IN,NPCOND, MSG=
+     +                  'PCG Solver failed to load NPCOND')
+      CALL GET_INTEGER(LINE,LLOC,ISTART,ISTOP,IOUT,IN,IHCOFADD,
+     +                                              ERROR_VAL=0)
+      !
+      WRITE (IOUT,509) MXITER, ITER1, NPCOND
   509 FORMAT (' MAXIMUM OF ',I6,' CALLS OF SOLUTION ROUTINE',/,
      +        ' MAXIMUM OF ',I6,
      +        ' INTERNAL ITERATIONS PER CALL TO SOLUTION ROUTINE',/,
@@ -108,17 +113,32 @@ C-------ALLOCATE SPACE FOR THE PCG ARRAYS
 C
 C-------READ HCLOSEPCG,RCLOSEPCG,RELAXPCG,NBPOL,IPRPCG,MUTPCG
 Crgn changed read to check for different value for transient dampening
-      READ (IN,*) HCLOSEPCG,RCLOSEPCG,RELAXPCG,
-     1    NBPOL,IPRPCG,MUTPCG,DAMPPCG
-      IF ( DAMPPCG.LT.0.0 ) THEN
-        BACKSPACE IN
-        READ (IN,*) HCLOSEPCG,RCLOSEPCG,RELAXPCG,
-     1    NBPOL,IPRPCG,MUTPCG,DAMPPCG,DAMPPCGT
+      CALL READ_TO_DATA(LINE, IN)
+      LLOC=1
+      CALL GET_NUMBER(LINE,LLOC,ISTART,ISTOP,IOUT,IN,HCLOSEPCG, MSG=
+     +                 'PCG Solver failed to load HCLOSEPCG')
+      CALL GET_NUMBER(LINE,LLOC,ISTART,ISTOP,IOUT,IN,RCLOSEPCG, MSG=
+     +                 'PCG Solver failed to load RCLOSEPCG')
+      CALL GET_NUMBER(LINE,LLOC,ISTART,ISTOP,IOUT,IN,RELAXPCG, MSG=
+     +                 'PCG Solver failed to load RELAXPCG')
+      CALL GET_INTEGER(LINE,LLOC,ISTART,ISTOP,IOUT,IN,NBPOL, MSG=
+     +                  'PCG Solver failed to load NBPOL')
+      CALL GET_INTEGER(LINE,LLOC,ISTART,ISTOP,IOUT,IN,IPRPCG, MSG=
+     +                  'PCG Solver failed to load IPRPCG')
+      CALL GET_INTEGER(LINE,LLOC,ISTART,ISTOP,IOUT,IN,MUTPCG, MSG=
+     +                  'PCG Solver failed to load MUTPCG')
+      CALL GET_NUMBER(LINE,LLOC,ISTART,ISTOP,IOUT,IN,DAMPPCG, MSG=
+     +                 'PCG Solver failed to load DAMPPCG')
+      !
+      IF (DAMPPCG == 0.0) DAMPPCG = 1.0
+      !
+      IF ( DAMPPCG < 0.0 ) THEN
+          CALL GET_NUMBER(LINE,LLOC,ISTART,ISTOP,IOUT,IN,DAMPPCGT, MSG=
+     +                     'PCG Solver failed to load DAMPPCGT')
           DAMPPCG = -DAMPPCG
-          IF (DAMPPCGT.EQ.0.0) DAMPPCGT = 1.0
+          IF (DAMPPCGT == 0.0) DAMPPCGT = 1.0
       ELSE
-        IF (DAMPPCG.EQ.0.0) DAMPPCG = 1.0
-        DAMPPCGT = DAMPPCG
+          DAMPPCGT = DAMPPCG
       END IF                                      
 C
 C-------PRINT MXITER,ITER1,NPCOND,HCLOSEPCG,RCLOSEPCG,RELAXPCG,NBPOL,IPRPCG,
@@ -196,7 +216,7 @@ C     ------------------------------------------------------------------
       USE CONSTANTS,                ONLY: DZ, UNO, BLNK, NLc=>NL, BLN
       USE NUM2STR_INTERFACE,        ONLY: NUM2STR
       USE WARNING_TYPE_INSTRUCTION, ONLY: WARNING_TYPE
-      USE GLOBAL, ONLY: KND, HCloseBAS, RCloseL2BAS
+      USE GLOBAL,    ONLY: KND, HCloseBAS, RCloseL2BAS
       REAL BIGH, BIGR, BPOLY, C0, C1, C2, CD, CD1, DAMP, 
      +     HCHG, HCLOSE, RCHG, RCLOSE, RELAX, T,
      +     DAMPSS, DAMPTR,HDRY
@@ -598,14 +618,20 @@ C-------CALCULATE CD - FIRST INTERNAL ITERATION ONLY
                 ENDIF
                 IF (NPCOND.EQ.1) THEN
                   IF (IR.GT.0) THEN
-                    FV = CV(IR)
 C                 MODIFIED FROM HILL(1990) 9/27/90: 2 REPLACES 1
-                    IF (K.EQ.NLAY .AND. ((J+I).GT.2)) FV = DZ
+                    IF (K.EQ.NLAY .AND. ((J+I).GT.2)) THEN
+                      FV = DZ
+                    ELSE
+                      FV = CV(IR)
+                    END IF
                     IF (CD(IR).NE.0.) FCR = (F/CD(IR))*(CC(IR)+FV)
                   ENDIF
                   IF (IC.GT.0) THEN
-                    FV = CV(IC)
-                    IF (K.EQ.NLAY .AND. (I.GT.1)) FV = DZ
+                    IF (K.EQ.NLAY .AND. (I.GT.1)) THEN
+                      FV = DZ
+                    ELSE
+                      FV = CV(IC)
+                    END IF
                     IF (CD(IC).NE.0.) FCC = (H/CD(IC))*(CR(IC)+FV)
                   ENDIF
                   IF (IL.GT.0) THEN
@@ -686,18 +712,14 @@ C-------CALCULATE P OF THE CONJUGATE GRADIENT ALGORITHM
   220 CONTINUE
 C
       IF (IITER.EQ.1.OR.(-1D-100<SROLD .AND. SROLD<1D-100)) THEN
-        DO CONCURRENT(N = 1:NODES); P(N) = SS(N)
+        DO CONCURRENT(N = 1:NODES)
+                                 P(N) = SS(N)
         END DO
-!        DO 230 N = 1, NODES
-!          P(N) = SS(N)
-!  230   CONTINUE
       ELSE
         FRAC = SRNEW/SROLD
-        DO CONCURRENT(N = 1:NODES); P(N) = SS(N) + FRAC*P(N)
+        DO CONCURRENT(N = 1:NODES)
+                                 P(N) = SS(N) + FRAC*P(N)
         END DO
-!        DO 240 N = 1, NODES
-!          P(N) = SS(N) + (SRNEW/SROLD)*P(N)
-!  240   CONTINUE
       ENDIF
 C
 C-------CALCULATE ALPHA OF THE CONJUGATE GRADIENT ROUTINE.
@@ -847,12 +869,6 @@ C-------CHECK IF CURRENT ITERATION (HNEW) IS AN EXACT SOLUTION - JDH 20110814
         IICNVG = 1
       END IF
       !
-      HCloseBAS   = ABS(BIGH)
-      RCloseL2BAS = 0D0
-      DO N=1, NODES
-          RCloseL2BAS = RCloseL2BAS + RES(N)*RES(N)
-      END DO
-      RCloseL2BAS = SQRT(RCloseL2BAS)
 C
 C-------STORE THE LARGEST UNSCALED HEAD CHANGE AND RESIDUAL VALUE
 C-------(THIS ITERATION) AND THEIR LOCATIONS.
@@ -899,6 +915,8 @@ C-------AT END OF EXTERNAL ITERATION, APPLY DAMP
          HNEW(N)= (UNO-DDAMP)*HPCG(N) + DDAMP*HNEW(N)
   320    CONTINUE
       END IF
+! Moved to SUBROUTINE PCG7OT
+!
 !C
 !C-------IF END OF TIME STEP, PRINT # OF ITERATIONS THIS STEP
 !      IF (ICNVG.NE.0 .OR. KITER.EQ.MXITER) THEN
@@ -937,19 +955,22 @@ C
      +                 MXITER,ITER1,NPCOND,NBPOL,NSTP,NCOL,NROW,
      +                 NLAY,NODES,RELAX,IOUT,MUTPCG,IT1,DAMPSS,RES,
      +                 HCSV,IERR,HPCG,DAMPTR,ISS,HDRY,
-     +                 IHCOFADD,BPOLY)
-      IMPLICIT NONE
-      INTEGER:: KITER,NITER
-      INTEGER:: ICNVG,KSTP,KPER,IPRPCG,MXITER,ITER1,NPCOND
-      INTEGER:: NBPOL,NSTP,NCOL,NROW,NLAY,NODES
-      INTEGER:: IOUT,MUTPCG,IERR,ISS,IHCOFADD
-      REAL,DIMENSION(MXITER*ITER1):: HCHG,RCHG
-      REAL,DIMENSION(NODES)::RES, HPCG, HCSV
-      INTEGER,DIMENSION(MXITER*ITER1):: IT1
-      INTEGER, DIMENSION(3,MXITER*ITER1)::LHCH,LRCH
-      REAL:: HCLOSE,RCLOSE,BPOLY
-      REAL:: RELAX, DAMPSS,DAMPTR,HDRY
-      !
+     +                   IHCOFADD,BPOLY)
+        USE GLOBAL,    ONLY: HCloseBAS, RCloseL2BAS, 
+     +                       MAX_RELATIVE_VOL_ERROR
+        USE NUM2STR_INTERFACE,        ONLY: NUM2STR
+        IMPLICIT NONE
+        INTEGER:: KITER,NITER
+        INTEGER:: ICNVG,KSTP,KPER,IPRPCG,MXITER,ITER1,NPCOND
+        INTEGER:: NBPOL,NSTP,NCOL,NROW,NLAY,NODES
+        INTEGER:: IOUT,MUTPCG,IERR,ISS,IHCOFADD
+        REAL,DIMENSION(MXITER*ITER1):: HCHG,RCHG
+        REAL,DIMENSION(NODES)::RES, HPCG, HCSV
+        INTEGER,DIMENSION(MXITER*ITER1):: IT1
+        INTEGER, DIMENSION(3,MXITER*ITER1)::LHCH,LRCH
+        REAL:: HCLOSE,RCLOSE,BPOLY
+        REAL:: RELAX, DAMPSS,DAMPTR,HDRY
+        DOUBLE PRECISION:: VOLERR
 C
 C-------IF END OF TIME STEP, PRINT # OF ITERATIONS THIS STEP
         IF (MUTPCG.LT.2) THEN

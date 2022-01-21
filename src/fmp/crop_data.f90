@@ -607,7 +607,7 @@ MODULE CROP_DATA_FMP_MODULE
                            SELECT CASE ( LINE(ISTART:ISTOP) )
                            CASE('BYIRRIGATE', 'BY_IRRIGATE','BYIRRIGATION',"BY_IRRIGATION")
                                            WRITE(BL%IOUT,'(3x,4A)') LINE(ISTART:ISTOP),' KEYWORD FOUND, SO IF USING LIST STYLE FOR EVAPORATION_IRRIGATION_FRACTION (FEI), THEN IT WILL EXPECT TO LOAD ', NUM2STR(CDAT%NIRRG), ' (NIRRIGATE) RECORDS.'
-                                           CALL CDAT%FEI%INIT('FEI_BYIRR',      LLOC, LINE, BL%IOUT, BL%IU, CDAT%NCROP, ONE, NROW, NCOL, FDIM%NFARM, BYFARM, CDAT%NCROP, BYCROP,CDAT%NIRRG, BYIRRIGATE, SCRATCH=BL%SCRATCH, CDIM=CDIM)
+                                           CALL CDAT%FEI%INIT('FEI_BYIRR',      LLOC, LINE, BL%IOUT, BL%IU, CDAT%NIRRG, ONE, NROW, NCOL, FDIM%NFARM, BYFARM, CDAT%NCROP, BYCROP,CDAT%NIRRG, BYIRRIGATE, SCRATCH=BL%SCRATCH, CDIM=CDIM)
                            CASE('BYCROP',"BY_CROP")
                                            WRITE(BL%IOUT,'(3x,4A)') LINE(ISTART:ISTOP),' KEYWORD FOUND, SO IF USING LIST STYLE FOR EVAPORATION_IRRIGATION_FRACTION (FEI), THEN IT WILL EXPECT TO LOAD ', NUM2STR(CDAT%NCROP), ' (NCROP) RECORDS.'
                                            CALL CDAT%FEI%INIT('FEI_BYCROP',      LLOC, LINE, BL%IOUT, BL%IU, CDAT%NCROP, ONE, NROW, NCOL, FDIM%NFARM, BYFARM, CDAT%NCROP, BYCROP,CDAT%NIRRG, BYIRRIGATE, SCRATCH=BL%SCRATCH, CDIM=CDIM)
@@ -2124,8 +2124,6 @@ MODULE CROP_DATA_FMP_MODULE
     CHARACTER(17):: DT
     CHARACTER(20):: BARE
     !
-    IF(.not. CLIM%HAS_REF_ET) CALL CDAT%OUT_ET%CLOSE()
-    !
     IF(.not. CDAT%OUT_ET%IS_OPEN) RETURN
     !
     DT = NUM2STR(DELT)
@@ -2141,7 +2139,6 @@ MODULE CROP_DATA_FMP_MODULE
     allocate( ETpot(0:ncrop, nfarm) )
     allocate( ETact(0:ncrop, nfarm) )
     allocate(  Area(0:ncrop, nfarm) )
-    Etref = DZ
     ETpot = DZ
     ETact = DZ
     Area  = DZ
@@ -2159,15 +2156,33 @@ MODULE CROP_DATA_FMP_MODULE
     DO K=ONE, CDAT%CROP(I)%N
         F = CDAT%CROP(I)%FID(K) 
         IF( F < ONE .OR. WBS%NFARM < F) CYCLE
-        R = CDAT%CROP(I)%RC(ONE,K)
-        C = CDAT%CROP(I)%RC(TWO,K)
         !
          Area(I,F) =  Area(I,F) + CDAT%CROP(I)%AREA(K)
-        ETref(I,F) = ETref(I,F) + CDAT%CROP(I)%AREA(K) * CLIM%REF_ET(C,R)
         ETpot(I,F) = ETpot(I,F) + CDAT%CROP(I)%CU(K)
         ETact(I,F) = ETact(I,F) + CDAT%CROP(I)%TI(K)*(UNO + CDAT%CROP(I)%CECT(K)) + CDAT%CROP(I)%TP(K) + CDAT%CROP(I)%EP(K) + CDAT%CROP(I)%TGWA(K) + CDAT%CROP(I)%EGWA(K)
     END DO 
     END DO
+    !
+    IF(.NOT. CLIM%HAS_REF_ET) THEN
+       BLOCK
+           DOUBLE PRECISION:: DTMP, NaN
+           NaN = IEEE_VALUE(DTMP, IEEE_QUIET_NAN)
+           ETref = NaN
+       END BLOCK
+    ELSE
+       Etref = DZ
+       DO I=ONE, ncrop    
+       DO K=ONE, CDAT%CROP(I)%N
+           F = CDAT%CROP(I)%FID(K) 
+           IF( Z < F .and. F <= WBS%NFARM ) THEN
+               R = CDAT%CROP(I)%RC(ONE,K)
+               C = CDAT%CROP(I)%RC(TWO,K)
+               !
+               ETref(I,F) = ETref(I,F) + CDAT%CROP(I)%AREA(K) * CLIM%REF_ET(C,R)
+           END IF
+       END DO 
+       END DO
+    END IF
     !
     IF(CDAT%CHECK_BARE) THEN
        DO R=ONE, CDAT%NROW
@@ -2178,13 +2193,23 @@ MODULE CROP_DATA_FMP_MODULE
           !
           IF(CDAT%BARE_FRAC(C,R) > DZ)  THEN
                                          Area(Z,F) =  Area(Z,F) + CDAT%BARE_FRAC(C,R) * WBS%AREA(C,R)
-                                        ETref(Z,F) = ETref(Z,F) + CDAT%BARE_FRAC(C,R) * WBS%AREA(C,R) * CLIM%REF_ET(C,R)
                                         ETpot(Z,F) = ETpot(Z,F) + CDAT%BARE_POT_EVAP(C,R)
                                         ETact(Z,F) = ETact(Z,F) + CDAT%BARE_EVAP(C,R)
           END IF
-        END DO 
-        END DO
+       END DO 
+       END DO
+       !
+       IF(CLIM%HAS_REF_ET) THEN
+          DO R=ONE, CDAT%NROW
+          DO C=ONE, CDAT%NCOL
+             F = WBS%FID_ARRAY(C,R)
+             !
+             IF( Z < F .and. F <= WBS%NFARM .and. CDAT%BARE_FRAC(C,R) > DZ ) ETref(Z,F) = ETref(Z,F) + CDAT%BARE_FRAC(C,R) * WBS%AREA(C,R) * CLIM%REF_ET(C,R)
+          END DO 
+          END DO
+       END IF
     END IF
+    !
     !
     DO F=ONE, WBS%NFARM
        !
@@ -5662,23 +5687,30 @@ MODULE CROP_DATA_FMP_MODULE
 !    END DO
 !    !
 !    END SUBROUTINE
+  !
+  PURE SUBROUTINE CALC_CIR_DEMAND(CDAT, SET_CIR_INI)   !WRAPPER TO CALL NEXT SUBROUTINE
+    CLASS(CROP_DATA),  INTENT(INOUT):: CDAT
+    LOGICAL,           INTENT(IN   ):: SET_CIR_INI
+    INTEGER:: I
     !
-  PURE SUBROUTINE CALC_CIR_DEMAND(CDAT)   !WRAPPER TO CALL NEXT SUBROUTINE
-    CLASS(CROP_DATA), INTENT(INOUT):: CDAT
+    DO I=1, CDAT%NCROP
+            CALL CALC_CIR_DEMAND_BY_CROP( CDAT%CROP(I) )
+    END DO
     !
-    IF(CDAT%NCROP>Z) CALL CALC_CIR_DEMAND_BY_CROP(CDAT%CROP)
+    IF(SET_CIR_INI) THEN
+           DO I=1, CDAT%NCROP
+                IF(CDAT%CROP(I)%N > Z) CDAT%CROP(I)%CIR_INI = CDAT%CROP(I)%CIR
+           END DO
+    END IF
     !
   END SUBROUTINE
   !
-  PURE ELEMENTAL SUBROUTINE CALC_CIR_DEMAND_BY_CROP(CROP)
+  PURE SUBROUTINE CALC_CIR_DEMAND_BY_CROP(CROP)
     CLASS(CROP_PROP), INTENT(INOUT):: CROP
-    INTEGER:: K, ID
+    INTEGER:: K
     !
-    ID = CROP%ID
-    DO CONCURRENT ( K=ONE:CROP%N )
-        !
-        !   PRECIP DOES NOT SATISFY NEEDS     NOT FALLOWED CROP         IRRIGATED CROP       
-        IF( CROP%TI(K) > NEARZERO_12 ) THEN ! CROP%NOT_FALLOW(K) .AND. CROP%IRR(K) > Z .AND. 
+    DO K=ONE, CROP%N
+        IF( CROP%TI(K) > NEARZERO_12 ) THEN ! PRECIP DOES NOT SATISFY NEEDS          ! remove: CROP%NOT_FALLOW(K) .AND. CROP%IRR(K) > Z .AND. 
             !
             CROP%CIR(K)    = CROP%TI(K) * (UNO + CROP%CECT(K))  !TI = TSUR-TP ==> (TSUR-TP)*(1+ FEI/FTR) --NOTE THAT IF FTR=0 THEN TGW = 0, SO TSUR =0 WHICH IS < TPPOT SO CONDITION FAILS
             CROP%DEMAND(K) = CROP%CIR(K) / CROP%EFF(K)
@@ -5688,8 +5720,6 @@ MODULE CROP_DATA_FMP_MODULE
             CROP%DEMAND(K) = DZ
         END IF
     END DO
-    !
-    IF(CROP%N > Z) CROP%CIR_INI = CROP%CIR
     !
   END SUBROUTINE
   !

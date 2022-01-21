@@ -1,3 +1,8 @@
+💧🧙💦🌊  <-These symbols help text editors identify file as Unicode UTF8.
+                    UTF8 is not necessary to view numerical results, but no UTF8 support can have artifacts where non-ascii symbols are used (such as the degree symbol).
+
+
+MODFLOW-OWHM v2.2.0
 
       MMMMMMM                                       MM      MMM     MM
     MMM     MMM    MM      M   MMMMMMMM             LM     DM M     ML     MM     MMMMMMMMM  MMMMMMMM  MMMMMMMM
@@ -10,30 +15,46 @@
      MMMMMMMMN     MM      M   MMMMMMMM                7MM      7MM  MN          MM   M      MMMMMMMM  MM      MM
 
 
- MODFLOW-OWHM v2.0.01  
-
-
                         MODFLOW
             ONE-WATER HYDROLOGIC-FLOW MODEL
 
-    U.S. GEOLOGICAL SURVEY MODULAR FINITE-DIFFERENCE 
-           CONJUNCTIVE USE SIMULATION PROGRAM
+    U.S. Geological Survey Modular Finite-Difference
+           Conjunctive Use Simulation Program
 
-                     Version 2.0
+                      Version 2.2
 
- Release: 01          4/23/2020
+ Release: 0
 
- Includes:
-          MODFLOW-2005 Version 1.12.0   02/03/2017
-          MODFLOW-FMP  Version 4.00.0   04/23/2017
-          MODFLOW-SWR  Version 1.04.0   09/15/2016
-          MODFLOW-SWI  Version 2.00.0   07/22/2013
-          MODFLOW-LGR  Version 2.00.0   09/19/2013
-          MODFLOW-NWT  Version 1.2.0    03/01/2020
-          MODFLOW-CFP  Version 1.09.57  09/12/2017
+ Includes the following base versions with enhancements:
 
+          MODFLOW-2005 Version 1.12
+          MODFLOW-FMP  Version 4.1
+          MODFLOW-SWR  Version 1.04
+          MODFLOW-SWI  Version 2.0
+          MODFLOW-LGR  Version 2.0
+          MODFLOW-NWT  Version 1.2
+          MODFLOW-CFP  Version 1.09.57
+                  SWO  Version 1.0
 
- OneWater Simulation Initiated at 
+------------------------------------------------------------------------------------
+USGS Software Disclaimer:                                                          |
+                                                                                   |
+   No warranty, expressed or implied, is made by the USGS or the U.S. Government   |
+   as to the functionality of the software and related material nor shall the      |
+   fact of release constitute any such warranty.                                   |
+                                                                                   |
+   The software is provided on the condition that neither the USGS nor             |
+   the U.S. Government shall be held liable for any damages resulting from the     |
+   authorized or unauthorized use of the software.                                 |
+                                                                                   |
+   Newer versions may be present at the official code and download repository:     |
+      https://code.usgs.gov/modflow/mf-owhm                                        |
+                                                                                   |
+------------------------------------------------------------------------------------
+
+∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙
+    OneWater Simulation Initiated at  
+∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙
 
 
  LIST FILE: ./output/l1a2k.lst
@@ -170,7 +191,7 @@ THE WARNING IS BELIEVED TO HAVE ORIGINATED FROM THE FOLLOWING FILE:
 THE GUESSED LINE THAT THE WARNING OCCURED ON IS:
 "NOFREE  BUDGETDB ./output/l1a2k_VolumetricBudget.txt  CUMULATIVE_HEAD_CHANGE ./output/l1a2k_CumHCHG.txt  PRINT_HEAD NPER ./output/l1a2k_Head.txt"
 
-THE DESRIPTION OF THE WARNING IS:
+THE DESCRIPTION OF THE WARNING IS:
 
 FOUND BAS PACKAGE OPTION KEYWORDS ALONG PACKAGE "OPTIONS LINE" (ie Data Set 1)
 
@@ -210,10 +231,10 @@ END OPTIONS
 
  NOW READING BAS OPTIONS
 
- FOUND OPTION: NOFREE
-     THE FREE FORMAT OPTION IS DISABLED (INPUT USES FIXED FORMATTED READ)
+ Found Option: NOFREE
+                 THE FREE FORMAT OPTION IS DISABLED (INPUT USES FIXED FORMATTED READ)
 
- FOUND OPTION: BUDGETDB
+ Found Option: BUDGETDB
 
 
 ########################################################################################################
@@ -228,7 +249,7 @@ THE WARNING IS BELIEVED TO HAVE ORIGINATED FROM THE FOLLOWING FILE:
 THE GUESSED LINE THAT THE WARNING OCCURED ON IS:
 "NOFREE  BUDGETDB ./output/l1a2k_VolumetricBudget.txt  CUMULATIVE_HEAD_CHANGE ./output/l1a2k_CumHCHG.txt  PRINT_HEAD NPER ./output/l1a2k_Head.txt"
 
-THE DESRIPTION OF THE WARNING IS:
+THE DESCRIPTION OF THE WARNING IS:
 
 ...CHECK_FOR_POST_KEY WARNINGS...
  THE FOLLOWING MESSAGES WERE PASSED WHILE CHECKING FOR ANY ADDITIONAL KEYWORDS ON LOADED LINE.
@@ -245,9 +266,10 @@ TO SUPRESS THIS WARNING PLEASE PLACE A "#" SYMBOL TO THE LEFT OF THE WORD TO IND
 
 
 
- FOUND OPTION: CUMULATIVE_HEAD_CHANGE
-    THIS OPTION IS ONLY USEFUL FOR MODEL RESULT COMPARISON WITH DIFFERENT CODE COMPARISONS.
 
+ Found Option: CUMULATIVE_HEAD_CHANGE
+                 Cumulative sum of absolute head differences for the entire model.
+                 This is a diagnostic feature meant for comparing MF-OWHM code versions with the same model input (software unit test).
 
 
 ########################################################################################################
@@ -262,7 +284,7 @@ THE WARNING IS BELIEVED TO HAVE ORIGINATED FROM THE FOLLOWING FILE:
 THE GUESSED LINE THAT THE WARNING OCCURED ON IS:
 "NOFREE  BUDGETDB ./output/l1a2k_VolumetricBudget.txt  CUMULATIVE_HEAD_CHANGE ./output/l1a2k_CumHCHG.txt  PRINT_HEAD NPER ./output/l1a2k_Head.txt"
 
-THE DESRIPTION OF THE WARNING IS:
+THE DESCRIPTION OF THE WARNING IS:
 
 ...CHECK_FOR_POST_KEY WARNINGS...
  THE FOLLOWING MESSAGES WERE PASSED WHILE CHECKING FOR ANY ADDITIONAL KEYWORDS ON LOADED LINE.
@@ -279,13 +301,19 @@ TO SUPRESS THIS WARNING PLEASE PLACE A "#" SYMBOL TO THE LEFT OF THE WORD TO IND
 
 
 
- FOUND OPTION: PRINT_HEAD    SP    TS   FILE
-                              1   100   ./output/l1a2k_Head.txt
 
- THE MAX STORAGE FOR PROPERTIES DEFINED BY PARAMETERS IS: 
- MAX STORAGE OF PARAMETERS (MXPAR)  IS       2000
- MAX STORAGE OF INSTANCES  (MXINST) IS      50000
- MAX STORAGE OF CLUSTERS   (MXCLST) IS    2000000
+ Found Option: PRINT_HEAD
+                 NPER ./output/l1a2k_Head.txt
+
+
+ Setting up PRINT_HEAD option for 
+    SP    TS   FILE
+     1   100   ./output/l1a2k_Head.txt
+
+ The total simulation limit for the number PARAMETERs defined is: 
+     Max number of PARAMETERs (MXPAR)  is       2000
+     Max number of INSTANCEs  (MXINST) is      50000
+     Max number of CLUSTERs   (MXCLST) is    2000000
 
 
 
@@ -1107,7 +1135,7 @@ TO SUPRESS THIS WARNING PLEASE PLACE A "#" SYMBOL TO THE LEFT OF THE WORD TO IND
 
          THE FOLLOWING COMMENTS WERE PASSED TO THE WARNING ROUTINE
 
-THE DESRIPTION OF THE WARNING IS:
+THE DESCRIPTION OF THE WARNING IS:
 
 DIS PACKAGE: THE GROUND SURFACE ELEVATION WAS NOT SPECIFIED WITH THE KEYWORD "SURFACE_ELEVATION"
 
@@ -1591,6 +1619,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  1,  8,  2) (  5,  9,  2) (  4, 10,  2) (  5,  9,  2)
 
 
+
+Solver Convergence Information:
+                              HClose:  4.8990985E-5
+                              RClose:  0.0080676
+                           L2-RClose:  0.0225678
+                         Rel-Vol-Err:  0.0
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 1
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -1698,6 +1734,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  2, 16,  9) (  4,  9,  2) (  3, 10,  2)
 
 
+
+Solver Convergence Information:
+                              HClose:  6.9145204E-5
+                              RClose:  0.0324102
+                           L2-RClose:  0.1220920
+                         Rel-Vol-Err:  6.4820409E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -1760,6 +1804,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
      0.8333E-03    0.1548E-03    0.4120E-04
   (  2, 16,  9) (  5, 16, 10) (  3, 16, 11)
 
+
+
+Solver Convergence Information:
+                              HClose:  4.1204729E-5
+                              RClose:  0.0159697
+                           L2-RClose:  0.0827971
+                         Rel-Vol-Err:  4.3902576E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
@@ -1824,6 +1876,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  2, 16,  9) (  5, 16, 10) (  3, 16, 11)
 
 
+
+Solver Convergence Information:
+                              HClose:  3.3935119E-5
+                              RClose:  0.0136113
+                           L2-RClose:  0.0889709
+                         Rel-Vol-Err:  5.4445207E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -1886,6 +1946,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
      0.5681E-03   -0.1319E-03   -0.3984E-04
   (  2, 16,  9) (  5,  8,  3) (  4,  9,  3)
 
+
+
+Solver Convergence Information:
+                              HClose:  3.9844974E-5
+                              RClose:  0.0191254
+                           L2-RClose:  0.0986781
+                         Rel-Vol-Err:  6.1977863E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
@@ -1950,6 +2018,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  1, 16,  9) (  5,  8,  3) (  4,  9,  3)
 
 
+
+Solver Convergence Information:
+                              HClose:  4.7318115E-5
+                              RClose:  0.0247015
+                           L2-RClose:  0.1084577
+                         Rel-Vol-Err:  6.8812311E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -2012,6 +2088,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.5322E-03   -0.1750E-03   -0.5531E-04
   (  3,  7,  3) (  5,  8,  3) (  4,  9,  3)
 
+
+
+Solver Convergence Information:
+                              HClose:  5.5307735E-5
+                              RClose:  0.0291110
+                           L2-RClose:  0.1208860
+                         Rel-Vol-Err:  7.3589265E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
@@ -2076,6 +2160,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  3,  7,  3) (  5,  8,  3) (  4,  9,  3)
 
 
+
+Solver Convergence Information:
+                              HClose:  6.2360303E-5
+                              RClose:  0.0330231
+                           L2-RClose:  0.1314739
+                         Rel-Vol-Err:  7.7131450E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -2139,6 +2231,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  3,  7,  3) (  5,  8,  3) (  4,  9,  3)
 
 
+
+Solver Convergence Information:
+                              HClose:  6.8512148E-5
+                              RClose:  0.0362400
+                           L2-RClose:  0.1442717
+                         Rel-Vol-Err:  7.9826951E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -2201,6 +2301,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.6894E-03   -0.2124E-03   -0.7419E-04
   (  2,  7,  3) (  5,  8,  3) (  4,  9,  3)
 
+
+
+Solver Convergence Information:
+                              HClose:  7.4194506E-5
+                              RClose:  0.0389938
+                           L2-RClose:  0.1617992
+                         Rel-Vol-Err:  8.0159962E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 1
  CELL-BY-CELL FLOW TERM FLAG = 1
@@ -2359,6 +2467,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  2,  7,  3) (  5,  8,  3) (  4,  9,  3)
 
 
+
+Solver Convergence Information:
+                              HClose:  7.9489723E-5
+                              RClose:  0.0415039
+                           L2-RClose:  0.1665535
+                         Rel-Vol-Err:  8.3007812E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -2421,6 +2537,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.6007E-03   -0.1891E-03   -0.6971E-04
   (  2,  7,  3) (  5,  8,  3) (  4,  9,  3)
 
+
+
+Solver Convergence Information:
+                              HClose:  6.9705180E-5
+                              RClose:  0.0366720
+                           L2-RClose:  0.1628103
+                         Rel-Vol-Err:  7.8484416E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
@@ -2485,6 +2609,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  2,  7,  4) (  5,  8,  3) (  4,  9,  4)
 
 
+
+Solver Convergence Information:
+                              HClose:  7.6180783E-5
+                              RClose:  0.0403831
+                           L2-RClose:  0.1750999
+                         Rel-Vol-Err:  8.0766201E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -2547,6 +2679,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.6637E-03   -0.1979E-03   -0.8327E-04
   (  2,  7,  4) (  5,  8,  4) (  4,  9,  4)
 
+
+
+Solver Convergence Information:
+                              HClose:  8.3266462E-5
+                              RClose:  0.0439534
+                           L2-RClose:  0.1854051
+                         Rel-Vol-Err:  8.7906897E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
@@ -2611,6 +2751,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  3,  7,  4) (  5,  8,  4) (  4,  9,  4)
 
 
+
+Solver Convergence Information:
+                              HClose:  7.8594234E-5
+                              RClose:  0.0404680
+                           L2-RClose:  0.1796053
+                         Rel-Vol-Err:  8.4567904E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -2673,6 +2821,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.6292E-03   -0.1820E-03   -0.7947E-04
   (  2,  7,  4) (  5,  8,  4) (  4,  9,  4)
 
+
+
+Solver Convergence Information:
+                              HClose:  7.9468692E-5
+                              RClose:  0.0407891
+                           L2-RClose:  0.1852487
+                         Rel-Vol-Err:  9.3553245E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
@@ -2737,6 +2893,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  2,  7,  5) (  5,  8,  4) (  4,  9,  4)
 
 
+
+Solver Convergence Information:
+                              HClose:  8.2262358E-5
+                              RClose:  0.0420382
+                           L2-RClose:  0.1853129
+                         Rel-Vol-Err:  1.0190511E-8
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -2799,6 +2963,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.5661E-03   -0.1783E-03   -0.8168E-04
   (  2,  7,  5) (  5,  8,  4) (  4,  9,  4)
 
+
+
+Solver Convergence Information:
+                              HClose:  8.1680516E-5
+                              RClose:  0.0416524
+                           L2-RClose:  0.1890770
+                         Rel-Vol-Err:  1.1311054E-8
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
@@ -2863,6 +3035,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  2,  7,  5) (  5,  8,  4) (  4,  9,  4)
 
 
+
+Solver Convergence Information:
+                              HClose:  8.0803343E-5
+                              RClose:  0.0406330
+                           L2-RClose:  0.1863612
+                         Rel-Vol-Err:  1.0449415E-8
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -2925,6 +3105,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.5739E-03   -0.1595E-03   -0.7521E-04
   (  2,  7,  5) (  5,  8,  4) (  4,  9,  4)
 
+
+
+Solver Convergence Information:
+                              HClose:  7.5211214E-5
+                              RClose:  0.0380833
+                           L2-RClose:  0.1768711
+                         Rel-Vol-Err:  1.1511147E-8
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 1
  CELL-BY-CELL FLOW TERM FLAG = 1
@@ -3083,6 +3271,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  2,  7,  6) (  5,  8,  4) (  4,  9,  4)
 
 
+
+Solver Convergence Information:
+                              HClose:  7.3098017E-5
+                              RClose:  0.0368409
+                           L2-RClose:  0.1750877
+                         Rel-Vol-Err:  1.2567037E-8
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -3145,6 +3341,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.5154E-03   -0.1414E-03   -0.6980E-04
   (  2,  7,  6) (  5,  8,  4) (  4,  9,  4)
 
+
+
+Solver Convergence Information:
+                              HClose:  6.9804742E-5
+                              RClose:  0.0350664
+                           L2-RClose:  0.1678462
+                         Rel-Vol-Err:  1.1127931E-8
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
@@ -3209,6 +3413,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  2,  7,  6) (  5,  8,  4) (  3,  9,  4)
 
 
+
+Solver Convergence Information:
+                              HClose:  6.6960423E-5
+                              RClose:  0.0334523
+                           L2-RClose:  0.1636573
+                         Rel-Vol-Err:  1.1548787E-8
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -3271,6 +3483,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.5461E-03   -0.1253E-03   -0.6446E-04
   (  2,  7,  6) (  5,  8,  4) (  3,  9,  4)
 
+
+
+Solver Convergence Information:
+                              HClose:  6.4460527E-5
+                              RClose:  0.0320151
+                           L2-RClose:  0.1583452
+                         Rel-Vol-Err:  1.1866587E-8
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
@@ -3335,6 +3555,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  2,  7,  6) (  5,  8,  4) (  3,  9,  4)
 
 
+
+Solver Convergence Information:
+                              HClose:  6.2273666E-5
+                              RClose:  0.0307432
+                           L2-RClose:  0.1561072
+                         Rel-Vol-Err:  1.2086982E-8
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -3397,6 +3625,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.5915E-03   -0.1115E-03   -0.5976E-04
   (  2,  7,  6) (  5,  8,  4) (  3,  9,  4)
 
+
+
+Solver Convergence Information:
+                              HClose:  5.9761446E-5
+                              RClose:  0.0314123
+                           L2-RClose:  0.1524277
+                         Rel-Vol-Err:  1.2564909E-8
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
@@ -3461,6 +3697,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  2,  7,  6) (  5,  8,  4) (  3,  9,  4)
 
 
+
+Solver Convergence Information:
+                              HClose:  5.7754137E-5
+                              RClose:  0.0301487
+                           L2-RClose:  0.1469612
+                         Rel-Vol-Err:  1.2059462E-8
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -3523,6 +3767,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.4847E-03   -0.9919E-04
   (  2,  7,  6) (  5,  8,  5)
 
+
+
+Solver Convergence Information:
+                              HClose:  9.9187342E-5
+                              RClose:  0.2454736
+                           L2-RClose:  0.8213335
+                         Rel-Vol-Err:  1.1941791E-8
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
@@ -3587,6 +3839,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  2,  7,  6) (  5,  8,  5)
 
 
+
+Solver Convergence Information:
+                              HClose:  9.4205229E-5
+                              RClose:  0.2316457
+                           L2-RClose:  0.7934417
+                         Rel-Vol-Err:  1.1362445E-8
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -3649,6 +3909,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.4757E-03   -0.9048E-04
   (  2,  7,  6) (  5,  8,  5)
 
+
+
+Solver Convergence Information:
+                              HClose:  9.0482157E-5
+                              RClose:  0.2203785
+                           L2-RClose:  0.7706402
+                         Rel-Vol-Err:  1.0890269E-8
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 1
  CELL-BY-CELL FLOW TERM FLAG = 1
@@ -3807,6 +4075,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  1,  7,  6) (  5,  8,  5)
 
 
+
+Solver Convergence Information:
+                              HClose:  8.7526610E-5
+                              RClose:  0.2137054
+                           L2-RClose:  0.7533103
+                         Rel-Vol-Err:  1.0513198E-8
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -3869,6 +4145,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.4676E-03   -0.8507E-04
   (  1,  7,  6) (  5,  8,  5)
 
+
+
+Solver Convergence Information:
+                              HClose:  8.5071959E-5
+                              RClose:  0.2093613
+                           L2-RClose:  0.7398727
+                         Rel-Vol-Err:  1.0198081E-8
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
@@ -3933,6 +4217,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  1,  7,  6) (  5,  8,  5)
 
 
+
+Solver Convergence Information:
+                              HClose:  8.2938335E-5
+                              RClose:  0.2056391
+                           L2-RClose:  0.7291965
+                         Rel-Vol-Err:  9.9226117E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -3995,6 +4287,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.4622E-03   -0.8100E-04
   (  1,  7,  6) (  5,  8,  5)
 
+
+
+Solver Convergence Information:
+                              HClose:  8.1004939E-5
+                              RClose:  0.2022707
+                           L2-RClose:  0.7204312
+                         Rel-Vol-Err:  9.6719146E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
@@ -4059,6 +4359,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  1,  7,  6) (  5,  8,  5)
 
 
+
+Solver Convergence Information:
+                              HClose:  7.9189686E-5
+                              RClose:  0.1990704
+                           L2-RClose:  0.7129171
+                         Rel-Vol-Err:  9.4359756E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -4121,6 +4429,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.4555E-03   -0.7744E-04
   (  1,  7,  6) (  5,  8,  5)
 
+
+
+Solver Convergence Information:
+                              HClose:  7.7435926E-5
+                              RClose:  0.1959082
+                           L2-RClose:  0.7061326
+                         Rel-Vol-Err:  9.2079639E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
@@ -4185,6 +4501,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  1,  7,  6) (  5,  8,  5)
 
 
+
+Solver Convergence Information:
+                              HClose:  7.5704235E-5
+                              RClose:  0.1926923
+                           L2-RClose:  0.6996606
+                         Rel-Vol-Err:  8.9831591E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -4247,6 +4571,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.4461E-03   -0.7397E-04
   (  1,  7,  6) (  5,  8,  5)
 
+
+
+Solver Convergence Information:
+                              HClose:  7.3967210E-5
+                              RClose:  0.1893584
+                           L2-RClose:  0.6931662
+                         Rel-Vol-Err:  8.7583899E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
@@ -4311,6 +4643,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  1,  7,  6) (  5,  8,  5)
 
 
+
+Solver Convergence Information:
+                              HClose:  7.2205961E-5
+                              RClose:  0.1858618
+                           L2-RClose:  0.6863807
+                         Rel-Vol-Err:  8.5314512E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -4373,6 +4713,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.4337E-03   -0.7041E-04
   (  1,  7,  6) (  5,  8,  5)
 
+
+
+Solver Convergence Information:
+                              HClose:  7.0407979E-5
+                              RClose:  0.1821733
+                           L2-RClose:  0.6790911
+                         Rel-Vol-Err:  8.3009958E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 1
  CELL-BY-CELL FLOW TERM FLAG = 1
@@ -4531,6 +4879,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  1,  7,  6) (  5,  8,  5)
 
 
+
+Solver Convergence Information:
+                              HClose:  6.8565584E-5
+                              RClose:  0.1782756
+                           L2-RClose:  0.6711304
+                         Rel-Vol-Err:  8.0662489E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -4593,6 +4949,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.4182E-03   -0.6667E-04
   (  1,  7,  6) (  5,  8,  5)
 
+
+
+Solver Convergence Information:
+                              HClose:  6.6674796E-5
+                              RClose:  0.1741605
+                           L2-RClose:  0.6623722
+                         Rel-Vol-Err:  7.8267932E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
@@ -4657,6 +5021,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  1,  7,  6) (  5,  8,  5)
 
 
+
+Solver Convergence Information:
+                              HClose:  6.4734528E-5
+                              RClose:  0.1698278
+                           L2-RClose:  0.6527241
+                         Rel-Vol-Err:  7.7890158E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -4719,6 +5091,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.3997E-03   -0.6275E-04
   (  1,  7,  6) (  5,  8,  5)
 
+
+
+Solver Convergence Information:
+                              HClose:  6.2746002E-5
+                              RClose:  0.1652834
+                           L2-RClose:  0.6421249
+                         Rel-Vol-Err:  7.7563167E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
@@ -4783,6 +5163,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  1,  7,  6) (  5,  8,  5)
 
 
+
+Solver Convergence Information:
+                              HClose:  6.0712182E-5
+                              RClose:  0.1605380
+                           L2-RClose:  0.6305395
+                         Rel-Vol-Err:  7.7036500E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -4845,6 +5233,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.3786E-03    0.5974E-04
   (  1,  7,  6) (  4,  6,  8)
 
+
+
+Solver Convergence Information:
+                              HClose:  5.9743326E-5
+                              RClose:  0.1556064
+                           L2-RClose:  0.6179571
+                         Rel-Vol-Err:  7.6304793E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
@@ -4909,6 +5305,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  1,  7,  6) (  4,  6,  8)
 
 
+
+Solver Convergence Information:
+                              HClose:  5.9174295E-5
+                              RClose:  0.1505066
+                           L2-RClose:  0.6043871
+                         Rel-Vol-Err:  7.5366974E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -4971,6 +5375,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.3553E-03    0.5844E-04
   (  1,  7,  6) (  4,  6,  8)
 
+
+
+Solver Convergence Information:
+                              HClose:  5.8439861E-5
+                              RClose:  0.1452591
+                           L2-RClose:  0.5898577
+                         Rel-Vol-Err:  7.4226022E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
@@ -5035,6 +5447,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  1,  7,  6) (  4,  6,  8)
 
 
+
+Solver Convergence Information:
+                              HClose:  5.7543105E-5
+                              RClose:  0.1398861
+                           L2-RClose:  0.5744121
+                         Rel-Vol-Err:  7.2888017E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -5097,6 +5517,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.3303E-03    0.5649E-04
   (  1,  7,  6) (  4,  6,  8)
 
+
+
+Solver Convergence Information:
+                              HClose:  5.6489547E-5
+                              RClose:  0.1344108
+                           L2-RClose:  0.5581076
+                         Rel-Vol-Err:  7.1361184E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 1
  CELL-BY-CELL FLOW TERM FLAG = 1
@@ -5255,6 +5683,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  1,  7,  6) (  4,  6,  8)
 
 
+
+Solver Convergence Information:
+                              HClose:  5.5286750E-5
+                              RClose:  0.1288576
+                           L2-RClose:  0.5410124
+                         Rel-Vol-Err:  6.9656491E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -5317,6 +5753,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.3040E-03    0.5394E-04
   (  1,  7,  6) (  4,  6,  8)
 
+
+
+Solver Convergence Information:
+                              HClose:  5.3944011E-5
+                              RClose:  0.1246273
+                           L2-RClose:  0.5232043
+                         Rel-Vol-Err:  6.7787766E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
@@ -5381,6 +5825,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  1,  7,  6) (  4,  6,  8)
 
 
+
+Solver Convergence Information:
+                              HClose:  5.2472176E-5
+                              RClose:  0.1215776
+                           L2-RClose:  0.5047686
+                         Rel-Vol-Err:  6.5768838E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -5443,6 +5895,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.2771E-03    0.5088E-04
   (  1,  7,  6) (  4,  6,  8)
 
+
+
+Solver Convergence Information:
+                              HClose:  5.0883165E-5
+                              RClose:  0.1182001
+                           L2-RClose:  0.4857957
+                         Rel-Vol-Err:  6.3616514E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
@@ -5507,6 +5967,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  1,  7,  6) (  4,  6,  8)
 
 
+
+Solver Convergence Information:
+                              HClose:  4.9189862E-5
+                              RClose:  0.1145280
+                           L2-RClose:  0.4663806
+                         Rel-Vol-Err:  6.1346889E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -5569,6 +6037,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.2500E-03    0.4741E-04
   (  1,  7,  6) (  4,  6,  8)
 
+
+
+Solver Convergence Information:
+                              HClose:  4.7405780E-5
+                              RClose:  0.1105959
+                           L2-RClose:  0.4466201
+                         Rel-Vol-Err:  5.8977842E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
@@ -5633,6 +6109,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  1,  7,  6) (  4,  6,  8)
 
 
+
+Solver Convergence Information:
+                              HClose:  4.5544830E-5
+                              RClose:  0.1064401
+                           L2-RClose:  0.4266123
+                         Rel-Vol-Err:  5.6526899E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -5695,6 +6179,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.2232E-03    0.4362E-04
   (  1,  7,  6) (  4,  6,  8)
 
+
+
+Solver Convergence Information:
+                              HClose:  4.3621131E-5
+                              RClose:  0.1020973
+                           L2-RClose:  0.4064548
+                         Rel-Vol-Err:  5.4012060E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
@@ -5759,6 +6251,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  1,  7,  6) (  4,  6,  8)
 
 
+
+Solver Convergence Information:
+                              HClose:  4.1648760E-5
+                              RClose:  0.0976047
+                           L2-RClose:  0.3862437
+                         Rel-Vol-Err:  5.1450968E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -5821,6 +6321,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.1971E-03    0.3964E-04
   (  1,  7,  6) (  4,  6,  8)
 
+
+
+Solver Convergence Information:
+                              HClose:  3.9641613E-5
+                              RClose:  0.0929988
+                           L2-RClose:  0.3660725
+                         Rel-Vol-Err:  4.8860550E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 1
  CELL-BY-CELL FLOW TERM FLAG = 1
@@ -5979,6 +6487,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  1,  7,  6) (  4,  6,  8)
 
 
+
+Solver Convergence Information:
+                              HClose:  3.7613209E-5
+                              RClose:  0.0883154
+                           L2-RClose:  0.3460317
+                         Rel-Vol-Err:  4.6257377E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -6041,6 +6557,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.1722E-03    0.3558E-04
   (  1,  7,  6) (  4,  6,  8)
 
+
+
+Solver Convergence Information:
+                              HClose:  3.5576606E-5
+                              RClose:  0.0835890
+                           L2-RClose:  0.3262065
+                         Rel-Vol-Err:  4.3657184E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
@@ -6105,6 +6629,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  1,  7,  6) (  4,  6,  8)
 
 
+
+Solver Convergence Information:
+                              HClose:  3.3544197E-5
+                              RClose:  0.0788524
+                           L2-RClose:  0.3066781
+                         Rel-Vol-Err:  4.1074991E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -6167,6 +6699,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.1488E-03    0.3153E-04
   (  1,  7,  6) (  4,  6,  8)
 
+
+
+Solver Convergence Information:
+                              HClose:  3.1527672E-5
+                              RClose:  0.0741366
+                           L2-RClose:  0.2875214
+                         Rel-Vol-Err:  3.8524747E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
@@ -6231,6 +6771,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  1,  7,  6) (  4,  6,  8)
 
 
+
+Solver Convergence Information:
+                              HClose:  2.9537914E-5
+                              RClose:  0.0694703
+                           L2-RClose:  0.2688057
+                         Rel-Vol-Err:  3.6019087E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -6293,6 +6841,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.1271E-03    0.2758E-04
   (  1,  7,  6) (  4,  6,  8)
 
+
+
+Solver Convergence Information:
+                              HClose:  2.7584883E-5
+                              RClose:  0.0648800
+                           L2-RClose:  0.2505939
+                         Rel-Vol-Err:  3.3569694E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
@@ -6357,6 +6913,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  1,  7,  6) (  4,  6,  8)
 
 
+
+Solver Convergence Information:
+                              HClose:  2.5677666E-5
+                              RClose:  0.0603894
+                           L2-RClose:  0.2329420
+                         Rel-Vol-Err:  3.1186700E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -6419,6 +6983,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.1073E-03    0.2382E-04
   (  1,  7,  6) (  4,  6,  8)
 
+
+
+Solver Convergence Information:
+                              HClose:  2.3824345E-5
+                              RClose:  0.0560199
+                           L2-RClose:  0.2158993
+                         Rel-Vol-Err:  2.8879881E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
@@ -6483,6 +7055,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  1,  7,  6)
 
 
+
+Solver Convergence Information:
+                              HClose:  9.8137246E-5
+                              RClose:  0.0684623
+                           L2-RClose:  0.3924473
+                         Rel-Vol-Err:  1.1992800E-8
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -6545,6 +7125,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.8952E-04
   (  1,  7,  6)
 
+
+
+Solver Convergence Information:
+                              HClose:  8.9521060E-5
+                              RClose:  0.0624955
+                           L2-RClose:  0.3595263
+                         Rel-Vol-Err:  1.1018467E-8
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 1
  CELL-BY-CELL FLOW TERM FLAG = 1
@@ -6703,6 +7291,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  1,  7,  6)
 
 
+
+Solver Convergence Information:
+                              HClose:  8.1374851E-5
+                              RClose:  0.0568495
+                           L2-RClose:  0.3282773
+                         Rel-Vol-Err:  1.0086751E-8
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -6765,6 +7361,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.7373E-04
   (  1,  7,  6)
 
+
+
+Solver Convergence Information:
+                              HClose:  7.3729724E-5
+                              RClose:  0.0515449
+                           L2-RClose:  0.2987969
+                         Rel-Vol-Err:  9.2020273E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
@@ -6829,6 +7433,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  1,  7,  6)
 
 
+
+Solver Convergence Information:
+                              HClose:  6.6585798E-5
+                              RClose:  0.0465825
+                           L2-RClose:  0.2711003
+                         Rel-Vol-Err:  8.3659291E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -6891,6 +7503,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.5994E-04
   (  1,  7,  6)
 
+
+
+Solver Convergence Information:
+                              HClose:  5.9936062E-5
+                              RClose:  0.0419587
+                           L2-RClose:  0.2451790
+                         Rel-Vol-Err:  7.5793386E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
@@ -6955,6 +7575,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  1,  7,  6)
 
 
+
+Solver Convergence Information:
+                              HClose:  5.3769860E-5
+                              RClose:  0.0376667
+                           L2-RClose:  0.2210108
+                         Rel-Vol-Err:  6.8425655E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -7017,6 +7645,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.4807E-04
   (  1,  7,  6)
 
+
+
+Solver Convergence Information:
+                              HClose:  4.8073818E-5
+                              RClose:  0.0336981
+                           L2-RClose:  0.1985614
+                         Rel-Vol-Err:  6.1554193E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
@@ -7081,6 +7717,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  1,  7,  6)
 
 
+
+Solver Convergence Information:
+                              HClose:  4.2832222E-5
+                              RClose:  0.0300429
+                           L2-RClose:  0.1777870
+                         Rel-Vol-Err:  5.5172563E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -7143,6 +7787,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.3803E-04
   (  1,  7,  6)
 
+
+
+Solver Convergence Information:
+                              HClose:  3.8027466E-5
+                              RClose:  0.0266893
+                           L2-RClose:  0.1586358
+                         Rel-Vol-Err:  4.9271345E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
@@ -7207,6 +7859,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  1,  7,  6)
 
 
+
+Solver Convergence Information:
+                              HClose:  3.3640384E-5
+                              RClose:  0.0236247
+                           L2-RClose:  0.1410488
+                         Rel-Vol-Err:  4.3837309E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -7269,6 +7929,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.2965E-04
   (  1,  7,  6)
 
+
+
+Solver Convergence Information:
+                              HClose:  2.9650457E-5
+                              RClose:  0.0208351
+                           L2-RClose:  0.1249607
+                         Rel-Vol-Err:  3.8854957E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 1
  CELL-BY-CELL FLOW TERM FLAG = 1
@@ -7427,6 +8095,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  1,  7,  6)
 
 
+
+Solver Convergence Information:
+                              HClose:  2.6036246E-5
+                              RClose:  0.0183063
+                           L2-RClose:  0.1103019
+                         Rel-Vol-Err:  3.4306288E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -7489,6 +8165,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.2278E-04
   (  1,  7,  6)
 
+
+
+Solver Convergence Information:
+                              HClose:  2.2775697E-5
+                              RClose:  0.0160231
+                           L2-RClose:  0.0969985
+                         Rel-Vol-Err:  3.0171752E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
@@ -7553,6 +8237,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  1,  7,  6)
 
 
+
+Solver Convergence Information:
+                              HClose:  1.9846202E-5
+                              RClose:  0.0139703
+                           L2-RClose:  0.0849740
+                         Rel-Vol-Err:  2.6429415E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -7615,6 +8307,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
     -0.1723E-04
   (  1,  7,  6)
 
+
+
+Solver Convergence Information:
+                              HClose:  1.7225173E-5
+                              RClose:  0.0121322
+                           L2-RClose:  0.0741501
+                         Rel-Vol-Err:  2.3057938E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
@@ -7679,6 +8379,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  1,  7,  6)
 
 
+
+Solver Convergence Information:
+                              HClose:  1.4890050E-5
+                              RClose:  0.0104935
+                           L2-RClose:  0.0644476
+                         Rel-Vol-Err:  2.0033479E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -7739,6 +8447,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
      0.6279E-02    0.1885E-02    0.1081E-02    0.5174E-03    0.9395E-04
   (  3,  9,  9) (  5,  6,  8) (  5, 12,  9) (  3, 10, 13) (  5, 12,  7)
 
+
+
+Solver Convergence Information:
+                              HClose:  9.3950446E-5
+                              RClose:  0.1156577
+                           L2-RClose:  0.3076116
+                         Rel-Vol-Err:  4.6263063E-8
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
@@ -7801,6 +8517,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  3,  9,  9) (  5,  6,  8) (  5, 12,  9) (  3, 10, 13) (  5, 12,  7)
 
 
+
+Solver Convergence Information:
+                              HClose:  8.0187169E-5
+                              RClose:  0.0996706
+                           L2-RClose:  0.2620986
+                         Rel-Vol-Err:  3.9868224E-8
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -7861,6 +8585,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
      0.4401E-02    0.1324E-02    0.7629E-03    0.3738E-03    0.6851E-04
   (  3,  9,  9) (  5,  6,  8) (  5, 12,  9) (  3, 10, 13) (  5, 12,  7)
 
+
+
+Solver Convergence Information:
+                              HClose:  6.8509044E-5
+                              RClose:  0.0858515
+                           L2-RClose:  0.2237257
+                         Rel-Vol-Err:  3.4340596E-8
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
@@ -7923,6 +8655,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  3,  9,  9) (  5,  6,  8) (  5, 12,  9) (  3, 10, 13) (  5, 12,  7)
 
 
+
+Solver Convergence Information:
+                              HClose:  5.8346301E-5
+                              RClose:  0.0737090
+                           L2-RClose:  0.1904095
+                         Rel-Vol-Err:  2.9483587E-8
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -7983,6 +8723,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
      0.3073E-02    0.9219E-03    0.5344E-03    0.2674E-03    0.4950E-04
   (  3,  9,  9) (  5,  6,  8) (  5, 12,  9) (  3, 10, 13) (  5, 12,  7)
 
+
+
+Solver Convergence Information:
+                              HClose:  4.9497059E-5
+                              RClose:  0.0630332
+                           L2-RClose:  0.1614431
+                         Rel-Vol-Err:  2.5213265E-8
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 1
  CELL-BY-CELL FLOW TERM FLAG = 1
@@ -8139,6 +8887,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  3,  9,  9) (  5,  6,  8) (  5, 12,  9) (  3, 10, 13) (  5, 12,  7)
 
 
+
+Solver Convergence Information:
+                              HClose:  4.1812663E-5
+                              RClose:  0.0536718
+                           L2-RClose:  0.1363200
+                         Rel-Vol-Err:  2.1468735E-8
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -8199,6 +8955,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
      0.2108E-02    0.6314E-03    0.3682E-03    0.1882E-03    0.3517E-04
   (  3,  9,  9) (  5,  6,  8) (  5, 12,  9) (  3, 10, 13) (  5, 12,  7)
 
+
+
+Solver Convergence Information:
+                              HClose:  3.5165653E-5
+                              RClose:  0.0454953
+                           L2-RClose:  0.1146107
+                         Rel-Vol-Err:  1.8198138E-8
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
@@ -8261,6 +9025,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  3,  9,  9) (  5,  6,  8) (  5, 12,  9) (  3, 10, 13) (  5, 12,  7)
 
 
+
+Solver Convergence Information:
+                              HClose:  2.9441027E-5
+                              RClose:  0.0383856
+                           L2-RClose:  0.0959304
+                         Rel-Vol-Err:  1.5354246E-8
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -8321,6 +9093,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
      0.1420E-02    0.4249E-03    0.2492E-03    0.1300E-03    0.2453E-04
   (  3,  9,  9) (  5,  6,  8) (  5, 12,  9) (  3, 10, 13) (  5, 12,  7)
 
+
+
+Solver Convergence Information:
+                              HClose:  2.4533522E-5
+                              RClose:  0.0322329
+                           L2-RClose:  0.0799282
+                         Rel-Vol-Err:  1.2893164E-8
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
@@ -8383,6 +9163,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  3,  9,  9) (  5,  6,  8) (  5, 12,  9) (  3, 10, 13) (  5, 12,  7)
 
 
+
+Solver Convergence Information:
+                              HClose:  2.0346683E-5
+                              RClose:  0.0269347
+                           L2-RClose:  0.0662842
+                         Rel-Vol-Err:  1.0773879E-8
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -8443,6 +9231,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
      0.9393E-03    0.2807E-03    0.1656E-03    0.8817E-04
   (  3,  9,  9) (  5,  6,  8) (  5, 12,  9) (  3, 10, 13)
 
+
+
+Solver Convergence Information:
+                              HClose:  8.8170347E-5
+                              RClose:  0.0562747
+                           L2-RClose:  0.1676205
+                         Rel-Vol-Err:  2.2509867E-8
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
@@ -8505,6 +9301,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  3,  9,  9) (  5,  6,  8) (  5, 12,  9) (  3, 10, 13)
 
 
+
+Solver Convergence Information:
+                              HClose:  7.1752685E-5
+                              RClose:  0.0455095
+                           L2-RClose:  0.1365744
+                         Rel-Vol-Err:  1.8203813E-8
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -8565,6 +9369,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
      0.5990E-03    0.1774E-03    0.1079E-03    0.5862E-04
   (  3,  9,  9) (  5,  6,  8) (  5, 12,  9) (  3, 10, 13)
 
+
+
+Solver Convergence Information:
+                              HClose:  5.8620062E-5
+                              RClose:  0.0371024
+                           L2-RClose:  0.1115662
+                         Rel-Vol-Err:  1.4840978E-8
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
@@ -8627,6 +9439,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
   (  3,  9,  9) (  5,  6,  8) (  5, 12,  9)
 
 
+
+Solver Convergence Information:
+                              HClose:  8.6959060E-5
+                              RClose:  0.1013687
+                           L2-RClose:  0.4927984
+                         Rel-Vol-Err:  4.6744347E-9
+ 
+
  HEAD/DRAWDOWN PRINTOUT FLAG = 0     TOTAL BUDGET PRINTOUT FLAG = 0
  CELL-BY-CELL FLOW TERM FLAG = 1
 
@@ -8687,6 +9507,14 @@ FYI, YOU CAN REDUCE RAM USUAGE WITH BAS OPTION
      0.2643E-03    0.1001E-03    0.6129E-04
   (  3,  9,  9) (  3, 10, 12) (  5, 12,  9)
 
+
+
+Solver Convergence Information:
+                              HClose:  6.1289983E-5
+                              RClose:  0.0745367
+                           L2-RClose:  0.3812044
+                         Rel-Vol-Err:  2.6210427E-9
+ 
 
  HEAD/DRAWDOWN PRINTOUT FLAG = 1     TOTAL BUDGET PRINTOUT FLAG = 1
  CELL-BY-CELL FLOW TERM FLAG = 1

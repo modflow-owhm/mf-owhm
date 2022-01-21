@@ -162,6 +162,7 @@ obj:=  $(patsubst             %.f90, %.o,   \
 #
 # Check for if Windows or Unix
 #
+#
 ifeq ($(OS),Windows_NT)
     ext:=.exe
 else
@@ -408,7 +409,7 @@ $(bin_out): $(addprefix $(int_dir)/,$(obj))
 	   echo "                              $(bin_out)"                                         ;  \
 	   echo                                                                                    ;  \
 	else                                                                                          \
-	   echo "NOW LINKING FINAL BINARY"                                                        ;   \
+	   echo "NOW LINKING FINAL BINARY"                                                        ;  \
 	   echo                                                                                    ;  \
 	fi
 	@$(F90) $(F90FLAGS) $(mod)   $^   $(STATICLNK)  -o  $@

@@ -1,5 +1,5 @@
 <NotepadPlus>
-    <UserLang name="SFR" ext="sfr sfr2 SFR.txt" udlVersion="2.1">
+    <UserLang name="SFR" ext="sfr sfr2 SFR.txt sfr.tpl sfr2.tpl SFR.txt.tpl sfr.template sfr2.template SFR.txt.template" udlVersion="2.1">
         <Settings>
             <Global caseIgnored="yes" allowFoldOfComments="no" foldCompact="no" forcePureLC="0" decimalSeparator="0" />
             <Prefix Keywords1="no" Keywords2="no" Keywords3="no" Keywords4="no" Keywords5="no" Keywords6="no" Keywords7="no" Keywords8="no" />

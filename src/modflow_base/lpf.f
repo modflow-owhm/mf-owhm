@@ -260,7 +260,8 @@ C4------ALLOCATE AND READ LAYTYP, LAYAVG, CHANI, LAYVKA, LAYWET, LAYSTRT.
          ELSE
             LAYWET = ONE
          END IF
-      ELSEIF(LINE(ISTART:ISTOP) == 'NO') THEN
+      ELSEIF(LINE(ISTART:ISTOP) == 'NO'     .OR.
+     +       LINE(ISTART:ISTOP) == 'NO_WETTING') THEN
          LAYWET = Z
       ELSE
           BACKSPACE(IN)
@@ -1185,7 +1186,7 @@ C
 C     SPECIFICATIONS:
 C     ------------------------------------------------------------------
       USE GLOBAL,      ONLY:NCOL,NROW,NLAY,IBOUND,HNEW,BUFF,CR,CC,CV,
-     1                      BOTM,LBOTM,IOUT
+     1                      BOTM,LBOTM,IOUT, NO_CONST_HEAD
       USE GWFBASMODULE,ONLY:MSUM,VBVL,VBNM,DELT,PERTIM,TOTIM,ICBCFL,
      1                      ICHFLG
       USE GWFLPFMODULE,ONLY:ILPFCB,LAYTYP,NOVFC
@@ -1196,6 +1197,8 @@ C
       DATA TEXT /'   CONSTANT HEAD'/
 C     ------------------------------------------------------------------
       CALL SGWF2LPF7PNT(IGRID)
+C
+      IF(NO_CONST_HEAD) RETURN
 C
 C1------SET IBD TO INDICATE IF CELL-BY-CELL BUDGET VALUES WILL BE SAVED.
       IBD=0

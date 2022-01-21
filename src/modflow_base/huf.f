@@ -2644,7 +2644,7 @@ C
 C     SPECIFICATIONS:
 C     ------------------------------------------------------------------
       USE GLOBAL,      ONLY:NCOL,NROW,NLAY,IBOUND,HNEW,BUFF,CR,CC,CV,
-     1                      BOTM,LBOTM,IOUT, KND
+     1                      BOTM,LBOTM,IOUT, KND, NO_CONST_HEAD
       USE GWFBASMODULE,ONLY:MSUM,VBVL,VBNM,DELT,PERTIM,TOTIM,ICBCFL,
      1                      ICHFLG
       USE GWFHUFMODULE,ONLY:LTHUF,IHUFCB,VDHT
@@ -2656,6 +2656,8 @@ C
       DATA TEXT /'   CONSTANT HEAD'/
 C     ------------------------------------------------------------------
       CALL SGWF2HUF7PNT(IGRID)
+C
+      IF(NO_CONST_HEAD) RETURN
 C
 C1------SET IBD TO INDICATE IF CELL-BY-CELL BUDGET VALUES WILL BE SAVED.
       IBD=0

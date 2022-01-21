@@ -8,13 +8,22 @@
 #
 #    Boyce, S.E., Hanson, R.T., Ferguson, I., Schmid, W., Henson, W., Reimann, T., Mehl, S.M., and Earll, M.M., 2020, One-Water Hydrologic Flow Model: A MODFLOW based conjunctive-use simulation software: U.S. Geological Survey Techniques and Methods 6–A60, 435 p., https://doi.org/10.3133/tm6A60
 #
-#    Boyce, S.E., 2021, MODFLOW One-Water Hydrologic Flow Model (MF-OWHM) Conjunctive Use and Integrated Hydrologic Flow Modeling Software, version 2.0.x: U.S. Geological Survey Software Release, https://doi.org/10.5066/P9P8I8GS
+#    Boyce, S.E., 2022, MODFLOW One-Water Hydrologic Flow Model (MF-OWHM) Conjunctive Use and Integrated Hydrologic Flow Modeling Software, version 2.2.x: U.S. Geological Survey Software Release, https://doi.org/10.5066/P9P8I8GS
 #
 # PROVIDED AS IS WITHOUT WARRANTY OR HELP.
 #
 # See next section to set the compiler type variables
 #   The initial setup has the compiler type variables set to the 
-#   GNU gfortran AND gcc to make a debug x64 version
+#   Intel Fortran Compiler Classic (ifort) AND the 
+#   Intel C++ Compiler Classic (icc) to make a release x64 version
+#      However, this makefile default setup does not compile GMG so icc is not used.
+#
+# This makefile contains the options for compiling mf-owhm using Intel, GFortran, and LLVM. 
+#   It is recommended to use the Intel Fortran Compiler Classic for compiling mf-owhm.
+#   gfortran is unlikely to successfully compile do to the variability of versions 
+#   included with linux or windows and several known compiler bugs present in multiple versions.
+#   At some point, mf-owhm maybe refactored to work around the known compiler bugs.
+#   The LLVM compilers, FLANG and CLANG, are still experimental and not yet fully supported.
 #
 # To Invoke/Compile type from command prompt:
 # make                  Compile the src files and testing files. Binary located in testing/bin
@@ -51,7 +60,7 @@
 # If you want to use Intel Fortran on Windows 10 
 #    then run the makefile in the Intel Command Prompt (for example, run from the start menu: Compiler 19.1 Update 1 for Intel 64 Visual Studio 2019 environment)
 #    or you will get path or license errors from Intel.
-#    -- Linux Intel Fortran works fine with this makefile.
+#    -- Linux Intel Fortran works fine with this makefile if ifort is in the PATH variable.
 #
 #         
 #############################################################################

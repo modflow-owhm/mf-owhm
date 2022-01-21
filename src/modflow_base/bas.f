@@ -20,8 +20,9 @@ C     ------------------------------------------------------------------
      5                     DDREF,IRESTART,KPERSTART,KSTPSTART,
      6                     IUNITSTART,SPSTART,SPEND,NOCBC,RBUF,
      7                     INPUT_CHECK,BIN_REAL_KIND,HNEW_OLD,SPTIM,
-     8                     BACKTRACKING, CBC_GLOBAL_UNIT, ALLOC_DDREF
-      USE GLOBAL,     ONLY:SUBLNK, UPLAY, UPLAY_IDX,
+     8                     BACKTRACKING, CBC_GLOBAL_UNIT, ALLOC_DDREF,
+     9                     RCloseBAS, HCloseBAS, RCloseL2BAS
+      USE GLOBAL,     ONLY:NO_CONST_HEAD, SUBLNK, UPLAY, UPLAY_IDX,
      +                     WTABLE, WTABLE_OLD
       USE GLOBAL,     ONLY: SUPER_NAMES
       USE PARAMMODULE,ONLY:MXPAR,MXCLST,MXINST,ICLSUM,IPSUM,
@@ -42,6 +43,7 @@ C     ------------------------------------------------------------------
      +                      PRNT_FRES_LRC,PRNT_FRES_DIF,
      +                      PRNT_VERR_OUTER, PRNT_VERR_NTERM, PRNT_VERR,
      +                      PRNT_VERR_LRC,PRNT_VERR_DIF,
+     +                      SAVE_HEAD,SAVE_HEAD_FLAG,
      +                      PRINT_HEAD,PRINT_HEAD_FLAG,
      +                      PRINT_WTAB,PRINT_WTAB_FLAG,
      +                      PRINT_WDEP,PRINT_WDEP_FLAG,
@@ -73,7 +75,8 @@ C     ------------------------------------------------------------------
       USE GENERIC_INPUT_FILE_INSTRUCTION,  ONLY: GENERIC_INPUT_FILE
       USE ULOAD_AND_SFAC_INTERFACE,      ONLY: ULOAD
       USE LOAD_SUPER_NAMES_INTERFACE,    ONLY: LOAD_SUPER_NAMES
-      USE BAS_OPTIONS_AND_STARTDATE,     ONLY: GET_BAS_OPTIONS
+      USE BAS_OPTIONS_AND_STARTDATE,     ONLY: GET_BAS_OPTIONS, 
+     +                                         GET_BAS_START_DATE_OPTION
       !
       TYPE(DATE_OPERATOR):: STARTING_DATE
       TYPE(DATE_OPERATOR):: DATE
@@ -103,6 +106,8 @@ C     ------------------------------------------------------------------
       !
       NaN = IEEE_VALUE(NaN, IEEE_QUIET_NAN)
       !
+      CALL STARTING_DATE%INIT() ! SETS IT TO 'NO_DATE' CAUSE NO ARG PASSED
+      !
 C1------Allocate scalar variables, which makes it possible for multiple
 C1------grids to be defined.
       ALLOCATE(CBC_GLOBAL_UNIT,NOCBC)
@@ -126,14 +131,22 @@ C1------grids to be defined.
       ALLOCATE(ABOVE_GSE_PRT)
       ALLOCATE(BACKTRACKING, SOURCE=.FALSE.)
       !
-      ALLOCATE(PRINT_HEAD_FLAG, SOURCE=0)   ! 0: not in use, 1 in use and SP specified, 2, print last time step, 3 print every timestep
+      ALLOCATE(SAVE_HEAD_FLAG,  SOURCE=0)   ! 0: not in use, 1 in use and SP specified, 2, print last time step, 3 print every timestep
+      ALLOCATE(PRINT_HEAD_FLAG, SOURCE=0) 
       ALLOCATE(PRINT_WTAB_FLAG, SOURCE=0)
       ALLOCATE(PRINT_WDEP_FLAG, SOURCE=0)
       !
+      ALLOCATE(SAVE_HEAD)
       ALLOCATE(PRINT_HEAD(1))
       ALLOCATE(PRINT_WTAB(1))
       ALLOCATE(PRINT_WDEP(1))
       !PRINT_HEAD(1)%EXTRA = ""  ! Allocate as empty to indicate option not in use
+      !
+      ALLOCATE(RCloseBAS, HCloseBAS, RCloseL2BAS)
+      !
+      RCloseBAS            = DZ
+      HCloseBAS            = DZ
+      RCloseL2BAS          = DZ
       !
       BAS_ADAMP            = inf_I
       BAS_ADAMP_TOL        = DZ
@@ -163,9 +176,12 @@ C1------grids to be defined.
       ALLOCATE(PDIFFPRT,REALTIM,USE_LEAP_YR)
       ALLOCATE(PROPPRINT, SOURCE=' ')
       ALLOCATE(SIMTIM_PER, REALTIM_PER, TOTPERTIM, SIMTIME)
+      ALLOCATE(HAS_STARTDATE, SOURCE=FALSE)
+      !
       PDIFFPRT = 5                                                     ! IF PERCENT ERROR GOES ABOVE 5% THEN PRINT TO CMD PROMPT
       IF(IGRID == ONE)THEN
-        ALLOCATE(SUBLNK,INPUT_CHECK,BIN_REAL_KIND)
+        ALLOCATE(NO_CONST_HEAD, SUBLNK,INPUT_CHECK,BIN_REAL_KIND)
+        NO_CONST_HEAD = FALSE
         SUBLNK      = FALSE
         INPUT_CHECK = FALSE
         BIN_REAL_KIND = REAL32  !SINGLE PRECISION BINARY OUTPUT
@@ -213,6 +229,9 @@ C3A-----SHOW PRECISION OF VARIABLES
      +              NUM2STR(IPBUFF)
       END IF
 C
+C4------Scan BAS options to see if a starting date was specified
+      CALL GET_BAS_START_DATE_OPTION(LINE, INBAS, IOUT, STARTING_DATE)
+C
 C5------Allocate and read discretization data.
       CALL SGWF2BAS7ARDIS(LINE,IUDIS,IOUT,STARTING_DATE)
       NODES=NCOL*NROW*NLAY
@@ -241,7 +260,7 @@ C6------Allocate space for global arrays except discretization data.
       ALLOCATE (UPLAY(NCOL,NROW), SOURCE=Z) ! UPLAY = upper most active layer, set to zero if all IBOUND=0, set to NLAY if last layer IBOUND/=0 but H<BOT
       !ALLOCATE (WTLAY(NCOL,NROW), SOURCE=Z) ! WTLAY = upper most active layer with H > BOT, set to zero for all other cases
       ALLOCATE (UPLAY_IDX)
-      ALLOCATE (WTABLE(NCOL,NROW), WTABLE_OLD(NCOL,NROW))
+      ALLOCATE (WTABLE(NCOL,NROW), WTABLE_OLD(NCOL,NROW))  ! Set via call set_adv_global_arrays(igrid) in subroutine modflow_owhm_run(name)
       !
 C
 C7------Initialize head-dependent thickness indicator to code that
@@ -273,23 +292,6 @@ C8A-----READ AND PRINT COMMENTS.  SAVE THE FIRST TWO COMMENTS IN HEADNG.
      +                     HSHIFT, WARN_DIM, USE_PAUSE, TIME_INFO,
      +                     SUPER_NAMES_IN, STARTING_DATE)
       !
-      IF(SPSTART>NPER) THEN
-       WRITE(IOUT,'(/3A,//28x,A,/32x,A,//A/)')       REPEAT('#',35),
-     + '...INPUT_CHECK OPTION TURNED ON...',REPEAT('#',35),
-     + 'OneWater WILL CYCLE THROUGH ALL STRESS PERIOD INPUTS',
-     + 'BUT WILL NOT SOLVE FOR THE STRESS PERIOD HEAD.',
-     + REPEAT('#',104)
-      END IF
-      IF(INPUT_CHECK) THEN
-          NOCBC=2  !DISABLE CBC WHEN DOING INPUTCHECK
-          CBC_GLOBAL_UNIT = Z
-      END IF
-C                                                                       !seb ALLOCATE MEMORY FOR PARAMETER VAIRABLES
-      WRITE(IOUT,'(/,1x,A,3(/,1x,A,I10),/)')
-     +   'THE MAX STORAGE FOR PROPERTIES DEFINED BY PARAMETERS IS: ',
-     +   'MAX STORAGE OF PARAMETERS (MXPAR)  IS ', MXPAR,
-     +   'MAX STORAGE OF INSTANCES  (MXINST) IS ', MXINST,
-     +   'MAX STORAGE OF CLUSTERS   (MXCLST) IS ', MXCLST
       ALLOCATE (B(MXPAR))
       ALLOCATE (IACTIVE(MXPAR))
       ALLOCATE (IPLOC(4,MXPAR))
@@ -375,13 +377,17 @@ C
       !WETCEL=IBOUND /= 0                                                !seb establish logical variable that is TRUE for wet cells and false for dry cells
 C
 C8F-----READ AND PRINT HEAD VALUE TO BE PRINTED FOR NO-FLOW CELLS.
+      CALL READ_TO_DATA(LINE, INBAS, NOSHIFT=IFREFM.EQ.Z)
+      !
+      LLOC = ONE
       IF(IFREFM == Z) THEN
-         READ(INBAS,'(F10.0)') HNF
+         CALL GET_NUMBER(LINE(1:10),LLOC,ISTART,ISTOP,IOUT,INBAS,HNF,
+     +                          MSG='BAS Package failed to read HNOFLO')
       ELSE
-         READ(INBAS,*) HNF
+         CALL GET_NUMBER(LINE,LLOC,ISTART,ISTOP,IOUT,INBAS,HNF,
+     +                          MSG='BAS Package failed to read HNOFLO')
       END IF
-      !HNF=HNOFLO
-      HNOFLO = HNF
+      HNOFLO = REAL(HNF, kind(HNOFLO))
       WRITE(IOUT,3) NUM2STR(HNOFLO)
     3 FORMAT(1X,/1X,'AQUIFER HEAD WILL BE SET TO ',A,
      1       ' AT ALL NO-FLOW NODES (IBOUND=0).',/)
@@ -441,6 +447,25 @@ C13-----READ PARAMETER VALUES FILE.
       IF(SUPER_NAMES_IN%IU /= Z) THEN
        CALL LOAD_SUPER_NAMES(LINE, SUPER_NAMES_IN%IU, IOUT, SUPER_NAMES)
       END IF
+      !
+      ! Check if there are constant heads
+      !
+      IF(NO_CONST_HEAD) NO_CONST_HEAD = IUNIT(16) == Z   ! FHB Package in use
+      IF(NO_CONST_HEAD) NO_CONST_HEAD = IUNIT(38) == Z   ! CHD Package in use
+      IF(NO_CONST_HEAD) THEN
+         LAY_LOOP: 
+     +   DO K=1, NLAY
+         DO I=1, NROW
+         DO J=1, NCOL
+         IF(IBOUND(J,I,K) < Z) THEN 
+                               NO_CONST_HEAD = FALSE
+                               EXIT LAY_LOOP
+         END IF
+         END DO
+         END DO
+         END DO LAY_LOOP
+      END IF
+         
 C
 C14-----SAVE POINTERS TO DATA AND RETURN.
       CALL SGWF2BAS7PSV(IGRID)
@@ -996,7 +1021,10 @@ C     ------------------------------------------------------------------
       USE GLOBAL,      ONLY:NCOL,NROW,NLAY,HNEW,HNEW_OLD,IBOUND,
      +                      BOTM,LBOTM,AREA,SPTIM,GSE, !BACKTRACKING,
      +                      CELL_MASS_BALANCE, RELATIVE_MASS_ERROR,
-     +                      MAX_RELATIVE_VOL_ERROR, CELL_VOL_ERROR
+     +                      MAX_RELATIVE_VOL_ERROR, CELL_VOL_ERROR,
+     +                      RCloseBAS, HCloseBAS, RCloseL2BAS,
+     +                      CALCULATE_MAX_HEAD_CHANGE,
+     +                      CALCULATE_RESIDUAL_MASS_ERROR, IOUT
       USE GWFBASMODULE,ONLY:PRNT_CNVG,PRNT_CNVG_OUTER,PRNT_CNVG_NTERM,
      +                      PRNT_CNVG_LRC, PRNT_CNVG_DIF,
      +                      PRNT_FRES,PRNT_FRES_OUTER,PRNT_FRES_NTERM,
@@ -1052,26 +1080,6 @@ C     ------------------------------------------------------------------
        ELSE
          DAMPEN_START = FALSE
        END IF
-      END IF
-      !
-      !--------------------------------------------------------------------
-      !
-      IF(ICNVG==ONE .OR. KITER>=MXITER) THEN
-        IF( MAX_REL_VOL_ERROR_CNT < TEN) THEN                !Can only stop convergences at most 10 times in a row
-          !DTMP =0.01D0
-          !CALL RELATIVE_MASS_ERROR(DIF, DTMP)
-          !
-          CALL MAX_RELATIVE_VOL_ERROR(DIF)
-          !WRITE(*,'(I4,F12.8)') Kiter, DIF
-          !
-          IF(DIF > MAX_REL_VOL_ERROR) THEN
-              ICNVG = Z
-              MAX_REL_VOL_INVOKED   = TRUE
-              MAX_REL_VOL_ERROR_CNT = MAX_REL_VOL_ERROR_CNT + ONE
-          END IF
-        END IF
-      ELSE
-              MAX_REL_VOL_ERROR_CNT = ONE
       END IF
       !
       !--------------------------------------------------------------------
@@ -1167,6 +1175,40 @@ C     ------------------------------------------------------------------
      +                          KPER, KSTP, ABOVE_GSE_PRT%IU, DT)
         !
       END IF
+      END IF
+      !
+      !--------------------------------------------------------------------
+      IF(ICNVG==ONE .OR. KITER>=MXITER) CALL MAX_RELATIVE_VOL_ERROR(DIF)
+      !--------------------------------------------------------------------
+      !
+      IF(ICNVG==ONE .OR. KITER>=MXITER) THEN
+        IF( MAX_REL_VOL_ERROR_CNT < TEN) THEN                ! Can only stop convergences at most 10 times in a row
+          !
+          !CALL MAX_RELATIVE_VOL_ERROR(DIF)
+          !
+          IF(DIF > MAX_REL_VOL_ERROR) THEN
+              ICNVG = Z
+              MAX_REL_VOL_INVOKED   = TRUE
+              MAX_REL_VOL_ERROR_CNT = MAX_REL_VOL_ERROR_CNT + ONE
+          END IF
+        END IF
+      ELSE
+              MAX_REL_VOL_ERROR_CNT = ONE
+      END IF
+      !
+      !--------------------------------------------------------------------
+      ! 
+      CALL CALCULATE_MAX_HEAD_CHANGE(HCloseBAS)
+      !
+      CALL CALCULATE_RESIDUAL_MASS_ERROR(RCloseBAS, RCloseL2BAS)
+      !
+      IF(ICNVG==ONE .OR. KITER>=MXITER) THEN 
+        WRITE(IOUT,'(/,/,A)')'Solver Convergence Information:'
+        WRITE(IOUT,'(25x,A, 2x,A)') "     HClose:", NUM2STR(HCloseBAS)
+        WRITE(IOUT,'(25x,A, 2x,A)') "     RClose:", NUM2STR(RCloseBAS)
+        WRITE(IOUT,'(25x,A, 2x,A)') "  L2-RClose:", NUM2STR(RCloseL2BAS)
+        WRITE(IOUT,'(25x,A, 2x,A)') "Rel-Vol-Err:", NUM2STR(DIF)
+        WRITE(IOUT,*)
       END IF
       !
       !--------------------------------------------------------------------
@@ -1856,9 +1898,11 @@ C
 C        SPECIFICATIONS:
 C     ------------------------------------------------------------------
       USE, INTRINSIC:: IEEE_ARITHMETIC, ONLY: IEEE_VALUE, IEEE_QUIET_NAN
+      USE, INTRINSIC:: ISO_FORTRAN_ENV, ONLY: REAL32, REAL64
       USE GLOBAL,      ONLY:IOUT,NLAY,NSTP,IXSEC,IFREFM,NOCBC
       USE GWFBASMODULE,ONLY:IHDDFL,IBUDFL,ICBCFL,IPEROC,ITSOC,IBDOPT,
-     1                      IOFLG,IUBGT,PRNT_CNVG, PRINT_HEAD_FLAG
+     1                      IOFLG,IUBGT,PRNT_CNVG, 
+     2                      SAVE_HEAD_FLAG, PRINT_HEAD_FLAG
 C
 C     ------------------------------------------------------------------
       CALL SGWF2BAS7PNT(IGRID)
@@ -1870,6 +1914,7 @@ C1------OUTPUT CONTROL IS ACTIVE.  IF NOT, SET DEFAULTS AND RETURN.
       IF(INOC == 0) THEN
          IHDDFL=0
          IF(ICNVG == 0 .OR. KSTP == NSTP(KPER))IHDDFL=1
+         IF( SAVE_HEAD_FLAG /= 0 ) IHDDFL=0           ! Head output requested through the BAS - Use that output instead
          IF(PRINT_HEAD_FLAG /= 0 ) IHDDFL=0           ! Head output requested through the BAS - Use that output instead
          IBUDFL=0
          IF(ICNVG == 0 .OR. KSTP == NSTP(KPER))IBUDFL=1
@@ -1993,14 +2038,16 @@ C     ------------------------------------------------------------------
       USE CONSTANTS,   ONLY: BLNK, BLN, NL, TRUE, FALSE, DZ, D10, Z, ONE
       USE GLOBAL,      ONLY:ITMUNI,IOUT,NCOL,NROW,NLAY,HNEW,STRT,DDREF,
      1                      INPUT_CHECK,WORST_CELL_MASS_BALANCE,IBOUND,
-     2                      MAX_RELATIVE_VOL_ERROR,NPER, NSTP, RBUF,GSE,
-     +                      CELL_MASS_BALANCE, HOLD, ALLOC_DDREF, WTABLE
+     2                      MAX_RELATIVE_VOL_ERROR,NPER,NSTP,BUFF,RBUF,
+     +                      GSE,CELL_MASS_BALANCE, HOLD, ALLOC_DDREF, 
+     +                      WTABLE, IXSEC
       USE GWFBASMODULE,ONLY:DELT,PERTIM,TOTIM,IHDDFL,IBUDFL,BUDGETDB,
      +                     MSUM,VBVL,VBNM,IDDREF,IUBGT,PDIFFPRT,DATE_SP,
      +                     MAX_REL_VOL_ERROR,MAX_REL_VOL_INVOKED,
      +                     INTER_INFO,PVOL_ERR, HAS_STARTDATE,
      +                     PRNT_RES, PRNT_RES_LIM, PRNT_RES_CUM,
      +                     PRNT_RES_CUM_ARR,
+     +                     SAVE_HEAD,SAVE_HEAD_FLAG,
      +                     PRINT_HEAD,PRINT_HEAD_FLAG,
      +                     PRINT_WTAB,PRINT_WTAB_FLAG,
      +                     PRINT_WDEP,PRINT_WDEP_FLAG,
@@ -2288,6 +2335,106 @@ C4------PRINT TOTAL BUDGET IF REQUESTED
        END ASSOCIATE
       END IF
       !
+      ! Print Head Arrays if Requested - Use Same Format as OC "SAVE HEAD" would produce ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      !
+      IF(SAVE_HEAD_FLAG /= 0) THEN 
+        !
+        n  = 0
+        !
+        IF ( SAVE_HEAD_FLAG == 1 ) THEN
+          BLOCK
+              CHARACTER(8):: SPTS
+              SPTS(1:4) = TRANSFER( KPER, SPTS(1:4) )     !  I = TRANSFER(c, I)  !GET SP
+              SPTS(5:8) = TRANSFER( KSTP, SPTS(5:8) )     !  J = TRANSFER(PRINT_HEAD(n)%EXTRA(5:8), J)  !GET TS
+              DO I=1, SIZE(PRINT_HEAD)
+                 IF( SPTS == PRINT_HEAD(I)%EXTRA ) THEN
+                                                   n = I
+                                                   EXIT                ! Only one file per SP/TS
+                 END IF
+              END DO
+          END BLOCK
+        ELSEIF(SAVE_HEAD_FLAG == 2) THEN  ! Last Time Step
+                 if(kstp==nstp(kper))  n = 1
+        ELSEIF(SAVE_HEAD_FLAG == 3) THEN  ! Every Time Step
+                                       n = 1
+        END IF
+        !
+        IF ( n > 0 ) THEN
+          !
+          CALL SAVE_HEAD%SIZE_CHECK()
+          !
+          IF(IS_REAL64(BUFF(1,1,1))) THEN
+              DO K=1, NLAY
+              DO I=1, NROW
+              DO J=1, NCOL
+                  IF(IBOUND(J,I,K)==0 .or.HNEW(J,I,K)== HDRY) THEN
+                                          BUFF(J,I,K) = NaN
+                  ELSEIF(HNEW(J,I,K) > 1.d100) THEN
+                                          BUFF(J,I,K) = inf
+                  ELSEIF(HNEW(J,I,K) < -1.d100) THEN
+                                          BUFF(J,I,K) = ninf
+                  ELSE
+                      BUFF(J,I,K) = HNEW(J,I,K)
+                  END IF
+              END DO
+              END DO
+              END DO
+          ELSE
+              BLOCK
+                  REAL:: NaNr, infr, ninfr
+                  NaNr = IEEE_VALUE(NaN, IEEE_QUIET_NAN   )
+                  infr = IEEE_VALUE(NaN, IEEE_POSITIVE_INF)
+                  ninfr= IEEE_VALUE(NaN, IEEE_NEGATIVE_INF)
+                  DO K=1, NLAY
+                  DO I=1, NROW
+                  DO J=1, NCOL
+                      IF(IBOUND(J,I,K)==0 .or.HNEW(J,I,K)== HDRY) THEN
+                                              BUFF(J,I,K) = NaNr
+                      ELSEIF(HNEW(J,I,K) > 3.4d38) THEN
+                                              BUFF(J,I,K) = infr
+                      ELSEIF(HNEW(J,I,K) < -3.4d38) THEN
+                                              BUFF(J,I,K) = ninfr
+                      ELSE
+                          BUFF(J,I,K) = REAL(HNEW(J,I,K), real32)
+                      END IF
+                  END DO
+                  END DO
+                  END DO
+              END BLOCK
+          END IF
+          !
+          BLOCK
+          INTEGER:: IHEDUN
+          CHARACTER(16):: TEXT
+          CHARACTER(20):: CHEDFM
+          IHEDUN = SAVE_HEAD%IU
+          CHEDFM = SAVE_HEAD%FMT
+          TEXT = '            HEAD'
+          IF(IXSEC == 0) THEN
+            IF(CHEDFM == ' ') THEN
+               DO K=1,NLAY
+                  CALL ULASAV(BUFF(:,:,K),TEXT,KSTP,KPER,PERTIM,TOTIM,
+     1                       NCOL,NROW,K,IHEDUN)
+               END DO
+            ELSE
+               DO K=1,NLAY
+                  CALL ULASV2(BUFF(:,:,K),TEXT,KSTP,KPER,PERTIM,TOTIM,
+     1                       NCOL,NROW,K,IHEDUN,CHEDFM,1,IBOUND(:,:,K))
+               END DO
+            END IF
+          ELSE
+            IF(CHEDFM == ' ') THEN
+               CALL ULASAV(BUFF,TEXT,KSTP,KPER,PERTIM,TOTIM,NCOL,
+     1                  NLAY,-1,IHEDUN)
+            ELSE
+               CALL ULASV2(BUFF,TEXT,KSTP,KPER,PERTIM,TOTIM,NCOL,
+     1                    NLAY,-1,IHEDUN,CHEDFM,1,IBOUND)
+            END IF
+          END IF
+          END BLOCK
+        END IF
+      END IF
+      !
       ! Print Head Arrays if Requested ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       !
       IF(PRINT_HEAD_FLAG /= 0) THEN !R, C, L, I, J, K
@@ -2342,9 +2489,9 @@ C4------PRINT TOTAL BUDGET IF REQUESTED
                 !
                 HD(1:NCOL) = HNEW(1:NCOL,I,K)
                 DO J=1, NCOL
-                   IF    (HD(J) >=  1D100) THEN
+                   IF    (HD(J) >=  1.D100) THEN
                                              HD(J) = inf
-                   ELSEIF(HD(J) <= -1D100) THEN
+                   ELSEIF(HD(J) <= -1.D100) THEN
                                              HD(J) = ninf
                    ELSEIF(HD(J) == HDRY  .OR.
      +                    HD(J) /= HD(J) .OR. IBOUND(J,I,K) == Z) THEN
@@ -2554,7 +2701,21 @@ C5------WILL BE PRODUCED.
       END IF
       !
       IF(ALLOCATED(HD)) DEALLOCATE(HD, stat=i)  !Clean up the tmp array if allocated
-C
+      !
+      CONTAINS
+      !
+      PURE FUNCTION IS_REAL64(x) RESULT(ANS)                  ! Could just do KIND(x)==REAL64
+        USE, INTRINSIC:: ISO_FORTRAN_ENV, ONLY: REAL32, REAL64
+        CLASS(*), INTENT(IN):: x
+        LOGICAL:: ANS
+        !
+        ANS = FALSE
+        SELECT TYPE(x)
+        TYPE IS(REAL(REAL64)); ANS = TRUE
+        END SELECT
+        !
+      END FUNCTION
+      !
       END SUBROUTINE
       !
       SUBROUTINE SGWF2BAS7ARDIS(LINE,IUDIS,IOUT,STARTING_DATE)
@@ -2568,20 +2729,21 @@ C     ------------------------------------------------------------------
      1                     LENUNI,IUNIT,LBOTM,LAYCBD,ITRSS, SPTIM,
      3                     PERLEN,NSTP,TSMULT,ISSFLG,DELR,DELC,BOTM,
      +                     XY_GRID_COODINATES,XYGRID,AREA,GSE     !seb XY_GRID_COODINATES IS REQUIRED TO CALL ITS ALLOCATION FUNCTION
-      USE GWFBASMODULE,ONLY:REALTIM, USE_LEAP_YR,DATE_SP,HAS_STARTDATE,
+      USE GWFBASMODULE,ONLY:REALTIM, USE_LEAP_YR,DATE_SP,
      +                      SIMTIM_PER, REALTIM_PER, TOTPERTIM
       USE BAS_UTIL,    ONLY: DELT_TO_DAY
       USE CONSTANTS,   ONLY: NL,TRUE,FALSE,UNO,SET_NAN, NEG, NEARZERO_5,
      +                       Z,ONE,TWO,THREE,FOUR,FIVE,DEGREE_SIGN,
-     +                       DNEG, DZ, UNO
+     +                       DNEG, DZ, UNO, BLN
       USE ERROR_INTERFACE,      ONLY: STOP_ERROR, WARNING_MESSAGE
       USE FILE_IO_INTERFACE,    ONLY: READ_TO_DATA
       USE PARSE_WORD_INTERFACE, ONLY: PARSE_WORD, PARSE_WORD_UP
       USE UTIL_INTERFACE,       ONLY: NEAR_ZERO
-      USE STRINGS,              ONLY: GET_INTEGER, GET_NUMBER
+      USE STRINGS,              ONLY: GET_INTEGER, GET_NUMBER, GET_DATE
       USE NUM2STR_INTERFACE,         ONLY: NUM2STR
       USE ULOAD_AND_SFAC_INTERFACE,  ONLY: ULOAD
       USE DATE_OPERATOR_INSTRUCTION, ONLY: DATE_OPERATOR
+      USE STRINGS,                   ONLY: UPPER
 C
       TYPE(DATE_OPERATOR), INTENT(INOUT):: STARTING_DATE
       CHARACTER(*), INTENT(INOUT):: LINE
@@ -2590,6 +2752,8 @@ C
       LOGICAL:: PRINTCOORD,LLCOODRINATE,CORNERCOORD
       DOUBLE PRECISION:: SP_LEN, TS_MULT
       REAL:: ONE_SNG
+      LOGICAL:: ERROR, FOUND_KEYWORD
+      TYPE(DATE_OPERATOR):: DATE
 C     ------------------------------------------------------------------
       ANAME(1) = '                    DELR'
       ANAME(2) = '                    DELC'
@@ -2598,11 +2762,6 @@ C     ------------------------------------------------------------------
       ANAME(5) = 'BOT. EL. OF QUASI-3D BED'
       ONE_SNG  = 1.0
 C
-      CALL STARTING_DATE%INIT() !SETS IT TO 'NO_DATE' CAUSE NO ARG PASSED
-      !
-      ALLOCATE(HAS_STARTDATE)
-      HAS_STARTDATE = FALSE
-      !
 C1------Check for existence of discretization file
       INDIS=IUNIT(IUDIS)
       IF(INDIS == Z) THEN
@@ -2902,8 +3061,188 @@ C14-----TIME STEP MULTIPLIER, AND STEADY-STATE FLAG..
       SIMTIM_PER  = DZ
       REALTIM_PER = DNEG
       USE_LEAP_YR = FALSE
-      DO N=1,NPER
+      !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       CALL READ_TO_DATA(LINE,INDIS,IOUT,IOUT)
+      LLOC = ONE
+      CALL PARSE_WORD_UP(LINE,LLOC,ISTART,ISTOP,TRUE)
+      FOUND_KEYWORD = FALSE
+      IF( LINE(ISTART:ISTOP) == 'DAILY'      ) THEN
+          !
+          FOUND_KEYWORD = TRUE
+          TSMULT(:) = ONE_SNG
+          !
+          IF(ITMUNI == 1) THEN  ! SECONDS
+               PERLEN(:) = 86400.
+          ELSE IF(ITMUNI == 2) THEN  ! MINUTES
+               PERLEN(:) = 1440.
+          ELSE IF(ITMUNI == 3) THEN  ! HOURS
+               PERLEN(:) = 24.
+          ELSE IF(ITMUNI == 4) THEN  ! DAYS
+               PERLEN(:) = 1.
+          ELSE
+               CALL STOP_ERROR(LINE,INDIS,IOUT,'FOUND KEYWORD '//
+     +         '"DAILY", WHICH IS ONLY SUPPORTED FOR ITMUNI = 1, '//
+     +         '2, 3, and 4.'//NL//
+     +         'It does not supoport ITMUNI = 0 or 5 (years).')
+          END IF
+          !
+          CALL GET_INTEGER(LINE,LLOC,ISTART,ISTOP,IOUT,INDIS, N,
+     +                     HAS_ERROR=ERROR)
+          IF(ERROR) THEN
+               N = 1
+               IF( ISTART < ISTOP ) CALL UPPER(LINE(ISTART:ISTOP))
+          ELSE
+              CALL PARSE_WORD_UP(LINE,LLOC,ISTART,ISTOP,TRUE)
+          END IF
+          !
+          NSTP(:) = N
+          ISSFLG(:) = Z
+          IF( LINE(ISTART:ISTOP) == 'SS' ) THEN
+                ISSFLG(1) = ONE
+                ISS       = ONE
+                IF(NPER > 1) ITR = ONE
+          ELSE
+                ITR       = ONE
+          END IF
+          !
+         WRITE (IOUT,'(9X,A21,I7,F25.5)',ADVANCE='NO') 'DAILY ',N,1.0
+      ELSEIF( LINE(ISTART:ISTOP) == 'MONTHLY') THEN
+          !
+          FOUND_KEYWORD = TRUE
+          !
+          IF(ITMUNI < 1 .OR. ITMUNI > 4) THEN
+             CALL STOP_ERROR(LINE,INDIS,IOUT,'FOUND KEYWORD '//
+     +       '"MONTHLY", WHICH IS ONLY SUPPORTED FOR ITMUNI = 1, '//
+     +       '2, 3, and 4.'//NL//
+     +       'It does not supoport ITMUNI = 0 or 5 (years).')
+          END IF
+          !
+          CALL GET_INTEGER(LINE,LLOC,ISTART,ISTOP,IOUT,INDIS, N,
+     +          MSG='DIS found MONTHLY keyword but failed to load NSTP')
+          !
+          SPTIM(:)%SPECIFY_DELT = N < 0
+          NSTP(:) = ABS(N)
+          TSMULT(:) = ONE_SNG
+          !
+          CALL PARSE_WORD_UP(LINE,LLOC,ISTART,ISTOP,TRUE)
+          IF( .NOT. LINE(ISTART:ISTOP) == 'SS' .AND.
+     +        .NOT. LINE(ISTART:ISTOP) == 'TR' ) LLOC = ISTART
+          !
+          CALL GET_DATE(LINE,LLOC,I,J,IOUT,INDIS, DATE, HAS_ERROR=ERROR)        ! I and J are place holders for ISTART and ISTOP
+          !
+          IF(STARTING_DATE%NOT_SET() ) THEN
+             IF( ERROR ) THEN
+               CALL STOP_ERROR(LINE,INDIS,IOUT, MSG=
+     +        'DIS package found "MONTHLY" keyword, '//NL//
+     +'but had no starting date to determine month lengths.'//BLN//
+     +'You must define a simulation starting date as one '//
+     +'of the following:'//NL//
+     +'  BAS "START_DATE" option followed by the starting date or'//NL//
+     +'  Specifying a starting date after the MONTHLY keyword.'//BLN//
+     +'For Example, add to the BAS package:'//BLN//
+     +'BEGIN OPTIONS'//NL//'    START_DATE 4/23/1979'//NL//
+     +'END OPTIONS'//BLN//'or'//BLN//
+     +'MONTHLY  4/23/1979   2'//BLN//
+     +'where 4/23/1979 represents the start of the simulation'//NL//
+     +'(that is, simulation time = 0)'//BLN//
+     +'Note, the date must contain either a "/" or "-"' )
+             END IF
+             STARTING_DATE = DATE
+          END IF
+          !
+          IF( .NOT. LINE(ISTART:ISTOP) == 'SS' .AND.
+     +        .NOT. LINE(ISTART:ISTOP) == 'TR' ) 
+     +              CALL PARSE_WORD_UP(LINE,LLOC,ISTART,ISTOP,TRUE)
+          !
+          ISSFLG(:) = Z
+          IF( LINE(ISTART:ISTOP) == 'SS' ) THEN
+                ISSFLG(1) = ONE
+                ISS       = ONE
+                IF(NPER > 1) ITR = ONE
+          ELSE
+                ITR       = ONE
+          END IF
+          !
+          WRITE (IOUT,'(9X,A21,I7,F25.5)',ADVANCE='NO') 'MONTHLY ',N,1.0
+          !
+          BLOCK
+             TYPE(DATE_OPERATOR):: DSTP
+             !
+             DSTP       = STARTING_DATE
+             DSTP%FRAC  = DZ
+             CALL DSTP%SET_DAY(1)
+             CALL DSTP%ADD_MONTH(1)
+             !
+             SP_LEN = DSTP - STARTING_DATE ! Fix first period to match month, so if started on 1/15/2000,
+             !                                              then first period is 16 days to get to Feb 1
+             IF(ITMUNI == 1) THEN  ! SECONDS
+                  PERLEN(1) = 86400. * SP_LEN
+             ELSE IF(ITMUNI == 2) THEN  ! MINUTES
+                  PERLEN(1) = 1440. * SP_LEN
+             ELSE IF(ITMUNI == 3) THEN  ! HOURS
+                  PERLEN(1) = 24. * SP_LEN
+             ELSE IF(ITMUNI == 4) THEN  ! DAYS
+                  PERLEN(1) = SP_LEN
+             END IF
+             !
+             DO N=2,NPER
+                    SP_LEN = DSTP%MONTHDAYS()
+                    !
+                    IF(ITMUNI == 1) THEN  ! SECONDS
+                         PERLEN(N) = 86400. * SP_LEN
+                    ELSE IF(ITMUNI == 2) THEN  ! MINUTES
+                         PERLEN(N) = 1440. * SP_LEN
+                    ELSE IF(ITMUNI == 3) THEN  ! HOURS
+                         PERLEN(N) = 24. * SP_LEN
+                    ELSE IF(ITMUNI == 4) THEN  ! DAYS
+                         PERLEN(N) = SP_LEN
+                    END IF
+                    !
+                    CALL DSTP%ADD_MONTH(1)
+             END DO
+          END BLOCK
+      END IF
+      !
+      IF(FOUND_KEYWORD) THEN
+!        IF( ITMUNI /= FOUR ) CALL STOP_ERROR(LINE,INDIS,IOUT,
+!     +      'DIS PACKAGE FOUND MONTHLY OR DAILY KEYWORD, BUT '//
+!     +      'THESE ONLY WORK WITH ITMUNI=4 (DAYS).')
+        IF(ISS == Z .AND. ITR /= Z) THEN
+                                     WRITE (IOUT,'(A)') ' TR'
+        ELSE IF(ISS /= Z .AND. ITR == Z) THEN
+                                     WRITE (IOUT,'(A)') ' SS'
+        ELSE
+                      WRITE (IOUT,'(A)') ' First SS, then TR'
+        END IF
+        !
+        FOUND_KEYWORD = N < 1  ! Now use as flag to indicate if time steps should try to be int numbers
+        !
+        DO N=1,NPER
+          ALLOCATE( SPTIM(N)%DT( NSTP(N) ) )
+        END DO
+        !
+        if(NSTP(1) == 1) then
+                DO N=1,NPER
+                       SPTIM(N)%DT(1) = DBLE(PERLEN(N))
+                END DO
+        elseif(SPTIM(1)%SPECIFY_DELT) then
+            DO N=1,NPER
+               SPTIM(N)%DT    = DZ
+               SPTIM(N)%DT(1) = DBLE(PERLEN(N))
+               CALL REDISTRIBUTE_SUM_TO_NATURAL_NUMBERS( SPTIM(N)%DT )
+            END DO
+        else
+              DO N=1,NPER
+                     SPTIM(N)%DT = DBLE(PERLEN(N)) / DBLE(NSTP(N))
+              END DO
+        end if
+        !
+        GO TO 999  ! Skip past regular DIS input read
+      END IF
+      !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      !
+      DO N=1,NPER
+      IF(N>1) CALL READ_TO_DATA(LINE,INDIS,IOUT,IOUT)
       LLOC = ONE
       CALL GET_NUMBER(LINE,LLOC,ISTART,ISTOP,IOUT,INDIS, SP_LEN,
      +                 MSG='DIS FAILED TO LOAD PERLEN')
@@ -2989,9 +3328,10 @@ C14-----TIME STEP MULTIPLIER, AND STEADY-STATE FLAG..
      +      LINE(ISTART:ISTOP) == 'DATE_START' .OR.
      +      LINE(ISTART:ISTOP) == 'DATESTART'     ) THEN
             !
-            CALL PARSE_WORD_UP(LINE,LLOC,ISTART,ISTOP,TRUE)
-            CALL STARTING_DATE%INIT(LINE(ISTART:ISTOP))  !EXPECTS 1/15/2015 or 2015-1-15
-            !
+            CALL GET_DATE(LINE,LLOC,ISTART,ISTOP,IOUT,INDIS,
+     +                  STARTING_DATE,MSG=
+     +        'DIS PACKAGE FOUND "START_DATE" KEYWORD, '//
+     +        'BUT FAILED TO READ THE STARTING DATE AFTER THE KEYWORD.')
         END IF
         IF(LINE(ISTART:ISTOP) == 'LEAPYEARS' .OR.
      +     LINE(ISTART:ISTOP) == 'LEAPYEAR') THEN
@@ -3043,7 +3383,7 @@ C15-----TSMULT LE 0, OR PERLEN LT 0.
       END DO
 C
 C16-----Assign ITRSS.
-      IF(ISS == Z .AND. ITR /= Z) THEN
+  999 IF(ISS == Z .AND. ITR /= Z) THEN
          ITRSS = ONE
            WRITE(IOUT,270)
   270    FORMAT(/,1X,'TRANSIENT SIMULATION')
@@ -3066,6 +3406,39 @@ C--------------ALLOCATE AND BUILD COORDINATE SYSTEM OF MODEL AND OPTIONALLY PRIN
       !
       IF(PRINTCOORD) CALL XYGRID%PRINT(IOUT)
 C
+      CONTAINS
+         PURE SUBROUTINE REDISTRIBUTE_SUM_TO_NATURAL_NUMBERS(val)
+           implicit none
+           double precision, dimension(:), intent(inout):: val
+           double precision:: tot, div, N
+           integer:: i, dim
+           !
+           dim = size(val)
+           N   = REAL(dim, kind(N))
+           tot = sum(val)
+           !
+           if ( tot <= N ) then           ! Sum is too small for whole number split
+                           val = tot/N
+                           return
+           end if
+           !
+           div = tot/N
+           div = AINT(div, kind(div))
+           val(1) = div
+           !
+           tot = tot - div
+           N   = N - 1.0d0
+           do i=2, dim-1
+                         div = tot/N
+                         div = AINT(div, kind(div))
+                         val(i) = div
+                         !
+                         tot = tot - div
+                         N   = N - 1.0d0
+           end do
+           val(dim) = tot
+           !  
+         END SUBROUTINE
       END SUBROUTINE
       !
       SUBROUTINE SGWF2BAS7D(KSTP,KPER,IPFLG,ISA)
@@ -4841,7 +5214,7 @@ C3------Read Number of Multiplier Arrays if Multiplier Option is active.
      +              LINE(ISTART:ISTOP) == 'EXPRESSION' ) THEN
                     READ (INMULT,'(A)') LINE
                ELSE
-                   CALL U2DDP(RMLT(:,:,1),ANAME,NROW,NCOL,0,INMULT,0)
+                   CALL U2DDBL(RMLT(:,:,1),ANAME,NROW,NCOL,0,INMULT,0)
                END IF
            END DO
            DEALLOCATE(RMLT)
@@ -4929,7 +5302,7 @@ C6D-----Define array using array reader.
 
              READ (INMULT,'(A)') LINE
              BACKSPACE(INMULT)
-             CALL U2DDP(RMLT(:,:,M),ANAME,NROW,NCOL,0,INMULT,IOUT)      !seb changed from U2DREL
+             CALL U2DDBL(RMLT(:,:,M),ANAME,NROW,NCOL,0,INMULT,IOUT)      !seb changed from U2DREL
              IF(MULTPRINT>0) THEN
                WRITE(IOUTM,29) MLTNAM(M)                                !seb ADDED PRINT OPTION FOR REGULAR MULT ARRAYS
    29          FORMAT(1X,/1X,'MULTIPLIER ARRAY: ',A)
@@ -5350,6 +5723,7 @@ C
           !
           NGRIDS        = ONE
           CMD_ITER_INFO = Z
+          RCloseBAS     = DZ
           HCloseBAS     = DZ
           RCloseL2BAS   = DZ
           GW_SOLVER     = BLNK
@@ -5440,6 +5814,9 @@ C
       DEALLOCATE( GLOBALDAT(IGRID)% SPEND           , STAT=J)
       DEALLOCATE( GLOBALDAT(IGRID)% NOCBC           , STAT=J)
       DEALLOCATE( GLOBALDAT(IGRID)% CBC_GLOBAL_UNIT , STAT=J)
+      DEALLOCATE( GLOBALDAT(IGRID)% RCloseBAS       , STAT=J)
+      DEALLOCATE( GLOBALDAT(IGRID)% HCloseBAS       , STAT=J)
+      DEALLOCATE( GLOBALDAT(IGRID)% RCloseL2BAS     , STAT=J)
       !
       ! Nullify LGR Data Types
       !
@@ -5501,6 +5878,9 @@ C
       NULLIFY( GLOBALDAT(IGRID)% SPEND           )
       NULLIFY( GLOBALDAT(IGRID)% NOCBC           )
       NULLIFY( GLOBALDAT(IGRID)% CBC_GLOBAL_UNIT )
+      NULLIFY( GLOBALDAT(IGRID)% RCloseBAS       )
+      NULLIFY( GLOBALDAT(IGRID)% HCloseBAS       )
+      NULLIFY( GLOBALDAT(IGRID)% RCloseL2BAS     )
       !
       ! NULLIFY local pointers that are no longer used
       !
@@ -5563,6 +5943,9 @@ C
          NULLIFY( SPEND           )
          NULLIFY( NOCBC           )
          NULLIFY( CBC_GLOBAL_UNIT )
+         NULLIFY( RCloseBAS       )
+         NULLIFY( HCloseBAS       )
+         NULLIFY( RCloseL2BAS     )
       END IF
       !
       ! Deallocate the BAS Module Variables -------------------------------------------
@@ -5646,6 +6029,8 @@ C
       DEALLOCATE( GWFBASDAT(IGRID)% PRNT_VERR            , STAT=J)
       DEALLOCATE( GWFBASDAT(IGRID)% PRNT_VERR_LRC        , STAT=J)
       DEALLOCATE( GWFBASDAT(IGRID)% PRNT_VERR_DIF        , STAT=J)
+      DEALLOCATE( GWFBASDAT(IGRID)% SAVE_HEAD            , STAT=J)
+      DEALLOCATE( GWFBASDAT(IGRID)% SAVE_HEAD_FLAG       , STAT=J)
       DEALLOCATE( GWFBASDAT(IGRID)% PRINT_HEAD           , STAT=J)
       DEALLOCATE( GWFBASDAT(IGRID)% PRINT_HEAD_FLAG      , STAT=J)
       DEALLOCATE( GWFBASDAT(IGRID)% PRINT_WTAB_FLAG      , STAT=J)
@@ -5744,6 +6129,8 @@ C
       NULLIFY( GWFBASDAT(IGRID)% PRNT_VERR            )
       NULLIFY( GWFBASDAT(IGRID)% PRNT_VERR_LRC        )
       NULLIFY( GWFBASDAT(IGRID)% PRNT_VERR_DIF        )
+      NULLIFY( GWFBASDAT(IGRID)% SAVE_HEAD            )
+      NULLIFY( GWFBASDAT(IGRID)% SAVE_HEAD_FLAG       )
       NULLIFY( GWFBASDAT(IGRID)% PRINT_HEAD           )
       NULLIFY( GWFBASDAT(IGRID)% PRINT_HEAD_FLAG      )
       NULLIFY( GWFBASDAT(IGRID)% PRINT_WTAB_FLAG      )
@@ -5843,6 +6230,8 @@ C
          NULLIFY( PRNT_VERR            )
          NULLIFY( PRNT_VERR_LRC        )
          NULLIFY( PRNT_VERR_DIF        )
+         NULLIFY( SAVE_HEAD            )
+         NULLIFY( SAVE_HEAD_FLAG       )
          NULLIFY( PRINT_HEAD           )
          NULLIFY( PRINT_HEAD_FLAG      )
          NULLIFY( PRINT_WTAB_FLAG      )
@@ -5994,6 +6383,9 @@ C
       SPEND           => GLOBALDAT(IGRID)% SPEND
       NOCBC           => GLOBALDAT(IGRID)% NOCBC
       CBC_GLOBAL_UNIT => GLOBALDAT(IGRID)% CBC_GLOBAL_UNIT
+      RCloseBAS       => GLOBALDAT(IGRID)% RCloseBAS 
+      HCloseBAS       => GLOBALDAT(IGRID)% HCloseBAS 
+      RCloseL2BAS     => GLOBALDAT(IGRID)% RCloseL2BAS
       !
       ! Setup Pointers for the BAS Module Variables -------------------------------------------
       !
@@ -6076,6 +6468,8 @@ C
       PRNT_VERR            => GWFBASDAT(IGRID)% PRNT_VERR
       PRNT_VERR_LRC        => GWFBASDAT(IGRID)% PRNT_VERR_LRC
       PRNT_VERR_DIF        => GWFBASDAT(IGRID)% PRNT_VERR_DIF
+      SAVE_HEAD            => GWFBASDAT(IGRID)% SAVE_HEAD
+      SAVE_HEAD_FLAG       => GWFBASDAT(IGRID)% SAVE_HEAD_FLAG
       PRINT_HEAD           => GWFBASDAT(IGRID)% PRINT_HEAD
       PRINT_HEAD_FLAG      => GWFBASDAT(IGRID)% PRINT_HEAD_FLAG
       PRINT_WTAB_FLAG      => GWFBASDAT(IGRID)% PRINT_WTAB_FLAG
@@ -6182,6 +6576,9 @@ C  Save global data for a grid.
       GLOBALDAT(IGRID)% SPEND           => SPEND
       GLOBALDAT(IGRID)% NOCBC           => NOCBC
       GLOBALDAT(IGRID)% CBC_GLOBAL_UNIT => CBC_GLOBAL_UNIT
+      GLOBALDAT(IGRID)% RCloseBAS       => RCloseBAS 
+      GLOBALDAT(IGRID)% HCloseBAS       => HCloseBAS 
+      GLOBALDAT(IGRID)% RCloseL2BAS     => RCloseL2BAS
       !
       ! Setup Pointers for the BAS Module Variables -------------------------------------------
       !
@@ -6264,6 +6661,8 @@ C  Save global data for a grid.
       GWFBASDAT(IGRID)% PRNT_VERR            => PRNT_VERR
       GWFBASDAT(IGRID)% PRNT_VERR_LRC        => PRNT_VERR_LRC
       GWFBASDAT(IGRID)% PRNT_VERR_DIF        => PRNT_VERR_DIF
+      GWFBASDAT(IGRID)% SAVE_HEAD            => SAVE_HEAD
+      GWFBASDAT(IGRID)% SAVE_HEAD_FLAG       => SAVE_HEAD_FLAG
       GWFBASDAT(IGRID)% PRINT_HEAD           => PRINT_HEAD
       GWFBASDAT(IGRID)% PRINT_HEAD_FLAG      => PRINT_HEAD_FLAG
       GWFBASDAT(IGRID)% PRINT_WTAB_FLAG      => PRINT_WTAB_FLAG

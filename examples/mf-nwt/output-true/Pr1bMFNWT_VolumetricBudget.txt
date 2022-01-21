@@ -1,2 +1,2 @@
          DATE_START   PER   STP           DELT        SIMTIME       STORAGE_IN      STORAGE_OUT           CHD_IN          CHD_OUT           RCH_IN          RCH_OUT         IN_OUT  PERCENT_ERROR
-  NaN                   1     1            1.0            1.0              0.0              0.0              0.0        4.9500000        4.9500000              0.0   1.5239374E-9   3.0786615E-8
+  NaN                   1     1            1.0            1.0              0.0              0.0              0.0        4.9500000        4.9500000              0.0   1.5240857E-9   3.0789611E-8

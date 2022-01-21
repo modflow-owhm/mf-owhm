@@ -1,4 +1,4 @@
-SP TS  1  1  ITER 17  DELT 86400.0  (NROW,NCOL,NLAY) = (15, 10, 1)   ERROR 4.3667740E-6 %  FORMAT "(*(ES12.5, :, 1x))"     LAY 1
+SP TS  1  1  ITER 17  DELT 86400.0  (NROW,NCOL,NLAY) = (15, 10, 1)   ERROR 3.9271459E-6 %  FORMAT "(*(ES12.5, :, 1x))"     LAY 1
  1.09302E+03  1.09011E+03          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN
  1.09025E+03  1.08698E+03  1.08227E+03          NaN          NaN  1.07343E+03  1.07280E+03  1.07241E+03          NaN          NaN
          NaN  1.07901E+03  1.07736E+03  1.07363E+03  1.07249E+03  1.07066E+03  1.06913E+03  1.06856E+03          NaN          NaN
