@@ -14,6 +14,9 @@ Boyce, S.E., Hanson, R.T., Ferguson, I., Schmid, W., Henson, W., Reimann, T., Me
 
 [[_TOC_]]
 
+------
+
+&nbsp;
 
 ## 2.2.0
 
@@ -42,7 +45,7 @@ See [CHANGELOG_Features.md](CHANGELOG_Features.md#2.1.1) for a listing of new Zo
 
     * `NWT` thin cell check is disabled. 
 
-        * By default, the `NWT` solver would check all model cells vertical thickness (`thick`) against the largest/thickest cell (`mxthick`). Any cell that had it's `thick < 0.01*mxthick` was changed to `IBOUND=0` (removed from the simulation/assumed impermeable rock). This caused models that had a few very model cells to drop out smaller ones, which might be thin clay layers in the middle of the model. Users were no aware that part of their model was not being simulated. To prevent this situation from occurring, this check is disabled by default.
+        * By default, the `NWT` solver would check all model cells vertical thickness (`thick`) against the largest/thickest cell (`mxthick`). Any cell that had its `thick < 0.01*mxthick` was changed to `IBOUND=0` (removed from the simulation/assumed impermeable rock). This caused models with a large difference between cell thicknesses to drop out smaller ones, which might be thin clay layers in the middle of the model. Users were NOT aware that part of their model was not being simulated. To prevent this situation from occurring, this check is disabled by default.
 
         * To enable the thin cell check, add the option `THIN_CELL_CHECK`.  
             All cells removed from the simulation are written to the LIST file.
@@ -50,7 +53,7 @@ See [CHANGELOG_Features.md](CHANGELOG_Features.md#2.1.1) for a listing of new Zo
 - `SFR` Modifications
     * The flow-depth-width lookup table, `ICALC = 4`, use `log10` interpolation,  
         except when the flow rate is less than the first point, then it uses linear interpolation.  
-        If the first point is lookup point is `<1.0E-30`, then SFR uses linear interpolation for the first two points.
+        If the first lookup point is `<1.0E-30`, then SFR uses linear interpolation for the first two points.
         * This prevents a floating point overflows from doing `log10(0.0)`.
 
 * `FMP` Bug Fixes
@@ -66,41 +69,41 @@ See [CHANGELOG_Features.md](CHANGELOG_Features.md#2.1.1) for a listing of new Zo
 
 - `MNW2` Bug Fixes
 
-    - Reported the well head (`hwel`) as the cell head for wells that went were dry  
-      (that is, when pumping that exceeded the well capacity).
-      - This affects the actual pumping if the well has partial penetration (PP) enabled and was in a convertible layer.  
-        Because it would apply the PP correction to what is a seepage face rather than a pumping well.  
+    - Previously, the well head (`hwel`) was set to cell head for wells that went dry  
+      (that is, pumping that exceeded the well capacity).
+      - Now `hwel` is set to the bottom of the well when it goes dry.
+      - This affects the actual pumping for wells with partial penetration (PP) enabled in a convertible layer.  
 
     * `MNW2` now only does the `RHS` formulation for the last 10 solver iterations in a time step that does not converge.
-      - That is, if the solver has `MXITER = 200 ` iteration,  
+      - That is, if the solver has `MXITER = 200` iterations,  
         then `MNW2` solves for odd iterations by modifying the `RHS` (WEL-like action)  
-         and even iterations modifies `HCOF`  (GHB-like action) ,  
-        then only modifies RHS for solver iterations `≥190` ,
+         and even iterations by modifying the `HCOF`  (GHB-like action),  
+        then only modifies RHS for solver iterations `≥190`.
       - This improves the mass error for time steps that fail to converge,  
         but have an option to continue to the simulation.  
         For example, `BAS` option `NO_FAILED_CONVERGENCE_STOP` or `NWT` `CONTINUE` option.  
 
-    - `MNW2` recalculates the node flows if the time step converges on an even iteration.  
+    - `MNW2` now recalculates the node flows if the time step converges on an even iteration.  
       On odd iterations MNW2 specifies the node flow rate directly by modifying the `RHS`, but  
       for even iterations it uses the previous iterations `HNEW` to modify `HCOF`  
       and make the node flow a function of the next iterations `HNEW`.  
       - The difference between the last two iterations of `HNEW` can significantly change the reported node flows.  
 
-    * `MNW2` and `NWT` fixed issue when writing to the cell-by-cell for nodes that have gone dry.  
+    * `MNW2` and `NWT` fixed issue when writing to the cell-by-cell for nodes that have gone dry because NWT/UPW does not change the IBOUND array.  
 
-* `SWT` now zeros out the `BUF`fer array before using it fixing an issue during Stead State stress periods.
+* `SWT` now zeros out the `BUF`fer array before using it fixing an issue during Steady State stress periods.
   - Previously, `SWT` would write what the previous package had stored in `BUF` causing it to report flows that did not exist.  
 
 - `SUB` fixes
   * Inelastic compaction is assumed to be complete if the head falls below the cell bottom.
-    * That is, if the critical head fallows below the cell bottom, then it is set to `-3.40E+38` to represent `-inf`.  
+    * That is, if the critical head falls below the cell bottom, then it is set to `-3.40E+38` to represent `-inf`.  
 
   - Compaction (inelastic and elastic) and expansion (elastic) only occurs  
-    when the cell head is greater than the cell's  bottom elevation. 
-    - Assume `HOLD` is the time step starting head, `HNEW` time step's ending head, `BOT` is the cell bottom:   
+    when the cell head is greater than the cell's  bottom elevation.
+    - Assume `HOLD` is the time step starting head, `HNEW` time step ending head, `BOT` is the cell bottom:  
       if a time step has `HOLD>BOT` and `HNEW<BOT`, then compaction occurs but solves with `HNEW=BOT`.  
-      if a time step has `HOLD<BOT` and `HNEW>BOT`, then expansion&nbsp; &nbsp; occurs but solves with `HOLD=BOT`.  
-      if a time step has `HOLD<BOT` and `HNEW<BOT`, then nothing happens.  
+      if a time step has `HOLD<BOT` and `HNEW>BOT`, then expansion occurs but solves with `HOLD=BOT`.  
+      if a time step has `HOLD<BOT` and `HNEW<BOT`, then nothing happens.
 
   - Changed the use of the PACK function to to use a mask array that is the same dimensions as BUFFER array. Previously, the mask was set to the scalar variable TRUE. This can have different meanings on different compilers.  
     An example of the changed code is:  
@@ -113,8 +116,8 @@ See [CHANGELOG_Features.md](CHANGELOG_Features.md#2.1.1) for a listing of new Zo
 
 * `CHOB` now works when using the `UPW` flow package and `NWT` solver.  
 
-- `U2DREL` with "`BINARY`" input option now raises a warning instead of stopping with an error.
-    - When the "`BINARY`"  option is found, MF-OWHM attempts to identify the binary input structure.  
+- `U2DREL` with `BINARY` input option now raises a warning instead of stopping with an error.
+    - When the `BINARY`  option is found, MF-OWHM attempts to identify the binary input structure.  
       If it succeeds, a warning is raised about the portability of binary-unformatted files.  
       If it fails, then the program stops with an error message.  
 
@@ -125,7 +128,7 @@ See [CHANGELOG_Features.md](CHANGELOG_Features.md#2.1.1) for a listing of new Zo
     Previously, if the end of the file was reached, then the last lines input would be reused.
 
 * Removed from the visual studio solution (`ide/visual_studio/OneWater_Project.sln`) the key entry:`GenAlternateCodePaths="codeForAVX"`
-    * `AVX` acceleration resulted floating point truncation that resulted in model results that were not repeatable. That is, the same model input would produce different numbers after the tenth digit. Results are now identical when running the multiple times with the same input.  
+    * `AVX` acceleration caused floating point truncation that resulted in model results that were not repeatable. That is, the same model input would produce different numbers after the tenth digit. Results are now identical when running the multiple times with the same input.  
 
 
 ### Refactoring
@@ -143,7 +146,7 @@ See [CHANGELOG_Features.md](CHANGELOG_Features.md#2.1.1) for a listing of new Zo
   * `MF-Flow-Packages.xml`
   * `MF-Packages.xml`
 
-* Changed `DO CONCURRENT` loops to a regular `DO` loops for code with multiple branches (`IF`-`ElSE`).  
+* Changed `DO CONCURRENT` loops to regular `DO` loops for code with multiple branches (`IF`-`ElSE`).  
   The current Fortran compilers seem to have issues with numerical accuracy  
   for complicated statements in a `DO CONCCURENT` loops.
 
@@ -154,6 +157,7 @@ See [CHANGELOG_Features.md](CHANGELOG_Features.md#2.1.1) for a listing of new Zo
 
 - `SUBROUTINE FMP3WELBD(KSTP,KPER,DELT,DATE,IGRID)` for the FB_DETAILS and FB_COMPACT output files rearranged the code for clarity and execution speed.  
   Changes occurred in `IF(FMPOUT%FB_COMPACT%IS_OPEN .OR. FMPOUT%FB_DETAILS%IS_OPEN) THEN` statement block.
+- `BAS` option`BUDGETDB` , which writes for each time step the volumetric budget for each package writes the absolute value of the mass balance errors (always positive) for the `PERCENT_ERROR`  column.
 
 &nbsp; 
 

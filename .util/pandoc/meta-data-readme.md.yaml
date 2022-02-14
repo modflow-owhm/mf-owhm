@@ -6,14 +6,45 @@ abstract: |
      
   `Readme.md` file from the MODFLOW-OWHM code repository: https://code.usgs.gov/modflow/mf-owhm  
      
-  File is converted to pdf using [pandoc](https://pandoc.org/) and [LuaLaTex](http://www.luatex.org/) pdf-engine 
-  and package management with [MiKTeX](https://miktex.org/).  
+  `Readme.md` is converted from [Markdown](https://en.wikipedia.org/wiki/Markdown) to pdf using [pandoc](https://pandoc.org/) and [LuaLaTex](http://www.luatex.org/) pdf-engine 
+  and package management with [MiKTeX](https://miktex.org/). It is created for convenience for those that do not want to 
+  install a markdown viewer or [view the file on the web](https://code.usgs.gov/modflow/mf-owhm/-/blob/release/README.md). 
+  Note that all relative link references (that is, hyperlinks to other markdown files) are removed and converted and appear italicized.  
      
-  This document may have different formatting from the original markdown due to conversion errors.  
-  In particular, any markdown relative links to other markdown files (ie, [CHANGELOG.md](https://./pathTo/CHANGELOG.md)) are removed  
-  and instead of showing a hyperlinked word, this pdf will show an italicized word (eg, *CHANGELOG.md* ).  
+  The file [readme.txt](https://code.usgs.gov/modflow/mf-owhm/-/blob/main/readme.txt) contains a brief explanation about Markdown files (`.md`).  
+  Any text editor can view a markdown file, but a Markdown viewer is required to see formatted, web-friendly form. 
+  The file readme.txt does contain a list of software suggestions to view markdown in their web form.  
      
-  This pdf file is created for convenience for those that do not want to install a markdown viewer or view the file on the web. Note that this document is not updated with every change to README.md, however typically the only change to the document is the version number. 
-  To see the most up to date file please instead view README.md.
+  `Readme.pdf`, this file, is only updated when the content has significantly changed. 
+  Most releases only modify the version number in `Readme.md`, so it is unnecessary to rebuild `Readme.pdf`. 
+  Please view `Readme.md`, with any text editor, for the version included in the download. 
+  It is located on the seventh line, and says `# Version X.Y.Z`.  
+     
+  It is recommended to check the version at  
+  https://code.usgs.gov/modflow/mf-owhm/-/blob/release/README.md  
+  against your current version and update if a newer one is available.  
+     
+  The following is a stable link for the most recent release (preliminary or production)  
+  https://code.usgs.gov/modflow/mf-owhm/-/archive/release/mf-owhm-release.zip  
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+  
 lang: en-US
 ...

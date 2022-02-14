@@ -10,6 +10,8 @@
 
 ------
 
+&nbsp;
+
 ## 2.2.0
 
 2022-01-20
@@ -27,14 +29,14 @@
 
 ### `NWT` Improvements  
 
-- `NWT` considers the MODFLOW Outer Iteration (`1` to `mxiter`) to be each time it solves for the Jacobian, and does not include iterations solved with Backtracking (residual control). This causes a disconnect with the other MODFLOW packages that assume an outer iteration occurs every time the aquifer flow equations are formulated (package's  `FM` routines). To fix this issue, the number of MODFLOW Outer Iterations is always accounted for as the  number f times the `FM` routines are called.  
+- `NWT` considers the MODFLOW Outer Iteration (`1` to `mxiter`) to be each time it solves for the Jacobian, and does not include iterations solved with Backtracking (residual control). This causes a disconnect with the other MODFLOW packages that assume an outer iteration occurs every time the aquifer flow equations are formulated (package's  `FM` routines). To fix this issue, the number of MODFLOW Outer Iterations is always accounted for as the number of times the `FM` routines are called.  
   
-    As a result of this, previous models may need to increase their maximum number of `NWT` iterations (`MAXITEROUT`) to allow for convergence. Previously, the number of outer iterations was under-reported such that a model that said it converged in `XX` iterations, really converged in `YY` iterations, where `YY >> XX`.  
+    Due to this, previous models may need to increase their maximum number of `NWT` iterations (`MAXITEROUT`) to allow for convergence. Previously, the number of outer iterations was under-reported such that a model that said it converged in `XX` iterations, really converged in `YY` iterations, where `YY >> XX`.  
     
-    Note – Backtracking is enabled for the "`OPTIONS`" keyword is `MODERATE`, `COMPLEX`, or `SPECIFIED` with `BACKFLAG=1`.
+    Note – Backtracking is enabled for the `OPTIONS` keyword is `MODERATE`, `COMPLEX`, or `SPECIFIED` with `BACKFLAG=1`.
 
 * `NWT` now imposes conditional minimum `mxiter` iteration limit.  
-    This input for NWT is called `MAXITEROUT` and the imposed limit is based on the "`OPTIONS`" keyword:
+    This input for NWT is called `MAXITEROUT` and the imposed limit is based on the `OPTIONS` keyword:
     
     * `SIMPLE:    if mxiter < 200; then mxiter = 200`
     * `MODERATE:  if mxiter < 300; then mxiter = 500`
@@ -62,14 +64,14 @@
     - Enables NWT thin cell check that removes any model cells that have a vertical thickness less than 1% of the thickest model cell. See in Changelog.md under "`NWT` thin cell check is disabled" for a full description why this feature was made an option rather than the default.
 
 * `NWT` options can be defined at the start of the input file, one per line, and specified in any order.
-  *  If the keyword "`SPECIFIED`" is defined at the start of the input file, that same line must include its required input. That is, you must have on the same line:  
+  *  If the keyword `SPECIFIED` is defined at the start of the input file, that same line must include its required input. That is, you must have on the same line:  
       `SPECIFIED  DBDTHETA  DBDGAMMA  MOMFACT  BACKFLAG  [MAXBACKITER  BACKTOL  BACKREDUCE]`
 
 ### `DIS` — Keywords `DAILY` and `MONTHLY` — Automatic Stress Period Setup
 
 * The standard Discretization Package (`DIS`) input defines `NPER` stress period simulation lengths (`PERLEN`) and the number of time steps (`NSTP`) in the stress period. This input is defined as Data Set 7 and is as follows:  
   `PERLEN NSTP TSMULT Ss/tr `  
-  which is read `NPER` times and must select `Ss` or `Tr` to indicate if the stress period is solved using the Steady State or Transient solution.
+  which is read `NPER` times and must include `Ss` or `Tr` to indicate if the stress period is solved using the Steady State or Transient solution.
 
 * Instead of reading in `NPER` stress period lengths, a single keyword can represent all stress period lengths and number of time steps. This then requires only specifying once a keyword, which indicates how all stress periods are handled. 
 
@@ -80,7 +82,7 @@
       86400 seconds, 1440 minutes, or 24 hours, but if set to unknown or years will raise an error.
 
   * `MONTHLY`, to indicate that all stress periods have `PERLEN` set equal to number of days in the month. 
-    * This option requires that a simulation starting date is specified. This can be done with the `BAS` package OPTIONS keyword `START_DATE` or be specifying `DATE` along with the `MONTHLY` keyword. If the starting date does not fall on the first of the month, then the first stress period length is set such that the second stress period is on the first. For example, if the starting date is `1/25/2022`, then the first stress period will have 7 days to make the second stress period start on February 1.
+    * This option requires that a simulation starting date is specified. This can be done with the `BAS` package OPTIONS keyword `START_DATE` or by specifying `DATE` along with the `MONTHLY` keyword. If the starting date does not fall on the first of the month, then the first stress period length is set such that the second stress period is on the first. For example, if the starting date is `1/25/2022`, then the first stress period will have 7 days to make the second stress period start on February 1.
     * This option does take into account leap years, where the number of days in February depends on the year.
 
 * The `DAILY` keyword full input is as follows:
@@ -125,7 +127,7 @@ MONTHLY  -4   SS        # MONTHLY input with 4 time steps, and first stress peri
 ### `BAS` — Options Block — Making the `OC` package optional
 
 * `CBC_UNIT` **INT**
-    * Defines a global cell-by-cell unit (**INT**) and overwrites each packages `IxxxCB` input variable (for example, `IWELCB`).
+    * Defines a global cell-by-cell unit (**INT**) and overwrites each package's `IxxxCB` input variable (for example, `IWELCB`).
 
 - `COMPACT BUDGET`
     - Indicates the cell-by-cell uses a compact/smaller structure. Same effect as specifying keyword in the `OC` package
@@ -133,10 +135,10 @@ MONTHLY  -4   SS        # MONTHLY input with 4 time steps, and first stress peri
 * `SAVE_HEAD  LAST_TIMESTEP   Generic_Output  [BINARY]  [SIGFIG  NDIG]`  
   `SAVE_HEAD  EVERY_TIMESTEP  Generic_Output  [BINARY]  [SIGFIG  NDIG]`
   * Save entire model grid head value using the MODFLOW-2005 standard write utility.  
-    This produces an equivalent output to `OUTPUT CONTROL` (`OC`) options "`SAVE HEAD`" and "`PRINT HEAD`"  
+    This produces an equivalent output to `OUTPUT CONTROL` (`OC`) options `SAVE HEAD` and `PRINT HEAD`  
     Best for writing to the cell-by-cell (CBC) file declared in the `NAME` file as `DATA(BINARY)`  
     Can only specify once, with one of the following two keywords:
-      * `LAST_TIMESTEP` indicates to write the head for the last time step of every stress period.
+      * `LAST_TIMESTEP` indicates to write the head for the last time step of every stress period
       * `EVERY_TIMESTEP` indicates to write the head for every time step  
           &nbsp; 
     
@@ -147,14 +149,14 @@ MONTHLY  -4   SS        # MONTHLY input with 4 time steps, and first stress peri
       and then replacing generic input with  
       `SAVE_HEAD  LAST_TIMESTEP   EXTERNAL 40`  
       
-      or do not include it in the Name file and create it with `Generic_Output`,   
+      or by not including it in the Name file and creating it with `Generic_Output`,   
       but you must include the post-keyword `BINARY`  
       `SAVE_HEAD  LAST_TIMESTEP   OPEN/CLOSE  cbc.bin  BINARY`  
       
     - If the output is text-based (not binary), then the optional post-keyword `SIGFIG`  
       specifies the number of significant figure digits to write out (`NDIG`). For example:  
       `SAVE_HEAD  LAST_TIMESTEP   OPEN/CLOSE  heads.txt  SIGFIG 11`  
-      will produce head output that contains `11` significant digits. If not specified, then the default is `5` digits.
+      will produce head output that contains `11` significant digits. If not specified, the default is `5` digits.
 
 ### `BAS` — Options Block — Improvements
 
@@ -179,9 +181,9 @@ MONTHLY  -4   SS        # MONTHLY input with 4 time steps, and first stress peri
 
 * `SURFACE_WATER` block includes output files for `NON_ROUTED_DELIVERY` (NRD) imported water:
      * `PRINT  NRD         GENERIC_OUTPUT`
-          * Output for each NRD in use during a time step that includes the DEMAND'ed water, the NRD's available water SUPPLY, and amount of NRD's water that is CONSUMED.
+          * Output for each NRD in use during a time step that includes the DEMAND'ed water, the NRD's available water `SUPPLY`, and amount of NRD's water that is `CONSUMED`.
      * `PRINT  NRD_BY_WBS  GENERIC_OUTPUT`
-          * Output summarized by Water Balance Subregion for each time step that includes the WBS water DEMAND, the NRD available water SUPPLY, and amount of NRD water that is CONSUMED.
+          * Output summarized by Water Balance Subregion for each time step that includes the WBS water `DEMAND`, the NRD available water `SUPPLY`, and amount of NRD water that is `CONSUMED`.
 
 ### `SUB` — Options Block — Write Initial Critical Heads to separate files for all Interbeds
 
@@ -189,7 +191,7 @@ MONTHLY  -4   SS        # MONTHLY input with 4 time steps, and first stress peri
   * For all interbeds being simulated, delay and instantaneous, write the critical head at the start of a simulation. 
     * The files are placed in the *OUTDIR* directory.  
       If *OUTDIR* is not specified, then it is assumed to be `./` (current directory)
-  * Each interbed's critical headis written as an `NROW` by `NCOL` array to a separate files.
+  * Each interbed's critical head is written as an `NROW` by `NCOL` array to separate files.
   * If the critical head is below the model cell's bottom, or not defined, then it is set to `-3.40E+38` to represent `-inf`
   * The filename structure is:  
     `DBED_CRIT_HEAD_LAYxx_BEDyy.txt` for delay interbeds and  
@@ -205,6 +207,29 @@ MONTHLY  -4   SS        # MONTHLY input with 4 time steps, and first stress peri
   
 * If there are other options specified at the start of the input, such as `TIME_STEP_PRINT`,  
   then only one option may be specified per line and the order they are specified does not matter.
+
+### `LIST` writes solver convergence info after every timestep
+
+* Independent of the solver in use
+  
+* The following are the convergence terms:
+  
+  * `HClose` 
+       * Larges change in head between the last solver iteration and the previous
+  * `RClose`
+       * Largest model cell residual error  
+         `r = Ah - RHS`  
+         where  
+         `r` is a vector that is the error residual, each row is a model cell,  
+         `A` is the system matrix of the model,
+         `h` is the head solution vector, each row is a model cell,
+         `RHS` is the right hand side vector, which represents sources and sinks in the model and each row is a model cell.
+  * `L2-RClose`
+    *  L<sub>2</sub> norm of the residual errors, or equivalently: |`r`|<sub>2</sub>
+  * `Rel-Vol-Err`
+    * Largest relative volume error (`|r/vol|`<sub>∞</sub>)
+    * `r` is the residual error vector, `vol`  is a vector of the model cell's volume. 
+  
 
 &nbsp; 
 

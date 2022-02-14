@@ -22,7 +22,7 @@
 #   It is recommended to use the Intel Fortran Compiler Classic for compiling mf-owhm.
 #   gfortran is unlikely to successfully compile do to the variability of versions 
 #   included with linux or windows and several known compiler bugs present in multiple versions.
-#   At some point, mf-owhm maybe refactored to work around the known compiler bugs.
+#   At some point, mf-owhm may be refactored to work around the known compiler bugs.
 #   The LLVM compilers, FLANG and CLANG, are still experimental and not yet fully supported.
 #
 # To Invoke/Compile type from command prompt:
