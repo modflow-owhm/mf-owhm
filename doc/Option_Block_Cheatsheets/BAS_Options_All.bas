@@ -153,11 +153,11 @@ BEGIN OPTIONS
     PRINT_WATER_DEPTH  SPTS  Generic_Output  [SIGFIG  NDIG]
     #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # Save entire model grid head value use the MODFLOW-2005 standard write utility.
+    # Save entire model grid head value using the MODFLOW-2005 standard write utility.
     #   This produces an equivalent output to OUTPUT CONTROL options "SAVE HEAD" or "PRINT HEAD"
     #   Only one of the following can be selected:
-    #      "LAST_TIMESTEP",  then will write the head for the last time step of every stress period.
-    #      "EVERY_TIMESTEP", then will write the head for    every time step
+    #      "LAST_TIMESTEP",  will write the head for the last time step of every stress period.
+    #      "EVERY_TIMESTEP", will write the head for    every time step
     #   
     #   Generic_Output is the location to write the output head.
     #      The post-keyword SIGFIG specifies the number of significant figure digits to write out (NDIG).

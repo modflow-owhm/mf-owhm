@@ -42,10 +42,14 @@ pandoc  ${file}.md  \
 cd "${OriginalPath}"
 #
 #
-#---- End of Scipt  ----------------------------------------------------------------------
+#---- Check For "nopause"  ---------------------------------------------------------------
 #
-echo
-read -p "Repo Now Clean. Press [ENTER] to end script ... "
+#
+if [ "$1" != "nopause" ]
+then
+   echo
+   read -p "Press [Enter] to end script  "
+fi
 #
 #
 #

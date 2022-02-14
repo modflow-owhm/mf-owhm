@@ -4,8 +4,46 @@ subtitle: from https://code.usgs.gov/modflow/mf-owhm
 author: Scott E. Boyce <seboye@usgs.gov>
 abstract: |
      
-  `Changelog.md` and `CHANGELOG_Features.md` files from the [MODFLOW-OWHM code repository](https://code.usgs.gov/modflow/mf-owhm)
-  converted to pdf using [pandoc](https://pandoc.org/) and [LuaLaTex](http://www.luatex.org/) pdf-engine 
-  and package management with [MiKTeX](https://miktex.org/).
+  `Changelog.md` and `CHANGELOG_Features.md` files from the [MODFLOW-OWHM code repository](https://code.usgs.gov/modflow/mf-owhm)  
+     
+  The files are concatenated and converted from [Markdown](https://en.wikipedia.org/wiki/Markdown) to pdf using [pandoc](https://pandoc.org/) and [LuaLaTex](http://www.luatex.org/) pdf-engine 
+  and package management with [MiKTeX](https://miktex.org/). The pdf is created for convenience for those that do not want to 
+  install a markdown viewer or view the file on the web. It may have different formatting from the original markdown due to conversion errors.  
+     
+  The file [readme.txt](https://code.usgs.gov/modflow/mf-owhm/-/blob/main/readme.txt) contains a brief explanation about Markdown files (`.md`).  
+  Any text editor can view a markdown file, but a Markdown viewer is required to see formatted, web-friendly form. 
+  The file readme.txt does contain a list of software suggestions to view markdown in their web form.  
+     
+  The original markdown files, in gitlab web format, can be viewed at:  
+  https://code.usgs.gov/modflow/mf-owhm/-/blob/release/CHANGELOG.md  
+  https://code.usgs.gov/modflow/mf-owhm/-/blob/release/CHANGELOG_Features.md  
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+  
 lang: en-US
 ...
