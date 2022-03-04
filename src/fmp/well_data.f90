@@ -1975,42 +1975,17 @@ MODULE WELL_DATA_FMP_MODULE
 !  END SUBROUTINE
   !
   IMPURE ELEMENTAL SUBROUTINE FWEL_FID_LINEFEED_LOAD(FWEL, SP)
-    USE GLOBAL, ONLY: IUNIT
-    USE GWFMNW2MODULE, ONLY: WELLID, MNWMAX
     CLASS(FARM_WELL_DATA), INTENT(INOUT):: FWEL !FARMWELL
     INTEGER,               INTENT(IN   ):: SP
     !LOGICAL,               INTENT(IN   ):: LFID
-    CHARACTER(:), ALLOCATABLE:: ERR
     CHARACTER(120):: LINE
     INTEGER:: I, J, K, IU, FD, DIM, NFEED, IERR
-    LOGICAL:: NOT_FOUND
     !
     !IF (FWEL%LOAD_TYPE .NE. 2 ) RETURN
     !
     NFEED = SIZE(FWEL%FID_FEED)
     !
-    IF(SP == ONE .AND. FWEL%NF == ONE) THEN  !FIRST ENTRY REQUIRES BUILDING MNW2 INDEX
-             !
-             IF(ANY(FWEL%FID_FEED%MNWLINK) .AND. IUNIT(50) == Z) CALL STOP_ERROR(OUTPUT=FWEL%IOUT, MSG='FMP FWELL HAS WELLS WITH LAY=0, WHICH INDICATES AN MNW2-LINK, BUT THE MNW2 PACKAGE IS NOT AVAILIBLE.')
-             !
-             ERR = BLNK
-             DO CONCURRENT ( FD=ONE:NFEED, FWEL%FID_FEED(FD)%MNWLINK )
-                !
-                DO CONCURRENT ( I=ONE:SIZE(FWEL%FID_FEED(FD)%FID), FWEL%FID_FEED(FD)%MNWLOC(I) .NE. Z )
-                      !
-                      NOT_FOUND = TRUE
-                      DO J=1, MNWMAX
-                          IF( WELLID(J) == FWEL%FID_FEED(FD)%WELLID(I) ) THEN
-                              FWEL%FID_FEED(FD)%MNWLOC(I) = J
-                              NOT_FOUND = FALSE
-                              !EXIT  --ALLOW FOR POTENTIAL DUBLICATE LINKAGES TO MNW2 WELLS
-                          END IF
-                      END DO
-                      IF (NOT_FOUND) ERR = TRIM(ERR//FWEL%FID_FEED(FD)%WELLID(I))//NL
-                END DO
-             END DO
-             IF (ERR .NE. BLNK) CALL STOP_ERROR(OUTPUT=FWEL%IOUT, MSG='FMP FWELL WITH MNW2-LINK FAILED TO LOCATE THE FOLLOWING WELL NAMES IN THE MNW2 WELLID LIST:'//NL//'(NO NAME MATCH BETWEEN THESE FMP FWELLs AND THE LIST OF MNW2 WELLs)'//NL//ERR//NL)
-    END IF
+    IF(SP == ONE .AND. FWEL%NF == ONE) CALL FWEL_FID_LINEFEED_MNW2_BUILD(FWEL)  ! FIRST ENTRY REQUIRES BUILDING MNW2 INDEX
     !
     IF(FWEL%NF == ONE) THEN
                          DO FD=ONE, NFEED
@@ -2091,14 +2066,55 @@ MODULE WELL_DATA_FMP_MODULE
     !
   END SUBROUTINE
   !
+  SUBROUTINE FWEL_FID_LINEFEED_MNW2_BUILD(FWEL)
+    USE GLOBAL, ONLY: IUNIT
+    USE GWFMNW2MODULE, ONLY: WELLID, MNWMAX, MNW2, MNWNOD
+    !
+    CLASS(FARM_WELL_DATA), INTENT(INOUT):: FWEL 
+    CHARACTER(:), ALLOCATABLE:: ERR
+    INTEGER:: I, J, N1, FD, NFEED
+    LOGICAL:: NOT_FOUND
+    !
+    NFEED = SIZE(FWEL%FID_FEED)
+    !
+    IF(ANY(FWEL%FID_FEED%MNWLINK) .AND. IUNIT(50) == Z) CALL STOP_ERROR(OUTPUT=FWEL%IOUT, MSG='FMP FWELL HAS WELLS WITH LAY=0, WHICH INDICATES AN MNW2-LINK, BUT THE MNW2 PACKAGE IS NOT AVAILIBLE.')
+    !
+    ERR = BLNK
+    DO FD=ONE, NFEED
+      IF( FWEL%FID_FEED(FD)%MNWLINK ) THEN
+       DO I=ONE, SIZE(FWEL%FID_FEED(FD)%FID)
+         IF( FWEL%FID_FEED(FD)%MNWLOC(I) /= Z ) THEN
+             NOT_FOUND = TRUE
+             DO J=1, MNWMAX
+                 IF( WELLID(J) == FWEL%FID_FEED(FD)%WELLID(I) ) THEN
+                     FWEL%FID_FEED(FD)%MNWLOC(I) = J
+                     !
+                     IF( FWEL%FID_FEED(FD)%LRC(2,I) < 1 .or. FWEL%FID_FEED(FD)%LRC(3,I) < 1 ) THEN
+                        N1 = NINT( MNW2(4,J) )                          ! N1 = FIRSTNODE in MNW2 Well - Used to get Row and Col
+                        FWEL%FID_FEED(FD)%LRC(2,I) = NINT( MNWNOD(2,N1) )
+                        FWEL%FID_FEED(FD)%LRC(3,I) = NINT( MNWNOD(3,N1) )
+                     END IF
+                     NOT_FOUND = FALSE
+                     !EXIT  --ALLOW FOR POTENTIAL DUBLICATE LINKAGES TO MNW2 WELLS
+                 END IF
+             END DO
+             IF (NOT_FOUND) ERR = TRIM(ERR//FWEL%FID_FEED(FD)%WELLID(I))//NL
+         END IF
+       END DO
+      END IF
+    END DO
+    IF (ERR .NE. BLNK) CALL STOP_ERROR(OUTPUT=FWEL%IOUT, MSG='FMP FWELL WITH MNW2-LINK FAILED TO LOCATE THE FOLLOWING WELL NAMES IN THE MNW2 WELLID LIST:'//NL//'(NO NAME MATCH BETWEEN THESE FMP FWELLs AND THE LIST OF MNW2 WELLs)'//NL//ERR//NL)
+    !
+  END SUBROUTINE
+  !
   IMPURE ELEMENTAL SUBROUTINE FWELL_BUILD_MNW2_INDEX(FWEL,HAS_MNW2)
-    USE GWFMNW2MODULE, ONLY: WELLID, MNWMAX, MNW_FMP_LINK
+    USE GWFMNW2MODULE, ONLY: WELLID, MNWMAX, MNW2, MNWNOD, MNW_FMP_LINK
     CLASS(FARM_WELL_DATA), INTENT(INOUT):: FWEL !FARMWELL
     LOGICAL,INTENT(IN):: HAS_MNW2
     INTEGER:: I, J
     LOGICAL::  NOT_FOUND
     CHARACTER(:),ALLOCATABLE:: ERR
-    INTEGER:: NF,FD
+    INTEGER:: NF,FD, N1
     !
     IF(FWEL%NF==ONE) THEN; IF(HAS_MNW2) MNW_FMP_LINK = FALSE
     END IF
@@ -2134,7 +2150,14 @@ MODULE WELL_DATA_FMP_MODULE
                      DO J=1, MNWMAX
                          IF( WELLID(J) == FWEL%WELLID(I) ) THEN
                              MNW_FMP_LINK(J) = TRUE
-                             FWEL%MNWLOC (I)  = J
+                             FWEL%MNWLOC (I) = J
+                             !
+                             IF( FWEL%LRC(2,I) < 1 .or. FWEL%LRC(3,I) < 1 ) THEN
+                                N1 = NINT( MNW2(4,J) )                 ! N1 = FIRSTNODE in MNW2 Well - Used to get Row and Col
+                                FWEL%LRC(2,I) = NINT( MNWNOD(2,N1) )
+                                FWEL%LRC(3,I) = NINT( MNWNOD(3,N1) )
+                             END IF
+                             !
                              NOT_FOUND = FALSE
                              EXIT
                          END IF
