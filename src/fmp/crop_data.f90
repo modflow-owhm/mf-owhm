@@ -1173,7 +1173,8 @@ MODULE CROP_DATA_FMP_MODULE
         !
         ! ALLOCATE NECESSARY ARRAYS
         IF (UPDATE) THEN
-              DO CONCURRENT ( I=ONE:CDAT%NCROP, CDAT%CROP(I)%N>Z )
+              DO I=ONE, CDAT%NCROP
+              IF( CDAT%CROP(I)%N>Z ) THEN
                   IF( .NOT. ALLOCATED(CDAT%CROP(I)%AREA) .OR. CDAT%CROP(I)%N .NE. SIZE(CDAT%CROP(I)%AREA) ) THEN
                                                                   !
                                                                   CALL ALLOC(CDAT%CROP(I)%T_CONCEPT, CDAT%CROP(I)%N)
@@ -1245,6 +1246,7 @@ MODULE CROP_DATA_FMP_MODULE
                                                                   CDAT%CROP(I)%THI = DZ
                                                                   CDAT%CROP(I)%THD = DZ
                   END IF
+              END IF
               END DO
               !
               ! SET UP CROP AREA
@@ -1544,7 +1546,8 @@ MODULE CROP_DATA_FMP_MODULE
                                                                               IF(PRNT(I)) ERROR = ERROR//BLNK//NUM2STR(I,-8)//'  FRACTION OF INEFFICIENT LOSSES FROM PRECIP (FIESWP) < 1.0, RESET TO 1.0'//NL
                                                                               PRNT(I) = FALSE
                                                                        END IF
-                  END DO; END DO
+                  END DO
+                  END DO
         END IF
         !
         IF(UPDATE .OR. (CDAT%FIESWI%TRANSIENT .AND. LOAD_NEXT) .OR. (NEW_IRR .AND. CDAT%FIESWI%SFAC%HAS_EX3)) THEN
@@ -1554,7 +1557,8 @@ MODULE CROP_DATA_FMP_MODULE
                                                                           CDAT%CROP(I)%FIESWI(K)  = DZ
                                                                           IF(PRNT(I)) ERROR = ERROR//BLNK//NUM2STR(I,-8)//'  FRACTION OF INEFFICIENT LOSSES FROM IRRIGATION (FIESWI) < 0.0, RESET TO 0.0'//NL
                                                                           PRNT(I) = FALSE
-                  END DO; END DO
+                  END DO
+                  END DO
                   !
                   PRNT = TRUE
                   DO CONCURRENT (I=ONE:CDAT%NCROP)
@@ -1564,7 +1568,8 @@ MODULE CROP_DATA_FMP_MODULE
                                                                               IF(PRNT(I)) ERROR = ERROR//BLNK//NUM2STR(I,-8)//'  FRACTION OF INEFFICIENT LOSSES FROM IRRIGATION (FIESWI) < 1.0, RESET TO 1.0'//NL
                                                                               PRNT(I) = FALSE
                                                                        END IF
-                  END DO; END DO
+                  END DO
+                  END DO
         END IF
         !
         IF (UPDATE .OR. (CDAT%GW_INTER%TRANSIENT .AND. LOAD_NEXT)) THEN
@@ -1578,7 +1583,8 @@ MODULE CROP_DATA_FMP_MODULE
                                                                          IF(PRNT(I)) ERROR = ERROR//BLNK//NUM2STR(I,-8)//'  GROUNDWATER_ROOT_INTERACTION MUST BE SET TO 0, 1, 2, 3, 4 or 5 NOW SET TO 5'//NL
                                                                          PRNT(I) = FALSE
                                                               END SELECT
-                  END DO; END DO
+                  END DO
+                  END DO
         END IF
         !
         IF (ERROR.NE.NL) THEN
@@ -2480,8 +2486,8 @@ MODULE CROP_DATA_FMP_MODULE
     !
     CNT = Z
     !
-    DO CONCURRENT (I=ONE:CDAT%NCROP)
-    DO CONCURRENT (K=ONE:CDAT%CROP(I)%N)
+    DO I=ONE, CDAT%NCROP
+    DO K=ONE, CDAT%CROP(I)%N
           !                                                     COL                   ROW
           CDAT%CROP(I)%FID(K) = WBS%FID_TFR%GET(Z, CDAT%CROP(I)%RC(TWO,K), CDAT%CROP(I)%RC(ONE,K), Z)
           !
@@ -2490,7 +2496,7 @@ MODULE CROP_DATA_FMP_MODULE
     END DO
     END DO
     !
-    DO CONCURRENT (F=ONE:WBS%NFARM)
+    DO F=ONE, WBS%NFARM
         IF(CNT(F)>Z) THEN
             CALL ALLOC(WBS%CROP(F)%PNT, FOUR, CNT(F))
             WBS%CROP(F)%N = CNT(F)
@@ -2501,8 +2507,9 @@ MODULE CROP_DATA_FMP_MODULE
     !
     CNT = Z
     !
-    DO CONCURRENT (I=ONE:CDAT%NCROP)
-    DO CONCURRENT (K=ONE:CDAT%CROP(I)%N, CDAT%CROP(I)%FID(K) > Z)
+    DO I=ONE, CDAT%NCROP
+    DO K=ONE, CDAT%CROP(I)%N
+    IF(CDAT%CROP(I)%FID(K) > Z) THEN
           !
           F = CDAT%CROP(I)%FID(K) 
           
@@ -2513,7 +2520,9 @@ MODULE CROP_DATA_FMP_MODULE
           WBS%CROP(F)%PNT(TWO,  CNT(F)) = K
           WBS%CROP(F)%PNT(THREE,CNT(F)) = CDAT%CROP(I)%RC(ONE,K)
           WBS%CROP(F)%PNT(FOUR, CNT(F)) = CDAT%CROP(I)%RC(TWO,K)
-    END DO; END DO
+    END IF
+    END DO
+    END DO
     !    
   END SUBROUTINE
   !
