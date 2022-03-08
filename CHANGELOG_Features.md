@@ -12,6 +12,18 @@
 
 &nbsp;
 
+## 2.2.1a
+
+TBA
+
+### TBA
+
+  * TBA
+
+&nbsp; 
+
+------
+
 ## 2.2.0
 
 2022-01-20
@@ -229,7 +241,6 @@ MONTHLY  -4   SS        # MONTHLY input with 4 time steps, and first stress peri
   * `Rel-Vol-Err`
     * Largest relative volume error (`|r/vol|`<sub>∞</sub>)
     * `r` is the residual error vector, `vol`  is a vector of the model cell's volume. 
-  
 
 &nbsp; 
 
@@ -279,6 +290,7 @@ and can be used when `CNSTNT`, `FMTIN`, and `IPRN` are not specified.
 
   * For example, `OPEN/CLOSE ./IC.txt 1 (FREE) -1 SHIFT 15 SHIFT -5` would add 10 to the input read in `IC.txt`
   * For example, `OPEN/CLOSE ./IC.txt             SHIFT 15 SHIFT -5` would add 10 to the input read in `IC.txt`
+
 &nbsp; 
 
 ------

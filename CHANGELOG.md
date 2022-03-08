@@ -18,6 +18,28 @@ Boyce, S.E., Hanson, R.T., Ferguson, I., Schmid, W., Henson, W., Reimann, T., Me
 
 &nbsp;
 
+## 2.2.1a
+
+TBA
+
+### Refactoring
+
+* `LPF` and `UPW` expanded comment support by using MF-OWHM read utilities.
+    * Provides better error and warning messages for bad input.
+    * Input allows comments and empty lines.
+      * This mainly effected when properties were defined by parameters and   
+        then the input would use a Fortran list-directed read to load the print factor (`IPRN`).  
+        In particular, the following code:  
+        `READ(IN,*) LAYFLG(1,K)`  
+        was changed to:  
+        `CALL READ_TO_DATA(LINE, IN, IOUT)`  
+        `LLOC = 1`  
+        `CALL GET_INTEGER(LINE, LLOC, ISTART, ISTOP, IOUT, IN, LAYFLG(1,K), ...` 
+
+&nbsp; 
+
+------
+
 ## 2.2.0
 
 2022-01-20
@@ -43,12 +65,10 @@ See [CHANGELOG_Features.md](CHANGELOG_Features.md#2.1.1) for a listing of new Zo
 
         Please see the [CHANGELOG_Features.md section 2.1.1 Section NWT Improvements for detailed information about this](CHANGELOG_Features.md#2.1.1).
 
-    * `NWT` thin cell check is disabled. 
-
-        * By default, the `NWT` solver would check all model cells vertical thickness (`thick`) against the largest/thickest cell (`mxthick`). Any cell that had its `thick < 0.01*mxthick` was changed to `IBOUND=0` (removed from the simulation/assumed impermeable rock). This caused models with a large difference between cell thicknesses to drop out smaller ones, which might be thin clay layers in the middle of the model. Users were NOT aware that part of their model was not being simulated. To prevent this situation from occurring, this check is disabled by default.
+    * `NWT` thin cell check is now disabled by default. 
 
         * To enable the thin cell check, add the option `THIN_CELL_CHECK`.  
-            All cells removed from the simulation are written to the LIST file.
+            All "thin" cells removed from the simulation are written to the LIST file.
 
 - `SFR` Modifications
     * The flow-depth-width lookup table, `ICALC = 4`, use `log10` interpolation,  

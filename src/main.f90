@@ -29,7 +29,7 @@ SUBROUTINE PRINT_MAIN_HEADER(IU)  ! Set to 6 for cmd prompt or use output_unit f
   CHARACTER(:),ALLOCATABLE:: Revision
   !
   VERSION_OWHM='2.2'
-  Revision    ='0'
+  Revision    ='1a'
   VERSION_MF  ='1.12'
   VERSION_FMP ='4.1'
   VERSION_SWR ='1.04'
@@ -440,7 +440,7 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
       END IF
       !
       !barc**add CFP AR                                                       !TR: 2017 07 20 CFPv2
-      !seba--PROCESS AND CHECK CONDUIT DATA                                   !TR: 2017 07 20 CFPv2
+      !--PROCESS AND CHECK CONDUIT DATA                                       !TR: 2017 07 20 CFPv2
       !
       IF(IUNIT(58) /= Z) CALL GWF2CFP1AR(IUNIT(58), IUNIT(59),IUNIT(60),CFPMODE)             !TR: 2017 07 20 CFPv2
       IF(IUNIT(49) /= Z) CALL LMT8BAS7AR(NAM_UNIT,CUNIT,IGRID)

@@ -57,9 +57,9 @@ C     ------------------------------------------------------------------
      3                      LAYFLG,VKA,VKCB,SC1,SC2,HANI,WETDRY,HK
       USE FILE_IO_INTERFACE,    ONLY: READ_TO_DATA
       USE PARSE_WORD_INTERFACE, ONLY: PARSE_WORD, PARSE_WORD_UP
-      USE STRINGS,              ONLY: GET_INTEGER
+      USE STRINGS,              ONLY: GET_INTEGER, GET_NUMBER
       USE NUM2STR_INTERFACE,    ONLY: NUM2STR
-      USE CONSTANTS,            ONLY: Z, ONE, DZ, NL, BLN
+      USE CONSTANTS,            ONLY: Z, ONE, DZ, UNO, NL, BLN, NL
       !
       CHARACTER(14):: LAYPRN(5),AVGNAM(3),TYPNAM(2),VKANAM(2),
      1                WETNAM(2),HANNAM
@@ -71,14 +71,14 @@ C     ------------------------------------------------------------------
       AVGNAM(1) = '      HARMONIC'
       AVGNAM(2) = '   LOGARITHMIC'
       AVGNAM(3) = '     LOG-ARITH'
-      !           
+      !
       TYPNAM(1) = '      CONFINED'
 	TYPNAM(2) = '   CONVERTIBLE'
-      !           
+      !
       VKANAM(1) = '    VERTICAL K'
       VKANAM(2) = '    ANISOTROPY'
-      !           
-      WETNAM(1) = '  NON-WETTABLE'
+      !
+      WETNAM(1) = '     NEVER-DRY'
       WETNAM(2) = '      WETTABLE'
       !
       HANNAM = '      VARIABLE'
@@ -126,7 +126,7 @@ C3A-----WRITE ITEM 1
    11 FORMAT(1X,'HEAD AT CELLS THAT CONVERT TO DRY=',ES13.5)
       IF(NPLPF > Z) THEN
            WRITE(IOUT,15) NPLPF
-   15    FORMAT(1X,I5,' Named Parameters     ')
+   15      FORMAT(1X,I5,' Named Parameters     ')
       ELSE
            NPLPF = Z
            WRITE(IOUT,'(A)') ' No named parameters'
@@ -197,7 +197,7 @@ C4------ALLOCATE AND READ LAYTYP, LAYAVG, CHANI, LAYVKA, LAYWET, LAYSTRT.
       CALL PARSE_WORD_UP(LINE,LLOC,ISTART,ISTOP)
       IF(LINE(ISTART:ISTOP) == 'CONVERTIBLE') THEN
         CALL GET_INTEGER(LINE,LLOC,ISTART,ISTOP,IOUT,IN,K,ERROR_VAL=0)
-        IF(K > 0) THEN
+        IF(K > Z) THEN
             LAYTYP     = Z
             LAYTYP(:K) = ONE
         ELSE
@@ -230,7 +230,7 @@ C4------ALLOCATE AND READ LAYTYP, LAYAVG, CHANI, LAYVKA, LAYWET, LAYSTRT.
       CALL PARSE_WORD_UP(LINE,LLOC,ISTART,ISTOP)
       IF(LINE(ISTART:ISTOP) == 'NO_HANI' .OR.
      +   LINE(ISTART:ISTOP) == 'NO'      ) THEN
-         CHANI = 1D0
+         CHANI = UNO
       ELSE
           BACKSPACE(IN)
           READ(IN,*) (CHANI(K),K=1,NLAY)
@@ -262,7 +262,7 @@ C4------ALLOCATE AND READ LAYTYP, LAYAVG, CHANI, LAYVKA, LAYWET, LAYSTRT.
          END IF
       ELSEIF(LINE(ISTART:ISTOP) == 'NO'     .OR.
      +       LINE(ISTART:ISTOP) == 'NO_WETTING') THEN
-         LAYWET = Z
+          LAYWET = Z
       ELSE
           BACKSPACE(IN)
           READ(IN,*) (LAYWET(K),K=1,NLAY)
@@ -282,8 +282,8 @@ C4A1----SET GLOBAL HEAD-DEPENDENT TRANSMISSIVITY AND STORAGE FLAGS.
         LAYHDT(K) = ONE
         LAYHDS(K) = ONE
       ELSE
-        LAYHDT(K)=0
-        LAYHDS(K)=0
+        LAYHDT(K) = Z
+        LAYHDS(K) = Z
       ENDIF
    50 CONTINUE
 C
@@ -291,7 +291,7 @@ C4A2----SET LAYSTRT AND RESET LAYTYP IF THICKSTRT OPTION IS ACTIVE.
       DO 60 K=1,NLAY
       LAYSTRT(K) = Z
       IF(LAYTYP(K) < Z .AND. ITHFLG /= Z) THEN
-         LAYSTRT(K)=1
+         LAYSTRT(K)= ONE
          LAYTYP(K) = Z
          LAYHDT(K) = Z
          LAYHDS(K) = Z
@@ -365,7 +365,14 @@ C4C-----PRINT WETTING INFORMATION.
            WRITE(IOUT,12) NWETD
    12    FORMAT(1X,/,1X,'WETTING CAPABILITY IS ACTIVE IN',I4,' LAYERS')
          IWDFLG=1
-         READ(IN,*) WETFCT,IWETIT,IHDWET
+         CALL READ_TO_DATA(LINE,IN,IOUT)
+         LLOC=1
+         CALL  GET_NUMBER(LINE,LLOC,ISTART,ISTOP,IOUT,IN,WETFCT,
+     +                    MSG='LPF failed to read WETFCT')
+         CALL GET_INTEGER(LINE,LLOC,ISTART,ISTOP,IOUT,IN,IWETIT,
+     +                    MSG='LPF failed to read IWETIT')
+         CALL GET_INTEGER(LINE,LLOC,ISTART,ISTOP,IOUT,IN,IHDWET,
+     +                    MSG='LPF failed to read IHDWET')
          IF(IWETIT.LE.0) IWETIT=1
            WRITE(IOUT,*) ' WETTING FACTOR=',WETFCT
            WRITE(IOUT,*) ' WETTING ITERATION INTERVAL=',IWETIT
@@ -428,7 +435,7 @@ C6------READ PARAMETER DEFINITIONS
 C   Note that NPHK and the other NP variables in
 C   this group are used only as flags, not counts
          IF(PTYP.EQ.'HK') THEN
-            NPHK=1
+            NPHK = ONE
          ELSE IF(PTYP.EQ.'HANI') THEN
 C6A-----WHEN A HANI PARAMETER IS USED, THEN ALL HORIZONTAL ANISOTROPY
 C6A-----MUST BE DEFINED USING PARAMETERS.  ENSURE THAT ALL CHANI <= 0
@@ -442,22 +449,28 @@ C6A-----MUST BE DEFINED USING PARAMETERS.  ENSURE THAT ALL CHANI <= 0
                 CALL USTOP(' ')
               ENDIF
   118       CONTINUE
-            NPHANI=1
+            NPHANI = ONE
          ELSE IF(PTYP.EQ.'VKCB') THEN
-            NPVKCB=1
+            NPVKCB = ONE
          ELSE IF(PTYP.EQ.'VK') THEN
-            NPVK=1
+            NPVK = ONE
             CALL SGWF2LPF7CK(IOUT,N,'VK  ')
          ELSE IF(PTYP.EQ.'VANI') THEN
-            NPVANI=1
+            NPVANI = ONE
             CALL SGWF2LPF7CK(IOUT,N,'VANI')
          ELSE IF(PTYP.EQ.'SS') THEN
-            NPSS=1
+            NPSS = ONE
          ELSE IF(PTYP.EQ.'SY') THEN
-            NPSY=1
+            NPSY = ONE
          ELSE
-              WRITE(IOUT,*) ' Invalid parameter type for LPF Package'
-            CALL USTOP(' ')
+              WRITE(IOUT,"(A)")
+     +     ' LPF Package bad parameter PARTYP for : "'//PTYP//'"'//NL//
+     +     ' Accepted types are: "HK", "HANI", "VKCB", "VK", '//
+     +     '"VANI", "SS", "SY"'
+            CALL USTOP(
+     +     ' LPF Package bad parameter PARTYP for : "'//PTYP//'"'//NL//
+     +     ' Accepted types are: "HK", "HANI", "VKCB", "VK", '//
+     +     '"VANI", "SS", "SY"')
          END IF
   120    CONTINUE
       END IF
@@ -470,8 +483,12 @@ C7A-----DEFINE HORIZONTAL HYDRAULIC CONDUCTIVITY (HK)
       IF(NPHK == Z) THEN
          CALL U2DREL(HK(:,:,KK),ANAME(1),NROW,NCOL,KK,IN,IOUT)
       ELSE
-         READ(IN,*) LAYFLG(1,K)
-           WRITE(IOUT,121) ANAME(1),K,LAYFLG(1,K)
+         CALL READ_TO_DATA(LINE,IN,IOUT)
+         LLOC=1
+         CALL GET_INTEGER(LINE,LLOC,ISTART,ISTOP,IOUT,IN,LAYFLG(1,K),
+     +            MSG='LPF failed to read HK print code (IPRN)')
+         !
+         WRITE(IOUT,121) ANAME(1),K,LAYFLG(1,K)
   121    FORMAT(1X,/1X,A,' FOR LAYER',I4,
      1   ' WILL BE DEFINED BY PARAMETERS',/1X,'(PRINT FLAG=',I4,')')
          CALL UPARARRSUB1(HK(:,:,KK),NCOL,NROW,KK,'HK',
@@ -486,12 +503,16 @@ C7B-----READ HORIZONTAL ANISOTROPY IF CHANI IS NON-ZERO
         IF(NPHANI == Z) THEN
            CALL U2DREL(HANI(:,:,KHANI),ANAME(2),NROW,NCOL,KK,IN,IOUT)
         ELSE
-           READ(IN,*) LAYFLG(6,K)
-             WRITE(IOUT,121) ANAME(2),K,LAYFLG(6,K)
-           CALL UPARARRSUB1(HANI(:,:,KHANI),NCOL,NROW,KK,'HANI',
-     &      IOUT,ANAME(2),LAYFLG(6,KK))
-           IF(NOPCHK == Z) CALL UPARARRCK(BUFF,IBOUND,IOUT,K,NCOL,
-     1      NLAY,NROW,'HANI')
+         CALL READ_TO_DATA(LINE,IN,IOUT)
+         LLOC=1
+         CALL GET_INTEGER(LINE,LLOC,ISTART,ISTOP,IOUT,IN,LAYFLG(6,K),
+     +            MSG='LPF failed to read HANI print code (IPRN)')
+         !
+         WRITE(IOUT,121) ANAME(2),K,LAYFLG(6,K)
+         CALL UPARARRSUB1(HANI(:,:,KHANI),NCOL,NROW,KK,'HANI',
+     +                              IOUT,ANAME(2),LAYFLG(6,KK))
+         IF(NOPCHK == Z) CALL UPARARRCK(BUFF,IBOUND,IOUT,K,NCOL,
+     1                                           NLAY,NROW,'HANI')
         END IF
       END IF
 C
@@ -506,10 +527,14 @@ C7C-----ANISOTROPY (VKA).
       IF(NPVK == Z .AND. NPVANI == Z) THEN
          CALL U2DREL(VKA(:,:,KK),ANAME(IANAME),NROW,NCOL,KK,IN,IOUT)
       ELSE
-         READ(IN,*) LAYFLG(2,K)
-           WRITE(IOUT,121) ANAME(IANAME),K,LAYFLG(2,K)
+         CALL READ_TO_DATA(LINE,IN,IOUT)
+         LLOC=1
+         CALL GET_INTEGER(LINE,LLOC,ISTART,ISTOP,IOUT,IN,LAYFLG(2,K),
+     +            MSG='LPF failed to read VKA print code (IPRN)')
+         !
+         WRITE(IOUT,121) ANAME(IANAME),K,LAYFLG(2,K)
          CALL UPARARRSUB1(VKA(:,:,KK),NCOL,NROW,KK,PTYP,IOUT,
-     &                       ANAME(IANAME),LAYFLG(2,KK))
+     +                       ANAME(IANAME),LAYFLG(2,KK))
          IF(NOPCHK == Z) CALL UPARARRCK(BUFF,IBOUND,IOUT,K,NCOL,NLAY,
      1                       NROW,PTYP)
       END IF
@@ -519,12 +544,16 @@ C7D-----DEFINE SPECIFIC STORAGE OR STORAGE COEFFICIENT IN ARRAY SC1 IF TRANSIENT
          IF(NPSS == Z) THEN
             CALL U2DREL(SC1(:,:,KK),STOTXT,NROW,NCOL,KK,IN,IOUT)
          ELSE
-            READ(IN,*) LAYFLG(3,K)
-              WRITE(IOUT,121) STOTXT,K,LAYFLG(3,K)
+            CALL READ_TO_DATA(LINE,IN,IOUT)
+            LLOC=1
+            CALL GET_INTEGER(LINE,LLOC,ISTART,ISTOP,IOUT,IN,LAYFLG(3,K),
+     +               MSG='LPF failed to read Ss print code (IPRN)')
+            !
+            WRITE(IOUT,121) STOTXT,K,LAYFLG(3,K)
             CALL UPARARRSUB1(SC1(:,:,KK),NCOL,NROW,KK,'SS',
-     1           IOUT,STOTXT,LAYFLG(3,KK))
+     +                       IOUT,STOTXT,LAYFLG(3,KK))
             IF(NOPCHK == Z) CALL UPARARRCK(BUFF,IBOUND,IOUT,K,NCOL,
-     1           NLAY,NROW,'SS  ')
+     +                                            NLAY,NROW,'SS  ')
          END IF
          IF(ISFAC == Z) THEN
             CALL SGWF2LPF7SC(SC1(:,:,KK),KK,1)
@@ -541,12 +570,16 @@ C7E-----IS CONVERTIBLE.
                CALL U2DREL(SC2(:,:,LAYTYP(K)),ANAME(7),NROW,NCOL,KK,IN,
      1                 IOUT)
             ELSE
-               READ(IN,*) LAYFLG(4,K)
-                 WRITE(IOUT,121) ANAME(7),K,LAYFLG(4,K)
+               CALL READ_TO_DATA(LINE,IN,IOUT)
+               LLOC=1
+            CALL GET_INTEGER(LINE,LLOC,ISTART,ISTOP,IOUT,IN,LAYFLG(4,K),
+     +                  MSG='LPF failed to read Sy print code (IPRN)')
+               !
+               WRITE(IOUT,121) ANAME(7),K,LAYFLG(4,K)
                CALL UPARARRSUB1(SC2(:,:,LAYTYP(K)),NCOL,
-     1         NROW,KK,'SY',IOUT,ANAME(7),LAYFLG(4,KK))
+     +                   NROW,KK,'SY',IOUT,ANAME(7),LAYFLG(4,KK))
                IF(NOPCHK == Z) CALL UPARARRCK(BUFF,IBOUND,IOUT,K,
-     1           NCOL,NLAY,NROW,'SY  ')
+     +                   NCOL,NLAY,NROW,'SY  ')
             END IF
             CALL SGWF2LPF7SC(SC2(:,:,LAYTYP(K)),KK,0)
          END IF
@@ -558,12 +591,16 @@ C7F-----READ CONFINING BED VERTICAL HYDRAULIC CONDUCTIVITY (VKCB)
             CALL U2DREL(VKCB(:,:,LAYCBD(K)),ANAME(5),NROW,NCOL,KK,IN,
      1             IOUT)
          ELSE
-            READ(IN,*) LAYFLG(5,K)
-              WRITE(IOUT,121) ANAME(5),K,LAYFLG(5,K)
+            CALL READ_TO_DATA(LINE,IN,IOUT)
+            LLOC=1
+            CALL GET_INTEGER(LINE,LLOC,ISTART,ISTOP,IOUT,IN,LAYFLG(5,K),
+     +                  MSG='LPF failed to read VKCB print code (IPRN)')
+            !
+            WRITE(IOUT,121) ANAME(5),K,LAYFLG(5,K)
             CALL UPARARRSUB1(VKCB(:,:,LAYCBD(K)),NCOL,NROW,KK,
-     1         'VKCB',IOUT,ANAME(5),LAYFLG(5,KK))
+     +                      'VKCB',IOUT,ANAME(5),LAYFLG(5,KK))
             IF(NOPCHK == Z) CALL UPARARRCK(BUFF,IBOUND,IOUT,K,NCOL,
-     1         NLAY,NROW,'VKCB')
+     +                                     NLAY,NROW,'VKCB')
          END IF
       END IF
 C
