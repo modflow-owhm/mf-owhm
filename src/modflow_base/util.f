@@ -590,7 +590,7 @@ C
 C        SPECIFICATIONS:
 C     ------------------------------------------------------------------
       USE CONSTANTS,              ONLY: Z, ONE, NL, BLN, TRUE
-      USE ERROR_INTERFACE,        ONLY: STOP_ERROR, WARNING_MESSAGE
+      USE ERROR_INTERFACE,        ONLY: STOP_ERROR
       USE FILE_IO_INTERFACE,      ONLY: READ_TO_DATA, MOVE_TO_DATA
       USE STRINGS,                ONLY: GET_WORD, GET_NUMBER
       USE GENERIC_OPEN_INTERFACE, ONLY: GENERIC_OPEN
@@ -605,12 +605,13 @@ C     ------------------------------------------------------------------
       CHARACTER(768):: CNTRL, FNAME
       INTEGER:: IE, N, J
       INTEGER:: ICOL, ISTART, ISTOP
-      INTEGER:: ICLOSE, IFREE, IPRN, LOCAT
+      INTEGER:: ICLOSE, IFREE, IPRN, LOCAT, NO_CNSTNT_IPRN
       LOGICAL:: FAIL
       REAL:: SHFT, ZERO, CNSTNT
 C     ------------------------------------------------------------------
       ZERO  = 0.0
       SHFT  = ZERO
+      NO_CNSTNT_IPRN = 0
 C
 C1------READ ARRAY CONTROL RECORD AS CHARACTER DATA.
       CALL READ_TO_DATA(CNTRL,IN,IOUT,NOSHIFT=TRUE) !seb originally => READ(IN,'(A)') CNTRL
@@ -678,10 +679,7 @@ C3------FOR FREE FORMAT CONTROL RECORD, READ REMAINING FIELDS.
      +                     MSG='U1DREL - FAILED TO READ CNSTNT')
          ELSEIF(FAIL) THEN
              CNSTNT=1.0
-             CALL WARNING_MESSAGE(LINE=CNTRL, INFILE=IN, OUTPUT=IOUT,
-     +       MSG= 'U1DREL - Failed to identify CNSTNT for "'//
-     +       TRIM(ADJUSTL(ANAME))//
-     +       '". Program will contine with CNSTNT = 1.0', inline=TRUE)
+             NO_CNSTNT_IPRN = 1
             IF(ISTOP < ISTART) THEN
                    CONTINUE
             ELSEIF(CNTRL(ISTART:ISTART) == '#') THEN
@@ -720,10 +718,7 @@ C3------FOR FREE FORMAT CONTROL RECORD, READ REMAINING FIELDS.
      +                         NO_PARSE_WORD=TRUE, HAS_ERROR=FAIL)
             IF(FAIL) THEN
               IPRN=-1
-              CALL WARNING_MESSAGE(LINE=CNTRL, INFILE=IN, OUTPUT=IOUT,
-     +        MSG= 'U1DREL - Failed to identify IPRN for "'//
-     +        TRIM(ADJUSTL(ANAME))//
-     +        '". Program will contine with IPRN = -1', inline=TRUE)
+              NO_CNSTNT_IPRN = NO_CNSTNT_IPRN + 10
             END IF
             !
             CALL NEXT_WORD_CHECK_SHIFT(CNTRL,ICOL,ISTART,ISTOP,SHFT)
@@ -761,12 +756,25 @@ C4B-----LOCAT>0; READ FORMATTED RECORDS USING FORMAT FMTIN.
       IF(ICLOSE /= Z) CLOSE(UNIT=LOCAT)
 C
 C5------IF CNSTNT NOT ZERO THEN MULTIPLY ARRAY VALUES BY CNSTNT.
-      IF(CNSTNT == ZERO) GO TO 120
+      IF(CNSTNT == ZERO .or. CNSTNT == 1.0) GO TO 120
       DO 100 J=1,JJ
   100 A(J)=A(J)*CNSTNT
 C
 C6------IF PRINT CODE (IPRN) =0 OR >0 THEN PRINT ARRAY VALUES.
 120   CONTINUE
+      !
+      IF(NO_CNSTNT_IPRN > Z .and. IOUT /= Z) THEN
+          WRITE(IOUT,'(3A)', ADVANCE="NO") ' U1DREL - Reading for "',
+     +                                     TRIM(ADJUSTL(ANAME)), '" '
+          IF(NO_CNSTNT_IPRN == 11) THEN
+            WRITE(IOUT,'(2A)') "autoset the scale factor CNSTNT to 1.0",
+     +                          ", and the print flag IPRN to -1"
+          ELSEIF(NO_CNSTNT_IPRN == 1) THEN
+            WRITE(IOUT,'(A)') "autoset the scale factor CNSTNT to 1.0"
+          ELSEIF(NO_CNSTNT_IPRN == 10) THEN
+            WRITE(IOUT,'(A)') "autoset the print flag IPRN to -1"
+          END IF
+      END IF
       !
       IF(SHFT /= ZERO) A = A + SHFT
       !
@@ -830,7 +838,7 @@ C
 C        SPECIFICATIONS:
 C     ------------------------------------------------------------------
       USE CONSTANTS,              ONLY: NL,BLN,Z,ONE,NEG,TRUE,FALSE
-      USE ERROR_INTERFACE,        ONLY: STOP_ERROR, WARNING_MESSAGE
+      USE ERROR_INTERFACE,        ONLY: STOP_ERROR
       USE FILE_IO_INTERFACE,      ONLY: READ_TO_DATA, MOVE_TO_DATA
       USE NUM2STR_INTERFACE,      ONLY: NUM2STR
       USE GENERIC_OPEN_INTERFACE, ONLY: GENERIC_OPEN
@@ -845,7 +853,7 @@ C     ------------------------------------------------------------------
       CHARACTER(768):: CNTRL, FNAME
       INTEGER:: IE, N, I, J
       INTEGER:: ICOL, ISTART, ISTOP
-      INTEGER:: ICLOSE, IFREE, ICONST, IPRN, LOCAT
+      INTEGER:: ICLOSE, IFREE, ICONST, IPRN, LOCAT, NO_CNSTNT_IPRN
       LOGICAL:: FORMATTED, FAIL
 C     ------------------------------------------------------------------
 C
@@ -855,6 +863,7 @@ C1------READ ARRAY CONTROL RECORD AS CHARACTER DATA.
 C
 C2------LOOK FOR ALPHABETIC WORD THAT INDICATES THAT THE RECORD IS FREE
 C2------FORMAT.  SET A FLAG SPECIFYING IF FREE FORMAT OR FIXED FORMAT.
+      NO_CNSTNT_IPRN = 0
       ICLOSE = Z
       IFREE  = ONE
       ICOL   = ONE
@@ -921,10 +930,7 @@ C3------FOR FREE FORMAT CONTROL RECORD, READ REMAINING FIELDS.
      +                     MSG='U2DINT - FAILED TO READ ICONST')
          ELSEIF(FAIL) THEN
              ICONST=1
-             CALL WARNING_MESSAGE(LINE=CNTRL, INFILE=IN, OUTPUT=IOUT,
-     +       MSG= 'U2DINT - Failed to identify ICONST for "'//
-     +       TRIM(ADJUSTL(ANAME))//
-     +       '". Program will contine with ICONST = 1', inline=TRUE)
+             NO_CNSTNT_IPRN = 1
             IF(ISTOP < ISTART) THEN
                    CONTINUE
             ELSEIF(CNTRL(ISTART:ISTART) == '#') THEN
@@ -970,10 +976,7 @@ C3------FOR FREE FORMAT CONTROL RECORD, READ REMAINING FIELDS.
      +                                             HAS_ERROR=FAIL)
             IF(FAIL) THEN
               IPRN=-1
-              CALL WARNING_MESSAGE(LINE=CNTRL, INFILE=IN, OUTPUT=IOUT,
-     +        MSG= 'U2DINT - Failed to identify IPRN for "'//
-     +        TRIM(ADJUSTL(ANAME))//
-     +        '". Program will contine with IPRN = -1', inline=TRUE)
+              NO_CNSTNT_IPRN = NO_CNSTNT_IPRN + 10
             END IF
          END IF
       END IF
@@ -1052,9 +1055,22 @@ C5------IF ICONST NOT ZERO THEN MULTIPLY ARRAY VALUES BY ICONST.
       DO 310 J=1,JJ
       IA(J,I)=IA(J,I)*ICONST
   310 CONTINUE
+      !
+  320 IF(NO_CNSTNT_IPRN > Z .and. IOUT /= Z) THEN
+          WRITE(IOUT,'(3A)', ADVANCE="NO") ' U2DINT - Reading for "',
+     +                                     TRIM(ADJUSTL(ANAME)), '" '
+          IF(NO_CNSTNT_IPRN == 11) THEN
+            WRITE(IOUT,'(2A)') "autoset the multiplier CNSTNT to 1",
+     +                          ", and the print flag IPRN to -1"
+          ELSEIF(NO_CNSTNT_IPRN == 1) THEN
+            WRITE(IOUT,'(A)') "autoset the multiplier CNSTNT to 1"
+          ELSEIF(NO_CNSTNT_IPRN == 10) THEN
+            WRITE(IOUT,'(A)') "autoset the print flag IPRN to -1"
+          END IF
+      END IF
 C
 C6------IF PRINT CODE (IPRN) <0 THEN RETURN.
-  320 IF(IPRN < Z .OR. IOUT == Z) RETURN
+      IF(IPRN < Z .OR. IOUT == Z) RETURN
 C
 C7------PRINT COLUMN NUMBERS AT TOP OF PAGE.
       IF(IPRN > 9 .OR. IPRN == Z) IPRN=6
@@ -1179,12 +1195,13 @@ C     ------------------------------------------------------------------
       CHARACTER(768):: CNTRL, FNAME
       INTEGER:: IE, N, I, J
       INTEGER:: ICOL, ISTART, ISTOP
-      INTEGER:: ICLOSE, IFREE, IPRN, LOCAT
+      INTEGER:: ICLOSE, IFREE, IPRN, LOCAT, NO_CNSTNT_IPRN
       LOGICAL:: FORMATTED, FAIL
       REAL:: SHFT, CNSTNT, ZERO
 C     ------------------------------------------------------------------
       ZERO  = 0.0
       SHFT  = ZERO
+      NO_CNSTNT_IPRN = 0
 C
 C1------READ ARRAY CONTROL RECORD AS CHARACTER DATA.
       CALL READ_TO_DATA(CNTRL,IN,IOUT,NOSHIFT=TRUE) !seb originally => READ(IN,'(A)') CNTRL
@@ -1259,10 +1276,7 @@ C3------FOR FREE FORMAT CONTROL RECORD, READ REMAINING FIELDS.
      +                     MSG='U2DREL - FAILED TO READ CNSTNT')
          ELSEIF(FAIL) THEN
              CNSTNT=1.0
-             CALL WARNING_MESSAGE(LINE=CNTRL, INFILE=IN, OUTPUT=IOUT,
-     +       MSG= 'U2DREL - Failed to identify CNSTNT for "'//
-     +       TRIM(ADJUSTL(ANAME))//
-     +       '". Program will contine with CNSTNT = 1.0', inline=TRUE)
+             NO_CNSTNT_IPRN = 1
             IF(ISTOP < ISTART) THEN
                    CONTINUE
             ELSEIF(CNTRL(ISTART:ISTART) == '#') THEN
@@ -1308,10 +1322,7 @@ C3------FOR FREE FORMAT CONTROL RECORD, READ REMAINING FIELDS.
      +                         NO_PARSE_WORD=TRUE, HAS_ERROR=FAIL)
             IF(FAIL) THEN
               IPRN=-1
-              CALL WARNING_MESSAGE(LINE=CNTRL, INFILE=IN, OUTPUT=IOUT,
-     +        MSG= 'U2DREL - Failed to identify IPRN for "'//
-     +        TRIM(ADJUSTL(ANAME))//
-     +        '". Program will contine with IPRN = -1', inline=TRUE)
+              NO_CNSTNT_IPRN = NO_CNSTNT_IPRN + 10
             END IF
          END IF
          !
@@ -1444,6 +1455,19 @@ C4C-----LOCAT<0; READ UNFORMATTED ARRAY VALUES.
            END IF
         END BLOCK
       END IF
+      !
+      IF(NO_CNSTNT_IPRN > Z .and. IOUT /= Z) THEN
+          WRITE(IOUT,'(3A)', ADVANCE="NO") ' U2DREL - Reading for "',
+     +                                     TRIM(ADJUSTL(ANAME)), '" '
+          IF(NO_CNSTNT_IPRN == 11) THEN
+            WRITE(IOUT,'(2A)') "autoset the scale factor CNSTNT to 1.0",
+     +                          ", and the print flag IPRN to -1"
+          ELSEIF(NO_CNSTNT_IPRN == 1) THEN
+            WRITE(IOUT,'(A)') "autoset the scale factor CNSTNT to 1.0"
+          ELSEIF(NO_CNSTNT_IPRN == 10) THEN
+            WRITE(IOUT,'(A)') "autoset the print flag IPRN to -1"
+          END IF
+      END IF
 C
 C5------IF CNSTNT NOT ZERO THEN MULTIPLY ARRAY VALUES BY CNSTNT.
       IF(ICLOSE /= Z) CLOSE(UNIT=LOCAT)
@@ -1537,12 +1561,13 @@ C     ------------------------------------------------------------------
       CHARACTER(768):: CNTRL, FNAME
       INTEGER:: IE, N, I, J
       INTEGER:: ICOL, ISTART, ISTOP
-      INTEGER:: ICLOSE, IFREE, IPRN, LOCAT
+      INTEGER:: ICLOSE, IFREE, IPRN, LOCAT, NO_CNSTNT_IPRN
       LOGICAL:: FORMATTED, FAIL
       REAL(REAL64):: SHFT, CNSTNT, ZERO
 C     ------------------------------------------------------------------
       ZERO  = 0.0_real64
       SHFT  = ZERO
+      NO_CNSTNT_IPRN = 0
 C
 C1------READ ARRAY CONTROL RECORD AS CHARACTER DATA.
       CALL READ_TO_DATA(CNTRL,IN,IOUT,NOSHIFT=TRUE) !seb originally => READ(IN,'(A)') CNTRL
@@ -1617,10 +1642,7 @@ C3------FOR FREE FORMAT CONTROL RECORD, READ REMAINING FIELDS.
      +                     MSG='U2DDBL - FAILED TO READ CNSTNT')
          ELSEIF(FAIL) THEN
              CNSTNT=1.0
-             CALL WARNING_MESSAGE(LINE=CNTRL, INFILE=IN, OUTPUT=IOUT,
-     +       MSG= 'U2DDBL - Failed to identify CNSTNT for "'//
-     +       TRIM(ADJUSTL(ANAME))//
-     +       '". Program will contine with CNSTNT = 1.0', inline=TRUE)
+             NO_CNSTNT_IPRN = 1
             IF(ISTOP < ISTART) THEN
                    CONTINUE
             ELSEIF(CNTRL(ISTART:ISTART) == '#') THEN
@@ -1666,10 +1688,7 @@ C3------FOR FREE FORMAT CONTROL RECORD, READ REMAINING FIELDS.
      +                         NO_PARSE_WORD=TRUE, HAS_ERROR=FAIL)
             IF(FAIL) THEN
               IPRN=-1
-              CALL WARNING_MESSAGE(LINE=CNTRL, INFILE=IN, OUTPUT=IOUT,
-     +        MSG= 'U2DDBL - Failed to identify IPRN for "'//
-     +        TRIM(ADJUSTL(ANAME))//
-     +        '". Program will contine with IPRN = -1', inline=TRUE)
+              NO_CNSTNT_IPRN = NO_CNSTNT_IPRN + 10
             END IF
          END IF
          !
@@ -1801,6 +1820,19 @@ C4C-----LOCAT<0; READ UNFORMATTED ARRAY VALUES.
               END IF
            END IF
         END BLOCK
+      END IF
+      !
+      IF(NO_CNSTNT_IPRN > Z .and. IOUT /= Z) THEN
+          WRITE(IOUT,'(3A)', ADVANCE="NO") ' U2DREL - Reading for "',
+     +                                     TRIM(ADJUSTL(ANAME)), '" '
+          IF(NO_CNSTNT_IPRN == 11) THEN
+            WRITE(IOUT,'(2A)') "autoset the scale factor CNSTNT to 1.0",
+     +                          ", and the print flag IPRN to -1"
+          ELSEIF(NO_CNSTNT_IPRN == 1) THEN
+            WRITE(IOUT,'(A)') "autoset the scale factor CNSTNT to 1.0"
+          ELSEIF(NO_CNSTNT_IPRN == 10) THEN
+            WRITE(IOUT,'(A)') "autoset the print flag IPRN to -1"
+          END IF
       END IF
 C
 C5------IF CNSTNT NOT ZERO THEN MULTIPLY ARRAY VALUES BY CNSTNT.
