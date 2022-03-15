@@ -377,15 +377,17 @@ RECURSIVE SUBROUTINE PROCESS_INLINE_CONDITIONAL(Eqn,R,COND_ANS)
   INTEGER,DIMENSION(:),ALLOCATABLE:: IDX                             !POINTER ARRAY THAT IS ONLY USED TO POINT TO THE & AND | IN CONDITIONAL PART OF IF
   INTEGER:: I, J, Rsub, MP, ROW, COL
   !
+  DOUBLE PRECISION,DIMENSION(:,:), ALLOCATABLE:: ATMP  !Temporary array of solution, necessary because there is no way to pass indexes to expression parser
   LOGICAL,DIMENSION(:,:), ALLOCATABLE:: COND
-  LOGICAL,DIMENSION(:,:), ALLOCATABLE:: COND2   !TEMPORARY ARRAY THAT IS ONLY USED IF THERE IS AN "OR" OPERATOR, ie "|"
+  LOGICAL,DIMENSION(:,:), ALLOCATABLE:: COND2          !Temporary array that is only used if there is an "OR" operator, ie "|"
   !
   CHARACTER(:), ALLOCATABLE:: TRUE_LN, FALSE_LN
-  CHARACTER(3):: NaN
+  
 
   ROW=SIZE(COND_ANS,1)
   COL=SIZE(COND_ANS,2)
   !
+  ALLOCATE(ATMP(ROW,COL))
   ALLOCATE(COND(ROW,COL))
   !
   ! 'IF[...'
@@ -439,31 +441,73 @@ RECURSIVE SUBROUTINE PROCESS_INLINE_CONDITIONAL(Eqn,R,COND_ANS)
   END DO
   R=R+1  !MOVE PAST CLOSING BRACKET SO NEXTATOM EITHER TERMINATES OR PROCESSES THE NEXT OPERATOR
   !
-  NaN='NaN'
-  DO I=1, ROW
-  DO J=1, COL
-    IF (COND(I,J)) THEN  !TRUE CONDITION
+  IF( ANY(COND) ) THEN  ! Contains 1 true solution
        CALL SplitFunc(TRUE_LN, SubEqn, .FALSE.)  !AT TRUE LOCATION EVALUATE WHAT IS THERE
        Rsub=1
        MP=1
-       CALL EqnParser(SubEqn,Rsub,COND_ANS(I:I,J:J),MP)    !SOLVE FOR THE RIGHT SIDE OF THE CONDITINAL
+       CALL EqnParser(SubEqn,Rsub,ATMP,MP)    !SOLVE FOR THE RIGHT SIDE OF THE CONDITINAL
        DEALLOCATE(SubEqn)
-    ELSE
-       IF(']' .NE. FALSE_LN) THEN                   !CHECK FALSE LOCATION
+       !
+       WHERE (COND) 
+           COND_ANS = ATMP
+       END WHERE
+  END IF
+  !
+  IF( .NOT. ALL(COND) ) THEN  ! Contains 1 false solution
+       IF(']' .NE. FALSE_LN) THEN                   ! Has a false solution to set to
           CALL SplitFunc(FALSE_LN, SubEqn, .FALSE.)
           Rsub=1
           MP=1
-          CALL EqnParser(SubEqn,Rsub,COND_ANS(I:I,J:J),MP)  !SOLVE FOR THE RIGHT SIDE OF THE CONDITINAL
+          CALL EqnParser(SubEqn,Rsub,ATMP,MP)       ! Solve for the right side of the conditinal
           DEALLOCATE(SubEqn)
+          DO I=1, ROW
+          DO J=1, COL
+          IF (.not. COND(I,J)) THEN
+                    COND_ANS(I,J) = ATMP(I,J)
+          END IF
+          END DO
+          END DO
        ELSE
-          READ(NaN,*) COND_ANS(I,J)   !SETS CONDITIONAL ANSWER TO NaN IF THERE IS NO FALSE OPTION. THIS ALLOWS THE EXPRESSION PARSER TO FLAG OUTSIDE CODES THAT IF FAILED
+          BLOCK
+            CHARACTER(3):: cNaN     ! Sets conditional answer to NaN if there is no false option. this allows the expression parser to flag outside codes that if failed
+            DOUBLE PRECISION:: NaN
+            cNaN = "NaN"
+            READ(cNaN,*) NaN
+            DO I=1, ROW
+            DO J=1, COL
+            IF (.not. COND(I,J)) THEN
+                      COND_ANS(I,J) = NaN
+            END IF
+            END DO
+            END DO
+          END BLOCK
        END IF
-    END IF
-  END DO
-  END DO
+  END IF
+  !
+  ! DO I=1, ROW   -- Old code caused index error if ROW>1 or COL>1 cause 
+  ! DO J=1, COL
+  !   IF (COND(I,J)) THEN  !TRUE CONDITION
+  !      CALL SplitFunc(TRUE_LN, SubEqn, .FALSE.)  !AT TRUE LOCATION EVALUATE WHAT IS THERE
+  !      Rsub=1
+  !      MP=1
+  !      CALL EqnParser(SubEqn,Rsub,COND_ANS(I:I,J:J),MP)    !SOLVE FOR THE RIGHT SIDE OF THE CONDITINAL
+  !      DEALLOCATE(SubEqn)
+  !   ELSE
+  !      IF(']' .NE. FALSE_LN) THEN                   !CHECK FALSE LOCATION
+  !         CALL SplitFunc(FALSE_LN, SubEqn, .FALSE.)
+  !         Rsub=1
+  !         MP=1
+  !         CALL EqnParser(SubEqn,Rsub,COND_ANS(I:I,J:J),MP)  !SOLVE FOR THE RIGHT SIDE OF THE CONDITINAL
+  !         DEALLOCATE(SubEqn)
+  !      ELSE
+  !         READ(NaN,*) COND_ANS(I,J)   !SETS CONDITIONAL ANSWER TO NaN IF THERE IS NO FALSE OPTION. THIS ALLOWS THE EXPRESSION PARSER TO FLAG OUTSIDE CODES THAT IF FAILED
+  !      END IF
+  !   END IF
+  ! END DO
+  ! END DO
   !
   !DEALLOCATE(LN)
-  DEALLOCATE(COND)
+  DEALLOCATE(COND, ATMP)
   DEALLOCATE(TRUE_LN, FALSE_LN)
 END SUBROUTINE
 !
