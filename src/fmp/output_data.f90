@@ -57,42 +57,41 @@ MODULE OUTPUT_DATA_FMP_MODULE!, ONLY: OUTPUT_DATA, INITIALIZE_OUTPUT_DATA
   CONTAINS
   !
   SUBROUTINE DEALLOCATE_OUTPUT_FINAL(OFL)
-  TYPE(OUTPUT_DATA)::OFL
-  CALL DEALLOCATE_OUTPUT(OFL)
+    TYPE(OUTPUT_DATA)::OFL
+    CALL DEALLOCATE_OUTPUT(OFL)
   END SUBROUTINE
   !
   SUBROUTINE DEALLOCATE_OUTPUT(OFL)
-  CLASS(OUTPUT_DATA), INTENT(INOUT)::OFL
-  !
-  OFL%WEL_CBC = Z
-  OFL%FNR_CBC = Z
-  !OFL%ISDPFL  = Z
-  !OFL%IFBPFL  = Z
-  OFL%HAS_ROUT= Z
-  !
-  CALL OFL%WBS_WATER_USE      %CLOSE()
-  CALL OFL%FDS                %CLOSE()
-  CALL OFL%FB_COMPACT         %CLOSE()
-  CALL OFL%FB_DETAILS         %CLOSE()
-  CALL OFL%ET_ARRAY_SUM       %CLOSE()
-  CALL OFL%ET_ARRAY_SEP       %CLOSE()
-  CALL OFL%ET_LIST            %CLOSE()
-  CALL OFL%FNRCH_ARRAY        %CLOSE()
-  CALL OFL%FNRCH_LIST         %CLOSE()
-  CALL OFL%FWELLS             %CLOSE()
-  CALL OFL%ROUTING_INFORMATION%CLOSE()
-  CALL OFL%EGWA               %CLOSE()
-  CALL OFL%TGWA               %CLOSE()
-  CALL OFL%TI                 %CLOSE()
-  CALL OFL%EI                 %CLOSE()
-  CALL OFL%TP                 %CLOSE()
-  CALL OFL%EP                 %CLOSE()
-  CALL OFL%ETGW               %CLOSE()
-  CALL OFL%ETI                %CLOSE()
-  CALL OFL%ETP                %CLOSE()
-  CALL OFL%RUNOFF             %CLOSE()
-  CALL OFL%DPERC              %CLOSE()
-  !
+    CLASS(OUTPUT_DATA), INTENT(INOUT)::OFL
+    !
+    OFL%WEL_CBC = Z
+    OFL%FNR_CBC = Z
+    !OFL%ISDPFL  = Z
+    !OFL%IFBPFL  = Z
+    OFL%HAS_ROUT= Z
+    !
+    CALL OFL%WBS_WATER_USE      %CLOSE()
+    CALL OFL%FDS                %CLOSE()
+    CALL OFL%FB_COMPACT         %CLOSE()
+    CALL OFL%FB_DETAILS         %CLOSE()
+    CALL OFL%ET_ARRAY_SUM       %CLOSE()
+    CALL OFL%ET_ARRAY_SEP       %CLOSE()
+    CALL OFL%ET_LIST            %CLOSE()
+    CALL OFL%FNRCH_ARRAY        %CLOSE()
+    CALL OFL%FNRCH_LIST         %CLOSE()
+    CALL OFL%FWELLS             %CLOSE()
+    CALL OFL%ROUTING_INFORMATION%CLOSE()
+    CALL OFL%EGWA               %CLOSE()
+    CALL OFL%TGWA               %CLOSE()
+    CALL OFL%TI                 %CLOSE()
+    CALL OFL%EI                 %CLOSE()
+    CALL OFL%TP                 %CLOSE()
+    CALL OFL%EP                 %CLOSE()
+    CALL OFL%ETGW               %CLOSE()
+    CALL OFL%ETI                %CLOSE()
+    CALL OFL%ETP                %CLOSE()
+    CALL OFL%RUNOFF             %CLOSE()
+    CALL OFL%DPERC              %CLOSE()
   END SUBROUTINE
   !  
   SUBROUTINE INITIALIZE_OUTPUT_DATA( BL, OFL, ITMUNI)

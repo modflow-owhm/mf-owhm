@@ -101,8 +101,8 @@ MODULE CROP_DATA_FMP_MODULE
       PROCEDURE, PASS(CPR), PRIVATE:: COPY_CROP_INPUT_TO_CROP_PROP
       PROCEDURE, PASS(CPR), PRIVATE:: COPY_CROP_INPUT_TO_CROP_PROP_INT
       FINAL:: DEALLOCATE_CROP_PROP_FINAL
-      END TYPE
-      !
+  END TYPE
+  !
   TYPE CROP_DATA
       INTEGER:: NCROP = Z, NIRRG=Z
       INTEGER:: NROW, NCOL
@@ -256,7 +256,6 @@ MODULE CROP_DATA_FMP_MODULE
     TYPE(CROP_PROP)::CPR
     !
     CALL DEALLOCATE_CROP_PROP(CPR)
-    !
   END SUBROUTINE
   !
   PURE ELEMENTAL SUBROUTINE DEALLOCATE_CROP_PROP(CPR)
@@ -2670,200 +2669,200 @@ MODULE CROP_DATA_FMP_MODULE
   END SUBROUTINE
   !
   PURE ELEMENTAL SUBROUTINE COPY_CROP_INPUT_TO_CROP_PROP(CPR, CPI)
-  CLASS(CROP_PROP),       INTENT(INOUT):: CPR
-  TYPE(LIST_ARRAY_INPUT), INTENT(IN   ):: CPI
-  INTEGER:: K, ID, LD  ! LD => LEADING DIMENSION
-  !
-  IF (CPR%N > Z .AND. CPI%INUSE) THEN
-     !
-     ID = CPR%ID
-     LD = CPR%LD
-     !
-     SELECT CASE(CPI%TYP)
-     CASE('ROOT'  )
-                    CALL ALLOC(CPR%ROOT, CPR%N)  !IF ROOT ALREADY ALLOCATED AND OVERDIMENSIONED, DONT BOTHER REALLOCATING
-                    IF(CPI%LISTLOAD) THEN
-                                         CPR%ROOT = CPI%LIST(ID)
-                    ELSEIF(CPI%HAS_IXJ) THEN
-                        CALL CROP_INPUT_IXJ_STRUCTURE_TO_PROP(ID, CPR%N, CPR%RC, CPR%ROOT, CPI%IXJ%DIM(1), CPI%IXJ%N, CPI%IXJ%SIZ, CPI%IXJ%DAT)
-                    ELSE
-                        CALL CROP_INPUT_ARRAY_TO_PROP(CPR%N,   CPR%RC, CPR%ROOT, CPI%ARRAY(:,LD:))
-                    END IF
-                    !    CROP_INPUT_APPLY_SFAC(SFAC, PROP, N, CID, FID, [IRR])
-                    CALL CROP_INPUT_APPLY_SFAC( CPR%ROOT, CPI%SFAC, CPR%N, ID, CPR%FID, CPR%IRR )
-                    !
-                    WHERE( CPR%ROOT < NEARZERO_30 );  CPR%ROOT = NEARZERO_30   !THIS IS TO PREVENT ANY DIV/0 ERRORS
-                    END WHERE
-                    
-     CASE('MULTI_FRAC')
-                    !
-                    IF(.NOT. CPI%HAS_IXJ) THEN !ASSUMES THAT PARSE_CROP_ROW_COL SET UP FRACTIONS ALREADY
-                        CALL ALLOC(CPR%FRAC, CPR%N)
-                        CALL CROP_INPUT_ARRAY_TO_PROP(CPR%N,   CPR%RC, CPR%FRAC, CPI%ARRAY(:,LD:))
-                    END IF
-                    !
-                    CALL CROP_INPUT_APPLY_SFAC( CPR%FRAC, CPI%SFAC, CPR%N, ID, CPR%FID, CPR%IRR )
-     CASE('SINGLE_FRAC')
-                    CALL ALLOC(CPR%FRAC, CPR%N)
-                    !
-                    IF(CPI%LISTLOAD) THEN
-                                         CPR%FRAC = CPI%LIST(ID)
-                    ELSEIF(CPI%HAS_IXJ) THEN
-                        CALL CROP_INPUT_IXJ_STRUCTURE_TO_PROP(ID, CPR%N, CPR%RC, CPR%FRAC, CPI%IXJ%DIM(1), CPI%IXJ%N, CPI%IXJ%SIZ, CPI%IXJ%DAT)
-                    ELSE
-                        CALL CROP_INPUT_ARRAY_TO_PROP(CPR%N,   CPR%RC, CPR%FRAC, CPI%ARRAY(:,LD:))
-                    END IF
-                    !
-                    CALL CROP_INPUT_APPLY_SFAC( CPR%FRAC, CPI%SFAC, CPR%N, ID, CPR%FID, CPR%IRR )
-     CASE('Kc'    )
-                    CALL ALLOC(CPR%Kc, CPR%N);  CALL ALLOC(CPR%CU, CPR%N)
-                    !
-                    IF(CPI%LISTLOAD) THEN
-                                         CPR%Kc = CPI%LIST(ID)
-                    ELSEIF(CPI%HAS_IXJ) THEN
-                        CALL CROP_INPUT_IXJ_STRUCTURE_TO_PROP(ID, CPR%N, CPR%RC, CPR%Kc, CPI%IXJ%DIM(1), CPI%IXJ%N, CPI%IXJ%SIZ, CPI%IXJ%DAT)
-                    ELSE
-                        CALL CROP_INPUT_ARRAY_TO_PROP(CPR%N,   CPR%RC, CPR%Kc, CPI%ARRAY(:,LD:))
-                    END IF
-                    !
-                    CALL CROP_INPUT_APPLY_SFAC( CPR%Kc, CPI%SFAC, CPR%N, ID, CPR%FID, CPR%IRR )
-     CASE('CF'    )
-                    CALL ALLOC(CPR%CF, CPR%N);  CALL ALLOC(CPR%CU, CPR%N)
-                    !
-                    IF(CPI%LISTLOAD) THEN
-                                         CPR%CF = CPI%LIST(ID)
-                    ELSEIF(CPI%HAS_IXJ) THEN
-                        CALL CROP_INPUT_IXJ_STRUCTURE_TO_PROP(ID, CPR%N, CPR%RC, CPR%CF, CPI%IXJ%DIM(1), CPI%IXJ%N, CPI%IXJ%SIZ, CPI%IXJ%DAT)
-                    ELSE
-                        CALL CROP_INPUT_ARRAY_TO_PROP(CPR%N,   CPR%RC, CPR%CF, CPI%ARRAY(:,LD:))
-                    END IF 
-                    !
-                    CALL CROP_INPUT_APPLY_SFAC(CPR%CF, CPI%SFAC, CPR%N, ID, CPR%FID, CPR%IRR )
-     CASE('FTR' )
-                    CALL ALLOC(CPR%FTR, CPR%N)
-                    IF(CPI%LISTLOAD) THEN
-                                         CPR%FTR = CPI%LIST(ID)
-                    ELSEIF(CPI%HAS_IXJ) THEN
-                        CALL CROP_INPUT_IXJ_STRUCTURE_TO_PROP(ID, CPR%N, CPR%RC, CPR%FTR, CPI%IXJ%DIM(1), CPI%IXJ%N, CPI%IXJ%SIZ, CPI%IXJ%DAT)
-                    ELSE
-                        CALL CROP_INPUT_ARRAY_TO_PROP(CPR%N,   CPR%RC, CPR%FTR, CPI%ARRAY(:,LD:))
-                    END IF
-                    !
-                    CALL CROP_INPUT_APPLY_SFAC(CPR%FTR, CPI%SFAC, CPR%N, ID, CPR%FID, CPR%IRR )
-     !!!CASE('FEI'   )
-     !!!               CALL ALLOC(CPR%FEI, CPR%N)
-     !!!               IF(CPI%LISTLOAD) THEN
-     !!!                                    CPR%FEI = CPI%LIST(ID)
-     !!!               ELSEIF(CPI%HAS_IXJ) THEN
-     !!!                   CALL CROP_INPUT_IXJ_STRUCTURE_TO_PROP(ID, CPR%N, CPR%RC, CPR%FEI, CPI%IXJ%DIM(1), CPI%IXJ%N, CPI%IXJ%SIZ, CPI%IXJ%DAT)
-     !!!               ELSE
-     !!!                   CALL CROP_INPUT_ARRAY_TO_PROP(CPR%N,   CPR%RC, CPR%FEI, CPI%ARRAY(:,LD:))
-     !!!               END IF
-     !!!               !
-     !!!               CALL CROP_INPUT_APPLY_SFAC(CPR%FEI, CPI%SFAC, CPR%N, ID, CPR%FID, CPR%IRR )
-     CASE('FEI_BYCROP')
-                    CALL ALLOC(CPR%FEI, CPR%N)
-                    IF(CPI%LISTLOAD) THEN
-                                         CPR%FEI = CPI%LIST(ID)
-                    ELSEIF(CPI%HAS_IXJ) THEN
-                        CALL CROP_INPUT_IXJ_STRUCTURE_TO_PROP(ID, CPR%N, CPR%RC, CPR%FEI, CPI%IXJ%DIM(1), CPI%IXJ%N, CPI%IXJ%SIZ, CPI%IXJ%DAT)
-                    ELSE
-                        CALL CROP_INPUT_ARRAY_TO_PROP(CPR%N,   CPR%RC, CPR%FEI, CPI%ARRAY(:,LD:))
-                    END IF
-                    !FEI_BYCROP FEI_BYIRR
-                    CALL CROP_INPUT_APPLY_SFAC(CPR%FEI, CPI%SFAC, CPR%N, ID, CPR%FID, CPR%IRR )
-     CASE('FEI_BYIRR')
-                    CALL ALLOC(CPR%FEI, CPR%N)
-                    IF(CPI%LISTLOAD) THEN
-                                    DO CONCURRENT(K=ONE:CPR%N)
-                                                     IF(CPR%IRR(K) > Z) THEN
-                                                         CPR%FEI(K) = CPI%LIST(CPR%IRR(K))
-                                                     ELSE
-                                                         CPR%FEI(K) = DZ
-                                                     END IF
-                                    END DO
-                    ELSEIF(CPI%HAS_IXJ) THEN
-                        CALL CROP_INPUT_IXJ_STRUCTURE_TO_PROP(ID, CPR%N, CPR%RC, CPR%FEI, CPI%IXJ%DIM(1), CPI%IXJ%N, CPI%IXJ%SIZ, CPI%IXJ%DAT)
-                    ELSE
-                        CALL CROP_INPUT_ARRAY_TO_PROP(CPR%N,   CPR%RC, CPR%FEI, CPI%ARRAY(:,LD:))
-                    END IF
-                    ! 
-                    CALL CROP_INPUT_APPLY_SFAC(CPR%FEI, CPI%SFAC, CPR%N, ID, CPR%FID, CPR%IRR )
-     CASE('FIESWP')
-                    CALL ALLOC(CPR%FIESWP, CPR%N)
-                    IF(CPI%LISTLOAD) THEN
-                                         CPR%FIESWP = CPI%LIST(ID)
-                    ELSEIF(CPI%HAS_IXJ) THEN
-                        CALL CROP_INPUT_IXJ_STRUCTURE_TO_PROP(ID, CPR%N, CPR%RC, CPR%FIESWP, CPI%IXJ%DIM(1), CPI%IXJ%N, CPI%IXJ%SIZ, CPI%IXJ%DAT)
-                    ELSE
-                        CALL CROP_INPUT_ARRAY_TO_PROP(CPR%N,   CPR%RC, CPR%FIESWP, CPI%ARRAY(:,LD:))
-                    END IF
-                    !
-                    CALL CROP_INPUT_APPLY_SFAC( CPR%FIESWP, CPI%SFAC, CPR%N, ID, CPR%FID, CPR%IRR )
-     CASE('FIESWI_BYCROP')
-                    CALL ALLOC(CPR%FIESWI, CPR%N)
-                    IF(CPI%LISTLOAD) THEN
-                                         CPR%FIESWI = CPI%LIST(ID)
-                    ELSEIF(CPI%HAS_IXJ) THEN
-                        CALL CROP_INPUT_IXJ_STRUCTURE_TO_PROP(ID, CPR%N, CPR%RC, CPR%FIESWI, CPI%IXJ%DIM(1), CPI%IXJ%N, CPI%IXJ%SIZ, CPI%IXJ%DAT)
-                    ELSE
-                        CALL CROP_INPUT_ARRAY_TO_PROP(CPR%N,   CPR%RC, CPR%FIESWI, CPI%ARRAY(:,LD:))
-                    END IF
-                    !FIESWI_BYCROP FIESWI_BYIRR
-                    CALL CROP_INPUT_APPLY_SFAC(CPR%FIESWI, CPI%SFAC, CPR%N, ID, CPR%FID, CPR%IRR )
-     CASE('FIESWI_BYIRR')
-                    CALL ALLOC(CPR%FIESWI, CPR%N)
-                    IF(CPI%LISTLOAD) THEN
-                                    DO CONCURRENT(K=ONE:CPR%N)
-                                                     IF(CPR%IRR(K) > Z) THEN
-                                                         CPR%FIESWI(K) = CPI%LIST(CPR%IRR(K))
-                                                     ELSE
-                                                         CPR%FIESWI(K) = DZ
-                                                     END IF
-                                    END DO
-                    ELSEIF(CPI%HAS_IXJ) THEN
-                        CALL CROP_INPUT_IXJ_STRUCTURE_TO_PROP(ID, CPR%N, CPR%RC, CPR%FIESWI, CPI%IXJ%DIM(1), CPI%IXJ%N, CPI%IXJ%SIZ, CPI%IXJ%DAT)
-                    ELSE
-                        CALL CROP_INPUT_ARRAY_TO_PROP(CPR%N,   CPR%RC, CPR%FIESWI, CPI%ARRAY(:,LD:))
-                    END IF
-                    ! 
-                    CALL CROP_INPUT_APPLY_SFAC(CPR%FIESWI, CPI%SFAC, CPR%N, ID, CPR%FID, CPR%IRR )
-     !CASE('PCF')
-     !               CALL ALLOC(CPR%CON_PRECIP_FRAC, CPR%N)
-     !               IF(CPI%LISTLOAD) THEN
-     !                                    CPR%CON_PRECIP_FRAC = CPI%LIST(ID)
-     !               ELSEIF(CPI%HAS_IXJ) THEN
-     !                   CALL CROP_INPUT_IXJ_STRUCTURE_TO_PROP(ID, CPR%N, CPR%RC, CPR%CON_PRECIP_FRAC, CPI%IXJ%DIM(1), CPI%IXJ%N, CPI%IXJ%SIZ, CPI%IXJ%DAT)
-     !               ELSE
-     !                   CALL CROP_INPUT_ARRAY_TO_PROP(CPR%N,   CPR%RC, CPR%CON_PRECIP_FRAC, CPI%ARRAY(:,LD:))
-     !               END IF
-     !               !
-     !               CALL CROP_INPUT_APPLY_SFAC(CPR%CON_PRECIP_FRAC, CPI%SFAC, CPR%N, ID, CPR%FID, CPR%IRR )
-     CASE('PSI'   )
-                    IF(.NOT. ALLOCATED(CPR%PSI)) ALLOCATE(CPR%PSI(4))
-                    CPR%PSI = CPI%ARRAY(:,ID)
-                    CALL CROP_INPUT_APPLY_SFAC(CPR%PSI, CPI%SFAC, 4, ID )
-     CASE('POND')
-                    CALL ALLOC(CPR%POND, CPR%N)
-                    CPR%POND = CPI%LIST(ID)
-                    CALL CROP_INPUT_APPLY_SFAC(CPR%POND, CPI%SFAC, CPR%N, ID, CPR%FID, CPR%IRR )
-     CASE('ADMD')
-                    CALL ALLOC(CPR%ADMD, CPR%N)
-                    IF(CPI%LISTARRAY) THEN
-                                         DO CONCURRENT(K=ONE:CPR%N)
-                                              CPR%ADMD(K) = CPI%ARRAY(CPR%FID(K), ID)
-                                         END DO
-                    ELSEIF(CPI%HAS_IXJ) THEN
-                        CALL CROP_INPUT_IXJ_STRUCTURE_TO_PROP(ID, CPR%N, CPR%RC, CPR%ADMD, CPI%IXJ%DIM(1), CPI%IXJ%N, CPI%IXJ%SIZ, CPI%IXJ%DAT)
-                    ELSE
-                        CALL CROP_INPUT_ARRAY_TO_PROP(CPR%N,   CPR%RC, CPR%ADMD, CPI%ARRAY(:,LD:))
-                    END IF
-                    !
-                    CALL CROP_INPUT_APPLY_SFAC(CPR%ADMD, CPI%SFAC, CPR%N, ID, CPR%FID, CPR%IRR )
-                    !
-     END SELECT
-  END IF
-  !
+    CLASS(CROP_PROP),       INTENT(INOUT):: CPR
+    TYPE(LIST_ARRAY_INPUT), INTENT(IN   ):: CPI
+    INTEGER:: K, ID, LD  ! LD => LEADING DIMENSION
+    !
+    IF (CPR%N > Z .AND. CPI%INUSE) THEN
+       !
+       ID = CPR%ID
+       LD = CPR%LD
+       !
+       SELECT CASE(CPI%TYP)
+       CASE('ROOT'  )
+                      CALL ALLOC(CPR%ROOT, CPR%N)  !IF ROOT ALREADY ALLOCATED AND OVERDIMENSIONED, DONT BOTHER REALLOCATING
+                      IF(CPI%LISTLOAD) THEN
+                                           CPR%ROOT = CPI%LIST(ID)
+                      ELSEIF(CPI%HAS_IXJ) THEN
+                          CALL CROP_INPUT_IXJ_STRUCTURE_TO_PROP(ID, CPR%N, CPR%RC, CPR%ROOT, CPI%IXJ%DIM(1), CPI%IXJ%N, CPI%IXJ%SIZ, CPI%IXJ%DAT)
+                      ELSE
+                          CALL CROP_INPUT_ARRAY_TO_PROP(CPR%N,   CPR%RC, CPR%ROOT, CPI%ARRAY(:,LD:))
+                      END IF
+                      !    CROP_INPUT_APPLY_SFAC(SFAC, PROP, N, CID, FID, [IRR])
+                      CALL CROP_INPUT_APPLY_SFAC( CPR%ROOT, CPI%SFAC, CPR%N, ID, CPR%FID, CPR%IRR )
+                      !
+                      WHERE( CPR%ROOT < NEARZERO_30 );  CPR%ROOT = NEARZERO_30   !THIS IS TO PREVENT ANY DIV/0 ERRORS
+                      END WHERE
+                      
+       CASE('MULTI_FRAC')
+                      !
+                      IF(.NOT. CPI%HAS_IXJ) THEN !ASSUMES THAT PARSE_CROP_ROW_COL SET UP FRACTIONS ALREADY
+                          CALL ALLOC(CPR%FRAC, CPR%N)
+                          CALL CROP_INPUT_ARRAY_TO_PROP(CPR%N,   CPR%RC, CPR%FRAC, CPI%ARRAY(:,LD:))
+                      END IF
+                      !
+                      CALL CROP_INPUT_APPLY_SFAC( CPR%FRAC, CPI%SFAC, CPR%N, ID, CPR%FID, CPR%IRR )
+       CASE('SINGLE_FRAC')
+                      CALL ALLOC(CPR%FRAC, CPR%N)
+                      !
+                      IF(CPI%LISTLOAD) THEN
+                                           CPR%FRAC = CPI%LIST(ID)
+                      ELSEIF(CPI%HAS_IXJ) THEN
+                          CALL CROP_INPUT_IXJ_STRUCTURE_TO_PROP(ID, CPR%N, CPR%RC, CPR%FRAC, CPI%IXJ%DIM(1), CPI%IXJ%N, CPI%IXJ%SIZ, CPI%IXJ%DAT)
+                      ELSE
+                          CALL CROP_INPUT_ARRAY_TO_PROP(CPR%N,   CPR%RC, CPR%FRAC, CPI%ARRAY(:,LD:))
+                      END IF
+                      !
+                      CALL CROP_INPUT_APPLY_SFAC( CPR%FRAC, CPI%SFAC, CPR%N, ID, CPR%FID, CPR%IRR )
+       CASE('Kc'    )
+                      CALL ALLOC(CPR%Kc, CPR%N);  CALL ALLOC(CPR%CU, CPR%N)
+                      !
+                      IF(CPI%LISTLOAD) THEN
+                                           CPR%Kc = CPI%LIST(ID)
+                      ELSEIF(CPI%HAS_IXJ) THEN
+                          CALL CROP_INPUT_IXJ_STRUCTURE_TO_PROP(ID, CPR%N, CPR%RC, CPR%Kc, CPI%IXJ%DIM(1), CPI%IXJ%N, CPI%IXJ%SIZ, CPI%IXJ%DAT)
+                      ELSE
+                          CALL CROP_INPUT_ARRAY_TO_PROP(CPR%N,   CPR%RC, CPR%Kc, CPI%ARRAY(:,LD:))
+                      END IF
+                      !
+                      CALL CROP_INPUT_APPLY_SFAC( CPR%Kc, CPI%SFAC, CPR%N, ID, CPR%FID, CPR%IRR )
+       CASE('CF'    )
+                      CALL ALLOC(CPR%CF, CPR%N);  CALL ALLOC(CPR%CU, CPR%N)
+                      !
+                      IF(CPI%LISTLOAD) THEN
+                                           CPR%CF = CPI%LIST(ID)
+                      ELSEIF(CPI%HAS_IXJ) THEN
+                          CALL CROP_INPUT_IXJ_STRUCTURE_TO_PROP(ID, CPR%N, CPR%RC, CPR%CF, CPI%IXJ%DIM(1), CPI%IXJ%N, CPI%IXJ%SIZ, CPI%IXJ%DAT)
+                      ELSE
+                          CALL CROP_INPUT_ARRAY_TO_PROP(CPR%N,   CPR%RC, CPR%CF, CPI%ARRAY(:,LD:))
+                      END IF 
+                      !
+                      CALL CROP_INPUT_APPLY_SFAC(CPR%CF, CPI%SFAC, CPR%N, ID, CPR%FID, CPR%IRR )
+       CASE('FTR' )
+                      CALL ALLOC(CPR%FTR, CPR%N)
+                      IF(CPI%LISTLOAD) THEN
+                                           CPR%FTR = CPI%LIST(ID)
+                      ELSEIF(CPI%HAS_IXJ) THEN
+                          CALL CROP_INPUT_IXJ_STRUCTURE_TO_PROP(ID, CPR%N, CPR%RC, CPR%FTR, CPI%IXJ%DIM(1), CPI%IXJ%N, CPI%IXJ%SIZ, CPI%IXJ%DAT)
+                      ELSE
+                          CALL CROP_INPUT_ARRAY_TO_PROP(CPR%N,   CPR%RC, CPR%FTR, CPI%ARRAY(:,LD:))
+                      END IF
+                      !
+                      CALL CROP_INPUT_APPLY_SFAC(CPR%FTR, CPI%SFAC, CPR%N, ID, CPR%FID, CPR%IRR )
+       !!!CASE('FEI'   )
+       !!!               CALL ALLOC(CPR%FEI, CPR%N)
+       !!!               IF(CPI%LISTLOAD) THEN
+       !!!                                    CPR%FEI = CPI%LIST(ID)
+       !!!               ELSEIF(CPI%HAS_IXJ) THEN
+       !!!                   CALL CROP_INPUT_IXJ_STRUCTURE_TO_PROP(ID, CPR%N, CPR%RC, CPR%FEI, CPI%IXJ%DIM(1), CPI%IXJ%N, CPI%IXJ%SIZ, CPI%IXJ%DAT)
+       !!!               ELSE
+       !!!                   CALL CROP_INPUT_ARRAY_TO_PROP(CPR%N,   CPR%RC, CPR%FEI, CPI%ARRAY(:,LD:))
+       !!!               END IF
+       !!!               !
+       !!!               CALL CROP_INPUT_APPLY_SFAC(CPR%FEI, CPI%SFAC, CPR%N, ID, CPR%FID, CPR%IRR )
+       CASE('FEI_BYCROP')
+                      CALL ALLOC(CPR%FEI, CPR%N)
+                      IF(CPI%LISTLOAD) THEN
+                                           CPR%FEI = CPI%LIST(ID)
+                      ELSEIF(CPI%HAS_IXJ) THEN
+                          CALL CROP_INPUT_IXJ_STRUCTURE_TO_PROP(ID, CPR%N, CPR%RC, CPR%FEI, CPI%IXJ%DIM(1), CPI%IXJ%N, CPI%IXJ%SIZ, CPI%IXJ%DAT)
+                      ELSE
+                          CALL CROP_INPUT_ARRAY_TO_PROP(CPR%N,   CPR%RC, CPR%FEI, CPI%ARRAY(:,LD:))
+                      END IF
+                      !FEI_BYCROP FEI_BYIRR
+                      CALL CROP_INPUT_APPLY_SFAC(CPR%FEI, CPI%SFAC, CPR%N, ID, CPR%FID, CPR%IRR )
+       CASE('FEI_BYIRR')
+                      CALL ALLOC(CPR%FEI, CPR%N)
+                      IF(CPI%LISTLOAD) THEN
+                                      DO CONCURRENT(K=ONE:CPR%N)
+                                                       IF(CPR%IRR(K) > Z) THEN
+                                                           CPR%FEI(K) = CPI%LIST(CPR%IRR(K))
+                                                       ELSE
+                                                           CPR%FEI(K) = DZ
+                                                       END IF
+                                      END DO
+                      ELSEIF(CPI%HAS_IXJ) THEN
+                          CALL CROP_INPUT_IXJ_STRUCTURE_TO_PROP(ID, CPR%N, CPR%RC, CPR%FEI, CPI%IXJ%DIM(1), CPI%IXJ%N, CPI%IXJ%SIZ, CPI%IXJ%DAT)
+                      ELSE
+                          CALL CROP_INPUT_ARRAY_TO_PROP(CPR%N,   CPR%RC, CPR%FEI, CPI%ARRAY(:,LD:))
+                      END IF
+                      ! 
+                      CALL CROP_INPUT_APPLY_SFAC(CPR%FEI, CPI%SFAC, CPR%N, ID, CPR%FID, CPR%IRR )
+       CASE('FIESWP')
+                      CALL ALLOC(CPR%FIESWP, CPR%N)
+                      IF(CPI%LISTLOAD) THEN
+                                           CPR%FIESWP = CPI%LIST(ID)
+                      ELSEIF(CPI%HAS_IXJ) THEN
+                          CALL CROP_INPUT_IXJ_STRUCTURE_TO_PROP(ID, CPR%N, CPR%RC, CPR%FIESWP, CPI%IXJ%DIM(1), CPI%IXJ%N, CPI%IXJ%SIZ, CPI%IXJ%DAT)
+                      ELSE
+                          CALL CROP_INPUT_ARRAY_TO_PROP(CPR%N,   CPR%RC, CPR%FIESWP, CPI%ARRAY(:,LD:))
+                      END IF
+                      !
+                      CALL CROP_INPUT_APPLY_SFAC( CPR%FIESWP, CPI%SFAC, CPR%N, ID, CPR%FID, CPR%IRR )
+       CASE('FIESWI_BYCROP')
+                      CALL ALLOC(CPR%FIESWI, CPR%N)
+                      IF(CPI%LISTLOAD) THEN
+                                           CPR%FIESWI = CPI%LIST(ID)
+                      ELSEIF(CPI%HAS_IXJ) THEN
+                          CALL CROP_INPUT_IXJ_STRUCTURE_TO_PROP(ID, CPR%N, CPR%RC, CPR%FIESWI, CPI%IXJ%DIM(1), CPI%IXJ%N, CPI%IXJ%SIZ, CPI%IXJ%DAT)
+                      ELSE
+                          CALL CROP_INPUT_ARRAY_TO_PROP(CPR%N,   CPR%RC, CPR%FIESWI, CPI%ARRAY(:,LD:))
+                      END IF
+                      !FIESWI_BYCROP FIESWI_BYIRR
+                      CALL CROP_INPUT_APPLY_SFAC(CPR%FIESWI, CPI%SFAC, CPR%N, ID, CPR%FID, CPR%IRR )
+       CASE('FIESWI_BYIRR')
+                      CALL ALLOC(CPR%FIESWI, CPR%N)
+                      IF(CPI%LISTLOAD) THEN
+                                      DO CONCURRENT(K=ONE:CPR%N)
+                                                       IF(CPR%IRR(K) > Z) THEN
+                                                           CPR%FIESWI(K) = CPI%LIST(CPR%IRR(K))
+                                                       ELSE
+                                                           CPR%FIESWI(K) = DZ
+                                                       END IF
+                                      END DO
+                      ELSEIF(CPI%HAS_IXJ) THEN
+                          CALL CROP_INPUT_IXJ_STRUCTURE_TO_PROP(ID, CPR%N, CPR%RC, CPR%FIESWI, CPI%IXJ%DIM(1), CPI%IXJ%N, CPI%IXJ%SIZ, CPI%IXJ%DAT)
+                      ELSE
+                          CALL CROP_INPUT_ARRAY_TO_PROP(CPR%N,   CPR%RC, CPR%FIESWI, CPI%ARRAY(:,LD:))
+                      END IF
+                      ! 
+                      CALL CROP_INPUT_APPLY_SFAC(CPR%FIESWI, CPI%SFAC, CPR%N, ID, CPR%FID, CPR%IRR )
+       !CASE('PCF')
+       !               CALL ALLOC(CPR%CON_PRECIP_FRAC, CPR%N)
+       !               IF(CPI%LISTLOAD) THEN
+       !                                    CPR%CON_PRECIP_FRAC = CPI%LIST(ID)
+       !               ELSEIF(CPI%HAS_IXJ) THEN
+       !                   CALL CROP_INPUT_IXJ_STRUCTURE_TO_PROP(ID, CPR%N, CPR%RC, CPR%CON_PRECIP_FRAC, CPI%IXJ%DIM(1), CPI%IXJ%N, CPI%IXJ%SIZ, CPI%IXJ%DAT)
+       !               ELSE
+       !                   CALL CROP_INPUT_ARRAY_TO_PROP(CPR%N,   CPR%RC, CPR%CON_PRECIP_FRAC, CPI%ARRAY(:,LD:))
+       !               END IF
+       !               !
+       !               CALL CROP_INPUT_APPLY_SFAC(CPR%CON_PRECIP_FRAC, CPI%SFAC, CPR%N, ID, CPR%FID, CPR%IRR )
+       CASE('PSI'   )
+                      IF(.NOT. ALLOCATED(CPR%PSI)) ALLOCATE(CPR%PSI(4))
+                      CPR%PSI = CPI%ARRAY(:,ID)
+                      CALL CROP_INPUT_APPLY_SFAC(CPR%PSI, CPI%SFAC, 4, ID )
+       CASE('POND')
+                      CALL ALLOC(CPR%POND, CPR%N)
+                      CPR%POND = CPI%LIST(ID)
+                      CALL CROP_INPUT_APPLY_SFAC(CPR%POND, CPI%SFAC, CPR%N, ID, CPR%FID, CPR%IRR )
+       CASE('ADMD')
+                      CALL ALLOC(CPR%ADMD, CPR%N)
+                      IF(CPI%LISTARRAY) THEN
+                                           DO CONCURRENT(K=ONE:CPR%N)
+                                                CPR%ADMD(K) = CPI%ARRAY(CPR%FID(K), ID)
+                                           END DO
+                      ELSEIF(CPI%HAS_IXJ) THEN
+                          CALL CROP_INPUT_IXJ_STRUCTURE_TO_PROP(ID, CPR%N, CPR%RC, CPR%ADMD, CPI%IXJ%DIM(1), CPI%IXJ%N, CPI%IXJ%SIZ, CPI%IXJ%DAT)
+                      ELSE
+                          CALL CROP_INPUT_ARRAY_TO_PROP(CPR%N,   CPR%RC, CPR%ADMD, CPI%ARRAY(:,LD:))
+                      END IF
+                      !
+                      CALL CROP_INPUT_APPLY_SFAC(CPR%ADMD, CPI%SFAC, CPR%N, ID, CPR%FID, CPR%IRR )
+                      !
+       END SELECT
+    END IF
+    !
   END SUBROUTINE
   !
   PURE SUBROUTINE CROP_INPUT_APPLY_SFAC(PROP, SFAC, N, CID, FID, IRR)
@@ -3079,92 +3078,92 @@ MODULE CROP_DATA_FMP_MODULE
   END SUBROUTINE
   !
   PURE ELEMENTAL SUBROUTINE COPY_CROP_INPUT_TO_CROP_PROP_INT(CPR, CPI)
-  CLASS(CROP_PROP),      INTENT(INOUT):: CPR
-  TYPE(LIST_ARRAY_INPUT_INT), INTENT(IN   ):: CPI
-  INTEGER:: ID, LD  ! LD => LEADING DIMENSION
-  !
-  IF (CPR%N > Z .AND. CPI%INUSE) THEN
-     !
-     ID = CPR%ID
-     LD = CPR%LD
-     !
-     SELECT CASE(CPI%TYP)
-     !!!CASE('IRR'    )
-     !!!            CALL ALLOC(CPR%IRR, CPR%N)
-     !!!            IF(CPI%LISTLOAD) THEN
-     !!!                                    CPR%IRR = CPI%LIST(ID)
-     !!!            ELSEIF(CPI%HAS_IXJ) THEN
-     !!!                CONTINUE
-     !!!            ELSE
-     !!!                CALL CROP_INPUT_ARRAY_TO_PROP_INT(CPR%N,   CPR%RC, CPR%IRR, CPI%ARRAY(:,LD:))
-     !!!            END IF
-     CASE('GWRT'   )
-                 CALL ALLOC(CPR%GW_INTER, CPR%N)
-                 IF(CPI%LISTLOAD) THEN
-                                         CPR%GW_INTER = CPI%LIST(ID)
-                 ELSEIF(CPI%HAS_IXJ) THEN
-                     CONTINUE
-                 ELSE
-                     CALL CROP_INPUT_ARRAY_TO_PROP_INT(CPR%N,   CPR%RC, CPR%GW_INTER, CPI%ARRAY(:,LD:))
-                 END IF
-     END SELECT
-  END IF
-  !
+    CLASS(CROP_PROP),      INTENT(INOUT):: CPR
+    TYPE(LIST_ARRAY_INPUT_INT), INTENT(IN   ):: CPI
+    INTEGER:: ID, LD  ! LD => LEADING DIMENSION
+    !
+    IF (CPR%N > Z .AND. CPI%INUSE) THEN
+       !
+       ID = CPR%ID
+       LD = CPR%LD
+       !
+       SELECT CASE(CPI%TYP)
+       !!!CASE('IRR'    )
+       !!!            CALL ALLOC(CPR%IRR, CPR%N)
+       !!!            IF(CPI%LISTLOAD) THEN
+       !!!                                    CPR%IRR = CPI%LIST(ID)
+       !!!            ELSEIF(CPI%HAS_IXJ) THEN
+       !!!                CONTINUE
+       !!!            ELSE
+       !!!                CALL CROP_INPUT_ARRAY_TO_PROP_INT(CPR%N,   CPR%RC, CPR%IRR, CPI%ARRAY(:,LD:))
+       !!!            END IF
+       CASE('GWRT'   )
+                   CALL ALLOC(CPR%GW_INTER, CPR%N)
+                   IF(CPI%LISTLOAD) THEN
+                                           CPR%GW_INTER = CPI%LIST(ID)
+                   ELSEIF(CPI%HAS_IXJ) THEN
+                       CONTINUE
+                   ELSE
+                       CALL CROP_INPUT_ARRAY_TO_PROP_INT(CPR%N,   CPR%RC, CPR%GW_INTER, CPI%ARRAY(:,LD:))
+                   END IF
+       END SELECT
+    END IF
+    !
   END SUBROUTINE
   !
   PURE SUBROUTINE COPY_AND_SETUP_IRRIGATION_INPUT_TO_CROP_PROP(CDAT, NEW_IRR)
-  CLASS(CROP_DATA),   INTENT(INOUT):: CDAT
-  LOGICAL,            INTENT(INOUT):: NEW_IRR 
-  INTEGER:: I,K,IRR,LD  ! LD => LEADING DIMENSION
-  LOGICAL:: NEW_ALLOC
-  !
-  NEW_IRR = FALSE
-  !
-  DO I=ONE, CDAT%NCROP
-   !
-   CALL ALLOC(CDAT%CROP(I)%IRR, CDAT%CROP(I)%N, NEW_ALLOC=NEW_ALLOC)
-   !
-   IF(CDAT%CROP(I)%N > Z ) THEN
+    CLASS(CROP_DATA),   INTENT(INOUT):: CDAT
+    LOGICAL,            INTENT(INOUT):: NEW_IRR 
+    INTEGER:: I,K,IRR,LD  ! LD => LEADING DIMENSION
+    LOGICAL:: NEW_ALLOC
+    !
+    NEW_IRR = FALSE
+    !
+    DO I=ONE, CDAT%NCROP
      !
-     IF( NEW_ALLOC ) NEW_IRR = TRUE
-     !  
-     IF(CDAT%IRR%LISTLOAD) THEN
-         IF(NEW_ALLOC) THEN !NOTE ENTIRE VECTOR SHOULD BE SAME VALUE
-             !
-             CDAT%CROP(I)%IRR = CDAT%IRR%LIST(I)
-             !
-         ELSEIF(CDAT%CROP(I)%IRR(ONE) .NE. CDAT%IRR%LIST(I)) THEN !NOTE ENTIRE VECTOR SHOULD BE SAME VALUE
-             !
-             NEW_IRR = TRUE
-             !
-             CDAT%CROP(I)%IRR = CDAT%IRR%LIST(I)
-         END IF
-     ELSE
-         IF (CDAT%MULTI_CROP_CELLS) THEN
-             LD = CDAT%CROP(I)%LD - ONE
-             !
-             DO  K=ONE, CDAT%CROP(I)%N
-                 !
-                 IRR = CDAT%IRR%ARRAY( CDAT%CROP(I)%RC(TWO,K), LD+CDAT%CROP(I)%RC(ONE,K) )
-                 !
-                 IF(.NOT. NEW_IRR) NEW_IRR = CDAT%CROP(I)%IRR(K) .NE. IRR
-                 !
-                 CDAT%CROP(I)%IRR(K) = IRR
-             END DO
-         ELSE
-             DO  K=ONE, CDAT%CROP(I)%N
-                 !
-                 IRR = CDAT%IRR%ARRAY( CDAT%CROP(I)%RC(TWO,K), CDAT%CROP(I)%RC(ONE,K) )
-                 !
-                 IF(.NOT. NEW_IRR) NEW_IRR = CDAT%CROP(I)%IRR(K) .NE. IRR
-                 !
-                 CDAT%CROP(I)%IRR(K) = IRR
-             END DO
-         END IF
+     CALL ALLOC(CDAT%CROP(I)%IRR, CDAT%CROP(I)%N, NEW_ALLOC=NEW_ALLOC)
+     !
+     IF(CDAT%CROP(I)%N > Z ) THEN
+       !
+       IF( NEW_ALLOC ) NEW_IRR = TRUE
+       !  
+       IF(CDAT%IRR%LISTLOAD) THEN
+           IF(NEW_ALLOC) THEN !NOTE ENTIRE VECTOR SHOULD BE SAME VALUE
+               !
+               CDAT%CROP(I)%IRR = CDAT%IRR%LIST(I)
+               !
+           ELSEIF(CDAT%CROP(I)%IRR(ONE) .NE. CDAT%IRR%LIST(I)) THEN !NOTE ENTIRE VECTOR SHOULD BE SAME VALUE
+               !
+               NEW_IRR = TRUE
+               !
+               CDAT%CROP(I)%IRR = CDAT%IRR%LIST(I)
+           END IF
+       ELSE
+           IF (CDAT%MULTI_CROP_CELLS) THEN
+               LD = CDAT%CROP(I)%LD - ONE
+               !
+               DO  K=ONE, CDAT%CROP(I)%N
+                   !
+                   IRR = CDAT%IRR%ARRAY( CDAT%CROP(I)%RC(TWO,K), LD+CDAT%CROP(I)%RC(ONE,K) )
+                   !
+                   IF(.NOT. NEW_IRR) NEW_IRR = CDAT%CROP(I)%IRR(K) .NE. IRR
+                   !
+                   CDAT%CROP(I)%IRR(K) = IRR
+               END DO
+           ELSE
+               DO  K=ONE, CDAT%CROP(I)%N
+                   !
+                   IRR = CDAT%IRR%ARRAY( CDAT%CROP(I)%RC(TWO,K), CDAT%CROP(I)%RC(ONE,K) )
+                   !
+                   IF(.NOT. NEW_IRR) NEW_IRR = CDAT%CROP(I)%IRR(K) .NE. IRR
+                   !
+                   CDAT%CROP(I)%IRR(K) = IRR
+               END DO
+           END IF
+       END IF
      END IF
-   END IF
-  END DO
-  !
+    END DO
+    !
   END SUBROUTINE
   !
 !!!  PURE SUBROUTINE CROP_INPUT_CAS_TO_PROP_INT(N, ID, RC, PROP, CAS)
@@ -3827,139 +3826,139 @@ MODULE CROP_DATA_FMP_MODULE
 !  END SUBROUTINE
   !
   PURE ELEMENTAL SUBROUTINE CALC_CROP_OPTIMAL_UPTAKE_PRESSURE(CPR, SOIL, MLT, ONLY_K)
-     !
-     CLASS(CROP_PROP),  INTENT(INOUT):: CPR
-     TYPE( SOIL_DATA),  INTENT(IN   ):: SOIL
-     DOUBLE PRECISION,  INTENT(IN   ):: MLT
-     INTEGER, OPTIONAL, INTENT(IN   ):: ONLY_K
-     !
-     DOUBLE PRECISION:: TPOT, PSI0, PSI1, PSI2, PSI3, XDRY, XWET, DRZ, NEXP
-     DOUBLE PRECISION:: PSIWET, PSIDRY, PSI3_CM, PSIWET_CM, PSIDRY_CM
-     INTEGER:: K, KK
-     !
-     IF(CPR%N==Z) RETURN
-     !
-     KK = Z
-     IF(PRESENT(ONLY_K)) KK = ONLY_K
-     !
-     IF( ANY(NOT_NEAR_ZERO(CPR%PSI, NEARZERO_12)) ) THEN
-       !
-       PSI0 = DZ;  PSI1 = DZ;  PSI2 = DZ;  PSI3 = DZ
-       !
-       IF( CPR%PSI(ONE  ) < DZ )  PSI0 = CPR%PSI(ONE  ) * DNEG  !FLIP TO POSITIVE --SAME AS ABSOLUTE VALUE
-       IF( CPR%PSI(TWO  ) < DZ )  PSI1 = CPR%PSI(TWO  ) * DNEG 
-       IF( CPR%PSI(THREE) < DZ )  PSI2 = CPR%PSI(THREE) * DNEG
-       IF( CPR%PSI(FOUR ) < DZ )  PSI3 = CPR%PSI(FOUR ) * DNEG
-       !
-       PSIWET = (PSI0+PSI1)/DOS    ! EVALUATE PRESSURE HEADS BETWEEN WHICH UPTAKE IS CONSIDERED OPTIMAL
-       PSIDRY = (PSI2+PSI3)/DOS
-       !
-       PSI3_CM   = PSI3  *MLT
-       PSIWET_CM = PSIWET*MLT
-       PSIDRY_CM = PSIDRY*MLT
-       !
-       !DO CONCURRENT ( K=ONE:CPR%N, KK==Z .OR. KK==K )
-       DO  K=ONE, CPR%N
-       IF(KK==Z .OR. KK==K ) THEN
-         !
-         ASSOCIATE(GW_INTER=>CPR%GW_INTER(K), UXX=>CPR%UXX(K), MXX=>CPR%MXX(K), GSE=>CPR%GSE(K), SS=>CPR%SS(K), ROOT=>CPR%ROOT(K), AREA=>CPR%AREA(K), R=>CPR%RC(ONE,K), C=>CPR%RC(TWO,K))
-                   !
-                   TPOT = CPR%TGW(K)
-                   !
-                   UXX = GSE   !ONLY CHANGES IF THERE IS GROUNDWATER-ROOT INTERACTION
-                   MXX = SS
-                   !
-                   !   GW_INTER =>
-                   ! 0 = No T/No CU
-                   ! 1 = No GW Interaction/Full CU from Surf/No  Anoxia/Soil Stress Reducation, No  Root-Groundwater Uptake  
-                   ! 2 = No GW Uptake/ HAS Anoxia/Soil Stress Reducation, No  Root-Groundwater Uptake  
-                   ! 3 = No Anoxia/No Soil Stress - But has GW Uptake
-                   ! 4 = No Anoxia - But has Soil Stress and GW Uptake
-                   ! 5 = Full Interaction HAS Anoxia/Soil Stress Reducation, HAS Root-Groundwater Uptake  
-                   !
-                   IF( AREA > DZ .AND. TPOT > DZ .AND. ANY(GW_INTER == [2,4,5]) ) THEN
-                      !
-                      !6B1C---CONVERT FLOWRATE OF ORIGINAL MAXIMUM TRANSPIRATION BACK TO FLUX (REASON: UXX AND MXX BELOW ARE FUNCTIONS OF T-FLUX NOT T-FLOWRATE; WITH:
-                      !        UXX =    Head Elevation of Upper Extinction of Transpiration due to Anoxia
-                      !        MXX =    Head Elevation of Elimination of crop-unproductive Wilting Zone)
-                      !
-                      !TPOT_AREA = MLT*TPOT/CPR%AREA(K)  !NOTE THIS IS A RATE RATHER THAN VOLUMETRIC RATE  --CONVERTED TO CM/T
-                      !
-                      !
-                      DRZ =  SOIL%COEF(C,R)%A*LOG(ROOT*MLT) + SOIL%COEF(C,R)%B*LOG(MLT*TPOT/AREA) + SOIL%COEF(C,R)%C  !TAKE EXP AFTER USED FOR NEXP CALCULATION
-                      NEXP = SOIL%COEF(C,R)%D*DRZ + SOIL%COEF(C,R)%E
-                      DRZ  = EXP(DRZ)
-                      !
-                      IF(DRZ  > PSI3_CM)     DRZ  = PSI3_CM
-                      IF(NEXP < NEARZERO_12) NEXP = NEARZERO_12
-                      !
-                      IF(PSIWET < NEARZERO_12) THEN
-                          XWET = DZ
-                      ELSE
-                          !     
-                          !6B1G---SOLVE ANALYTICAL FUNCTION FOR DEPTHS BETWEEN WHICH UPTAKE IS OPTIMAL:
-                          !       ANALYTICAL FUNCTION: PSI(DEPTH) = FUNCTION (DRZ,NEXP,PSI3,DEPTH)
-                          !                            PSI(DEPTH)   IS SOLVED ITERATIVELY BY BISECTION-METHOD
-                          !                                         FOR DEPTH(PSIWET) AND FOR DEPTH(PSIDRY)
-                          XWET = RTFUNC(DRZ,PSI3_CM,NEXP,PSIWET_CM) / MLT
-                          !
-                          IF(XWET.NE.XWET) THEN
-                              !CALL WARNING_MESSAGE(OUTPUT=LOUT,MSG='FMP CROP: SOLVING ANALYITICAL WATER STRESS RESPONSE FUNCTION, XWET = PSI(DEPTH) = FUNCTION (DRZ,NEXP,PSI3,DEPTH), WITH BISECTION METHOD FAILED TO IDENTIFY INITIAL GUESS (d1 and d2) THAT ARE ON BOTH SIDES OF THE ROOT. (viz. PSI(d1)*PSI(d2)>0).'//NL// &
-                              !                                          'TO KEEP PROGRAM FROM STOPPING THE SOLUTION THE HEAD ELEVATION OF UPPER EXTINCTION OF TRANSPIRATION DUE TO ANOXIA IS ASSUMED TO BE THE GROUND SURFACE.'//NL// &
-                              !                                          'THIS PROBLEM OCCURED FOR CROP '//NUM2STR(I)//NL//' LOCATED IN ROW, COL: '//NUM2STR(R)//', '//NUM2STR(C), INLINE=TRUE)
-                              XWET = DZ
-                          ELSEIF(XWET < DZ)  THEN
-                              XWET = DZ
-                          END IF
-                          !
-                      ENDIF
-                      !
-                      IF    (XWET < NEARZERO_12 ) THEN
-                                                 UXX = GSE
-                      ELSEIF(XWET > ROOT ) THEN
-                                                 UXX = SS
-                      ELSEIF(XWET > PSIWET) THEN
-                                                 UXX = GSE - PSIWET
-                      ELSE
-                                                 UXX = GSE - XWET
-                      END IF
-                      !
-                      !
-                      XDRY = RTFUNC(DRZ,PSI3_CM,NEXP,PSIDRY_CM) / MLT
-                      !
-                      !
-                      IF(XDRY.NE.XDRY) THEN
-                          !WRITE(CDAT%LOUT,'(/A/,A/,6A)') 'FMP CROP WARNING. SOLVING ANALYITICAL WATER STRESS RESPONSE FUNCTION, XDRY = PSI(DEPTH) = FUNCTION (DRZ,NEXP,PSI3,DEPTH), WITH BISECTION METHOD FAILED TO IDENTIFY INITIAL GUESS (d1 and d2) THAT ARE ON BOTH SIDES OF THE ROOT. (viz. PSI(d1)*PSI(d2)>0).', &
-                          !                               'TO KEEP PROGRAM FROM STOPPING THE SOLUTION THE HEAD ELEVATION OF ELIMINATION OF CROP-UNPRODUCTIVE WILTING ZONE IS ASSUMED TO BE THE AT THE BOTTOM OF THE ROOT ZONE.', &
-                          !                               'THIS PROBLEM OCCURED FOR CROP ',NUM2STR(I),' LOCATED IN ROW, COL: ', NUM2STR(R), ', ', NUM2STR(C)
-                          !CALL WARNING_MESSAGE(OUTPUT=CDAT%LOUT,MSG='FMP CROP: SOLVING ANALYITICAL WATER STRESS RESPONSE FUNCTION, XDRY = PSI(DEPTH) = FUNCTION (DRZ,NEXP,PSI3,DEPTH), WITH BISECTION METHOD FAILED TO IDENTIFY INITIAL GUESS (d1 and d2) THAT ARE ON BOTH SIDES OF THE ROOT. (viz. PSI(d1)*PSI(d2)>0).'//NL// &
-                          !                                  'TO KEEP PROGRAM FROM STOPPING THE SOLUTION THE HEAD ELEVATION OF ELIMINATION OF CROP-UNPRODUCTIVE WILTING ZONE IS ASSUMED TO BE THE AT THE BOTTOM OF THE ROOT ZONE.'//NL// &
-                          !                                  'THIS PROBLEM OCCURED FOR CROP '//NUM2STR(I)//NL//' LOCATED IN ROW, COL: '//NUM2STR(R)//', '//NUM2STR(C), INLINE=TRUE)
-                          XDRY = ROOT
-                      END IF
-                      !
-                      IF(XDRY >= ROOT) THEN
-                          MXX = SS
-                      ELSE
-                          MXX = GSE - XDRY      
-                      END IF
-                      !
-                      IF(MXX > UXX) MXX = UXX
-                      !
-                   END IF
-         END ASSOCIATE
-       END IF
-       END DO
-       !------------------------------------------------------------------------------------------------------------------
-     ELSEIF(KK>Z) THEN
-           CPR%UXX(KK) = CPR%GSE(KK)
-           CPR%MXX(KK) = CPR%SS( KK)
-          !---------------------------------------------------------------------------------------------------------------
-     ELSE
-           CPR%UXX = CPR%GSE
-           CPR%MXX = CPR%SS
-     END IF
-     !
+    !
+    CLASS(CROP_PROP),  INTENT(INOUT):: CPR
+    TYPE( SOIL_DATA),  INTENT(IN   ):: SOIL
+    DOUBLE PRECISION,  INTENT(IN   ):: MLT
+    INTEGER, OPTIONAL, INTENT(IN   ):: ONLY_K
+    !
+    DOUBLE PRECISION:: TPOT, PSI0, PSI1, PSI2, PSI3, XDRY, XWET, DRZ, NEXP
+    DOUBLE PRECISION:: PSIWET, PSIDRY, PSI3_CM, PSIWET_CM, PSIDRY_CM
+    INTEGER:: K, KK
+    !
+    IF(CPR%N==Z) RETURN
+    !
+    KK = Z
+    IF(PRESENT(ONLY_K)) KK = ONLY_K
+    !
+    IF( ANY(NOT_NEAR_ZERO(CPR%PSI, NEARZERO_12)) ) THEN
+      !
+      PSI0 = DZ;  PSI1 = DZ;  PSI2 = DZ;  PSI3 = DZ
+      !
+      IF( CPR%PSI(ONE  ) < DZ )  PSI0 = CPR%PSI(ONE  ) * DNEG  !FLIP TO POSITIVE --SAME AS ABSOLUTE VALUE
+      IF( CPR%PSI(TWO  ) < DZ )  PSI1 = CPR%PSI(TWO  ) * DNEG 
+      IF( CPR%PSI(THREE) < DZ )  PSI2 = CPR%PSI(THREE) * DNEG
+      IF( CPR%PSI(FOUR ) < DZ )  PSI3 = CPR%PSI(FOUR ) * DNEG
+      !
+      PSIWET = (PSI0+PSI1)/DOS    ! EVALUATE PRESSURE HEADS BETWEEN WHICH UPTAKE IS CONSIDERED OPTIMAL
+      PSIDRY = (PSI2+PSI3)/DOS
+      !
+      PSI3_CM   = PSI3  *MLT
+      PSIWET_CM = PSIWET*MLT
+      PSIDRY_CM = PSIDRY*MLT
+      !
+      !DO CONCURRENT ( K=ONE:CPR%N, KK==Z .OR. KK==K )
+      DO  K=ONE, CPR%N
+      IF(KK==Z .OR. KK==K ) THEN
+        !
+        ASSOCIATE(GW_INTER=>CPR%GW_INTER(K), UXX=>CPR%UXX(K), MXX=>CPR%MXX(K), GSE=>CPR%GSE(K), SS=>CPR%SS(K), ROOT=>CPR%ROOT(K), AREA=>CPR%AREA(K), R=>CPR%RC(ONE,K), C=>CPR%RC(TWO,K))
+                  !
+                  TPOT = CPR%TGW(K)
+                  !
+                  UXX = GSE   !ONLY CHANGES IF THERE IS GROUNDWATER-ROOT INTERACTION
+                  MXX = SS
+                  !
+                  !   GW_INTER =>
+                  ! 0 = No T/No CU
+                  ! 1 = No GW Interaction/Full CU from Surf/No  Anoxia/Soil Stress Reducation, No  Root-Groundwater Uptake  
+                  ! 2 = No GW Uptake/ HAS Anoxia/Soil Stress Reducation, No  Root-Groundwater Uptake  
+                  ! 3 = No Anoxia/No Soil Stress - But has GW Uptake
+                  ! 4 = No Anoxia - But has Soil Stress and GW Uptake
+                  ! 5 = Full Interaction HAS Anoxia/Soil Stress Reducation, HAS Root-Groundwater Uptake  
+                  !
+                  IF( AREA > DZ .AND. TPOT > DZ .AND. ANY(GW_INTER == [2,4,5]) ) THEN
+                     !
+                     !6B1C---CONVERT FLOWRATE OF ORIGINAL MAXIMUM TRANSPIRATION BACK TO FLUX (REASON: UXX AND MXX BELOW ARE FUNCTIONS OF T-FLUX NOT T-FLOWRATE; WITH:
+                     !        UXX =    Head Elevation of Upper Extinction of Transpiration due to Anoxia
+                     !        MXX =    Head Elevation of Elimination of crop-unproductive Wilting Zone)
+                     !
+                     !TPOT_AREA = MLT*TPOT/CPR%AREA(K)  !NOTE THIS IS A RATE RATHER THAN VOLUMETRIC RATE  --CONVERTED TO CM/T
+                     !
+                     !
+                     DRZ =  SOIL%COEF(C,R)%A*LOG(ROOT*MLT) + SOIL%COEF(C,R)%B*LOG(MLT*TPOT/AREA) + SOIL%COEF(C,R)%C  !TAKE EXP AFTER USED FOR NEXP CALCULATION
+                     NEXP = SOIL%COEF(C,R)%D*DRZ + SOIL%COEF(C,R)%E
+                     DRZ  = EXP(DRZ)
+                     !
+                     IF(DRZ  > PSI3_CM)     DRZ  = PSI3_CM
+                     IF(NEXP < NEARZERO_12) NEXP = NEARZERO_12
+                     !
+                     IF(PSIWET < NEARZERO_12) THEN
+                         XWET = DZ
+                     ELSE
+                         !     
+                         !6B1G---SOLVE ANALYTICAL FUNCTION FOR DEPTHS BETWEEN WHICH UPTAKE IS OPTIMAL:
+                         !       ANALYTICAL FUNCTION: PSI(DEPTH) = FUNCTION (DRZ,NEXP,PSI3,DEPTH)
+                         !                            PSI(DEPTH)   IS SOLVED ITERATIVELY BY BISECTION-METHOD
+                         !                                         FOR DEPTH(PSIWET) AND FOR DEPTH(PSIDRY)
+                         XWET = RTFUNC(DRZ,PSI3_CM,NEXP,PSIWET_CM) / MLT
+                         !
+                         IF(XWET.NE.XWET) THEN
+                             !CALL WARNING_MESSAGE(OUTPUT=LOUT,MSG='FMP CROP: SOLVING ANALYITICAL WATER STRESS RESPONSE FUNCTION, XWET = PSI(DEPTH) = FUNCTION (DRZ,NEXP,PSI3,DEPTH), WITH BISECTION METHOD FAILED TO IDENTIFY INITIAL GUESS (d1 and d2) THAT ARE ON BOTH SIDES OF THE ROOT. (viz. PSI(d1)*PSI(d2)>0).'//NL// &
+                             !                                          'TO KEEP PROGRAM FROM STOPPING THE SOLUTION THE HEAD ELEVATION OF UPPER EXTINCTION OF TRANSPIRATION DUE TO ANOXIA IS ASSUMED TO BE THE GROUND SURFACE.'//NL// &
+                             !                                          'THIS PROBLEM OCCURED FOR CROP '//NUM2STR(I)//NL//' LOCATED IN ROW, COL: '//NUM2STR(R)//', '//NUM2STR(C), INLINE=TRUE)
+                             XWET = DZ
+                         ELSEIF(XWET < DZ)  THEN
+                             XWET = DZ
+                         END IF
+                         !
+                     ENDIF
+                     !
+                     IF    (XWET < NEARZERO_12 ) THEN
+                                                UXX = GSE
+                     ELSEIF(XWET > ROOT ) THEN
+                                                UXX = SS
+                     ELSEIF(XWET > PSIWET) THEN
+                                                UXX = GSE - PSIWET
+                     ELSE
+                                                UXX = GSE - XWET
+                     END IF
+                     !
+                     !
+                     XDRY = RTFUNC(DRZ,PSI3_CM,NEXP,PSIDRY_CM) / MLT
+                     !
+                     !
+                     IF(XDRY.NE.XDRY) THEN
+                         !WRITE(CDAT%LOUT,'(/A/,A/,6A)') 'FMP CROP WARNING. SOLVING ANALYITICAL WATER STRESS RESPONSE FUNCTION, XDRY = PSI(DEPTH) = FUNCTION (DRZ,NEXP,PSI3,DEPTH), WITH BISECTION METHOD FAILED TO IDENTIFY INITIAL GUESS (d1 and d2) THAT ARE ON BOTH SIDES OF THE ROOT. (viz. PSI(d1)*PSI(d2)>0).', &
+                         !                               'TO KEEP PROGRAM FROM STOPPING THE SOLUTION THE HEAD ELEVATION OF ELIMINATION OF CROP-UNPRODUCTIVE WILTING ZONE IS ASSUMED TO BE THE AT THE BOTTOM OF THE ROOT ZONE.', &
+                         !                               'THIS PROBLEM OCCURED FOR CROP ',NUM2STR(I),' LOCATED IN ROW, COL: ', NUM2STR(R), ', ', NUM2STR(C)
+                         !CALL WARNING_MESSAGE(OUTPUT=CDAT%LOUT,MSG='FMP CROP: SOLVING ANALYITICAL WATER STRESS RESPONSE FUNCTION, XDRY = PSI(DEPTH) = FUNCTION (DRZ,NEXP,PSI3,DEPTH), WITH BISECTION METHOD FAILED TO IDENTIFY INITIAL GUESS (d1 and d2) THAT ARE ON BOTH SIDES OF THE ROOT. (viz. PSI(d1)*PSI(d2)>0).'//NL// &
+                         !                                  'TO KEEP PROGRAM FROM STOPPING THE SOLUTION THE HEAD ELEVATION OF ELIMINATION OF CROP-UNPRODUCTIVE WILTING ZONE IS ASSUMED TO BE THE AT THE BOTTOM OF THE ROOT ZONE.'//NL// &
+                         !                                  'THIS PROBLEM OCCURED FOR CROP '//NUM2STR(I)//NL//' LOCATED IN ROW, COL: '//NUM2STR(R)//', '//NUM2STR(C), INLINE=TRUE)
+                         XDRY = ROOT
+                     END IF
+                     !
+                     IF(XDRY >= ROOT) THEN
+                         MXX = SS
+                     ELSE
+                         MXX = GSE - XDRY      
+                     END IF
+                     !
+                     IF(MXX > UXX) MXX = UXX
+                     !
+                  END IF
+        END ASSOCIATE
+      END IF
+      END DO
+      !------------------------------------------------------------------------------------------------------------------
+    ELSEIF(KK>Z) THEN
+          CPR%UXX(KK) = CPR%GSE(KK)
+          CPR%MXX(KK) = CPR%SS( KK)
+         !---------------------------------------------------------------------------------------------------------------
+    ELSE
+          CPR%UXX = CPR%GSE
+          CPR%MXX = CPR%SS
+    END IF
+    !
   END SUBROUTINE
   !
   SUBROUTINE CALC_TRANSPIRATION(CDAT, SOIL, RELAX, NO_HD_TERM)
@@ -4708,7 +4707,7 @@ MODULE CROP_DATA_FMP_MODULE
          END DO
     END IF
     !
-    END SUBROUTINE
+  END SUBROUTINE
   !
 !  SUBROUTINE CALC_TRANSPIRATION(CDAT, WBS, SOIL)
 !    !
