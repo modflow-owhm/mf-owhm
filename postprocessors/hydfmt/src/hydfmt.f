@@ -1,4 +1,3 @@
-C     Last change:  ERB  23 Aug 2001    9:26 am
 CC
        PROGRAM HYDFMT
 CC
@@ -58,26 +57,26 @@ cc
        DATA (nu(i),i=1,13)/61,62,63,64,65,66,67,68,69,70,71,72,73/
 C
 C seb MOVED INITIALIZTION OUTSIDE OF DATA TO MAKE EXE SMALLER
-      wellid=' ------------------ '
-      wellidh=' ------------------ '
-      wellidd=' ------------------ '
-      wellidch=' ------------------ '
-      wellidc=' ------------------ '
-      wellids=' ------------------ '
-      wellidfi=' ------------------ '
-      wellidfo=' ------------------ '
-      wellidfa=' ------------------ '
-      wellidhf=' ------------------ '
-      wellidsv=' ------------------ '
-      wellidse=' ------------------ '
-      wellidcv=' ------------------ '
-      wellidce=' ------------------ '
+      wellid   = ' ------------------ '
+      wellidh  = wellid
+      wellidd  = wellid
+      wellidch = wellid
+      wellidc  = wellid
+      wellids  = wellid
+      wellidfi = wellid
+      wellidfo = wellid
+      wellidfa = wellid
+      wellidhf = wellid
+      wellidsv = wellid
+      wellidse = wellid
+      wellidcv = wellid
+      wellidce = wellid
       icnt=0
       blank=''
       itype=13
       LEAPYR='L'
       inunit=60
-      fmt1='                                       '
+      fmt1=blank
       fmtout='(i4,1x,a4,12x,*(1x,a20))'
       fmtoute='(f21.3,*(ES21.10))'
       fmtoutd='(1x,i8,3x,*(ES21.10))'
