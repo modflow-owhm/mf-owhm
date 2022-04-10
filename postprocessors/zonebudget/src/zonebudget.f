@@ -1020,9 +1020,16 @@ C
       IF(NZDIM.EQ.0) THEN
          CALL STOP_ERROR('', 0, IOUT, 'Error - No zones defined')
       END IF
-      WRITE(*,195) (LSTZON(M),M=1,NZDIM)
-195   FORMAT(*(I5))
-      WRITE(IOUT,195) (LSTZON(M),M=1,NZDIM)
+      DO M=1, NZDIM
+         WRITE(*,   '(1x,2A)', ADVANCE='NO') INT2STR(LSTZON(M))
+         WRITE(IOUT,'(1x,2A)', ADVANCE='NO') INT2STR(LSTZON(M))
+         IF(MOD(M, 25) == 0) THEN
+            WRITE(*,*)
+            WRITE(IOUT,*) 
+         END IF
+      END DO
+      WRITE(*,*)
+      WRITE(IOUT,*) 
 C
 C  Change IZONE to the zone index number
       DO 300 K=1,NLAY
