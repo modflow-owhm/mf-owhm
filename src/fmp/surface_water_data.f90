@@ -2474,7 +2474,7 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
       !
       IF(SWF%SRRLOC(F)%N == Z) THEN
              IF(SWF%OUT_SFR_RET%BINARY) THEN
-                                           WRITE(IU) DATE,DYEAR,DELT,KPER,KSTP, F, SWF%SRRLOC(F)%SR(ONE,I), SWF%SRRLOC(F)%SR(TWO,I), SWF%SRRLOC(F)%RUNOFF(I), INFLOW, OTFLOW, SWF%SRRLOC(F)%ISRR(I), NEG
+                                           WRITE(IU) DATE,DYEAR,DELT,KPER,KSTP, F, Z, Z, SWF%SRRLOC(F)%RUNOFF(I), INFLOW, OTFLOW, NEG
              ELSE
                      WRITE(IU, '(5I7, 4A17, 2x,F13.7, 2x,A, 2x,A)') KPER, KSTP, F, Z, Z, NUM2STR(SWF%SRRLOC(F)%RUNOFF(ONE)), ZER, ZER, DT, DYEAR, DATE, '-1'
              END IF
