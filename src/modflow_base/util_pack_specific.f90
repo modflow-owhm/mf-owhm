@@ -1436,7 +1436,6 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
   USE BAS_UTIL,                         ONLY: DELT_TO_DAY
   USE LINKED_LIST_INSTRUCTION,          ONLY: CHARACTER_LINKED_LIST
   USE CAST_TO_STRING,                   ONLY: CAST2STR
-  USE SORT_INTERFACE,                   ONLY: SORT
   !
   USE GWFBASMODULE, ONLY: PRNT_CNVG_NTERM, PRNT_CNVG_OUTER, PRNT_CNVG, PRNT_CNVG_LRC, PRNT_CNVG_DIF,             &
                           PRNT_FRES_NTERM, PRNT_FRES_OUTER, PRNT_FRES, PRNT_FRES_LRC, PRNT_FRES_DIF,             &
@@ -2452,17 +2451,19 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
                      !
                      J = LLOC
                      CALL PARSE_WORD(PRINT_HEAD_LIST%LN,LLOC,ISTART,ISTOP)                     !Capture File Name for output
-                     WRITE(IOUT,'(2I6, 3x, A)') ITMP(:,I), PRINT_HEAD_LIST%LN(ISTART:ISTOP)
-                     LLOC = ISTART
                      !
                      IF (N>1) THEN
                         DO J=1, N-1
                             IF( ITMP(1,J)==ITMP(1,N) .AND. ITMP(2,J)==ITMP(2,N) ) THEN
+                                WRITE(IOUT,'(2I6, 3x, 2A)') ITMP(:,I), PRINT_HEAD_LIST%LN(ISTART:ISTOP), '  <- SP/TS already defined, ignoring this entry'
                                 CALL PRINT_HEAD_LIST%DEL_LINE()
                                 CYCLE PHEAD
                             END IF
                         END DO
                      END IF
+                     !
+                     WRITE(IOUT,'(2I6, 3x, A)') ITMP(:,I), PRINT_HEAD_LIST%LN(ISTART:ISTOP)
+                     LLOC = ISTART
                      !
                      ! Drop SPTS/DATE part of line
                      DIM = LEN(PRINT_HEAD_LIST%LN)
@@ -2477,9 +2478,6 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
                      CALL PRINT_HEAD_LIST%NEXT_LINE()
                      N = N+1
              END DO PHEAD
-             !
-             N = N-1
-             CALL SORT(ITMP(:,:N), [1,2], SORT_BY_ROW=TRUE)   ! (A, SORT_INDICES, [DESCEND], [SORT_BY_ROW], [P], [NO_STABLE]) -- Sort by SP (row1), then by TS (row2)
              !
              K = PRINT_HEAD_LIST%LEN()
              IF(K > 1) THEN
@@ -2604,17 +2602,19 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
                      !
                      J = LLOC
                      CALL PARSE_WORD(PRINT_WTAB_LIST%LN,LLOC,ISTART,ISTOP)                     !Capture File Name for output
-                     WRITE(IOUT,'(2I6, 3x, A)') ITMP(:,I), PRINT_WTAB_LIST%LN(ISTART:ISTOP)
-                     LLOC = ISTART
                      !
                      IF (N>1) THEN
                         DO J=1, N-1
                             IF( ITMP(1,J)==ITMP(1,N) .AND. ITMP(2,J)==ITMP(2,N) ) THEN
+                                WRITE(IOUT,'(2I6, 3x, 2A)') ITMP(:,I), PRINT_WTAB_LIST%LN(ISTART:ISTOP), '  <- SP/TS already defined, ignoring this entry'
                                 CALL PRINT_WTAB_LIST%DEL_LINE()
                                 CYCLE PWTAB
                             END IF
                         END DO
                      END IF
+                     !
+                     WRITE(IOUT,'(2I6, 3x, A)') ITMP(:,I), PRINT_WTAB_LIST%LN(ISTART:ISTOP)
+                     LLOC = ISTART
                      !
                      ! Drop SPTS/DATE part of line
                      DIM = LEN(PRINT_WTAB_LIST%LN)
@@ -2629,9 +2629,6 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
                      CALL PRINT_WTAB_LIST%NEXT_LINE()
                      N = N+1
              END DO PWTAB
-             !
-             N = N-1
-             CALL SORT(ITMP(:,:N), [1,2], SORT_BY_ROW=TRUE)   ! (A, SORT_INDICES, [DESCEND], [SORT_BY_ROW], [P], [NO_STABLE]) -- Sort by SP (row1), then by TS (row2)
              !
              K = PRINT_WTAB_LIST%LEN()
              IF(K > 1) THEN
@@ -2756,17 +2753,19 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
                      !
                      J = LLOC
                      CALL PARSE_WORD(PRINT_WDEP_LIST%LN,LLOC,ISTART,ISTOP)                     !Capture File Name for output
-                     WRITE(IOUT,'(2I6, 3x, A)') ITMP(:,I), PRINT_WDEP_LIST%LN(ISTART:ISTOP)
-                     LLOC = ISTART
                      !
                      IF (N>1) THEN
                         DO J=1, N-1
                             IF( ITMP(1,J)==ITMP(1,N) .AND. ITMP(2,J)==ITMP(2,N) ) THEN
+                                WRITE(IOUT,'(2I6, 3x, 2A)') ITMP(:,I), PRINT_WDEP_LIST%LN(ISTART:ISTOP), '  <- SP/TS already defined, ignoring this entry'
                                 CALL PRINT_WDEP_LIST%DEL_LINE()
                                 CYCLE PWDEP
                             END IF
                         END DO
                      END IF
+                     !
+                     WRITE(IOUT,'(2I6, 3x, A)') ITMP(:,I), PRINT_WDEP_LIST%LN(ISTART:ISTOP)
+                     LLOC = ISTART
                      !
                      ! Drop SPTS/DATE part of line
                      DIM = LEN(PRINT_WDEP_LIST%LN)
@@ -2781,9 +2780,6 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
                      CALL PRINT_WDEP_LIST%NEXT_LINE()
                      N = N+1
              END DO PWDEP
-             !
-             N = N-1
-             CALL SORT(ITMP(:,:N), [1,2], SORT_BY_ROW=TRUE)   ! (A, SORT_INDICES, [DESCEND], [SORT_BY_ROW], [P], [NO_STABLE]) -- Sort by SP (row1), then by TS (row2)
              !
              K = PRINT_WDEP_LIST%LEN()
              IF(K > 1) THEN
