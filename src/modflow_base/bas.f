@@ -2552,7 +2552,7 @@ C4------PRINT TOTAL BUDGET IF REQUESTED
               WRITE(PRINT_WTAB(n)%IU,'(A,4x)',ADVANCE='NO')
      +                  DATE_SP(KPER)%TS(KSTP-1)%STR_MONTHYEAR()
           END IF
-          WRITE(PRINT_HEAD(n)%IU,"(A)") "WATER_TABLE"
+          WRITE(PRINT_WTAB(n)%IU,"(A)") "WATER_TABLE"
           !
           DO I=1, NROW
              !
@@ -2620,7 +2620,7 @@ C4------PRINT TOTAL BUDGET IF REQUESTED
               WRITE(PRINT_WTAB(n)%IU,'(A,4x)',ADVANCE='NO')
      +                  DATE_SP(KPER)%TS(KSTP-1)%STR_MONTHYEAR()
           END IF
-          WRITE(PRINT_HEAD(n)%IU,"(A)") "WATER_DEPTH"
+          WRITE(PRINT_WDEP(n)%IU,"(A)") "WATER_DEPTH"
           !
           DO I=1, NROW
              !
