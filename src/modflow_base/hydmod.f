@@ -91,6 +91,28 @@ C  initial SE call in the AR subroutine.
         TYPE(HYDSUBTYPE),  SAVE  ::HYDSUBDAT(10)
       END MODULE
 
+      MODULE HYDSWTMODULE
+        USE OBS_GROUP_INTERPOLATOR, ONLY: OBS_POINTS
+        PRIVATE:: OBS_POINTS
+        !
+        INTEGER, SAVE,         POINTER                ::NHYDSWT
+        LOGICAL, SAVE,         POINTER,DIMENSION(:)   ::IBHYDSWT
+        LOGICAL, SAVE,         POINTER,DIMENSION(:)   ::INTRPHYDSWT
+        CHARACTER(LEN=4),SAVE, POINTER,DIMENSION(:)   ::HYDSWTARR
+        INTEGER, SAVE,         POINTER,DIMENSION(:)   ::IBTOP
+        !
+        TYPE(OBS_POINTS),SAVE,POINTER,DIMENSION(:),CONTIGUOUS:: SB_OB  !Uses SB_OB%OP(IB) to hold each interbed in the same layer 
+        TYPE HYDSWTTYPE
+          INTEGER,          POINTER                ::NHYDSWT
+          LOGICAL,          POINTER,DIMENSION(:)   ::IBHYDSWT
+          LOGICAL,          POINTER,DIMENSION(:)   ::INTRPHYDSWT
+          CHARACTER(LEN=4), POINTER,DIMENSION(:)   ::HYDSWTARR
+          !
+          TYPE(OBS_POINTS),POINTER,DIMENSION(:),CONTIGUOUS:: SB_OB
+        END TYPE 
+        TYPE(HYDSWTTYPE),  SAVE  ::HYDSWTDAT(10)
+      END MODULE
+
       MODULE HYDSTRMODULE
         INTEGER, SAVE,         POINTER                ::NHYDSTR
         INTEGER, SAVE,         POINTER,DIMENSION(:)   ::ISTRHYD
@@ -123,6 +145,7 @@ C
 C        SPECIFICATIONS:
 C     ------------------------------------------------------------------
       USE CONSTANTS,                ONLY: NL
+      USE STRINGS,                  ONLY: GET_INTEGER, GET_NUMBER
       USE WARNING_TYPE_INSTRUCTION, ONLY: WARNING_TYPE
       USE FILE_IO_INTERFACE,        ONLY: READ_TO_DATA
       USE NUM2STR_INTERFACE,        ONLY: NUM2STR
@@ -133,7 +156,7 @@ C     ------------------------------------------------------------------
       USE HYDBASMODULE
       IMPLICIT NONE
       INTEGER, INTENT(IN):: IN,IGRID,IUNITNWT
-      CHARACTER(768):: LINE
+      CHARACTER(256):: LINE
       CHARACTER(1) INTYP
       CHARACTER(20) HYDBASLBL
       TYPE(WARNING_TYPE):: WRN
@@ -156,22 +179,25 @@ C     ------------------------------------------------------------------
 C
 C1------IDENTIFY PROGRAM.
        WRITE(IOUT,1) IN
-    1  FORMAT(1X,/1X,'HYD -- HYDROGRAPH DATA FOR BAS, SUB, ,',
-     1  '& SFR PACKAGES -- VERSION OWHM',/
+    1  FORMAT(1X,/1X,'HYD -- HYDROGRAPH DATA FOR BAS, SUB, SWT,',
+     1  ' and SFR PACKAGES -- VERSION OWHM',/
      2  1X,'        INPUT READ FROM UNIT',I3)
 C
 C4------READ NUMBER OF HYDROGRAPHS AND UNIT FOR SAVING UNFORMATTED
 C4------HYDROGRAPH FILE AND NUMERIC FLAG FOR DRY/INACTIVE CELLS
-      CALL READ_TO_DATA(LINE,IN,IOUT)
-      !READ(IN,'(A)') LINE
-      LLOC=1
+      CALL READ_TO_DATA(LINE,IN,IOUT,IOUT, 
+     +                          HED="-- READING HYD PACKAGE INPUT --")
 C  Number of hydrographs (NHYDM) specified by the user is ignored --
 C    the program initially counts the number of hydrographs (NTOT).
 C    Note that there may be less than NHTOT hydrographs because some
 C    may be eliminated due to invalid values.
-      CALL URWORD(LINE,LLOC,ISTART,ISTOP,2,NHYDM,R,IOUT,IN)
-      CALL URWORD(LINE,LLOC,ISTART,ISTOP,2,IHYDMUN,R,IOUT,IN)
-      CALL URWORD(LINE,LLOC,ISTART,ISTOP,3,N,HYDNOH,IOUT,IN)
+      LLOC=1
+      CALL GET_INTEGER(LINE,LLOC,ISTART,ISTOP,IOUT,IN, NHYDM, 
+     +                 MSG='HydMod failed to read 1st number: NHYDM')
+      CALL GET_INTEGER(LINE,LLOC,ISTART,ISTOP,IOUT,IN, IHYDMUN, 
+     +                 MSG='HydMod failed to read 2nd number: IHYDMUN')
+      CALL GET_NUMBER (LINE,LLOC,ISTART,ISTOP,IOUT,IN, HYDNOH, 
+     +                 MSG='HydMod failed to read 3rd number: HYDNOH')
        WRITE(IOUT,5) IHYDMUN,HYDNOH
   5   FORMAT(1X,'HYDROGRAPH VALUES WILL BE SAVED ON UNIT:',I4,
      2     /,1X,'HYDROGRAPH VALUES AT DRY CELLS WILL BE:',ES14.5)
@@ -206,16 +232,12 @@ C  ALLOCATE MEMORY FOR BAS HYDROGRAPH DATA
       IF(NHYDBAS.GT.0) THEN
         ALLOCATE(IBHYDBAS(NHYDBAS))
         ALLOCATE(INTRPHYDBAS(NHYDBAS))
-        !ALLOCATE(JIKHYDBAS(3,NHYDBAS))
-        !ALLOCATE(HYDBASWT(4,NHYDBAS))
         ALLOCATE(HYDBASSTRT(NHYDBAS))
         ALLOCATE(HYDBASARR(NHYDBAS))
         ALLOCATE(HD_OP(NHYDBAS))
       ELSE
         ALLOCATE(IBHYDBAS(1))
         ALLOCATE(INTRPHYDBAS(1))
-        !ALLOCATE(JIKHYDBAS(3,1))
-        !ALLOCATE(HYDBASWT(4,1))
         ALLOCATE(HYDBASSTRT(1))
         ALLOCATE(HYDBASARR(1))
         ALLOCATE(HD_OP(1))
@@ -253,20 +275,12 @@ C Record applies to BAS Package
       CALL URWORD(LINE,LLOC,ISTART,ISTOP,0,N,R,IOUT,IN)
       WRITE(HYDBASLBL(4:6),FMT='(I3.3)')KLAY
       HYDBASLBL(7:20)=LINE(ISTART:ISTOP)
-!moved      WRITE(IOUT,23) HYDBASARR(NHYDBAS),INTYP,KLAY,XL,YL,HYDBASLBL
-! 23   FORMAT(1X,A,1X,A,I7,1PE14.5,1PE14.5,2X,A)  !seb ORIGINALLY: 1X,A,1X,A,I7,1PE14.5,E14.5,2X,A
       !seb ADDED CHECK FOR POINTS BEING WITHIN MODEL
       CALL XYGRID%XY2RC(XL,YL,NR1,NC1)
       NC2 = NC1 ! no longer used
       NR2 = NR1 
       IF(NR1 == 0)THEN
          CALL WRN%ADD(TRIM(ADJUSTL(LINE))//NL )
-!         WRITE(LINE,'(3A, 1x,A,1x,A,I7,2EN14.5,2x,A)') 
-!     +    NEW_LINE(INTYP),
-!     +   'HYDMOD ERROR: (XL,YL) BEYOND MODEL BOUNDS FOR THE FOLLOWING:',
-!     +    NEW_LINE(INTYP),
-!     +    HYDBASARR(NHYDBAS),INTYP,KLAY,XL,YL,HYDBASLBL
-!         WRITE(IOUT,'(A)') TRIM(LINE)
          NHYDBAS=NHYDBAS-1
          GO TO 20
 ccrth         CALL USTOP(TRIM(LINE))
@@ -294,7 +308,6 @@ C  Find the grid coordinates for the cell.
       CALL HD_OP(NHYDBAS)%INIT(XYGRID,' ',XL,YL,KLAY,
      +                         INTYP.EQ.'I', 0,NR1,NC1)
       !
-      !!!!CALL SGWF2HYD7GRDLOC(XL,YL,NR1,NC1,NR2,NC2,X1,X2,Y1,Y2)
 Cseb WRITE OUT HYDMOD POINT INFORMATION
       WRITE(IOUT,'(1X,A,1X,A,I7,2ES14.5,2I6,2X,A)')
      +  HYDBASARR(NHYDBAS),INTYP,KLAY,XL,YL,NR1,NC1,HYDBASLBL
@@ -312,30 +325,10 @@ C  Do not interpolate
             NHYDBAS=NHYDBAS-1
             GO TO 20
          ENDIF
-         !JIKHYDBAS(1,NHYDBAS)=NC1
-         !JIKHYDBAS(2,NHYDBAS)=NR1
-         !JIKHYDBAS(3,NHYDBAS)=KLAY
-         !HYDBASWT(1,NHYDBAS)=ONE
-         !HYDBASWT(2,NHYDBAS)=ZERO
-         !HYDBASWT(3,NHYDBAS)=ZERO
-         !HYDBASWT(4,NHYDBAS)=ZERO
       ELSE IF(INTYP.EQ.'I') THEN
 C
 C  Interpolate between cells
          INTRPHYDBAS(NHYDBAS)=.TRUE.
-         !!!CALL SGWF2HYD7MW(XL,YL,X1,X2,Y1,Y2,W1,W2,W3,W4)
-         !!!IF(NR2.LT.2.OR.NR2.GT.NROW.OR.NC2.LT.1.OR.NC2.GT.(NCOL-1)) THEN
-         !!!   WRITE(IOUT,26) TRIM(LINE)
-         !!!   NHYDBAS=NHYDBAS-1
-         !!!   GO TO 20
-         !!!ENDIF
-         !JIKHYDBAS(1,NHYDBAS)=NC2
-         !JIKHYDBAS(2,NHYDBAS)=NR2
-         !JIKHYDBAS(3,NHYDBAS)=KLAY
-         !HYDBASWT(1,NHYDBAS)=W1
-         !HYDBASWT(2,NHYDBAS)=W2
-         !HYDBASWT(3,NHYDBAS)=W3
-         !HYDBASWT(4,NHYDBAS)=W4
       ELSE
 C
 C  Interpolation coding error.
@@ -350,29 +343,12 @@ C
 C  If computing drawdown, save the starting head
       IF(HYDBASARR(NHYDBAS).EQ.'DD') THEN
          !
-!         IF(HAS_NWT_HDRY) THEN
-!           CALL HD_OP(NHYDBAS)%BASIS_BUILDER(NROW,NCOL,NLAY,
-!     +                                     IBOUND,DELC,DELR,HNEW,BOTM,
-!     +                                     LBOTM,LAYHDT) 
-!         ELSE
-!           CALL HD_OP(NHYDBAS)%BASIS_BUILDER(NROW,NCOL,NLAY,
-!     +                                     IBOUND,DELC,DELR)
-!         END IF
          CALL HD_OP(NHYDBAS)%BASIS_BUILDER(NROW,NCOL,NLAY,
      +                                   IBOUND,DELC,DELR)
          !
          CALL HD_OP(NHYDBAS)%INTERP(NROW,NCOL,NLAY,STRT) 
          !
          HYDBASSTRT(NHYDBAS)=HD_OP(NHYDBAS)%SIM
-         !IF(INTYP.EQ.'I')THEN
-         !   H1=STRT(NC2,NR2,KLAY)
-         !   H2=STRT(NC2+1,NR2,KLAY)
-         !   H3=STRT(NC2+1,NR2-1,KLAY)
-         !   H4=STRT(NC2,NR2-1,KLAY)
-         !   HYDBASSTRT(NHYDBAS)=H1*W1+H2*W2+H3*W3+H4*W4
-         !ELSEIF(INTYP.EQ.'C')THEN
-         !   HYDBASSTRT(NHYDBAS)=STRT(NC1,NR1,KLAY)
-         !ENDIF
       ENDIF
 C
 C  Save the hydrograph label and continue with the next record.
@@ -408,8 +384,11 @@ C     ------------------------------------------------------------------
       IMPLICIT NONE
 C
       INTEGER, INTENT(IN):: IN,IGRID
-      CHARACTER LINE*80
-      CHARACTER HYDIBSLBL*20,PCKG*3,ARR*2,INTYP*1
+      CHARACTER(256):: LINE
+      CHARACTER( 20):: HYDIBSLBL
+      CHARACTER(  3):: PCKG
+      CHARACTER(  2):: ARR
+      CHARACTER(  1):: INTYP
       INTEGER:: LLOC,ISTART,ISTOP,N
       INTEGER:: KLAY, NC1, NR1, NC2, NR2, NQ, K
       REAL:: XL, YL, X1, X2, Y1, Y2, W1, W2, W3, W4
@@ -583,8 +562,11 @@ C
       INTEGER, INTENT(IN):: IN,IGRID
       TYPE(WARNING_TYPE):: WRN
 C
-      CHARACTER LINE*80
-      CHARACTER HYDSUBLBL*20,PCKG*3,ARR*2,INTYP*1
+      CHARACTER(256):: LINE
+      CHARACTER( 20):: HYDSUBLBL
+      CHARACTER(  3):: PCKG
+      CHARACTER(  2):: ARR
+      CHARACTER(  1):: INTYP
       INTEGER:: LLOC,ISTART,ISTOP,N,I, K
       INTEGER:: KLAY, NC1, NR1, NC2, NR2
       REAL:: XL, YL
@@ -609,18 +591,12 @@ C  ALLOCATE MEMORY FOR SUB HYDROGRAPH DATA
  19   IF(NHYDSUB.GT.0) THEN
         ALLOCATE(IBHYDSUB(NHYDSUB))
         ALLOCATE(INTRPHYDSUB(NHYDSUB))
-        !ALLOCATE(JIKHYDSUB(3,NHYDSUB))
-        !ALLOCATE(HYDSUBWT(4,NHYDSUB))
         ALLOCATE(HYDSUBARR(NHYDSUB))
-        !ALLOCATE(IBFACT(NLAY))
         ALLOCATE(IBTOP(NHYDSUB))
-        !ALLOCATE(UPPERLAYER(NHYDSUB))
         ALLOCATE(SB_OB(NHYDSUB))
       ELSE
         ALLOCATE(IBHYDSUB(1))
         ALLOCATE(INTRPHYDSUB(1))
-        !ALLOCATE(JIKHYDSUB(3,1))
-        !ALLOCATE(HYDSUBWT(4,1))
         ALLOCATE(HYDSUBARR(1))
         ALLOCATE(SB_OB(1))
          WRITE(IOUT,18)
@@ -688,12 +664,6 @@ cc    TIME SERIES ACCUMULATED OVER ALL LAYERS OF THE TOTAL ELASTIC COMPACTION AR
       ELSE IF (ARR.EQ.'SE') THEN
          HYDSUBARR(NHYDSUB)='SE'
          IBHYDSUB(NHYDSUB)=.FALSE.
-!!!C  Change the layer number to the number of subsidence layers
-!!!         NQSUB=0
-!!!         DO 20 K=1,KLAY
-!!!         IF(LN(K).GT.0) NQSUB=NQSUB+1
-!!! 20      CONTINUE
-!!!         KLAY=NQSUB
       ELSE
           WRITE(IOUT,25) LINE
  25      FORMAT(' Invalid array type was found on the following',
@@ -702,12 +672,7 @@ cc    TIME SERIES ACCUMULATED OVER ALL LAYERS OF THE TOTAL ELASTIC COMPACTION AR
          NHYDSUB=NHYDSUB-1
          GO TO 15
       ENDIF
-!       WRITE(IOUT,23) HYDSUBARR(NHYDSUB),INTYP,KLAY,XL,YL,HYDSUBLBL
-! 23   FORMAT(1X,A,1X,A,I7,1PE14.5,E14.5,2X,A)
-C
-C  Get the cell location
-      !CALL SGWF2HYD7GRDLOC(XL,YL,NR1,NC1,NR2,NC2,X1,X2,Y1,Y2)
-Cseb WRITE OUT HYDMOD POINT INFORMATION
+! WRITE OUT HYDMOD POINT INFORMATION
         WRITE(IOUT,'(1X,A,1X,A,I7,2ES14.5,2I6,2X,A)')
      +  HYDSUBARR(NHYDSUB),INTYP,KLAY,XL,YL,NR1,NC1,HYDSUBLBL
 C
@@ -722,41 +687,9 @@ C  Use cell value without interpolation
             NHYDSUB=NHYDSUB-1
             GO TO 15
          ENDIF
-       !  JIKHYDSUB(1,NHYDSUB)=NC1                                      !seb moved  out of if block
-       !  JIKHYDSUB(2,NHYDSUB)=NR1
-       !  JIKHYDSUB(3,NHYDSUB)=KLAY
-       !  HYDSUBWT(1,NHYDSUB)=ZERO
-       !  HYDSUBWT(2,NHYDSUB)=ZERO
-       !  HYDSUBWT(3,NHYDSUB)=ZERO
-       !  HYDSUBWT(4,NHYDSUB)=ZERO
-       !if((NR2.GT.0.and.NR2.LT.NROW).and.(NC2.GT.0.and.NC2.LT.NCOL))then
-!seb   !    JIKHYDSUB(1,NHYDSUB)=NC1
-!      !    JIKHYDSUB(2,NHYDSUB)=NR1
-       !   if((NR1.EQ.NR2).and.(NC1.EQ.NC2))HYDSUBWT(1,NHYDSUB)=ONE
-       !   if((NR1.EQ.NR2).and.(NC1.GT.NC2))HYDSUBWT(2,NHYDSUB)=ONE
-       !   if((NR1.LT.NR2).and.(NC1.GT.NC2))HYDSUBWT(3,NHYDSUB)=ONE
-       !   if((NR1.LT.NR2).and.(NC1.EQ.NC2))HYDSUBWT(4,NHYDSUB)=ONE
-       !else
-!seb   !    JIKHYDSUB(1,NHYDSUB)=NC1
-!      !    JIKHYDSUB(2,NHYDSUB)=NR1
-       !   HYDSUBWT(1,NHYDSUB)=ONE
-       !endif
       ELSE IF(INTYP.EQ.'I') THEN
 C  Interpolate value between nodes
          INTRPHYDSUB(NHYDSUB)=.TRUE.
-         !CALL SGWF2HYD7MW(XL,YL,X1,X2,Y1,Y2,W1,W2,W3,W4)
-         !IF(NR2.LT.2.OR.NR2.GT.NROW.OR.NC2.LT.1.OR.NC2.GT.NCOL-1) THEN
-         !   WRITE(IOUT,26) LINE
-         !   NHYDSUB=NHYDSUB-1
-         !   GO TO 15
-         !ENDIF
-         !JIKHYDSUB(1,NHYDSUB)=NC2
-         !JIKHYDSUB(2,NHYDSUB)=NR2
-         !JIKHYDSUB(3,NHYDSUB)=KLAY
-         !HYDSUBWT(1,NHYDSUB)=W1
-         !HYDSUBWT(2,NHYDSUB)=W2
-         !HYDSUBWT(3,NHYDSUB)=W3
-         !HYDSUBWT(4,NHYDSUB)=W4
       ELSE
           WRITE(IOUT,27) LINE
  27      FORMAT(' Invalid interpolation type was found on the ',
@@ -834,6 +767,227 @@ C
       IF(NHYDSUB.GT.0) CALL GWF2HYD7SUB7SE(2,IGRID)
       RETURN
       END
+      SUBROUTINE GWF2HYD7SWT7AR(IN,IGRID)
+C     ******************************************************************
+C     READ SWT PACKAGE DATA FOR HYDROGRAPHS
+C     ******************************************************************
+C
+C     SPECIFICATIONS:
+C     ------------------------------------------------------------------
+      USE GLOBAL, ONLY: IOUT,NCOL,NROW,XYGRID
+      USE HYDBASMODULE
+      USE HYDSWTMODULE
+      USE GWFSWTMODULE,   ONLY: LNWT,NSYSTM 
+      USE WARNING_TYPE_INSTRUCTION, ONLY: WARNING_TYPE
+      USE NUM2STR_INTERFACE,        ONLY: NUM2STR
+      USE CONSTANTS,                ONLY: NL
+      USE GENERIC_OPEN_INTERFACE,   ONLY: UTF8_BOM_OFFSET_REWIND
+      IMPLICIT NONE
+C
+      INTEGER, INTENT(IN):: IN,IGRID
+      TYPE(WARNING_TYPE):: WRN
+C
+      CHARACTER(256):: LINE
+      CHARACTER( 20):: HYDSWTLBL
+      CHARACTER(  3):: PCKG
+      CHARACTER(  2):: ARR
+      CHARACTER(  1):: INTYP
+      INTEGER:: LLOC,ISTART,ISTOP,N,I, K
+      INTEGER:: KLAY, NC1, NR1, NC2, NR2
+      REAL:: XL, YL
+      REAL:: ONE, ZERO, R
+C     ------------------------------------------------------------------
+      ALLOCATE (NHYDSWT)
+      ONE=1.0
+      ZERO=0.0
+      NHYDSWT=0
+      CALL WRN%INIT()
+      CALL UTF8_BOM_OFFSET_REWIND(IN)
+C
+      READ(IN,'(A)',END=19) LINE
+ 10   READ(IN,'(A)',END=19) LINE
+      IF(LINE.EQ.' ') GO TO 10
+      LLOC=1
+      CALL URWORD(LINE,LLOC,ISTART,ISTOP,1,N,R,IOUT,IN)
+      IF(LINE(ISTART:ISTOP).EQ.'SWT') NHYDSWT=NHYDSWT+1
+      GO TO 10
+C
+C  ALLOCATE MEMORY FOR SWT HYDROGRAPH DATA
+ 19   IF(NHYDSWT.GT.0) THEN
+        ALLOCATE(IBHYDSWT(NHYDSWT))
+        ALLOCATE(INTRPHYDSWT(NHYDSWT))
+        ALLOCATE(HYDSWTARR(NHYDSWT))
+        ALLOCATE(IBTOP(NHYDSWT))
+        ALLOCATE(SB_OB(NHYDSWT))
+      ELSE
+        ALLOCATE(IBHYDSWT(1))
+        ALLOCATE(INTRPHYDSWT(1))
+        ALLOCATE(HYDSWTARR(1))
+        ALLOCATE(SB_OB(1))
+         WRITE(IOUT,18)
+  18    FORMAT(1X,'NO HYDROGRAPHS FOR SWT PACKAGE')
+        GO TO 999
+      END IF
+C
+C  Read SWT hydrograph data.
+      NHYDSWT=0
+      CALL UTF8_BOM_OFFSET_REWIND(IN)
+      READ(IN,'(A)',END=99) LINE
+ 15   READ(IN,'(A)',END=99) LINE
+      LLOC=1
+      CALL URWORD(LINE,LLOC,ISTART,ISTOP,1,N,R,IOUT,IN)
+      IF(LINE(ISTART:ISTOP).NE.'SWT') GO TO 15
+      NHYDSWT=NHYDSWT+1
+      PCKG=LINE(ISTART:ISTOP)
+      CALL URWORD(LINE,LLOC,ISTART,ISTOP,1,N,R,IOUT,IN)
+      ARR=LINE(ISTART:ISTOP)
+      WRITE(HYDSWTLBL(1:2),FMT='(A2)')ARR
+      CALL URWORD(LINE,LLOC,ISTART,ISTOP,1,N,R,IOUT,IN)
+      INTYP=LINE(ISTART:ISTOP)
+      WRITE(HYDSWTLBL(3:3),FMT='(A1)')INTYP
+      CALL URWORD(LINE,LLOC,ISTART,ISTOP,2,KLAY,R,IOUT,IN)
+      CALL URWORD(LINE,LLOC,ISTART,ISTOP,3,N,XL,IOUT,IN)
+      CALL URWORD(LINE,LLOC,ISTART,ISTOP,3,N,YL,IOUT,IN)
+      CALL URWORD(LINE,LLOC,ISTART,ISTOP,0,N,R,IOUT,IN)
+      !
+      CALL XYGRID%XY2RC(XL,YL,NR1,NC1)
+      NC2 = NC1 ! no longer used
+      NR2 = NR1 
+      IF(NR1 == 0)THEN
+         CALL WRN%ADD(TRIM(ADJUSTL(LINE))//NL )
+         NHYDSWT=NHYDSWT-1
+         GO TO 15
+      END IF
+      !
+      WRITE(HYDSWTLBL(4:6),FMT='(I3.3)')KLAY
+      HYDSWTLBL(7:20)=LINE(ISTART:ISTOP)
+cc    TIME SERIES FROM THE CRITICAL HEAD ARRAY
+      IF (ARR.EQ.'HC') THEN
+         HYDSWTARR(NHYDSWT)='HC'
+         IBHYDSWT(NHYDSWT)=.TRUE.
+cc    TIME SERIES FROM THE TOTAL COMPACTION ARRAY
+      ELSE IF (ARR.EQ.'CP') THEN
+         HYDSWTARR(NHYDSWT)='CP'
+         IBHYDSWT(NHYDSWT)=.TRUE.
+cc    TIME SERIES FROM THE GEOSTATIC STRESS
+      ELSE IF (ARR.EQ.'GS') THEN
+         HYDSWTARR(NHYDSWT)='GS'
+         IBHYDSWT(NHYDSWT)=.TRUE.
+cc    TIME SERIES FROM THE EFFECTIVE STRESS
+      ELSE IF (ARR.EQ.'ES') THEN
+         HYDSWTARR(NHYDSWT)='ES'
+         IBHYDSWT(NHYDSWT)=.TRUE.
+cc    TIME SERIES FROM THE VOID RATIO
+      ELSE IF (ARR.EQ.'VR') THEN
+         HYDSWTARR(NHYDSWT)='VR'
+         IBHYDSWT(NHYDSWT)=.TRUE.
+cc    TIME SERIES ACCUMULATED OVER ALL LAYERS OF THE TOTAL COMPACTION ARRAY
+      ELSE IF (ARR.EQ.'SB') THEN
+         HYDSWTARR(NHYDSWT)='SB'
+         IBHYDSWT(NHYDSWT)=.FALSE.
+      ELSE
+          WRITE(IOUT,25) LINE
+ 25      FORMAT(' Invalid array type was found on the following',
+     &   ' record:',/,A80)
+         WRITE(IOUT,*) 'Hydrograph Record will be ignored.'
+         NHYDSWT=NHYDSWT-1
+         GO TO 15
+      ENDIF
+C
+C WRITE OUT HYDMOD POINT INFORMATION
+        WRITE(IOUT,'(1X,A,1X,A,I7,2ES14.5,2I6,2X,A)')
+     +  HYDSWTARR(NHYDSWT),INTYP,KLAY,XL,YL,NR1,NC1,HYDSWTLBL
+C
+      IF(INTYP.EQ.'C') THEN
+C  Use cell value without interpolation
+         INTRPHYDSWT(NHYDSWT)=.FALSE.
+         IF(NR1.LT.1.OR.NR1.GT.NROW.OR.NC1.LT.1.OR.NC1.GT.NCOL) THEN
+           WRITE(IOUT,26) LINE
+ 26         FORMAT(' Coordinates of the following record are ',
+     &           'outside of the model grid:',/,A80)
+            WRITE(IOUT,*) 'Hydrograph Record will be ignored.'
+            NHYDSWT=NHYDSWT-1
+            GO TO 15
+         ENDIF
+      ELSE IF(INTYP.EQ.'I') THEN
+C  Interpolate value between nodes
+         INTRPHYDSWT(NHYDSWT)=.TRUE.
+      ELSE
+          WRITE(IOUT,27) LINE
+ 27      FORMAT(' Invalid interpolation type was found on the ',
+     &   'following hydrograph record:',/,A80)
+          WRITE(IOUT,*) 'Hydrograph Record will be ignored.'
+         NHYDSWT=NHYDSWT-1
+         GO TO 15
+      ENDIF
+      !
+      N = NHYDSWT
+      IF(HYDSWTARR(N).EQ.'SB') THEN
+        !
+        K = COUNT(0 < LNWT .AND. LNWT <= KLAY)
+        IF (K == 0) THEN
+          WRITE(IOUT,28) LINE
+ 28      FORMAT(' SPECIFIED LAYERS DO NOT HAVE ANY INTERBEDS',
+     &   ' record:',/,A80)
+         WRITE(IOUT,*) 'Hydrograph Record will be ignored.'
+         NHYDSWT=NHYDSWT-1
+         GO TO 15
+        END IF
+        !
+        CALL SB_OB(NHYDSWT)%INIT(K) ! HAS K INTERBEDS WITHIN LAYERS
+        !
+        K = 0
+        DO I=1, NSYSTM
+          IF(0 < LNWT(I) .AND. LNWT(I) <= KLAY) THEN
+             K=K+1
+             CALL SB_OB(NHYDSWT)%OP(K)%INIT(XYGRID,' ',XL,YL,LNWT(I), 
+     +                                      INTYP.EQ.'I', 0,NR1,NC1, I) !NSYSYEM = I
+          END IF
+        END DO
+      ELSE
+        !
+        K = COUNT(LNWT == KLAY)
+        IF (K == 0) THEN
+          WRITE(IOUT,29) LINE
+ 29      FORMAT(' SPECIFIED LAYER DOES NOT HAVE ANY INTERBEDS',
+     &   ' record:',/,A80)
+         WRITE(IOUT,*) 'Hydrograph Record will be ignored.'
+         NHYDSWT=NHYDSWT-1
+         GO TO 15
+        END IF
+        !
+        CALL SB_OB(NHYDSWT)%INIT(K) ! HAS K INTERBEDS WITHIN LAYERS
+        !
+        K = 0
+        DO I=1, NSYSTM
+          IF(LNWT(I) == KLAY) THEN
+             K=K+1
+             CALL SB_OB(NHYDSWT)%OP(K)%INIT(XYGRID,' ',XL,YL,KLAY, 
+     +                                      INTYP.EQ.'I', 0,NR1,NC1, I) !NSYSYEM = I
+          END IF
+        END DO
+      END IF
+C
+C  Save the hydrograph label and process the next line in input file
+      HYDLBL(NHYDTOT+NHYDSWT)=HYDSWTLBL
+      GO TO 15
+C
+C  End of file after all SWT hydrograph data have been processed
+ 99   IF(NHYDSWT.GT.0) THEN
+        WRITE(IOUT,108) NHYDSWT
+108     FORMAT(/,' A total of ',I10,' points have been added ',
+     & 'for the hydrographs of SWT arrays.')
+      END IF
+      !
+      IF(WRN%RAISED) THEN
+          CALL WRN%CHECK('HYDMOD NOTICE - THE FOLLOWING LINES '//
+     +     'HAD BAD X, Y COORDIANTES:', OUTPUT=IOUT)
+      END IF
+C
+ 999  CALL SGWF2HYD7SWT7PSV(IGRID)
+      IF(NHYDSWT.GT.0) CALL GWF2HYD7SWT7SE(2,IGRID)
+      RETURN
+      END
       SUBROUTINE GWF2HYD7STR7AR(IN,IGRID)
 C     ******************************************************************
 C     READ STREAM PACKAGE DATA FOR HYDROGRAPHS
@@ -849,7 +1003,7 @@ C     ------------------------------------------------------------------
 C      
       INTEGER, INTENT(IN):: IN,IGRID
 C
-      CHARACTER LINE*80
+      CHARACTER(256):: LINE
       INTEGER:: LLOC,ISTART,ISTOP,N
       REAL:: R
 C     ------------------------------------------------------------------
@@ -894,7 +1048,9 @@ C     ------------------------------------------------------------------
 C
       INTEGER, INTENT(IN):: IN,KPER,IGRID
 C
-      CHARACTER HYDSTRLBL*20,LINE*80,INTYP*1
+      CHARACTER(256):: LINE
+      CHARACTER( 20):: HYDSTRLBL
+      CHARACTER(  1):: INTYP
       INTEGER:: LLOC,ISTART,ISTOP,N
       INTEGER:: NUMSTR, ISEG, IRCH, KLAY
       REAL:: XL, YL
@@ -916,7 +1072,7 @@ C ------Read STR hydrograph data
 C ------Reading is done here (rather than in AR) because stream data are
 C ------not available until the first time step is initiated.
 C ---- Reading could be done in a special RP routine right after STRRP
-      IF(KPER.EQ.1) THEN
+      !IF(KPER.EQ.1) THEN
         NUMSTR=0
         CALL UTF8_BOM_OFFSET_REWIND(IN)
         READ(IN,'(A)',END=99) LINE
@@ -991,7 +1147,7 @@ C ------End of input file.
 C
 C  Create initial values for stream hydrographs
         IF(NHYDSTR.GT.0) CALL GWF2HYD7STR7SE(2,IGRID)
-      END IF
+      !END IF
 C
 C ------RETURN
       RETURN
@@ -1011,7 +1167,7 @@ C     ------------------------------------------------------------------
 C
       INTEGER, INTENT(IN):: IN,IGRID
 C
-      CHARACTER LINE*80
+      CHARACTER(256):: LINE
       INTEGER:: LLOC,ISTART,ISTOP,N
       REAL::R
 C     ------------------------------------------------------------------
@@ -1057,7 +1213,9 @@ C     ------------------------------------------------------------------
 C
       INTEGER, INTENT(IN):: IN,KPER,IGRID
 C
-      CHARACTER HYDSFRLBL*20,LINE*80,INTYP*1
+      CHARACTER(256):: LINE
+      CHARACTER( 20):: HYDSFRLBL
+      CHARACTER(  1):: INTYP
       INTEGER:: NUMSFR, ISEG, IRCH, KLAY, LEN_XL, LEN_YL
       INTEGER::LLOC,ISTART,ISTOP,N
       REAL:: R, XL, YL
@@ -1078,7 +1236,7 @@ C ------Read SFR hydrograph data
 C ------Reading is done here (rather than in AR) because stream data are
 C ------not available until the first time step is initiated.
 C ---- Reading could be done in a special RP routine right after SFRRP
-      IF(KPER.EQ.1) THEN
+      !IF(KPER.EQ.1) THEN
         NUMSFR=0
         CALL UTF8_BOM_OFFSET_REWIND(IN)
         READ(IN,'(A)',END=99) LINE
@@ -1169,7 +1327,7 @@ C ------End of input file.
 C
 C  Create initial values for stream hydrographs
         IF(NHYDSFR.GT.0) CALL GWF2HYD7SFR7SE(2,IGRID)
-      END IF
+      !END IF
 C
 C ------RETURN
       RETURN
@@ -1207,25 +1365,6 @@ C -----and locations of IBOUND codes at or around hydrograph point.
 C
 C -----If IBOUND is to be checked for inactive cells, retrieve values
 C -----at or around hydrograph point.
-      !!!IF(IBHYDBAS(N)) THEN  --seb
-      !!!   IB1=IBOUND(J,I,K)
-      !!!   IF(LAYHDT(K).NE.0) THEN
-      !!!      IF(HNEW(J,I,K).LE.BOTM(J,I,LBOTM(K))) IB1=0                 !seb CHECK TO SEE IF THE CELL IS UPW DRY
-      !!!   END IF
-      !!!   IBFACT=IB1
-      !!!   IF(INTRPHYDBAS(N)) THEN
-      !!!      IB2=IBOUND(J+1,I,K)
-      !!!      IB3=IBOUND(J+1,I-1,K)
-      !!!      IB4=IBOUND(J,I-1,K)
-      !!!      IF(LAYHDT(K).ne.0)then
-      !!!      IF( HNEW(J+1,I,  K).LE.BOTM(J+1,I,  LBOTM(K)) ) IB2=0       !seb ADDED CHECK FOR UPW DRY CELLS
-      !!!      IF( HNEW(J+1,I-1,K).LE.BOTM(J+1,I-1,LBOTM(K)) ) IB3=0
-      !!!      IF( HNEW(J,  I-1,K).LE.BOTM(J,  I-1,LBOTM(K)) ) IB4=0
-      !!!      END IF
-      !!!      !
-      !!!      IBFACT=IB1*IB2*IB3*IB4
-      !!!   ENDIF
-      !!!ENDIF
       !
       IBFACT=IBOUND(J,I,K)
       IF(IBFACT .NE. 0 .AND. HAS_NWT_HDRY) THEN                            !Only apply check if NWT uses HDRY instead of regular head
@@ -1235,14 +1374,6 @@ C -----at or around hydrograph point.
       END IF
       !
       IF(IBFACT .NE. 0) THEN
-!!!        IF(HAS_NWT_HDRY) THEN
-!!!          CALL HD_OP(N)%BASIS_BUILDER(NROW,NCOL,NLAY,
-!!!     +                                    IBOUND,DELC,DELR,HNEW,BOTM,
-!!!     +                                    LBOTM,LAYHDT) 
-!!!        ELSE
-!!!          CALL HD_OP(N)%BASIS_BUILDER(NROW,NCOL,NLAY,
-!!!     +                                    IBOUND,DELC,DELR)
-!!!        END IF
         CALL HD_OP(N)%BASIS_BUILDER(NROW,NCOL,NLAY,
      +                                  IBOUND,DELC,DELR)
         !
@@ -1421,91 +1552,6 @@ C -----Calculate value for each hydrograph point.
       ELSE 
           IB_TRUE = .TRUE.
       END IF
-       
-!!!      NN=N
-!!!      IBTOT=1
-!!!      UPPERLAYER(N)=.TRUE.
-!!!C -----Determine interpolation type, word length, number of weights,
-!!!C -----and locations of IBOUND codes at or around hydrograph point.
-!!!      J=JIKHYDSUB(1,N)
-!!!      I=JIKHYDSUB(2,N)
-!!!      K=JIKHYDSUB(3,N)
-!!!      IBTOP(n)=0
-!!!      KLAY=K
-!!!C
-!!!C -----If IBOUND is to be checked for inactive cells, retrieve values
-!!!C -----at or around hydrograph point.
-!!!         IB1=IBOUND(J,I,K)
-!!!         IBFACT(1)=IB1
-!!!        IF(HYDSUBARR(N).EQ.'HC'.or.HYDSUBARR(N).EQ.'CE'.or.
-!!!     &       HYDSUBARR(N).EQ.'CV'.or.HYDSUBARR(N).EQ.'CP')THEN
-!!!            IB2=IBOUND(J+1,I,K)
-!!!            IB3=IBOUND(J+1,I-1,K)
-!!!            IB4=IBOUND(J,I-1,K)
-!!!            IF(LAYHDT(K).NE.0) THEN
-!!!             IF(HNEW(J,I,K).LE.BOTM(J,I,LBOTM(K))) IB1=0                !seb CHECK TO SEE IF THE CELL IS UPW DRY
-!!!             IF( HNEW(J+1,I,  K).LE.BOTM(J+1,I,  LBOTM(K)) ) IB2=0      !seb ADDED CHECK FOR UPW DRY CELLS
-!!!             IF( HNEW(J+1,I-1,K).LE.BOTM(J+1,I-1,LBOTM(K)) ) IB3=0
-!!!             IF( HNEW(J,  I-1,K).LE.BOTM(J,  I-1,LBOTM(K)) ) IB4=0
-!!!            END IF
-!!!          if(INTRPHYDSUB(N))then
-!!!            IBFACT(1)=IB1*IB2*IB3*IB4
-!!!          else
-!!!            IBFACT(K)=IB1                                               !seb CHANGED FROM '=IB3'
-!!!          endif       
-!!!            IF(IBFACT(1).gt.0)IBFACT(1)=1
-!!!            IF(IBFACT(1).le.0)IBFACT(1)=0
-!!!        ELSEIF(HYDSUBARR(N).EQ.'SB'.or.HYDSUBARR(N).EQ.'SE'.or.
-!!!     &       HYDSUBARR(N).EQ.'SV') THEN
-!!!         IBTOT=0                                                        !seb INITIALIZE
-!!!         DO 38 K=1,KLAY
-!!!            IBFACT(K)=0
-!!!            IB1=IBOUND(J,I,K)
-!!!            IB2=IBOUND(J+1,I,K)
-!!!            IB3=IBOUND(J+1,I-1,K)
-!!!            IB4=IBOUND(J,I-1,K)
-!!!            IF(LAYHDT(K).NE.0) THEN                                     !seb ADDED CHECK FOR UPW DRY CELLS
-!!!              IF( HNEW(J  ,I,  K).LE.BOTM(J  ,I,  LBOTM(K)) ) IB1=0     
-!!!              IF( HNEW(J+1,I,  K).LE.BOTM(J+1,I,  LBOTM(K)) ) IB2=0
-!!!              IF( HNEW(J+1,I-1,K).LE.BOTM(J+1,I-1,LBOTM(K)) ) IB3=0
-!!!              IF( HNEW(J,  I-1,K).LE.BOTM(J,  I-1,LBOTM(K)) ) IB4=0
-!!!            END IF
-!!!         if(INTRPHYDSUB(N))then
-!!!            IBFACT(K)=IB1*IB2*IB3*IB4 
-!!!           IF(IBFACT(K).GT.0.and.(UPPERLAYER(N)))then
-!!!            IBTOP(N)=K
-!!!            UPPERLAYER(N)=.FALSE.
-!!!!seb           ELSEIF(IBFACT(K).LE.0)then
-!!!!seb            IBTOT=0
-!!!           ENDIF
-!!!           IF(IBFACT(K).GT.0.and.(.not.(UPPERLAYER(N))))then
-!!!               IBTOT=1
-!!!               IPTOP=K
-!!!               EXIT
-!!!           endif
-!!!!seb           IF(IBFACT(K).LE.0.and.(.not.(UPPERLAYER(N))))IBTOT=0
-!!!         else
-!!!           IBFACT(K)=IB1         
-!!!           IF(IBFACT(K).GT.0) THEN
-!!!            IBTOP(N)=K
-!!!            IBTOT=1
-!!!            EXIT
-!!!           END IF
-!!!           IF(K.EQ.KLAY)THEN
-!!!             IF(SUM(IBFACT).EQ.0)THEN
-!!!               WRITE(IOUT,37) N,I,J,K
-!!! 37            FORMAT(' HYDMOD SUB ERROR: Subsidence Point number ',I6,
-!!!     +         ' IN MODEL CELL WITH ROW, COL, LAYER',
-!!!     +         3I6,' DOES NOT HAVE A LAYER WITH A NONZERO IBOUND')
-!!!ccrth               CALL USTOP('HYDMOD SUB ERROR: MODEL CELL DOES NOT HAVE'//
-!!!ccrth     +                    ' A LAYER WITH A NONZERO IBOUND.')
-!!!ccrth              UPPERLAYER(N)=.FALSE. 
-!!!ccrth              IK=IK+1
-!!!             END IF
-!!!           END IF
-!!!         endif
-!!!  38     CONTINUE
-!!!        ENDIF
 C
 C -----Check if hydrograph value is Preconsolidation Head.
       IF(HYDSUBARR(N).EQ.'HC') THEN
@@ -1526,41 +1572,6 @@ C -----Check if hydrograph value is Preconsolidation Head.
        ELSE
            HYDVAL(NHYDTOT+N,IHYDLOC)=HYDNOH
        END IF
-!!!         IF(IBHYDSUB(N) .AND. IBFACT(1).EQ.0) THEN
-!!!            HYDVAL(NHYDTOT+N,IHYDLOC)=HYDNOH                   
-!!!         ELSE
-!!!            IC=JIKHYDSUB(1,N)                                           !seb FIXED TO CORRECT POINTER LOCATION WITH SUB
-!!!            IR=JIKHYDSUB(2,N)
-!!!            IL=JIKHYDSUB(3,N)
-!!!            W1=HYDSUBWT(1,N)
-!!!            W2=HYDSUBWT(2,N)
-!!!            W3=HYDSUBWT(3,N)
-!!!            W4=HYDSUBWT(4,N)                                            !seb FIXED TO CORRECT POINTER LOCATION WITH SUB
-!!!            LNLOC=0
-!!!            NDBCOUNT=0
-!!!            DO I=1, NNDB
-!!!                IF(LN(I).EQ.IL) THEN
-!!!                    NDBCOUNT=NDBCOUNT+1
-!!!                    LNLOC(NDBCOUNT)=I
-!!!                END IF
-!!!            END DO
-!!!            HYDVAL(NHYDTOT+N,IHYDLOC) = 0.0
-!!!            DO I=1, NDBCOUNT
-!!!                IB=LNLOC(I)
-!!!                icell1 = ((IB-1)*nrow*ncol)+((IR-1)*ncol)+(IC  )
-!!!                icell2 = ((IB-1)*nrow*ncol)+((IR-1)*ncol)+(IC+1)
-!!!                icell3 = ((IB-1)*nrow*ncol)+((IR-2)*ncol)+(IC+1)
-!!!                icell4 = ((IB-1)*nrow*ncol)+((IR-2)*ncol)+(IC  )
-!!!                HYDVAL(NHYDTOT+N,IHYDLOC) = HYDVAL(NHYDTOT+N,IHYDLOC) +
-!!!     1 HC(icell1)*W1+HC(icell2)*W2+HC(icell3)*W3+HC(icell4)*W4
-!!!            END DO
-!!!            !icell1 = ((K-1)*nrow*ncol)+((I-1)*ncol)+J
-!!!            !icell2 = ((K-1)*nrow*ncol)+((I-1)*ncol)+(J+1)
-!!!            !icell3 = ((K-1)*nrow*ncol)+((I-2)*ncol)+(J+1)
-!!!            !icell4 = ((K-1)*nrow*ncol)+((I-2)*ncol)+(J)
-!!!            !if(icell3.le.0.or.icell3.gt.(K*nrow*ncol))icell3=icell1
-!!!            !if(icell4.le.0.or.icell3.gt.(K*nrow*ncol))icell4=icell1
-!!!         ENDIF
 C
 C -----Check if hydrograph value is compaction
        ELSE IF(HYDSUBARR(N).EQ.'CP') THEN
@@ -1611,50 +1622,6 @@ C -----Check if hydrograph value is compaction
         ELSE
             HYDVAL(NHYDTOT+N,IHYDLOC)=HYDNOH
         END IF
-!!!       ELSE IF(HYDSUBARR(N).EQ.'CP'.or.HYDSUBARR(N).EQ.'CE'.or.
-!!!     &        HYDSUBARR(N).EQ.'CV') THEN
-!!!         IF(IBHYDSUB(N) .AND. IBFACT(1).EQ.0) THEN
-!!!            HYDVAL(NHYDTOT+N,IHYDLOC)=HYDNOH
-!!!         ELSE
-!!!            IC=JIKHYDSUB(1,N)
-!!!            IR=JIKHYDSUB(2,N)
-!!!            IL=JIKHYDSUB(3,N)
-!!!            W1=HYDSUBWT(1,N)
-!!!            W2=HYDSUBWT(2,N)
-!!!            W3=HYDSUBWT(3,N)
-!!!            W4=HYDSUBWT(4,N)                                            !seb FIXED TO CORRECT POINTER LOCATION WITH SUB
-!!!            LNLOC=0
-!!!            NDBCOUNT=0
-!!!            DO I=1, NNDB
-!!!                IF(LN(I).EQ.IL) THEN
-!!!                    NDBCOUNT=NDBCOUNT+1
-!!!                    LNLOC(NDBCOUNT)=I
-!!!                END IF
-!!!            END DO
-!!!            HYDVAL(NHYDTOT+N,IHYDLOC) = 0.0
-!!!            DO I=1, NDBCOUNT
-!!!              IB=LNLOC(I)
-!!!              icell1 = ((IB-1)*nrow*ncol)+((IR-1)*ncol)+(IC  )
-!!!              icell2 = ((IB-1)*nrow*ncol)+((IR-1)*ncol)+(IC+1)
-!!!              icell3 = ((IB-1)*nrow*ncol)+((IR-2)*ncol)+(IC+1)
-!!!              icell4 = ((IB-1)*nrow*ncol)+((IR-2)*ncol)+(IC  )
-!!!            !icell1 = ((K-1)*nrow*ncol)+((I-1)*ncol)+J
-!!!            !icell2 = ((K-1)*nrow*ncol)+((I-1)*ncol)+(J+1)
-!!!            !icell3 = ((K-1)*nrow*ncol)+((I-2)*ncol)+(J+1)
-!!!            !icell4 = ((K-1)*nrow*ncol)+((I-2)*ncol)+(J)
-!!!            !if(icell3.le.0.or.icell3.gt.(K*nrow*ncol))icell3=icell1
-!!!            !if(icell4.le.0.or.icell3.gt.(K*nrow*ncol))icell4=icell1
-!!!              IF(HYDSUBARR(N).EQ.'CP')
-!!!     +         HYDVAL(NHYDTOT+N,IHYDLOC) = HYDVAL(NHYDTOT+N,IHYDLOC) +
-!!!     +   SUB(icell1)*W1+SUB(icell2)*W2+SUB(icell3)*W3+SUB(icell4)*W4
-!!!              IF(HYDSUBARR(N).EQ.'CE')
-!!!     +         HYDVAL(NHYDTOT+N,IHYDLOC) = HYDVAL(NHYDTOT+N,IHYDLOC) +
-!!!     +   SUBE(icell1)*W1+SUBE(icell2)*W2+SUBE(icell3)*W3+SUBE(icell4)*W4
-!!!            IF(HYDSUBARR(N).EQ.'CV')
-!!!     +        HYDVAL(NHYDTOT+N,IHYDLOC) = HYDVAL(NHYDTOT+N,IHYDLOC) +
-!!!     +   SUBV(icell1)*W1+SUBV(icell2)*W2+SUBV(icell3)*W3+SUBV(icell4)*W4
-!!!            END DO
-!!!         END IF
 C
 C -----Hydrograph value must be subsidence (not HC and not CP)
       ELSE IF(HYDSUBARR(N).EQ.'SB') THEN
@@ -1690,58 +1657,164 @@ C -----Hydrograph value must be subsidence (not HC and not CP)
           HYDVAL(NHYDTOT+N,IHYDLOC) = HYDVAL(NHYDTOT+N,IHYDLOC) +
      1                                SB_OB(N)%OP(K)%SIM
          END DO
-!!!      ELSE IF(HYDSUBARR(N).EQ.'SB'.or.HYDSUBARR(N).EQ.'SE'.or.
-!!!     &       HYDSUBARR(N).EQ.'SV') THEN
-!!!         KLAY=JIKHYDSUB(3,N)
-!!!         TOTL=0.
-!!!cc         IF(IBHYDSUB(N).AND.(IBTOT.EQ.0.and.(INTRPHYDSUB(N)))) THEN
-!!!         IF(IBTOT.EQ.0. .OR. IBTOP(N).EQ.0) THEN                       !seb ADDED '.OR. IBTOP(N).EQ.0' TO CHECK IF THERE ARE NO LAYERS TO SUM OVER
-!!!            HYDVAL(NHYDTOT+N,IHYDLOC)=HYDNOH
-!!!         ELSE
-!!!          !II=IBTOP(N)
-!!!          DO 40 IL=IBTOP(N),KLAY
-!!!            IC=JIKHYDSUB(1,N)
-!!!            IR=JIKHYDSUB(2,N)
-!!!            W1=HYDSUBWT(1,N)
-!!!            W2=HYDSUBWT(2,N)
-!!!            W3=HYDSUBWT(3,N)
-!!!            W4=HYDSUBWT(4,N)                                            !seb FIXED TO CORRECT POINTER LOCATION WITH SUB
-!!!            LNLOC=0
-!!!            NDBCOUNT=0
-!!!            DO I=1, NNDB
-!!!                IF(LN(I).EQ.IL) THEN
-!!!                    NDBCOUNT=NDBCOUNT+1
-!!!                    LNLOC(NDBCOUNT)=I
-!!!                END IF
-!!!            END DO
-!!!            !HYDVAL(NHYDTOT+N,IHYDLOC) = 0.0
-!!!            DO I=1, NDBCOUNT
-!!!              IB=LNLOC(I)
-!!!              icell1 = ((IB-1)*nrow*ncol)+((IR-1)*ncol)+(IC  )
-!!!              icell2 = ((IB-1)*nrow*ncol)+((IR-1)*ncol)+(IC+1)
-!!!              icell3 = ((IB-1)*nrow*ncol)+((IR-2)*ncol)+(IC+1)
-!!!              icell4 = ((IB-1)*nrow*ncol)+((IR-2)*ncol)+(IC  )
-!!!            !icell1 = ((K-1)*nrow*ncol)+((I-1)*ncol)+J
-!!!            !icell2 = ((K-1)*nrow*ncol)+((I-1)*ncol)+(J+1)
-!!!            !icell3 = ((K-1)*nrow*ncol)+((I-2)*ncol)+(J+1)
-!!!            !icell4 = ((K-1)*nrow*ncol)+((I-2)*ncol)+(J)
-!!!            !if(icell3.le.0.or.icell3.gt.(K*nrow*ncol))icell3=icell1
-!!!              
-!!!            !if(icell4.le.0.or.icell3.gt.(K*nrow*ncol))icell4=icell1
-!!!            IF(HYDSUBARR(N).EQ.'SB'.and.IBTOT.gt.0)TOTL=TOTL+
-!!!     1 SUB(icell1)*W1+SUB(icell2)*W2+SUB(icell3)*W3+SUB(icell4)*W4
-!!!            IF(HYDSUBARR(N).EQ.'SE'.and.IBTOT.gt.0)TOTL=TOTL+
-!!!     1 SUBE(icell1)*W1+SUBE(icell2)*W2+SUBE(icell3)*W3+SUBE(icell4)*W4
-!!!            IF(HYDSUBARR(N).EQ.'SV'.and.IBTOT.gt.0)TOTL=TOTL+
-!!!     1 SUBV(icell1)*W1+SUBV(icell2)*W2+SUBV(icell3)*W3+SUBV(icell4)*W4
-!!!            END DO
-!!!   40    CONTINUE
-!!!         HYDVAL(NHYDTOT+N,IHYDLOC)=TOTL 
-!!!        ENDIF                      
        ENDIF
    50 CONTINUE
-!seb      NHYDSUB=NHYDSUB-IK
       NHYDTOT=NHYDTOT+NHYDSUB
+C
+C ------RETURN
+      RETURN
+      END
+      SUBROUTINE GWF2HYD7SWT7SE(IHYDLOC,IGRID)
+C     ******************************************************************
+C     COMPUTE HYDROGRAPH RECORDS FOR SWT
+C     ******************************************************************
+C
+C     SPECIFICATIONS:
+C     ------------------------------------------------------------------
+      USE GLOBAL, ONLY: IBOUND,NROW,NCOL,NLAY,DELC,DELR
+      USE HYDBASMODULE
+      USE HYDSWTMODULE
+      USE GWFSWTMODULE,   ONLY: PCS,GL,VOID,EST,SUB,NSYSTM
+      IMPLICIT NONE
+      INTEGER, INTENT(IN):: IHYDLOC, IGRID
+      INTEGER::N, I, J, K
+      LOGICAL:: IB_TRUE
+C     ------------------------------------------------------------------
+      CALL SGWF2HYD7SWT7PNT(IGRID)
+C
+C -----Return if no SWT hydrographs.
+      IF(NHYDSWT.LE.0) RETURN
+C
+C -----Calculate value for each hydrograph point.
+      DO 50 N=1,NHYDSWT
+       !
+       DO CONCURRENT(K=1:SB_OB(N)%N)
+          CALL SB_OB(N)%OP(K)%BASIS_BUILDER(NROW,NCOL,NLAY,
+     +                                      IBOUND,DELC,DELR)
+       END DO
+       !
+       IF(HYDSWTARR(N).EQ.'HC')THEN
+          I=SB_OB(N)%OP(1)%ROW
+          J=SB_OB(N)%OP(1)%COL
+          K=SB_OB(N)%OP(1)%LAY
+          IB_TRUE = IBOUND(J,I,K).NE.0
+      ELSE 
+          IB_TRUE = .TRUE.
+      END IF
+C
+C -----Check if hydrograph value is Preconsolidation Head.
+      IF(HYDSWTARR(N).EQ.'HC') THEN
+       !
+       IF(IB_TRUE) THEN
+        DO CONCURRENT(K=1:SB_OB(N)%N)
+           CALL SB_OB(N)%OP(K)%INTERP(NROW,NCOL,NSYSTM,PCS)
+        END DO
+        !   
+        HYDVAL(NHYDTOT+N,IHYDLOC) = 0.0
+        DO K=1, SB_OB(N)%N
+         !
+         HYDVAL(NHYDTOT+N,IHYDLOC) = HYDVAL(NHYDTOT+N,IHYDLOC) +
+     1                               SB_OB(N)%OP(K)%SIM
+        END DO
+        HYDVAL(NHYDTOT+N,IHYDLOC) = HYDVAL(NHYDTOT+N,IHYDLOC) /
+     1                                                  DBLE(SB_OB(N)%N)
+       ELSE
+           HYDVAL(NHYDTOT+N,IHYDLOC)=HYDNOH
+       END IF
+C
+C -----Check if hydrograph value is GEOSTATIC STRESS
+      ELSE IF(HYDSWTARR(N).EQ.'GS') THEN
+       !
+       IF(IB_TRUE) THEN
+        DO CONCURRENT(K=1:SB_OB(N)%N)
+           CALL SB_OB(N)%OP(K)%INTERP(NROW,NCOL,NSYSTM,GL)
+        END DO
+        !   
+        HYDVAL(NHYDTOT+N,IHYDLOC) = 0.0
+        DO K=1, SB_OB(N)%N
+         !
+         HYDVAL(NHYDTOT+N,IHYDLOC) = HYDVAL(NHYDTOT+N,IHYDLOC) +
+     1                               SB_OB(N)%OP(K)%SIM
+        END DO
+        HYDVAL(NHYDTOT+N,IHYDLOC) = HYDVAL(NHYDTOT+N,IHYDLOC) /
+     1                                                  DBLE(SB_OB(N)%N)
+       ELSE
+           HYDVAL(NHYDTOT+N,IHYDLOC)=HYDNOH
+       END IF
+C
+C -----Check if hydrograph value is EFFECTIVE STRESS
+      ELSE IF(HYDSWTARR(N).EQ.'ES') THEN
+       !
+       IF(IB_TRUE) THEN
+        DO CONCURRENT(K=1:SB_OB(N)%N)
+           CALL SB_OB(N)%OP(K)%INTERP(NROW,NCOL,NSYSTM,EST)
+        END DO
+        !   
+        HYDVAL(NHYDTOT+N,IHYDLOC) = 0.0
+        DO K=1, SB_OB(N)%N
+         !
+         HYDVAL(NHYDTOT+N,IHYDLOC) = HYDVAL(NHYDTOT+N,IHYDLOC) +
+     1                               SB_OB(N)%OP(K)%SIM
+        END DO
+        HYDVAL(NHYDTOT+N,IHYDLOC) = HYDVAL(NHYDTOT+N,IHYDLOC) /
+     1                                                  DBLE(SB_OB(N)%N)
+       ELSE
+           HYDVAL(NHYDTOT+N,IHYDLOC)=HYDNOH
+       END IF
+C
+C -----Check if hydrograph value is VOID RATIO
+      ELSE IF(HYDSWTARR(N).EQ.'VR') THEN
+       !
+       IF(IB_TRUE) THEN
+        DO CONCURRENT(K=1:SB_OB(N)%N)
+           CALL SB_OB(N)%OP(K)%INTERP(NROW,NCOL,NSYSTM,VOID)
+        END DO
+        !   
+        HYDVAL(NHYDTOT+N,IHYDLOC) = 0.0
+        DO K=1, SB_OB(N)%N
+         !
+         HYDVAL(NHYDTOT+N,IHYDLOC) = HYDVAL(NHYDTOT+N,IHYDLOC) +
+     1                               SB_OB(N)%OP(K)%SIM
+        END DO
+        HYDVAL(NHYDTOT+N,IHYDLOC) = HYDVAL(NHYDTOT+N,IHYDLOC) /
+     1                                                  DBLE(SB_OB(N)%N)
+       ELSE
+           HYDVAL(NHYDTOT+N,IHYDLOC)=HYDNOH
+       END IF
+C
+C -----Check if hydrograph value is compaction
+       ELSE IF(HYDSWTARR(N).EQ.'CP') THEN
+        !
+        IF(IB_TRUE) THEN
+         DO CONCURRENT(K=1:SB_OB(N)%N)
+            CALL SB_OB(N)%OP(K)%INTERP(NROW,NCOL,NSYSTM,SUB)
+         END DO
+         !   
+         HYDVAL(NHYDTOT+N,IHYDLOC) = 0.0
+         DO K=1, SB_OB(N)%N
+          !
+          HYDVAL(NHYDTOT+N,IHYDLOC) = HYDVAL(NHYDTOT+N,IHYDLOC) +
+     1                                SB_OB(N)%OP(K)%SIM
+         END DO
+        ELSE
+            HYDVAL(NHYDTOT+N,IHYDLOC)=HYDNOH
+        END IF
+C
+C -----Hydrograph value must be subsidence (not HC and not CP)
+      ELSE IF(HYDSWTARR(N).EQ.'SB') THEN
+         DO CONCURRENT(K=1:SB_OB(N)%N)
+            CALL SB_OB(N)%OP(K)%INTERP(NROW,NCOL,NSYSTM,SUB)
+         END DO
+         !   
+         HYDVAL(NHYDTOT+N,IHYDLOC) = 0.0
+         DO K=1, SB_OB(N)%N
+          !
+          HYDVAL(NHYDTOT+N,IHYDLOC) = HYDVAL(NHYDTOT+N,IHYDLOC) +
+     1                                SB_OB(N)%OP(K)%SIM
+         END DO     
+       ENDIF
+   50 CONTINUE
+      NHYDTOT=NHYDTOT+NHYDSWT
 C
 C ------RETURN
       RETURN
@@ -1763,7 +1836,6 @@ C
 C
       INTEGER::N, I, J, K, II
       INTEGER:: ISTR
-      !CHARACTER HYDSTRLBL*20,LINE*80,INTYP*1
 C     ------------------------------------------------------------------
       CALL SGWF2HYD7STR7PNT(IGRID)
 C
@@ -1832,7 +1904,6 @@ C
 C
       INTEGER::N, I, J, K
       INTEGER:: ISFR
-      !CHARACTER HYDSFRLBL*20,LINE*80,INTYP*1
 C     ------------------------------------------------------------------
       CALL SGWF2HYD7SFR7PNT(IGRID)
 C
@@ -2135,6 +2206,8 @@ C2------CHECK IF HYDMOD IS USED WITH OTHER PACKAGES.  IF SO, DEALLOCATE
      1                   CALL SGWF2HYD7IBS7DA(IGRID)
       IF(IUNIT(43).NE.0 .AND. IUNIT(54).NE.0) 
      1                   CALL SGWF2HYD7SUB7DA(IGRID)
+      IF(IUNIT(43).NE.0 .AND. IUNIT(57).NE.0) 
+     1                   CALL SGWF2HYD7SWT7DA(IGRID)
       IF(IUNIT(43).NE.0 .AND. IUNIT(18).NE.0) 
      1                   CALL SGWF2HYD7STR7DA(IGRID)
       IF(IUNIT(43).NE.0 .AND. IUNIT(44).NE.0) 
@@ -2283,12 +2356,9 @@ C  Deallocate HYD SUB memory
       INTEGER:: IERR
 C
       DEALLOCATE(HYDSUBDAT(IGRID)%NHYDSUB,     STAT = IERR)
-      IF(ASSOCIATED (HYDSUBDAT(IGRID)%IBHYDSUB))  !rth=> deallocation error needs fixing
-     & DEALLOCATE(HYDSUBDAT(IGRID)%IBHYDSUB)
-      DEALLOCATE(HYDSUBDAT(IGRID)%INTRPHYDSUB,     STAT = IERR)
-      !DEALLOCATE(HYDSUBDAT(IGRID)%JIKHYDSUB,     STAT = IERR)
-      !DEALLOCATE(HYDSUBDAT(IGRID)%HYDSUBWT,     STAT = IERR)
-      DEALLOCATE(HYDSUBDAT(IGRID)%HYDSUBARR,     STAT = IERR)
+      DEALLOCATE(HYDSUBDAT(IGRID)%IBHYDSUB,    STAT = IERR)
+      DEALLOCATE(HYDSUBDAT(IGRID)%INTRPHYDSUB, STAT = IERR)
+      DEALLOCATE(HYDSUBDAT(IGRID)%HYDSUBARR,   STAT = IERR)
 C
       RETURN
       END
@@ -2301,8 +2371,6 @@ C
       NHYDSUB=>HYDSUBDAT(IGRID)%NHYDSUB
       IBHYDSUB=>HYDSUBDAT(IGRID)%IBHYDSUB
       INTRPHYDSUB=>HYDSUBDAT(IGRID)%INTRPHYDSUB
-      !JIKHYDSUB=>HYDSUBDAT(IGRID)%JIKHYDSUB
-      !HYDSUBWT=>HYDSUBDAT(IGRID)%HYDSUBWT
       HYDSUBARR=>HYDSUBDAT(IGRID)%HYDSUBARR
 C
       RETURN
@@ -2316,9 +2384,47 @@ C
       HYDSUBDAT(IGRID)%NHYDSUB=>NHYDSUB
       HYDSUBDAT(IGRID)%IBHYDSUB=>IBHYDSUB
       HYDSUBDAT(IGRID)%INTRPHYDSUB=>INTRPHYDSUB
-      !HYDSUBDAT(IGRID)%JIKHYDSUB=>JIKHYDSUB
-      !HYDSUBDAT(IGRID)%HYDSUBWT=>HYDSUBWT
       HYDSUBDAT(IGRID)%HYDSUBARR=>HYDSUBARR
+C
+      RETURN
+      END
+      SUBROUTINE SGWF2HYD7SWT7DA(IGRID)
+C  Deallocate HYD SWT memory
+      USE HYDSWTMODULE
+      IMPLICIT NONE
+      INTEGER, INTENT(IN):: IGRID
+      INTEGER:: IERR
+C
+      DEALLOCATE(HYDSWTDAT(IGRID)%NHYDSWT,     STAT = IERR)
+      DEALLOCATE(HYDSWTDAT(IGRID)%IBHYDSWT,    STAT = IERR)
+      DEALLOCATE(HYDSWTDAT(IGRID)%INTRPHYDSWT, STAT = IERR)
+      DEALLOCATE(HYDSWTDAT(IGRID)%HYDSWTARR,   STAT = IERR)
+C
+      RETURN
+      END
+      SUBROUTINE SGWF2HYD7SWT7PNT(IGRID)
+C  Change HYD SWT data to a different grid.
+      USE HYDSWTMODULE
+      IMPLICIT NONE
+      INTEGER, INTENT(IN):: IGRID
+C
+      NHYDSWT=>HYDSWTDAT(IGRID)%NHYDSWT
+      IBHYDSWT=>HYDSWTDAT(IGRID)%IBHYDSWT
+      INTRPHYDSWT=>HYDSWTDAT(IGRID)%INTRPHYDSWT
+      HYDSWTARR=>HYDSWTDAT(IGRID)%HYDSWTARR
+C
+      RETURN
+      END
+      SUBROUTINE SGWF2HYD7SWT7PSV(IGRID)
+C  Save HYD SWT data for a grid.
+      USE HYDSWTMODULE
+      IMPLICIT NONE
+      INTEGER, INTENT(IN):: IGRID
+C
+      HYDSWTDAT(IGRID)%NHYDSWT=>NHYDSWT
+      HYDSWTDAT(IGRID)%IBHYDSWT=>IBHYDSWT
+      HYDSWTDAT(IGRID)%INTRPHYDSWT=>INTRPHYDSWT
+      HYDSWTDAT(IGRID)%HYDSWTARR=>HYDSWTARR
 C
       RETURN
       END

@@ -29,7 +29,7 @@ SUBROUTINE PRINT_MAIN_HEADER(IU)  ! Set to 6 for cmd prompt or use output_unit f
   CHARACTER(:),ALLOCATABLE:: Revision
   !
   VERSION_OWHM='2.2'
-  Revision    ='1b'
+  Revision    ='1c'
   VERSION_MF  ='1.12'
   VERSION_FMP ='4.1'
   VERSION_SWR ='1.04'
@@ -435,6 +435,7 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
                            !
                            IF(IUNIT(19) /= Z) CALL GWF2HYD7IBS7AR(IUNIT(43),IGRID)
                            IF(IUNIT(54) /= Z) CALL GWF2HYD7SUB7AR(IUNIT(43),IGRID)
+                           IF(IUNIT(57) /= Z) CALL GWF2HYD7SWT7AR(IUNIT(43),IGRID)
                            IF(IUNIT(18) /= Z) CALL GWF2HYD7STR7AR(IUNIT(43),IGRID)
                            IF(IUNIT(44) /= Z) CALL GWF2HYD7SFR7AR(IUNIT(43),IGRID)
       END IF
@@ -1234,6 +1235,7 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
                                    CALL GWF2HYD7BAS7SE(1,IGRID)
                                    IF(IUNIT(19) /= Z) CALL GWF2HYD7IBS7SE(1,IGRID)
                                    IF(IUNIT(54) /= Z) CALL GWF2HYD7SUB7SE(1,IGRID)
+                                   IF(IUNIT(57) /= Z) CALL GWF2HYD7SWT7SE(1,IGRID)
                                    IF(IUNIT(18) /= Z) CALL GWF2HYD7STR7SE(1,IGRID)
                                    IF(IUNIT(44) /= Z) CALL GWF2HYD7SFR7SE(1,IGRID)
               END IF
