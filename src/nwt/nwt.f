@@ -61,8 +61,8 @@
       ALLOCATE (RMSAVE,ADAMP,Breduc_Reset,HED_LIM,GSE_LIM(1,1))
       ALLOCATE (Numnonzero, Numactive, Numcell, II, iBtrak)
       ALLOCATE (Akappa,Gamma,Amomentum,Btrack,Breduc)
-      ALLOCATE (Nonmeth, Linmeth, IPRNWT, Itreal, Ibt)
-      ALLOCATE (IBOTAV)
+      ALLOCATE (Nonmeth, Linmeth, IPRNWT, Ibt)
+      ALLOCATE (IBOTAV, ITREAL)
       ALLOCATE (itertot)
 !1------IDENTIFY PACKAGE AND INITIALIZE.
         WRITE (Iout, 9001) In
@@ -70,8 +70,8 @@
      +    'VERSION OWHM', /, 9X, 'INPUT READ FROM UNIT',
      +        I5,/)
       i         = ONE
-      Itreal    = Z
       Ibt       = Z
+      ITREAL    = Z
       ADAMP     = UNO
       RMS2      = DZ
       RMS1      = DZ
@@ -910,7 +910,7 @@ C-------STRAIGHT LINE WITH PARABOLIC SMOOTHING
 ! Order system for MODFLOW storage scheme by relating Row, Col, and Lay to
 ! Jacobian order
       USE GLOBAL, ONLY:Ncol, Nrow, Nlay, Ibound, Iout, HNEW
-      USE GWFBASMODULE, ONLY: HDRY
+      USE GWFBASMODULE, ONLY: HNOFLO
       USE GWFNWTMODULE
       IMPLICIT NONE
 !     ------------------------------------------------------------------
@@ -963,7 +963,7 @@ C-------STRAIGHT LINE WITH PARABOLIC SMOOTHING
               WRITE(IOUT,*)'ROW=',ir,'COL=',ic,'LAY=',il
               WRITE(IOUT,*)
             Ibound(ic, ir, il) = 0
-            HNEW(ic,ir,il) = HDRY
+            HNEW(ic,ir,il) = HNOFLO
           END IF
         ENDIF
         ic = ic + 1
