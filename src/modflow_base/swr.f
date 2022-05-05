@@ -2977,13 +2977,6 @@ C-----------DETERMINE IF ANY QAQ CALCULATIONS ARE PERFORMED
           END IF
         END DO QAQCALC
 C
-C--------RECALCULATE THE TOTAL NUMBER OF QAQ CONNECTIONS
-          NQAQCONN = 0
-          CQAQCONN: DO irch = 1, NREACHES
-            NQAQCONN = NQAQCONN + 
-     2        REACH(irch)%LAYEND - REACH(irch)%LAYSTR + 1
-          END DO CQAQCONN
-C
 C--------RECALCULATE NGWET
         NGWET = 0
         CGWET: DO irch = 1, NREACHES
@@ -3836,7 +3829,7 @@ C           TO SPECIFY STRCRIT OR STRVAL
                   CASE (1)
                     cstruct(1) = 'STRCRIT   '
                   CASE (2)
-                    cstruct(1) = 'STRVAL     '
+                    cstruct(1) = 'STRVAL    '
                   CASE DEFAULT
                     CALL USTOP('PROGRAMMING ERROR: UNDEFINED ISTRTYPE')
                 END SELECT
@@ -4159,6 +4152,14 @@ C-------UPDATE STAGES USING CURRENT STAGES TO CALCULATE VOLUME AND OFFSETS
       IF ( IRDGEO.NE.IZERO .OR. IRDSTG.NE.IZERO ) THEN
         CALL SSWR_VOL2STG_UPDATE()
       END IF
+C
+C-------CALCULATE THE TOTAL NUMBER OF QAQ CONNECTIONS
+      NQAQCONN = 0
+      DO irch = 1, NREACHES
+        DO k = REACH(irch)%LAYSTR, REACH(irch)%LAYEND
+          NQAQCONN = NQAQCONN + 1
+        END DO
+      END DO
 C
 C-------CLEAN UP TEMPORARY STORAGE
       IF ( IRDSTR.GT.0 ) THEN
@@ -5761,7 +5762,6 @@ C---------IF SAVING CELL-BY-CELL FLOWS IN A LIST, WRITE FLOW.
             ival   = 1
           END IF
           DO kl = REACH(irch)%LAYSTR, REACH(irch)%LAYEND
-              !rate = layrate(kl)
               rate = REACH(irch)%QAQRATE(kl)
             CALL UBDSVB(ISWRCB,NCOL,NROW,jc,ir,kl,rate,
      1                  AUXROW,ival,iaux,1,IBOUND,NLAY)
@@ -6758,13 +6758,26 @@ C       + + + DUMMY ARGUMENTS + + +
         INTEGER, INTENT(IN) :: Iu
 C       + + + LOCAL DEFINITIONS + + +
         CHARACTER (LEN=2), PARAMETER :: comment = '//'
-        CHARACTER (LEN=768) :: line
+        CHARACTER (LEN=512) :: line
+        CHARACTER (LEN=512) :: error_line
+        LOGICAL :: openedq
         LOGICAL :: iscomment
         INTEGER :: ios
         line = comment
         DO
           READ (Iu,'(A)',IOSTAT=ios) line
-          IF (ios /= 0) CALL USTOP('COULD NOT READ FROM UNIT Iu')
+          IF (ios /= 0) THEN
+            WRITE(error_line,'(a,1x,i0,1x,a,i0)') 
+     2        'COULD NOT READ FROM UNIT Iu', Iu,
+     3        'IOSTAT=', ios
+            inquire(unit=Iu, opened=openedq)
+            IF (.NOT. openedq) then
+            ELSE
+              WRITE(error_line,'(a,1x,a)')
+     2          TRIM(ADJUSTL(error_line)), 'FILE IS NOT OPENED'
+            END IF
+            CALL USTOP(TRIM(ADJUSTL(error_line)))
+          END IF
           IF (LEN_TRIM(line).LT.1) THEN
             line = comment
             CYCLE
@@ -14587,7 +14600,7 @@ C     + + + FUNCTIONS + + +
 C     + + + OUTPUT FORMATS + + +
 02000   FORMAT(//1X,'NUMBER OF REACHES IN SWR1 STAGE FILE (',I10,')',
      2         1X,'INCONSISTENT WITH NUMBER OF SWR1 REACHES (',I10,')',
-     3          /1X,'SPECIFIED IN SWR1 DATASET 1')
+     3         /1X,'SPECIFIED IN SWR1 DATASET 1')
 02010   FORMAT(//1X,'NO DATA READ FROM SPECIFIED SWR1 STAGE FILE',
      2           1X,'(UNIT',I10,')')
 C     + + + CODE + + +
