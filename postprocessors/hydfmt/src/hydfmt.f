@@ -105,6 +105,8 @@ C seb MOVED INITIALIZTION OUTSIDE OF DATA TO MAKE EXE SMALLER
       FMT1=blank
       DCONVRT=1.
 CC
+      WRITE(*,'(/,1X,A,/,/)') 'HYDFMT version 1.1'
+CC
 C----- Read file names
     1 WRITE(*,*) 'Enter name of file with unformatted hydrograph data:'
       READ(*,'(A)') FN1
