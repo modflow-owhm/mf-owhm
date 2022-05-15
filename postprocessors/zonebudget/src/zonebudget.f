@@ -114,7 +114,7 @@ C-----          used.
      +'   but ZoneBudget thinks its single precision, '//LF//
      +'   is single precision when is double, '//LF//
      +'   or the binary contains a mixture of the two.'//LF//LF//
-     +'4) The binary is not compatible with ZoneBudget 3.2. '//LF//
+     +'4) The binary is not compatible with ZoneBudget 3.3. '//LF//
      +'    - Contact a developer for help'//LF//LF
       CHARACTER(:), ALLOCATABLE:: ERRMSG
       !
@@ -128,7 +128,7 @@ C     ------------------------------------------------------------------
               END FUNCTION
       END INTERFACE
       
-      VERSON='ZONEBUDGET version 3.2'
+      VERSON='ZONEBUDGET version 3.3'
 C
 C-----DEFINE INPUT AND OUTPUT UNITS AND INITIALIZE OTHER VARIABLES
       INZN1    = 10
