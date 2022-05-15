@@ -149,9 +149,9 @@ MODULE SALINITY_DATA_FMP_MODULE!, ONLY: SALINITY_DATA, INITIALIZE_SALINITY_DATA
     SALT%CROP_FRACTION = CROP_FRACTION
     !
     !SELECT CASE (LENUNI)
-    !CASE(Z);     SUP%TO_LITER = 1000D0
+    !CASE(Z);     SUP%TO_LITER = 1000.D0
     !CASE(ONE);   SUP%TO_LITER = 28.316846592D0
-    !CASE(TWO);   SUP%TO_LITER = 1000D0
+    !CASE(TWO);   SUP%TO_LITER = 1000.D0
     !CASE(THREE); SUP%TO_LITER = 0.001D0
     !END SELECT
     !
@@ -752,14 +752,14 @@ MODULE SALINITY_DATA_FMP_MODULE!, ONLY: SALINITY_DATA, INITIALIZE_SALINITY_DATA
                           WBS%SUPPLY(I)%NRD   *  SALT%SUP_PPM(3,I) +  &
                           WBS%SUPPLY(I)%MAGIC *  SALT%SUP_PPM(4,I)   ) / WBS%SUPPLY(I)%USED
         ELSEIF(WBS%SUPPLY(I)%HAS_MAGIC) THEN
-            SALT%ECw(I) = ( SALT%SUP_PPM(1,I) + SALT%SUP_PPM(2,I) + SALT%SUP_PPM(3,I) + SALT%SUP_PPM(4,I) ) / 4D0
+            SALT%ECw(I) = ( SALT%SUP_PPM(1,I) + SALT%SUP_PPM(2,I) + SALT%SUP_PPM(3,I) + SALT%SUP_PPM(4,I) ) / 4.D0
             
         ELSE
-            SALT%ECw(I) = ( SALT%SUP_PPM(1,I) + SALT%SUP_PPM(2,I) + SALT%SUP_PPM(3,I) ) / 3D0
+            SALT%ECw(I) = ( SALT%SUP_PPM(1,I) + SALT%SUP_PPM(2,I) + SALT%SUP_PPM(3,I) ) / 3.D0
         END IF
     END DO
     !
-    SALT%ECw = SALT%ECw / 640D0 !mg/l  => dS/m
+    SALT%ECw = SALT%ECw / 640.D0 !mg/l  => dS/m
     !
     IF(SALT%SKIP_SALINITY) RETURN  !NOTHING HAS SALINTIY
     !
@@ -1191,9 +1191,9 @@ MODULE SALINITY_DATA_FMP_MODULE!, ONLY: SALINITY_DATA, INITIALIZE_SALINITY_DATA
        !
        IF(CDMD>NEARZERO_10 .AND. DMD>UNO) THEN
            !
-           PIN = (DMD/CDMD)*100D0
+           PIN = (DMD/CDMD)*100.D0
            !
-           IF(PIN < 100000D0) THEN
+           IF(PIN < 100000.D0) THEN
                 WRITE(PC,'(1x,F12.2)') PIN
            ELSE
                WRITE(PC,'(1x,ES12.2)') PIN
@@ -1358,9 +1358,9 @@ MODULE SALINITY_DATA_FMP_MODULE!, ONLY: SALINITY_DATA, INITIALIZE_SALINITY_DATA
                !
                IF(CDMD>NEARZERO_10 .AND. DMD>UNO) THEN
                    !
-                   PIN = (DMD/CDMD)*100D0
+                   PIN = (DMD/CDMD)*100.D0
                    !
-                   IF(PIN < 100000D0) THEN
+                   IF(PIN < 100000.D0) THEN
                         WRITE(PC,'(1x,F12.2)') PIN
                    ELSE
                        WRITE(PC,'(1x,ES12.2)') PIN
@@ -1490,9 +1490,9 @@ MODULE SALINITY_DATA_FMP_MODULE!, ONLY: SALINITY_DATA, INITIALIZE_SALINITY_DATA
               !
               IF(CDMD>NEARZERO_10 .AND. DMD>UNO) THEN
                   !
-                  PIN = (DMD/CDMD)*100D0
+                  PIN = (DMD/CDMD)*100.D0
                   !
-                  IF(PIN < 100000D0) THEN
+                  IF(PIN < 100000.D0) THEN
                        WRITE(PC,'(1x,F12.2)') PIN
                   ELSE
                       WRITE(PC,'(1x,ES12.2)') PIN

@@ -64,11 +64,11 @@ MODULE WELL_DATA_FMP_MODULE
   TYPE FARM_WELL_DATA               ! ALL INFORMATION FOR FARM WELLS FOR 1 FARM
       INTEGER:: NF                  !FARM ID THAT WELL SET PERTAINS TOO
       !
-      DOUBLE PRECISION:: QMAX = 0D0 ! FARM TOTAL PUMPING CAPACITY
-      DOUBLE PRECISION:: QMAXini    ! FARM INITIAL TOTAL PUMPING CAPACITY
-      DOUBLE PRECISION:: SFAC = 1D0 ! SCALE FACTOR
-      DOUBLE PRECISION:: SMOOTH_LIM ! SMOOTHING ACTIVATION LIMIT --EITHER MIN THICKNESS OR FRACTION OF A LAYER
-      DOUBLE PRECISION:: ALLOT=-1D0 ! FARM ALLOTMENT FOR PUMPAGE (MAX VOLUME)  <0 INDICATES NO ALLOTMENT
+      DOUBLE PRECISION:: QMAX = 0.D0 ! FARM TOTAL PUMPING CAPACITY
+      DOUBLE PRECISION:: QMAXini     ! FARM INITIAL TOTAL PUMPING CAPACITY
+      DOUBLE PRECISION:: SFAC = 1.D0 ! SCALE FACTOR
+      DOUBLE PRECISION:: SMOOTH_LIM  ! SMOOTHING ACTIVATION LIMIT --EITHER MIN THICKNESS OR FRACTION OF A LAYER
+      DOUBLE PRECISION:: ALLOT=-1.D0 ! FARM ALLOTMENT FOR PUMPAGE (MAX VOLUME)  <0 INDICATES NO ALLOTMENT
       !
       INTEGER:: N   = Z             ! NUMBER OF ACTIVE WELLS FOR SP
       INTEGER:: NAUX= Z             ! NUMBER OF AUX VARIABLES
@@ -240,7 +240,7 @@ MODULE WELL_DATA_FMP_MODULE
 !    !
 !    IF (NF < 1) RETURN
 !    !
-!    DZ = 0D0
+!    DZ = 0.D0
 !    ONE = 1
 !    !
 !    FWEL(NF)%DIM=FWEL(NF)%DIM + ONE
@@ -476,7 +476,7 @@ MODULE WELL_DATA_FMP_MODULE
                 !cof2 = -(2.0D0*SAT_THICK)/(MIN_THICK**3.0D0)
                 !cof3 = 3.0D0/(MIN_THICK**2.0D0)
                 !FWEL%Qsmf(I) = cof1*(cof2+cof3)                   !      coef1             coef3                            coef2
-                                                    FWEL%Qsmf(I) = SAT_THICK*SAT_THICK * (  (3D0/(MIN_THICK*MIN_THICK))  -  (2D0*SAT_THICK/(MIN_THICK*MIN_THICK*MIN_THICK))  )
+                                                    FWEL%Qsmf(I) = SAT_THICK*SAT_THICK * (  (3.D0/(MIN_THICK*MIN_THICK))  -  (2.D0*SAT_THICK/(MIN_THICK*MIN_THICK*MIN_THICK))  )
               END IF
           END IF
           !
@@ -2301,7 +2301,7 @@ MODULE WELL_DATA_FMP_MODULE
                 !
                 PUMPCAP=NINT(MNW2(22,J))
                 IF(PUMPCAP.GT.Z) THEN
-                     IF( FWEL%Qcap(I) < MINSIZE ) THEN                           !IF QDES IS 0D0 FOR THIS STRESS PERIOD, DO NOT APPLY PUMP CAPACITY RESTRAINTS (Should )
+                     IF( FWEL%Qcap(I) < MINSIZE ) THEN                           !IF QDES IS 0.D0 FOR THIS STRESS PERIOD, DO NOT APPLY PUMP CAPACITY RESTRAINTS (Should )
                           MNW2(25,J)=Z
                           MNW2(27,J)=Z                                        !INITIALIZE CAPFLAG
                      ELSE
@@ -2418,7 +2418,7 @@ MODULE WELL_DATA_FMP_MODULE
   !!!              !
   !!!              PUMPCAP=NINT(MNW2(22,J))
   !!!              IF(PUMPCAP.GT.Z) THEN
-  !!!                   IF( FWEL%Qcap(I) < MINSIZE ) THEN                           !IF QDES IS 0D0 FOR THIS STRESS PERIOD, DO NOT APPLY PUMP CAPACITY RESTRAINTS (Should )
+  !!!                   IF( FWEL%Qcap(I) < MINSIZE ) THEN                           !IF QDES IS 0.D0 FOR THIS STRESS PERIOD, DO NOT APPLY PUMP CAPACITY RESTRAINTS (Should )
   !!!                        MNW2(25,J)=Z
   !!!                        MNW2(27,J)=Z                                        !INITIALIZE CAPFLAG
   !!!                   ELSE
@@ -2525,7 +2525,7 @@ MODULE WELL_DATA_FMP_MODULE
 !            !
 !            PUMPCAP=NINT(MNW2(22,J))
 !            IF(PUMPCAP.GT.Z) THEN
-!                 IF( FWEL%Qcap(I) < MINSIZE ) THEN                           !IF QDES IS 0D0 FOR THIS STRESS PERIOD, DO NOT APPLY PUMP CAPACITY RESTRAINTS (Should )
+!                 IF( FWEL%Qcap(I) < MINSIZE ) THEN                           !IF QDES IS 0.D0 FOR THIS STRESS PERIOD, DO NOT APPLY PUMP CAPACITY RESTRAINTS (Should )
 !                      MNW2(25,J)=Z
 !                      MNW2(27,J)=Z                                        !INITIALIZE CAPFLAG
 !                 ELSE
@@ -3180,7 +3180,7 @@ MODULE WELL_DATA_FMP_MODULE
     STP = ADJUSTL(STP)
     !
     DO I=ONE,FWEL%DIM
-        IF((FWEL%ACT(I) .OR. FWEL%EXT(I)) .AND. FWEL%Qsmf(I) < 1D0) THEN
+        IF((FWEL%ACT(I) .OR. FWEL%EXT(I)) .AND. FWEL%Qsmf(I) < UNO) THEN
               IL = FWEL%LRC(1,I)
               IR = FWEL%LRC(2,I)
               IC = FWEL%LRC(3,I)
@@ -3188,7 +3188,7 @@ MODULE WELL_DATA_FMP_MODULE
               QINI = ADJUSTR(QINI)
               QCAP = NUM2STR(FWEL%Qcap(I))
               QCAP = ADJUSTR(QCAP)
-              QFIN = NUM2STR(-1D0*FWEL%Q(I))
+              QFIN = NUM2STR(-1.0D0*FWEL%Q(I))
               QFIN = ADJUSTR(QFIN)
               QSMF = NUM2STR(FWEL%Qsmf(I))
               QSMF = ADJUSTR(QSMF)
@@ -3260,7 +3260,7 @@ MODULE WELL_DATA_FMP_MODULE
               QINI = ADJUSTR(QINI)
               QCAP = NUM2STR(FWEL%Qcap(I))
               QCAP = ADJUSTR(QCAP)
-              QFIN = NUM2STR(-1D0*FWEL%Q(I))
+              QFIN = NUM2STR(-1.0D0*FWEL%Q(I))
               QFIN = ADJUSTR(QFIN)
               !
               IF(PRESENT(KPER)) THEN
@@ -3487,7 +3487,7 @@ MODULE WELL_DATA_FMP_MODULE
                           IF(FWEL%SMOOTH>0) THEN
                               SMF = FWEL%Qsmf(I)
                           ELSE
-                              SMF = 1D0
+                              SMF = UNO
                           END IF
                           !
                           IF(FWEL%Q(I) < NEGNEARZERO_6) THEN
@@ -3710,7 +3710,7 @@ MODULE WELL_DATA_FMP_MODULE
        IF(FWEL%NF == ONE .AND. KPER==ONE .AND. KSTP==ONE) WRITE(FWEL%IOUT,'(A,/A)')'FARM WELL CAPCITIES BY FARM OUTPUT WRITTEN TO BINARY FILE USING STREAM UNFORMATTED STRUCTURE. EACH THE RECORD IN BINARY HAS THE FOLLOWING STRUCTURE:',"DATE_START (19char), DECIMAL YEAR (double), TIME STEP LENGTH (double), STRESS PERIOD (int), TIME STEP (int), FARM ID (int), INITIAL FARM'S CAPACIY (double), FARM'S CAPACITY (double), FINAL FARM'S PUMPAGE (double), INITIAL FARM'S DEMAND (double)"
        !
        IF(FWEL%N > Z) THEN
-            WRITE(IU) DATE, DYEAR, DELT, KPER, KSTP, FWEL%NF, FWEL%QMAXini, FWEL%QMAX, -1D0*SUM(FWEL%Q, MASK=FWEL%ACT.OR.FWEL%EXT), TFDR_INI, TFDR
+            WRITE(IU) DATE, DYEAR, DELT, KPER, KSTP, FWEL%NF, FWEL%QMAXini, FWEL%QMAX, -1.0D0*SUM(FWEL%Q, MASK=FWEL%ACT.OR.FWEL%EXT), TFDR_INI, TFDR
        ELSE
             WRITE(IU) DATE, DYEAR, DELT, KPER, KSTP, FWEL%NF, DZ,           DZ,                            DZ,         DZ,         DZ
        END IF
@@ -3730,7 +3730,7 @@ MODULE WELL_DATA_FMP_MODULE
             IF(FWEL%QMAXini > MINSIZE .AND. FWEL%ALLOT > -0.1D0) THEN
                 FRAC = FWEL%ALLOT / FWEL%QMAXini
             ELSE
-                FRAC = 1D0
+                FRAC = UNO
             END IF
             !
             TFINI = NUM2STR(TFDR_INI)
@@ -3746,7 +3746,7 @@ MODULE WELL_DATA_FMP_MODULE
             QCAP = ADJUSTR(QCAP)
             !QMAX = NUM2STR(FWEL%QMAX)
             !QMAX = ADJUSTR(QMAX)
-            QFIN = NUM2STR(-1D0*SUM(FWEL%Q, MASK=FWEL%ACT.OR.FWEL%EXT))
+            QFIN = NUM2STR(-1.0D0*SUM(FWEL%Q, MASK=FWEL%ACT.OR.FWEL%EXT))
             QFIN = ADJUSTR(QFIN)
             WRITE(IU, '(3I7, 7A, 2x,F13.7, 2x,A)') KPER, KSTP, FWEL%NF, QINI, QALOT, QCAP, QFIN,TFINI,   TF, DT, DYEAR, DATE
        ELSE
@@ -3904,7 +3904,7 @@ MODULE WELL_DATA_FMP_MODULE
 !!!  INTEGER:: I, IR, IC
 !!!  DOUBLE PRECISION:: AREA, Z
 !!!  !
-!!!  Z = 0D0
+!!!  Z = 0.D0
 !!!  FMLOC%AREA     = Z
 !!!  FMLOC%CRP_AREA = Z
 !!!  FMLOC%IRR_AREA = Z

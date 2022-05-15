@@ -90,7 +90,7 @@ FUNCTION ExpEval1D(Ln,NML,NMV,CHKCASE,CHKKEY) RESULT(RES)           !Ln='Actual 
   IF(CHKK) CALL KEYWORDCHECK(VAR)
   !
   VAL=RESHAPE(NMV,[ROW,COL,NVAR])
-  ANS=0D0
+  ANS=0.0D0
   !
   CALL ExpEvalRun(Ln,ANS)
   !
@@ -130,7 +130,7 @@ FUNCTION ExpEval2D(Ln,NML,NMV,CHKCASE,CHKKEY) RESULT(RES)           !Ln='Actual 
   IF(CHKK) CALL KEYWORDCHECK(VAR)
   !
   VAL=RESHAPE(NMV,[ROW,COL,NVAR])
-  ANS=0D0
+  ANS=0.0D0
   !
   CALL ExpEvalRun(Ln,ANS)
   !
@@ -170,7 +170,7 @@ FUNCTION ExpEval3D(Ln,NML,NMV,CHKCASE,CHKKEY) RESULT(RES)           !Ln='Actual 
   !
   !VAL=RESHAPE(NMV,[ROW,COL,NVAR])
   VAL=NMV
-  ANS=0D0
+  ANS=0.0D0
   !
   CALL ExpEvalRun(Ln,ANS)
   !
@@ -234,7 +234,7 @@ RECURSIVE SUBROUTINE EqnParser(Eqn,R,ANS,MP)                      !EVALUATE PART
   COL=SIZE(ANS,2)
   IF(.NOT. ALLOCATED(RHS)) THEN
     ALLOCATE(RHS(ROW,COL))
-    RHS=0D0
+    RHS=0.0D0
   END IF
   !
   CALL NextAtom(Eqn,R,ANS)                                          !NEXT ATOM MOVES TO NEXT PART OF EQUATION
@@ -959,8 +959,8 @@ PURE ELEMENTAL FUNCTION MathOP(OP,L,R) RESULT(ANS)                     !APPLY TH
   CASE ('*');  ANS =  L*R
   CASE ('/');  ANS =  L/R
   CASE ('^')
-           IF(L==0D0) THEN
-               ANS =  0D0
+           IF(L==0.0D0) THEN
+               ANS =  0.0D0
            ELSE
                ANS =  L**R
            END IF
@@ -1017,20 +1017,20 @@ PURE ELEMENTAL SUBROUTINE KEYWORDEVAL(WORD,ANS,VALID)
    CASE('ABS');  ANS=ABS(ANS)
    CASE('EXP');  ANS=EXP(ANS)
    CASE('LOG')
-               IF(ANS<=0D0) THEN
+               IF(ANS<=0.0D0) THEN
                  VALID=.FALSE.
                ELSE
                  ANS=LOG(ANS)
                END IF
    CASE('L10')
-               IF(ANS<=0D0) THEN
+               IF(ANS<=0.0D0) THEN
                  VALID=.FALSE.
                ELSE
                  ANS=LOG10(ANS)
                END IF
-   CASE('NEG');  ANS=-1D0*ANS
+   CASE('NEG');  ANS=-1.0D0*ANS
    CASE('SQRT')
-               IF(ANS<0D0) THEN
+               IF(ANS<0.0D0) THEN
                  VALID=.FALSE.
                ELSE
                  ANS=SQRT(ANS)

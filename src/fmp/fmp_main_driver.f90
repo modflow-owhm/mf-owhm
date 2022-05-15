@@ -587,7 +587,7 @@ MODULE FMP_MAIN_DRIVER
                      !
                      WRITE(IOUT,'(4X,I4,20X,I6,9X,2A20)')     NF,FWELL(NF)%N, FWELL(NF)%QMAXini,' NaN', ' NaN'
                      !
-          ELSEIF(WBS%INUSE(NF) .AND. FWELL(NF)%QMAXini > 0D0 .AND. FWELL(NF)%QMAXini > ALLOT%GW_RATE_LIM(NF) ) THEN
+          ELSEIF(WBS%INUSE(NF) .AND. FWELL(NF)%QMAXini > DZ .AND. FWELL(NF)%QMAXini > ALLOT%GW_RATE_LIM(NF) ) THEN
                      !
                      WRITE(IOUT,'(4X,I4,20X,I6,9X,3F20.4)')   NF,FWELL(NF)%N,FWELL(NF)%QMAXini, ALLOT%GW_RATE_LIM(NF), ALLOT%GW_RATE_LIM(NF)/FWELL(NF)%QMAXini
           ELSE
@@ -630,12 +630,12 @@ MODULE FMP_MAIN_DRIVER
     !
     IF(.NOT. SWFL%HAS_NRD) THEN
        DO NF=1,FDIM%NFARM
-          NRD(1,NF)=0.D0
-          NRD(2,NF)=0.D0
-          RNRD(1,1,NF)=0.D0
-          RNRD(2,1,NF)=0.D0
+          NRD(1,NF) = DZ
+          NRD(2,NF) = DZ
+          RNRD(1,1,NF) = DZ
+          RNRD(2,1,NF) = DZ
           DO N=1,4
-                  UNRD(N,NF)=0.D0
+                  UNRD(N,NF) = DZ
           ENDDO
        ENDDO
     ENDIF
@@ -1104,9 +1104,9 @@ MODULE FMP_MAIN_DRIVER
     IF(WBS%HAS_WATERSTACK) CALL FCROP%NOT_FALLOW_RESET()  !FEATURE NOT YET IMPLIMENTED
     !
     !4B-----INITIALIZE SOME VARIABLES 
-    ND=0.D0
-    SURPLUS1=0.D0
-    SURPLUS2=0.D0
+    ND = DZ
+    SURPLUS1 = DZ
+    SURPLUS2 = DZ
     IF(( WBS%HAS_SFR .AND. SWFL%HAS_SRD        .AND. ISTARTFL.EQ.0 )  &
         .OR.                                                          &
        ((WBS%HAS_SFR  .OR. .NOT. SWFL%HAS_SRD) .AND. ISTARTFL.EQ.1  )   ) THEN
@@ -1147,7 +1147,7 @@ MODULE FMP_MAIN_DRIVER
     CALL FWELL%FWELL_ZERO_Q()
     !
     !4D-----INITIALIZE SOME LOCAL VARIABLES
-    FARMALLOT=0.D0
+    FARMALLOT = DZ
     !
     !5===== UPDATE QMAXF WHEN QMAXRESET FLAG OCCURS ======================================= THIS USED TO BE FOR FOR MNW IF QMAX OF MNW-WELLS ITERATIVELY CHANGES NOW CAN APPLY TO ALL WHENEVER QMAXRESET IS IN USE FOR NWT SMOOTHED PUMPING
     !       (ONLY IN FM WHEN QMAXRESET FLAG IS SET TO TRUE. -- QMAX NORMALLY DONE IN RP)
@@ -1221,15 +1221,15 @@ MODULE FMP_MAIN_DRIVER
           !
           !6G2-----FOR EACH WELL FIELD SIMULATED AS NON-ROUTED DELIVERY TYPE
           DO NT=1,SWFL%MXNRD      
-             CTFDR=0.D0
+             CTFDR = DZ
              !
              !6G2A----CALCULATE CUMULATIVE DELIVERY REQUIREMENT OF FARMS SUPPLIED BY A PARTICULAR WELL FIELD
              !        AND EVALUATE AVAILABLE SIMULATED "NON-ROUTED DELIVERY" FROM THAT WELL FIELD
              DO NF=1, WBS%NFARM
              IF(WBS%INUSE(NF)) THEN
                 !
-                IF(TFDROLD(NF).EQ.0D0) TF=WBS%DEMAND(NF)
-                IF(TFDROLD(NF).GT.0D0) TF=TFDROLD(NF)           
+                IF(TFDROLD(NF) .EQ. DZ) TF=WBS%DEMAND(NF)
+                IF(TFDROLD(NF) .GT. DZ) TF=TFDROLD(NF)           
                 IF(IDINT(UNRD(NT*3+1,NF)).LT.0) THEN
                      IF(NT.EQ.1) THEN
                        CTFDR=CTFDR+TF
@@ -1249,8 +1249,8 @@ MODULE FMP_MAIN_DRIVER
              DO NF=1, WBS%NFARM
              IF(WBS%INUSE(NF)) THEN
                 !
-                IF(TFDROLD(NF).EQ.0D0) TF=WBS%DEMAND(NF)
-                IF(TFDROLD(NF).GT.0D0) TF=TFDROLD(NF)         
+                IF(TFDROLD(NF) .EQ. DZ) TF=WBS%DEMAND(NF)
+                IF(TFDROLD(NF) .GT. DZ) TF=TFDROLD(NF)         
                 IF(CTFDR.GT.0) THEN
                      IF(IDINT(UNRD(NT*3+1,NF)).LT.0)THEN
                          IF(NT.EQ.1)THEN
@@ -1258,7 +1258,7 @@ MODULE FMP_MAIN_DRIVER
                          ELSE
                          RNRD(1,NT,NF)=-RNRD(1,NT,IDDELF)*(TF-RNRD(1,NT-1,NF))/CTFDR
                          ENDIF
-                         RNRD(2,NT,NF)=0.D0
+                         RNRD(2,NT,NF) = DZ
                      ENDIF
                 ENDIF
              END IF
@@ -1588,8 +1588,8 @@ MODULE FMP_MAIN_DRIVER
              !
              !             store original pumping requirement before updates after acreage-optimization are done
              IF(.NOT. ( FMPOPT%WELLFIELD .AND. (KITER.LE.1.OR.ISTARTFL.LE.1))) THEN 
-                IF(NRD(2,NF).EQ.0.0D0) NRD(2,NF)=NRD(1,NF)
-                IF(TFDROLD(NF).EQ.0.0D0) TFDROLD(NF)=WBS%DEMAND(NF)
+                IF(NRD(2,NF) .EQ. DZ) NRD(2,NF)=NRD(1,NF)
+                IF(TFDROLD(NF) .EQ. DZ) TFDROLD(NF)=WBS%DEMAND(NF)
              END IF
              !
              WBS%Q_DEMAND(NF)=QR     
@@ -1609,8 +1609,8 @@ MODULE FMP_MAIN_DRIVER
    !       DETERMINE SURFACE-WATER RUNOFF FOR EACH FARM CELL:
    !       ======================================================================
    !
-   WBS%DPERC  = 0D0  !THESE WILL BE POPULATED
-   WBS%RUNOFF = 0D0 
+   WBS%DPERC  = DZ  !THESE WILL BE POPULATED
+   WBS%RUNOFF = DZ 
    CALL FCROP%CALC_INEFFICIENT_LOSSES(WBS, SOIL%SURF_VK)           !POPULATES  WBS%DPERC  and   WBS%RUNOFF(NCOL,NROW)
    !
    ! CHECK IF RUNOFF IS DISABLED
@@ -1620,7 +1620,7 @@ MODULE FMP_MAIN_DRIVER
        DO CONCURRENT ( IC=1:NCOL, IR=1:NROW, WBS%RUNOFF(IC,IR) > DZ)
            !
            WBS%DPERC (IC,IR) = WBS%DPERC(IC,IR) + WBS%RUNOFF(IC,IR)
-           WBS%RUNOFF(IC,IR) = 0D0
+           WBS%RUNOFF(IC,IR) = DZ
            !
        END DO 
        !
@@ -1678,13 +1678,13 @@ MODULE FMP_MAIN_DRIVER
    ! ADD DEEP PERCOLATION TO RECHARGE
    !
    IF(WBS%UZF_LINK) THEN
-       !DO CONCURRENT (IR=1:FDIM%NROW, IC=1:FDIM%NCOL,      WBS%DPERC(IC,IR)>0D0  &
-       !                                              .AND. IUZFBND(IC,IR)<1      &
+       !DO CONCURRENT (IR=1:FDIM%NROW, IC=1:FDIM%NCOL,      WBS%DPERC(IC,IR)>0.D0  &
+       !                                              .AND. IUZFBND(IC,IR)<1       &
        !                                              .AND. UPLAY(IC,IR)>0         )
        DO IR=1, FDIM%NROW
        DO IC=1, FDIM%NCOL
-       IF(      WBS%DPERC(IC,IR)>0D0  &
-          .AND. IUZFBND(IC,IR)<1      &
+       IF(      WBS%DPERC(IC,IR)>DZ  &
+          .AND. IUZFBND(IC,IR)<1       &
           .AND. UPLAY(IC,IR)>0         ) THEN
                 IL = UPLAY(IC,IR)
                 RHS(IC,IR,IL) = RHS(IC,IR,IL) - WBS%DPERC(IC,IR)   !NEGATIVE ADDS DPERC TO GW
@@ -1692,11 +1692,11 @@ MODULE FMP_MAIN_DRIVER
        END DO
        END DO
    ELSE
-       !DO CONCURRENT (IR=1:FDIM%NROW, IC=1:FDIM%NCOL,       WBS%DPERC(IC,IR)>0D0  &
+       !DO CONCURRENT (IR=1:FDIM%NROW, IC=1:FDIM%NCOL,       WBS%DPERC(IC,IR)>0.D0  &
        !                                               .AND. UPLAY(IC,IR)>0         )
        DO IR=1, FDIM%NROW
        DO IC=1, FDIM%NCOL
-       IF(      WBS%DPERC(IC,IR)>0D0  &
+       IF(      WBS%DPERC(IC,IR)>DZ  &
           .AND. UPLAY(IC,IR)>0         ) THEN
                 IL = UPLAY(IC,IR)
                 RHS(IC,IR,IL) = RHS(IC,IR,IL) - WBS%DPERC(IC,IR)   !NEGATIVE ADDS DPERC TO GW
@@ -1708,7 +1708,7 @@ MODULE FMP_MAIN_DRIVER
    !DIR$ NOINLINE
    IF(WBS%UZF_LINK) CALL UZF_LOOPS(NROW, NCOL, WBS%DPERC, WBS%AREA, IUZFBND, VKS, FINF, EXCESPP)
    !IF(WBS%UZF_LINK) THEN
-   !    DO CONCURRENT (IR=1:NROW, IC=1:NCOL, IUZFBND(IC,IR)>0 .AND. WBS%DPERC(IC,IR)>0D0 )
+   !    DO CONCURRENT (IR=1:NROW, IC=1:NCOL, IUZFBND(IC,IR)>0 .AND. WBS%DPERC(IC,IR)>0.D0 )
    !        !             !
    !        FINF(IC,IR)=SNGL(WBS%DPERC(IC,IR)/WBS%AREA(IC,IR)) !(DELR(IC)*DELC(IR))
    !        !
@@ -1907,6 +1907,7 @@ MODULE FMP_MAIN_DRIVER
   END SUBROUTINE
   !
   PURE SUBROUTINE UZF_LOOPS(NROW, NCOL, DPERC, AREA, IUZFBND, VKS, FINF, EXCESPP)
+    USE CONSTANTS, ONLY: DZ
     INTEGER,                                INTENT(IN   ):: NROW, NCOL
     INTEGER,          DIMENSION(NCOL,NROW), INTENT(IN   ):: IUZFBND
     DOUBLE PRECISION, DIMENSION(NCOL,NROW), INTENT(IN   ):: DPERC, AREA
@@ -1916,7 +1917,7 @@ MODULE FMP_MAIN_DRIVER
     !
     DO IR=1, NROW
     DO IC=1, NCOL
-        IF( IUZFBND(IC,IR)>0 .AND. DPERC(IC,IR)>0D0 ) THEN
+        IF( IUZFBND(IC,IR)>0 .AND. DPERC(IC,IR)>DZ ) THEN
           !             !
           FINF(IC,IR)=SNGL(DPERC(IC,IR)/AREA(IC,IR)) !(DELR(IC)*DELC(IR))
           !
@@ -2429,6 +2430,7 @@ MODULE FMP_MAIN_DRIVER
     !     ******************************************************************
     !        SPECIFICATIONS:
     !     ------------------------------------------------------------------
+    USE CONSTANTS, ONLY: UNO
     USE FMP_GLOBAL,    ONLY:FWELL, WBS, FMPOPT 
     USE FMPBLK,       ONLY:FPS,ZERO
     USE GWFMNW2MODULE, ONLY:MNW2,MNWNOD
@@ -2490,18 +2492,18 @@ MODULE FMP_MAIN_DRIVER
               J=FWELL(FID)%MNWLOC(I)
               !
               FIRSTNODE=IDINT( MNW2(4,J) )
-              LASTNODE =IDINT( MNW2(4,J) + ABS(MNW2(2,J)) - 1D0 )
+              LASTNODE =IDINT( MNW2(4,J) + ABS(MNW2(2,J)) - UNO )
               !
               Qdes=MNW2(5,J)
               Qact=SUM(MNWNOD(4,FIRSTNODE:LASTNODE))
               !
-              IF(ABS(Qdes).GT.FPS.AND.ABS(Qact).GT.FPS.AND.ABS(Qdes/Qact-1D0).GT.FMPOPT%MNWCLOSE(1)) THEN
+              IF(ABS(Qdes).GT.FPS.AND.ABS(Qact).GT.FPS.AND.ABS(Qdes/Qact-UNO).GT.FMPOPT%MNWCLOSE(1)) THEN
                   !
-                  HCL=HCL*(1.D0-FMPOPT%MNWCLOSE(2))
-                  RCL=RCL*(1.D0-FMPOPT%MNWCLOSE(3))
-                  WRITE(WBS%IOUT,10) FMPOPT%MNWCLOSE(2)*100D0,FMPOPT%MNWCLOSE(3)*100D0,HCL,RCL,Qact,Qdes,FWELL(FID)%WELLID(I),FWELL(FID)%LRC(2,I),FWELL(FID)%LRC(3,I)
+                  HCL=HCL*(UNO - FMPOPT%MNWCLOSE(2))
+                  RCL=RCL*(UNO - FMPOPT%MNWCLOSE(3))
+                  WRITE(WBS%IOUT,10) FMPOPT%MNWCLOSE(2)*100.D0,FMPOPT%MNWCLOSE(3)*100.D0,HCL,RCL,Qact,Qdes,FWELL(FID)%WELLID(I),FWELL(FID)%LRC(2,I),FWELL(FID)%LRC(3,I)
     
-                  WRITE(*,10) FMPOPT%MNWCLOSE(2)*100D0,FMPOPT%MNWCLOSE(3)*100D0,HCL,RCL,Qact,Qdes,FWELL(FID)%WELLID(I),FWELL(FID)%LRC(2,I),FWELL(FID)%LRC(3,I)
+                  WRITE(*,10) FMPOPT%MNWCLOSE(2)*100.D0,FMPOPT%MNWCLOSE(3)*100.D0,HCL,RCL,Qact,Qdes,FWELL(FID)%WELLID(I),FWELL(FID)%LRC(2,I),FWELL(FID)%LRC(3,I)
                   !
                   UPDATE_CLOSURE =.TRUE.
                   EXIT FARM_LOOP
@@ -2749,7 +2751,7 @@ MODULE FMP_MAIN_DRIVER
                                                               TOTIN = TOTIN+EXT
          ENDIF
          !
-         IF(ABS(TOTIN+TOTOUT).GT.FPS) DISC=((TOTIN-TOTOUT)/((TOTIN+TOTOUT)/2.D0))*100D0
+         IF(ABS(TOTIN+TOTOUT).GT.FPS) DISC=((TOTIN-TOTOUT)/((TOTIN+TOTOUT)/2.D0))*100.D0
          !
          IF(FMPOUT%FB_COMPACT%IS_OPEN) THEN
              !
@@ -3263,8 +3265,6 @@ MODULE FMP_MAIN_DRIVER
       !
       !4B1----WRITE HEADER TO ASCII FILE
       IF(FMPOUT%FNRCH_LIST%IS_OPEN) THEN
-          IF(KPER.EQ.1.AND.KSTP.EQ.1) WRITE(FMPOUT%FNRCH_LIST%IU,"(2X,'PER',2X,'STP',A14,4X,'FARM ID         RATE')") TIMEUNIT
-          !
           DO NF=1,WBS%NFARM
                   WRITE(FMPOUT%FNRCH_LIST%IU,'(2I5,A14,I11,G17.8)') KPER,KSTP,TIME,IFA(NF), WBS%TOT_FNRCH(NF)
           ENDDO
@@ -3312,6 +3312,7 @@ MODULE FMP_MAIN_DRIVER
     !     ******************************************************************
     !        SPECIFICATIONS:
     !     ------------------------------------------------------------------
+    USE CONSTANTS, ONLY: DZ
     USE FMP_GLOBAL,    ONLY:IFA,FMPOUT,FMP_LGR_PNT, WBS, CRP=>FCROP
     USE FMPBLK,       ONLY:TPL,TPU,ZERO,ZER
     USE GLOBAL,       ONLY:NCOL,NROW,NLAY,IBOUND,ITMUNI,HNEW, BOTM
@@ -3437,8 +3438,8 @@ MODULE FMP_MAIN_DRIVER
         !
         !4B2----WRITE LIST OF CUMULATIVE EVAPORATION AND TRANSPIRATION FOR EACH FARM
         DO NF=1,WBS%NFARM
-                      EVAP=0D0
-                      TRAN=0D0        
+                      EVAP = DZ
+                      TRAN = DZ        
                       DO IR=1,NROW
                       DO IC=1,NCOL
                               IF(WBS%FID_ARRAY(IC,IR).EQ.IFA(NF)) THEN
@@ -3464,6 +3465,7 @@ MODULE FMP_LGR_LINK
   CONTAINS
   !
   SUBROUTINE FMP3PRTOCH_BILINEAR(P,F)
+    USE CONSTANTS, ONLY: DZ
     !
     USE GLOBAL,      ONLY:NCOL,NROW,GLOBALDAT
     USE LGRMODULE,   ONLY:NPCBEG,NPRBEG,NPCEND,NPREND,NCPP,NPL,NCPPL
@@ -3487,8 +3489,8 @@ MODULE FMP_LGR_LINK
     NROWEXT=NROW+2*ICEND
     NCOLEXT=NCOL+2*JCEND
     ALLOCATE(R(NCOLEXT,NROWEXT))
-    R=0D0
-    F=0D0
+    R = DZ
+    F = DZ
     KCLAY=0
     DO KPLAY = 1,NPL
       KCEND=NCPPL(KPLAY)       
@@ -4044,7 +4046,7 @@ MODULE FMP_LGR_LINK
 !!!      ENDIF
 !!!      NRCH=0
 !!!      IF(H2ORETURN(1,NF).NE.0 .AND. H2ORETURN(2,NF)==0
-!!!     +                        .AND. FDSEGL(NF)==0D0) THEN
+!!!     +                        .AND. FDSEGL(NF)==0.D0) THEN
 !!!!      IF( H2ORETURN(1,NF).NE.0.AND.IRRFL.NE.0.AND.FDSEGL(NF).EQ.0 .AND.
 !!!!     +   ( ISRRFL.EQ.0 .OR. (ISRRFL.GT.0.AND.ALL(ISRR(2:5,NF).EQ.0))
 !!!!     +   ) )THEN 

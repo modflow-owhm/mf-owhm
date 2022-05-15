@@ -539,7 +539,7 @@ MODULE BAS_UTIL
                          CASE (2)                                !MINUTES
                              DAY = DELT * 6.94444444444444D-04
                          CASE (3)                                !HOURS
-                             DAY = DELT / 24D0
+                             DAY = DELT / 24.D0
                          CASE (5)                                !YEARS  --NO WAY TO CORRECT FOR LEAP YEARS FOR THIS CASE
                              DAY = DELT * 365.25D0
                        END SELECT
@@ -552,7 +552,7 @@ MODULE BAS_UTIL
                          CASE (2)                                !MINUTES
                              DAY = DELT * 6.94444444444444E-04
                          CASE (3)                                !HOURS
-                             DAY = DELT / 24E0
+                             DAY = DELT / 24.E0
                          CASE (5)                                !YEARS  --NO WAY TO CORRECT FOR LEAP YEARS FOR THIS CASE
                              DAY = DELT * 365.25
                        END SELECT
@@ -626,7 +626,7 @@ MODULE BAS_UTIL
                                                    YEAR_TRANSITION=2  !NO TRANSION, BUT     IN A LEAP YEAR
     !
     !NOW IF YEAR CHANGE AND TRANSION FROM LEAP YEAR TO NON LEAN YEAR OR VICE-VERSA
-    ELSEIF(DELT > 0D0)                                            THEN!   TRANSITION BETWEEN YEARS IN FORWARD DIRECTION (eg 1932 to 1933 or 1931 to 1932)
+    ELSEIF(DELT > 0.0D0)                                            THEN!   TRANSITION BETWEEN YEARS IN FORWARD DIRECTION (eg 1932 to 1933 or 1931 to 1932)
       IF(      YR_NEW_LEAP .AND. .NOT.YR_OLD_LEAP) YEAR_TRANSITION=3  !TRANSITION FROM NOLEAP TO LEAP YEAR
       IF(.NOT. YR_NEW_LEAP .AND.      YR_OLD_LEAP) YEAR_TRANSITION=4  !TRANSITION FROM LEAP TO NOLEAP YEAR
       !
@@ -694,7 +694,7 @@ MODULE BAS_UTIL
          CASE (3)                                                     !HOURS
              CVRT2DYEAR = 1.140794586245D-04
          CASE (5)
-             CVRT2DYEAR = 1D0
+             CVRT2DYEAR = 1.0D0
        END SELECT
        !
     ELSEIF(YEARTYPE .EQ. 1) THEN  ! 365 days to year
@@ -709,7 +709,7 @@ MODULE BAS_UTIL
          CASE (3)                                                     !HOURS
              CVRT2DYEAR = 1.141552511416D-04
          CASE (5)
-             CVRT2DYEAR = 1D0
+             CVRT2DYEAR = 1.0D0
        END SELECT
        !
     ELSEIF(YEARTYPE .EQ. 2) THEN  ! 366 days to year
@@ -724,7 +724,7 @@ MODULE BAS_UTIL
          CASE (3)                                                     !HOURS
              CVRT2DYEAR = 1.138433515483D-04
          CASE (5)
-             CVRT2DYEAR = 1D0
+             CVRT2DYEAR = 1.0D0
        END SELECT
        !
     END IF

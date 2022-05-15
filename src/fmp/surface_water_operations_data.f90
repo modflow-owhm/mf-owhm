@@ -2594,16 +2594,16 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
                                                  CALL SWO%RELEASE_DMD_FRAC%INIT('REL_FRAC',  DNEG, BL%IOUT, BL%IU, NRES_BAL, ONE, Z, Z)
                         CASE("BY_POTENTIAL_RELEASE")
                                                  WRITE(BL%IOUT,'(A)') '   BY_POTENTIAL_RELEASE KEYWORD FOUND. REQUIRED RELEASES WILL BE APPLIED BASED ON THE RATIO OF THE USUALABLE STORAGE'
-                                                 CALL SWO%RELEASE_DMD_FRAC%INIT('REL_FRAC', -2D0, BL%IOUT, BL%IU, NRES_BAL, ONE, Z, Z)
+                                                 CALL SWO%RELEASE_DMD_FRAC%INIT('REL_FRAC', -2.D0, BL%IOUT, BL%IU, NRES_BAL, ONE, Z, Z)
                         CASE("BY_AVAILABLE_RELEASE")
                                                  WRITE(BL%IOUT,'(A)') '   BY_AVAILABLE_RELEASE KEYWORD FOUND. REQUIRED RELEASES WILL BE APPLIED BASED ON THE RATIO OF THE USUALABLE STORAGE'
-                                                 CALL SWO%RELEASE_DMD_FRAC%INIT('REL_FRAC', -3D0, BL%IOUT, BL%IU, NRES_BAL, ONE, Z, Z)
+                                                 CALL SWO%RELEASE_DMD_FRAC%INIT('REL_FRAC', -3.D0, BL%IOUT, BL%IU, NRES_BAL, ONE, Z, Z)
                         CASE("BY_STORAGE")
                                                  WRITE(BL%IOUT,'(A)') '   BY_STORAGE KEYWORD FOUND. REQUIRED RELEASES WILL BE APPLIED BASED ON THE RATIO OF THE USUALABLE STORAGE'
-                                                 CALL SWO%RELEASE_DMD_FRAC%INIT('REL_FRAC', -4D0, BL%IOUT, BL%IU, NRES_BAL, ONE, Z, Z)
+                                                 CALL SWO%RELEASE_DMD_FRAC%INIT('REL_FRAC', -4.D0, BL%IOUT, BL%IU, NRES_BAL, ONE, Z, Z)
                         CASE("BY_USABLE_STORAGE","BY_USEABLE_STORAGE")
                                                  WRITE(BL%IOUT,'(A)') '   BY_USABLE_STORAGE KEYWORD FOUND. REQUIRED RELEASES WILL BE APPLIED BASED ON THE RATIO OF THE USUALABLE STORAGE'
-                                                 CALL SWO%RELEASE_DMD_FRAC%INIT('REL_FRAC', -5D0, BL%IOUT, BL%IU, NRES_BAL, ONE, Z, Z)
+                                                 CALL SWO%RELEASE_DMD_FRAC%INIT('REL_FRAC', -5.D0, BL%IOUT, BL%IU, NRES_BAL, ONE, Z, Z)
                         CASE DEFAULT
                                                  LLOC = N
                                                  CALL SWO%RELEASE_DMD_FRAC%INIT('REL_FRAC',  LLOC, LINE, BL%IOUT, BL%IU, NRES_BAL, ONE, Z, Z, SCRATCH=BL%SCRATCH)
@@ -2625,16 +2625,16 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
                                                  CALL SWO%RELEASE_REQ_FRAC%INIT('REL_REQ_FRAC',  DNEG, BL%IOUT, BL%IU, NRES_BAL, ONE, Z, Z)
                         CASE("BY_POTENTIAL_RELEASE")
                                                  WRITE(BL%IOUT,'(A)') '   BY_POTENTIAL_RELEASE KEYWORD FOUND. REQUIRED RELEASES WILL BE APPLIED BASED ON THE RATIO OF THE USUALABLE STORAGE'
-                                                 CALL SWO%RELEASE_REQ_FRAC%INIT('REL_REQ_FRAC', -2D0, BL%IOUT, BL%IU, NRES_BAL, ONE, Z, Z)
+                                                 CALL SWO%RELEASE_REQ_FRAC%INIT('REL_REQ_FRAC', -2.D0, BL%IOUT, BL%IU, NRES_BAL, ONE, Z, Z)
                         CASE("BY_AVAILABLE_RELEASE")
                                                  WRITE(BL%IOUT,'(A)') '   BY_AVAILABLE_RELEASE KEYWORD FOUND. REQUIRED RELEASES WILL BE APPLIED BASED ON THE RATIO OF THE USUALABLE STORAGE'
-                                                 CALL SWO%RELEASE_REQ_FRAC%INIT('REL_REQ_FRAC', -3D0, BL%IOUT, BL%IU, NRES_BAL, ONE, Z, Z)
+                                                 CALL SWO%RELEASE_REQ_FRAC%INIT('REL_REQ_FRAC', -3.D0, BL%IOUT, BL%IU, NRES_BAL, ONE, Z, Z)
                         CASE("BY_STORAGE")
                                                  WRITE(BL%IOUT,'(A)') '   BY_STORAGE KEYWORD FOUND. REQUIRED RELEASES WILL BE APPLIED BASED ON THE RATIO OF THE USUALABLE STORAGE'
-                                                 CALL SWO%RELEASE_REQ_FRAC%INIT('REL_REQ_FRAC', -4D0, BL%IOUT, BL%IU, NRES_BAL, ONE, Z, Z)
+                                                 CALL SWO%RELEASE_REQ_FRAC%INIT('REL_REQ_FRAC', -4.D0, BL%IOUT, BL%IU, NRES_BAL, ONE, Z, Z)
                         CASE("BY_USABLE_STORAGE","BY_USEABLE_STORAGE")
                                                  WRITE(BL%IOUT,'(A)') '   BY_USABLE_STORAGE KEYWORD FOUND. REQUIRED RELEASES WILL BE APPLIED BASED ON THE RATIO OF THE USUALABLE STORAGE'
-                                                 CALL SWO%RELEASE_REQ_FRAC%INIT('REL_REQ_FRAC', -5D0, BL%IOUT, BL%IU, NRES_BAL, ONE, Z, Z)
+                                                 CALL SWO%RELEASE_REQ_FRAC%INIT('REL_REQ_FRAC', -5.D0, BL%IOUT, BL%IU, NRES_BAL, ONE, Z, Z)
                         CASE("BY_PROJECT_RELEASE_FRACTION","BY_RELEASE_FRACTION")
                                                  WRITE(BL%IOUT,'(A)') '   BY_RELEASE_DEMAND_FRACTION KEYWORD FOUND. REQUIRED RELEASES WILL USE THE VALUES DEFINED BY "RESERVOIR_MAXIMUM_RELEASE" KEYWORD OR ITs S COUNTERPART'
                                                  CALL SWO%RELEASE_REQ_FRAC%INIT('REL_REQ_FRAC',DZ, BL%IOUT, BL%IU, NRES_BAL, ONE, Z, Z)
@@ -6384,56 +6384,56 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
           SWO%RESDAT(IPROJ)%RESBAL(1)%RESBAL_RESID     = -99
           SWO%RESDAT(IPROJ)%RESBAL(1)%RESBAL_POOLFLG   = -99
           SWO%RESDAT(IPROJ)%RESBAL(1)%STORAGE_PREV     = DZ
-          SWO%RESDAT(IPROJ)%RESBAL(1)%AREA_PREV        = -99D0
-          SWO%RESDAT(IPROJ)%RESBAL(1)%INFLOW           = -99D0
-          SWO%RESDAT(IPROJ)%RESBAL(1)%PRCP             = -99D0
-          SWO%RESDAT(IPROJ)%RESBAL(1)%EVAP             = -99D0
+          SWO%RESDAT(IPROJ)%RESBAL(1)%AREA_PREV        = -99.D0
+          SWO%RESDAT(IPROJ)%RESBAL(1)%INFLOW           = -99.D0
+          SWO%RESDAT(IPROJ)%RESBAL(1)%PRCP             = -99.D0
+          SWO%RESDAT(IPROJ)%RESBAL(1)%EVAP             = -99.D0
           SWO%RESDAT(IPROJ)%RESBAL(1)%RELEASE_MIN_INPUT= DZ
           SWO%RESDAT(IPROJ)%RESBAL(1)%RELEASE_MIN      = DZ
-          SWO%RESDAT(IPROJ)%RESBAL(1)%RELEASE_SPEC     = -99D0
-          SWO%RESDAT(IPROJ)%RESBAL(1)%RELEASE_ADDF      = -99D0
+          SWO%RESDAT(IPROJ)%RESBAL(1)%RELEASE_SPEC     = -99.D0
+          SWO%RESDAT(IPROJ)%RESBAL(1)%RELEASE_ADDF      = -99.D0
           SWO%RESDAT(IPROJ)%RESBAL(NRES)%MAX_RELEASE_S = SWO%NaN
-          SWO%RESDAT(IPROJ)%RESBAL(NRES)%ADD_RELEASE_S = -99D0
-          SWO%RESDAT(IPROJ)%RESBAL(NRES)%ADD_RELEASE_S_VOL = -99D0
-          SWO%RESDAT(IPROJ)%RESBAL(NRES)%MAX_RELEASE_S_VOL = -99D0
-          SWO%RESDAT(IPROJ)%RESBAL(1)%RELEASE_PROJ_ADD_INI = -99D0
-          SWO%RESDAT(IPROJ)%RESBAL(1)%RELEASE_PROJ_ADD     = -99D0
-          SWO%RESDAT(IPROJ)%RESBAL(1)%RELEASE_PROJ      = -99D0
-          SWO%RESDAT(IPROJ)%RESBAL(1)%RELEASE_FLOD      = -99D0
-          SWO%RESDAT(IPROJ)%RESBAL(1)%SPILL_WAY         = -99D0
-          SWO%RESDAT(IPROJ)%RESBAL(1)%OVER_TOP          = -99D0
-          SWO%RESDAT(IPROJ)%RESBAL(1)%RELEASE_REQF      = -99D0
-          SWO%RESDAT(IPROJ)%RESBAL(1)%RELEASE_REQF_PREV = -99D0
-          SWO%RESDAT(IPROJ)%RESBAL(1)%STORAGE          = -99D0
-          SWO%RESDAT(IPROJ)%RESBAL(1)%AREA             = -99D0
-          SWO%RESDAT(IPROJ)%RESBAL(1)%AREA_DPL         = -99D0
+          SWO%RESDAT(IPROJ)%RESBAL(NRES)%ADD_RELEASE_S = -99.D0
+          SWO%RESDAT(IPROJ)%RESBAL(NRES)%ADD_RELEASE_S_VOL = -99.D0
+          SWO%RESDAT(IPROJ)%RESBAL(NRES)%MAX_RELEASE_S_VOL = -99.D0
+          SWO%RESDAT(IPROJ)%RESBAL(1)%RELEASE_PROJ_ADD_INI = -99.D0
+          SWO%RESDAT(IPROJ)%RESBAL(1)%RELEASE_PROJ_ADD     = -99.D0
+          SWO%RESDAT(IPROJ)%RESBAL(1)%RELEASE_PROJ      = -99.D0
+          SWO%RESDAT(IPROJ)%RESBAL(1)%RELEASE_FLOD      = -99.D0
+          SWO%RESDAT(IPROJ)%RESBAL(1)%SPILL_WAY         = -99.D0
+          SWO%RESDAT(IPROJ)%RESBAL(1)%OVER_TOP          = -99.D0
+          SWO%RESDAT(IPROJ)%RESBAL(1)%RELEASE_REQF      = -99.D0
+          SWO%RESDAT(IPROJ)%RESBAL(1)%RELEASE_REQF_PREV = -99.D0
+          SWO%RESDAT(IPROJ)%RESBAL(1)%STORAGE          = -99.D0
+          SWO%RESDAT(IPROJ)%RESBAL(1)%AREA             = -99.D0
+          SWO%RESDAT(IPROJ)%RESBAL(1)%AREA_DPL         = -99.D0
           SWO%RESDAT(IPROJ)%RESBAL(1)%MAIN_SPLT        = 1
 
           ! RESSPLIT (Lumped/Pooled Reservoir Mass Balance)
           SWO%RESDAT(IPROJ)%RESSPLIT(1)%RESSPLIT_PROJID= -99
           SWO%RESDAT(IPROJ)%RESSPLIT(1)%RESSPLIT_RESID = -99
-          SWO%RESDAT(IPROJ)%RESSPLIT(1)%DOY            = -99D0
-          SWO%RESDAT(IPROJ)%RESSPLIT(1)%STORAGE        = -99D0
-          SWO%RESDAT(IPROJ)%RESSPLIT(1)%AREA           = -99D0
-          SWO%RESDAT(IPROJ)%RESSPLIT(1)%ELEV           = -99D0
-          SWO%RESDAT(IPROJ)%RESSPLIT(1)%ELEV_PREV      = -99D0
+          SWO%RESDAT(IPROJ)%RESSPLIT(1)%DOY            = -99.D0
+          SWO%RESDAT(IPROJ)%RESSPLIT(1)%STORAGE        = -99.D0
+          SWO%RESDAT(IPROJ)%RESSPLIT(1)%AREA           = -99.D0
+          SWO%RESDAT(IPROJ)%RESSPLIT(1)%ELEV           = -99.D0
+          SWO%RESDAT(IPROJ)%RESSPLIT(1)%ELEV_PREV      = -99.D0
           SWO%RESDAT(IPROJ)%RESSPLIT(1)%MAIN_RES       = FALSE
 
           ! ACAP (Area-Capacity-Elevation Table)
           SWO%RESDAT(IPROJ)%ACAP(1)%RESNAME            = "N/A"
           SWO%RESDAT(IPROJ)%ACAP(1)%ACAP_PROJID        = -99
           SWO%RESDAT(IPROJ)%ACAP(1)%ACAP_RESID         = -99
-          SWO%RESDAT(IPROJ)%ACAP(1)%ACAP_STORAGE       = -99D0
-          SWO%RESDAT(IPROJ)%ACAP(1)%ACAP_AREA          = -99D0
-          SWO%RESDAT(IPROJ)%ACAP(1)%ACAP_ELEV          = -99D0
+          SWO%RESDAT(IPROJ)%ACAP(1)%ACAP_STORAGE       = -99.D0
+          SWO%RESDAT(IPROJ)%ACAP(1)%ACAP_AREA          = -99.D0
+          SWO%RESDAT(IPROJ)%ACAP(1)%ACAP_ELEV          = -99.D0
 
           ! FRAC (Reservoir Storage Fraction Table)
           SWO%RESDAT(IPROJ)%FRAC(1)%RESNAME            = "N/A"
           SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_PROJID        = -99
           SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_RESID         = -99
-          !SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_LEAP          = -99D0
-          SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_NOLEAP        = -99D0
-          SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_FRAC          = -99D0
+          !SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_LEAP          = -99.D0
+          SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_NOLEAP        = -99.D0
+          SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_FRAC          = -99.D0
 
           ! HEAD (Reservoir Head Cells)
           SWO%RESDAT(1)%HEAD(1)%HEAD_PROJID            = -99
@@ -6493,23 +6493,23 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
           ! (No pooled reservoirs for IRESFL>0 --> dummy alloc/init)
           SWO%RESDAT(IPROJ)%RESSPLIT(1)%RESSPLIT_PROJID= -99
           SWO%RESDAT(IPROJ)%RESSPLIT(1)%RESSPLIT_RESID = -99
-          SWO%RESDAT(IPROJ)%RESSPLIT(1)%DOY            = -99D0
-          SWO%RESDAT(IPROJ)%RESSPLIT(1)%STORAGE        = -99D0
-          SWO%RESDAT(IPROJ)%RESSPLIT(1)%AREA           = -99D0
-          SWO%RESDAT(IPROJ)%RESSPLIT(1)%ELEV           = -99D0
-          SWO%RESDAT(IPROJ)%RESSPLIT(1)%ELEV_PREV      = -99D0
-          !SWO%RESDAT(IPROJ)%RESSPLIT(1)%MAX_ELEV       = -99D0
-          !SWO%RESDAT(IPROJ)%RESSPLIT(1)%MIN_ELEV       = -99D0
-          !SWO%RESDAT(IPROJ)%RESSPLIT(1)%STOR_SPEC_MIN_ELEV      = -99D0
+          SWO%RESDAT(IPROJ)%RESSPLIT(1)%DOY            = -99.D0
+          SWO%RESDAT(IPROJ)%RESSPLIT(1)%STORAGE        = -99.D0
+          SWO%RESDAT(IPROJ)%RESSPLIT(1)%AREA           = -99.D0
+          SWO%RESDAT(IPROJ)%RESSPLIT(1)%ELEV           = -99.D0
+          SWO%RESDAT(IPROJ)%RESSPLIT(1)%ELEV_PREV      = -99.D0
+          !SWO%RESDAT(IPROJ)%RESSPLIT(1)%MAX_ELEV       = -99.D0
+          !SWO%RESDAT(IPROJ)%RESSPLIT(1)%MIN_ELEV       = -99.D0
+          !SWO%RESDAT(IPROJ)%RESSPLIT(1)%STOR_SPEC_MIN_ELEV      = -99.D0
           SWO%RESDAT(IPROJ)%RESSPLIT(1)%MAIN_RES       = FALSE
 
           ! FRAC (Reservoir Storage Fraction Table)
           SWO%RESDAT(IPROJ)%FRAC(1)%RESNAME            = "N/A"
           SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_PROJID        = -99
           SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_RESID         = -99
-          !SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_LEAP          = -99D0
-          SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_NOLEAP        = -99D0
-          SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_FRAC          = -99D0
+          !SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_LEAP          = -99.D0
+          SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_NOLEAP        = -99.D0
+          SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_FRAC          = -99.D0
 
         ! IRESFL<0
         ! --> One lumped/pooled storage, fractional split to individual reservoirs
@@ -6640,47 +6640,47 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
 !          SWO%RESDAT(IPROJ)%RESBAL(1)%RESBAL_PROJID    = -99
 !          SWO%RESDAT(IPROJ)%RESBAL(1)%RESBAL_RESID     = -99
 !          SWO%RESDAT(IPROJ)%RESBAL(1)%RESBAL_POOLFLG   = -99
-!          SWO%RESDAT(IPROJ)%RESBAL(1)%STORAGE_PREV     = -99D0
-!          SWO%RESDAT(IPROJ)%RESBAL(1)%AREA_PREV        = -99D0
-!          SWO%RESDAT(IPROJ)%RESBAL(1)%INFLOW           = -99D0
-!          SWO%RESDAT(IPROJ)%RESBAL(1)%PRCP             = -99D0
-!          SWO%RESDAT(IPROJ)%RESBAL(1)%EVAP             = -99D0
-!          SWO%RESDAT(IPROJ)%RESBAL(1)%RELEASE_SPEC     = -99D0
-!          SWO%RESDAT(IPROJ)%RESBAL(1)%ADD_RELEASE      = -99D0
-!          SWO%RESDAT(IPROJ)%RESBAL(NRES)%MAX_RELEASE_S = -99D0
-!          SWO%RESDAT(IPROJ)%RESBAL(NRES)%ADD_RELEASE_S = -99D0
-!          SWO%RESDAT(IPROJ)%RESBAL(1)%RELEASE_PROJ      = -99D0
-!          SWO%RESDAT(IPROJ)%RESBAL(1)%RELEASE_FLOD      = -99D0
-!          SWO%RESDAT(IPROJ)%RESBAL(1)%SPILL_WAY        = -99D0
-!          SWO%RESDAT(IPROJ)%RESBAL(1)%STORAGE          = -99D0
-!          SWO%RESDAT(IPROJ)%RESBAL(1)%AREA             = -99D0
-!          SWO%RESDAT(IPROJ)%RESBAL(1)%AREA_DPL         = -99D0
+!          SWO%RESDAT(IPROJ)%RESBAL(1)%STORAGE_PREV     = -99.D0
+!          SWO%RESDAT(IPROJ)%RESBAL(1)%AREA_PREV        = -99.D0
+!          SWO%RESDAT(IPROJ)%RESBAL(1)%INFLOW           = -99.D0
+!          SWO%RESDAT(IPROJ)%RESBAL(1)%PRCP             = -99.D0
+!          SWO%RESDAT(IPROJ)%RESBAL(1)%EVAP             = -99.D0
+!          SWO%RESDAT(IPROJ)%RESBAL(1)%RELEASE_SPEC     = -99.D0
+!          SWO%RESDAT(IPROJ)%RESBAL(1)%ADD_RELEASE      = -99.D0
+!          SWO%RESDAT(IPROJ)%RESBAL(NRES)%MAX_RELEASE_S = -99.D0
+!          SWO%RESDAT(IPROJ)%RESBAL(NRES)%ADD_RELEASE_S = -99.D0
+!          SWO%RESDAT(IPROJ)%RESBAL(1)%RELEASE_PROJ      = -99.D0
+!          SWO%RESDAT(IPROJ)%RESBAL(1)%RELEASE_FLOD      = -99.D0
+!          SWO%RESDAT(IPROJ)%RESBAL(1)%SPILL_WAY        = -99.D0
+!          SWO%RESDAT(IPROJ)%RESBAL(1)%STORAGE          = -99.D0
+!          SWO%RESDAT(IPROJ)%RESBAL(1)%AREA             = -99.D0
+!          SWO%RESDAT(IPROJ)%RESBAL(1)%AREA_DPL         = -99.D0
 !
 !          ! RESSPLIT (Lumped/Pooled Reservoir Mass Balance)
 !          SWO%RESDAT(IPROJ)%RESSPLIT(1)%RESSPLIT_PROJID= -99
 !          SWO%RESDAT(IPROJ)%RESSPLIT(1)%RESSPLIT_RESID = -99
-!          SWO%RESDAT(IPROJ)%RESSPLIT(1)%DOY            = -99D0
-!          SWO%RESDAT(IPROJ)%RESSPLIT(1)%STORAGE        = -99D0
-!          SWO%RESDAT(IPROJ)%RESSPLIT(1)%AREA           = -99D0
-!          SWO%RESDAT(IPROJ)%RESSPLIT(1)%ELEV           = -99D0
-!          SWO%RESDAT(IPROJ)%RESSPLIT(1)%ELEV_PREV      = -99D0
+!          SWO%RESDAT(IPROJ)%RESSPLIT(1)%DOY            = -99.D0
+!          SWO%RESDAT(IPROJ)%RESSPLIT(1)%STORAGE        = -99.D0
+!          SWO%RESDAT(IPROJ)%RESSPLIT(1)%AREA           = -99.D0
+!          SWO%RESDAT(IPROJ)%RESSPLIT(1)%ELEV           = -99.D0
+!          SWO%RESDAT(IPROJ)%RESSPLIT(1)%ELEV_PREV      = -99.D0
 !          SWO%RESDAT(IPROJ)%RESSPLIT(1)%MAIN_RES       = FALSE
 !
 !          ! ACAP (Area-Capacity-Elevation Table)
 !          SWO%RESDAT(IPROJ)%ACAP(1)%RESNAME            = "N/A"
 !          SWO%RESDAT(IPROJ)%ACAP(1)%ACAP_PROJID        = -99
 !          SWO%RESDAT(IPROJ)%ACAP(1)%ACAP_RESID         = -99
-!          SWO%RESDAT(IPROJ)%ACAP(1)%ACAP_STORAGE       = -99D0
-!          SWO%RESDAT(IPROJ)%ACAP(1)%ACAP_AREA          = -99D0
-!          SWO%RESDAT(IPROJ)%ACAP(1)%ACAP_ELEV          = -99D0
+!          SWO%RESDAT(IPROJ)%ACAP(1)%ACAP_STORAGE       = -99.D0
+!          SWO%RESDAT(IPROJ)%ACAP(1)%ACAP_AREA          = -99.D0
+!          SWO%RESDAT(IPROJ)%ACAP(1)%ACAP_ELEV          = -99.D0
 !
 !          ! FRAC (Reservoir Storage Fraction Table)
 !          SWO%RESDAT(IPROJ)%FRAC(1)%RESNAME            = "N/A"
 !          SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_PROJID        = -99
 !          SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_RESID         = -99
-!          !SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_LEAP          = -99D0
-!          SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_NOLEAP        = -99D0
-!          SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_FRAC          = -99D0
+!          !SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_LEAP          = -99.D0
+!          SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_NOLEAP        = -99.D0
+!          SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_FRAC          = -99.D0
 !
 !          ! HEAD (Reservoir Head Cells)
 !          SWO%RESDAT(1)%HEAD(1)%HEAD_PROJID            = -99
@@ -6887,22 +6887,22 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
 !          ! (No pooled reservoirs for IRESFL>0 --> dummy alloc/init)
 !          SWO%RESDAT(IPROJ)%RESSPLIT(1)%RESSPLIT_PROJID= -99
 !          SWO%RESDAT(IPROJ)%RESSPLIT(1)%RESSPLIT_RESID = -99
-!          SWO%RESDAT(IPROJ)%RESSPLIT(1)%DOY            = -99D0
-!          SWO%RESDAT(IPROJ)%RESSPLIT(1)%STORAGE        = -99D0
-!          SWO%RESDAT(IPROJ)%RESSPLIT(1)%AREA           = -99D0
-!          SWO%RESDAT(IPROJ)%RESSPLIT(1)%ELEV           = -99D0
-!          SWO%RESDAT(IPROJ)%RESSPLIT(1)%ELEV_PREV      = -99D0
-!          SWO%RESDAT(IPROJ)%RESSPLIT(1)%MAX_ELEV       = -99D0
-!          SWO%RESDAT(IPROJ)%RESSPLIT(1)%MIN_ELEV       = -99D0
+!          SWO%RESDAT(IPROJ)%RESSPLIT(1)%DOY            = -99.D0
+!          SWO%RESDAT(IPROJ)%RESSPLIT(1)%STORAGE        = -99.D0
+!          SWO%RESDAT(IPROJ)%RESSPLIT(1)%AREA           = -99.D0
+!          SWO%RESDAT(IPROJ)%RESSPLIT(1)%ELEV           = -99.D0
+!          SWO%RESDAT(IPROJ)%RESSPLIT(1)%ELEV_PREV      = -99.D0
+!          SWO%RESDAT(IPROJ)%RESSPLIT(1)%MAX_ELEV       = -99.D0
+!          SWO%RESDAT(IPROJ)%RESSPLIT(1)%MIN_ELEV       = -99.D0
 !          SWO%RESDAT(IPROJ)%RESSPLIT(1)%MAIN_RES       = FALSE
 !
 !          ! FRAC (Reservoir Storage Fraction Table)
 !          SWO%RESDAT(IPROJ)%FRAC(1)%RESNAME            = "N/A"
 !          SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_PROJID        = -99
 !          SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_RESID         = -99
-!          !SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_LEAP          = -99D0
-!          SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_NOLEAP        = -99D0
-!          SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_FRAC          = -99D0
+!          !SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_LEAP          = -99.D0
+!          SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_NOLEAP        = -99.D0
+!          SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_FRAC          = -99.D0
 !
 !          ! Compute initial area from initial storage
 !          DTMP1 = SWO%RESDAT(IPROJ)%RESBAL(NRES)%STORAGE_PREV
@@ -7536,7 +7536,7 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
 !   ------------------------------------------------------------------
 !
     LEAP = UNO
-    IF(SWO%LEAP_YEAR .AND. ISLEAP) LEAP = 365D0 / 366D0
+    IF(SWO%LEAP_YEAR .AND. ISLEAP) LEAP = 365.D0 / 366.D0
     !
     DFDD = DZ; FRAC = DZ
     !
@@ -7804,7 +7804,7 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
 !   ------------------------------------------------------------------
 !
     LEAP = UNO
-    IF(SWO%LEAP_YEAR .AND. ISLEAP) LEAP = 365D0 / 366D0
+    IF(SWO%LEAP_YEAR .AND. ISLEAP) LEAP = 365.D0 / 366.D0
     !
     DFDD = DZ; FRC = DZ
     !
@@ -8623,7 +8623,7 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
 !          END IF
 !
 !          IF (.NOT.ALLOCATED(TMPDAT)) THEN
-!            ALLOCATE(TMPDAT(1)); TMPDAT= -99D0
+!            ALLOCATE(TMPDAT(1)); TMPDAT= -99.D0
 !          END IF
 !
 !          DO IRES = 1,SWO%NRES_BAL(IPROJ)
@@ -8702,7 +8702,7 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
 !          END IF
 !
 !          IF (.NOT.ALLOCATED(TMPDAT)) THEN
-!            ALLOCATE(TMPDAT(1)); TMPDAT= (/-99D0/)
+!            ALLOCATE(TMPDAT(1)); TMPDAT= (/-99.D0/)
 !          END IF
 !
 !!          ! Print status
