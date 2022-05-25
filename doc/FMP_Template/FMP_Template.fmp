@@ -1003,7 +1003,6 @@ BEGIN SURFACE_WATER
    #         = 0 indicates only the water necessary is obtained, excess is not delivered
    #         = 1 indicates that unused delivered water is evenly discharged to SFR Delivery locations defined with SEMI_ROUTED_DELIVERY. If SEMI_ROUTED_DELIVERY is not defined, then functions the same as NRDU = 0
    #         = 2 indicates that unused delivered water is evenly injected to a WBS associated supply wells
-   #        >=10 indicates that unused delivered water is evenly infiltrated as deep percolation to the locations within NRD_INFILTRATION_LOCATION that have the same integer
    #
    #
    # It maybe specified as VOLUME of water per stress period.
@@ -1014,13 +1013,10 @@ BEGIN SURFACE_WATER
    #    specified as [WBS_ID, NRD_TYPES*(NRDV NRDR NRDU)];   (NRDV NRDR NRDU) = (Volume Rank UseType)
    #
    #
-   #
    #    *** NON_ROUTED_DELIVERY is only allowed if in the GLOBAL DIMENSION Block has NRD_TYPES>0 ***
    #
    NON_ROUTED_DELIVERY [{RATE, VOLUME}] LAI[S,T,L-(3*NRD_TYPES)]
    #
-   #
-   NRD_INFILTRATION_LOCATION LAI[S,T,A]
    #
    # ------------------------------------------------------------------------------------------------------------------
    #

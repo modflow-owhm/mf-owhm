@@ -1058,7 +1058,6 @@ span {
 </span><span class="sc24">   </span><span class="sc2">#         = 0 indicates only the water necessary is obtained, excess is not delivered
 </span><span class="sc24">   </span><span class="sc2">#         = 1 indicates that unused delivered water is evenly discharged to SFR Delivery locations defined with SEMI_ROUTED_DELIVERY. If SEMI_ROUTED_DELIVERY is not defined, then functions the same as NRDU = 0
 </span><span class="sc24">   </span><span class="sc2">#         = 2 indicates that unused delivered water is evenly injected to a WBS associated supply wells
-</span><span class="sc24">   </span><span class="sc2">#        &gt;=10 indicates that unused delivered water is evenly infiltrated as deep percolation to the locations within NRD_INFILTRATION_LOCATION that have the same integer
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># It maybe specified as VOLUME of water per stress period.
@@ -1069,14 +1068,11 @@ span {
 </span><span class="sc24">   </span><span class="sc2">#    specified as [WBS_ID, NRD_TYPES*(NRDV NRDR NRDU)];   (NRDV NRDR NRDU) = (Volume Rank UseType)
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2">#
-</span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2">#    *** NON_ROUTED_DELIVERY is only allowed if in the GLOBAL DIMENSION Block has NRD_TYPES&gt;0 ***
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc6">NON_ROUTED_DELIVERY</span><span class="sc24"> </span><span class="sc12">[{</span><span class="sc7">RATE</span><span class="sc12">,</span><span class="sc24"> </span><span class="sc7">VOLUME</span><span class="sc12">}]</span><span class="sc24"> </span><span class="sc7">LAI</span><span class="sc12">[</span><span class="sc0">S</span><span class="sc12">,</span><span class="sc0">T</span><span class="sc12">,</span><span class="sc0">L-(3*NRD_TYPES)</span><span class="sc12">]</span><span class="sc24">
    </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2">#
-</span><span class="sc24">   </span><span class="sc6">NRD_INFILTRATION_LOCATION</span><span class="sc24"> </span><span class="sc7">LAI</span><span class="sc12">[</span><span class="sc0">S</span><span class="sc12">,</span><span class="sc0">T</span><span class="sc12">,</span><span class="sc0">A</span><span class="sc12">]</span><span class="sc24">
-   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># ------------------------------------------------------------------------------------------------------------------
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># OUTPUT OPTIONS (optional)
