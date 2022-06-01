@@ -200,12 +200,13 @@ MODULE FMP_MAIN_DRIVER
                     CONTINUE
                 END IF
               END IF
-              CALL UTF8_BOM_OFFSET_REWIND(IN_FMP)
               EXIT
            END IF
        END IF
        CALL READ_TO_DATA(LINE,IN_FMP,IOUT,EOF=EOF)
     END DO
+    !
+    CALL UTF8_BOM_OFFSET_REWIND(IN_FMP)
     !
     BLK%EXTRA = 'GO'   !This ensures that loop starts
     !
