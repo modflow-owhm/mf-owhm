@@ -58,9 +58,9 @@ MODULE FMP_MAIN_DRIVER
     CHARACTER(250):: LINE  !Only to hold "BEGIN NAME"
     CHARACTER(10):: WORD   !Used to get "BEGIN"
     !
-    INTEGER:: LLOC,N,NF,NS,NC
+    INTEGER:: LLOC, N, NF, NS, NC, NFARM
     !
-    LOGICAL:: EOF, FOUND_BEGIN
+    LOGICAL:: EOF, FOUND_BEGIN, NO_GLOBAL_FOUND
     !
     ! LGR Pointer Update
     !
@@ -82,8 +82,6 @@ MODULE FMP_MAIN_DRIVER
     !
     ALLOCATE(FCROP,SWFL,CLIMATE,ALLOT,SOIL,FMPOPT,FMPOUT,SALT)
     ALLOCATE(SWODAT)
-    !
-    FDIM%NFARM = Z
     !
     WBS%HAS_SFR  = IUNITSFR  .NE. Z
     WBS%HAS_UZF  = IUNITUZF  .NE. Z
@@ -123,6 +121,7 @@ MODULE FMP_MAIN_DRIVER
     !
     !  Search for Global Dimension Block
     !
+    NO_GLOBAL_FOUND = TRUE 
     CALL READ_TO_DATA(LINE,IN_FMP,IOUT,EOF=EOF)
     DO WHILE (.NOT. EOF)
        LLOC=ONE
@@ -133,26 +132,27 @@ MODULE FMP_MAIN_DRIVER
                          !
                          CALL BLK%LOAD(IN_FMP,IOUT,LINE)
                          CALL FDIM%INIT(BLK, NROW, NCOL, IUNITUZF, WBS%GSE)
-                         CALL UTF8_BOM_OFFSET_REWIND(IN_FMP)
+                         NO_GLOBAL_FOUND = FALSE
                          EXIT
                    END IF
        END IF
        CALL READ_TO_DATA(LINE,IN_FMP,IOUT,EOF=EOF)
     END DO
     !
+    CALL UTF8_BOM_OFFSET_REWIND(IN_FMP)
+    !
     CALL SGWF2BAS7PSV(IGRID)  !Ensure that BAS/DIS is backed up due to changes in FDIM
     CALL SGWF2BAS7PNT(IGRID)  !Ensure that BAS Pointers are correct before using FDIM
     !
-    !
+    IF(NO_GLOBAL_FOUND) CALL STOP_ERROR(BLNK,IN_FMP,IOUT,MSG=                                     &
+            'FAILED TO LOCATE "BEGIN GLOBAL DIMENSION" WITHIN FMP INPUT FILE'//NL//               &
+            'FMP AT REQUIRES AT THE MINUMUM SPECIFYING THE "GLOBAL DIMENSION" BLOCK INPUT.'//NL// &
+            '-- PLEASE CHECK INPUT --')
+    
     IF(FDIM%NFARM < Z) CALL STOP_ERROR(BLNK,IN_FMP,IOUT,MSG=                                        &
-            'FAILED TO LOCATE "GLOBAL DIMENSION" BLOCK WITHIN FMP INPUT FILE'//NL//                       &
-            'OR IT FAILED TO LOAD ITS CONTENTS'//BLN//                                                    &
-            'FMP AT REQUIRES AT THE MINUMUM SPECIFYING THE "GLOBAL DIMENSION" BLOCK.'//BLN//              &
-            'PLEASE CHECK INPUT'//NL//                                                                    &
-            '(NOTE THE INPUT IS SCANNED FOR THESE BLOCKS FIRST SO THEIR POSITION DOES NOT MATTER.'//NL//  &
-            'HOWEVER BLOCKS THAT DO NOT HAVE A CORRESPONDING END OR '//NL//                               &
-            'HAVE UNCOMMENTED/NONBLANK LINES OUTSIDE OF A BLOCK'//NL//                                    &
-            'MAY CAUSE OneWater TO CRASH')
+            'FOUND GLOBAL DIMENSION BLOCK,'//NL//                                                   &
+            'BUT IT DID NOT SPECIFY THE NUMBER OF WATER BALANCE SUBREGIONS (NWBS).'//NL//                       &
+            'IT IS REQUIRED AT A MINIMUM TO SPECIFY NWBS FOLLOWED BY AN INTEGER (eg "NWBS 1" or "NWBS 4").')
     !
     ! IF LOADED BUILD ISTRM INDEX
     IF( NSEG > 0 ) THEN
