@@ -154,6 +154,9 @@ MODULE FMP_MAIN_DRIVER
             'BUT IT DID NOT SPECIFY THE NUMBER OF WATER BALANCE SUBREGIONS (NWBS).'//NL//                       &
             'IT IS REQUIRED AT A MINIMUM TO SPECIFY NWBS FOLLOWED BY AN INTEGER (eg "NWBS 1" or "NWBS 4").')
     !
+    NFARM = FDIM%NFARM
+    IF(NFARM < ONE) NFARM = ONE  ! Note FDIM%NFARM will be updated at end of subroutine
+    !
     ! IF LOADED BUILD ISTRM INDEX
     IF( NSEG > 0 ) THEN
                    CALL FDIM%SFR_ID%BUILD_ISTRM(NSEG, SEG_NSTRM)  !Build ISTRM pointers for SFR_NAMES
@@ -172,11 +175,7 @@ MODULE FMP_MAIN_DRIVER
         CALL SFR_DELIV%ALLOC(ONE)
     END IF
     !
-    IF(FDIM%NFARM > Z) THEN
-        ALLOCATE(FWELL(FDIM%NFARM))
-    ELSE
-        ALLOCATE(FWELL(ONE))   
-    END IF
+    ALLOCATE(FWELL(NFARM))
     !
     WBS%NFARM = NEG
     !
@@ -290,15 +289,24 @@ MODULE FMP_MAIN_DRIVER
     END DO  
     CALL BLK%DESTROY()
     !                                                                                                                       
-    IF(WBS%NFARM < Z) CALL STOP_ERROR(BLNK,IN_FMP,IOUT,MSG=                                                           &
-                      'FAILED TO LOCATE "WATER_BALANCE_SUBREGION" BLOCK ("BEGIN WATER_BALANCE_SUBREGION") WITHIN FMP INPUT FILE'//NL//       &
-                      'OR IT FAILED TO LOAD ITS CONTENTS'//BLN//                                                                             &
-                      'FMP AT REQUIRES AT THE MINUMUM SPECIFYING THE "GLOBAL DIMENSION" AND "WATER_BALANCE_SUBREGION" BLOCKS.'//BLN//        &
-                      'PLEASE CHECK INPUT'//NL//'(NOTE THE INPUT IS SCANNED FOR THESE BLOCKS FIRST SO THEIR POSITION DOES NOT MATTER.'//NL// &
-                      'HOWEVER BLOCKS THAT DO NOT HAVE A CORRESPONDING END OR '//NL//                                                        &
-                      'HAVE UNCOMMENTED/NONBLANK LINES OUTSIDE OF A BLOCK'//NL//                                                             &
-                      'MAY CAUSE OneWater TO CRASH')
-                      !
+    IF(WBS%NFARM < Z .AND. FDIM%NFARM > Z) CALL STOP_ERROR(BLNK,IN_FMP,IOUT,MSG=                                                           &
+                      'THE "GLOBAL DIMENSION" BLOCK SPECIFIED NWBS > 0, BUT FAILED TO LOCATE THE "WATER_BALANCE_SUBREGION" BLOCK.'//NL//   &
+                      'IF NWBS > 0, THEN YOU MUST SPECIFY THE WATER_BALANCE_SUBREGION BLOCK AND SPECIFY IN IT THE "LOCATION" KEYWORD.'//NL//                                                        &
+                      'OTHERWISE FMP DOES NOT KNOW HOW THE GEOGRAPHIC LOCATION OF EACH WBS.' )
+    
+    IF(WBS%NFARM < Z) THEN
+        CALL WARNING_MESSAGE(OUTPUT=IOUT,MSG='FMP FAILED TO LOCATE THE "WATER_BALANCE_SUBREGION" BLOCK AND NWBS < 1.'//NL//              &
+                                             'FMP WILL SET NWBS = 1 AND SET THE ENTIRE MODEL GRID AS BEING ASSOCIATED WITH WBS1.'//NL//  &
+                                             'That is, the following is assumed:'//BLN//  &
+                                             'BEGIN GLOBAL DIMENSION'//NL//               &
+                                             '           NWBS 1"'//NL//                   &
+                                             'END  GLOBAL DIMENSION'//BLN//               &
+                                             'BEGIN WATER_BALANCE_SUBREGION'//NL//        &
+                                             '           LOCATION STATIC LIST CONSTANT 1"'//NL//  &
+                                             'END WATER_BALANCE_SUBREGION')
+        CALL WBS%SETUP_NO_WBS_DATA(FDIM, IN_FMP, IOUT)
+    END IF
+    !                  !
     IF(.NOT. WBS%HAS_SOIL) THEN
          CALL WARNING_MESSAGE(OUTPUT=IOUT,MSG=BLN//                                                                                                  &
                        'FMP INPUT FAILED TO LOCATE THE SOIL BLOCK (BEGIN SOIL).'//BLN//                                                                &
@@ -313,9 +321,8 @@ MODULE FMP_MAIN_DRIVER
         CALL WARNING_MESSAGE(OUTPUT=IOUT,MSG=                                                         &
                        'FMP INPUT FAILED TO LOCATE THE "SUPPLY_WELL" BLOCK (BEGIN SUPPLY_WELL).'//BLN// &
                         'NO FARM WELLS WILL BE EMPLOYED DURING SIMULATION'//BLN//                       &
-                       '(i.e. NO AVAILIBLE PUMPAGE TO MEET DEMAND -- NO WELLS TO PUMP).',               &
-                       CMD_PRINT=TRUE)
-        CALL FWEL_BASIC_ALLOCATE(FWELL,IOUT,FDIM%NFARM)  !SETS UP REQUIRED INITS WHEN BLOCK WAS NEVER CALLED
+                       '(i.e. NO AVAILIBLE PUMPAGE TO MEET DEMAND -- NO WELLS TO PUMP).')
+        CALL FWEL_BASIC_ALLOCATE(FWELL, IOUT, NFARM)  ! SETS UP REQUIRED INITS WHEN BLOCK WAS NEVER CALLED
     ELSE
         WBS%HAS_WELL = ANY(ABS(FWELL%DIM) > Z) !THERE IS A CHANCE THERE ARE NO FARM WELLS LOADED  --NOTE TYPE 2 (FID FEED) SETS DIM TO ZERO INITIALLY TO REPRESENT THE TOTAL WELL COUNT
         !
@@ -330,7 +337,7 @@ MODULE FMP_MAIN_DRIVER
                        '(NO AVAILIBLE PUMPAGE TO MEET DEMAND -- NO WELLS TO PUMP).',                        &
                        CMD_PRINT=TRUE)
                        !
-           CALL FWEL_BASIC_ALLOCATE(FWELL,IOUT,FDIM%NFARM)  !SETS UP REQUIRED INITS WHEN BLOCK WAS NEVER CALLED
+           CALL FWEL_BASIC_ALLOCATE(FWELL, IOUT, NFARM)  ! SETS UP REQUIRED INITS WHEN BLOCK WAS NEVER CALLED
         END IF
     END IF
     !
@@ -386,26 +393,26 @@ MODULE FMP_MAIN_DRIVER
     !
     !4H-----Allocate space for the double precision array for the Total Delivery Requirement array (TDR, cell-by-cell) 
     !       and the Total Farm Delivery Requirement lists (TFDR,TFDROLD, farm-by-farm) and initialize 
-    ALLOCATE(TFDROLD(FDIM%NFARM), SOURCE=DZ)
+    ALLOCATE(TFDROLD(NFARM), SOURCE=DZ)
     !
     !
     !4P-----Allocate space for the double precision lists of Unranked (UNRD), Ranked (RNRD), & actually used (NRD)
     !       Non-Routed Delivery Lists and initialize
     !
-    ALLOCATE( SWFL%NRD(FDIM%NFARM) )
+    ALLOCATE( SWFL%NRD(NFARM) )
     !
     IF(.NOT.SWFL%HAS_NRD) THEN
-                        ALLOCATE(UNRD(4,FDIM%NFARM)  , SOURCE=DZ)                                      !DUMMY 4       !DP
-                        ALLOCATE(RNRD(2,1,FDIM%NFARM), SOURCE=DZ)                                      !DUMMY 2,1     !DP
-                        ALLOCATE(NRD(2,FDIM%NFARM)   , SOURCE=DZ)                                      !DP
+                        ALLOCATE(UNRD(4,NFARM)  , SOURCE=DZ)                                      !DUMMY 4       !DP
+                        ALLOCATE(RNRD(2,1,NFARM), SOURCE=DZ)                                      !DUMMY 2,1     !DP
+                        ALLOCATE(NRD(2,NFARM)   , SOURCE=DZ)                                      !DP
     ELSE
-                        ALLOCATE(UNRD((SWFL%MXNRD*3+1),FDIM%NFARM), SOURCE=DZ)                         !DP (1=FID; 3 per type = NRD-vol., NRD-rank, NRD-use-flag)
+                        ALLOCATE(UNRD((SWFL%MXNRD*3+1),NFARM), SOURCE=DZ)                         !DP (1=FID; 3 per type = NRD-vol., NRD-rank, NRD-use-flag)
                         IF(ILGR.NE.0) THEN
-                        ALLOCATE(RNRD(2,SWFL%MXNRD*2,FDIM%NFARM)  , SOURCE=DZ)                         !DP (2 per ranked type = NRD-vol., NRD-use-flag) 2 times the MXNRDT to save old RNDR before
+                        ALLOCATE(RNRD(2,SWFL%MXNRD*2,NFARM)  , SOURCE=DZ)                         !DP (2 per ranked type = NRD-vol., NRD-use-flag) 2 times the MXNRDT to save old RNDR before
                         ELSE                                                                           !scaling it down as a result of prorating for parent and child farm NRDs.        
-                        ALLOCATE(RNRD(2,SWFL%MXNRD,FDIM%NFARM)    , SOURCE=DZ)                         !DP (2 per ranked type = NRD-vol., NRD-use-flag)
+                        ALLOCATE(RNRD(2,SWFL%MXNRD,NFARM)    , SOURCE=DZ)                         !DP (2 per ranked type = NRD-vol., NRD-use-flag)
                         ENDIF
-                        ALLOCATE(NRD(2,FDIM%NFARM)                , SOURCE=DZ)                         !DP (2: NRD-new, NRD-old)
+                        ALLOCATE(NRD(2,NFARM)                , SOURCE=DZ)                         !DP (2: NRD-new, NRD-old)
                         !
                         CALL SWFL%NRD%INIT(SWFL%MXNRD)
     ENDIF
@@ -419,7 +426,7 @@ MODULE FMP_MAIN_DRIVER
     !
     !      
     !5F------Allocate space for ... lgr link  --Wolfgang hold over...not sure what to do with pointer codes
-    ALLOCATE(IFA(FDIM%NFARM))      
+    ALLOCATE(IFA(NFARM))      
     IF(FDIM%NSOIL>Z) THEN
         ALLOCATE(ISA(FDIM%NSOIL))
         DO NS=1,FDIM%NSOIL
@@ -438,13 +445,15 @@ MODULE FMP_MAIN_DRIVER
         ALLOCATE(ICA(ONE), SOURCE=Z)
     END IF
     !
-    DO NF=1,FDIM%NFARM
-                     IFA(NF)=NF   !FOR CHILD MODELS THIS GETS SET TO CHILD FARMS
+    DO NF=1,NFARM
+            IFA(NF)=NF   !FOR CHILD MODELS THIS GETS SET TO CHILD FARMS
     END DO     
     !
     !
     ! ALLOCATE DRT LOCATION AND RETURN FLOW TO FMP ARRAY
-    ALLOCATE(DRTFLOW(FDIM%NFARM))
+    ALLOCATE(DRTFLOW(NFARM))
+    !
+    IF(FDIM%NFARM < ONE) FDIM%NFARM = ONE  ! Override for outside packages to know there is 1 WBS
     !      
     !7===== SAVE POINTERS FOR GRID AND RETURN. ========================================================
     CALL FMP_LGR_PNT_SAV(IGRID)

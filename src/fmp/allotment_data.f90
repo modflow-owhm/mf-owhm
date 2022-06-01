@@ -73,6 +73,7 @@ MODULE ALLOTMENT_DATA_FMP_MODULE
     ALOT%IOUT = BL%IOUT
     ALOT%LOUT = BL%IOUT
     ALOT%NFARM = FDIM%NFARM
+    IF(ALOT%NFARM < ONE) ALOT%NFARM = ONE
     BYFARM = 'BYWBS'
     !
     ERROR='ERROR'
@@ -103,10 +104,10 @@ MODULE ALLOTMENT_DATA_FMP_MODULE
                         !
                         ALOT%HAS_SW_ALLOTMENT = TRUE
                         !
-                        CALL ALOT%SW_ALLOTMENT_TFR%INIT('SW_ALOT',  LLOC, LINE, BL%IOUT, BL%IU, FDIM%NFARM, ONE, Z, Z, FDIM%NFARM, BYFARM, SCRATCH=BL%SCRATCH)
+                        CALL ALOT%SW_ALLOTMENT_TFR%INIT('SW_ALOT',  LLOC, LINE, BL%IOUT, BL%IU, ALOT%NFARM, ONE, Z, Z, ALOT%NFARM, BYFARM, SCRATCH=BL%SCRATCH)
                         !
-                        ALLOCATE(ALOT%SW_ALLOTMENT(FDIM%NFARM))
-                        ALLOCATE(ALOT%SW_RATE_LIM (FDIM%NFARM))
+                        ALLOCATE(ALOT%SW_ALLOTMENT(ALOT%NFARM))
+                        ALLOCATE(ALOT%SW_RATE_LIM (ALOT%NFARM))
       CASE ("GROUNDWATER")
                         !
                         CALL PARSE_WORD_UP(LINE,LLOC,ISTART,ISTOP)
@@ -121,10 +122,10 @@ MODULE ALLOTMENT_DATA_FMP_MODULE
                         !
                         ALOT%HAS_GW_ALLOTMENT = TRUE
                         !
-                        CALL ALOT%GW_ALLOTMENT_TFR%INIT('GW_ALOT',  LLOC, LINE, BL%IOUT, BL%IU, FDIM%NFARM, ONE, Z, Z, FDIM%NFARM, BYFARM, SCRATCH=BL%SCRATCH)
+                        CALL ALOT%GW_ALLOTMENT_TFR%INIT('GW_ALOT',  LLOC, LINE, BL%IOUT, BL%IU, ALOT%NFARM, ONE, Z, Z, ALOT%NFARM, BYFARM, SCRATCH=BL%SCRATCH)
                         !
-                        ALLOCATE(ALOT%GW_ALLOTMENT(FDIM%NFARM))
-                        ALLOCATE(ALOT%GW_RATE_LIM (FDIM%NFARM))
+                        ALLOCATE(ALOT%GW_ALLOTMENT(ALOT%NFARM))
+                        ALLOCATE(ALOT%GW_RATE_LIM (ALOT%NFARM))
       CASE DEFAULT
                         CALL WARN_MSG%ADD('FOUND UNKNOWN KEYWORD "'//LINE(ISTART:ISTOP)//'" ***IT WILL BE IGNORED***'//BLN)
       END SELECT
