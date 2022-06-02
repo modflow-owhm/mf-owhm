@@ -16,8 +16,8 @@
         DOUBLE PRECISION, SAVE,                    POINTER:: HNEW_FACTOR
         INTEGER,          SAVE,                    POINTER:: UPLAY_ADJUST
         INTEGER,          SAVE,                    POINTER :: STRHC1KHFLAG, STRHC1KVFLAG
-        DOUBLE PRECISION, SAVE,                    POINTER:: THETAB, FLUXB, FLUXHLD2    !seb added POINTER
-        INTEGER,          SAVE,                    POINTER:: Nfoldflbt, NUMTAB, ROWTAB  !seb added POINTER
+        DOUBLE PRECISION, SAVE,                    POINTER:: THETAB, FLUXB, FLUXHLD2
+        INTEGER,          SAVE,                    POINTER:: Nfoldflbt, NUMTAB, ROWTAB
         INTEGER,SAVE,                              POINTER:: NFLOWTYPE
         CHARACTER(16),    SAVE,  DIMENSION(:),     POINTER, CONTIGUOUS:: FLOWTYPE
         INTEGER,          SAVE,  DIMENSION(:),     POINTER, CONTIGUOUS:: DVRCH   !(diverted recharge flag; then reharge cell count)
@@ -30,6 +30,7 @@
         INTEGER,          SAVE,                    POINTER:: ISFROPT, NSTRAIL, ISUZN, NSFRSETS
         INTEGER,          SAVE,                    POINTER:: NUZST, NSTOTRL, NUMAVE, NSFRAUX
         INTEGER,          SAVE,                    POINTER:: ITMP, IRDFLG, IPTFLG, NP
+        INTEGER,          SAVE,                    POINTER:: OUTSEGFLAG, UNITSEGOUT
         REAL,             SAVE,                    POINTER:: CONST, DLEAK, WEIGHT, SFRRATIN, SFRRATOUT
         REAL,             SAVE,                    POINTER:: FLWTOL, STRMDELSTOR_CUM, STRMDELSTOR_RATE
         REAL,             SAVE,                    POINTER:: FACTORKH,FACTORKV
@@ -43,6 +44,8 @@
         REAL,             SAVE,  DIMENSION(:),     POINTER, CONTIGUOUS:: STRIN, STROUT, FXLKOT
         REAL,             SAVE,  DIMENSION(:),     POINTER, CONTIGUOUS:: UHC, SGOTFLW, DVRSFLW
         REAL,             SAVE,  DIMENSION(:),     POINTER, CONTIGUOUS:: SFRUZBD
+        REAL,             SAVE,  DIMENSION(:),     POINTER, CONTIGUOUS:: SEGFLOWS
+        REAL,             SAVE,  DIMENSION(:),     POINTER, CONTIGUOUS:: SEGINFLOWSAVE
         REAL,             SAVE,  DIMENSION(:,:),   POINTER, CONTIGUOUS:: SEG, STRM,  SFRQ
         REAL,             SAVE,  DIMENSION(:,:),   POINTER, CONTIGUOUS:: HWDTH, HWTPRM
         REAL,             SAVE,  DIMENSION(:,:),   POINTER, CONTIGUOUS:: QSTAGE, XSEC
@@ -95,8 +98,8 @@
         DOUBLE PRECISION,                    POINTER:: HNEW_FACTOR
         INTEGER,                             POINTER:: UPLAY_ADJUST
         INTEGER,                             POINTER :: STRHC1KHFLAG, STRHC1KVFLAG
-        DOUBLE PRECISION,                    POINTER:: THETAB, FLUXB, FLUXHLD2    !seb added POINTER
-        INTEGER,                             POINTER:: Nfoldflbt, NUMTAB, ROWTAB  !seb added POINTER
+        DOUBLE PRECISION,                    POINTER:: THETAB, FLUXB, FLUXHLD2
+        INTEGER,                             POINTER:: Nfoldflbt, NUMTAB, ROWTAB
         INTEGER,                             POINTER:: NFLOWTYPE
         CHARACTER(16),      DIMENSION(:),    POINTER, CONTIGUOUS:: FLOWTYPE
         INTEGER,           DIMENSION(:),     POINTER, CONTIGUOUS:: DVRCH      !Diversions to recharge
@@ -109,6 +112,7 @@
         INTEGER,                             POINTER:: ISFROPT, NSTRAIL, ISUZN, NSFRSETS
         INTEGER,                             POINTER:: NUZST, NSTOTRL, NUMAVE, NSFRAUX
         INTEGER,                             POINTER:: ITMP, IRDFLG, IPTFLG, NP
+        INTEGER,                             POINTER:: OUTSEGFLAG, UNITSEGOUT
         REAL,                                POINTER:: CONST, DLEAK, WEIGHT, SFRRATIN, SFRRATOUT
         REAL,                                POINTER:: FLWTOL, STRMDELSTOR_CUM, STRMDELSTOR_RATE
         REAL,                                POINTER:: FACTORKH,FACTORKV
@@ -122,6 +126,8 @@
         REAL,              DIMENSION(:),     POINTER, CONTIGUOUS:: STRIN, STROUT, FXLKOT
         REAL,              DIMENSION(:),     POINTER, CONTIGUOUS:: UHC, SGOTFLW, DVRSFLW
         REAL,              DIMENSION(:),     POINTER, CONTIGUOUS:: SFRUZBD
+        REAL,              DIMENSION(:),     POINTER, CONTIGUOUS:: SEGFLOWS
+        REAL,              DIMENSION(:),     POINTER, CONTIGUOUS:: SEGINFLOWSAVE
         REAL,              DIMENSION(:,:),   POINTER, CONTIGUOUS:: SEG, STRM, SFRQ
         REAL,              DIMENSION(:,:),   POINTER, CONTIGUOUS:: HWDTH, HWTPRM
         REAL,              DIMENSION(:,:),   POINTER, CONTIGUOUS:: QSTAGE, XSEC
