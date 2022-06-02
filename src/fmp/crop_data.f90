@@ -183,6 +183,7 @@ MODULE CROP_DATA_FMP_MODULE
       CONTAINS
       !
       PROCEDURE, PASS(CDAT):: PARSE_CROP_ROW_COL
+      PROCEDURE, PASS(CDAT):: SETUP_DEPENDENT_PARTS
       PROCEDURE, PASS(CDAT):: NEXT                 => SETUP_NEXT_STRESS_PERIOD
       PROCEDURE, PASS(CDAT):: NEXT_TS              => SETUP_NEXT_TIME_STEP
       PROCEDURE, PASS(CDAT):: SETUP_CROP_EFFICIENCY
@@ -325,6 +326,65 @@ MODULE CROP_DATA_FMP_MODULE
     !
   END SUBROUTINE
   !
+  SUBROUTINE SETUP_BASIC_VAR_CROP_DATA( CDAT, FDIM, IOUT )  
+    CLASS(CROP_DATA),     INTENT(INOUT):: CDAT
+    CLASS(FMP_DIMENSION), INTENT(IN   ):: FDIM
+    INTEGER,              INTENT(IN   ):: IOUT
+    INTEGER:: NROW, NCOL
+    !
+    NROW  = FDIM%NROW
+    NCOL  = FDIM%NCOL
+    !
+    CDAT%NROW  = NROW
+    CDAT%NCOL  = NCOL
+    !
+    CDAT%NIRRG = FDIM%NIRRG
+    CDAT%NCROP = FDIM%NCROP
+    !
+    CDAT%NCROP_ELEV = FDIM%NCROP_ELEV
+    CDAT%IOUT  = IOUT
+    CDAT%LOUT  = IOUT
+    !
+    CDAT%MULTI_CROP_CELLS = FALSE
+    CDAT%CHECK_BARE       = FALSE
+    CDAT%HAS_DEMAND_EXT   = FALSE
+    CDAT%DEMAND_EXT_FLUX  = FALSE
+    !
+    CDAT%HNEW_FACTOR = FDIM%HNEW_FACTOR
+    !
+    CDAT%HAS_Kc                 = FALSE
+    CDAT%ITER_CALC_EGW_TGW_LOCK = inf_I
+    CDAT%ITER_AVE_HEAD          = inf_I
+    !
+    CDAT%MIN_BARE   = DZ
+    CDAT%RELAX_FACT = UNO
+    !
+    SELECT CASE (LENUNI)
+    CASE(ONE);          CDAT%MLT = 30.48D0  !FOOT
+    CASE(TWO);          CDAT%MLT = 100.D0   !METER
+    CASE(THREE);        CDAT%MLT = 1.D0     !CENTIMETER
+    CASE DEFAULT;       CDAT%MLT = 1.D0     !UNKNOWN
+    END SELECT
+    !
+    !CDAT%PCF_IS_FRAC = TRUE
+    !
+    IF(ALLOCATED(CDAT%TTOT)) DEALLOCATE(CDAT%TTOT)
+    IF(ALLOCATED(CDAT%ETOT)) DEALLOCATE(CDAT%ETOT)
+    IF(ALLOCATED(CDAT%TGWA)) DEALLOCATE(CDAT%TGWA)
+    IF(ALLOCATED(CDAT%EGWA)) DEALLOCATE(CDAT%EGWA)
+    ALLOCATE(CDAT%TTOT(NCOL,NROW), &
+            CDAT%ETOT(NCOL,NROW), &
+            CDAT%TGWA(NCOL,NROW), &
+            CDAT%EGWA(NCOL,NROW), SOURCE=DZ) 
+       
+    IF(ALLOCATED(CDAT%BARE_FRAC)) DEALLOCATE(CDAT%BARE_FRAC)
+    ALLOCATE(CDAT%BARE_FRAC(NCOL,NROW), SOURCE=DZ)
+    
+    IF(ALLOCATED(CDAT%BARE_FRAC_RUNOFF)) DEALLOCATE(CDAT%BARE_FRAC_RUNOFF)
+    ALLOCATE(CDAT%BARE_FRAC_RUNOFF(NCOL,NROW), SOURCE=DZ)
+    !
+  END SUBROUTINE 
+  !
   SUBROUTINE INITIALIZE_CROP_DATA( BL, CDAT, LINE, FDIM, HAS_SFR )  !NFARM, IFID
     CLASS(GENERIC_BLOCK_READER), INTENT(INOUT):: BL   !DATA BLOCK
     CLASS(CROP_DATA),            INTENT(INOUT):: CDAT
@@ -352,6 +412,8 @@ MODULE CROP_DATA_FMP_MODULE
     !
     WRITE(BL%IOUT,'(/A/)') 'CROP BLOCK FOUND AND NOW LOADING PROPERTIES'
     !
+    CALL SETUP_BASIC_VAR_CROP_DATA( CDAT, FDIM, BL%IOUT )
+    !
     NFARM = FDIM%NFARM
     IF(NFARM < ONE) NFARM = ONE
     !
@@ -364,45 +426,17 @@ MODULE CROP_DATA_FMP_MODULE
     NROW = FDIM%NROW
     !
     ELV_NROW   = NROW
-    CDAT%NROW  = NROW
-    CDAT%NCOL  = NCOL
-    CDAT%NIRRG = FDIM%NIRRG
-    CDAT%NCROP = FDIM%NCROP
-    CDAT%NCROP_ELEV = FDIM%NCROP_ELEV
-    CDAT%IOUT  = BL%IOUT
-    CDAT%LOUT  = BL%IOUT
-    CDAT%CHECK_BARE = FALSE
-    CDAT%HAS_DEMAND_EXT  = FALSE
-    CDAT%DEMAND_EXT_FLUX = FALSE
-    CDAT%HNEW_FACTOR = FDIM%HNEW_FACTOR
-    !CDAT%PCF_IS_FRAC     = TRUE
-    CDAT%HAS_Kc = FALSE
-    CDAT%ITER_CALC_EGW_TGW_LOCK = inf_I
-    CDAT%ITER_AVE_HEAD = inf_I
     NPRNT_CROP = Z
     !
-    ALLOCATE(CDAT%TTOT(NCOL,NROW), CDAT%ETOT(NCOL,NROW), CDAT%TGWA(NCOL,NROW), CDAT%EGWA(NCOL,NROW), SOURCE=DZ) !AUTOALLOCATES ALL TO ZERO
-    ALLOCATE(CDAT%BARE_FRAC(NCOL,NROW), SOURCE=DZ)
-    !
-    SELECT CASE (LENUNI)
-    CASE(ONE);          CDAT%MLT = 30.48D0  !FOOT
-    CASE(TWO);          CDAT%MLT = 100.D0   !METER
-    CASE(THREE);        CDAT%MLT = 1.D0     !CENTIMETER
-    CASE DEFAULT;       CDAT%MLT = 1.D0     !UNKNOWN
-    END SELECT
-    !
-    CDAT%RELAX_FACT= UNO
     ERROR='ERROR'
     !
     IF(CDAT%NCROP==Z) THEN
-        CALL WARNING_MESSAGE(OUTPUT=BL%IOUT,MSG='FMP NCROP = 0, ARE YOU SURE YOU WANT TO USE FMP WITHOUT ANY CROPS???',INLINE=TRUE)
         RETURN
     END IF
     !
     CALL BL%START()
     !
     EOF = TRUE  !USE AS FLAG IF KEYWORD IS FOUND
-    CDAT%MULTI_CROP_CELLS = FALSE
     DO I=ONE, BL%NLINE
                     LLOC=ONE
                     CALL PARSE_WORD_UP(BL%LINE,LLOC,ISTART,ISTOP)
@@ -915,6 +949,44 @@ MODULE CROP_DATA_FMP_MODULE
     !
   END SUBROUTINE 
   !
+  SUBROUTINE SETUP_DEPENDENT_PARTS(CDAT, FDIM, WBS, CLIM, SOIL, IOUT )
+    CLASS(CROP_DATA),    INTENT(INOUT):: CDAT
+    TYPE(FMP_DIMENSION), INTENT(IN   ):: FDIM
+    TYPE(WBS_DATA),      INTENT(IN   ):: WBS
+    TYPE(CLIMATE_DATA),  INTENT(IN   ):: CLIM
+    TYPE(SOIL_DATA),     INTENT(IN   ):: SOIL
+    INTEGER,             INTENT(IN   ):: IOUT
+    !
+    IF(.NOT. WBS%HAS_CROP .AND. CDAT%NCROP > Z) THEN
+         ! RAISE ERROR    
+    END IF
+    !
+    IF(FDIM%NCROP == Z) CALL WARNING_MESSAGE(OUTPUT=IOUT,MSG='FMP NCROP = 0'//NL// &
+                                                                'Are you sure you want to use FMP without any crops or land uses defined???', INLINE=TRUE)
+    !
+    IF( .NOT. WBS%HAS_CROP ) CALL SETUP_BASIC_VAR_CROP_DATA( CDAT, FDIM, IOUT )  ! No Crop Block Read In
+    !
+    IF( CDAT%NCROP == Z) THEN
+        !
+        CDAT%CHECK_BARE = CLIM%HAS_BARE_REF_ET
+        !
+        IF(CDAT%CHECK_BARE .AND. (.NOT. SOIL%HAS_SOIL .OR. .NOT. SOIL%HAS_FRINGE))  THEN
+            CALL WARNING_MESSAGE(OUTPUT=CDAT%LOUT,MSG='FMP CROP. Either NSOIL = 0 or capilary fringe was not specified in SOIL Block.'//NL//   &
+                                                      'Yet the CLIMATE Block specified either reference et and/or bare soil evaporation'//NL// &
+                                                      'indicating simulation of bare soil evaporation. This will be disabled because it'//NL// &
+                                                      'requires a capilary fringe for evaporation calculations.'//NL// &
+                                                      '-- DISABLING FMP CROP/LAND USE BARE SOIL EVAPORATION --')
+            CDAT%CHECK_BARE = FALSE
+        END IF
+        !
+        IF(CDAT%CHECK_BARE) ALLOCATE(CDAT%BARE_GSE(CDAT%NCOL, CDAT%NROW), SOURCE = WBS%GSE)  ! SETUP_CROP_ELEVATION(CDAT, WBS) never called so allocate missing array
+        !
+    END IF
+    !
+    IF( .NOT. WBS%HAS_CROP .AND. .NOT. CDAT%CHECK_BARE) CDAT%MIN_BARE = inf  ! Disable using bare soil calclations
+    !
+  END SUBROUTINE 
+  !
   SUBROUTINE SETUP_NEXT_TIME_STEP(CDAT, WBS)
     CLASS(CROP_DATA),   INTENT(INOUT):: CDAT
     TYPE(WBS_DATA),     INTENT(INOUT):: WBS
@@ -946,21 +1018,6 @@ MODULE CROP_DATA_FMP_MODULE
     CALL WRN%INIT()
     !
     IF(CDAT%NCROP == Z) THEN !-----------------------------------------------------------------------------------------------------------
-        IF( .NOT. ALLOCATED(CDAT%ETOT)) THEN
-            !
-            CDAT%CHECK_BARE = CLIM%HAS_BARE_REF_ET
-            CDAT%NCOL = WBS%NCOL
-            CDAT%NROW = WBS%NROW
-            !
-            IF(CDAT%CHECK_BARE .AND. (.NOT. SOIL%HAS_SOIL .OR. .NOT. SOIL%HAS_FRINGE))  THEN
-                CALL WARNING_MESSAGE(OUTPUT=CDAT%LOUT,MSG='FMP CROP. EITHER NSOIL = 0 OR CAPILARY FRINGE WAS NOT SPECIFIED IN SOIL BLOCK, YET THE CLIMATE BLOCK SPECIFIED EITHER REFERENCE ET AND/OR BARE SOIL EVAPORATION INDICATING SIMULATION OF BARE SOIL EVAPORATION. THIS WILL BE DISABLED BECAUSE IT REQUIRES A CAPILARY FRINGE FOR EVAPORATION CALCULATIONS.')
-                CDAT%CHECK_BARE = FALSE
-            END IF
-            !
-            ALLOCATE(CDAT%TTOT(CDAT%NCOL,CDAT%NROW), CDAT%TGWA(CDAT%NCOL,CDAT%NROW),CDAT%ETOT(CDAT%NCOL,CDAT%NROW), CDAT%EGWA(CDAT%NCOL,CDAT%NROW), SOURCE=DZ) !AUTO ALLOCATES ALL TO ZERO
-            !
-            IF(CDAT%CHECK_BARE) ALLOCATE(CDAT%BARE_FRAC(CDAT%NCOL,CDAT%NROW), CDAT%BARE_FRAC_RUNOFF(CDAT%NCOL, CDAT%NROW), SOURCE=DZ)  !, CDAT%BARE_FRAC_PRECIP(CDAT%NCOL, CDAT%NROW)
-        END IF
         !
         IF(.NOT. CDAT%TFR_READ) THEN
             CDAT%TFR_READ = TRUE
@@ -968,19 +1025,13 @@ MODULE CROP_DATA_FMP_MODULE
         END IF
         !
         IF(CDAT%CHECK_BARE) THEN
-                                CALL WBS%SETUP_FALLOW_FRACTION_ARRAY(WBS%BARE_FRAC_RUNOFF, CDAT%BARE_FRAC_RUNOFF, TRUE)
-                                !CALL WBS%SETUP_FALLOW_FRACTION_ARRAY(WBS%BARE_FRAC_PRECIP, CDAT%BARE_FRAC_PRECIP, TRUE)
-                                !
-                                WHERE (WBS%FID_ARRAY > Z) 
-                                                     CDAT%BARE_FRAC = UNO
-                                                    !CDAT%BARE_FRAC_PRECIP = UNO
-                                ELSEWHERE
-                                                     CDAT%BARE_FRAC = DZ
-                                                     !CDAT%BARE_FRAC_PRECIP = DZ
-                                END WHERE
-                                !
-                                ! SET UP BARE ELEVATIONS
-                                CALL SETUP_CROP_ELEVATION(CDAT, WBS)
+            CALL WBS%SETUP_FALLOW_FRACTION_ARRAY(WBS%BARE_FRAC_RUNOFF, CDAT%BARE_FRAC_RUNOFF, TRUE)
+            !
+            WHERE (WBS%FID_ARRAY > Z) 
+                                 CDAT%BARE_FRAC = UNO
+            ELSEWHERE
+                                 CDAT%BARE_FRAC = DZ
+            END WHERE
         END IF
         !
     ELSE!--------------------------------------------------------------------------------------------------------------------------------
@@ -2038,10 +2089,9 @@ MODULE CROP_DATA_FMP_MODULE
                        CDAT%BARE_EVAP_EHI      (CDAT%NCOL,CDAT%NROW), &
                        CDAT%BARE_EVAP_EHD      (CDAT%NCOL,CDAT%NROW), &
                        CDAT%BARE_EVAP_PRECIP   (CDAT%NCOL,CDAT%NROW), &
-                       CDAT%BARE_FRAC_RUNOFF   (CDAT%NCOL,CDAT%NROW), &
                        !CDAT%BARE_FRAC_PRECIP(CDAT%NCOL,CDAT%NROW), &
                                                                    SOURCE=DZ)
-             !
+             
              IF(CDAT%HAS_Pe) ALLOCATE(CDAT%BARE_RNOFF_Peff(CDAT%NCOL,CDAT%NROW), SOURCE=DZ)
          ELSE
              CDAT%BARE_EVAP_EHI = DZ
