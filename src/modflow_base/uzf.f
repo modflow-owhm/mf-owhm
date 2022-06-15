@@ -59,7 +59,7 @@ C     ******************************************************************
       double precision, intent(in) :: hh,s,x,c,smoothet
       double precision, intent(inout) :: trhs,thcof,dET
 ! local
-      double precision depth,gwet,smint,etgw,detdh
+      double precision depth ,smint,etgw,detdh
       external smoothuz
       double precision smoothuz
 !
@@ -141,8 +141,7 @@ C     ------------------------------------------------------------------
       INTEGER istart, istop, lloc, ivol, numactive, ic, ir
       INTEGER ibndflg, ichld, iflgbnd, igage, igunit, irhld, isyflg, 
      +        iuzcol, iuzflg, iuzlay, iuzopt, iuzrow, l, ncck, ncth, 
-     +        nlth, nrck, nrnc, nrth, i, icheck, kkrch, k, NPP, MXVL,
-     +        llocsave, icheck2
+     +        nlth, nrck, nrnc, nrth, i, icheck, kkrch, k, NPP, MXVL
       REAL r, sy, fkmin, fkmax, range, finc, thick, smooth
       CHARACTER(LEN=200) line
       CHARACTER(LEN=24) aname(9)
@@ -277,6 +276,10 @@ C1------IDENTIFY PACKAGE AND INITIALIZE.
               ISEEPREJECT = 1
               WRITE(IOUT,'(/2A/)')'SURFACE LEAKAGE WILL BE CALCULATED ',
      +                            'USING LAND SURFACE K'
+        CASE('SAVEFINF')
+            Isavefinf = 1
+            WRITE(IOUT,'(/A/)')'VALUES SPECIFIED IN FINF FOR ',
+     +                         'TRANSIENT GSFLOW MODELS WILL BE SAVED'
         CASE ('NETFLUX')
             CALL URWORD(LINE,LLOC,ISTART,ISTOP,2,UNITRECH,R,IOUT,IN)
             IF(UNITRECH.LT.0) UNITRECH=0
@@ -1853,8 +1856,7 @@ C     SET LAYER FOR GROUNDWATER RECHARGE AND DISCHARGE
 C     VERSION 1.2.0:  March 01, 2020
 C     ******************************************************************
       USE GWFUZFMODULE
-      USE GLOBAL,       ONLY: NCOL, NROW, NLAY, ISSFLG, IBOUND, 
-     +                        HNEW, BOTM, LBOTM
+      USE GLOBAL,       ONLY: NLAY, IBOUND, HNEW, BOTM, LBOTM
       IMPLICIT NONE
 C     -----------------------------------------------------------------
 C     SPECIFICATIONS:
@@ -1864,7 +1866,7 @@ C     -----------------------------------------------------------------
 C     -----------------------------------------------------------------
 C     LOCAL VARIABLES
 C     -----------------------------------------------------------------
-      INTEGER :: IC, IR, IL, ILL, LL, IBND, KKSTP, IBND2, ILACTIVE
+      INTEGER :: IC, IR, IL, ILL, LL, IBND, KKSTP, ILACTIVE
       DOUBLE PRECISION :: S1, S2
 C     -----------------------------------------------------------------
 C      
@@ -1917,7 +1919,7 @@ C     SURFACE LEAKAGE AND ADD OR SUBTRACT TERMS RHS AND HCOF
 C     NEW VERSION NUMBER 1.0.6:  December 5, 2012 modified by rth for OWHM
 C     ******************************************************************
       USE GWFUZFMODULE
-      USE GLOBAL,       ONLY: NCOL, NROW, NLAY, HNEW, ISSFLG, DELR,
+      USE GLOBAL,       ONLY: NROW, NCOL, NLAY, HNEW, ISSFLG, DELR,
      +                        DELC, BOTM, IBOUND, HCOF, RHS,
      +                        ITMUNI, LENUNI, UPLAY
       USE GWFBASMODULE, ONLY: DELT, HDRY
@@ -1925,6 +1927,7 @@ C     ******************************************************************
       USE GWFNWTMODULE, ONLY: A, IA, Heps, Icell
       USE GWFAGMODULE, ONLY: DIVERSIONIRRUZF,NUMIRRDIVERSION,
      +                        WELLIRRUZF,NUMIRRWEL
+      USE SET_ARRAY_INTERFACE, ONLY: SET_ZERO
 
       IMPLICIT NONE
 C     -----------------------------------------------------------------
@@ -1942,8 +1945,8 @@ C     -----------------------------------------------------------------
       REAL epsilon, fks, rootdp, ths, wiltwc,celthick, finfact, finfhold
       REAL finfsaveadd
       INTEGER ic, il, ill, ir, iset, iss, iwav, l, numwaves,
-     +        land, idelt, ik, ll, idr
-      INTEGER lakflg, lakid, ibnd, i, ij, nlayp1, lakflginf
+     +        land, idelt, ik, ll
+      INTEGER lakflg, lakid, ibnd, ij, nlayp1, lakflginf
       DOUBLE PRECISION oldsflx, surflux, dlength, h, celtop, deltinc,
      +                 zoldist, totflux, etact, rateud, hld, htest1,
      +                 htest2, flength, width, thr, cellarea, fact,
@@ -1953,11 +1956,15 @@ C     -----------------------------------------------------------------
 !!     +                 dcsep
 !!     +                 rhsnew, hcofold, hcofnew, rhsold, bbot, ttop, 
 !!     +                 dcsep
-      DOUBLE PRECISION s, x, c, etdp, etgw, trhs, thcof, hh, dET
+      DOUBLE PRECISION s, x, c, etgw, trhs, thcof, hh, dET
 C     -----------------------------------------------------------------
 C
 C1------SET POINTERS FOR THE CURRENT GRID.
       CALL SGWF2UZF1PNT(Igrid)      
+      !
+      ! Initialize variables
+      CALL SET_ZERO(NCOL, NROW, GWET)
+      CALL SET_ZERO(NCOL, NROW, EXCESPP)
 C
 C2------LOOP THROUGH UNSATURATED ZONE FLOW CELLS.
       iss = ISSFLG(Kkper)
@@ -1995,7 +2002,7 @@ C2------LOOP THROUGH UNSATURATED ZONE FLOW CELLS.
         idelt = 1
       END IF
 C set excess precipitation to zero for integrated (GSFLOW) simulation
-      IF ( IGSFLOW.GT.0 .and. Isavefinf == 0 ) EXCESPP = 0.0
+!      IF ( IGSFLOW.GT.0 .and. Isavefinf == 0 ) EXCESPP = 0.0
       l = 0
       DO ll = 1, NUMCELLS
         etgw = 0.0
@@ -2007,7 +2014,7 @@ C set excess precipitation to zero for integrated (GSFLOW) simulation
         hcofold = 0.0D0
         ir = IUZHOLD(1, ll)
         ic = IUZHOLD(2, ll)
-        EXCESPP(ic, ir) = 0.0
+        !EXCESPP(ic, ir) = 0.0
         ibnd = IUZFBND(ic, ir)
         IF ( abs(ibnd) > 0 ) THEN
         IF ( ibnd.GT.0 ) l = l + 1
@@ -2306,9 +2313,10 @@ C7------CALCULATE ET DEMAND LEFT FOR GROUND WATER.
             hh = H
             IF ( c.LT.0.0d0 ) c = 0.0d0
             call simuzet(etopt,smoothet,hh,s,x,c,trhs,thcof,dET,etgw)
-                    RHS(ic, ir, il) = RHS(ic, ir, il) + trhs
-                    HCOF(ic, ir, il) = HCOF(ic, ir, il) + thcof
-                    !UZFETOUT(ic, ir) = etact*cellarea + etgw*DELT  !code from MF05
+            GWET(ic, ir) = etgw
+            RHS(ic, ir, il) = RHS(ic, ir, il) + trhs
+            HCOF(ic, ir, il) = HCOF(ic, ir, il) + thcof
+            !UZFETOUT(ic, ir) = etact*cellarea + etgw*DELT  !code from MF05
 ! Derivative for RHS
             IF ( Iunitnwt.NE.0 ) THEN
               ij = Icell(ic, ir, il)
@@ -2473,7 +2481,7 @@ C     -----------------------------------------------------------------
      +                 deltinc, fkseep, trhs, thcof, hh, dET, s, x, c, 
      +                 etgw, fkreject
       REAL avdpt, avwat, bigvl1, bigvl2, depthinc, epsilon, 
-     +     etdp, eps_m1, ftheta1, ftheta2, finfsaveadd
+     +     eps_m1, ftheta1, ftheta2, finfsaveadd
       REAL fhold, fks, fminn, gcumin, gcumrch, gdelstor, gdlstr, ghdif, 
      +     ghnw, ginfltr, grchr, gseep, gseepr, guzstore, prcntercum,
      +     prcnterrat, ratin, ratout, cumapplinf, dum1, dum2
@@ -2487,12 +2495,12 @@ C     -----------------------------------------------------------------
      +        j, jj, jk, land, nwavm1, nwaves, idelt, ik, ll, ibnd, iret
       INTEGER k, kknt, l, loop, numwaves, numwavhld, nuzc, nuzr, jm1
       INTEGER lakflg, lakid, nlayp1, lakflginf
-      CHARACTER(LEN=16) textrch, textet, textexfl, textinf, textinf2
+      CHARACTER(LEN=16) textrch, textet, textexfl, textinf!, textinf2
       CHARACTER(LEN=16) uzsttext, uzettext, uzinftxt, txthold,textrej
       CHARACTER(LEN=16) netrchtext, netdistext
       CHARACTER(LEN=17) val1, val2
       DATA textinf/'    UZF INFILTR.'/
-      DATA textinf2/'SFR-DIV. INFLTR.'/
+      !DATA textinf2/'SFR-DIV. INFLTR.'/
       DATA textrch/'    UZF RECHARGE'/
       DATA textet/'           GW ET'/
       DATA textexfl/' SURFACE LEAKAGE'/
@@ -2577,7 +2585,7 @@ CDEP 05/05/2006
         fks = VKS(ic, ir)
         fkreject = fks
         fkseep = fks
-        IF ( Iseepreject > 0 .and. IGSFLOW == 0 ) fkseep = surfk(ic,ir)
+        IF ( Iseepreject > 0 ) fkseep = surfk(ic,ir)
         IF ( Isurfkreject > 0 ) fkreject = surfk(ic, ir)
         volinflt = 0.0D0
         finfsaveadd = zero
@@ -5740,7 +5748,7 @@ C     ******************************************************************
       USE GLOBAL,       ONLY: BOTM, NLAY
       USE GWFBASMODULE, ONLY: DELT
       USE GWFUZFMODULE, ONLY: NWAV, CLOSEZERO, IUZFBND, NWAVST,
-     +                        RTSOLUTE, GRIDSTOR, GRIDET, IUZFOPT, IOUT
+     +                        GRIDSTOR, GRIDET, IUZFOPT
       IMPLICIT NONE
 C     ------------------------------------------------------------------
 C     SPECIFICATIONS:
