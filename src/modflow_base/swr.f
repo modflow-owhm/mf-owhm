@@ -8493,6 +8493,11 @@ C     + + + CODE + + +
         rtop = REACH(irch)%GTELEV
         rbot = REACH(irch)%GBELEV
         ktop = MAX(1, ABS(REACH(irch)%KRCH))
+        IF(rbot > BOTM(jc,ir,1)) THEN        ! seb set default value for kbot
+            kbot = 1
+        ELSE
+            kbot = NLAY
+        END IF
         k0 = ktop
         DO k = k0, NLAY
           kk = LBOTM(k)
