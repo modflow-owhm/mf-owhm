@@ -76,7 +76,7 @@ C     INITIALIZE AND READ VARIABLES FOR HEAD OBSERVATIONS
 C     ******************************************************************
 C     SPECIFICATIONS:
 C     ------------------------------------------------------------------
-      USE GLOBAL, ONLY: NCOL,NROW,NLAY,DELR,DELC,
+      USE GLOBAL, ONLY: NCOL,NROW,NLAY,
      1                  NPER,NSTP,PERLEN,TSMULT,ISSFLG,IOUT,ITRSS
       USE OBSBASMODULE
       USE GWFBASMODULE,ONLY: HAS_STARTDATE
@@ -217,8 +217,8 @@ C
 C7------INITIALIZE OTIME, SIMULATED EQUIVALENT HEAD, NDER(5,n), and IHOBWET.
       OTIME = ONEN
       H = NO_OBS
-      NDER(5,:)=0
-      IHOBWET=1
+      NDER = 0
+      IHOBWET = 1
 !      DO 50 N = 1, NH
 !        OTIME(N) = ONEN
 !        H(N) = HOBDRY
@@ -402,6 +402,29 @@ C15B3---WRITE ONE MULTI-TIME OBSERVATION.
         CALL UOBSTI(OBSNAM(N),IOUT,ISSFLG,ITRSS,NPER,NSTP,IREFSP,
      &              NDER(4,N),PERLEN,TOFF(N),TOFFSET,TOMULTH,
      &              TSMULT,0,OTIME(N),SKIP_OBS(N),DATE,DYEAR)
+        !
+        IF(ITT.EQ.2 .AND. J.NE.1 .AND. .not. SKIP_OBS(N)) THEN
+          IF(NDER(4,N) < NDER(4,NBASE) .OR. 
+     +      (NDER(4,N) ==NDER(4,NBASE) .AND. TOFF(N)<TOFF(NBASE))) THEN
+            BLOCK
+                CHARACTER:: NL
+                CHARACTER(:), ALLOCATABLE:: TXT
+                NL = NEW_LINE(' ')
+                TXT = 'HOB ABORTING BECAUSE A DRAWDOWN OBSERVATION '//
+     +                '(ITT = 2) HAS ITS OBSERVATION TIME OCCUR '//
+     +                'BEFORE THE FIRST HEAD OBSERVATION.'//NL//
+     +                'THAT IS, THE OBSERVATION TIME FOR'//NL//'   '//
+     +                OBSNAM(N)//NL//
+     +                'OCCURS BEFORE'//NL//'   '//
+     +                OBSNAM(NBASE)//NL//
+     +                'EITHER CHANGE THE DRAWDOWN OBSERVATIONS TO '//
+     +                'BE IN CHRONOLOGICAL ORDER'//NL//
+     +                'OR CHANGE TO HEAD OBSERVATION (SET ITT = 1)'
+                      CALL USTOP(TXT)
+            END BLOCK
+        END IF
+        END IF
+        !
         IF(DATE.NE.'NO_DATE') THEN
             HOB_DATE(N)=DATE
             HOB_DYR (N)=DYEAR
@@ -449,8 +472,7 @@ C     INTERPOLATE HEADS.  ACCOUNT FOR DRY CELLS, IF NEEDED.
 C     ******************************************************************
 C        SPECIFICATIONS:
 C     ------------------------------------------------------------------
-      USE GLOBAL, ONLY: NCOL,NROW,NLAY,DELR,DELC,IBOUND,HNEW,
-     1                  NPER,NSTP,PERLEN,TSMULT,ISSFLG,IOUT
+      USE GLOBAL, ONLY: NCOL,NROW,NLAY,DELR,DELC,IBOUND,HNEW,IOUT
       USE OBSBASMODULE
       DOUBLE PRECISION V
       LOGICAL:: WRITEVAL
@@ -707,8 +729,7 @@ C     ASSUMING ALL CELLS ARE ACTIVE.
 C     ******************************************************************
 C        SPECIFICATIONS:
 C     ------------------------------------------------------------------
-      USE GLOBAL, ONLY: NCOL,NROW,NLAY,DELR,DELC,IBOUND,HNEW,STRT,
-     1                  NPER,NSTP,PERLEN,TSMULT,ISSFLG,IOUT
+      USE GLOBAL, ONLY: NCOL,NROW,DELR,DELC
       USE OBSBASMODULE
 C     ------------------------------------------------------------------
 C
