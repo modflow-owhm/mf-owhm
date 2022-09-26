@@ -938,7 +938,7 @@ BEGIN CLIMATE
    #
    # ------------------------------------------------------------------------------------------------------------------
    #
-   # Optional keywords that define how Bare Soil Potential Evaporation is determined
+   # Optional keywords that define how Bare Soil Potential Evaporation is calculated
    #
    # Potential evaporation rate of groundwater under Fallow and Bare Soil
    #   ***If not specified then REFERENCE_ET is used in its place. If REFERENCE_ET is not specified then set to 0.0

@@ -1293,7 +1293,7 @@ MODULE WELL_DATA_FMP_MODULE
   END SUBROUTINE
   !
   SUBROUTINE FWEL_PROPERTY_READ(BL,WELLID,IL,IR,IC,NAUX,AUX,INSTYLE,NF,Q,SPSTART,SPEND)
-    USE GLOBAL,                          ONLY:  NPER, NLAY, BOTM, LBOTM, XYGRID
+    USE GLOBAL, ONLY:  NROW, NCOL, NLAY, NPER, BOTM, LBOTM, XYGRID
     CLASS(GENERIC_BLOCK_READER),       INTENT(INOUT):: BL   !DATA BLOCK -- MUST POINT TO CURRENT LINE TO PROCESS
     CHARACTER(*),                      INTENT(OUT  ):: WELLID
     INTEGER,                           INTENT(OUT  ):: IL,IR,IC
@@ -1346,6 +1346,15 @@ MODULE WELL_DATA_FMP_MODULE
                  CALL XYGRID%XY2RC(X,Y,IR,IC) 
     END IF
     !
+    IF( IL /= Z ) THEN
+        IF(IR < ONE .OR. IR > NROW .OR. IC < ONE .OR. IC > NCOL) THEN
+            CALL STOP_ERROR(BL%LIST%LN,BL%IU,BL%IOUT,'FMP SUPPLY WELL ERROR:'//NL// &
+                                                     'WELLS WITH A LAYER NOT EQUAL TO ZERO OR "MNW" MUST SPECIFY A ROW AND COLUMN WITHIN THE MODEL GRID.'//NL// &
+                                                     'ROW = '//NUM2STR(IR, -10)//' NROW = '//NUM2STR(NROW)//NL// &
+                                                     'COL = '//NUM2STR(IC, -10)//' NCOL = '//NUM2STR(NCOL))
+        END IF
+    END IF
+    !
     IF    ( IL < Z ) THEN
                         IF( IL == -20 ) ELEV = DBLE(BOTM(IC,IR,Z)) - ELEV
                         DO I = ONE, NLAY
@@ -1355,6 +1364,14 @@ MODULE WELL_DATA_FMP_MODULE
                                         END IF
                         END DO
                         IF(IL < Z) CALL STOP_ERROR(BL%LIST%LN,BL%IU,BL%IOUT,'FMP FWELL BLOCK FAILED TO FIND A LAYER FOR THE SPECIFIED OR CALCULATED "ELEVATION" OF '//NUM2STR(ELEV))
+    END IF
+    !
+    IF( IL /= Z) THEN
+        IF(IL < Z .OR. IL > NLAY) THEN
+            CALL STOP_ERROR(BL%LIST%LN,BL%IU,BL%IOUT,'FMP SUPPLY WELL ERROR:'//NL// &
+                                                     'WELLS WITH A LAYER NOT EQUAL TO ZERO OR "MNW" MUST SPECIFY A LAYER WITHIN THE MODEL GRID.'//NL// &
+                                                     'LAY = '//NUM2STR(IL, -10)//' NLAY = '//NUM2STR(NLAY))
+        END IF
     END IF
     !
     IF(PRESENT(Q))  CALL GET_NUMBER(BL%LIST%LN,LLOC,ISTART,ISTOP,BL%IOUT,BL%IU,Q,MSG='FWEL_PROPERTY_READ ERROR: INPUT EXPECTED TO LOAD FARM WELL CAPACITY (Qcap).')

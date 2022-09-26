@@ -422,7 +422,7 @@ C15B3---WRITE ONE MULTI-TIME OBSERVATION.
      +                'OR CHANGE TO HEAD OBSERVATION (SET ITT = 1)'
                       CALL USTOP(TXT)
             END BLOCK
-        END IF
+          END IF
         END IF
         !
         IF(DATE.NE.'NO_DATE') THEN
