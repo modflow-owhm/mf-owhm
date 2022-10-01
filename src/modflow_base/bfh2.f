@@ -66,7 +66,7 @@ C     ******************************************************************
 C
 C        SPECIFICATIONS:
 C     ------------------------------------------------------------------
-      USE GLOBAL,      ONLY:IOUT,NCOL,NROW,NLAY
+      USE GLOBAL,      ONLY:IOUT
       USE GWFBFHMODULE,ONLY:ISCHILD,IBOTFLG,IBFLG,NPBNODES,NCBNODES,
      1                      NTIMES,NLAYP,NROWP,NCOLP,IUBC,NGRIDS,NCPP,
      2                      BTEXT,NPLBEG,NPRBEG,NPCBEG,NPLEND,NPREND,
@@ -415,13 +415,12 @@ C     HEADER INFO.
 C
 C        SPECIFICATIONS:
 C     ------------------------------------------------------------------
-      USE GLOBAL,      ONLY:NCOL,NROW,NLAY,IBOUND,HNEW,CC,CR,CV
+      USE GLOBAL,      ONLY:NLAY,IBOUND,HNEW,CC,CR,CV
       USE GWFBASMODULE,ONLY:HNOFLO
       USE GWFBFHMODULE,ONLY:ISCHILD,NPBNODES,NCBNODES,NPLBEG,NPRBEG,
-     &                      NPCBEG,NPLEND,NPREND,NPCEND,NLAYP,NROWP,
-     &                      NCOLP,KLAY,IROW,JCOL,KPLAY,IPROW,JPCOL,IUBC,
-     &                      NGRIDS,IBPFLG,IBB,IFACEGN 
-      CHARACTER(768):: LINE
+     &                      NPCBEG,NPLEND,NPREND,NPCEND,
+     &                      KLAY,IROW,JCOL,KPLAY,IPROW,JPCOL,IUBC,
+     &                      NGRIDS,IBB,IFACEGN 
       DOUBLE PRECISION  HNF
 C     ------------------------------------------------------------------
 C
@@ -794,7 +793,7 @@ C     ------------------------------------------------------------------
       USE GLOBAL,      ONLY:IOUT,HNEW
       USE GWFBASMODULE,ONLY:IBUDFL
       USE GWFBFHMODULE,ONLY:ISCHILD,IUBC,NPBNODES,NCBNODES,KLAY,IROW,
-     1                      JCOL,KPLAY,IPROW,JPCOL,NPINDX,BFLUX,
+     1                      JCOL,KPLAY,IPROW,JPCOL,BFLUX,
      2                      BFLUXCHK,BHEADCHK
 C     ------------------------------------------------------------------
 C

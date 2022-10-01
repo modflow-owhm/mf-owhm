@@ -339,10 +339,10 @@ C     CALCULATE CONSTANT-HEAD BOUNDARY FLOW FOR A GIVEN CELL
 C     ******************************************************************
 C        SPECIFICATIONS:
 C     ------------------------------------------------------------------
-      USE GLOBAL,       ONLY:IBOUND,HNEW,CR,CC,CV,BOTM,NBOTM,
+      USE GLOBAL,       ONLY:IBOUND,HNEW,CR,CC,CV,BOTM,
      1                       NCOL,NROW,NLAY,LAYHDT,LBOTM
       USE GWFBASMODULE, ONLY:ICHFLG
-      USE GWFUPWMODULE,ONLY:IUPWCB, Sn, LAYTYPUPW
+      USE GWFUPWMODULE,ONLY:Sn, LAYTYPUPW
       USE GWFNWTMODULE,ONLY:Icell, Closezero
 C
       DOUBLE PRECISION HD,X1,X2,X3,X4,X5,X6,RATE

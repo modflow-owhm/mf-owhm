@@ -418,7 +418,7 @@ C     ------------------------------------------------------------------
       IMPLICIT NONE
       INTRINSIC ABS, DBLE
       
-      type (check_bot) :: uzfar_check
+      !type (check_bot) :: uzfar_check
 C     ------------------------------------------------------------------
 C     ARGUMENTS
 C     ------------------------------------------------------------------
@@ -3305,10 +3305,10 @@ C     -----------------------------------------------------------------
 C     -----------------------------------------------------------------
 C     LOCAL VARIABLES
 C     -----------------------------------------------------------------
-      DOUBLE PRECISION dz1, dz2, dz3, dz4, dslope, fminslope, dx3, dx4,
+      DOUBLE PRECISION dz1, dz2, dz3, dz4, fminslope, dx3, dx4,
      1                 fminelev, slopenew, dvzup, dvzrch, dvzdn
       INTEGER l, ic, ir, il, ilp, irp, icp, nreach, icu, iru, ilu
-      INTEGER i,  istsg, lk
+      INTEGER istsg
       EXTERNAL FLOWTERP
       REAL FLOWTERP
       DOUBLE PRECISION, DIMENSION(:), ALLOCATABLE:: STRTOP
@@ -3509,14 +3509,13 @@ C     ADD STREAM TERMS TO RHS AND HCOF IF FLOW OCCURS IN MODEL CELL
 !rgn------REVISION NUMBER CHANGED TO BE CONSISTENT WITH NWT RELEASE
 C     *****************************************************************
       USE GWFSFRMODULE !HD_RELAX
-      USE GLOBAL,       ONLY: NLAY, ISSFLG, IBOUND, HCOF, 
+      USE GLOBAL,       ONLY: ISSFLG, IBOUND, HCOF, 
      +                        RHS, BOTM, LBOTM, HOLD, HNEW, UPLAY
       USE GWFBASMODULE, ONLY: DELT, TOTIM, HDRY
       USE GWFNWTMODULE, ONLY: Heps
       USE GWFLAKMODULE, ONLY: THETA, STGOLD, STGNEW, LKARR1
       !USE GWFNWTMODULE, ONLY: Heps, A, IA, Icell
       !USE GWFLAKMODULE, ONLY: THETA, STGOLD, STGNEW, VOL, LKARR1
-      USE LGRMODULE,    ONLY: ISCHILD                                   !swm - LGR added by wschmid, ADDED ILGR
       USE CONSTANTS, ONLY: NL, BLN, BLNK, TRUE, FALSE, DZ, UNO, Z,
      +                     NEARZERO_15, NEGNEARZERO_15
       USE NUM2STR_INTERFACE, ONLY: NUM2STR
@@ -3557,19 +3556,18 @@ C     -----------------------------------------------------------------
      +                 runof, runoff, qa, qb, qc, qd, hstrave, fbot,
      +                 depthave, WT0, WT1
       DOUBLE PRECISION fbcheck, hld, totflwt, sbdthk, thetas, epsilon, 
-     +                 thr, thet1, dvrsn, fact, rhsh1, hcofh1, rhsh2, 
-     +                 hcofh2, depthtr, dwdh, wetpermsmooth,cstrsmooth
+     +                 thr, thet1, dvrsn, fact,  
+     +                 depthtr, dwdh, wetpermsmooth,cstrsmooth
       REAL areamax, avhc, errold, fks, ha, qcnst, seep, 
      +     stgon, strlen, roughch, roughbnk, widthch, deltinc, qlat, 
-     +     fltest, Transient_bd, dum, totdum  !CJM
+     +     fltest, Transient_bd
 !      real fin, fout
       INTEGER i, ibflg, ic, icalc, idivseg, iflg, iic, iic2, iic3, iic4,
      +        il, iprior, iprndpth, iprvsg, ir, istsg, itot,itrib,
      +        itstr, iwidthcheck, kerp, kss, l, lk, ll, nstrpts, nreach,
-     +        maxwav, icalccheck, iskip, iss, lsub, numdelt, irt, ii, 
-     +        idr, lfold, ij, illake, lakid,lgrgrid,lgrgridprv,lgrseg,
-     +        lint, nseg
-      INTEGER irr, icc, icount, UP  !cjm
+     +        maxwav, icalccheck, iskip, iss, lsub, numdelt, irt, 
+     +        lfold, illake, lakid,lgrgrid,lgrgridprv,lgrseg
+      INTEGER UP  !cjm
       DOUBLE PRECISION:: MX_FLO, MX_STG 
       DOUBLE PRECISION:: FIVE_THIRDS, PRED, CORR
       LOGICAL:: NO_GW, FIXED_HEAD_CELL
@@ -5216,9 +5214,6 @@ C     *****************************************************************
       USE GWFBASMODULE, ONLY: MSUM, ICBCFL, IBUDFL, DELT, PERTIM, TOTIM,
      +                        VBVL, VBNM, HDRY, IAUXSV, 
      +                        DATE_SP, HAS_STARTDATE
-!      USE GWFRCHMODULE,ONLY:RECH  !cjm
-!      USE GWFUZFMODULE,ONLY:FINF  !cjm
-      USE LGRMODULE,    ONLY: ISCHILD
       USE CONSTANTS, ONLY: NL, BLN, TRUE, FALSE, ninf, DZ, UNO, Z,
      +                     NEARZERO_15, NEGNEARZERO_15
       IMPLICIT NONE
@@ -5246,12 +5241,12 @@ C     ------------------------------------------------------------------
      +     fltest, Transient_bd, Transient_bd_tot, strm9
 !IFACE
       REAL xface(1)
-      INTEGER naux,lfold
+      INTEGER naux
       INTEGER i, ibd, iblst, ibdlbl, ibdst, ibstlb, ic, icalc, idivseg, 
      +        il, iout1, iout2, iprior, iprvsg, ir, istsg, itrib,
      +        iwidthcheck, kss, l, lk, ll, nreach, numdelt, maxwav,
-     +        icalccheck, iss, lsub, irt, itstr, imassroute, lfold
-     +        lgrgrid, lgrgridprv, lgrseg, lint 
+     +        icalccheck, iss, lsub, irt, itstr, imassroute, lfold,
+     +        lgrgrid, lgrgridprv, lgrseg 
       INTEGER illake, LAKID, UP
       DOUBLE PRECISION h, hstr, sbot, cstr, ratin, ratout, flowin,
      +                 flobot, flow, flowot, sbdthk, upflw, trbflw,
@@ -7172,7 +7167,7 @@ C     *******************************************************************
 C     COMPUTE FLOW AND WIDTH IN STREAM GIVEN DEPTH USING RATING TABLES.
 !--------REVISED FOR MODFLOW-2005 RELEASE 1.9, FEBRUARY 6, 2012
 C     *******************************************************************
-      USE GWFSFRMODULE, ONLY: QSTAGE, IOUT!!, DVRPERC
+      USE GWFSFRMODULE, ONLY: QSTAGE
       USE CONSTANTS,    ONLY: DZ,HUND,DIEZ,D100,NEARZERO_30
       IMPLICIT NONE
       INTRINSIC DLOG10
@@ -7181,7 +7176,7 @@ C     SPECIFICATIONS:
 C     -------------------------------------------------------------------
 C     ARGUMENTS
 C     -------------------------------------------------------------------
-      INTEGER Istsg, Itb, Kkiter, Nreach, Nstrpts
+      INTEGER Istsg, Kkiter, Nreach, Nstrpts
       DOUBLE PRECISION Flow, Depth, Width
 C     -------------------------------------------------------------------
 C     LOCAL VARIABLES
@@ -7376,7 +7371,7 @@ C     READ STREAM SEGMENT DATA -- parameters or non parameters
 C     ******************************************************************
       USE GWFSFRMODULE, ONLY: NSS, MAXPTS, ISFROPT, IDIVAR, IOTSG, ISEG,
      +                        SEG, XSEC, QSTAGE, CONCQ, CONCRUN, 
-     +                        CONCPPT, NSFRAUX,RECHSAVE, IOUT
+     +                        CONCPPT, NSFRAUX, IOUT
       USE ERROR_INTERFACE,   ONLY: STOP_ERROR
       USE NUM2STR_INTERFACE, ONLY: NUM2STR
 !!     +                        DVRCH, DVRCELL, DVEFF, DVRPERC  !cjm (added DVRCH, DVRCELL and RECHSAVE)
@@ -7395,8 +7390,7 @@ C     ------------------------------------------------------------------
 C     LOCAL VARIABLES
 C     ------------------------------------------------------------------
       INTEGER icalc, idum, ii, iqseg, isol, iupseg, jfst, jj, jk, jlst, 
-     +        lstend, n, noutseg, nseg, nstrpts, numcell, i  !cjm (added numcell and i)
-      REAL dum, totdum
+     +        lstend, n, noutseg, nseg, nstrpts, i  !cjm (added numcell and i)
 C     ------------------------------------------------------------------
 C
       I = 0

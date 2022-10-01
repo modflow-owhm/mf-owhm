@@ -51,7 +51,7 @@ C     ******************************************************************
 C        SPECIFICATIONS:
 C     ------------------------------------------------------------------
       USE GLOBAL,  ONLY:IOUT,NPER,NSTP,PERLEN,TSMULT,ISSFLG,
-     1                  NCOL,NROW,NLAY,ITRSS
+     1                  NCOL,NROW,ITRSS
       USE OBSDRNMODULE
       CHARACTER(768):: LINE
       CHARACTER(10)::DATE

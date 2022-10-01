@@ -35,9 +35,7 @@ C     ******************************************************************
 C
 C     SPECIFICATIONS:
 C     ------------------------------------------------------------------
-      USE GLOBAL,       ONLY:IOUT,NCOL,NROW,NLAY,IBOUND,DELR,DELC,
-     1                       PERLEN,NSTP,TSMULT,IFREFM
-      USE GWFBASMODULE, ONLY:DELT
+      USE GLOBAL,       ONLY:IOUT,NCOL,NROW,DELR,DELC,IFREFM
       USE GWFRESMODULE, ONLY:NRES,IRESCB,NRESOP,IRESPT,NPTS,
      1                       IRES,IRESL,BRES,CRES,BBRES,HRES,HRESSE
       USE FILE_IO_INTERFACE, ONLY: READ_TO_DATA
@@ -237,26 +235,11 @@ C     ------------------------------------------------------------------
       USE STRINGS,           ONLY: GET_NUMBER
       USE NUM2STR_INTERFACE, ONLY: NUM2STR
       CHARACTER(768)::LINE
-      CHARACTER(:),ALLOCATABLE::FNAME
       LOGICAL:: NOFREE, EOF
       NOFREE = IFREFM == 0
 C     ------------------------------------------------------------------
       CALL SGWF2RES7PNT(IGRID)
 C
-!!!      DO N=1,NRES          
-!!!      READ(IN,'(A)', IOSTAT=L) LINE   !seb allow for free format read.
-!!!      !
-!!!      IF(L>0) THEN                                                      !seb
-!!!         ALLOCATE(CHARACTER(768)::FNAME)
-!!!         INQUIRE(IN,NAME=FNAME)
-!!!         LINE='FILE IO ERROR WHILE READING IN LINE WITH RES PACKAGE. '//
-!!!     +      'FROM FILE: '//TRIM(FNAME)//NEW_LINE(' ')//
-!!!     +      'THIS MAYBE THE ERROR LINE OR THE PRECEDING LINE: '//
-!!!     +      NEW_LINE(' ')//TRIM(LINE)
-!!!         IF(IOUT.NE.0) WRITE(IOUT,'(A)')TRIM(LINE)
-!!!         CALL USTOP(TRIM(LINE))
-!!!      END IF
-      !
       DO N=1, NRES
         CALL READ_TO_DATA(LINE,IN,IOUT,NOSHIFT=NOFREE, EOF=EOF)
         IF    (EOF) THEN

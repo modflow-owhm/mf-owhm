@@ -107,8 +107,8 @@ C
 C     SPECIFICATIONS:
 C     ------------------------------------------------------------------
       USE GLOBAL,       ONLY:IOUT
-      USE GWFMNW2MODULE, ONLY:MNWMAX,MNW2,WELLID
-      USE GWFMNW2IMODULE, ONLY:Wel1flag,QSUMflag,BYNDflag,MNWOBS,
+      USE GWFMNW2MODULE, ONLY:MNWMAX,WELLID
+      USE GWFMNW2IMODULE, ONLY:MNWOBS,
      1                       MNWILST,MNWIID
       USE CONSTANTS, ONLY: Z, ONE, TRUE, FALSE, DZ
       USE FILE_IO_INTERFACE, ONLY: READ_TO_DATA
@@ -269,10 +269,10 @@ c     ******************************************************************
 c
 c        specifications:
 c     ------------------------------------------------------------------
-      USE GLOBAL,       ONLY:IOUT,ncol,nrow,nlay,hnew
+      USE GLOBAL,       ONLY:IOUT,hnew
       USE GWFBASMODULE, ONLY:HDRY,DELT,TOTIM
       USE GWFMNW2MODULE, ONLY:MNWMAX,NMNWVL,MNWAUX,MNW2,WELLID,NODTOT,
-     1                       NTOTNOD,MNWNOD,SMALL
+     1                       NTOTNOD,MNWNOD
       USE GWFMNW2MODULE,  ONLY: SGWF2MNW2PNT
       USE GWFMNW2IMODULE, ONLY:Wel1flag,QSUMflag,BYNDflag,MNWOBS,
      1                       MNWILST,MNWIID

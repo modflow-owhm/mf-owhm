@@ -48,7 +48,7 @@ C
 C        SPECIFICATIONS:
 C     ------------------------------------------------------------------
       USE GLOBAL,  ONLY:NCOL,NROW,NLAY,ITRSS,LAYHDT,LAYHDS,LAYCBD,
-     1                     NCNFBD,IBOUND,BUFF,BOTM,NBOTM,DELR,DELC,IOUT
+     1                     NCNFBD,IBOUND,BUFF,IOUT
       USE PARAMMODULE, ONLY:PROPPRINT
       USE GWFBASMODULE,ONLY:HDRY
       USE GWFLPFMODULE,ONLY:ILPFCB,IWDFLG,IWETIT,IHDWET,
@@ -630,7 +630,6 @@ C
 C        SPECIFICATIONS:
 C     ------------------------------------------------------------------
       USE GLOBAL,      ONLY:NCOL,NROW,NLAY,ISSFLG,IBOUND,HOLD,BOTM,LBOTM
-     1                      ,LAYCBD,IUNIT                                    !added for detecting confining beds - WSCHMID
       USE GWFLPFMODULE,ONLY:LAYWET,WETDRY                               !SUB-Linkage --> adjusted in FM  rth,wschmid
 C     ------------------------------------------------------------------
       CALL SGWF2LPF7PNT(IGRID)
@@ -669,8 +668,8 @@ C     ******************************************************************
 C
 C        SPECIFICATIONS:
 C     ------------------------------------------------------------------
-      USE GLOBAL,      ONLY:NCOL,NROW,NLAY,IBOUND,BOTM,NBOTM,DELR,DELC,
-     1                      LBOTM,CV,HNEW,RHS,HCOF,HOLD,ISSFLG,IOUT
+      USE GLOBAL,      ONLY:NCOL,NROW,NLAY,IBOUND,BOTM,
+     1                      LBOTM,CV,HNEW,RHS,HCOF,HOLD,ISSFLG
       USE GWFBASMODULE,ONLY:DELT
       USE GWFLPFMODULE,ONLY:LAYTYP,SC1,SC2,NOVFC
 C     ------------------------------------------------------------------
@@ -800,8 +799,7 @@ C     ******************************************************************
 C
 C        SPECIFICATIONS:
 C     ------------------------------------------------------------------
-      USE GLOBAL,      ONLY:NCOL,NROW,NLAY,IBOUND,HNEW,LAYCBD,CV,
-     1                      BOTM,NBOTM,DELR,DELC,IOUT
+      USE GLOBAL,      ONLY:NCOL,NROW,NLAY,IBOUND,HNEW,LAYCBD,IOUT
       USE GWFBASMODULE,ONLY:HNOFLO
       USE GWFLPFMODULE,ONLY:LAYWET,WETDRY,HK,VKCB,LAYTYP,VKA
 C     ------------------------------------------------------------------
@@ -1446,7 +1444,7 @@ C     ******************************************************************
 C
 C     SPECIFICATIONS:
 C     ------------------------------------------------------------------
-      USE GLOBAL,        ONLY:NCOL,NROW,DELR,DELC,BOTM,LBOTM,LAYCBD
+      USE GLOBAL,        ONLY:NCOL,NROW,DELR,DELC,BOTM,LBOTM
 C
       DIMENSION SC(NCOL,NROW)
 C     ------------------------------------------------------------------
@@ -1479,7 +1477,7 @@ C     ******************************************************************
 C
 C      SPECIFICATIONS:
 C     ------------------------------------------------------------------
-      USE GLOBAL,      ONLY:IOUT,NCOL,NROW,IBOUND,HNEW,BOTM,NBOTM,
+      USE GLOBAL,      ONLY:IOUT,NCOL,NROW,IBOUND,HNEW,BOTM,
      1                      LBOTM,CC,STRT
       USE GWFBASMODULE,ONLY:HDRY
       USE GWFLPFMODULE,ONLY:LAYWET,IWETIT,LAYTYP,LAYAVG,LAYSTRT
@@ -1598,7 +1596,7 @@ C
 C      SPECIFICATIONS:
 C     ------------------------------------------------------------------
       USE GLOBAL,        ONLY:IOUT,NCOL,NROW,NLAY,HNEW,IBOUND,BOTM,LBOTM
-      USE GWFLPFMODULE,  ONLY:LAYTYP,CHANI,LAYVKA,LAYWET,WETDRY,
+      USE GWFLPFMODULE,  ONLY:LAYWET,WETDRY,
      1                        WETFCT,IHDWET
 C
       CHARACTER(3) ACNVRT
@@ -1995,7 +1993,7 @@ C      SPECIFICATIONS:
 C     ------------------------------------------------------------------
       USE GLOBAL,        ONLY:NCOL,NROW,NLAY,IBOUND,HNEW,CV,DELR,DELC,
      1                        BOTM,LBOTM,LAYCBD,IOUT,STRT
-      USE GWFLPFMODULE,  ONLY:LAYTYP,LAYAVG,CHANI,LAYVKA,LAYWET,
+      USE GWFLPFMODULE,  ONLY:LAYTYP,LAYVKA,
      1                        HK,VKA,VKCB,NOCVCO,ICONCV,LAYSTRT
 C
       DOUBLE PRECISION BBOT,TTOP,HHD
@@ -2096,7 +2094,7 @@ C     ******************************************************************
 C
 C      SPECIFICATIONS:
 C     ------------------------------------------------------------------
-      USE GWFLPFMODULE,  ONLY:LAYTYP,LAYAVG,CHANI,LAYVKA,LAYWET
+      USE GWFLPFMODULE,  ONLY:LAYVKA
       USE PARAMMODULE
 C
       CHARACTER(4) PTYP

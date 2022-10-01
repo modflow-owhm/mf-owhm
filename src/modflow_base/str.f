@@ -169,8 +169,8 @@ C     SPECIFICATIONS:
 C     -----------------------------------------------------------------C
       USE GLOBAL,      ONLY:IOUT,NCOL,NROW,NLAY,IFREFM
       USE GWFSTRMODULE,ONLY:MXSTRM,NSTREM,NSS,NTRIB,NDIV,ICALC,
-     1                      IPTFLG,CONST,NPSTR,ISTRPB,
-     2                      STRM,ARTRIB,ISTRM,ITRBAR,IDIVAR,NDFGAR,
+     1                      IPTFLG,NPSTR,ISTRPB,
+     2                      STRM,ISTRM,ITRBAR,IDIVAR,
      3                      STRAUX,NSTRVL
 C     -----------------------------------------------------------------C
       CALL SGWF2STR7PNT(IGRID)
@@ -334,9 +334,8 @@ C                                                                      C
 C     SPECIFICATIONS:                                                  C
 C     -----------------------------------------------------------------C
       USE GLOBAL,      ONLY:IBOUND,HNEW,RHS,HCOF
-      USE GWFSTRMODULE,ONLY:MXSTRM,NSTREM,NSS,NTRIB,NDIV,ICALC,
-     1                      CONST,NPSTR,ISTRPB,
-     2                      STRM,ARTRIB,ISTRM,ITRBAR,IDIVAR,NDFGAR
+      USE GWFSTRMODULE,ONLY:NSTREM,NSS,NTRIB,ICALC,CONST,STRM,
+     1                      ARTRIB,ISTRM,ITRBAR,IDIVAR,NDFGAR
 C     -----------------------------------------------------------------C
       CALL SGWF2STR7PNT(IGRID)
 C                                                                      C
@@ -474,7 +473,7 @@ C     -----------------------------------------------------------------C
       USE GLOBAL,      ONLY:IOUT,NCOL,NROW,NLAY,IBOUND,BUFF,HNEW
       USE GWFBASMODULE,ONLY:MSUM,VBVL,VBNM,ICBCFL,DELT,
      1                      IAUXSV,PERTIM,TOTIM
-      USE GWFSTRMODULE,ONLY:MXSTRM,NSTREM,NSS,NTRIB,NDIV,ICALC,ISTCB1,
+      USE GWFSTRMODULE,ONLY:NSTREM,NSS,NTRIB,ICALC,ISTCB1,
      1                      ISTCB2,IPTFLG,CONST,
      2                      STRM,ARTRIB,ISTRM,ITRBAR,IDIVAR,NDFGAR,
      3                      NSTRVL,STRAUX
