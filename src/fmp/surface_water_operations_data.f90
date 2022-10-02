@@ -6118,6 +6118,8 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
           REQF: DO IREQ = ONE, SWO%REQFLOW%N
              !
              ASSOCIATE(N => SWO%REQFLOW%RES(IREQ)%N, RES => SWO%REQFLOW%RES(IREQ)%VEC)
+                IF(N < ONE) CYCLE REQF
+                !
                 IF(N == ONE) THEN
                     I = SWO%RESBAL2PROJ(ONE,RES(ONE))
                     J = SWO%RESBAL2PROJ(TWO,RES(ONE))
