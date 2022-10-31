@@ -2,15 +2,24 @@
 
 ![MF-OWHM_banner_v2b](img/MF-OWHM_banner_v2b.png)
 
-&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; **IPDS No.**&nbsp; `IP-136416`
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; **IPDS No.**&nbsp; `IP-TBA`
 
-# Version 2.2.0
+# Version 2.3.0a
 
-MODFLOW One-Water Hydrologic Flow Model (MF-OWHM) Conjunctive Use and Integrated Hydrologic Flow Modeling Software.
+MODFLOW One-Water Hydrologic Flow Model (MF-OWHM) Conjunctive Use and Integrated Hydrologic Flow Modeling Software
 
 Pronounced as Mod-Flow-Ohm (mäd flō ōm) or colloquially called OneWater.
 
 ------
+
+&nbsp; 
+
+**USGS Software Websites**
+
+- Landing Page: &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; https://www.usgs.gov/software/modflow-one-water-hydrologic-flow-model-mf-owhm
+- Download and code: &nbsp; https://code.usgs.gov/modflow/mf-owhm
+
+&nbsp; 
 
 **Version Release Notes**
 
@@ -19,7 +28,7 @@ Pronounced as Mod-Flow-Ohm (mäd flō ōm) or colloquially called OneWater.
 
 * [code.json](code.json) &emsp; for version metadata as a text file in json format.
 
-
+&nbsp; 
 
 **Important Repository Branches**
 
@@ -34,8 +43,8 @@ which explains how the *Git Tags Page* works to download specific mf-owhm versio
 
 ## Downloads
 
-The following downloads the latest 64-bit executables for Windows (`.exe`) and Ubuntu Linux (`.nix`)  
-and includes the source code, examples, postprocessors, and supplemental documentation (`~40MB` download).
+The following downloads the latest 64-bit executables for Windows (`.exe`) and Ubuntu Linux (`.nix`) from the `release` branch.  
+The download includes the source code, examples, postprocessors,  and supplemental documentation (`~40MB` download).
 
 - **[Current Release Version Download](https://code.usgs.gov/modflow/mf-owhm/-/archive/release/mf-owhm-release.zip)** &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ➤ *Recommended option*
 - **[Specific Version Downloads on Git Tags Page](https://code.usgs.gov/modflow/mf-owhm/-/tags)**
@@ -44,7 +53,23 @@ The following downloads the latest Windows x64 executable only:
 
 - **[mf-owhm.exe](https://code.usgs.gov/modflow/mf-owhm/-/raw/release/bin/mf-owhm.exe)**
 - **[mf-owhm-gmg.exe](https://code.usgs.gov/modflow/mf-owhm/-/raw/release/bin/mf-owhm-gmg.exe)**
-- **[ZoneBudget and HydFMT](#post-processors-zonebudget-and-hydfmt)**
+- **[ZoneBudget and HydFMT](#post-processors-zonebudget-and-hydfmt)**  
+
+
+> :warning: **This source repository will always have a `release` and a `main` branch.**  
+> &nbsp;   
+> &emsp;&emsp;The `release` branch uses the `main` source code to build *Production Release* and *Preliminary Release* versions.  
+> &emsp;&emsp;&nbsp; &nbsp; ➥ This branch is a stable snapshot of the code meant for public use.  
+> &emsp;&emsp;&nbsp; &nbsp; ➥ All download links point to the release branch to obtain the compiled executables.  
+> &emsp;&emsp;&nbsp; &nbsp; ➥ The default code.usgs.gov website view is the main branch, go to [release branch view](https://code.usgs.gov/modflow/mf-owhm/-/tree/release#-)  
+> &emsp;&emsp;&emsp;&nbsp; &nbsp; &nbsp; to view what the release branch contains (code version, readme, and changelog).  
+> &nbsp;   
+> &emsp;&emsp;The `main` branch contains the current public source code with the most recent features and bug fixes.   
+> &emsp;&emsp;&nbsp; &nbsp; ➥ This may be newer than what is compiled in the release branch.   
+> &emsp;&emsp;&nbsp; &nbsp; ➥ See [Visual Studio and Intel Fortran Installation Guide](doc/Visual_Studio_and_Intel_Fortran_Installation_Guide.md) or use the provided makefile  
+> &emsp;&emsp;&emsp;&nbsp; &nbsp; &nbsp; if you want to compile source from the main branch (or contact a developer to build a *Preliminary Release*). 
+
+&nbsp; 
 
 ### USGS Software Release Types
 
@@ -64,25 +89,23 @@ The difference between the two release types are:
    - `"status": "Production"` &nbsp; for a *Production Release* and  
    - `"status": "Preliminary"` for a *Preliminary Release*  
       &nbsp; 
-1. If the code version is registered in the USGS Information Product Data System (`IPDS`).  
+1. If the code version is registered in the USGS Information Product Data System (`IPDS`) and underwent colleague review.  
    ➥ A *Production Release* is registered in `IPDS` and includes a *git tag* with the message "production release".  
    Any other commit (or *git tag*) is considered a *Preliminary Release*.
     - All code changes, including bug fixes, start as a *Preliminary Release*;  
       when the code version is registered with `IPDS` it becomes a *Production Release*.
     - A *Production Release* and its associated *git tag* are stable and guaranteed to remain in the code.usgs.gov repository.
-    - A *Preliminary Release* is semi-stable and may be replaced by a newer *Preliminary* or *Production Release*.
-        - The source code is stable and remains in the `main` branch,  
-          but the `release` branch commit that contains compiled executables may be removed.
-        - That is, the `main` branch is stable and the `release` branch may drop intermediate-preliminary releases.
+    - A *Preliminary Release* tag may be superseded by a *Production Release* with the same version number.  
 
-&nbsp;
 
 > :warning: **Note that it is possible for a *Production Release* and *Preliminary Release* to have the same version number.**  
 > &emsp;&emsp;That is, they are the same release but contain a different disclaimer in the `main` branch (source branch).  
 > &emsp;&emsp;However, the *Production Release* supersedes a *Preliminary Release* in the `release` branch (executable branch) .
 
-> :warning: **Contact a developer if you need to convert the current *Preliminary Release* to a *Production Release*.**  
+> :warning: **Contact a developer if you need to convert the current *Preliminary Release* tag to a *Production Release* tag.**  
 > &emsp;&emsp;Some publication sources—particularly USGS Scientific Investigations Report (SIR)—can only cite a *Production Release*.
+
+&nbsp; 
 
 ### Obtaining Code via Git
 
@@ -98,15 +121,15 @@ To obtain this repository via git run:
     + To view all the branches in the clone, run: `git branch --all` to see a list that might include:  
       `remotes/origin/BranchName`, and then to unpack it run: `git switch BranchName`
 
-&nbsp;
+&nbsp; 
 
 ## Code Citation
 
-> Boyce, S.E., 2022, MODFLOW One-Water Hydrologic Flow Model (MF-OWHM) Conjunctive Use and Integrated Hydrologic Flow Modeling Software, version 2.2.0: U.S. Geological Survey Software Release, https://doi.org/10.5066/P9P8I8GS
+> Boyce, S.E., 2022, MODFLOW One-Water Hydrologic Flow Model (MF-OWHM) Conjunctive Use and Integrated Hydrologic Flow Modeling Software, version 2.3.0a: U.S. Geological Survey Software Release, https://doi.org/10.5066/P9P8I8GS
 
 And if you use Surface Water Operations (`SWO`) in your project:
 
-> Boyce, S.E. and Ferguson, I.M., 2022, MODFLOW One-Water Hydrologic Flow Model (MF-OWHM) Conjunctive Use and Integrated Hydrologic Flow Modeling Software with Surface Water Operations, version 2.2.0: U.S. Geological Survey Software Release, https://doi.org/10.5066/P9P8I8GS
+> Boyce, S.E. and Ferguson, I.M., 2022, MODFLOW One-Water Hydrologic Flow Model (MF-OWHM) Conjunctive Use and Integrated Hydrologic Flow Modeling Software with Surface Water Operations, version 2.3.0a: U.S. Geological Survey Software Release, https://doi.org/10.5066/P9P8I8GS
 
 ## Documentation Citation
 
@@ -555,7 +578,7 @@ Borden, John Carter; Gaur, Anju; Singh, Chabungbam Rajagopal, 2016, Water resour
 
 
 
-- Traylor, J.P., Mashburn, S.L., Hanson, R.T., and Peterson, S.M., 2021, Assessment of water availability in the Osage Nation using an integrated hydrologic-flow model: U.S. Geological Survey Scientific Investigations Report 2020–5141, 96 p., https://doi.org/10.3133/sir20205141.
+- Traylor, J.P., Mashburn, S.L., Hanson, R.T., and Peterson, S.M., 2021, Assessment of water availability in the Osage Nation using an integrated hydrologic-flow model: U.S. Geological Survey Scientific Investigations Report 2020–5141, 96 p., https://doi.org/10.3133/sir20205141
 
   
 
@@ -563,11 +586,19 @@ Borden, John Carter; Gaur, Anju; Singh, Chabungbam Rajagopal, 2016, Water resour
 
   
 
-- Hanson, R.T., Ritchie, A.B., Boyce, S.E., Galanter, A.E., Ferguson, I.A., Flint, L.E., Flint, A., and Henson, W.R., 2020, Rio Grande transboundary integrated hydrologic model and water-availability analysis, New Mexico and Texas, United States, and northern Chihuahua, Mexico: U.S. Geological Survey Scientific Investigations Report 2019–5120, 186 p., https://doi.org/10.3133/sir20195120.
+- Hanson, R.T., Ritchie, A.B., Boyce, S.E., Galanter, A.E., Ferguson, I.A., Flint, L.E., Flint, A., and Henson, W.R., 2020, Rio Grande transboundary integrated hydrologic model and water-availability analysis, New Mexico and Texas, United States, and northern Chihuahua, Mexico: U.S. Geological Survey Scientific Investigations Report 2019–5120, 186 p., https://doi.org/10.3133/sir20195120
 
 
 
 ### Publications
+
+
+
+- Ritchie, A.B., Galanter, A.E., Flickinger, A.K., Shephard, Z.M., and Ferguson, I.M., 2022, Update and recalibration of the Rio Grande Transboundary Integrated Hydrologic Model, New Mexico and Texas, United States, and northern Chihuahua, Mexico: U.S. Geological Survey Scientific Investigations Report 2022–5045, 28 p., https://doi.org/10.3133/sir20225045
+
+
+
+- Traum, J.A., Teague, N.F., Sweetkind, D.S., and Nishikawa, T., 2022, Hydrologic and geochemical characterization of the Petaluma River watershed, Sonoma County, California: U.S. Geological Survey Scientific Investigations Report 2022–5009, 217 p., https://doi.org/10.3133/sir20225009
 
 
 

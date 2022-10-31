@@ -18,9 +18,114 @@ Boyce, S.E., Hanson, R.T., Ferguson, I., Schmid, W., Henson, W., Reimann, T., Me
 
 &nbsp;
 
-## 2.2.1a
+## 2.3.0a
 
 TBA
+
+### HYDFMT v1.1
+
+Update to HYDFMT from `1.0` to `1.1`  
+The update includes the MF-OWHM read utilities, new options, and fixed minor bugs.  
+See [CHANGELOG_Features.md](CHANGELOG_Features.md#2.1.1) for a listing of new ZoneBudget features.
+
+### ZoneBudget v3.3
+
+Update to ZoneBudget from `3.2` to `3.3`  
+The update includes the MF-OWHM read utilities, new options, and fixed minor bugs.  
+See [CHANGELOG_Features.md](CHANGELOG_Features.md#2.1.1) for a listing of new ZoneBudget features.
+
+### Merge ⯬ MF-NWT v1.3
+
+- `NWT` Solver version 1.3 source code merged
+    - Obtained from: https://water.usgs.gov/water-resources/software/MODFLOW-NWT/MODFLOW-NWT_1.3.0.zip
+
+### Fixed
+
+* `FMP` Bug Fixes
+  
+    * Can use `FMP` without `SFR`.
+      * Previously, if `FMP` is used without `SFR`, then an index error occurred when `FMP` attempted to check for runoff and delivery locations. To prevent this index error from occurring the user had to specify the `WATERSOURCE` keyword to indicate that `SFR` is not available. 
+      * Now if `SFR` is not in use, then `FMP` automatically disables `SFR` diversions and runoff is flagged for flowing out of the model (rather than to a specific `SFR` location).  
+    * `MNW2`-`FMP` Supply well link no longer crashes if row and column do not match (`SUPPLY_WELL` Block). Instead, `FMP` now copies the row and column specified in `MNW2`. The row and column input is still required in `FMP` as a placeholder, but not used.
+    * `SURFACE_WATER` block `PRINT SFR_RETURN` keyword with binary output (`BINARY` keyword) wrote a random integer if the WBS did not have assigned any SFR return flow locations.
+      * The fix changed this to write the segment and reach as zero to indicate no SFR return flow point was specified.
+      * Note this is already how the text version of the option already works.
+    * FMP failed to identify other blocks when `LAND_USE` was not specified in the input.
+      * While this block should always be specified, the input indicates it is optional.  
+        The code now reflects this flexibility.
+    * Fixed errors when NOT including the `LAND_USE` block in the input and:
+      * `CLIMATE` block specified `REFERENCE_ET` to result in bare soil evaporative fallback calculations (fixed allocation error).
+      * 
+    
+* Surface Water Operations (`SWO`) fixed an index error that occurs when the Slang input does not declare any required flow variables.
+    
+* `BAS` Options Fixes
+    
+    *  `PRINT_HEAD`, `PRINT_WATER_TABLE`, and `PRINT_WATER_DEPTH` no longer sorts the stress period and time step (`SPTS`).
+        * In `MODULE BAS_OPTIONS_AND_STARTDATE`, if multiple `PRINT_HEAD`, `PRINT_WATER_TABLE`, or `PRINT_WATER_DEPTH` keywords are included to indicate output for different `SPTS`, then they would be sorted by stress period and time step. However, this only slowed the runtime rather than improved it.
+    
+    * `PRINT_WATER_TABLE` and `PRINT_WATER_DEPTH` file header write error.
+        * In `bas.f` the subroutine `GWF2BAS7OT` checks if `PRINT_WATER_TABLE` and/or `PRINT_WATER_DEPTH` options are in use and if the corresponding arrays should be written to a file for the stress period and time step that just finished. While writing the header to the output, the code would use the file unit number associated with `PRINT_HEAD` option, which would either put an extra header in those files or raise a random access violation error.
+    
+* `SWR` Bug Fixes
+
+    * Reach ending layer assignment is set to 1 if the elevation is above the top of layer 1 and set to `NLAY` if it is below the bottom of `NLAY`. Previously, this situation resulted in the layer assignment being undefined.
+    * The code block that updates the number of QAQ connections (`NQAQCONN`) was specified too early in the code. The `CQAQCONN` loop was moved to the correct location.
+    
+* `NWT` Bug Fixes
+
+    * Isolated model cells (that is surrounded by `IBOUND=0` cells) were previously set `HDRY` and the  `IBOUND` changed to zero. To be consistent with other flow packages, the head value is instead changed to `HNOFLO`.
+      
+    * `SUBROUTINE XMD7DA` added declaration for `IGRID` argument rather than using implicit typing.
+    
+    * `xmd_lib.f` reorder declaring variables.
+      
+      * Several routines in `xmd_lib.f` declare the subroutine arguments after local variables. Most compilers work around this, but it can cause strange effects for arguments that represent local array dimensions.
+      
+      * For example:   
+        ```
+        subroutine array_routine(dim)
+             integer, dimension(dim):: work
+             integer:: dim
+        end subroutine
+        ```
+        Has the issue of `dim` being used as an array dimension before being declared. Most compilers, will catch this and automatically use dim appropriately, but it is best to restructure the routine as:  
+        ```
+        subroutine array_routine(dim)
+             integer:: dim
+             integer, dimension(dim):: work
+        end subroutine
+        ```
+
+
+* `MULT` Bug Fixes
+    * `ExpressionParser` inline `IF` conditional index error.
+
+        * If the `ExpressionParser` solved an expression within an inline `IF` that did not result in all the values being True or all False (that is changing the entire array), then an index error was raised.
+
+        * Inline IF is defined as follows:  
+            `IF[ COND, trueANS, falseANS ]`   
+            &nbsp;  
+            where:   
+            `COND` is a conditional expression (must contain <, <=, >, >=)  
+            `trueANS`  is the result returned where `COND` is True  
+            `falseANS` is the result returned where `COND` is False.  
+            &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; It is optional to include `falseANS`,  
+            &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if not present, then where `COND` is False,  
+            &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; then the result returned is `NaN`.
+            &nbsp;  
+        * For example, given  
+            `x = 10.`  
+            `y = 5.`  
+            would have:  
+            `IF[ x + 3 > y, 2*x, 10*y ]`  
+            return the `trueANS`, which is`2*x` or `20`  
+            
+            Another example is  
+            `IF[ A < -1e-6 & A > 1e-6, 0, B / A ]`  
+            would return an array with values of zero where `A` is near zero,  
+            otherwise sets the location to `B` divided by `A`
+
 
 ### Refactoring
 
@@ -35,6 +140,89 @@ TBA
         `CALL READ_TO_DATA(LINE, IN, IOUT)`  
         `LLOC = 1`  
         `CALL GET_INTEGER(LINE, LLOC, ISTART, ISTOP, IOUT, IN, LAYFLG(1,K), ...` 
+
+* `main.f90` white space cleanup and reordering of `HYD` subroutine calls.
+
+  * Fixed indentation to make code line up.
+  * Modified an if statement to improve speed when using `HYD` and calling `GWF2HYD7STR7RP` and `GWF2HYD7SFR7RP` routines.
+
+* `xmd.f` indentation cleanup.
+
+* `tabfile_module.f` reading the the actual tabfile's filenames now accept the keywords `OPEN/CLOSE`, `DATAFILE`, and `DATAUNIT`. 
+  * Previously, the tabfile filename was specified without a keyword as just *FNAME* or `EXTERNAL` *UNIT*.  
+    If the user used a keyword, such as `OPEN/CLOSE ./myTabFile.txt`,  
+    then the program would stop saying `Failed to open "OPEN/CLOSE"` causing confusing to the user.
+
+* `util.f` subroutines no longer raises a warning if the optional inputs `CNSTNT` or `IPRN` are not provided.
+
+  * This effects the following subroutines:
+
+    * `U1DREL`
+    * `U2DINT`
+    * `U2DREL`
+    * `U2DDBL`
+
+  *  Instead now, if either is not present, the following is written to the LIST file:  
+    `Reading for XYZ, autoset the scale factor CNSTNT to 1.0, and the print flag IPRN to -1`
+    
+
+* `WEL` and `MNW2` improved missing `ITMP` warning.
+
+  * For the `MNW2` and `WEL` packages, if the end of file is reached or the input fails to read `ITMP`, then `ITMP` is assumed to be zero for the rest of the simulation.
+  * When this occurres a formal warning was made.  
+    This was changed to being a minor message in the `LIST`ing file with the worlds:  
+    `Don't Panic`  
+    in the warning message.
+  * It also indicates to the user that if they are using `LINEFEED` or `FMP-Link` that the rates may be initialized outside of the package.
+
+* `FMP` variable `DRTFLOW` is always allocated when using FMP.
+
+  * The `DRT-FMP` link requires the intermediate variable `DRTFLOW`. This variable was only allocated when `DRT` and `FMP` are both in use. To simplify the connection, `FMP` now always allocates `DRTFLOW` when `FMP` is in use.
+
+* `FMP` improved "runoff leave model" warning message.
+
+  * If a WBS/Farm contains runoff, but has no where to go, a soft warning is raised to let the user know which WBS has runoff and that the runoff is flowing out of the model because it has no where within the model to go.  
+
+    The warning has been expanded to include suggestions on how to fix the problem and what potential causes of the warning are.  
+
+    The warning also indicates that, it is not a problem, but instead is letting the user know that water is leaving the model domain automatically since the user did not specify a runoff location.  
+
+* `FMP` source file standardization of indentation for the following files:
+
+  * `src/fmp/allotment_data.f90`
+  * `src/fmp/climate_data.f90`
+  * `src/fmp/crop_data.f90`
+  * `src/fmp/options_data.f90`
+  * `src/fmp/output_data.f90`
+  * `src/fmp/salinity_data.f90`
+  * `src/fmp/soil_data.f90`
+  * `src/fmp/surface_water_data.f90`
+  * `src/fmp/surface_water_operations_data.f90`
+
+* `src/fmp/wbs_data.f90`  added `SETUP_BASIC_VAR_WBS_DATA` subroutine in `WBS_DATA_FMP_MODULE`
+
+    * In module `WBS_DATA_FMP_MODULE` the basic variable initialization and allocations done by `SUBROUTINE INITIALIZE_WBS_DATA` and `SUBROUTINE SETUP_NO_WBS_DATA` are moved to `SUBROUTINE SETUP_BASIC_VAR_WBS_DATA`.
+
+    * This minimizes the redundant code between the two routines.
+
+* `src/fmp/crop_data.f90`  moved crop initial array allocations to separate subroutine.
+
+    * The FMP `LAND_USE` block, `MODULE CROP_DATA_FMP_MODULE`, contained conditional array allocations that occurred in the `SETUP_NEXT_STRESS_PERIOD` subroutine (RP routine). These have been moved to `SUBROUTINE SETUP_DEPENDENT_PARTS`.
+    * By doing this, allows the allocations to occur at the FMP allocate and read routine (`SUBOURITNE FMP_AR`) after all the FMP block inputs have been read.
+
+* `hydfmt.f` minor character variable cleanup to reduce final executable binary size.
+
+    * To reduce the size of the binary, variables that were set to the same static string only set the first variable and then the remaining were set to the first.  
+    * For example:  
+        &nbsp; &nbsp; &nbsp; `a = '---------'`  
+        &nbsp; &nbsp; &nbsp; `b = '---------'`  
+        &nbsp; &nbsp; &nbsp; `c = '---------'`  
+        is changed to:  
+        &nbsp; &nbsp; &nbsp; `a = '---------'`  
+        &nbsp; &nbsp; &nbsp; `b = a`  
+        &nbsp; &nbsp; &nbsp; `c = a`
+
+
 
 &nbsp; 
 
@@ -149,6 +337,9 @@ See [CHANGELOG_Features.md](CHANGELOG_Features.md#2.1.1) for a listing of new Zo
 
 * Removed from the visual studio solution (`ide/visual_studio/OneWater_Project.sln`) the key entry:`GenAlternateCodePaths="codeForAVX"`
     * `AVX` acceleration caused floating point truncation that resulted in model results that were not repeatable. That is, the same model input would produce different numbers after the tenth digit. Results are now identical when running the multiple times with the same input.  
+* Multiple files changed floating literal numbers that did not include a decimal point to have one.
+    * For example, `X = 0D0` sets `X` to the integer `0`, rather than double precision `0.0`. The compiler than changes the zero from the integer to a double on the fly, but at the minor expense to runtime. To be syntactically correct, this is changed to `X = 0.D0` to indicate a double precision number.
+
 
 
 ### Refactoring
