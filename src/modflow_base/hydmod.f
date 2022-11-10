@@ -11,6 +11,8 @@ C  initial SE call in the AR subroutine.
         USE OBS_GROUP_INTERPOLATOR, ONLY: OBS_POINTS, OBS_POINT
         PRIVATE:: OBS_POINTS, OBS_POINT
         !
+        INTEGER,SAVE,       POINTER                ::HYD_BIN_REAL_KIND
+        INTEGER,SAVE,       POINTER                ::NREAD_HEADER
         INTEGER,SAVE,       POINTER                ::NHYDTOT
         REAL,   SAVE,       POINTER,DIMENSION(:,:),CONTIGUOUS::HYDVAL
         CHARACTER(LEN=20),SAVE, POINTER,DIMENSION(:),CONTIGUOUS::HYDLBL
@@ -26,6 +28,7 @@ C  initial SE call in the AR subroutine.
         LOGICAL,SAVE,       POINTER:: HAS_NWT_HDRY
         TYPE(OBS_POINT), SAVE,POINTER,DIMENSION(:),CONTIGUOUS:: HD_OP
         TYPE HYDBASTYPE
+          INTEGER, POINTER                         ::HYD_BIN_REAL_KIND
           INTEGER, POINTER                         ::NHYDTOT
           REAL,             POINTER,DIMENSION(:,:),CONTIGUOUS ::HYDVAL
           CHARACTER(LEN=20),POINTER,DIMENSION(:),CONTIGUOUS   ::HYDLBL
@@ -144,14 +147,16 @@ C     ******************************************************************
 C
 C        SPECIFICATIONS:
 C     ------------------------------------------------------------------
+      USE, INTRINSIC:: ISO_FORTRAN_ENV, ONLY: REAL64
       USE CONSTANTS,                ONLY: NL
       USE STRINGS,                  ONLY: GET_INTEGER, GET_NUMBER
+      USE PARSE_WORD_INTERFACE,     ONLY: RET_WORD
       USE WARNING_TYPE_INSTRUCTION, ONLY: WARNING_TYPE
       USE FILE_IO_INTERFACE,        ONLY: READ_TO_DATA
       USE NUM2STR_INTERFACE,        ONLY: NUM2STR
       USE GWFUPWMODULE,             ONLY: IPHDRY
       USE GLOBAL , ONLY: IOUT,NCOL,NROW,NLAY, STRT,IBOUND,
-     +                   DELR,DELC,XYGRID
+     +                   DELR,DELC,XYGRID,BIN_REAL_KIND
       USE GENERIC_OPEN_INTERFACE, ONLY: UTF8_BOM_OFFSET_REWIND
       USE HYDBASMODULE
       IMPLICIT NONE
@@ -161,11 +166,12 @@ C     ------------------------------------------------------------------
       CHARACTER(20) HYDBASLBL
       TYPE(WARNING_TYPE):: WRN
       INTEGER:: LLOC,ISTART,ISTOP,N
-      INTEGER:: NHYDM, NTOT, KLAY, NC1, NR1, NC2, NR2
+      INTEGER:: NHYDM, NTOT, KLAY, NC1, NR1, NC2, NR2, K
       REAL:: ONE, ZERO, XL, YL, R
 C     ------------------------------------------------------------------
-      ALLOCATE(NHYDTOT)
+      ALLOCATE(NHYDTOT, NREAD_HEADER)
       ALLOCATE(IHYDMUN,NHYDBAS,HYDNOH)
+      ALLOCATE(HYD_BIN_REAL_KIND)
       ONE=1.0
       ZERO=0.0
       NHYDTOT=0
@@ -175,7 +181,6 @@ C     ------------------------------------------------------------------
       !
       IF(IUNITNWT.NE.0) HAS_NWT_HDRY = IPHDRY > 0   !Only flag NWT if HYDRY is recorded for HNEW<BOTM  --> IPHDRY > 0 indicates usings HDRY
           
-
 C
 C1------IDENTIFY PROGRAM.
        WRITE(IOUT,1) IN
@@ -187,6 +192,23 @@ C4------READ NUMBER OF HYDROGRAPHS AND UNIT FOR SAVING UNFORMATTED
 C4------HYDROGRAPH FILE AND NUMERIC FLAG FOR DRY/INACTIVE CELLS
       CALL READ_TO_DATA(LINE,IN,IOUT,IOUT, 
      +                          HED="-- READING HYD PACKAGE INPUT --")
+      NREAD_HEADER = 1
+      !
+      HYD_BIN_REAL_KIND = BIN_REAL_KIND
+      LINE_OPT_READ: DO
+         SELECT CASE (RET_WORD(LINE))
+         CASE('DOUBLE_PRECISION_BINARY')
+                                       HYD_BIN_REAL_KIND = REAL64
+                                       CALL READ_TO_DATA(LINE,IN,IOUT)
+         CASE DEFAULT
+                     EXIT LINE_OPT_READ                              
+         END SELECT
+         !
+         NREAD_HEADER = NREAD_HEADER + 1
+         !
+      END DO LINE_OPT_READ
+
+      !
 C  Number of hydrographs (NHYDM) specified by the user is ignored --
 C    the program initially counts the number of hydrographs (NTOT).
 C    Note that there may be less than NHTOT hydrographs because some
@@ -203,10 +225,13 @@ C    may be eliminated due to invalid values.
      2     /,1X,'HYDROGRAPH VALUES AT DRY CELLS WILL BE:',ES14.5)
 C
 C4------COUNT NUMBER OF BAS PACKAGE AND OVERALL HYDROGRAPHS.
+      CALL UTF8_BOM_OFFSET_REWIND(IN)
+      DO K=1, NREAD_HEADER
+              CALL READ_TO_DATA(LINE,IN,IOUT)
+      END DO
+C
       NTOT=0
       NHYDBAS=0
-      CALL UTF8_BOM_OFFSET_REWIND(IN)
-      READ(IN,'(A)',END=19) LINE
  10   READ(IN,'(A)',END=19) LINE
       IF(LINE.EQ.' ') GO TO 10
       NTOT=NTOT+1
@@ -252,9 +277,12 @@ C  ALLOCATE MEMORY FOR BAS HYDROGRAPH DATA
       END IF
 C
 C  READ BAS HYDROGRAPH DATA
-      NHYDBAS=0
       CALL UTF8_BOM_OFFSET_REWIND(IN)
-      READ(IN,'(A)',END=99) LINE
+      DO K=1, NREAD_HEADER
+              CALL READ_TO_DATA(LINE,IN,IOUT)
+      END DO
+C
+      NHYDBAS=0
  20   READ(IN,'(A)',END=99) LINE
       IF(LINE.EQ.' ') GO TO 20
       LLOC=1
@@ -376,6 +404,7 @@ C     ******************************************************************
 C
 C     SPECIFICATIONS:
 C     ------------------------------------------------------------------
+      USE FILE_IO_INTERFACE, ONLY: READ_TO_DATA
       USE GLOBAL, ONLY: IOUT,NCOL,NROW
       USE HYDBASMODULE
       USE HYDIBSMODULE
@@ -397,10 +426,12 @@ C     ------------------------------------------------------------------
       ALLOCATE (NHYDIBS)
       ONE=1.0
       ZERO=0.0
-      NHYDIBS=0
       CALL UTF8_BOM_OFFSET_REWIND(IN)
+      DO K=1, NREAD_HEADER
+              CALL READ_TO_DATA(LINE,IN,IOUT)
+      END DO
 C
-      READ(IN,'(A)',END=19) LINE
+      NHYDIBS=0
  10   READ(IN,'(A)',END=19) LINE
       IF(LINE.EQ.' ') GO TO 10
       LLOC=1
@@ -427,9 +458,11 @@ C  ALLOCATE MEMORY FOR IBS HYDROGRAPH DATA
       END IF
 C
 C  Read IBS hydrograph data.
+      DO K=1, NREAD_HEADER
+              CALL READ_TO_DATA(LINE,IN,IOUT)
+      END DO
+C
       NHYDIBS=0
-      CALL UTF8_BOM_OFFSET_REWIND(IN)
-      READ(IN,'(A)',END=99) LINE
  15   READ(IN,'(A)',END=99) LINE
       LLOC=1
       CALL URWORD(LINE,LLOC,ISTART,ISTOP,1,N,R,IOUT,IN)
@@ -549,6 +582,7 @@ C     ******************************************************************
 C
 C     SPECIFICATIONS:
 C     ------------------------------------------------------------------
+      USE FILE_IO_INTERFACE, ONLY: READ_TO_DATA
       USE GLOBAL, ONLY: IOUT,NCOL,NROW,XYGRID
       USE HYDBASMODULE
       USE HYDSUBMODULE
@@ -575,11 +609,13 @@ C     ------------------------------------------------------------------
       ALLOCATE (NHYDSUB)
       ONE=1.0
       ZERO=0.0
-      NHYDSUB=0
       CALL WRN%INIT()
       CALL UTF8_BOM_OFFSET_REWIND(IN)
+      DO K=1, NREAD_HEADER
+              CALL READ_TO_DATA(LINE,IN,IOUT)
+      END DO
 C
-      READ(IN,'(A)',END=19) LINE
+      NHYDSUB=0
  10   READ(IN,'(A)',END=19) LINE
       IF(LINE.EQ.' ') GO TO 10
       LLOC=1
@@ -605,9 +641,12 @@ C  ALLOCATE MEMORY FOR SUB HYDROGRAPH DATA
       END IF
 C
 C  Read SUB hydrograph data.
-      NHYDSUB=0
       CALL UTF8_BOM_OFFSET_REWIND(IN)
-      READ(IN,'(A)',END=99) LINE
+      DO K=1, NREAD_HEADER
+              CALL READ_TO_DATA(LINE,IN,IOUT)
+      END DO
+C
+      NHYDSUB=0
  15   READ(IN,'(A)',END=99) LINE
       LLOC=1
       CALL URWORD(LINE,LLOC,ISTART,ISTOP,1,N,R,IOUT,IN)
@@ -774,6 +813,7 @@ C     ******************************************************************
 C
 C     SPECIFICATIONS:
 C     ------------------------------------------------------------------
+      USE FILE_IO_INTERFACE, ONLY: READ_TO_DATA
       USE GLOBAL, ONLY: IOUT,NCOL,NROW,XYGRID
       USE HYDBASMODULE
       USE HYDSWTMODULE
@@ -800,11 +840,13 @@ C     ------------------------------------------------------------------
       ALLOCATE (NHYDSWT)
       ONE=1.0
       ZERO=0.0
-      NHYDSWT=0
       CALL WRN%INIT()
       CALL UTF8_BOM_OFFSET_REWIND(IN)
-C
-      READ(IN,'(A)',END=19) LINE
+      DO K=1, NREAD_HEADER
+              CALL READ_TO_DATA(LINE,IN,IOUT)
+      END DO
+C 
+      NHYDSWT=0
  10   READ(IN,'(A)',END=19) LINE
       IF(LINE.EQ.' ') GO TO 10
       LLOC=1
@@ -830,9 +872,12 @@ C  ALLOCATE MEMORY FOR SWT HYDROGRAPH DATA
       END IF
 C
 C  Read SWT hydrograph data.
-      NHYDSWT=0
       CALL UTF8_BOM_OFFSET_REWIND(IN)
-      READ(IN,'(A)',END=99) LINE
+      DO K=1, NREAD_HEADER
+              CALL READ_TO_DATA(LINE,IN,IOUT)
+      END DO
+C
+      NHYDSWT=0
  15   READ(IN,'(A)',END=99) LINE
       LLOC=1
       CALL URWORD(LINE,LLOC,ISTART,ISTOP,1,N,R,IOUT,IN)
@@ -995,6 +1040,7 @@ C     ******************************************************************
 C
 C     SPECIFICATIONS:
 C     ------------------------------------------------------------------
+      USE FILE_IO_INTERFACE, ONLY: READ_TO_DATA
       USE GENERIC_OPEN_INTERFACE, ONLY: UTF8_BOM_OFFSET_REWIND
       USE GLOBAL,    ONLY: IOUT
       USE HYDBASMODULE
@@ -1004,14 +1050,17 @@ C
       INTEGER, INTENT(IN):: IN,IGRID
 C
       CHARACTER(256):: LINE
-      INTEGER:: LLOC,ISTART,ISTOP,N
+      INTEGER:: LLOC,ISTART,ISTOP,N, K
       REAL:: R
 C     ------------------------------------------------------------------
       ALLOCATE (NHYDSTR)
 C  Count number of Stream hydrographs
-      NHYDSTR=0
       CALL UTF8_BOM_OFFSET_REWIND(IN)
-      READ(IN,'(A)',END=15) LINE
+      DO K=1, NREAD_HEADER
+              CALL READ_TO_DATA(LINE,IN,IOUT)
+      END DO
+C
+      NHYDSTR=0
  10   READ(IN,'(A)',END=15) LINE
       IF(LINE.EQ.' ') GO TO 10
       LLOC=1
@@ -1039,6 +1088,7 @@ C     ******************************************************************
 C
 C     SPECIFICATIONS:
 C     ------------------------------------------------------------------
+      USE FILE_IO_INTERFACE, ONLY: READ_TO_DATA
       USE GLOBAL,   ONLY: IOUT
       USE HYDBASMODULE
       USE HYDSTRMODULE
@@ -1051,7 +1101,7 @@ C
       CHARACTER(256):: LINE
       CHARACTER( 20):: HYDSTRLBL
       CHARACTER(  1):: INTYP
-      INTEGER:: LLOC,ISTART,ISTOP,N
+      INTEGER:: LLOC,ISTART,ISTOP,N, K
       INTEGER:: NUMSTR, ISEG, IRCH, KLAY
       REAL:: XL, YL
       REAL:: R
@@ -1073,9 +1123,12 @@ C ------Reading is done here (rather than in AR) because stream data are
 C ------not available until the first time step is initiated.
 C ---- Reading could be done in a special RP routine right after STRRP
       !IF(KPER.EQ.1) THEN
-        NUMSTR=0
         CALL UTF8_BOM_OFFSET_REWIND(IN)
-        READ(IN,'(A)',END=99) LINE
+        DO K=1, NREAD_HEADER
+                CALL READ_TO_DATA(LINE,IN,IOUT)
+        END DO
+C
+        NUMSTR=0
  20     READ(IN,'(A)',END=99) LINE
         IF(LINE.EQ.' ') GO TO 20
         LLOC=1
@@ -1159,6 +1212,7 @@ C     ******************************************************************
 C
 C     SPECIFICATIONS:
 C     ------------------------------------------------------------------
+      USE FILE_IO_INTERFACE, ONLY: READ_TO_DATA
       USE GLOBAL,    ONLY: IOUT
       USE GENERIC_OPEN_INTERFACE, ONLY: UTF8_BOM_OFFSET_REWIND
       USE HYDBASMODULE
@@ -1168,14 +1222,17 @@ C
       INTEGER, INTENT(IN):: IN,IGRID
 C
       CHARACTER(256):: LINE
-      INTEGER:: LLOC,ISTART,ISTOP,N
+      INTEGER:: LLOC,ISTART,ISTOP,N, K
       REAL::R
 C     ------------------------------------------------------------------
       ALLOCATE (NHYDSFR)
 C  Count number of Stream hydrographs
-      NHYDSFR=0
       CALL UTF8_BOM_OFFSET_REWIND(IN)
-      READ(IN,'(A)',END=15) LINE
+      DO K=1, NREAD_HEADER
+              CALL READ_TO_DATA(LINE,IN,IOUT)
+      END DO
+C
+      NHYDSFR=0
  10   READ(IN,'(A)',END=15) LINE
       IF(LINE.EQ.' ') GO TO 10
       LLOC=1
@@ -1203,6 +1260,7 @@ C     ******************************************************************
 C
 C     SPECIFICATIONS:
 C     ------------------------------------------------------------------
+      USE FILE_IO_INTERFACE, ONLY: READ_TO_DATA
       USE GLOBAL,   ONLY: IOUT
       USE HYDBASMODULE
       USE HYDSFRMODULE
@@ -1217,7 +1275,7 @@ C
       CHARACTER( 20):: HYDSFRLBL
       CHARACTER(  1):: INTYP
       INTEGER:: NUMSFR, ISEG, IRCH, KLAY, LEN_XL, LEN_YL
-      INTEGER::LLOC,ISTART,ISTOP,N
+      INTEGER::LLOC,ISTART,ISTOP,N, K
       REAL:: R, XL, YL
 C     ------------------------------------------------------------------
       CALL SGWF2HYD7SFR7PNT(IGRID)
@@ -1237,9 +1295,12 @@ C ------Reading is done here (rather than in AR) because stream data are
 C ------not available until the first time step is initiated.
 C ---- Reading could be done in a special RP routine right after SFRRP
       !IF(KPER.EQ.1) THEN
-        NUMSFR=0
         CALL UTF8_BOM_OFFSET_REWIND(IN)
-        READ(IN,'(A)',END=99) LINE
+        DO K=1, NREAD_HEADER
+                CALL READ_TO_DATA(LINE,IN,IOUT)
+        END DO
+C
+        NUMSFR=0
  20     READ(IN,'(A)',END=99) LINE
         IF(LINE.EQ.' ') GO TO 20
         HYDSFRLBL=''  !seb START REBUILDING NEW HYDLABEL
@@ -1952,7 +2013,7 @@ C     SPECIFICATIONS:
 C     ------------------------------------------------------------------
       USE, INTRINSIC:: ISO_FORTRAN_ENV, ONLY: REAL32, REAL64
       USE UTIL_INTERFACE,               ONLY: TO_SNGL
-      USE GLOBAL,   ONLY:ITMUNI,IOUT,BIN_REAL_KIND
+      USE GLOBAL,   ONLY:ITMUNI,IOUT
       USE GWFBASMODULE, ONLY: TOTIM
       USE HYDBASMODULE
       IMPLICIT NONE
@@ -1971,7 +2032,7 @@ C2------IF THIS IS THE FIRST TIME IN THE SIMULATION, WRITE HEADER RECORD.
         WRITE(IOUT,130) NHYDTOT
  130    FORMAT(/,1X,'A TOTAL OF ',I10,' HYDROGRAPH POINTS HAVE BEEN ',
      1        'PREPARED.')
-        SELECT CASE(BIN_REAL_KIND)
+        SELECT CASE(HYD_BIN_REAL_KIND)
         CASE(REAL32); WRITE(IHYDMUN)  NHYDTOT,ITMUNI
         CASE(REAL64); WRITE(IHYDMUN) -NHYDTOT,ITMUNI
         END SELECT
@@ -1980,7 +2041,7 @@ C2------IF THIS IS THE FIRST TIME IN THE SIMULATION, WRITE HEADER RECORD.
         !
         SELECT CASE(KIND(TOTIM))
         CASE(REAL32)
-               SELECT CASE(BIN_REAL_KIND)
+               SELECT CASE(HYD_BIN_REAL_KIND)
                CASE(REAL32)
                            WRITE(IHYDMUN) 0.0_REAL32
                            DO N=1,NHYDTOT
@@ -1993,7 +2054,7 @@ C2------IF THIS IS THE FIRST TIME IN THE SIMULATION, WRITE HEADER RECORD.
                            END DO 
                END SELECT
         CASE(REAL64)
-               SELECT CASE(BIN_REAL_KIND)
+               SELECT CASE(HYD_BIN_REAL_KIND)
                CASE(REAL32)
                            WRITE(IHYDMUN) 0.0_REAL32
                            DO N=1,NHYDTOT
@@ -2020,7 +2081,7 @@ C3------WRITE HYDROGRAPH RECORD FOR ONE TIME STEP.
       !WRITE(IHYDMUN) TOTIM,(HYDVAL(N,1),N=1,NHYDTOT)
       SELECT CASE(KIND(TOTIM))
       CASE(REAL32)
-             SELECT CASE(BIN_REAL_KIND)
+             SELECT CASE(HYD_BIN_REAL_KIND)
              CASE(REAL32)
                          WRITE(IHYDMUN) TOTIM
                          DO N=1,NHYDTOT
@@ -2033,7 +2094,7 @@ C3------WRITE HYDROGRAPH RECORD FOR ONE TIME STEP.
                         END DO 
              END SELECT
       CASE(REAL64)
-             SELECT CASE(BIN_REAL_KIND)
+             SELECT CASE(HYD_BIN_REAL_KIND)
              CASE(REAL32)
                         WRITE(IHYDMUN) TO_SNGL(TOTIM)
                         DO N=1,NHYDTOT
@@ -2222,6 +2283,7 @@ C  Deallocate HYD BAS memory
       INTEGER, INTENT(IN):: IGRID
       INTEGER:: IERR
 C
+      DEALLOCATE(HYDBASDAT(IGRID)%HYD_BIN_REAL_KIND,   STAT = IERR)
       DEALLOCATE(HYDBASDAT(IGRID)%NHYDTOT,     STAT = IERR)
       DEALLOCATE(HYDBASDAT(IGRID)%HYDVAL,      STAT = IERR)
       DEALLOCATE(HYDBASDAT(IGRID)%HYDLBL,      STAT = IERR)
@@ -2239,6 +2301,7 @@ C
 C
 C NULLIFY LOCAL POINTERS
       IF(IGRID.EQ.1) THEN
+         HYD_BIN_REAL_KIND  =>NULL()
          NHYDTOT    =>NULL()
          HYDVAL     =>NULL()
          HYDLBL     =>NULL()
@@ -2263,6 +2326,7 @@ C  Change HYD BAS data to a different grid.
       IMPLICIT NONE
       INTEGER, INTENT(IN):: IGRID
 C
+      HYD_BIN_REAL_KIND=>HYDBASDAT(IGRID)%HYD_BIN_REAL_KIND
       NHYDTOT=>HYDBASDAT(IGRID)%NHYDTOT
       HYDVAL=>HYDBASDAT(IGRID)%HYDVAL
       HYDLBL=>HYDBASDAT(IGRID)%HYDLBL
@@ -2286,6 +2350,7 @@ C  Save HYD BAS data for a grid.
       IMPLICIT NONE
       INTEGER, INTENT(IN):: IGRID
 C
+      HYDBASDAT(IGRID)%HYD_BIN_REAL_KIND=>HYD_BIN_REAL_KIND
       HYDBASDAT(IGRID)%NHYDTOT=>NHYDTOT
       HYDBASDAT(IGRID)%HYDVAL=>HYDVAL
       HYDBASDAT(IGRID)%HYDLBL=>HYDLBL
