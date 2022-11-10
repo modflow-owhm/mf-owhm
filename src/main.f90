@@ -28,14 +28,14 @@ SUBROUTINE PRINT_MAIN_HEADER(IU)  ! Set to 6 for cmd prompt or use output_unit f
   CHARACTER(:),ALLOCATABLE:: VERSION_SWO
   CHARACTER(:),ALLOCATABLE:: Revision
   !
-  VERSION_OWHM='2.2'
-  Revision    ='1c'
+  VERSION_OWHM='2.3'
+  Revision    ='0a'
   VERSION_MF  ='1.12'
   VERSION_FMP ='4.1'
   VERSION_SWR ='1.04'
   VERSION_SWI ='2.0'
   VERSION_LGR ='2.0'
-  VERSION_NWT ='1.2'
+  VERSION_NWT ='1.3'
   VERSION_CFP ='1.09.57'
   VERSION_SWO ='1.0'
   !
