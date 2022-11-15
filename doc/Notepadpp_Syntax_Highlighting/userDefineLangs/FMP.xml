@@ -1,5 +1,5 @@
 <NotepadPlus>
-    <UserLang name="FMP" ext="fmp fmp4 fmpwell fmp_well FMP.txt fmp_well.txt fmp.tpl fmp4.tpl fmpwell.tpl fmp_well.tpl FMP.txt.tpl fmp_well.txt.tpl fmp.template fmp4.template fmpwell.template fmp_well.template FMP.txt.template fmp_well.txt.template" udlVersion="2.1">
+    <UserLang name="FMP" ext="fmp fmp4 fmpwell fmp_well FMP.txt fmp_well.txt fmp.tpl fmp4.tpl fmpwell.tpl fmp_well.tpl FMP.txt.tpl fmp_well.txt.tpl fmp.template fmp4.template fmpwell.template fmp_well.template FMP.txt.template fmp_well.txt.template swo" udlVersion="2.1">
         <Settings>
             <Global caseIgnored="yes" allowFoldOfComments="no" foldCompact="no" forcePureLC="0" decimalSeparator="0" />
             <Prefix Keywords1="no" Keywords2="no" Keywords3="no" Keywords4="no" Keywords5="no" Keywords6="no" Keywords7="no" Keywords8="no" />
