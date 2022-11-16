@@ -987,7 +987,6 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
                 CALL BUILD_SRR_LOC_FLOW(SWF, SEG_NSTRM, STRM)
     ELSE
         DO CONCURRENT (F=ONE:SWF%NFARM, .NOT. SWF%SRRLOC(F)%HAS_RETURN)
-                 !
                  SWF%SRRLOC(F)%N = Z
         END DO
     END IF
@@ -1367,10 +1366,10 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
              END IF
          END DO
          !
-             SWF%SRRLOC(F)%N = DIM
+         SWF%SRRLOC(F)%N = DIM
          SWF%SRRLOC(F)%TOTLENGTH = DZ
          SWF%SRRLOC(F)%LEAVE_MODEL = DIM == Z
-             !
+         !
          IF(DIM > Z) THEN      
              CALL ALLOC(SWF%SRRLOC(F)%WT,    DIM)   !(ARR, N)
              CALL ALLOC(SWF%SRRLOC(F)%ISTRM, DIM)   !(ARR, N)
@@ -1393,7 +1392,7 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
                          SWF%SRRLOC(F)%WT(DIM)    = SWF%ISRR_TFR%WT(K)
                          !
                          SWF%SRRLOC(F)%SR(:,DIM) = Z
-                     !
+                         !
                          SWF%SRRLOC(F)%ISRR(DIM) = K
                      ELSEIF( IRCH > Z ) THEN
                          !
@@ -1534,15 +1533,16 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
                     !
                 ELSE !ASSUME AN EVEN SPLIT OF RUNOFF
                     WT_SUM = DZ
-                        IF(    DIM == TWO  ) THEN; WT_SUM = HALF
-                        ELSEIF(DIM == THREE) THEN; WT_SUM = THIRD
-                        ELSEIF(DIM == FOUR ) THEN; WT_SUM = FOURTH
-                        ELSEIF(DIM == FIVE ) THEN; WT_SUM = FIFTH
-                        ELSE;                      WT_SUM = UNO / DBLE(DIM)
-                        END IF
-                        !
-                    DO CONCURRENT (K=ONE:DIM);  SWF%SRRLOC(F)%WT(K) = WT_SUM
-                        END DO
+                    IF(    DIM == TWO  ) THEN; WT_SUM = HALF
+                    ELSEIF(DIM == THREE) THEN; WT_SUM = THIRD
+                    ELSEIF(DIM == FOUR ) THEN; WT_SUM = FOURTH
+                    ELSEIF(DIM == FIVE ) THEN; WT_SUM = FIFTH
+                    ELSE;                      WT_SUM = UNO / DBLE(DIM)
+                    END IF
+                    !
+                    DO CONCURRENT (K=ONE:DIM)
+                                   SWF%SRRLOC(F)%WT(K) = WT_SUM
+                    END DO
                 END IF
                 !
                 ! Ensure weights sum to 1
@@ -2460,29 +2460,29 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
     DO F=ONE, SWF%NFARM
       !
       IF(.NOT. SWF%SRRLOC(F)%FULLY) THEN
-                IF(SWF%OUT_SFR_SRR%BINARY) THEN
+         IF(SWF%OUT_SFR_SRR%BINARY) THEN
                  WRITE(IU) DATE,DYEAR,DELT,KPER,KSTP,F, Z, Z, SWF%SRRLOC(F)%LOST_RUNOFF, DZ, DZ, NEG
-                ELSE
+         ELSE
                  WRITE(IU, '(5I7, 4A17, 2x,F13.7, 2x,A, 2x,A)') KPER, KSTP, F, Z, Z, NUM2STR(SWF%SRRLOC(F)%LOST_RUNOFF), ZER, ZER, DT, DYEAR, DATE, '-1'
-                END IF
+         END IF
          !
-             DO I = ONE, SWF%SRRLOC(F)%N
-              !
+         DO I = ONE, SWF%SRRLOC(F)%N
+          !
           IF(SWF%SRRLOC(F)%ISTRM(I) == Z) THEN
             OTFLOW = DZ
             INFLOW = DZ
           ELSE
-                OTFLOW = STRM(9, SWF%SRRLOC(F)%ISTRM(I))
-                INFLOW = STRM(10,SWF%SRRLOC(F)%ISTRM(I))
+            OTFLOW = STRM(9, SWF%SRRLOC(F)%ISTRM(I))
+            INFLOW = STRM(10,SWF%SRRLOC(F)%ISTRM(I))
           END IF
-                !
-                IF(SWF%OUT_SFR_SRR%BINARY) THEN
-                                             WRITE(IU) DATE,DYEAR,DELT,KPER,KSTP,F, SWF%SRRLOC(F)%SR(ONE,I), SWF%SRRLOC(F)%SR(TWO,I), SWF%SRRLOC(F)%RUNOFF(I), INFLOW, OTFLOW, SWF%SRRLOC(F)%ISRR(I)
-                ELSE
-                        WRITE(IU, '(5I7, 4A17, 2x,F13.7, 2x,A, 2x,A)') KPER, KSTP, F, SWF%SRRLOC(F)%SR(ONE,I), SWF%SRRLOC(F)%SR(TWO,I), NUM2STR(SWF%SRRLOC(F)%RUNOFF(I)), NUM2STR(INFLOW), NUM2STR(OTFLOW), DT, DYEAR, DATE, NUM2STR(SWF%SRRLOC(F)%ISRR(I))
-                END IF
-             END DO
-         END IF
+          !
+          IF(SWF%OUT_SFR_SRR%BINARY) THEN
+                  WRITE(IU) DATE,DYEAR,DELT,KPER,KSTP,F, SWF%SRRLOC(F)%SR(ONE,I), SWF%SRRLOC(F)%SR(TWO,I), SWF%SRRLOC(F)%RUNOFF(I), INFLOW, OTFLOW, SWF%SRRLOC(F)%ISRR(I)
+          ELSE
+                  WRITE(IU, '(5I7, 4A17, 2x,F13.7, 2x,A, 2x,A)') KPER, KSTP, F, SWF%SRRLOC(F)%SR(ONE,I), SWF%SRRLOC(F)%SR(TWO,I), NUM2STR(SWF%SRRLOC(F)%RUNOFF(I)), NUM2STR(INFLOW), NUM2STR(OTFLOW), DT, DYEAR, DATE, NUM2STR(SWF%SRRLOC(F)%ISRR(I))
+          END IF
+         END DO
+      END IF
     END DO
     !
   END SUBROUTINE
@@ -2521,11 +2521,11 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
     !
     DO F=ONE, SWF%NFARM
       !
-             IF(SWF%OUT_SFR_RET%BINARY) THEN
+      IF(SWF%OUT_SFR_RET%BINARY) THEN
               WRITE(IU) DATE,DYEAR,DELT,KPER,KSTP, F, Z, Z, SWF%SRRLOC(F)%LOST_RUNOFF, INFLOW, OTFLOW, NEG
-             ELSE
+      ELSE
               WRITE(IU, '(5I7, 4A17, 2x,F13.7, 2x,A, 2x,A)') KPER, KSTP, F, Z, Z, NUM2STR(SWF%SRRLOC(F)%LOST_RUNOFF), ZER, ZER, DT, DYEAR, DATE, '-1'
-             END IF
+      END IF
       !
       IF(SWF%SRRLOC(F)%FULLY) THEN
           DO I = ONE, SWF%SRRLOC(F)%N
@@ -2534,7 +2534,7 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
              INFLOW = STRM(10,SWF%SRRLOC(F)%ISTRM(I))
              !
              IF(SWF%OUT_SFR_RET%BINARY) THEN
-                                           WRITE(IU) DATE,DYEAR,DELT,KPER,KSTP, F, SWF%SRRLOC(F)%SR(ONE,I), SWF%SRRLOC(F)%SR(TWO,I), SWF%SRRLOC(F)%RUNOFF(I), INFLOW, OTFLOW, SWF%SRRLOC(F)%ISRR(I), Z
+                     WRITE(IU) DATE,DYEAR,DELT,KPER,KSTP, F, SWF%SRRLOC(F)%SR(ONE,I), SWF%SRRLOC(F)%SR(TWO,I), SWF%SRRLOC(F)%RUNOFF(I), INFLOW, OTFLOW, SWF%SRRLOC(F)%ISRR(I), Z
              ELSE
                      WRITE(IU, '(5I7, 4A17, 2x,F13.7, 2x,A, 2x,A)') KPER, KSTP, F, SWF%SRRLOC(F)%SR(ONE,I), SWF%SRRLOC(F)%SR(TWO,I), NUM2STR(SWF%SRRLOC(F)%RUNOFF(I)), NUM2STR(INFLOW), NUM2STR(OTFLOW), DT, DYEAR, DATE, '0'
              END IF
@@ -2549,11 +2549,11 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
              OTFLOW = STRM(9, SWF%SRRLOC(F)%ISTRM(I))
              INFLOW = STRM(10,SWF%SRRLOC(F)%ISTRM(I))
            END IF
-             !
-             IF(SWF%OUT_SFR_RET%BINARY) THEN
-                                           WRITE(IU) DATE,DYEAR,DELT,KPER,KSTP, F, SWF%SRRLOC(F)%SR(ONE,I), SWF%SRRLOC(F)%SR(TWO,I), SWF%SRRLOC(F)%RUNOFF(I), INFLOW, OTFLOW, SWF%SRRLOC(F)%ISRR(I)
-             ELSE
-                     WRITE(IU, '(5I7, 4A17, 2x,F13.7, 2x,A, 2x,A)') KPER, KSTP, F, SWF%SRRLOC(F)%SR(ONE,I), SWF%SRRLOC(F)%SR(TWO,I), NUM2STR(SWF%SRRLOC(F)%RUNOFF(I)), NUM2STR(INFLOW), NUM2STR(OTFLOW), DT, DYEAR, DATE, NUM2STR(SWF%SRRLOC(F)%ISRR(I))
+           !
+           IF(SWF%OUT_SFR_RET%BINARY) THEN
+                   WRITE(IU) DATE,DYEAR,DELT,KPER,KSTP, F, SWF%SRRLOC(F)%SR(ONE,I), SWF%SRRLOC(F)%SR(TWO,I), SWF%SRRLOC(F)%RUNOFF(I), INFLOW, OTFLOW, SWF%SRRLOC(F)%ISRR(I)
+           ELSE
+                   WRITE(IU, '(5I7, 4A17, 2x,F13.7, 2x,A, 2x,A)') KPER, KSTP, F, SWF%SRRLOC(F)%SR(ONE,I), SWF%SRRLOC(F)%SR(TWO,I), NUM2STR(SWF%SRRLOC(F)%RUNOFF(I)), NUM2STR(INFLOW), NUM2STR(OTFLOW), DT, DYEAR, DATE, NUM2STR(SWF%SRRLOC(F)%ISRR(I))
            END IF
           END DO
       END IF
