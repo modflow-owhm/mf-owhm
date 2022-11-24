@@ -164,17 +164,6 @@ int_dir ?=./obj/$(obj_dir)
 #
 #############################################################################
 #
-#Define the source code directory search path (really only need source directories)
-#
-#
-VPATH := $(src_dir)     $(int_dir)     $(bin_dir)     \
-         $(cfp_src_dir) $(fmp_src_dir) $(gmg_src_dir) \
-         $(mfb_src_dir) $(nwt_src_dir) $(bif_src_dir) \
-         $(bif_sub_dir)  $(slg_src_dir) $(swo_src_dir)
-#
-#
-#############################################################################
-#
 # Construct a function for converting space delimited variables to new lines
 
 null :=
@@ -377,17 +366,34 @@ main_src:= \
 #
 all_src := $(GMG_src) $(bif_src) $(main_src)
 #
-# Get all source names with extension changed to ".o"
-obj:=  $(patsubst               %.f90, %.o,   \
-         $(patsubst             %.f,   %.o,   \
-           $(patsubst           %.fpp, %.o,   \
-             $(patsubst         %.c,   %.o,   \
-               $(patsubst       %.for, %.o,   \
-                 $(patsubst     %.F,   %.o,   \
-                   $(patsubst   %.F90, %.o,   \
-                     $(patsubst %.FOR, %.o,   \
-                            $(notdir $(all_src))  \
-        ) ) ) ) ) ) ) )
+#############################################################################
+#
+#Define the source code directory search path (really only need source directories)
+#      $(sort $(dir $(all_src))) gets all the directories that source files reside in 
+#                                -? "$(sort" XYZ) removes duplicates
+#
+VPATH := $(sort $(dir $(all_src)))  $(int_dir)  $(bin_dir)
+#
+#VPATH := $(src_dir)     $(int_dir)     $(bin_dir)     \
+#         $(cfp_src_dir) $(fmp_src_dir) $(gmg_src_dir) \
+#         $(mfb_src_dir) $(nwt_src_dir) $(bif_src_dir) \
+#         $(bif_sub_dir)  $(slg_src_dir) $(swo_src_dir)
+#
+#
+# Change all source names with extension changed to ".o"
+obj:=$(addsuffix .o, $(basename $(notdir $(all_src))))
+
+# Old method, manually replace each extension by patter matching
+#obj:=  $(patsubst               %.f90, %.o,   \
+#         $(patsubst             %.f,   %.o,   \
+#           $(patsubst           %.fpp, %.o,   \
+#             $(patsubst         %.c,   %.o,   \
+#               $(patsubst       %.for, %.o,   \
+#                 $(patsubst     %.F,   %.o,   \
+#                   $(patsubst   %.F90, %.o,   \
+#                     $(patsubst %.FOR, %.o,   \
+#                            $(notdir $(all_src))  \
+#        ) ) ) ) ) ) ) )
 #
 #obj:= $(patsubst %.f90,%.o,$(patsubst %.f,%.o,$(src)))
 #
@@ -488,7 +494,7 @@ ifeq ($(CFG), DEBUG)
    PROGRAM:=$(PROGRAM)_debug
    #
    F90FlagsIntel :=-O0 -g -debug -traceback -assume nocc_omp -fpe0 -fp-model source -nologo -warn nousage -check bounds,pointers,stack,format,output_conversion,uninit
-   F90FlagsGCC   :=-O0 -g -w -fbacktrace -fdefault-double-8  -ffree-line-length-2048 -fmax-errors=10 -ffpe-trap=zero,overflow,underflow -finit-real=nan #-fstack-usage  #<= THIS PROVIDES LOTS OF INFO   -std=f2008
+   F90FlagsGCC   :=-O0 -g -w -fbacktrace -fno-range-check -fdefault-double-8  -ffree-line-length-2048 -fmax-errors=10 -ffpe-trap=zero,overflow,underflow -finit-real=nan #-fstack-usage  #<= THIS PROVIDES LOTS OF INFO   -std=f2008
    F90FlagsLLVM  :=
    #
    CFlagsIntel   :=-O0 -debug -g  -fbuiltin 
@@ -498,7 +504,7 @@ else
    # NOTE "-ip" can sometimes cause catastrophic error: **Internal compiler error:
    #
    F90FlagsIntel :=-O2 -assume nocc_omp -fpe0 -fp-model source -threads -warn nousage -nologo
-   F90FlagsGCC   :=-O2 -w -fno-backtrace -fdefault-double-8 -ffree-line-length-2048
+   F90FlagsGCC   :=-O2 -w -fno-backtrace -fno-range-check -fdefault-double-8 -ffree-line-length-2048
    F90FlagsLLVM  :=
    #
    CFlagsIntel   :=-O2  -fbuiltin
