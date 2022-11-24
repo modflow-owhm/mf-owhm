@@ -22,11 +22,10 @@ Boyce, S.E., Hanson, R.T., Ferguson, I., Schmid, W., Henson, W., Reimann, T., Me
 
 TBA
 
-### HYDFMT v1.1
+### HYDFMT v1.2
 
-Update to HYDFMT from `1.0` to `1.1`  
 The update includes the MF-OWHM read utilities, new options, and fixed minor bugs.  
-See [CHANGELOG_Features.md](CHANGELOG_Features.md#2.1.1) for a listing of new ZoneBudget features.
+See [CHANGELOG_Features.md](CHANGELOG_Features.md#2.1.1) for a listing of new Hydmod and HYDFMT features.
 
 ### ZoneBudget v3.3
 
@@ -58,9 +57,9 @@ See [CHANGELOG_Features.md](CHANGELOG_Features.md#2.1.1) for a listing of new Zo
       * 
     
 * Surface Water Operations (`SWO`) fixed an index error that occurs when the Slang input does not declare any required flow variables.
-    
+  
 * `BAS` Options Fixes
-    
+  
     *  `PRINT_HEAD`, `PRINT_WATER_TABLE`, and `PRINT_WATER_DEPTH` no longer sorts the stress period and time step (`SPTS`).
         * In `MODULE BAS_OPTIONS_AND_STARTDATE`, if multiple `PRINT_HEAD`, `PRINT_WATER_TABLE`, or `PRINT_WATER_DEPTH` keywords are included to indicate output for different `SPTS`, then they would be sorted by stress period and time step. However, this only slowed the runtime rather than improved it.
     

@@ -39,6 +39,35 @@ and `ARR` supports the following `CHARACTER(len=2)` options:
   "VR" -> void ratio              for layer KLAY
 ```
 
+### `HYD` added `DOUBLE_PRECISION_BINARY` option
+
+The HydMod package now supports an optional keyword `DOUBLE_PRECISION_BINARY`. If this keyword is present, then Hydmod writes all variables to the unformatted binary file using double precision (14 digits) instead of single precision (7 digits). This keyword is specified at the start of the input file before the regular input. The following is the new input structure:
+
+```
+[DOUBLE_PRECISION_BINARY]  # Optional Keyword
+NHYD IHYDUN HYDNOH
+PCKG ARR INTYP KLAY XL YL HYDLBL # Repeat as needed
+```
+
+The following is an input example without the keyword:
+
+```
+3  70  -999                    # NHYD IHYDUN HYDNOH
+BAS  HD  I  1  1.  1.  Label1  # PCKG ARR INTYP KLAY XL YL HYDLBL 
+BAS  HD  I  1  3.  2.  Label2     
+BAS  HD  I  1  5.  2.  Label3
+```
+
+and with the option enabled:
+
+```
+DOUBLE_PRECISION_BINARY
+3  70  -999                    # NHYD IHYDUN HYDNOH
+BAS  HD  I  1  1.  1.  Label1  # PCKG ARR INTYP KLAY XL YL HYDLBL 
+BAS  HD  I  1  3.  2.  Label2     
+BAS  HD  I  1  5.  2.  Label3
+```
+
 ### `LPF` and `UPW` Improved #Comment Support
 
 * Expanded comment support in the package input. If `LPF`/`UPW` properties are defined with parameters, then the packages used list-directed reads for the print factor `IPRN`. This caused problems if there are empty lines or commented lines between reading different `IPRN` values. Also added comment support when reading the `WET`ting parameters.
