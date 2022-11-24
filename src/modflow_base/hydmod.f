@@ -207,7 +207,6 @@ C4------HYDROGRAPH FILE AND NUMERIC FLAG FOR DRY/INACTIVE CELLS
          NREAD_HEADER = NREAD_HEADER + 1
          !
       END DO LINE_OPT_READ
-
       !
 C  Number of hydrographs (NHYDM) specified by the user is ignored --
 C    the program initially counts the number of hydrographs (NTOT).
