@@ -15187,6 +15187,10 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
       !
       DO IUNIT = 1,NUNIT
         !
+        DIVIN = DZ
+        SUMIN = DZ
+        SUMOUT = DZ
+        !
         ! If no diversion, use previous value
         IF ( UNIT(IUNIT)%DIVORDER.EQ.DZ .OR. UNIT(IUNIT)%DIVERSION.EQ.DZ ) THEN
           !
