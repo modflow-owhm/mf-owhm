@@ -815,8 +815,8 @@ MODULE BAS_UTIL
      'THIS CAN BE ADJUSTED WITH THE BASIC (BAS) PACKAGE OPTION '//NL//CH5//                                          &
      '"MAX_RELATIVE_VOLUME_ERROR" FOLLOWED BY THE DESIRED LIMIT.'                                                    )
   END IF
-!
-!------IF ITERATIVE PROCEDURE FAILED TO CONVERGE PRINT MESSAGE
+  !
+  !------IF ITERATIVE PROCEDURE FAILED TO CONVERGE PRINT MESSAGE
   IF(ICNVG.EQ.0) THEN
    !
    CALL TXT%ADD_BEGIN(CH5//                                                                                                   &
@@ -2023,7 +2023,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
               II = LLOC
               CALL PRNT_CNVG%OPEN(BL%LINE,LLOC,BL%IOUT,BL%IU,NO_INTERNAL=TRUE)
               !
-              IF(.NOT. PRNT_CNVG%BINARY)CALL PRNT_CNVG%SET_HEADER('   SP   TS  ITER  LAY  ROW  COL           HEAD     CHNG_HEAD   DATE      CELL_ID')
+              IF(.NOT. PRNT_CNVG%BINARY)CALL PRNT_CNVG%SET_HEADER('   SP   TS  ITER  LAY  ROW  COL           HEAD      CHNG_HEAD   CELL_ID  DATE_START')
               !
               IF(PRNT_CNVG_OUTER > Z) THEN
                  WRITE(IOUT,'(17x, *(A))') 'After solver iteration ',             num2str(PRNT_CNVG_OUTER),", the change in head between iterations (head convergence, Δh<HCLOSE) for the ",                              num2str(PRNT_CNVG_NTERM), ' largest cells and are written to ', TRIM(ADJUSTL(BL%LINE(II:)))
@@ -2045,7 +2045,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
               II = LLOC
               CALL PRNT_FRES%OPEN(BL%LINE,LLOC,BL%IOUT,BL%IU,NO_INTERNAL=TRUE)
               !
-              IF(.NOT. PRNT_FRES%BINARY) CALL PRNT_FRES%SET_HEADER('   SP   TS  ITER  LAY  ROW  COL           HEAD    FLOW_RESIDUAL    VOL_RESIDUAL     CELL_VOLUME      DATE  CELL_ID')
+              IF(.NOT. PRNT_FRES%BINARY) CALL PRNT_FRES%SET_HEADER('   SP   TS  ITER  LAY  ROW  COL           HEAD    FLOW_RESIDUAL    VOL_RESIDUAL     CELL_VOLUME   CELL_ID  DATE_START')
               !
               IF(PRNT_FRES_OUTER > Z) THEN
                  WRITE(IOUT,'(17x, *(A))') 'After solver iteration ',             num2str(PRNT_FRES_OUTER),", the model's residual error (r = Ah - RHS < RCLOSE) for the ", num2str(PRNT_FRES_NTERM), ' largest cells and are written to ', TRIM(ADJUSTL(BL%LINE(II:)))
@@ -2067,7 +2067,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
               II = LLOC
               CALL PRNT_VERR%OPEN(BL%LINE,LLOC,BL%IOUT,BL%IU,NO_INTERNAL=TRUE)
               !
-              IF(.NOT. PRNT_VERR%BINARY) CALL PRNT_VERR%SET_HEADER('   SP   TS  ITER  LAY  ROW  COL           HEAD  REL_VOL_ERR    VOL_RESIDUAL'//'   FLOW_RESIDUAL  DATE      CELL_ID')
+              IF(.NOT. PRNT_VERR%BINARY) CALL PRNT_VERR%SET_HEADER('   SP   TS  ITER  LAY  ROW  COL           HEAD  REL_VOL_ERR    VOL_RESIDUAL    FLOW_RESIDUAL   CELL_ID  DATE_START')
               !
               IF(PRNT_VERR_OUTER > Z) THEN
                  WRITE(IOUT,'(17x, *(A))') 'After solver iteration ',             num2str(PRNT_VERR_OUTER),", the model's relative volume error (re = (Ah - RHS)/vol < MxRE) for the ", num2str(PRNT_VERR_NTERM), ' largest cells and are written to ', TRIM(ADJUSTL(BL%LINE(II:)))
@@ -2287,7 +2287,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
               CALL INTER_INFO%OPEN(BL%LINE,LLOC,IOUT,INBAS,SPLITMAXCOUNT=Z)
               LINE = '    SP    TS  ITER  TS_LENGTH       VOLUME_ERROR   RATE_ERROR     RAT_PERROR'
               !
-              IF(HAS_STARTDATE) LINE = TRIM(LINE)//'     DATE'
+              IF(HAS_STARTDATE) LINE = TRIM(LINE)//'   MONTH  DATE_START'
               !
               CALL INTER_INFO%SET_HEADER(TRIM(LINE))
               !CALL INTER_INFO%SET_HEADER('    SP    TS  ITER  TS_LENGTH      VOLUME_ERROR   RATE_ERROR     RAT_PERROR     DATE')

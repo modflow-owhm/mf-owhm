@@ -1049,7 +1049,7 @@ C     ------------------------------------------------------------------
       INTEGER, INTENT(INOUT):: ICNVG
       !
       INTEGER:: I, J, K, II, ID, ITMP, CNT
-      CHARACTER(8):: DT
+      CHARACTER(19):: DT
       DOUBLE PRECISION:: DIF, ADIF, DTMP, DELT
       LOGICAL:: CHECK
       INTEGER, SAVE:: MAX_REL_VOL_ERROR_CNT = Z
@@ -1166,6 +1166,7 @@ C     ------------------------------------------------------------------
         !
         IF(HAS_STARTDATE) THEN
             DT = DATE_SP(KPER)%TS(KSTP)%STR_MONTHYEAR()
+            DT = ADJUSTL(DT)
         ELSE
             DT=''
         END IF
@@ -1394,7 +1395,8 @@ C     ------------------------------------------------------------------
         CALL SORT(PRNT_CNVG_LRC, PRNT_CNVG_DIF, SORT_B=FALSE)  !SORT ON INDEX
         !
         IF(HAS_STARTDATE) THEN
-            DT = DATE_SP(KPER)%TS(KSTP)%STR_MONTHYEAR()
+            ! DT = DATE_SP(KPER)%TS(KSTP)%STR_MONTHYEAR()
+            DT = DATE_SP(KPER)%TS(KSTP-1)%STR('T')
         ELSE
             DT='NaN'
         END IF
@@ -1408,12 +1410,12 @@ C     ------------------------------------------------------------------
          DIF = PRNT_CNVG_DIF(II) ! HNEW(J,I,K) - HNEW_OLD(J,I,K) uncomment if output wants sign
          !
          IF(PRNT_CNVG%BINARY) THEN
-         WRITE(PRNT_CNVG%IU)KPER,KSTP,KITER,K,I,J,HNEW(J,I,K),DIF,DT,ID
+         WRITE(PRNT_CNVG%IU)KPER,KSTP,KITER,K,I,J,HNEW(J,I,K),DIF,ID,DT
          ELSE
          WRITE(PRNT_CNVG%IU,'(2(1x,I4),1x,I5,3(1x,I4),2(1x,A),2(2x,A))')
      +                  KPER,KSTP,KITER,K,I,J,
-     +                  NUM2STR7(HNEW(J,I,K),14), NUM2STR7(DIF,14),DT,
-     +                  NUM2STR(ID)
+     +                  NUM2STR7(HNEW(J,I,K),14), NUM2STR7(DIF,14),
+     +                  NUM2STR(ID,8), DT
          END IF
         END DO
         !
@@ -1489,7 +1491,8 @@ C     ------------------------------------------------------------------
         CALL SORT(PRNT_FRES_LRC, PRNT_FRES_DIF, SORT_B=FALSE)  !SORT ON INDEX
         !
         IF(HAS_STARTDATE) THEN
-            DT = DATE_SP(KPER)%TS(KSTP)%STR_MONTHYEAR()
+            ! DT = DATE_SP(KPER)%TS(KSTP)%STR_MONTHYEAR()
+            DT = DATE_SP(KPER)%TS(KSTP-1)%STR('T')
         ELSE
             DT='NaN'
         END IF
@@ -1507,13 +1510,13 @@ C     ------------------------------------------------------------------
          !
          IF(PRNT_FRES%BINARY) THEN
          WRITE(PRNT_FRES%IU)KPER,KSTP,KITER,K,I,J,HNEW(J,I,K),DIF,
-     +                      DTMP,ADIF,DT,ID
+     +                      DTMP,ADIF,ID,DT
          ELSE
          WRITE(PRNT_FRES%IU,'(2(1x,I4),1x,I5,3(1x,I4),2x,A,
      +                        3(1x,ES15.7),2(2x,A))')
      +                  KPER,KSTP,KITER,K,I,J,
      +                  NUM2STR7(HNEW(J,I,K),14), DIF,DTMP,ADIF,
-     +                  DT,NUM2STR(ID)
+     +                  NUM2STR(ID,8),DT
          END IF
         END DO
         !
@@ -1587,7 +1590,8 @@ C     ------------------------------------------------------------------
         CALL SORT(PRNT_VERR_LRC, PRNT_VERR_DIF, SORT_B=FALSE)  !SORT ON INDEX
         !
         IF(HAS_STARTDATE) THEN
-            DT = DATE_SP(KPER)%TS(KSTP)%STR_MONTHYEAR()
+            ! DT = DATE_SP(KPER)%TS(KSTP)%STR_MONTHYEAR()
+            DT = DATE_SP(KPER)%TS(KSTP-1)%STR('T')
         ELSE
             DT='NaN'
         END IF
@@ -1608,13 +1612,13 @@ C     ------------------------------------------------------------------
          !
          IF(PRNT_VERR%BINARY) THEN
          WRITE(PRNT_VERR%IU)KPER,KSTP,KITER,K,I,J,HNEW(J,I,K),DIF,
-     +                      ADIF,DTMP,DT,ID
+     +                      ADIF,DTMP,ID,DT
          ELSE
          WRITE(PRNT_VERR%IU,'(2(1x,I4),1x,I5,3(1x,I4),1x,A,1x,F12.6,
      +                        2(1x,ES15.7),2(2x,A))')
      +                  KPER,KSTP,KITER,K,I,J,
      +                  NUM2STR7(HNEW(J,I,K),14), DIF,ADIF,DTMP,
-     +                  DT,NUM2STR(ID)
+     +                  NUM2STR(ID,8),DT
          END IF
         END DO
         !
@@ -2247,8 +2251,9 @@ C4------PRINT TOTAL BUDGET IF REQUESTED
      +                    VOL,RAT,NUM2STR(ABS(BUDPERC),K)
          !
          IF(HAS_STARTDATE) THEN
-             WRITE(INTER_INFO%IU,'(1x,A)',ADVANCE='NO')
-     +                 DATE_SP(KPER)%TS(KSTP-1)%STR_MONTHYEAR()
+             DATE = DATE_SP(KPER)%TS(KSTP-1)%STR_MONTHYEAR()  ! only want the mmm of mmm-yyyy
+             WRITE(INTER_INFO%IU,'(1x,A,2x,A)',ADVANCE='NO')
+     +                 DATE(1:3), DATE_SP(KPER)%TS(KSTP-1)%STR('T')
          END IF
          !
          WRITE(INTER_INFO%IU,'(A)')
