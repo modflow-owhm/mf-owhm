@@ -957,12 +957,11 @@ MODULE CROP_DATA_FMP_MODULE
     TYPE(SOIL_DATA),     INTENT(IN   ):: SOIL
     INTEGER,             INTENT(IN   ):: IOUT
     !
-    IF(.NOT. WBS%HAS_CROP .AND. CDAT%NCROP > Z) THEN
-         ! RAISE ERROR    
+    IF(.NOT. WBS%HAS_CROP .AND. FDIM%NCROP > Z) THEN
+         CALL STOP_ERROR(OUTPUT=IOUT,MSG='FMP GLOBAL BLOCK ERROR. Input did not find the LAND_USE block, but NCROP is greater than zero (NCROP = '//NUM2STR(FDIM%NCROP)//')'//NL//'To continue, specify the LAND_USE block or set NCROP=0')
+    ELSEIF(FDIM%NCROP == Z) THEN
+        CALL WARNING_MESSAGE(OUTPUT=IOUT,MSG='FMP NCROP = 0'//NL//'Are you sure you want to use FMP without any crops or land uses defined???', INLINE=TRUE)
     END IF
-    !
-    IF(FDIM%NCROP == Z) CALL WARNING_MESSAGE(OUTPUT=IOUT,MSG='FMP NCROP = 0'//NL// &
-                                                                'Are you sure you want to use FMP without any crops or land uses defined???', INLINE=TRUE)
     !
     IF( .NOT. WBS%HAS_CROP ) CALL SETUP_BASIC_VAR_CROP_DATA( CDAT, FDIM, IOUT )  ! No Crop Block Read In
     !
