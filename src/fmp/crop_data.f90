@@ -1018,20 +1018,17 @@ MODULE CROP_DATA_FMP_MODULE
     !
     IF(CDAT%NCROP == Z) THEN !-----------------------------------------------------------------------------------------------------------
         !
-        IF(.NOT. CDAT%TFR_READ) THEN
-            CDAT%TFR_READ = TRUE
-            WBS%IRR_AREA = DZ
-        END IF
+        UPDATE = WBS%NEW_FID .OR. .NOT. CDAT%TFR_READ
         !
-        IF(CDAT%CHECK_BARE) THEN
-            CALL WBS%SETUP_FALLOW_FRACTION_ARRAY(WBS%BARE_FRAC_RUNOFF, CDAT%BARE_FRAC_RUNOFF, TRUE)
-            !
+        IF(CDAT%CHECK_BARE .AND. UPDATE ) THEN ! (WBS%BARE_FRAC_RUNOFF%TRANSIENT .OR.
             WHERE (WBS%FID_ARRAY > Z) 
                                  CDAT%BARE_FRAC = UNO
             ELSEWHERE
                                  CDAT%BARE_FRAC = DZ
             END WHERE
         END IF
+        !
+        IF(.NOT. CDAT%TFR_READ) CDAT%TFR_READ = TRUE
         !
     ELSE!--------------------------------------------------------------------------------------------------------------------------------
         !
@@ -2127,7 +2124,8 @@ MODULE CROP_DATA_FMP_MODULE
          !
          CDAT%BARE_POT_EVAP = CDAT%BARE_FRAC * WBS%AREA * CLIM%BARE_POT_EVAP
          !
-         WHERE(CDAT%BARE_POT_EVAP < DZ); CDAT%BARE_POT_EVAP = DZ
+         WHERE(CDAT%BARE_POT_EVAP < DZ)
+               CDAT%BARE_POT_EVAP = DZ
          END WHERE
          !
          DO CONCURRENT ( R=ONE:CDAT%NROW, C=ONE:CDAT%NCOL)

@@ -1210,35 +1210,35 @@ MODULE WBS_DATA_FMP_MODULE
         !
         BFR = UNO
         !
-    ELSEIF(WBS_BARE_FRAC%INUSE .AND. (WBS_BARE_FRAC%TRANSIENT .OR. WBS%FID_TFR%TRANSIENT .OR. UPDATE)) THEN
+    ELSEIF(WBS_BARE_FRAC%INUSE .AND. (WBS_BARE_FRAC%TRANSIENT .OR. UPDATE)) THEN   !  .OR. WBS%FID_TFR%TRANSIENT -> Should be included in UPDATE
         !
         IF(WBS_BARE_FRAC%LISTLOAD) THEN
-                                                !
-                                                DO CONCURRENT(J=ONE:SIZE(WBS%FID_ARRAY,TWO), I=ONE:SIZE(WBS%FID_ARRAY,ONE))
-                                                      !
-                                                      IF (WBS%FID_ARRAY(I,J) == Z) THEN
-                                                          BFR(I,J) = DZ
-                                                      ELSE
-                                                          BFR(I,J) = WBS_BARE_FRAC%LIST( WBS%FID_ARRAY(I,J) )
-                                                          IF(WBS_BARE_FRAC%SFAC%HAS_EX1) BFR(I,J) = BFR(I,J) * WBS_BARE_FRAC%SFAC%EX1(WBS%FID_ARRAY(I,J))
-                                                      END IF
-                                                      !
-                                                END DO
-                                                !
-                                                IF(WBS_BARE_FRAC%SFAC%HAS_ALL) BFR = BFR * WBS_BARE_FRAC%SFAC%ALL
-                                                !
+            !
+            DO CONCURRENT(J=ONE:SIZE(WBS%FID_ARRAY,TWO), I=ONE:SIZE(WBS%FID_ARRAY,ONE))
+                  !
+                  IF (WBS%FID_ARRAY(I,J) == Z) THEN
+                      BFR(I,J) = DZ
+                  ELSE
+                      BFR(I,J) = WBS_BARE_FRAC%LIST( WBS%FID_ARRAY(I,J) )
+                      IF(WBS_BARE_FRAC%SFAC%HAS_EX1) BFR(I,J) = BFR(I,J) * WBS_BARE_FRAC%SFAC%EX1(WBS%FID_ARRAY(I,J))
+                  END IF
+                  !
+            END DO
+            !
+            IF(WBS_BARE_FRAC%SFAC%HAS_ALL) BFR = BFR * WBS_BARE_FRAC%SFAC%ALL
+            !
         ELSE
-                                                BFR = WBS_BARE_FRAC%ARRAY
-                                                !
-                                                IF(WBS_BARE_FRAC%SFAC%HAS_ALL) BFR = BFR * WBS_BARE_FRAC%SFAC%ALL
-                                                !
-                                                IF(WBS_BARE_FRAC%SFAC%HAS_EX1) THEN
-                                                      DO CONCURRENT(J=ONE:SIZE(WBS%FID_ARRAY,TWO), I=ONE:SIZE(WBS%FID_ARRAY,ONE), WBS%FID_ARRAY(I,J) > Z)
-                                                            !
-                                                            BFR(I,J) = BFR(I,J) * WBS_BARE_FRAC%SFAC%EX1(WBS%FID_ARRAY(I,J))
-                                                      END DO
-                                                END IF
-                                                
+            BFR = WBS_BARE_FRAC%ARRAY
+            !
+            IF(WBS_BARE_FRAC%SFAC%HAS_ALL) BFR = BFR * WBS_BARE_FRAC%SFAC%ALL
+            !
+            IF(WBS_BARE_FRAC%SFAC%HAS_EX1) THEN
+                  DO CONCURRENT(J=ONE:SIZE(WBS%FID_ARRAY,TWO), I=ONE:SIZE(WBS%FID_ARRAY,ONE), WBS%FID_ARRAY(I,J) > Z)
+                        !
+                        BFR(I,J) = BFR(I,J) * WBS_BARE_FRAC%SFAC%EX1(WBS%FID_ARRAY(I,J))
+                  END DO
+            END IF
+            
         END IF
         !
         DO CONCURRENT(J=ONE:SIZE(WBS%FID_ARRAY,TWO), I=ONE:SIZE(WBS%FID_ARRAY,ONE))
