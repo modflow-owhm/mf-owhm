@@ -2757,8 +2757,9 @@ C
       LOGICAL:: PRINTCOORD,LLCOODRINATE,CORNERCOORD
       DOUBLE PRECISION:: SP_LEN, TS_MULT
       REAL:: ONE_SNG
-      LOGICAL:: ERROR, FOUND_KEYWORD
+      LOGICAL:: ERROR, FOUND_KEYWORD, EOF
       TYPE(DATE_OPERATOR):: DATE
+      INTEGER:: INDIS
 C     ------------------------------------------------------------------
       ANAME(1) = '                    DELR'
       ANAME(2) = '                    DELC'
@@ -2780,7 +2781,10 @@ C
 C
 C2------Read comments and the first line following the comments.
       CALL READ_TO_DATA(LINE,INDIS,IOUT,IOUT,
-     +                            HED="-- READING DIS PACKAGE INPUT --")
+     +                            HED="-- READING DIS PACKAGE INPUT --",
+     +                            EOF=EOF)
+      IF(EOF) CALL EOF_ERROR(
+     +             'Failed to read the first line. Is the file empty?')
 C
 C3------Get the number of layers, rows, columns, stress periods,
 C3------ITMUNI, and LENUNI from the line.
@@ -2968,7 +2972,8 @@ C7------ALLOCATE LAYER FLAGS.
       ALLOCATE(LAYCBD(NLAY))
 C
 C8------Read confining bed information
-      CALL READ_TO_DATA(LINE,INDIS,IOUT)
+      CALL READ_TO_DATA(LINE,INDIS,IOUT,EOF=EOF)
+      IF(EOF) CALL EOF_ERROR('Failed to read the LAYCBD line.')
       LLOC = ONE
       CALL PARSE_WORD_UP(LINE,LLOC,ISTART,ISTOP)
       IF(LINE(ISTART:ISTOP)=='NOLAYCBD'  .OR.
@@ -3021,7 +3026,9 @@ C11-----Read the DELR and DELC arrays.
       DO CONCURRENT(J=1:NCOL, I=1:NROW); AREA(J,I) = DELR(J)*DELC(I)
       END DO
       !
-      CALL READ_TO_DATA(LINE,INDIS,IOUT)
+      CALL READ_TO_DATA(LINE,INDIS,IOUT,EOF=EOF)
+      IF(EOF) CALL EOF_ERROR(
+     +   'Failed to read the SURFACE_ELEVATION (optional) or TOP line.')
       LLOC = ONE
       CALL PARSE_WORD_UP(LINE,LLOC,ISTART,ISTOP)
       IF(LINE(ISTART:ISTOP) == 'SURFACE' .OR.
@@ -3067,7 +3074,9 @@ C14-----TIME STEP MULTIPLIER, AND STEADY-STATE FLAG..
       REALTIM_PER = DNEG
       USE_LEAP_YR = FALSE
       !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-      CALL READ_TO_DATA(LINE,INDIS,IOUT,IOUT)
+      CALL READ_TO_DATA(LINE,INDIS,IOUT,IOUT,EOF=EOF)
+      IF(EOF) CALL EOF_ERROR(
+     +             'Failed to read the SURFACE_ELEVATION line.')
       LLOC = ONE
       CALL PARSE_WORD_UP(LINE,LLOC,ISTART,ISTOP,TRUE)
       FOUND_KEYWORD = FALSE
@@ -3247,7 +3256,13 @@ C14-----TIME STEP MULTIPLIER, AND STEADY-STATE FLAG..
       !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       !
       DO N=1,NPER
-      IF(N>1) CALL READ_TO_DATA(LINE,INDIS,IOUT,IOUT)
+      IF(N>1) CALL READ_TO_DATA(LINE,INDIS,IOUT,IOUT,EOF=EOF)
+      IF(EOF) CALL EOF_ERROR(
+     +             'Failed to read the PERLEN line.'//NL//
+     +             'Input expects to read NPER lines.'//NL//
+     +'Input Read '//NUM2STR(N-1)//' lines, when it expected '//
+     +NUM2STR(NPER)//' lines.')
+      
       LLOC = ONE
       CALL GET_NUMBER(LINE,LLOC,ISTART,ISTOP,IOUT,INDIS, SP_LEN,
      +                 MSG='DIS FAILED TO LOAD PERLEN')
@@ -3412,6 +3427,27 @@ C--------------ALLOCATE AND BUILD COORDINATE SYSTEM OF MODEL AND OPTIONALLY PRIN
       IF(PRINTCOORD) CALL XYGRID%PRINT(IOUT)
 C
       CONTAINS
+         !
+         SUBROUTINE EOF_ERROR(MSG)
+           IMPORT:: INDIS, LINE, IOUT, NL
+           CHARACTER(*), INTENT(IN):: MSG
+           CHARACTER(:), ALLOCATABLE:: ERR
+           !
+           BACKSPACE(INDIS)
+           READ(IN, '(A)') LINE
+           !
+           ERR = 'Reached end of file (eof) when reading the '//
+     +           'next input line.'//NL//NL
+           IF(LINE /= '') ERR=ERR//
+     +       'The guessed line is the previous line read.'//NL//NL
+           IF(MSG /= '') ERR=ERR//
+     +       'The following is an additional note to the '//
+     +       'error routine:'//NL//NL//MSG
+           !
+           CALL STOP_ERROR(LINE,INFILE=INDIS,OUTPUT=IOUT,MSG=ERR)
+           !  
+         END SUBROUTINE
+         !
          PURE SUBROUTINE REDISTRIBUTE_SUM_TO_NATURAL_NUMBERS(val)
            implicit none
            double precision, dimension(:), intent(inout):: val
@@ -3444,6 +3480,7 @@ C
            val(dim) = tot
            !  
          END SUBROUTINE
+         !
       END SUBROUTINE
       !
       SUBROUTINE SGWF2BAS7D(KSTP,KPER,IPFLG,ISA)
