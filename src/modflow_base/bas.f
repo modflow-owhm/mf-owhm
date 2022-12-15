@@ -3429,7 +3429,7 @@ C
       CONTAINS
          !
          SUBROUTINE EOF_ERROR(MSG)
-           IMPORT:: INDIS, LINE, IOUT, NL
+           ! IMPORT:: INDIS, LINE, IOUT, NL   ! currently not supported by gfortran
            CHARACTER(*), INTENT(IN):: MSG
            CHARACTER(:), ALLOCATABLE:: ERR
            !
