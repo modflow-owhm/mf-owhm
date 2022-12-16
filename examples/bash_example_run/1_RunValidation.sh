@@ -8,10 +8,16 @@
 #    check    -> skip running examples and only CHECK the results in the output directories
 #    debug    -> runs mf-owhm_debug program instead of mf-owhm
 #    fast     -> ZYZ run test examples as background processes (more than one at once)
-#    nopause  -> disables requrin the user to hit pause at the end of the script (auto ends)
+#    nopause  -> disables requiring the user to hit pause at the end of the script (auto ends)
 #    save     -> do not delete intermediate testing program mf_owhm_validate_example_results
 #    reuse    -> if mf_owhm_validate_example_results already exists, reuse it instead of recompiling
-#                resuse implies the "save" option
+#                reuse implies the "save" option
+#
+# Example use:
+#             $ ./1_RunValidation.sh all fast
+# will run all the examples, including the very long ones,
+# and run them in parallel
+#
 start_time=$SECONDS
 echo
 echo "  Run Validation Start:  `date +"%T  %F"`"
