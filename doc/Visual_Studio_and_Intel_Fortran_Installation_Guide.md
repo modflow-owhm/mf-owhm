@@ -1,15 +1,23 @@
 # Integrated Development Environment (IDE)
 
-This document provides an overview on how to setup the tools for compiling [MODFLOW-OWHM](https://code.usgs.gov/modflow/mf-owhm). In particular, the installation and setup of [MS Visual Studio](https://visualstudio.microsoft.com/) (the IDE) and [Intel oneAPI](https://www.intel.com/content/www/us/en/developer/tools/oneapi/overview.html) (Fortran and C compilers). The tools mentioned are not endorsed in any way, but are used to build the executable binaries of MODFLOW-OWHM. Fortunately, as of writing this document, both offer both Visual Studio and oneAPI offer free, no-cost editions. [GFortran](https://gcc.gnu.org/wiki/GFortran) and [LLVM Flang](https://flang.llvm.org/docs/) are open-source compilers that are available, but come with several limitations. First, GFortran contains several compiler bugs that prevent it from successfully compiling MODFLOW-OWHM or its dependency library [Batteries Included Fortran](https://code.usgs.gov/fortran/bif). This may change with future releases of GFortran, and consequently, the provided *makefile* does include a gfortran option. Flang is a relatively new Fortran compiler that is part of the [LLVM](https://llvm.org/) project. While LLVM does support MS Windows, Flang does not nor, as of writing this, considered "production ready".
+This document provides an overview on how to setup the tools for compiling
+[MODFLOW-OWHM](https://code.usgs.gov/modflow/mf-owhm).
+In particular, the installation and setup of [MS Visual Studio](https://visualstudio.microsoft.com/) (the IDE) and [Intel oneAPI](https://www.intel.com/content/www/us/en/developer/tools/oneapi/overview.html) (Fortran and C compilers).
+The tools mentioned are not endorsed in any way, but are used to build the
+executable binaries of MODFLOW-OWHM.
+Fortunately, as of writing this document, both offer both Visual Studio and oneAPI offer free, no-cost editions. [GFortran](https://gcc.gnu.org/wiki/GFortran) and [LLVM Flang](https://flang.llvm.org/docs/) are open-source compilers that are available, but come with several limitations. First, there are GFortran multiple versions of gfortran, and most older versions are unable to compile this code due to compiler bugs or lack of newer fortran features (gfortran 11.3.0 and 12.1.0 can compile this repository). Second, gfortran tends to provide slower running executables compared to Intel Fortran. Despite this, the included makefile is set to compile with gfortran as the default option. Flang is a relatively new Fortran compiler that is part of the [LLVM](https://llvm.org/) project. While LLVM does support MS Windows, Flang does NOT nor, as of writing this, considered "production ready".
 
-This document will first explain what Visual Studio is, and how to do a minimal installation for setting up oneAPI. Then it will go over the minimal installation of oneAPI in order to compile MODFLOW-OWHM.
+This document will first explain what Visual Studio is, and how to do a minimal installation for setting up oneAPI. Then it will go over the minimal installation of oneAPI in order to compile
+MODFLOW-OWHM.
 
 
 [[_TOC_]]     
 
 ## Import Note: oneAPI Compiler Versions
 
-Intel oneAPI currently has two Fortran compilers denoted as Intel Fortran Compiler Classic (**ifort**) and Intel Fortran Compiler (**ifx**). The ifort compiler, formerly called *Intel Parallel Studio* and *Intel Fortran Composer*, is the original Fortran compiler provided by Intel that is used to compile MODFLOW. The ifx compiler is a new, redesigned compiler by Intel that translates the Fortran to [LLVM language-independent intermediate representation]([LLVM - Wikipedia](https://en.wikipedia.org/wiki/LLVM)) (IR) that is then compiled. The ifx compiler is intended to replace ifort; however as of writing this, ifx cannot compile all software that is ifort can. As of writing this document, **MODFLOW-OWHM only compiles with ifort**; using ifx raises multiple errors saying feature not currently implemented.  
+Intel oneAPI currently has two Fortran compilers denoted as Intel Fortran Compiler Classic (**ifort**) and Intel Fortran Compiler (**ifx**). The ifort compiler, formerly called *Intel Parallel Studio* and *Intel Fortran Composer*, is the original Fortran compiler provided by Intel that is used to compile MODFLOW. The ifx compiler is a new, redesigned compiler by Intel that translates the Fortran to [LLVM language-independent intermediate representation]([LLVM - Wikipedia](https://en.wikipedia.org/wiki/LLVM)) (IR) that is then compiled. The ifx compiler is intended to replace ifort; however as of writing this, ifx cannot compile all software that is ifort can. As of writing this document, 
+**MODFLOW-OWHM only compiles with ifort**; 
+using ifx raises multiple errors saying feature not currently implemented.  
 
 To make compilers more confusing is the versioning of oneAPI is different for ifort and ifx. The oneAPI version is formatted as `YYYY.x`, where `YYYY` is the year released and `x` is a release number (bigger is newer). For example, the past five versions are:
 
@@ -101,7 +109,9 @@ The next window will ask you to select a theme. You may want to leave this as *G
 
 &nbsp; 
 
-Visual Studio does not yet understand Fortran syntax nor can it read a solution/project files created for Intel Fortran (such as, `mf-owhm.vfproj`). If you attempt to open an Intel oneAPI solution or project file, then you will get the following error message:
+Visual Studio does not yet understand Fortran syntax nor can it read a solution/project files created for Intel Fortran 
+(such as, `mf-owhm.vfproj`). 
+If you attempt to open an Intel oneAPI solution or project file, then you will get the following error message:
 
 ![visual studio unsupported project error](./img/vs_unsupported_project.png)
 
@@ -267,12 +277,12 @@ At a minimum you should see:
 - `mf-owhm-gmg.vfproj`
 - `mf-owhm.vfproj`
 
-and the additional files are created by Visual Studio for any local customizations, such as breakpoints and IDE window arrangement. 
+and any additional files are created by Visual Studio for any local customizations, such as breakpoints and IDE window arrangement. 
 
 
 The first time you run `OneWater_GMG_Project.sln` or `OneWater_Project.sln` you will have to associate it with what program to run it with. I recommend picking a single version of Visual Studio rather than the "Selector". You can always change the version with the Windows "Open With" right click option:
 
-![mf-owhm ide/visual_studio folder](./img/mf-owhm_visual_studio_first_open.png)
+![visual_studio_first_open](./img/visual_studio_first_open.png)
 
 
 
@@ -290,11 +300,11 @@ Before you can compile you need to select the Configuration and Platform. The Pl
 
 The following is where you can change the Configuration and Platform:
 
-![mf-owhm ide/visual_studio folder](./img/mf-owhm_visual_studio_compile1.png)
+![visual_studio_compile release x64 location](./img/visual_studio_compile1.png)
 
 To compile a new executable, go to the `Build` menu and select `Build Solution` or `Rebuild Solution`. The only difference between the two, is that Rebuild will delete all existing intermediate files before compilation (this forces all new files to be generated).
 
-![mf-owhm ide/visual_studio folder](./img/mf-owhm_visual_studio_compile2.png)
+![visual_studio_compile build and rebuild location](./img/visual_studio_compile2.png)
 
 
 
