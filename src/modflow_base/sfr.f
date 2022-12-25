@@ -5186,7 +5186,7 @@ C82-----RETURN.
       RETURN
       CONTAINS
              PURE FUNCTION DIV(NUM, DENOM) RESULT(ANS)
-             IMPORT:: NEARZERO
+             !IMPORT:: NEARZERO
              REAL, INTENT(IN):: NUM, DENOM
              REAL:: ANS
              !
