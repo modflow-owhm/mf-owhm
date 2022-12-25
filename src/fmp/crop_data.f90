@@ -756,7 +756,7 @@ MODULE CROP_DATA_FMP_MODULE
                         CASE ("BARE")
                                           CALL CDAT%OUT_BARE%OPEN(LINE,LLOC,BL%IOUT,BL%IU,BINARY=BINARY,SPLITMAXCOUNT=11)
                         CASE ("ET_BYWBS_BYCROP")
-                                          CALL CDAT%OUT_ET%OPEN(LINE,LLOC,BL%IOUT,BL%IU,NOBINARY=.TRUE.,SPLITMAXCOUNT=11)
+                                          CALL CDAT%OUT_ET%OPEN(LINE,LLOC,BL%IOUT,BL%IU,NO_BINARY=.TRUE.,SPLITMAXCOUNT=11)
                         CASE ("INPUT")
                                           CALL CDAT%OUT_INPUT%OPEN(LINE,LLOC,BL%IOUT,BL%IU,BINARY=BINARY,SPLITMAXCOUNT=11)
                         CASE ("ROW_COL","ROW_COLUMN","ROW")

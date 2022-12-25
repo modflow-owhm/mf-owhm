@@ -266,12 +266,12 @@ C3------CELL-BY-CELL FLOW TERMS, AND PRINT FLAG
         CASE('PRINT_NODE_INFO') 
             !
             CALL PRNT_MNW2_NODE%OPEN(BL%LINE,LLOC,IOUT,IN,
-     +                                 NOBINARY=TRUE, SAVE_FNAME=TRUE)
+     +                                 NO_BINARY=TRUE, SAVE_FNAME=TRUE)
             !      
         CASE('PRINT_WELL_NODE_FLOW') 
             !
             CALL PRNT_MNW2_Q_NODE%OPEN(BL%LINE,LLOC,IOUT,IN,
-     +                                 NOBINARY=TRUE, SAVE_FNAME=TRUE)
+     +                                 NO_BINARY=TRUE, SAVE_FNAME=TRUE)
             !     
         CASE('PRINT_WELL_INOUT','PRINT_WELL_IN_OUT') 
             !

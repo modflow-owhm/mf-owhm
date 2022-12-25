@@ -2272,7 +2272,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
               CUM_HEAD_CHNG     = DZ
               CUM_HEAD_CHNG_E10 = Z
               !
-              CALL PRNT_CUM_HEAD_CHNG%OPEN(BL%LINE,LLOC,IOUT,INBAS,NOBINARY=TRUE, SPLITMAXCOUNT=Z, NO_INTERNAL=TRUE)
+              CALL PRNT_CUM_HEAD_CHNG%OPEN(BL%LINE,LLOC,IOUT,INBAS,NO_BINARY=TRUE, SPLITMAXCOUNT=Z, NO_INTERNAL=TRUE)
               !
               WRITE(PRNT_CUM_HEAD_CHNG%IU, "(3A)", ADVANCE="NO")                                                 &
                   '# CUMULATIVE_HEAD_CHANGE file for comparing code versions with the same model input. ',       &
@@ -2295,7 +2295,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
               CALL BUDGETDB%OPEN(BL%LINE,LLOC,IOUT,INBAS, SPLITMAXCOUNT=Z)
               !
           CASE('TIME_INFO', 'PRINT_TIME_INFO')
-              CALL TIME_INFO%OPEN(BL%LINE,LLOC,IOUT,INBAS,NOBINARY=TRUE)
+              CALL TIME_INFO%OPEN(BL%LINE,LLOC,IOUT,INBAS,NO_BINARY=TRUE)
               !
           CASE('SUPER_NAMES', 'SUPERNAMES')
               CALL SUPER_NAMES_IN%OPEN(BL%LINE,LLOC,IOUT,INBAS)
@@ -2390,7 +2390,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
                          WRITE(IOUT,'(A, 2x, A)') "EVERY_TIMESTEP", PRINT_HEAD_LIST%LN(ISTART:)
                      END IF
                      !
-                     CALL PRINT_HEAD(1)%OPEN(PRINT_HEAD_LIST%LN, LLOC, IOUT, INBAS, NOBINARY=TRUE, SPLITMAXCOUNT=Z)
+                     CALL PRINT_HEAD(1)%OPEN(PRINT_HEAD_LIST%LN, LLOC, IOUT, INBAS, NO_BINARY=TRUE, SPLITMAXCOUNT=Z)
                      !
                      IF(ALLOCATED(PRINT_HEAD(1)%FMT)) THEN
                                   READ(PRINT_HEAD(1)%FMT,*) J
@@ -2489,7 +2489,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
              DO I=1, K
                      LLOC = ONE
                      !
-                     CALL PRINT_HEAD(I)%OPEN(PRINT_HEAD_LIST%LN, LLOC, IOUT, INBAS, NOBINARY=TRUE, SPLITMAXCOUNT=Z)
+                     CALL PRINT_HEAD(I)%OPEN(PRINT_HEAD_LIST%LN, LLOC, IOUT, INBAS, NO_BINARY=TRUE, SPLITMAXCOUNT=Z)
                      !
                      IF(ALLOCATED(PRINT_HEAD(I)%FMT)) THEN
                                   READ(PRINT_HEAD(I)%FMT,*) J
@@ -2541,7 +2541,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
                          WRITE(IOUT,'(A, 2x, A)') "EVERY_TIMESTEP", PRINT_WTAB_LIST%LN(ISTART:)
                      END IF
                      !
-                     CALL PRINT_WTAB(1)%OPEN(PRINT_WTAB_LIST%LN, LLOC, IOUT, INBAS, NOBINARY=TRUE, SPLITMAXCOUNT=Z)
+                     CALL PRINT_WTAB(1)%OPEN(PRINT_WTAB_LIST%LN, LLOC, IOUT, INBAS, NO_BINARY=TRUE, SPLITMAXCOUNT=Z)
                      !
                      IF(ALLOCATED(PRINT_WTAB(1)%FMT)) THEN
                                   READ(PRINT_WTAB(1)%FMT,*) J
@@ -2640,7 +2640,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
              DO I=1, K
                      LLOC = ONE
                      !
-                     CALL PRINT_WTAB(I)%OPEN(PRINT_WTAB_LIST%LN, LLOC, IOUT, INBAS, NOBINARY=TRUE, SPLITMAXCOUNT=Z)
+                     CALL PRINT_WTAB(I)%OPEN(PRINT_WTAB_LIST%LN, LLOC, IOUT, INBAS, NO_BINARY=TRUE, SPLITMAXCOUNT=Z)
                      !
                      IF(ALLOCATED(PRINT_WTAB(I)%FMT)) THEN
                                   READ(PRINT_WTAB(I)%FMT,*) J
@@ -2692,7 +2692,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
                          WRITE(IOUT,'(A, 2x, A)') "EVERY_TIMESTEP", PRINT_WDEP_LIST%LN(ISTART:)
                      END IF
                      !
-                     CALL PRINT_WDEP(1)%OPEN(PRINT_WDEP_LIST%LN, LLOC, IOUT, INBAS, NOBINARY=TRUE, SPLITMAXCOUNT=Z)
+                     CALL PRINT_WDEP(1)%OPEN(PRINT_WDEP_LIST%LN, LLOC, IOUT, INBAS, NO_BINARY=TRUE, SPLITMAXCOUNT=Z)
                      !
                      IF(ALLOCATED(PRINT_WDEP(1)%FMT)) THEN
                                   READ(PRINT_WDEP(1)%FMT,*) J
@@ -2791,7 +2791,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
              DO I=1, K
                      LLOC = ONE
                      !
-                     CALL PRINT_WDEP(I)%OPEN(PRINT_WDEP_LIST%LN, LLOC, IOUT, INBAS, NOBINARY=TRUE, SPLITMAXCOUNT=Z)
+                     CALL PRINT_WDEP(I)%OPEN(PRINT_WDEP_LIST%LN, LLOC, IOUT, INBAS, NO_BINARY=TRUE, SPLITMAXCOUNT=Z)
                      !
                      IF(ALLOCATED(PRINT_WDEP(I)%FMT)) THEN
                                   READ(PRINT_WDEP(I)%FMT,*) J
