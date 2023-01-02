@@ -36,15 +36,8 @@
 #   ifx                        WILL NOT compile this project (feature not implemented errors)
 #   ifort 2021.8.0             WILL NOT compile this project (oneAPI 2023.0.0)
 #   ifort 2021.7.0 and earlier WILL compile this project     (oneAPI 2022.2.1)
-#   gfortran 11.3.0 and 12.1.0 WILL compile this project (others have not been tested)
+#   gfortran 11.3.0 and 12.1.0 WILL compile this project (but raises runtime errors do to compiler bugs)
 # 
-#   The initial setup has the compiler type variables set to the 
-#   GNU Compiler Collection (gfortran and gcc)
-#   To compile with the Intel Fortran Compiler Classic (ifort), you will need to set:
-#      COMPILER := INTEL
-#      F90 := ifort
-#      CC  := icc         # -> only needed if compiling C code, otherwise ignored
-#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 # To Invoke/Compile type from command prompt:
@@ -116,11 +109,11 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 #         
-#############################################################################
-#############################################################################
-###   Set the following Variables                                         ###
-#############################################################################
-#############################################################################
+#################################################################################################################################
+#################################################################################################################################
+###   Set the following Variables                                         #######################################################
+#################################################################################################################################
+#################################################################################################################################
 #
 # Compilation Configuration-Optimization Scheme
 #   ===> Accepted Answers: RELEASE, DEBUG
@@ -133,17 +126,17 @@ USEGMG := NO
 #
 # Compilation Software                        --> Indicates the compiler collection used for setting compiler flags
 #   ===> Accepted Answers: INTEL, GCC, LLVM       --> LLVM not fully-supported yet
-COMPILER := GCC
+COMPILER := INTEL
 #
 #
 # Define the Fortran Compiler
 #                    ===> For example: gfortran, gfortran-9, gfortran-10, ifort
 #                         ****Note that the version of your Fortran compiler may not support all of the Fortran Standards (viz 2003, 2008, 2015)
-F90 := gfortran
+F90 := ifort
 #
 # Define the C Compiler
 #   ===> Accepted Answers: gcc, icc
-CC  := gcc
+CC  := icc
 #
 # Program Name - Do not include extension (eg .exe). Also _debug will automatically be added if CONFIG = debug. Use bin_out= to specify exact location and name for binary.
 #
@@ -163,15 +156,14 @@ DBLE := YES
 ARG = 
 #
 #
-########################################################################
-########################################################################
-#             DO NOT MODIFY BELOW THIS LINE
-#            UNLESS YOU KNOW WHAT YOUR DOING
-########################################################################
-########################################################################
-#
-########################################################################
-#
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+#################################################################################################################################@
+#################################################################################################################################@
+#             DO NOT MODIFY BELOW THIS LINE                           ###########################################################@
+#            UNLESS YOU KNOW WHAT YOUR DOING                          ###########################################################@
+#################################################################################################################################@
+#################################################################################################################################@
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 #
 # Program Name for echo output
 ST:=
@@ -549,10 +541,10 @@ PROGRAM :=$(strip $(PROGRAM))
 #
 ifeq ($(CFG), DEBUG)
    #
-   PROGRAM:=$(PROGRAM)_debug
+   PROGRAM:=$(PROGRAM)-debug
    #
    F90FlagsIntel :=-O0 -g -debug -traceback -assume nocc_omp -fpe0 -fp-model source -nologo -warn nousage -check bounds,pointers,stack,format,output_conversion,uninit
-   F90FlagsGCC   :=-O0 -g -w -fbacktrace -fdefault-double-8  -ffree-line-length-2048 -fmax-errors=10 -ffpe-trap=zero,overflow,underflow -finit-real=nan #-fstack-usage  #<= THIS PROVIDES LOTS OF INFO   -std=f2008
+   F90FlagsGCC   :=-O0 -g -w -fbacktrace -fdefault-double-8  -ffree-line-length-2048 -fmax-errors=10 -ffpe-trap=zero,overflow,underflow -finit-real=nan -fcheck=all # -fstack-usage #<= THIS PROVIDES LOTS OF INFO   -std=f2008
    F90FlagsLLVM  :=
    #
    CFlagsIntel   :=-O0 -debug -g  -fbuiltin 
@@ -562,7 +554,7 @@ else
    # NOTE "-ip" can sometimes cause catastrophic error: **Internal compiler error:
    #
    F90FlagsIntel :=-O2 -assume nocc_omp -fpe0 -fp-model source -threads -warn nousage -nologo
-   F90FlagsGCC   :=-O2 -w -fno-backtrace -fno-range-check -fdefault-double-8 -ffree-line-length-2048
+   F90FlagsGCC   :=-O2 -w -fno-backtrace -fdefault-double-8 -ffree-line-length-2048
    F90FlagsLLVM  :=
    #
    CFlagsIntel   :=-O2  -fbuiltin
