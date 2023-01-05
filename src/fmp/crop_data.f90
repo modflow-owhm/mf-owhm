@@ -869,15 +869,15 @@ MODULE CROP_DATA_FMP_MODULE
     !
     ! Set up minimum bare fraction of area
     !
-    IF( .NOT. CDAT%FRAC%INUSE .AND. CDAT%MIN_BARE > NEAR_inf ) CDAT%MIN_BARE=UNO         !NEVER IS NEEDED
+    IF( .NOT. CDAT%FRAC%INUSE .AND. CDAT%MIN_BARE > NEAR_inf ) CDAT%MIN_BARE=UNO         !NEVER IS NEEDED, EXCEPT FOR CROP=0 CELLS
     IF(       CDAT%Kc%INUSE   .AND. CDAT%MIN_BARE > NEAR_inf ) CDAT%MIN_BARE=NEARZERO_12 !KNOWN THAT ETR IS DEFINED
     !
     IF(CDAT%MIN_BARE<NEARZERO_30 ) CDAT%MIN_BARE=NEARZERO_30
-    IF(CDAT%MIN_BARE<UNO) THEN
-        WRITE(CDAT%IOUT,'(/2A, /A/)') 'MINIMUM BARE FRACTION IS: ', NUM2STR(CDAT%MIN_BARE),'ANY FRACTIONS LESS THAN THIS WILL BE AUTOMATICALLY SET TO ZERO.'
-    ELSEIF(CDAT%MIN_BARE < NEAR_inf) THEN
-        WRITE(CDAT%IOUT,'(4(/A), /)') 'MINIMUM BARE FRACTION IS GREATER THAN 1.0,','SO SOIL EVAPORATION, DEEP PERCOLATION, AND SURFACE RUNOFF ON BAR SOIL/FALLOW CROPS WILL NOT BE CALCULATED.','PRECIPITATION THAT FALLS ON BARE SOIL/FALLOW CROPS IS REMOVED FROM MODEL.','THIS EFFECTS CELLS WITH CROP IDs EQUAL TO ZERO OR CROP FRACTIONS DO NOT SUM TO ONE FOR A MODEL CELL.'
-    END IF
+    !IF(CDAT%MIN_BARE<UNO) THEN
+    !    WRITE(CDAT%IOUT,'(/2A, /A/)') 'MINIMUM BARE FRACTION IS: ', NUM2STR(CDAT%MIN_BARE),'ANY FRACTION OF CELL THAT IS NOT DEFINED BY A CROP IS AUTOMATICALLY SET TO ZERO (eg Crop Frac = 0.75; so Bare Area = 0.25, if MIN < 0.25, then Bare Soil Evaporation is calculated, otherwise it is not.)'
+    !ELSEIF(CDAT%MIN_BARE < NEAR_inf) THEN
+    !    WRITE(CDAT%IOUT,'(4(/A), /)') 'MINIMUM BARE FRACTION IS GREATER THAN 1.0,','SO SOIL EVAPORATION, DEEP PERCOLATION, AND SURFACE RUNOFF ON BAR SOIL/FALLOW CROPS WILL NOT BE CALCULATED.','PRECIPITATION THAT FALLS ON BARE SOIL/FALLOW CROPS IS REMOVED FROM MODEL.','THIS ONLY EFFECTS CELLS WITH CROP IDs GREATER THAN ZERO OR CROP FRACTIONS DO NOT SUM TO ONE FOR A MODEL CELL  (eg Crop Frac = 0.75; so Bare Area = 0.25, so 0.25 of the area is not simulated.)'
+    !END IF
     !
     !CALL CDAT%PARSE_CROP_ROW_COL()  !POPULATE CDAT%CROP%RC
     !CALL CDAT%SETUP_FID(IFID)      !POPULATE CDAT%CROP%FID
@@ -1415,10 +1415,8 @@ MODULE CROP_DATA_FMP_MODULE
                                                     IF( (CDAT%CROP(I)%Kc(K) < NEARZERO_30 .AND. CDAT%CROP(I)%CU(K) < NEARZERO_30) ) THEN  ! CROP HAS BEEN FALLOWED -- .OR. CDAT%CROP(I)%FTR(K) < NEARZERO_30
                                                         IF(CDAT%ZERO_CU_TO_BARE%LIST(I) == ONE) THEN
                                                             CDAT%CROP(I)%CU(K) = CDAT%CROP(I)%AREA(K) * CLIM%BARE_POT_EVAP(CDAT%CROP(I)%RC(TWO,K),CDAT%CROP(I)%RC(ONE,K))  !CLIM%REF_ET(CDAT%CROP(I)%RC(TWO,K),CDAT%CROP(I)%RC(ONE,K))
-                                                            !CDAT%CROP(I)%FTR(K) = DZ
                                                         ELSE
                                                             CDAT%CROP(I)%CU(K)  = DZ
-                                                            !CDAT%CROP(I)%FTR(K) = DZ
                                                             WRN%RAISED = TRUE
                                                         END IF
                                                         CDAT%CROP(I)%NOT_FALLOW_SP(K) = FALSE
@@ -1431,7 +1429,6 @@ MODULE CROP_DATA_FMP_MODULE
                   DO CONCURRENT ( K=ONE:CDAT%CROP(I)%N ) !  CU + Kc * Area* ETR
                                                     IF( (CDAT%CROP(I)%Kc(K) < NEARZERO_30 .AND. CDAT%CROP(I)%CU(K) < NEARZERO_30) ) THEN  ! CROP HAS BEEN FALLOWED -- .OR. CDAT%CROP(I)%FTR(K) < NEARZERO_30
                                                         CDAT%CROP(I)%CU(K)  = DZ
-                                                        !CDAT%CROP(I)%FTR(K) = DZ
                                                         CDAT%CROP(I)%NOT_FALLOW_SP(K) = FALSE
                                                         WRN%RAISED = TRUE
                                                     ELSE
@@ -1443,10 +1440,8 @@ MODULE CROP_DATA_FMP_MODULE
                   DO CONCURRENT (K=ONE:CDAT%CROP(I)%N, CDAT%CROP(I)%CU(K) < NEARZERO_30 ) ! CROP HAS BEEN FALLOWED  -- .OR. CDAT%CROP(I)%FTR(K) < NEARZERO_30
                                                        IF(CDAT%ZERO_CU_TO_BARE%LIST(I) == ONE) THEN
                                                             CDAT%CROP(I)%CU(K) = CDAT%CROP(I)%AREA(K) * CLIM%BARE_POT_EVAP(CDAT%CROP(I)%RC(TWO,K),CDAT%CROP(I)%RC(ONE,K))       !CLIM%REF_ET(CDAT%CROP(I)%RC(TWO,K),CDAT%CROP(I)%RC(ONE,K))
-                                                            !CDAT%CROP(I)%FTR(K) = DZ
                                                         ELSE
                                                             CDAT%CROP(I)%CU(K)  = DZ
-                                                            !CDAT%CROP(I)%FTR(K) = DZ
                                                             WRN%RAISED = TRUE
                                                         END IF
                                                         CDAT%CROP(I)%NOT_FALLOW_SP(K) = FALSE
