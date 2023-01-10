@@ -4640,7 +4640,7 @@ MODULE CROP_DATA_FMP_MODULE
                          EGWA = EHI
                          !EHD  = DZ
                          !
-                     ELSEIF(HH < CDAT%CROP(I)%XX(K)) THEN  !GSE-CAP
+                     ELSEIF(HH <= CDAT%CROP(I)%XX(K)) THEN  !GSE-CAP
                          !
                          !EHI  = DZ
                          !EHD  = DZ
