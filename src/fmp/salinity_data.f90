@@ -374,7 +374,9 @@ MODULE SALINITY_DATA_FMP_MODULE!, ONLY: SALINITY_DATA, INITIALIZE_SALINITY_DATA
             ELSE
                 ASSOCIATE (CPR=>CDAT%CROP, TF=>SALT%INUSE, ARRAY=>SALT%USED%ARRAY)
                     DO I=ONE, SALT%NCROP
-                         CALL CROP_INPUT_ARRAY_TO_LOGICAL_PROP(CPR(I)%N, CPR(I)%RC, TF(I)%VEC, ARRAY(:,CPR(I)%LD:) )
+                       if(CPR(I)%N > 0) then
+                          CALL CROP_INPUT_ARRAY_TO_LOGICAL_PROP(CPR(I)%N, CPR(I)%RC, TF(I)%VEC, ARRAY(:,CPR(I)%LD:) )
+                       end if
                     END DO
                 END ASSOCIATE
             END IF
@@ -678,7 +680,9 @@ MODULE SALINITY_DATA_FMP_MODULE!, ONLY: SALINITY_DATA, INITIALIZE_SALINITY_DATA
     ELSE
         ASSOCIATE (CPR=>CDAT%CROP, TF=>SALT%INUSE, ARRAY=>SALT%USED%ARRAY)
             DO I=ONE, SALT%NCROP
-                 CALL CROP_INPUT_ARRAY_TO_LOGICAL_PROP(CPR(I)%N, CPR(I)%RC, TF(I)%VEC, ARRAY(:,CPR(I)%LD:) )
+               if(CPR(I)%N > 0) then
+                  CALL CROP_INPUT_ARRAY_TO_LOGICAL_PROP(CPR(I)%N, CPR(I)%RC, TF(I)%VEC, ARRAY(:,CPR(I)%LD:) )
+               end if
             END DO
         END ASSOCIATE
     END IF
