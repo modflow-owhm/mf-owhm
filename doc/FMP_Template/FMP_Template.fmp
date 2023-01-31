@@ -1030,7 +1030,7 @@ BEGIN SURFACE_WATER
    PRINT SFR_RETURN            GENERIC_OUTPUT_OptKey  # Runoff budget for all SFR segment/reaches that receive FMP runoff
    PRINT SFR_SRR_ONLY          GENERIC_OUTPUT_OptKey  # Runoff budget for the NSFR_RETURN SFR segment/reaches that receive FMP runoff
    #
-   # 
+   #
    PRINT NRD                   GENERIC_OUTPUT_OptKey  # NON_ROUTED_DELIVERY output by WBS that specifies WBS water DEMAND, the NRD available water SUPPLY, and amount of NRD water CONSUMED
    PRINT NRD_BY_WBS            GENERIC_OUTPUT_OptKey  # NON_ROUTED_DELIVERY output by NRD that specifies WBS water DEMAND, the NRD available water SUPPLY, and amount of NRD water CONSUMED
    #
@@ -1203,12 +1203,15 @@ BEGIN SUPPLY_WELL
    # OUTPUT OPTIONS (optional)
    #    The following keywords result in an output file that contains information about the SUPPLY_WELLs
    #
-   PRINT BYWELL      GENERIC_OUTPUT_OptKey   # Summary Supply Well output for each active well
-   PRINT ByWBS       GENERIC_OUTPUT_OptKey   # Summary Supply Well output by WBS
-   PRINT ByMNW       GENERIC_OUTPUT_OptKey   # Summary Supply Well output for or MNW2-Linked Wells
-   PRINT LIST                                # Echo supply well results to LIST file (not recommended)
-   PRINT INPUT       GENERIC_OUTPUT_OptKey   # Echo supply well input to LIST file
-   PRINT SMOOTHING   GENERIC_OUTPUT_OptKey   # If smoothing is enabled, then output smooth effect to file
+   PRINT BYWELL     GENERIC_OUTPUT_OptKey  # Summarize Supply Well output for each active well
+   PRINT ByWBS      GENERIC_OUTPUT_OptKey  # Summarize Supply Well output by WBS
+   PRINT ByMNW      GENERIC_OUTPUT_OptKey  # Summarize Supply Well output for or MNW2-Linked Wells
+   PRINT LIST                              # Echo supply well results to LIST file (not recommended)
+   PRINT INPUT      GENERIC_OUTPUT_OptKey  # Echo supply well input to LIST file
+   PRINT SMOOTHING  GENERIC_OUTPUT_OptKey  # If smoothing is enabled, then output smooth effect to file
+   #
+   PRINT BYWBS_BYLAYER  GENERIC_OUTPUT_OptKey  # Summarize by WBS the pumping in and out of each model layer
+                                               #    from FMP, MNW2, and WEL Packages
    #
    # ------------------------------------------------------------------------------------------------------------------
    #

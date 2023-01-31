@@ -115,6 +115,7 @@ MODULE WELL_DATA_FMP_MODULE
       INTEGER,                                            POINTER:: IOUT        => NULL()
       INTEGER,                                            POINTER:: NFARM       => NULL()
       TYPE(GENERIC_OUTPUT_FILE),                          POINTER:: OUT_INPUT   => NULL()  !THIS WILL POINT TO GLOBAL OUTPUT FILE
+      TYPE(GENERIC_OUTPUT_FILE),                          POINTER:: OUT_BYLAYER => NULL()  !THIS WILL POINT TO GLOBAL OUTPUT FILE
       TYPE(GENERIC_OUTPUT_FILE),                          POINTER:: OUT_BYMNW   => NULL()  !THIS WILL POINT TO GLOBAL OUTPUT FILE
       TYPE(GENERIC_OUTPUT_FILE),                          POINTER:: OUT_BYWELL  => NULL()  !THIS WILL POINT TO GLOBAL OUTPUT FILE
       TYPE(GENERIC_OUTPUT_FILE),                          POINTER:: OUT_BYFARM  => NULL()  !THIS WILL POINT TO GLOBAL OUTPUT FILE
@@ -147,6 +148,7 @@ MODULE WELL_DATA_FMP_MODULE
       PROCEDURE, PASS(FWEL):: PRINT_WELL  => PRINT_WELL_LIST        !()
       PROCEDURE, PASS(FWEL)::                PRINT_SMOOTHED_PUMPING !( KPER, KSTP, TOTIME, DATE )
       PROCEDURE, PASS(FWEL):: PRINT_TO_LIST=>PRINT_DETAILS_TO_LIST  !( KPER, KSTP, TOTIME, DATE )
+      PROCEDURE, PASS(FWEL):: PRINT_BYLAYER=>PRINT_OUT_BYLAYER     !( KPER, KSTP, DELT, DYEAR, DATE )
       PROCEDURE, PASS(FWEL):: PRINT_BYMNW  =>PRINT_OUT_BYMNW        !( KPER, KSTP, DELT, DYEAR, DATE )
       PROCEDURE, PASS(FWEL):: PRINT_BYWELL =>PRINT_OUT_BYWELL       !( KPER, KSTP, DELT, DYEAR, DATE )
       PROCEDURE, PASS(FWEL):: PRINT_BYFARM =>PRINT_OUT_BYFARM       !( KPER, KSTP, DELT, DYEAR, DATE )
@@ -337,6 +339,7 @@ MODULE WELL_DATA_FMP_MODULE
     ! DEALLOCATE INTERNAL INTERNAL GLOBAL VARIABLES
     IF(FWEL%NF == ONE) THEN
                         DEALLOCATE(FWEL%OUT_INPUT   )
+                        DEALLOCATE(FWEL%OUT_BYLAYER )
                         DEALLOCATE(FWEL%OUT_BYMNW   )
                         DEALLOCATE(FWEL%OUT_BYWELL  )
                         DEALLOCATE(FWEL%OUT_BYFARM  )
@@ -355,6 +358,7 @@ MODULE WELL_DATA_FMP_MODULE
     !
     !
     FWEL%OUT_INPUT  => NULL()
+    FWEL%OUT_BYLAYER=> NULL()
     FWEL%OUT_BYMNW  => NULL()
     FWEL%OUT_BYWELL => NULL()
     FWEL%OUT_BYFARM => NULL()
@@ -718,6 +722,7 @@ MODULE WELL_DATA_FMP_MODULE
     ! XXX_DEPOINT(cls) => GFORTRAN compiler error work-around for pointer data type FINAL statement
     IF(ASSOCIATED(FWEL(ONE)%SMOOTH_LIM_BY_LAYER ))  DEALLOCATE(FWEL(ONE)%SMOOTH_LIM_BY_LAYER )
     IF(ASSOCIATED(FWEL(ONE)%OUT_INPUT           ))  CALL GENERIC_OUTPUT_FILE_DEPOINT(FWEL(ONE)%OUT_INPUT )
+    IF(ASSOCIATED(FWEL(ONE)%OUT_BYLAYER         ))  CALL GENERIC_OUTPUT_FILE_DEPOINT(FWEL(ONE)%OUT_BYLAYER)
     IF(ASSOCIATED(FWEL(ONE)%OUT_BYMNW           ))  CALL GENERIC_OUTPUT_FILE_DEPOINT(FWEL(ONE)%OUT_BYMNW)
     IF(ASSOCIATED(FWEL(ONE)%OUT_BYWELL          ))  CALL GENERIC_OUTPUT_FILE_DEPOINT(FWEL(ONE)%OUT_BYWELL)
     IF(ASSOCIATED(FWEL(ONE)%OUT_BYFARM          ))  CALL GENERIC_OUTPUT_FILE_DEPOINT(FWEL(ONE)%OUT_BYFARM)
@@ -900,6 +905,8 @@ MODULE WELL_DATA_FMP_MODULE
                                           CALL FWEL(ONE)%OUT_BYMNW %OPEN(BL%LINE,LLOC,BL%IOUT,BL%IU,BINARY=BINARY,SPLITMAXCOUNT=11)
                         CASE ("BYFARM", "BYWBS")
                                           CALL FWEL(ONE)%OUT_BYFARM%OPEN(BL%LINE,LLOC,BL%IOUT,BL%IU,BINARY=BINARY,SPLITMAXCOUNT=11)
+                        CASE ("BYWBS_BYLAYER", "BYWBSBYLAYER","BYWBSCROP","BYFARM_BYLAYER", "BYFARMBYLAYER")
+                                          CALL FWEL(ONE)%OUT_BYLAYER%OPEN(BL%LINE,LLOC,BL%IOUT,BL%IU,BINARY=BINARY,SPLITMAXCOUNT=11)
                         CASE ("SMOOTHING")
                                           CALL FWEL(ONE)%OUT_SMOOTH%OPEN(BL%LINE,LLOC,BL%IOUT,BL%IU,BINARY=BINARY,SPLITMAXCOUNT=11)
                                                                                                    !
@@ -1257,6 +1264,7 @@ MODULE WELL_DATA_FMP_MODULE
     ALLOCATE(FWEL(ONE)%NFARM,   SOURCE = DIM )
     ALLOCATE(FWEL(ONE)%IOUT, SOURCE = IOUT )
     ALLOCATE(FWEL(ONE)%OUT_INPUT  )
+    ALLOCATE(FWEL(ONE)%OUT_BYLAYER)
     ALLOCATE(FWEL(ONE)%OUT_BYMNW  )
     ALLOCATE(FWEL(ONE)%OUT_BYWELL )
     ALLOCATE(FWEL(ONE)%OUT_BYFARM )
@@ -1269,6 +1277,7 @@ MODULE WELL_DATA_FMP_MODULE
               FWEL(I)%NFARM      => FWEL(ONE)%NFARM
               FWEL(I)%IOUT       => FWEL(ONE)%IOUT      
               FWEL(I)%OUT_INPUT  => FWEL(ONE)%OUT_INPUT 
+              FWEL(I)%OUT_BYLAYER=> FWEL(ONE)%OUT_BYLAYER
               FWEL(I)%OUT_BYMNW  => FWEL(ONE)%OUT_BYMNW
               FWEL(I)%OUT_BYWELL => FWEL(ONE)%OUT_BYWELL
               FWEL(I)%OUT_BYFARM => FWEL(ONE)%OUT_BYFARM
@@ -3576,6 +3585,165 @@ MODULE WELL_DATA_FMP_MODULE
                     END IF
                 END DO
             END IF
+    END IF
+  END SUBROUTINE
+  !
+  IMPURE ELEMENTAL SUBROUTINE PRINT_OUT_BYLAYER(FWEL, KPER, KSTP, DELT, DYEAR, DATE, WBS) 
+    USE GLOBAL,              ONLY: NROW, NCOL, NLAY, IUNIT, IBOUND
+    USE GWFWELMODULE,        ONLY: NWELLS1 => NWELLS, WELL
+    USE GWFWEL2MODULE,       ONLY: NWELLS2 => NWELLS, WELDATA
+    USE GWFMNW2MODULE,       ONLY: WELLID, MNWMAX, MNW2, MNWNOD, MNW_FMP_LINK
+    USE WBS_DATA_FMP_MODULE, ONLY: WBS_DATA
+    CLASS(FARM_WELL_DATA), INTENT(INOUT)::FWEL
+    INTEGER,         INTENT(IN):: KPER, KSTP
+    DOUBLE PRECISION,INTENT(IN):: DELT
+    DOUBLE PRECISION,INTENT(IN):: DYEAR
+    CHARACTER(*),    INTENT(IN):: DATE
+    TYPE(WBS_DATA),  INTENT(IN):: WBS
+    INTEGER:: I, J, IU, FIRSTNODE, LASTNODE
+    INTEGER:: IL, IR, IC, NF
+    INTEGER:: FIRST_NODE, LAST_NODE
+    DOUBLE PRECISION:: Qtmp
+    DOUBLE PRECISION, DIMENSION(NLAY):: FWEL_IN, FWEL_OUT, FMNW_IN, FMNW_OUT, MNW_IN, MNW_OUT, WEL_IN, WEL_OUT
+    CHARACTER(17):: DT, cFWEL_IN, cFWEL_OUT, cFMNW_IN, cFMNW_OUT, cMNW_IN, cMNW_OUT, cWEL_IN, cWEL_OUT
+    logical:: FMP_LINK
+    !
+    IF(FWEL%OUT_BYLAYER%IU == Z) RETURN  !NOTHING TO PRINT OUT
+    !
+    IF(FWEL%NF == ONE) CALL FWEL%OUT_BYLAYER%SIZE_CHECK()  !CHECK SIZE EVERY 10 STRESS PERIODS
+    !
+    IU = FWEL%OUT_BYLAYER%IU
+    !
+    IF(FWEL%OUT_BYLAYER%BINARY) THEN
+                          IF(FWEL%NF == ONE .AND. KPER==ONE .AND. KSTP==ONE) WRITE(FWEL%IOUT,'(A,/A)')'FMP, WEL, AND MWN2 PUMPING BY WBS AND LAYER OUTPUT WRITTEN TO BINARY FILE USING STREAM UNFORMATTED STRUCTURE. EACH THE RECORD IN BINARY HAS THE FOLLOWING STRUCTURE:','DATE_START (19char), DECIMAL YEAR (double), TIME STEP LENGTH (double), STRESS PERIOD (int), TIME STEP (int), FARM ID (int), LAYER (int), FMNW_RATE_IN (double), FMNW_RATE_OUT (double), MNW_RATE_IN (double), MNW_RATE_OUT (double), FWEL_RATE_IN (double), FWEL_RATE_OUT (double), WEL_RATE_IN (double), WEL_RATE_OUT (double)'
+    ELSE
+                          IF(FWEL%NF==ONE .AND. ((KPER==ONE .AND. KSTP==ONE) .OR. FWEL%IOUT==IU) )  THEN
+                              !
+                              IF (FWEL%IOUT==IU) WRITE(IU,*)
+                              !
+                              CALL FWEL%OUT_BYLAYER%SET_HEADER(  '    PER    STP    WBS  LAYER        FMNW_RATE_IN    FMNW_RATE_OUT      MNW_RATE_IN     MNW_RATE_OUT     FWEL_RATE_IN    FWEL_RATE_OUT      WEL_RATE_IN     WEL_RATE_OUT             DELT   DYEAR         DATE_START' )
+                          END IF
+    END IF
+    !
+    FWEL_IN  = DZ
+    FWEL_OUT = DZ
+    FMNW_IN  = DZ
+    FMNW_OUT = DZ
+    MNW_IN   = DZ
+    MNW_OUT  = DZ
+    WEL_IN   = DZ
+    WEL_OUT  = DZ
+    !
+    IF(IUNIT(2) /= Z) THEN  ! WEL is in use
+       DO I=1, NWELLS2
+          IL = WELDATA(I)%LAY
+          IR = WELDATA(I)%ROW
+          IC = WELDATA(I)%COL
+          Qtmp=WELDATA(I)%VAL(1)
+          !
+          IF(FWEL%NF == WBS%FID_ARRAY(IC, IR) .AND. IBOUND(IC,IR,IL) > Z) THEN
+              IF(Qtmp < DZ) THEN
+                   WEL_OUT(IL) = WEL_OUT(IL) - Qtmp
+              ELSE
+                   WEL_IN(IL)  = WEL_IN(IL)  + Qtmp
+              END IF
+          END IF
+       END DO
+    END IF
+    !
+    IF(IUNIT(67) /= Z) THEN  ! WEL1 is in use
+       DO I=1, NWELLS1
+          IL = WELL(1,I)
+          IR = WELL(2,I)
+          IC = WELL(3,I)
+          Qtmp=WELL(4,I)
+          !
+          IF(FWEL%NF == WBS%FID_ARRAY(IC, IR) .AND. IBOUND(IC,IR,IL) > Z) THEN
+              IF(Qtmp < DZ) THEN
+                   WEL_OUT(IL) = WEL_OUT(IL) - Qtmp
+              ELSE
+                   WEL_IN(IL)  = WEL_IN(IL)  + Qtmp
+              END IF
+          END IF
+       END DO
+    END IF
+    !
+    IF(IUNIT(50) /= Z) THEN  ! MNW2 is in use
+       DO I=ONE, MNWMAX           
+          !
+          IR = NINT( MNWNOD(2,I) )            
+          IC = NINT( MNWNOD(3,I) )
+          !
+          IF(FWEL%NF /= WBS%FID_ARRAY(IC, IR)) CYCLE
+          !
+          FIRST_NODE = NINT( MNW2(4,I) )
+          !
+          IF(MNW2(1,I) >= 0.5D0) THEN
+              LAST_NODE = NINT( MNW2(4,I) + ABS(MNW2(2,I)) - UNO )
+              !
+              FMP_LINK = FALSE
+              !
+              IF(FWEL%MNWLINK) THEN
+                 DO J=1, FWEL%DIM
+                    IF( FWEL%ACT(J) .AND. FWEL%MNWLOC(J) == I ) THEN
+                        FMP_LINK = TRUE
+                        EXIT
+                    END IF
+                 END DO
+              END IF
+              !
+              DO J=FIRST_NODE, LAST_NODE
+                  IL = NINT( MNWNOD(1,J) )
+                  Qtmp = MNWNOD(4,J)
+                  !
+                  IF(FMP_LINK) THEN
+                      IF(Qtmp < DZ) THEN
+                          FMNW_OUT(IL) = FMNW_OUT(IL) - Qtmp
+                      ELSE
+                          FMNW_IN(IL)  = FMNW_IN(IL)  + Qtmp
+                      END IF
+                  ELSEIF(Qtmp < DZ) THEN
+                       MNW_OUT(IL) = MNW_OUT(IL) - Qtmp
+                  ELSE
+                       MNW_IN(IL)  = MNW_IN(IL)  + Qtmp
+                  END IF
+                  !
+              END DO
+          END IF
+       END DO
+    END IF
+    !
+    DO I=1, FWEL%DIM
+       IF( FWEL%ACT(I) .AND. FWEL%MNWLOC(I) == Z ) THEN
+           Qtmp = FWEL%Q(I)
+           IF(Qtmp < DZ) THEN
+                FWEL_OUT(IL) = FWEL_OUT(IL) - Qtmp
+           ELSE
+                FWEL_IN(IL)  = FWEL_IN(IL)  + Qtmp
+           END IF
+       END IF
+    END DO
+    !
+    IF(FWEL%OUT_BYLAYER%BINARY) THEN
+       DO IL=1, NLAY
+           WRITE(IU) DATE, DYEAR, DELT, KPER, KSTP, FWEL%NF, IL, FMNW_IN(IL), FMNW_OUT(IL), MNW_IN(IL), MNW_OUT(IL), FWEL_IN(IL), FWEL_OUT(IL), WEL_IN(IL), WEL_OUT(IL)
+       END DO
+    ELSE
+       DT = NUM2STR(DELT)
+       DT = ADJUSTR(DT)
+       !
+       DO IL=1, NLAY
+           cFWEL_IN  = NUM2STR( FWEL_IN (IL) ); cFWEL_IN  = ADJUSTR(cFWEL_IN )
+           cFWEL_OUT = NUM2STR( FWEL_OUT(IL) ); cFWEL_OUT = ADJUSTR(cFWEL_OUT)
+           cFMNW_IN  = NUM2STR( FMNW_IN (IL) ); cFMNW_IN  = ADJUSTR(cFMNW_IN )
+           cFMNW_OUT = NUM2STR( FMNW_OUT(IL) ); cFMNW_OUT = ADJUSTR(cFMNW_OUT)
+           cMNW_IN   = NUM2STR( MNW_IN  (IL) ); cMNW_IN   = ADJUSTR(cMNW_IN  )
+           cMNW_OUT  = NUM2STR( MNW_OUT (IL) ); cMNW_OUT  = ADJUSTR(cMNW_OUT )
+           cWEL_IN   = NUM2STR( WEL_IN  (IL) ); cWEL_IN   = ADJUSTR(cWEL_IN  )
+           cWEL_OUT  = NUM2STR( WEL_OUT (IL) ); cWEL_OUT  = ADJUSTR(cWEL_OUT )
+           !
+           WRITE(IU, '(4I7, 3x,8A, A, 2x,F13.7, 2x,A)') KPER, KSTP, FWEL%NF, IL, cFMNW_IN, cFMNW_OUT, cMNW_IN, cMNW_OUT, cFWEL_IN, cFWEL_OUT, cWEL_IN, cWEL_OUT, DT, DYEAR, DATE
+       END DO
     END IF
   END SUBROUTINE
   !
