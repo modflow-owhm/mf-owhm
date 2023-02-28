@@ -10,7 +10,7 @@
 #
 BEGIN OPTIONS
     #
-    # Run model but don't solve gw equation to cycle through all input files 
+    # Run model but don't solve gw equation to cycle through all input files
  ###INPUT_CHECK
     #
     # Has the same effect as including the "COMPACT BUDGET" in the Output Control (OC) package

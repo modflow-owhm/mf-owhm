@@ -1,4 +1,4 @@
-# CBC_UNIT
+# 
 # Listing of all available Options for the BAS package
 #
 # Options are grouped based on common usage or when only one should be selected
@@ -32,7 +32,7 @@ BEGIN OPTIONS
     #   Useful to hold terminal window open after simulation is complete, BUT bad for automatic calibration.
     PAUSE
     #
-    # Run model but don't solve gw equation to cycle through all input files 
+    # Run model but don't solve gw equation to cycle through all input files
     INPUT_CHECK
     #
     #  Run model from Stress Period (or Date) STR to STP.
