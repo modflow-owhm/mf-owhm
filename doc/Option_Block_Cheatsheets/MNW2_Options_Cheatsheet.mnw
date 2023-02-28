@@ -20,12 +20,14 @@ BEGIN OPTIONS
     #Similar to previous output, but includes total groundwater flow into the well and out of the well
     PRINT_WELL_INOUT      GENERIC_OUTPUT                      # MNW2_INOUT.txt
     #
-    # Prints each well's desired pumping rate and each of its nodes flow rates
+    # Prints each well's desired pumping rate and each of its nodes flow rates by column
+    #    - Note it is recommended to use PRINT_NODE_INFO instead; it has the same information in a computer friendly format
     PRINT_WELL_NODE_FLOW  GENERIC_OUTPUT                      # MNW2_Node_Flow.txt
     #
-    # Prints each well's node flow rate between the node and model cell, the node's well head, cell's head, and conductance.
+    # Prints each well's node flow rate between the node and model cell, the node's layer, row, col, 
+    #    the node's well head, cell's head, and conductance.
     #    The well head is either the entire well's head value or the cell's bottom elevation.
-    PRINT_NODE_INFO       GENERIC_OUTPUT                      # MNW2_Node_Info.txt   #Head and Cond by Node
+    PRINT_NODE_INFO       GENERIC_OUTPUT                      # MNW2_Node_Info.txt   #Pump, Head, Cond, Lay, Row, Col by Node
     #
     # Advanced Options ------------------------------------------------------------------------------------------------------------------------------
     #
