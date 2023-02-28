@@ -1419,6 +1419,8 @@ BEGIN LAND_USE
    #  The input may either expect at most one land use per surface model cell
    #    or allow for multiple land use types per surface model cell.
    #
+   # This section uses the words "land use" and "crop" interchangeably (they repesent the same thing)
+   #
    # ------------------------------------------------------------------------------------------------------------------
    #
    #  The keywords
@@ -1442,16 +1444,23 @@ BEGIN LAND_USE
    #
    LOCATION LAI[S,T,A]
    #
-   # If MULTIPLE_LAND_USE_PER_CELL then it is required to specify LAND_USE_AREA_FRACTION
-   #  which indicates the portion of each model cell that each crop uses/its area.
-   #  If SINGLE_LAND_USE_PER_CELL is specified then LAND_USE_AREA_FRACTION is optional an specifies
-   #    the area that the land use covers for that specific surface cell and the rest is considered bare/fallow land
+   # If MULTIPLE_LAND_USE_PER_CELL is specified, then it is required to specify LAND_USE_AREA_FRACTION
+   #   which identifies the model cell location for each land use and the area it occupies.
+   #   If the sum of all the crop fractions for a cell exceeds 1, then the crop fraction for hat cell are scaled to equal 1.
+   #   If the sum of all the crop fractions are less than 1, then the undefined area is set to bare soil.
+   #     -> Only Array-Style input is supported.
+   # 
+   # If SINGLE_LAND_USE_PER_CELL is specified, then LAND_USE_AREA_FRACTION is optional and 
+   #   specifies the area that the land use covers and the rest is considered bare/fallow land.
+   #   If not specified, then where ever LOCATION has a crop identified (>0) uses 1.0 as the fraction (crop occupies entire cell).
+   #     -> List-Style and Array-Style input are supported.
    #
-   #  MULTIPLE_LAND_USE_PER_CELL => NCROP*NROW by NCOL Float array with numbers from 0.0 to 1.0,
-   #                                                         sum from all crops for a specific Row/Column
-   #                                                         can be at most 1.0, if less then 1.0 the remaining portion is assumed bare/fallowed land
-   #  SINGLE_LAND_USE_PER_CELL   =>       NROW by NCOL Float array with numbers from 0.0 to 1.0,
-   #                                                         if fraction is less then 1.0 then the remaining portion is assumed bare/fallowed land
+   # Array-Style input size:
+   #   MULTIPLE_LAND_USE_PER_CELL => NCROP*NROW by NCOL Float array with numbers from 0.0 to 1.0,
+   #                                                          sum from all crops for a specific Row/Column
+   #                                                          can be at most 1.0, if less then 1.0 the remaining portion is assumed bare/fallowed land
+   #   SINGLE_LAND_USE_PER_CELL   =>       NROW by NCOL Float array with numbers from 0.0 to 1.0,
+   #                                                          if fraction is less then 1.0 then the remaining portion is assumed bare/fallowed land
    LAND_USE_AREA_FRACTION LAI[S,T,A,L]
    #
    # ------------------------------------------------------------------------------------------------------------------
@@ -1489,9 +1498,10 @@ BEGIN LAND_USE
    #
    # Potential Consumptive Use CU = CF + Kc*ETref
    #    If not specified then set to zero.
-   #    If CU = 0.0, then land is assumed to be bare/fallow,
-   #    so all precipitation either becomes runoff or deep percolation
-   #    and groundwater evaporation is determined from (in order of priority):
+   #    If CU = 0.0, then no consumption is possible and the crop is treated as if it is scraped clean earth.
+   #    All precipitation either becomes runoff or deep percolation.
+   #    If specify the ZERO_CONSUMPTIVE_USE_BECOMES_BARE_SOIL option,
+   #    then groundwater evaporation will occur with a potential rate set to (in order of priority):
    #        1) If POTENTIAL_EVAPORATION_BARE is provided, it is used as the potential evaporation of groundwater underneath the bare soil
    #        2) If REFERENCE_ET               is provided, it is used as the potential evaporation of groundwater underneath the bare soil
    #        3) There is no groundwater evaporation
@@ -1571,6 +1581,8 @@ BEGIN LAND_USE
    #        forces FMP to correct FEI + FTR > 1 by setting FEI = 1 - FTR (Not Recommended)
    #
    #      Optionally, BY_CROP or BY_IRRIGATE may be specified after EVAPORATION_IRRIGATION_FRACTION
+   #        to indicate the number of records that read with List-Style and how they are applied.
+   #        The keywords are ignored if the input uses Array-Style input (as input is applied spatially and not by record).
    #
    #        EVAPORATION_IRRIGATION_FRACTION BY_CROP indicates that
    #           List-Style input expects NCROP records and applies them by crop type
@@ -1579,15 +1591,15 @@ BEGIN LAND_USE
    #           List-Style input expects NIRRIGATE records and applies them
    #           by each crop's irrigation type defined with the IRRIGATION keyword
    #
-   #        If BY_CROP or BY_IRRIGATE is not specified then the input assumes List-Style
-   #           is NCROP records (same as specifying BY_CROP)
+   #        If BY_CROP or BY_IRRIGATE is not specified and the input uses List-Style,
+   #           then the default is to read NCROP records (same as specifying BY_CROP)
    #
    #       If FEI = -1, then it is recalculated as FEI = 1 - FTR
    #
    EVAPORATION_IRRIGATION_FRACTION  [{BY_CROP, BY_IRRIGATE}]  LAI[S,T,A,L]
    #
    #
-   # Any precipitation not consumed by the crop either becomes an inefficient loss.
+   # Any precipitation not consumed by the crop becomes an inefficient loss.
    #     The inefficient loss becomes either runoff or deep percolation.
    #
    # SURFACEWATER_LOSS_FRACTION_PRECIPITATION indicates
@@ -1607,6 +1619,8 @@ BEGIN LAND_USE
    #     (e.g. 0.75 indicates 75% of extra irrigation becomes surface runoff)
    #
    #      Optionally, BY_CROP or BY_IRRIGATE may be specified after SURFACEWATER_LOSS_FRACTION_IRRIGATION
+   #        to indicate the number of records that read with List-Style and how they are applied.
+   #        The keywords are ignored if the input uses Array-Style input (as input is applied spatially and not by record).
    #
    #        If the keyword is SURFACEWATER_LOSS_FRACTION_IRRIGATION BY_CROP,
    #           then List-Style input expects NCROP records and applies them by crop type
@@ -1615,8 +1629,8 @@ BEGIN LAND_USE
    #           then List-Style input expects NIRRIGATE records and
    #           applies them by each crops irrigation type defined with the IRRIGATION keyword
    #
-   #        If BY_CROP or BY_IRRIGATE is not specified then the input assumes List-Style
-   #           is NCROP records (same as specifying BY_CROP)
+   #        If BY_CROP or BY_IRRIGATE is not specified and the input uses List-Style,
+   #           then the default is to read NCROP records (same as specifying BY_CROP)
    #
    SURFACEWATER_LOSS_FRACTION_IRRIGATION [{BY_CROP, BY_IRRIGATE}]   LAI[S,T,A,L]
    #
@@ -1639,11 +1653,11 @@ BEGIN LAND_USE
    # demanded water only becomes surface runoff or deep percolation
    # based on the fraction specified in the WBS Block "ADDED_DEMAND_RUNOFF_SPLIT"
    #
-   # IT may only be specified as a Length per time (LENGTH) or Volume per time (VOLUME).
+   # It may only be specified as a Length per Time (LENGTH or FLUX) or Volume per Time (RATE).
    #
    # The added demand is summed with other added demands (e.g. WBS Block ADDED_CROP_DEMAND)
    #
-   ADDED_DEMAND  {LENGTH,RATE}  LAI[S,T,A,L-NWBS]
+   ADDED_DEMAND  {FLUX, RATE}  LAI[S,T,A,L-NWBS]
    #
    # ------------------------------------------------------------------------------------------------------------------
    #
@@ -1660,8 +1674,8 @@ BEGIN LAND_USE
    # If it is desired to convert CU = 0 to Fallow/Bare soil, then
    #   it is necessary to specify the keyword ZERO_CONSUMPTIVE_USE_BECOMES_BARE_SOIL
    #
-   #   With this keyword, if CF and Kc are set to zero, then CU = 0.5*ETref
-   #   and only evaporation is allowed (FTR = 0). That is it is turned to fallow soil evaporation.
+   #   With this keyword, if CF and Kc are set to zero, then CU = REFERENCE_ET_TO_BARE * ETref or
+   #   CU = POTENTIAL_EVAPORATION_BARE and only groundwater evaporation is allowed.
    #
    #   LAI[S,T,L] is optional. If LAI[S,T,L] is not specified,
    #     then all Crops become bare soil when CU = 0
@@ -1761,12 +1775,17 @@ BEGIN SALINITY_FLUSH_IRRIGATION
    # Keywords that begin with CROP read NCROP records for List-Style
    # Keywords that begin with WBS  read NWBS  records for List-Style
    #
+   # They following keywords are required as part of the input:
+   #    CROP_SALINITY_TOLERANCE
+   #    CROP_LEACHING_REQUIREMENT
+   #    CROP_SALINITY_APPLIED_WATER
+   #
    # ------------------------------------------------------------------------------------------------------------------
    #
    # OUTPUT OPTIONS --All Optional
    #
-   PRINT BYFARM         GENERIC_OUTPUT_OptKey
-   PRINT BYFARM_BYCROP  GENERIC_OUTPUT_OptKey
+   PRINT BYWBS          GENERIC_OUTPUT_OptKey
+   PRINT BYWBS_BYCROP   GENERIC_OUTPUT_OptKey
    PRINT ALL            GENERIC_OUTPUT_OptKey
    PRINT INPUT          GENERIC_OUTPUT_OptKey
    #
@@ -1797,12 +1816,14 @@ BEGIN SALINITY_FLUSH_IRRIGATION
    # The input is read as WBS ID, Non-Routed Delivery (NRD), Surface Water Delivery (SW), Groundwater Pumpage (GW), External Source.
    #   The External Source is only value for WBS Block DEFICIENCY_SCENARIO set to 0,
    #   which indicates external water is brought in to meet deficit demands
+   # If not specified, then all source water supplies use a salt concentration of 0.0 PPM (mg/L).
    #
    WBS_SUPPLY_SALT_CONCENTRATION LAI[S,T,L-4]
    #
    # The irrigation uniformity represents how evenly the
    #   irrigation method is spread across the root zone.
    #   It is specified from 0.0 to 1.0, with 1 being perfect, uniform spread
+   # If not specified, then all irrigation is assumed to be perfectly, uniform (1.0)
    #
    WBS_IRRIGATION_UNIFORMITY LAI[S,T,L-NIRRIGATE]
    #
@@ -1812,12 +1833,13 @@ BEGIN SALINITY_FLUSH_IRRIGATION
    # HAS_CROP_SALINITY_DEMAND is similar to IBOUND, which is an INT and
    # indicates if crop has a salinity irrigation demand calculated
    # If specified as a zero (0), then it does not have it, if it is non-zero then it does.
+   # If keyword is not included, then all crops are assumed to have salinity flushing.
    #
    #   ARRAY input is supported as NROW by NCOL, but if CROP Block LAND_USE_AREA_FRACTION MULTI is used, then it is NCROP*NROW by NCOL (multiple crops per model cell--one array per crop)
    #
    CROP_HAS_SALINITY_DEMAND LAI[S,T,A,L]
    #
-   # Specify each Crops salinity tolerance (ECe) in Electrical Conductivity (EC)
+   # REQUIRED keyword that specifies each Crop's salinity tolerance (ECe) in Electrical Conductivity (EC)
    # in units of deciSiemens per meter (dS/m) ***NOT MODEL UNITS!!!
    #      Note 1 dS/m = 640 ppm = 640 mg/L
    #
@@ -1832,18 +1854,26 @@ BEGIN SALINITY_FLUSH_IRRIGATION
    #
    # ------------------------------------------------------------------------------------------------------------------
    #
+   # Required Keywords:
+   #
    # CROP_LEACHING_REQUIREMENT and CROP_SALINITY_APPLIED_WATER read a NCROP LIST that may be one of the following input:
    #    1) FLOAT     ==> Specify its exact value
    #    2) RHOADES   ==> Indicates that Rhoades equation is used
    #    3) None      ==> Indicates that evaluation is skipped (set to zero)
    #    4) Custom Expression
    #            Specify any equation that has a set of Predefined Variables (See bottom of this file)
-   #            Equation supports keywords and in-line IF as described in Appendix H
    #            Any scale factors that are loaded are applied to the result of the equation
+   #            Equation supports keywords and in-line IF,
+   #                structured as "IF[ Condition, TrueResult, FalseResult ]"
+   #                  where
+   #                    Condition   is a conditional expression supported by OWHM
+   #                    TrueResult  is the result that is returned in Cond is TRUE (may be an expression)
+   #                    FalseResult is the result that is returned in Cond is FALSE (may be an expression)
+   #
    #                 Example Custom Expressions:
-   #                         ECw/(5*ECe - ECw)         # <= RHOADS equation
-   #                         (ETi/DU)/(1-LR) - ETi     # <= RHOADS equation
-   #                         IF[ ETc > ETr, (ECe/ECw)*LOG(CIR) + CIR, 0.1*CIR ]
+   #                         ECw/(5*ECe - ECw)         # <= Custom expression equivalent to RHOADS equation for calculating the Leaching Requirement (LR)
+   #                         (ETi/DU)/(1-LR) - ETi     # <= Custom expression equivalent to RHOADS equation for calculating the Applied Water (AW)
+   #                         IF[ ETc > ETr, (ECe/ECw)*LOG(CIR) + CIR, 0.1*CIR ]  #  <= Example of an in-line IF
    #
    #  CROP_LEACHING_REQUIREMENT is calculated first to specify a
    #    Crop's leaching requirement that is between 0.0 and MAX_LEACHING_REQUIREMENT
@@ -1893,7 +1923,7 @@ BEGIN SURFACE_WATER_OPERATIONS
    #
    # Due to the length of the Surface Water Operations input file,
    # it is recommended to build the input data set in a separate file and use BLOCK_INCLUDE
-   # to insert the text into the FMP 
+   # to insert the text into the FMP
    #
    BLOCK_INCLUDE  SWO_Template.swo
    #
