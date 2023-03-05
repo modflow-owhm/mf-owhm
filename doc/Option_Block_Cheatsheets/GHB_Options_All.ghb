@@ -1,0 +1,165 @@
+#
+# Listing of all available Options for the GHB package
+#   and other supported block input options.
+#
+# These blocks are all optional, and when not present, or empty, are not applied to the simulation.
+#
+# Options are grouped based on common usage or when only one should be selected
+#
+# The Option block is placed at the start of the GHB package input after the Parameter Declaration statement if used.
+#    If there are multiple block style inputs (BEGIN/END), the order of the blocks does not matter.
+#
+BEGIN OPTIONS
+    #
+    # If present, GHB input is not echoed to the LISTing file. 
+    NOPRINT
+    #
+    # Defines IGHBCB, the GHB Cell-By-Cell (CBC) unit number. 
+    #    - Note that IGHBCB is not read if option is specified.
+    GHB_CBC   INT
+    #
+    # Specifies that GHB TabFiles write additional information to the LIST file.
+    TABPRINT     #
+    #
+    # Output Files ----------------------------------------------------------------------------------------------------------------------------------
+    #   Generic_Output is a place holder for the output file location.
+    #   The file name that is commented to the right is the recommended name.
+    #   Example use:
+    #               DBFILE   ./output/package_flow_budget.txt
+    #
+    # Print the GHB flows in a column based format (database friendly).
+    DBFILE               Generic_Output          # package_flow_budget.txt
+    #
+    # Writes for the specified GHB BGROUP the boundary flow to Generic_Output. 
+    #    BGROUP must  be defined in the BEGIN BUDGET_GROUP block.
+    BUDGET_GROUP_OUTPUT  BGROUP  Generic_Output  # ghb_flow_BGROP.txt
+    #
+    # AUXILIARY -------------------------------------------------------------------------------------------------------------------------------------
+    #
+    # OWHM v2 specific auxiliary values that are read with input.
+    #   AuxName is the specific auxiliary value that is read (eg, FLOW_PACK_COND).
+    #      AUXILIARY  AuxName
+    #      AUX        AuxName
+    #
+    #   When AUX is present, the GHB input reads an additional integer flag called "xyz". 
+    #   The order the AUX options are specified are the order the integer flags are read.
+    #   For example,
+    #               AUX FLOW_PACK_COND
+    #               AUX VARIABLE_CONDUCTANCE
+    #   indicates that two integer flags are read for "xyz" and the first int is for FLOW_PACK_COND and the second is for VARIABLE_CONDUCTANCE.
+    #
+    #   The location of the xyz is at the following input location (the bracket [] indicate it is optional):
+    #      Layer Row Column Bhead Cond [BGROUP] [xyz] [TABNAM TSFAC [TAB_EQN]]
+    #
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #
+    # If present, then the GHB conductance is calculated from the flow package (eg, LPF) hydraulic conductivity (HK). 
+    # The GHB conductance (Cond) is still read and is multiplied with the calculated conductance (that is, it becomes a scale factor).
+    #   Set Cond to 1.0 if you want to use the calculated conductance.
+    #   Note that if the layer is "CONVERTIBLE", then the GHB conductance will vary with saturated thickness.
+    #   The xyz integer indicates the HK direction to use (row, column, vertical).
+    #      xyz:
+    #          0 -> Use the GHB specified conductance (Cond)
+    #          1 -> Use HK in the row    direction (GHB is adjacent to a row)   ; if CONVERTIBLE, vary with saturated thickness
+    #          2 -> Use HK in the column direction (GHB is adjacent to a column); if CONVERTIBLE, vary with saturated thickness
+    #          3 -> Use HK in the vertical direction (that is, VK; GHB is adjacent to the top or bottom of the cell); NEVER varies with saturated thickness
+    #
+    #   If you do not want the GHB conductance to vary with saturated for convertible layers, then just make the flags negative.
+    #   That is, -1 will only use the saturated HK in the row direction.
+    #
+    AUXILIARY FLOW_PACK_COND
+    #
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #
+    # If present, then the GHB conductance varies with saturated thickness 
+    #   for both CONVERTIBLE and CONFINE layers.
+    #   The xyz integer is set to 1 to enable, and 0 to disable this aux.
+    #
+    # It is best not to combine this aux with FLOW_PACK_COND.
+    #   However, if AUXILIARY FLOW_PACK_COND is specified and 
+    #     the FLOW_PACK_COND xyz integer is: 
+    #        = 0, then VARIABLE_CONDUCTANCE decides what happens
+    #        > 0, then FLOW_PACK_COND       decides what happens
+    #        < 0, then VARIABLE_CONDUCTANCE decides what happens
+    #
+    AUXILIARY VARIABLE_CONDUCTANCE
+    #
+END OPTIONS
+#
+# /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
+#
+# Budget Group Block (optional) - Splitting a GHB Budget Information into Subgroups
+#    See MODFLOW-OWHM v2 Report, Appendix 3, Budget Groups for more detail: https://doi.org/10.3133/tm6A60
+#
+# Allows grouping GHB cells into separate budgets. MODFLOW-OWHM will treat
+# each group as if it is a separate package for volumetric budgets.
+#
+# That is, instead of writing to the "VOLUMETRIC BUDGET FOR ENTIRE MODEL" the GHB as "HEAD DEP BOUNDS",
+#   it will instead write each BGROUP name. This will also effect the Cell-By-Cell output too.
+#
+# If the BUDGET_GROUPS block is present and contains at least one BGROUP specified,  
+# then BGROUP is not optional input (its required) in:
+#      Layer Row Column Bhead Cond [BGROUP] [xyz] [TABNAM TSFAC [TAB_EQN]]
+#                                                                         (the bracket [] indicate it is optional)
+# BGROUP is the budget group name, up to 16 characters long. 
+# GHB cells (layer, row, col) will agregate their flows to the BGROUP they are associated with.
+# If BUDGET_GROUPS is not defined, then all GHB cells are aggregated with the default name: "HEAD DEP BOUNDS"
+#
+BEGIN BUDGET_GROUP
+                #
+                BGROUP   # Repeat for as many budget group names that should be calculated as part of the volumetric budget .
+                #
+END BUDGET_GROUP
+#
+# /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
+#
+# LineFeed Alternative Input (optional)
+#    To see an example GHB LineFeed please go to "examples\mf-owhm"
+#    See MODFLOW-OWHM v2 Report, Appendix 2, "LineFeed—Alternative Temporal Input" and "LineFeed—GHB Package Input" for more details: https://doi.org/10.3133/tm6A60
+#
+# LineFeed input can be used with the regular input structure or act as a full replacement to the GHB input.
+# If you only use LineFeed, then it is recommended to also include the options block to specify GHB_CBC.
+#
+# Within the LineFeed block, you specify external files that list the GHB cell location (lay, row, col) and conductance (Cond), and optionally the BGROUP and Aux Flags (xyz).
+# GHB cells are specified until the keyword "TEMPORAL INPUT" is encountered. 
+# After that, each line represents the stress period Bhead that is applied to the GHB cells.
+#   If  GHB cell is not in use for a stress period, then set the Bhead to: NaN
+# 
+# The general input structure is:
+# 
+# |--------------------------------------------------------------------------------------------------------------------------------------------------------------------------- 
+# | #  LineFeed FeedFile 
+# |   LAY  ROW  COL  COND     [BGroup]  [xyz]  -> GHB Cell, repeat as needed, note the order defines the columns for the temporal input
+# |   ...
+# |   TEMPORAL INPUT      # Flag to indicate, file now specifies stress period input. Each uncommented line is input for a stress period. If you do not want a GHB to be used in a Stress Period, set the Bhead to: NaN
+# |   Bhead1, Bhead2, ... # Stress Period 1 input, the number of Bhead values read correspond with the number of GHB Cells, the first Bhead is applied to the first GHB Cell specified, 
+# |   Bhead1, Bhead2, ... # Stress Period 2                                                                                 then second to the second, and so forth
+# |   ...
+# |   Bhead1, Bhead2, ... # Stress Period NPER
+# |--------------------------------------------------------------------------------------------------------------------------------------------------------------------------- 
+#
+# An example FeedFile is:
+#
+# |------------------------------------------------------------------------------------------------------|
+# |  # Example Feed File with Budget Group and no Aux; and NPER = 3 and use of NaN to disable GHB_2      |
+# |  # Spatial Section                                                                                   |
+# |  #                                                                                                   |
+# |  Lay Row Col Cond [Bgroup] [xyz]                                                                     |
+# |   1   4   4  100. GHB_SEA       # GHB_1                                                              |
+# |   1   5   3  100. GHB_SEA       # GHB_2                                                              |
+# |   1   2   8  100. GHB_LAKE      # GHB_3                                                              |
+# |   1   2   7  100. GHB_LAKE      # GHB_4                                                              |
+# |  #                                                                                                   |
+# |  TEMPORAL INPUT                                                                                      |
+# |  #                                                                                                   |
+# |  # GHB_1 GHB_2  GHB_3  GHB_4                                                                         |
+# |    5.5   NaN    -0.10  -0.25  # Stress Period 1 -> Note GHB_2 is not simulated until Stress Period 3 |
+# |    5.8   NaN    -0.10  -0.30  # Stress Period 2                                                      |
+# |    5.9   1.05   -0.02  -0.28  # Stress Period 3                                                      |
+# |------------------------------------------------------------------------------------------------------|
+#
+BEGIN LINEFEED
+                #
+                FEED_FILE   # Specified the FeedFile location using Generic_Input, => Repeat as needed, one per line. Multiple FeedFiles allow for dividing up large input in to smaller files. 
+                #
+END LINEFEED
