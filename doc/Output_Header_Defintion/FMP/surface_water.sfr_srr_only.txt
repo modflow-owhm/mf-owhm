@@ -1,0 +1,108 @@
+
+PRINT SFR_SRR_ONLY Output file from FMP SURFACE_WATER Block
+
+Writes for each time step runoff to SFR output information 
+for semi-routed return reaches (SRR)
+summarized by WBS. 
+
+SRR is defined by the SEMI_ROUTED_RETURN keyword
+and have identification numbers (ISRR) from 1 to NSFR_RETURN.
+
+If the ISRR is set to -1, then the runoff did not 
+have a SFR location and was removed from the model.
+Specifically, the runoff is not applied and assumed 
+to flow outside the modeled domain.
+
+The output may be text or binary format.
+
+If the output file is text format, then it will contain a single header line
+followed by the output written for each time step. If the output file is binary format,
+then each times step writes a binary record containing only the output data.
+
+
+/-------------------------------------\
+|                                     |
+|    Text File Header Definition      |
+|                                     |
+\-------------------------------------/
+
+PER                        is the stress period number
+STP                        is the time step number
+WBS                        is the Water Balance Subregion (Farm) ID number
+SEG                        is the SFR Segment number that received the runoff, if set to zero then runoff was removed from the model and not applied to SFR
+RCH                        is the SFR Reach   number that received the runoff, if set to zero then runoff was removed from the model and not applied to SFR
+RUNOFF            [L3/T]   is the runoff from the WBS that applied to the SFR SEG and RCH.
+SFR_INFLOW        [L3/T]   is the upstream flow into the SEG, RCH
+SFR_OUTFLOW       [L3/T]   is the outflow from the SEG, RCH, including the runoff (Note that SFR_OUTFLOW = SFR_INFLOW + RUNOFF + other gains and losses to the reach)
+DELT              [T]      is the time step length
+DYEAR                      is the date at the end of the time step as a decimal year
+DATE_START                 is the starting calendar date of the time step in the form: yyyy-mm-ddThh:mm:ss
+ISRR                       is the semi-routed return identification number from 1 to NSFR_RETURN (the SRR position in the input)
+                              is set to -1 if the runoff was not applied to SFR and was removed from the model
+
+
+/-------------------------------------\
+|                                     |
+|    Binary File Record Formatting    |
+|                                     |
+\-------------------------------------/
+
+
+DATE_START          CHARACTER(19), starting date formatted as ‘yyyy-mm-ddThh:mm:ss’
+DYEAR               DOUBLE
+DELT                DOUBLE
+PER                 INTEGER
+STP                 INTEGER
+WBS                 INTEGER
+SEG                 INTEGER
+RCH                 INTEGER
+RUNOFF              DOUBLE
+SFR_INFLOW          DOUBLE
+SFR_OUTFLOW         DOUBLE
+ISRR                INTEGER
+
+
+/----------------------------\
+|                            |
+|   Additional Information   |
+|                            |
+\----------------------------/
+
+
+Date output is formatted using ISO 8601-1:2019 standard without a time zone designation:
+https://en.wikipedia.org/wiki/ISO_8601#Combined_date_and_time_representations
+
+The general format is:
+yyyy-mm-ddThh:mm:ss
+                   where:
+                         yyyy is the four digit Gregorian year
+                         mm   before the T is the two digit month number       (01 to 12)
+                         dd   is the two digit day of the month                (01 to {28, 29, 30, 31}, depending on the month)
+                         T    calendar date and 24-hour clock time separator
+                         hh   is the hour within the day                       (00 to 23 hour)
+                         mm   after the T is the two digit minutes in the hour (00 to 59 minute)
+                         ss   is the two digit seconds of the minute           (00 to 59 second)
+
+Output is in model units that uses an
+   L as a place holder for Length, L2 is for area, L3 is for volume and
+   T as a place holder for Time
+
+which are defined in the DIS package as being:
+   L: Feet, Meters, Centimeters, and Undefined
+   T: Seconds, Minutes, Hours, Days, Years, and Undefined
+
+------------------------------------------------------------------------------------------
+
+The MODFLOW-OWHM standard binary formatting is set to
+Fortran Unformatted Stream (C style binary).
+
+The description of each header indicates the Fortran variable
+that is used to write the binary recorded.
+
+The following explain their storage use:
+
+Keyword       Storage      Default Fortran Type  Python Numpy Type       Fortran 2003 Standard
+DOUBLE        8 bytes      Double Precision      numpy.dtype('float64')  REAL(kind=real64)
+INTEGER       4 bytes      Integer               numpy.dtype('int32')    INTEGER(kind=int32)
+CHARACTER(X)  X × 1 bytes  Character(X)          numpy.dtype('SX')       CHARACTER(len=X)
+SNGL          4 bytes      Real                  numpy.dtype('float32')  REAL(kind=real32)

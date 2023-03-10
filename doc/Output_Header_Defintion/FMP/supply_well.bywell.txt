@@ -1,0 +1,121 @@
+
+PRINT ByWELL Output file from FMP SUPPLY_WELL Block
+
+Writes for each time step the FMP Supply Wells location, capacity, desired pumping rate, 
+and actual pumping rate. Only wells that are in use during the time step are printed. 
+Note, that output will include wells that are available for time step, 
+but have zero pumping capacity.
+
+The output may be text or binary format.
+
+If the output file is text format, then it will contain a single header line
+followed by the output written for each time step. If the output file is binary format,
+then each times step writes a binary record containing only the output data.
+
+
+/-------------------------------------\
+|                                     |
+|    Text File Header Definition      |
+|                                     |
+\-------------------------------------/
+
+PER                        is the stress period number
+STP                        is the time step number
+WBS                        is the Water Balance Subregion (Farm) ID number that the FMP supply well provides water to (pumps to meet the WBS demand)
+WELLID                     is the name of the FMP supply well
+Q-CAP-INI         [L3/T]   is the initial FMP supply well’s pumping capacity as specified by the input
+Q-CAP-FIN         [L3/T]   is the finial  FMP supply well’s pumping capacity. This is reduced by the SMOOTH option or the ALLOTMENTS block, but typically equal to Q-CAP-INI.
+Q-ACT             [L3/T]   is the actual  FMP supply well’s pumping rate. This will either be equal to Q-CAP-FIN or the necessary pumpage to meet demand.
+Q-DES-DMD         [L3/T]   is the desired FMP supply well’s pumping rate to meet the WBS demand. This will equal either Q-ACT or the total pumpage needed to meet demand.
+LAY                        is the well's model layer number; it is set to zero if well is linked to MNW2
+ROW                        is the well's model row number
+COL                        is the well's model column number
+DELT              [T]      is the time step length
+DYEAR                      is the date at the end of the time step as a decimal year
+DATE_START                 is the starting calendar date of the time step in the form: yyyy-mm-ddThh:mm:ss
+
+
+/-------------------------------------\
+|                                     |
+|    Binary File Record Formatting    |
+|                                     |
+\-------------------------------------/
+
+
+WELLID              CHARACTER(20)
+LAY                 INTEGER
+ROW                 INTEGER
+COL                 INTEGER
+DATE_START          CHARACTER(19), starting date formatted as ‘yyyy-mm-ddThh:mm:ss’
+DYEAR               DOUBLE
+DELT                DOUBLE
+PER                 INTEGER
+STP                 INTEGER
+WBS                 INTEGER
+Q-CAP-INI           DOUBLE
+Q-CAP-FIN           DOUBLE
+Q-ACT               DOUBLE
+Q-DES-DMD           DOUBLE
+
+
+/----------------------------\
+|                            |
+|   Additional Information   |
+|                            |
+\----------------------------/
+
+
+Date output is formatted using ISO 8601-1:2019 standard without a time zone designation:
+https://en.wikipedia.org/wiki/ISO_8601#Combined_date_and_time_representations
+
+The general format is:
+yyyy-mm-ddThh:mm:ss
+                   where:
+                         yyyy is the four digit Gregorian year
+                         mm   before the T is the two digit month number       (01 to 12)
+                         dd   is the two digit day of the month                (01 to {28, 29, 30, 31}, depending on the month)
+                         T    calendar date and 24-hour clock time separator
+                         hh   is the hour within the day                       (00 to 23 hour)
+                         mm   after the T is the two digit minutes in the hour (00 to 59 minute)
+                         ss   is the two digit seconds of the minute           (00 to 59 second)
+
+Output is in model units that uses an
+   L as a place holder for Length, L2 is for area, L3 is for volume and
+   T as a place holder for Time
+
+which are defined in the DIS package as being:
+   L: Feet, Meters, Centimeters, and Undefined
+   T: Seconds, Minutes, Hours, Days, Years, and Undefined
+
+------------------------------------------------------------------------------------------
+
+The MODFLOW-OWHM standard binary formatting is set to
+Fortran Unformatted Stream (C style binary).
+
+The description of each header indicates the Fortran variable
+that is used to write the binary recorded.
+
+The following explain their storage use:
+
+Keyword       Storage      Default Fortran Type  Python Numpy Type       Fortran 2003 Standard
+DOUBLE        8 bytes      Double Precision      numpy.dtype('float64')  REAL(kind=real64)
+INTEGER       4 bytes      Integer               numpy.dtype('int32')    INTEGER(kind=int32)
+CHARACTER(X)  X × 1 bytes  Character(X)          numpy.dtype('SX')       CHARACTER(len=X)
+SNGL          4 bytes      Real                  numpy.dtype('float32')  REAL(kind=real32)
+
+------------------------------------------------------------------------------------------------------------------------
+
+FMP Supply wells are defined with a start and end date for providing supply to a Water Balance Subregion (WBS).
+The Supply well is considered not available for time steps that occur before the start date and after the end date.
+
+An FMP Supply well can be linked to MNW2. This is done by specifying LAY equal to 0 or MNW2 and the WELLID matches
+to a MNW2 well with the same WELLID. MNW2-linked wells have FMP specify the desired pumping rate (Qdes) based 
+on the WBS demand, then MNW2 determines the actual pumping rate (Qact) based on the aquifer conditions. 
+
+The SUPPY_WELL SMOOTH keyword allows reduction of non-MWN2 linked wells when the water table approaches 
+the bottom of the model cell. This simulates a loss of production capacity due to insufficient water.
+The change in capacity is reflected in the difference between Q-CAP-INI and Q-CAP-FIN.
+
+The ALLOTMENTS block GROUNDWATER allotment keyword specifies a total groundwater pumpage limit. If the
+total pumpage for the WBS reaches the groundwater allotment, then the curtailment that is applied to
+the supply well is reflected in the difference between Q-CAP-INI and Q-CAP-FIN.
