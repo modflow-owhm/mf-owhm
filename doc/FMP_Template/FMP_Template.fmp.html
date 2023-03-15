@@ -1012,11 +1012,18 @@ span {
 </span><span class="sc24">   </span><span class="sc2"># Specify recharge that is sent directly to the bottom of the root zone.
 </span><span class="sc24">   </span><span class="sc2">#  The recharge is not consumed by crops and is treated as deep percolation
 </span><span class="sc24">   </span><span class="sc2">#
-</span><span class="sc24">   </span><span class="sc2">#  The deep percolation is then passed to either UZF or the water table
+</span><span class="sc24">   </span><span class="sc2">#  The deep percolation is then passed to either UZF or the water table.
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2">#  The keyword LENGTH or FLUX indicates that the input is in model units of length (L/T)
 </span><span class="sc24">   </span><span class="sc2">#  The keyword RATE indicates that the input is in volumetric rate                 (L^3/T)
 </span><span class="sc24">   </span><span class="sc2">#     --This feature mimics both the RCH package Infiltration and UZF Recharge.
+</span><span class="sc24">   </span><span class="sc2">#
+</span><span class="sc24">   </span><span class="sc2"># DIRECT_RECHARGE can be specified multiple times and the sum of the recharge arrays 
+</span><span class="sc24">   </span><span class="sc2"># are applied to deep percolation. That is you can have something like:
+</span><span class="sc24">   </span><span class="sc2">#       DIRECT_RECHARGE  FLUX  STATIC ARRAY OPEN/CLOSE rch1.txt
+</span><span class="sc24">   </span><span class="sc2">#       DIRECT_RECHARGE  FLUX  STATIC ARRAY OPEN/CLOSE rch2.txt
+</span><span class="sc24">   </span><span class="sc2">#       DIRECT_RECHARGE  RATE  STATIC ARRAY OPEN/CLOSE rch3.txt
+</span><span class="sc24">   </span><span class="sc2"># and sum from the arrays read in from rch1.txt, rch2.txt, rch3.txt is applied to deep percolation.
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc6">DIRECT_RECHARGE</span><span class="sc24">  </span><span class="sc12">{</span><span class="sc7">FLUX</span><span class="sc12">,</span><span class="sc24"> </span><span class="sc7">RATE</span><span class="sc12">}</span><span class="sc24">  </span><span class="sc7">LAI</span><span class="sc12">[</span><span class="sc0">S</span><span class="sc12">,</span><span class="sc0">T</span><span class="sc12">,</span><span class="sc0">A</span><span class="sc12">]</span><span class="sc24">
    </span><span class="sc2">#

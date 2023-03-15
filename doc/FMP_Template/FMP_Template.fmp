@@ -957,11 +957,18 @@ BEGIN CLIMATE
    # Specify recharge that is sent directly to the bottom of the root zone.
    #  The recharge is not consumed by crops and is treated as deep percolation
    #
-   #  The deep percolation is then passed to either UZF or the water table
+   #  The deep percolation is then passed to either UZF or the water table.
    #
    #  The keyword LENGTH or FLUX indicates that the input is in model units of length (L/T)
    #  The keyword RATE indicates that the input is in volumetric rate                 (L^3/T)
    #     --This feature mimics both the RCH package Infiltration and UZF Recharge.
+   #
+   # DIRECT_RECHARGE can be specified multiple times and the sum of the recharge arrays 
+   # are applied to deep percolation. That is you can have something like:
+   #       DIRECT_RECHARGE  FLUX  STATIC ARRAY OPEN/CLOSE rch1.txt
+   #       DIRECT_RECHARGE  FLUX  STATIC ARRAY OPEN/CLOSE rch2.txt
+   #       DIRECT_RECHARGE  RATE  STATIC ARRAY OPEN/CLOSE rch3.txt
+   # and sum from the arrays read in from rch1.txt, rch2.txt, rch3.txt is applied to deep percolation.
    #
    DIRECT_RECHARGE  {FLUX, RATE}  LAI[S,T,A]
    #

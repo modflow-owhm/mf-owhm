@@ -902,17 +902,20 @@ MODULE WBS_DATA_FMP_MODULE
     !
   END SUBROUTINE
   !
-  PURE SUBROUTINE SUM_WBS_DIRECT_RECHARGE(WBS, DRCH)
-    CLASS(WBS_DATA),                 INTENT(INOUT):: WBS
-    CLASS(COMPRESSED_VALUE_STORAGE), INTENT(IN   ):: DRCH
-    INTEGER:: F,K
+  PURE SUBROUTINE SUM_WBS_DIRECT_RECHARGE(WBS, NDRCH, DRCH)
+    CLASS(WBS_DATA),                                   INTENT(INOUT):: WBS
+    INTEGER,                                           INTENT(IN   ):: NDRCH
+    CLASS(COMPRESSED_VALUE_STORAGE), DIMENSION(NDRCH), INTENT(IN   ):: DRCH
+    INTEGER:: F,I,K
     !
     WBS%TOT_DIR_RCH   = DZ
     !
-    DO CONCURRENT (K=ONE:DRCH%N)
-                               F = WBS%FID_ARRAY( DRCH%DIM(ONE,K), DRCH%DIM(TWO,K) )
-                               !
-                               IF( F > Z) WBS%TOT_DIR_RCH(F) = WBS%TOT_DIR_RCH(F) + DRCH%VAL(K)
+    DO I=ONE, NDRCH
+       DO K=ONE, DRCH(I)%N
+                                  F = WBS%FID_ARRAY( DRCH(I)%DIM(ONE,K), DRCH(I)%DIM(TWO,K) )
+                                  !
+                                  IF( F > Z) WBS%TOT_DIR_RCH(F) = WBS%TOT_DIR_RCH(F) + DRCH(I)%VAL(K)
+       END DO
     END DO
     !
   END SUBROUTINE
