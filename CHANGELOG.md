@@ -4,7 +4,7 @@
 
 **[New Feature Changelog](CHANGELOG_Features.md)**
 
-Boyce, S.E., 2022, MODFLOW One-Water Hydrologic Flow Model (MF-OWHM) Conjunctive Use and Integrated Hydrologic Flow Modeling Software, version X.Y.Z: U.S. Geological Survey Software Release, https://doi.org/10.5066/P9P8I8GS
+Boyce, S.E., 2023, MODFLOW One-Water Hydrologic Flow Model (MF-OWHM) Conjunctive Use and Integrated Hydrologic Flow Modeling Software, version X.Y.Z: U.S. Geological Survey Software Release, https://doi.org/10.5066/P9P8I8GS
 
 Boyce, S.E., Hanson, R.T., Ferguson, I., Schmid, W., Henson, W., Reimann, T., Mehl, S.M., and Earll, M.M., 2020, One-Water Hydrologic Flow Model: A MODFLOW based conjunctive-use simulation software: U.S. Geological Survey Techniques and Methods 6–A60, 435 p., https://doi.org/10.3133/tm6A60
 
@@ -18,9 +18,11 @@ Boyce, S.E., Hanson, R.T., Ferguson, I., Schmid, W., Henson, W., Reimann, T., Me
 
 &nbsp;
 
-## 2.3.0a
+## 2.3.0
 
-TBA
+2023-4-23
+
+git commit log: `git log 9d9f5b50c77a03b538e4ec818f5a67e7bcf3e5ea..HEAD`
 
 ### HYDFMT v1.2
 
@@ -38,6 +40,11 @@ See [CHANGELOG_Features.md](CHANGELOG_Features.md#2.1.1) for a listing of new Zo
 - `NWT` Solver version 1.3 source code merged
     - Obtained from: https://water.usgs.gov/water-resources/software/MODFLOW-NWT/MODFLOW-NWT_1.3.0.zip
 
+### Merge ⯬ BiF v1.2.0
+
+- Batteries Included Fortran (BiF) version 1.2.0 source code merged.
+    - https://code.usgs.gov/fortran/bif/-/tags/1.2.0
+
 ### Fixed
 
 * `FMP` Bug Fixes
@@ -54,29 +61,40 @@ See [CHANGELOG_Features.md](CHANGELOG_Features.md#2.1.1) for a listing of new Zo
         The code now reflects this flexibility.
     * Fixed errors when NOT including the `LAND_USE` block in the input and:
       * `CLIMATE` block specified `REFERENCE_ET` to result in bare soil evaporative fallback calculations (fixed allocation error).
-      * 
+      * Raise an error when `NCROP > 0`
+    * Fixed errors with FMP `LAND_USE` block and Bare Soil:
+      * Improved logic for bare soil evaporation when `NCROP = 0`
     
-* Surface Water Operations (`SWO`) fixed an index error that occurs when the Slang input does not declare any required flow variables.
+* Surface Water Operations (`SWO`) 
+  
+  * Fixed an index error that occurs when the Slang input does not declare any required flow variables.
+  
+  * Budget routine missing initialization for 3 diversion accounting variables. 
   
 * `BAS` Options Fixes
-  
+
     *  `PRINT_HEAD`, `PRINT_WATER_TABLE`, and `PRINT_WATER_DEPTH` no longer sorts the stress period and time step (`SPTS`).
         * In `MODULE BAS_OPTIONS_AND_STARTDATE`, if multiple `PRINT_HEAD`, `PRINT_WATER_TABLE`, or `PRINT_WATER_DEPTH` keywords are included to indicate output for different `SPTS`, then they would be sorted by stress period and time step. However, this only slowed the runtime rather than improved it.
-    
-    * `PRINT_WATER_TABLE` and `PRINT_WATER_DEPTH` file header write error.
+
+    *  `PRINT_WATER_TABLE` and `PRINT_WATER_DEPTH` file header write error.
         * In `bas.f` the subroutine `GWF2BAS7OT` checks if `PRINT_WATER_TABLE` and/or `PRINT_WATER_DEPTH` options are in use and if the corresponding arrays should be written to a file for the stress period and time step that just finished. While writing the header to the output, the code would use the file unit number associated with `PRINT_HEAD` option, which would either put an extra header in those files or raise a random access violation error.
-    
+    *  Convergence output files changed date format to ISO Standard. This effects the following options:
+        *  `PRINT_ITERATION_INFO`
+        *  `PRINT_CONVERGENCE`
+        *  `PRINT_FLOW_RESIDUAL`
+        *  `PRINT_RELATIVE_VOLUME_ERROR`
+
 * `SWR` Bug Fixes
 
     * Reach ending layer assignment is set to 1 if the elevation is above the top of layer 1 and set to `NLAY` if it is below the bottom of `NLAY`. Previously, this situation resulted in the layer assignment being undefined.
     * The code block that updates the number of QAQ connections (`NQAQCONN`) was specified too early in the code. The `CQAQCONN` loop was moved to the correct location.
-    
+
 * `NWT` Bug Fixes
 
     * Isolated model cells (that is surrounded by `IBOUND=0` cells) were previously set `HDRY` and the  `IBOUND` changed to zero. To be consistent with other flow packages, the head value is instead changed to `HNOFLO`.
       
     * `SUBROUTINE XMD7DA` added declaration for `IGRID` argument rather than using implicit typing.
-    
+
     * `xmd_lib.f` reorder declaring variables.
       
       * Several routines in `xmd_lib.f` declare the subroutine arguments after local variables. Most compilers work around this, but it can cause strange effects for arguments that represent local array dimensions.
@@ -97,7 +115,13 @@ See [CHANGELOG_Features.md](CHANGELOG_Features.md#2.1.1) for a listing of new Zo
         ```
 
 
+* `HOB` requires drawdown observations to be in chronological order or an error is raised. 
+  
+
+    * Either the user will need to fix the order or change the observation order or change to head observations.
+
 * `MULT` Bug Fixes
+
     * `ExpressionParser` inline `IF` conditional index error.
 
         * If the `ExpressionParser` solved an expression within an inline `IF` that did not result in all the values being True or all False (that is changing the entire array), then an index error was raised.
@@ -129,6 +153,7 @@ See [CHANGELOG_Features.md](CHANGELOG_Features.md#2.1.1) for a listing of new Zo
 ### Refactoring
 
 * `LPF` and `UPW` expanded comment support by using MF-OWHM read utilities.
+  
     * Provides better error and warning messages for bad input.
     * Input allows comments and empty lines.
       * This mainly effected when properties were defined by parameters and   
@@ -139,6 +164,9 @@ See [CHANGELOG_Features.md](CHANGELOG_Features.md#2.1.1) for a listing of new Zo
         `CALL READ_TO_DATA(LINE, IN, IOUT)`  
         `LLOC = 1`  
         `CALL GET_INTEGER(LINE, LLOC, ISTART, ISTOP, IOUT, IN, LAYFLG(1,K), ...` 
+    * `DIS` improved end of file error message when not enough stress period information is specified.
+    
+* `FMP` `CLIMATE` Block refactored code to allow specifying `DIRECT_RECHARGE` multiple times and the sum of the recharge arrays are applied to deep percolation.
 
 * `main.f90` white space cleanup and reordering of `HYD` subroutine calls.
 
@@ -230,6 +258,8 @@ See [CHANGELOG_Features.md](CHANGELOG_Features.md#2.1.1) for a listing of new Zo
 ## 2.2.0
 
 2022-01-20
+
+git commit log: `git log 4bfb023b3a0f18d8a53a35146f85a93528d6ddd0..9d9f5b50c77a03b538e4ec818f5a67e7bcf3e5ea` 
 
 ### ZoneBudget v3.2
 
@@ -383,6 +413,8 @@ Initial release of MODFLOW Surface Water Operations (`SWO`) in MF-OWHM
   simulating large-scale surface water management in MODFLOW-based hydrologic models:  
   Denver, Colo., Bureau of Reclamation Technical Memorandum no. 86-68210–2016-02, 96 p.
 
+git commit log: `git log d8ec82ae504a2aaec594ccd576f8674961f59404..4bfb023b3a0f18d8a53a35146f85a93528d6ddd0`
+
 ### Fixed
 
 * `UZF` incorrectly set `ZEROD9 = 1.0d0-9`, now it is `1.0d-9` (that is, it was set to -8 and now it is 10<sup>-9</sup>).
@@ -418,6 +450,8 @@ Initial release of MODFLOW Surface Water Operations (`SWO`) in MF-OWHM
 
 2021-05-25
 
+git commit log: `git log 3adf1e3b8e634d83b8296fd673b3e3360a5cae06..d8ec82ae504a2aaec594ccd576f8674961f59404` 
+
 ### Fixed
 
 * Improvement on warning and error messages in `MNW2`, `UPW`, and `NWT` packages.
@@ -429,6 +463,9 @@ Initial release of MODFLOW Surface Water Operations (`SWO`) in MF-OWHM
 ## 2.0.2
 
 2021-05-15
+
+git commit log: `git log 12b331ce38c47a7e88f7da234c189ffa585d637a..3adf1e3b8e634d83b8296fd673b3e3360a5cae06`  
+or web view at: https://code.usgs.gov/modflow/mf-owhm/-/compare/2.0.1..2.0.2
 
 ### Merge ⯬ BiF v1.0.1
 
@@ -456,6 +493,8 @@ Initial release of MODFLOW Surface Water Operations (`SWO`) in MF-OWHM
 ## 2.0.1
 
 2021-03-15
+
+git commit log: `git log 12b331ce38c47a7e88f7da234c189ffa585d637a`
 
 ### Merge ⯬ MF-NWT v1.2
 

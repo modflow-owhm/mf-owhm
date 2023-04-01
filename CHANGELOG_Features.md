@@ -12,9 +12,9 @@
 
 &nbsp;
 
-## 2.3.0a
+## 2.3.0
 
-TBA
+2023-4-23
 
 ### `HYD` supports the `SWT` package
 
@@ -72,11 +72,36 @@ BAS  HD  I  1  5.  2.  Label3
 
 * Expanded comment support in the package input. If `LPF`/`UPW` properties are defined with parameters, then the packages used list-directed reads for the print factor `IPRN`. This caused problems if there are empty lines or commented lines between reading different `IPRN` values. Also added comment support when reading the `WET`ting parameters.
 
+### `BAS`, `FMP`, `MNW2` Output File Header Description
+
+* `doc/Output_Header_Defintion/*` 
+* Describes  `BAS`, `FMP`, and `MNW2` common output files and defines the file headers.
+* See [doc/Output_Header_Defintion/README.md](doc/Output_Header_Defintion/README.md) for a description of how the files are named and formatted.
+
+### `GHB` Block Input Cheat Sheet – `GHB_Options_All.ghb`
+
+* The file `doc/Option_Block_Cheatsheets/GHB_Options_All.ghb` is added to help users develop the GHB package.  
+  This file includes documentation for:
+  * `OPTIONS` block
+  * `BudgetGroups` block
+  * `LineFeed` Alternative Input
+
 ### `FMP` Improvements
+
+* `SUPPLY_WELL` Block new output option: `PRINT ByWBS_ByLAYER`
+  * This output option writes for each Water Balance Subregion (WBS) the total pumpage in and out of groundwater from each model layer from FMP Supply Wells, FMP Linked to MNW2 Wells, Non-Lined MNW2 Wells, and Non-Lined Well Package wells.
+  * Note that FMP supply wells are any well linked to the WBS, consequently they may NOT be within the WBS area.  
+    The non-FMP wells are those located within the WBS area.
 
 * `SUPPLY_WELL` Block ignores row and column read in for supply wells that are linked to `MNW2`. Their input is still required, but is not used. Instead the row and column are copied over from the `MNW2` input.
 * `SUPPLY_WELL` Block now checks if non-MNW2 linked wells are within model grid and raises an error if a well is not.
 * Improved reading in the spatial location of the Water Balance Subregion (WBS). This input is read in the`WATER_BALANCE_SUBREGION` Block with the the keyword `LOCATION`, as an integer array, with a value of `0` to indicate no WBS and non-zero to indicate the WBS that is associated with that (row, col) loocation. If the number specified in the input is greater than the total number (`>NWBS`) or less than `0`, then the WBS number is changed to `0` and the model cell location is ignored. 
+* `CLIMATE` Block `DIRECT_RECHARGE` keyword can be specified multiple times. The sum of the recharge arrays are applied to deep percolations.  
+  For example:  
+  `DIRECT_RECHARGE  FLUX  STATIC ARRAY OPEN/CLOSE rch1.txt`  
+  `DIRECT_RECHARGE  FLUX  STATIC ARRAY OPEN/CLOSE rch2.txt`  
+  `DIRECT_RECHARGE  RATE  STATIC ARRAY OPEN/CLOSE rch3.txt`  
+  would apply to deep percolation the sum from the arrays read in from rch1.txt, rch2.txt, and rch3.txt
 * Part of runoff can be defined to leave the model.
   * Runoff that is generated from FMP either flows to SFR or leaves the model as lost runoff. The SFR locations are either defined explicitly as a semi-routed return (`SRR`) points or automatically as fully-routed return (`FRR`). `FRR` just searched for any SFR segments/reaches that reside in a Water Balance Subregion (WBS) and set then as `SRR` locations.
   * The code was updated to allow defining `SRR`  locations with the segment = 0 to indicate that runoff is supposed to leave the model. There is no limit for how many `SRR` locations that remove water from the model, but it is recommended to only have one per WBS.
@@ -98,15 +123,6 @@ BAS  HD  I  1  5.  2.  Label3
   `BEGIN WATER_BALANCE_SUBREGION `  
   `  LOCATION STATIC LIST CONSTANT 1 `  
   `END`
-
-### Misc. Options Added
-
-* The `SFR` package added the option `SEGOUTPUT` that is followed by a unit number to write segment flow output to.
-  * That is the input structure is:  
-    `SEGOUTPUT  iu`  
-    where `iu` is a unit number declared in the name file as:  
-    `DATA  iu filename`
-* The `UZF` package added the option `SAVEFINF`.
 
 ### `HOB` Improvements
 
@@ -248,6 +264,15 @@ Observation point `XYZ_7` is always set to the `NO_OBS_VALUE` because it is beyo
   *filename*  
   `OPEN/CLOSE` *filename*  
   `DATAFILE` *filename*
+
+### Misc. Options Added
+
+* The `SFR` package added the option `SEGOUTPUT` that is followed by a unit number to write segment flow output to.
+  * That is the input structure is:  
+    `SEGOUTPUT  iu`  
+    where `iu` is a unit number declared in the name file as:  
+    `DATA  iu filename`
+* The `UZF` package added the option `SAVEFINF`.
 
 &nbsp; 
 
