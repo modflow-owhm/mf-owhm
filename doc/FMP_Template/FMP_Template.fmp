@@ -573,12 +573,12 @@ BEGIN GLOBAL DIMENSION
    #  It may be more accurate to use a combination of the head at the start of the time step (HOLD) with HNEW.
    #
    #  HEAD_PREDICTOR_FACTOR specifies a weight for determining the water table (WT) from HNEW and HOLD
-   #     WT = FACT*HNEW + (1-FACT)*HOLD
+   #     WT = FACT*HNEW + (1-FACT)*HOLD
    #
    #  FACT should be set to 0.0 or 0.5 or 1.0 to indicate using only HOLD, the average, or only HNEW
    #
    #  If keyword is not specified, then, by default, FACT = 1 which makes:
-   #     WT = HNEW
+   #     WT = HNEW
    #
    HEAD_PREDICTOR_FACTOR FLOAT
    #
