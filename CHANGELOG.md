@@ -47,6 +47,12 @@ See [CHANGELOG_Features.md](CHANGELOG_Features.md#2.1.1) for a listing of new Zo
 
 ### Fixed
 
+* `RCH` reverted back to using upper most `IBOUND /= 0` cell to match results from MF-NWT.
+  
+    * This removes the RCH fix in [2.0.1](#2.0.1) that changed the check to include for convertible layers a check for if the head is about the cell bottom.    
+    * Added `NRCHOP = 4` and `NRCHOP = 5` as options to mimic the old behavior.    
+    * For details about this change, please see  [CHANGELOG_Features.md](CHANGELOG_Features.md#2.3.0)
+    
 * `FMP` Bug Fixes
   
     * Can use `FMP` without `SFR`.
@@ -512,8 +518,9 @@ git commit log: `git log 12b331ce38c47a7e88f7da234c189ffa585d637a`
 
 * `MNW2` using `QLIMIT` with `NWT` resulted in the models that failed to converge do to a bad index reference for well head.
 
-- `RCH` and `NWT` packages with `NRCHOP=3` did not pass recharge to the time step's upper most active layer. Previously, it only passed water to the upper most non-zero `IBOUND` cell rather than the upper most non-dry cell.
-    - To mimic the original behavior of `RCH` with `NWT` set `NRCHOP = -1`, which applies recharge to the initial upper most non-zero `IBOUND` cell.
+- *`RCH` and `NWT` packages with `NRCHOP=3` did not pass recharge to the time step's upper most active layer. Previously, it only passed water to the upper most non-zero `IBOUND` cell rather than the upper most non-dry cell.*
+    - *To mimic the original behavior of `RCH` with `NWT` set `NRCHOP = -1`, which applies recharge to the initial upper most non-zero `IBOUND` cell.*
+    - **Removed in 2.3.0, see [CHANGELOG_Features](CHANGELOG_Features.md) for more information.**
 
 * `UPW`/`NWT` packages with convertible layers kept releasing water from storage after a model cell was dry.
 

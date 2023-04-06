@@ -68,6 +68,52 @@ BAS  HD  I  1  3.  2.  Label2
 BAS  HD  I  1  5.  2.  Label3
 ```
 
+### `RCH` modified to produce similar to results to `MF-NWT` `RCH` package
+
+This reverts a feature added in version [2.0.1](#2.0.1) under the header "`RCH` can set `NRCHOP` to `-1` "  to reflect how it originally operated in MODFLOW-NWT. 
+
+In summary, when using the `NWT` solver the IBOUND array is never changed from the `BAS` package. When `NWT` is not in use, any layer marked as `CONVERTIBLE` and has the head drops below the cell bottom changes the IBOUND to zero; the so called *DRY* cell (IBOUND=0). Because `NWT` does not vary vertical conductance (that is, it is held constant at the saturated value), any water added to a *DRY* cell percolates downward roughly at the rate of  
+C<sub>v</sub>(h<sub>cell_below</sub> - h<sub>dry_cell</sub>)
+
+For the `RCH` package, it checks for IBOUND=0 to determine if a cell should not receive recharge or not; it does not apply recharge to *DRY* cells. However, since `NWT` never changes the IBOUND array, recharge is applied to cells that are considered *DRY* by other packages (and `NWT` will output `HDRY` for those cells). This particularly important for the `NRCHOP=3` option in `RCH`, which applies recharge to the upper most active cell. 
+
+For example, assume there is a two layer model with both layers set to `CONVERTIBLE` and have `IBOUND>0`.  
+Assume RCH applies 1 unit of recharge and the following is the state of the model: 
+
+- Lay 1 has the head less than its bottom (`HNEW(1) < BOTM(1)`)
+  - If `NWT` not used, then MODFLOW sets IBOUND to zero (`IBOUND(1) = 0`)
+- Lay 2 has the head greater than its bottom (`HNEW(2) > BOTM(2)`)
+
+When using `NWT` the IBOUND array is not changed so the 1 unit of recharge is applied to Lay 1, which would percolate downward to Lay 2.  
+When using any other solver the recharge is placed in Lay 2 because Lay 1 has `IBOUND(1)=0`.
+
+This subtle difference lead to the a fix released in version 2.0.1 that only applied recharge if the cell was `CONFINE` or `CONVERTIBLE` and `HNEW > BOTM`. However, models that calibrated to this feature resulted in a significant different result when using MODFLOW-NWT and MODFLOW-OWHM, so it was decided to revert back to the method used by MODFLOW-NWT. 
+
+If you want to apply the recharge only to the water table, please see the next feature.
+
+### `RCH` supports `NRCHOP = 4`  and `5` ➣ Apply recharge to water table cell
+
+As discussed in the previous feature, when using the `NWT` solver with a DRY cell can result in a difference in how the recharge is applied to the model. Since the fix applied in version [2.0.1](#2.0.1) was removed, recharge is applied to the upper most `IBOUND /= 0` cell rather than the water table. To allow users to still apply recharge to the water table a new option was added. 
+
+If `RCH` sets the `NRCHOP = 4`:
+
+- `CONFINE` layers are exactly like `NRCHOP = 3` (upper most active cell)
+- `CONVERTIBLE` layers apply recharge to the upper most cell that has the head above the cell bottom (water table cell)
+
+If `RCH` sets the `NRCHOP = 5`:
+
+- `CONFINE` and `CONVERTIBLE` layers apply recharge to the upper most cell that has the head above the cell bottom (water table cell)
+
+Using the example presented in the previous feature, the following happens (independent of the solver):
+
+- `NRCHOP = 4`
+  - `CONFINE` ➣ Lay 1
+  - `CONVERTIBLE` ➣ Lay 2
+- `NRCHOP = 5`
+  - `CONFINE` ➣ Lay 2
+  - `CONVERTIBLE` ➣ Lay 2
+
+
 ### `LPF` and `UPW` Improved #Comment Support
 
 * Expanded comment support in the package input. If `LPF`/`UPW` properties are defined with parameters, then the packages used list-directed reads for the print factor `IPRN`. This caused problems if there are empty lines or commented lines between reading different `IPRN` values. Also added comment support when reading the `WET`ting parameters.
@@ -650,7 +696,7 @@ and can be used when `CNSTNT`, `FMTIN`, and `IPRN` are not specified.
     * `PRINT_WELL_NODE_FLOW` &nbsp; &nbsp; &nbsp; &nbsp;                                    *GENERIC_OUTPUT*
     * `PRINT_WELL_INOUT`     &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;        *GENERIC_OUTPUT*
 
-### `RCH` can set `NRCHOP` to `-1` 
+### `RCH` can set `NRCHOP` to `-1`  ➣ Removed in 2.3.0
 
 * This indicates that the initial upper most non-zero `IBOUND` is used. This is a hybrid between `NRCHOP` as `1` and `3`.
 * This option was created to mimic the original behavior of `RCH` with the `NWT` solver and  `NRCHOP=3`.  
