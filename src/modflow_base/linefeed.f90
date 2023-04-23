@@ -629,7 +629,7 @@ CONTAINS
       END SELECT
       !
       IF(NPROP > Z) THEN
-        FEED%FD(I)%PROP(:, J) = 0D0
+        FEED%FD(I)%PROP(:, J) = 0.D0
         DO K=1, NPROP
            CALL GET_NUMBER(LINE,LLOC,ISTART,ISTOP,IOUT,IN,FEED%FD(I)%PROP(K, J),MSG='LINEFEED ERROR: FAILED TO LOAD MODEL FEATURE PROPERTY. THIS PACKAGE EXPECTS '//NUM2STR(NPROP)//' PROPERTIES TO BE LOADED. (AN EXAMPLE PROPTER WOULD BE GHB CONDUCTANCE IF YOU ARE USING THE GHB PACKAGE)')
         END DO
@@ -984,7 +984,7 @@ CONTAINS
                 MNW2(25,MNWID)=DZ                                     !Initialize CapFlag2
                 MNW2(27,MNWID)=DZ
            else
-             IF(Qdes.EQ.0D0)THEN                                        !seb ALLOW HOLDING OF CAPMULT FOR Qdes=0 BUT DO NOT ENABLE CAPACITY CONTSTRAINTS TO FACILITATE LINK TO FMP
+             IF(Qdes.EQ.0.0D0)THEN                                        !seb ALLOW HOLDING OF CAPMULT FOR Qdes=0 BUT DO NOT ENABLE CAPACITY CONTSTRAINTS TO FACILITATE LINK TO FMP
                 MNW2(25,MNWID)=DZ
                 MNW2(27,MNWID)=DZ                                     !Initialize CapFlag2
              ELSE
@@ -1043,7 +1043,7 @@ CONTAINS
   !
   DO I=1, FEED%NFEED
     DO J=1, FEED%FD(I)%NDAT
-      IF( FEED%FD(I)%DAT(J) .NE. FEED%FD(I)%DAT(J) ) FEED%FD(I)%DAT(J)=0D0          !NaN VALUES ARE SET TO ZERO
+      IF( FEED%FD(I)%DAT(J) .NE. FEED%FD(I)%DAT(J) ) FEED%FD(I)%DAT(J)=0.0D0          !NaN VALUES ARE SET TO ZERO
       !
       ISEG = FEED%FD(I)%NUMIDX(1,J)
       IF(0 < ISEG .AND. ISEG < NSEG) PAK(IPVL,ISEG) = 0.0

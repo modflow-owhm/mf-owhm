@@ -266,7 +266,7 @@ MODULE SWO_HIERARCHY_DATA_TYPES
       INTEGER:: NAUX
       INTEGER,          DIMENSION(:),ALLOCATABLE:: SEG, RCH
       DOUBLE PRECISION, DIMENSION(:), ALLOCATABLE:: FACTOR
-  CONTAINS
+      CONTAINS
       PROCEDURE, PASS(GIN):: ALLOC => ALLOCATE_AUX_SFR_TYPE
       PROCEDURE, PASS(GIN):: LOAD => LOAD_AUX_SFR_TYPE
   END TYPE
@@ -390,11 +390,11 @@ MODULE SWO_HIERARCHY_DATA_TYPES
       ! holds inputs/variables to compute reservoir mass balance for current timestep for a single reservoir
       TYPE SWOPS_RESSPLIT
         CHARACTER(:),ALLOCATABLE:: RESNAME                                        ! name of reservoir
-          !
-          LOGICAL:: MAIN_RES        = TRUE                              ! SET TO TRUE IF IT IS THE LARGEST OF THE SPLIT RESERVOIRS
-          INTEGER:: RESSPLIT_PROJID = Z                                 ! project associated with reservoir
-          INTEGER:: RESSPLIT_RESID  = Z                                 ! unique reservoir ID
-          INTEGER:: HEADCELL        = Z                                 ! flag indicating whether reservoir contributes to head boundary
+        !
+        LOGICAL:: MAIN_RES        = TRUE                                ! SET TO TRUE IF IT IS THE LARGEST OF THE SPLIT RESERVOIRS
+        INTEGER:: RESSPLIT_PROJID = Z                                   ! project associated with reservoir
+        INTEGER:: RESSPLIT_RESID  = Z                                   ! unique reservoir ID
+        INTEGER:: HEADCELL        = Z                                   ! flag indicating whether reservoir contributes to head boundary
         DOUBLE PRECISION :: &
               DOY       = DZ ,   &                                      ! day-of-year used for FRACTBK look-up
               STORAGE   = DZ ,   &                                      ! storage @ end of current TS [L^3]
@@ -409,10 +409,10 @@ MODULE SWO_HIERARCHY_DATA_TYPES
       ! holds ACAP look-up table for single reservoir
       TYPE SWOPS_ACAPTBL
         CHARACTER(:),ALLOCATABLE :: RESNAME                           ! name of reservoir
-          INTEGER ::            &
-            ACAP_PROJID = Z ,   &                                     ! project associated with reservoir
-            ACAP_RESID  = Z ,   &                                     ! unique reservoir ID
-            ACAP_COUNT  = Z                                           ! number of values in ACAP table
+        INTEGER ::            &
+          ACAP_PROJID = Z ,   &                                       ! project associated with reservoir
+          ACAP_RESID  = Z ,   &                                       ! unique reservoir ID
+          ACAP_COUNT  = Z                                             ! number of values in ACAP table
         DOUBLE PRECISION,DIMENSION(:),ALLOCATABLE :: &
               ACAP_STORAGE,   &                                       ! storage values for look-up
               ACAP_AREA   ,   &                                       ! area vales for look-up
@@ -423,22 +423,22 @@ MODULE SWO_HIERARCHY_DATA_TYPES
       ! holds reservoir split look-up table for single reservoir
       TYPE SWOPS_FRACTBL
         CHARACTER(:),ALLOCATABLE:: RESNAME                                                   ! name of reservoir
-          INTEGER ::           &
-            FRAC_PROJID = Z ,  &                                     ! project associated with reservoir
-            FRAC_RESID  = Z ,  &                                     ! unique reservoir ID
-            FRAC_COUNT  = Z 
+        INTEGER ::           &
+          FRAC_PROJID = Z ,  &                                        ! project associated with reservoir
+          FRAC_RESID  = Z ,  &                                        ! unique reservoir ID
+          FRAC_COUNT  = Z 
         DOUBLE PRECISION,DIMENSION(:),ALLOCATABLE :: & !FRAC_LEAP
-              FRAC_NOLEAP,  &                                              ! day-of-year values for look-up
-              FRAC_FRAC                                                 ! fraction of total storage in res. for look-up
+              FRAC_NOLEAP,  &                                         ! day-of-year values for look-up
+              FRAC_FRAC                                               ! fraction of total storage in res. for look-up
       END TYPE
 !
       ! SWOPS_RESHEAD -->
       ! holds list of cells where each reservoir contributes to head boundary
       TYPE SWOPS_RESHEAD
-        CHARACTER(:),ALLOCATABLE:: RESNAME                                      ! name of reservoir
-          INTEGER :: HEAD_PROJID = Z                                  ! project associated with reservoir
-          INTEGER :: HEAD_RESID  = Z                                  ! unique reservoir ID
-          INTEGER :: HEAD_NCELL  = Z                                  ! number of head cells for reservoir
+        CHARACTER(:),ALLOCATABLE:: RESNAME                            ! name of reservoir
+        INTEGER :: HEAD_PROJID = Z                                    ! project associated with reservoir
+        INTEGER :: HEAD_RESID  = Z                                    ! unique reservoir ID
+        INTEGER :: HEAD_NCELL  = Z                                    ! number of head cells for reservoir
         INTEGER,DIMENSION(:,:),ALLOCATABLE :: HEAD_CELLS              ! list of [row,col] where reservoir contributes to head boundary
       END TYPE
 !
@@ -488,8 +488,8 @@ MODULE SWO_HIERARCHY_DATA_TYPES
   !    TYPE(TABFILETYPE1IDX):: TABIDX_EXT
   !END TYPE
   !
-    CONTAINS
-    !
+  CONTAINS
+  !
   PURE ELEMENTAL SUBROUTINE SET_RELEASE_POT(RESDAT)
     CLASS(SWOPS_RESTYPE), INTENT(INOUT):: RESDAT
     DOUBLE PRECISION:: AREA_AVG, PRCP_AREA, PRCP, EVAP, INFLOW, STOR_TRAN
@@ -1048,50 +1048,50 @@ MODULE SWO_TREE_BUILDER!, ONLY: MAP_UPTREE, MAP_DNTREE
 !     ------------------------------------------------------------------
 !        ARGUMENTS:
 !     ------------------------------------------------------------------
-      LOGICAL,                                     INTENT(IN   ):: UNIT_OPTION
-      INTEGER,                                     INTENT(IN   ):: NSEGTYPE
-      TYPE(SWOPS_SEGTREE), DIMENSION(:),CONTIGUOUS,INTENT(INOUT):: UPTREE
-      TYPE(SEGINFODAT),    DIMENSION(:),CONTIGUOUS,INTENT(IN):: SEGINFO
-      TYPE(SWOPS_SEGLIST), DIMENSION(:),CONTIGUOUS,INTENT(IN):: UPSEG
-      INTEGER,                          INTENT(IN):: NSS
-      INTEGER,DIMENSION(:,:),CONTIGUOUS,INTENT(IN):: IDIVAR
-      INTEGER,DIMENSION(:),  CONTIGUOUS,INTENT(IN):: IOTSG
+    LOGICAL,                                     INTENT(IN   ):: UNIT_OPTION
+    INTEGER,                                     INTENT(IN   ):: NSEGTYPE
+    TYPE(SWOPS_SEGTREE), DIMENSION(:),CONTIGUOUS,INTENT(INOUT):: UPTREE
+    TYPE(SEGINFODAT),    DIMENSION(:),CONTIGUOUS,INTENT(IN):: SEGINFO
+    TYPE(SWOPS_SEGLIST), DIMENSION(:),CONTIGUOUS,INTENT(IN):: UPSEG
+    INTEGER,                          INTENT(IN):: NSS
+    INTEGER,DIMENSION(:,:),CONTIGUOUS,INTENT(IN):: IDIVAR
+    INTEGER,DIMENSION(:),  CONTIGUOUS,INTENT(IN):: IOTSG
 !
-!     ------------------------------------------------------------------
-!        LOCAL VARIABLES:
-      INTEGER :: NSEG,SEGCOUNT,COUNTER
-!     ------------------------------------------------------------------
+!   ------------------------------------------------------------------
+!      LOCAL VARIABLES:
+    INTEGER :: NSEG,SEGCOUNT,COUNTER
+!   ------------------------------------------------------------------
 !
-      ! Loop over segments...
-      ! (1) count segments in upstream tree
-      ! (2) allocate UPTREE(NSS)%SEGTREE
-      ! (3) fill in tree
-      DO NSEG = 1,NSS
+    ! Loop over segments...
+    ! (1) count segments in upstream tree
+    ! (2) allocate UPTREE(NSS)%SEGTREE
+    ! (3) fill in tree
+    DO NSEG = 1,NSS
 
-          ! assign NSEG
-          UPTREE(NSEG)%NSEG = NSEG
+        ! assign NSEG
+        UPTREE(NSEG)%NSEG = NSEG
 
-          ! deallocate UPTREE(NSEG)%SEGTREE if already allocated
-          !IF (ALLOCATED(UPTREE(NSEG)%SEGTREE)) THEN
-          !    DEALLOCATE(UPTREE(NSEG)%SEGTREE)
-          !END IF
-          !
-          ! initialize/reset counters
-          SEGCOUNT  = 0
-          COUNTER   = 0
-          !
-          ! count segments...
-          CALL MAP_UPCOUNT(UPTREE(NSEG),NSEG,NSEGTYPE,UNIT_OPTION,SEGCOUNT,SEGINFO,UPSEG,NSS,IDIVAR,IOTSG)
-          !
-          ! allocate segment tree to dimension SEGCOUNT...
-          UPTREE(NSEG)%NTREE = SEGCOUNT
-          CALL ALLOC( UPTREE(NSEG)%SEGTREE,SEGCOUNT )
+        ! deallocate UPTREE(NSEG)%SEGTREE if already allocated
+        !IF (ALLOCATED(UPTREE(NSEG)%SEGTREE)) THEN
+        !    DEALLOCATE(UPTREE(NSEG)%SEGTREE)
+        !END IF
+        !
+        ! initialize/reset counters
+        SEGCOUNT  = 0
+        COUNTER   = 0
+        !
+        ! count segments...
+        CALL MAP_UPCOUNT(UPTREE(NSEG),NSEG,NSEGTYPE,UNIT_OPTION,SEGCOUNT,SEGINFO,UPSEG,NSS,IDIVAR,IOTSG)
+        !
+        ! allocate segment tree to dimension SEGCOUNT...
+        UPTREE(NSEG)%NTREE = SEGCOUNT
+        CALL ALLOC( UPTREE(NSEG)%SEGTREE,SEGCOUNT )
 
-          ! fill segment tree...
-          CALL MAP_UPSTEP(UPTREE(NSEG),NSEG,NSEGTYPE,UNIT_OPTION,COUNTER,SEGINFO,UPSEG,NSS,IDIVAR,IOTSG)
-          !
-      END DO !(NSEG  1,NSS)
-      !
+        ! fill segment tree...
+        CALL MAP_UPSTEP(UPTREE(NSEG),NSEG,NSEGTYPE,UNIT_OPTION,COUNTER,SEGINFO,UPSEG,NSS,IDIVAR,IOTSG)
+        !
+    END DO !(NSEG  1,NSS)
+    !
   END SUBROUTINE MAP_UPTREE
   !
   RECURSIVE SUBROUTINE MAP_UPCOUNT(UPTREE,NSEG,NSEGTYPE,UNIT_OPTION,SEGCOUNT,SEGINFO,UPSEG,NSS,IDIVAR,IOTSG)
@@ -1106,61 +1106,61 @@ MODULE SWO_TREE_BUILDER!, ONLY: MAP_UPTREE, MAP_DNTREE
 !     ------------------------------------------------------------------
 !        ARGUMENTS:
 !     ------------------------------------------------------------------
-      LOGICAL, INTENT(IN)                :: UNIT_OPTION
-      INTEGER, INTENT(IN)                :: NSEG,NSEGTYPE
-      INTEGER, INTENT(INOUT)             :: SEGCOUNT
-      TYPE(SWOPS_SEGTREE), INTENT(INOUT) :: UPTREE
-      TYPE(SEGINFODAT),    DIMENSION(:),CONTIGUOUS,INTENT(IN):: SEGINFO
-      TYPE(SWOPS_SEGLIST), DIMENSION(:),CONTIGUOUS,INTENT(IN):: UPSEG
-      INTEGER,                          INTENT(IN):: NSS
-      INTEGER,DIMENSION(:,:),CONTIGUOUS,INTENT(IN):: IDIVAR
-      INTEGER,DIMENSION(:),  CONTIGUOUS,INTENT(IN):: IOTSG
+    LOGICAL, INTENT(IN)                :: UNIT_OPTION
+    INTEGER, INTENT(IN)                :: NSEG,NSEGTYPE
+    INTEGER, INTENT(INOUT)             :: SEGCOUNT
+    TYPE(SWOPS_SEGTREE), INTENT(INOUT) :: UPTREE
+    TYPE(SEGINFODAT),    DIMENSION(:),CONTIGUOUS,INTENT(IN):: SEGINFO
+    TYPE(SWOPS_SEGLIST), DIMENSION(:),CONTIGUOUS,INTENT(IN):: UPSEG
+    INTEGER,                          INTENT(IN):: NSS
+    INTEGER,DIMENSION(:,:),CONTIGUOUS,INTENT(IN):: IDIVAR
+    INTEGER,DIMENSION(:),  CONTIGUOUS,INTENT(IN):: IOTSG
 !
-!     ------------------------------------------------------------------
-!        LOCAL VARIABLES:
-      INTEGER :: JSEG,JTYPE,I,JUNIT,IUNIT
-!     ------------------------------------------------------------------
+!   ------------------------------------------------------------------
+!      LOCAL VARIABLES:
+    INTEGER :: JSEG,JTYPE,I,JUNIT,IUNIT
+!   ------------------------------------------------------------------
 !
-      ! recursive loop to count segments in tree
-      DO I = 1,UPSEG(NSEG)%NLIST
+    ! recursive loop to count segments in tree
+    DO I = 1,UPSEG(NSEG)%NLIST
 
-          JSEG  = UPSEG(NSEG)%SEGLIST(I)
-          JTYPE = SEGINFO(JSEG)%SegType
+        JSEG  = UPSEG(NSEG)%SEGLIST(I)
+        JTYPE = SEGINFO(JSEG)%SegType
 
-          IF (UNIT_OPTION) THEN
-              IUNIT = SEGINFO(NSEG)%UnitID
-              JUNIT = SEGINFO(JSEG)%UnitID
-          ELSE
-              IUNIT = 1
-              JUNIT = 1
-          END IF !(UNIT_OPTION)
+        IF (UNIT_OPTION) THEN
+            IUNIT = SEGINFO(NSEG)%UnitID
+            JUNIT = SEGINFO(JSEG)%UnitID
+        ELSE
+            IUNIT = 1
+            JUNIT = 1
+        END IF !(UNIT_OPTION)
 
-          IF (NSEGTYPE.LT.5) THEN                                       ! Single type ...
-              IF (JTYPE.EQ.NSEGTYPE) THEN
-                  IF (IUNIT.EQ.JUNIT) THEN
-                      SEGCOUNT = SEGCOUNT + 1
-                      IF (JTYPE.NE.3) THEN                              ! Stop @ delivery segments!!
-                          CALL MAP_UPCOUNT(UPTREE,JSEG,NSEGTYPE,UNIT_OPTION,SEGCOUNT,SEGINFO,UPSEG,NSS,IDIVAR,IOTSG)
-                      END IF
-                      ! CALL MAP_UPCOUNT(UPTREE,JSEG,NSEGTYPE,UNIT_OPTION,SEGCOUNT,NSS,IDIVAR,IOTSG)
-                  END IF !(IUNIT=JUNIT)
-              END IF !(JTYPE)
+        IF (NSEGTYPE.LT.5) THEN                                       ! Single type ...
+            IF (JTYPE.EQ.NSEGTYPE) THEN
+                IF (IUNIT.EQ.JUNIT) THEN
+                    SEGCOUNT = SEGCOUNT + 1
+                    IF (JTYPE.NE.3) THEN                              ! Stop @ delivery segments!!
+                        CALL MAP_UPCOUNT(UPTREE,JSEG,NSEGTYPE,UNIT_OPTION,SEGCOUNT,SEGINFO,UPSEG,NSS,IDIVAR,IOTSG)
+                    END IF
+                    ! CALL MAP_UPCOUNT(UPTREE,JSEG,NSEGTYPE,UNIT_OPTION,SEGCOUNT,NSS,IDIVAR,IOTSG)
+                END IF !(IUNIT=JUNIT)
+            END IF !(JTYPE)
 
-          ELSE IF (NSEGTYPE.EQ.5) THEN                                  ! NSEGTYPE=5 --> conveyance *or* delivery!
-              IF ((JTYPE.EQ.2).OR.(JTYPE.EQ.3)) THEN
-                  IF (IUNIT.EQ.JUNIT) THEN
-                      SEGCOUNT = SEGCOUNT + 1
-                      IF (JTYPE.NE.3) THEN                              ! Stop @ delivery segments!!
-                          CALL MAP_UPCOUNT(UPTREE,JSEG,NSEGTYPE,UNIT_OPTION,SEGCOUNT,SEGINFO,UPSEG,NSS,IDIVAR,IOTSG)
-                      END IF
-                      ! CALL MAP_UPCOUNT(UPTREE,JSEG,NSEGTYPE,UNIT_OPTION,SEGCOUNT,NSS,IDIVAR,IOTSG)
-                  END IF !(IUNIT=JUNIT)
-              END IF !(JTYPE)
+        ELSE IF (NSEGTYPE.EQ.5) THEN                                  ! NSEGTYPE=5 --> conveyance *or* delivery!
+            IF ((JTYPE.EQ.2).OR.(JTYPE.EQ.3)) THEN
+                IF (IUNIT.EQ.JUNIT) THEN
+                    SEGCOUNT = SEGCOUNT + 1
+                    IF (JTYPE.NE.3) THEN                              ! Stop @ delivery segments!!
+                        CALL MAP_UPCOUNT(UPTREE,JSEG,NSEGTYPE,UNIT_OPTION,SEGCOUNT,SEGINFO,UPSEG,NSS,IDIVAR,IOTSG)
+                    END IF
+                    ! CALL MAP_UPCOUNT(UPTREE,JSEG,NSEGTYPE,UNIT_OPTION,SEGCOUNT,NSS,IDIVAR,IOTSG)
+                END IF !(IUNIT=JUNIT)
+            END IF !(JTYPE)
 
-          END IF !(NSEGTYPE LT/EQ 5)
+        END IF !(NSEGTYPE LT/EQ 5)
 
-      END DO !(I = 1,UPSEG(NSEG)%NLIST)
-      !
+    END DO !(I = 1,UPSEG(NSEG)%NLIST)
+    !
   END SUBROUTINE MAP_UPCOUNT
   !
   RECURSIVE SUBROUTINE MAP_UPSTEP(UPTREE,NSEG,NSEGTYPE,UNIT_OPTION,COUNTER,SEGINFO,UPSEG,NSS,IDIVAR,IOTSG)
@@ -1175,63 +1175,63 @@ MODULE SWO_TREE_BUILDER!, ONLY: MAP_UPTREE, MAP_DNTREE
 !     ------------------------------------------------------------------
 !        ARGUMENTS:
 !     ------------------------------------------------------------------
-      LOGICAL, INTENT(IN)                :: UNIT_OPTION
-      INTEGER, INTENT(IN)                :: NSEG,NSEGTYPE
-      INTEGER, INTENT(INOUT)             :: COUNTER
-      TYPE(SWOPS_SEGTREE), INTENT(INOUT) :: UPTREE
-      TYPE(SEGINFODAT),    DIMENSION(:),CONTIGUOUS,INTENT(IN):: SEGINFO
-      TYPE(SWOPS_SEGLIST), DIMENSION(:),CONTIGUOUS,INTENT(IN):: UPSEG
-      INTEGER,                          INTENT(IN):: NSS
-      INTEGER,DIMENSION(:,:),CONTIGUOUS,INTENT(IN):: IDIVAR
-      INTEGER,DIMENSION(:),  CONTIGUOUS,INTENT(IN):: IOTSG
+    LOGICAL, INTENT(IN)                :: UNIT_OPTION
+    INTEGER, INTENT(IN)                :: NSEG,NSEGTYPE
+    INTEGER, INTENT(INOUT)             :: COUNTER
+    TYPE(SWOPS_SEGTREE), INTENT(INOUT) :: UPTREE
+    TYPE(SEGINFODAT),    DIMENSION(:),CONTIGUOUS,INTENT(IN):: SEGINFO
+    TYPE(SWOPS_SEGLIST), DIMENSION(:),CONTIGUOUS,INTENT(IN):: UPSEG
+    INTEGER,                          INTENT(IN):: NSS
+    INTEGER,DIMENSION(:,:),CONTIGUOUS,INTENT(IN):: IDIVAR
+    INTEGER,DIMENSION(:),  CONTIGUOUS,INTENT(IN):: IOTSG
 !
-!     ------------------------------------------------------------------
-!        LOCAL VARIABLES:
-      INTEGER :: JSEG,JTYPE,I,JUNIT,IUNIT
-!     ------------------------------------------------------------------
+!   ------------------------------------------------------------------
+!      LOCAL VARIABLES:
+    INTEGER :: JSEG,JTYPE,I,JUNIT,IUNIT
+!   ------------------------------------------------------------------
 !
-      ! recursive loop to fill segments in tree
-      DO I = 1,UPSEG(NSEG)%NLIST
+    ! recursive loop to fill segments in tree
+    DO I = 1,UPSEG(NSEG)%NLIST
 
-          JSEG  = UPSEG(NSEG)%SEGLIST(I)
-          JTYPE = SEGINFO(JSEG)%SegType
+        JSEG  = UPSEG(NSEG)%SEGLIST(I)
+        JTYPE = SEGINFO(JSEG)%SegType
 
-          IF (UNIT_OPTION) THEN
-              IUNIT = SEGINFO(NSEG)%UnitID
-              JUNIT = SEGINFO(JSEG)%UnitID
-          ELSE
-              IUNIT = 1
-              JUNIT = 1
-          END IF !(UNIT_OPTION)
+        IF (UNIT_OPTION) THEN
+            IUNIT = SEGINFO(NSEG)%UnitID
+            JUNIT = SEGINFO(JSEG)%UnitID
+        ELSE
+            IUNIT = 1
+            JUNIT = 1
+        END IF !(UNIT_OPTION)
 
-          IF (NSEGTYPE.LT.5) THEN                                       ! Single type ...
-              IF (JTYPE.EQ.NSEGTYPE) THEN
-                  IF (JUNIT.EQ.IUNIT) THEN
-                      COUNTER = COUNTER + 1
-                      UPTREE%SEGTREE(COUNTER) = JSEG
-                      IF (JTYPE.NE.3) THEN                              ! Stop @ delivery segments!!
-                          CALL MAP_UPSTEP(UPTREE,JSEG,NSEGTYPE,UNIT_OPTION,COUNTER,SEGINFO,UPSEG,NSS,IDIVAR,IOTSG)
-                      END IF
-                      ! CALL MAP_UPSTEP(UPTREE,JSEG,NSEGTYPE,UNIT_OPTION,COUNTER,NSS,IDIVAR,IOTSG)
-                  END IF !(JUNIT=IUNIT)
-              END IF !(JTYPE)
+        IF (NSEGTYPE.LT.5) THEN                                       ! Single type ...
+            IF (JTYPE.EQ.NSEGTYPE) THEN
+                IF (JUNIT.EQ.IUNIT) THEN
+                    COUNTER = COUNTER + 1
+                    UPTREE%SEGTREE(COUNTER) = JSEG
+                    IF (JTYPE.NE.3) THEN                              ! Stop @ delivery segments!!
+                        CALL MAP_UPSTEP(UPTREE,JSEG,NSEGTYPE,UNIT_OPTION,COUNTER,SEGINFO,UPSEG,NSS,IDIVAR,IOTSG)
+                    END IF
+                    ! CALL MAP_UPSTEP(UPTREE,JSEG,NSEGTYPE,UNIT_OPTION,COUNTER,NSS,IDIVAR,IOTSG)
+                END IF !(JUNIT=IUNIT)
+            END IF !(JTYPE)
 
-          ELSE IF (NSEGTYPE.EQ.5) THEN                                  ! NSEGTYPE=5 --> conveyance *or* delivery!
-              IF ((JTYPE.EQ.2) .OR. (JTYPE.EQ.3)) THEN
-                  IF (JUNIT.EQ.IUNIT) THEN
-                      COUNTER = COUNTER + 1
-                      UPTREE%SEGTREE(COUNTER) = JSEG
-                      IF (JTYPE.NE.3) THEN                              ! Stop @ delivery segments!!
-                          CALL MAP_UPSTEP(UPTREE,JSEG,NSEGTYPE,UNIT_OPTION,COUNTER,SEGINFO,UPSEG,NSS,IDIVAR,IOTSG)
-                      END IF
-                      ! CALL MAP_UPSTEP(UPTREE,JSEG,NSEGTYPE, UNIT_OPTION,COUNTER,NSS,IDIVAR,IOTSG)
-                  END IF !(JUNIT=IUNIT)
-              END IF !(JTYPE)
+        ELSE IF (NSEGTYPE.EQ.5) THEN                                  ! NSEGTYPE=5 --> conveyance *or* delivery!
+            IF ((JTYPE.EQ.2) .OR. (JTYPE.EQ.3)) THEN
+                IF (JUNIT.EQ.IUNIT) THEN
+                    COUNTER = COUNTER + 1
+                    UPTREE%SEGTREE(COUNTER) = JSEG
+                    IF (JTYPE.NE.3) THEN                              ! Stop @ delivery segments!!
+                        CALL MAP_UPSTEP(UPTREE,JSEG,NSEGTYPE,UNIT_OPTION,COUNTER,SEGINFO,UPSEG,NSS,IDIVAR,IOTSG)
+                    END IF
+                    ! CALL MAP_UPSTEP(UPTREE,JSEG,NSEGTYPE, UNIT_OPTION,COUNTER,NSS,IDIVAR,IOTSG)
+                END IF !(JUNIT=IUNIT)
+            END IF !(JTYPE)
 
-          END IF !(NSEGTYPE LT/EQ 5)
+        END IF !(NSEGTYPE LT/EQ 5)
 
-      END DO !(I = 1,UPSEG(NSEG)%NLIST)
-      !
+    END DO !(I = 1,UPSEG(NSEG)%NLIST)
+    !
   END SUBROUTINE MAP_UPSTEP
   !
   SUBROUTINE MAP_DNTREE(DNTREE,NSEGTYPE,UNIT_OPTION,SEGINFO,DNSEG,NSS,IDIVAR,IOTSG)
@@ -1265,49 +1265,49 @@ MODULE SWO_TREE_BUILDER!, ONLY: MAP_UPTREE, MAP_DNTREE
 !     ------------------------------------------------------------------
 !        ARGUMENTS:
 !     ------------------------------------------------------------------
-      LOGICAL, INTENT(IN)               :: UNIT_OPTION
-      INTEGER, INTENT(IN)               :: NSEGTYPE
-      TYPE(SWOPS_SEGTREE), DIMENSION(:) :: DNTREE
-      TYPE(SEGINFODAT),    DIMENSION(:),CONTIGUOUS,INTENT(IN):: SEGINFO
-      TYPE(SWOPS_SEGLIST), DIMENSION(:),CONTIGUOUS,INTENT(IN):: DNSEG
-      INTEGER,                          INTENT(IN):: NSS
-      INTEGER,DIMENSION(:,:),CONTIGUOUS,INTENT(IN):: IDIVAR
-      INTEGER,DIMENSION(:),  CONTIGUOUS,INTENT(IN):: IOTSG
+    LOGICAL, INTENT(IN)               :: UNIT_OPTION
+    INTEGER, INTENT(IN)               :: NSEGTYPE
+    TYPE(SWOPS_SEGTREE), DIMENSION(:) :: DNTREE
+    TYPE(SEGINFODAT),    DIMENSION(:),CONTIGUOUS,INTENT(IN):: SEGINFO
+    TYPE(SWOPS_SEGLIST), DIMENSION(:),CONTIGUOUS,INTENT(IN):: DNSEG
+    INTEGER,                          INTENT(IN):: NSS
+    INTEGER,DIMENSION(:,:),CONTIGUOUS,INTENT(IN):: IDIVAR
+    INTEGER,DIMENSION(:),  CONTIGUOUS,INTENT(IN):: IOTSG
 !
-!     ------------------------------------------------------------------
-!        LOCAL VARIABLES:
-      INTEGER :: NSEG,SEGCOUNT,COUNTER
-!     ------------------------------------------------------------------
+!   ------------------------------------------------------------------
+!      LOCAL VARIABLES:
+    INTEGER :: NSEG,SEGCOUNT,COUNTER
+!   ------------------------------------------------------------------
 !
-      ! Loop over segments...
-      ! (1) count segments in downstream tree
-      ! (2) allocate DNTREE(NSS)%SEGTREE
-      ! (3) fill in tree
-      DO NSEG = 1,NSS
+    ! Loop over segments...
+    ! (1) count segments in downstream tree
+    ! (2) allocate DNTREE(NSS)%SEGTREE
+    ! (3) fill in tree
+    DO NSEG = 1,NSS
 
-          ! assign NSEG
-          DNTREE(NSEG)%NSEG = NSEG
+        ! assign NSEG
+        DNTREE(NSEG)%NSEG = NSEG
 
-          ! deallocate DNTREE(NSEG)%SEGTREE if already allocated
-          !IF (ALLOCATED(DNTREE(NSEG)%SEGTREE)) THEN
-          !    DEALLOCATE(DNTREE(NSEG)%SEGTREE)
-          !END IF
+        ! deallocate DNTREE(NSEG)%SEGTREE if already allocated
+        !IF (ALLOCATED(DNTREE(NSEG)%SEGTREE)) THEN
+        !    DEALLOCATE(DNTREE(NSEG)%SEGTREE)
+        !END IF
 
-          ! initialize/reset counters
-          SEGCOUNT  = 0
-          COUNTER   = 0
+        ! initialize/reset counters
+        SEGCOUNT  = 0
+        COUNTER   = 0
 
-          ! count segments...
-          CALL MAP_DNCOUNT(DNTREE(NSEG),NSEG,NSEGTYPE,UNIT_OPTION,SEGCOUNT,SEGINFO,DNSEG,NSS,IDIVAR,IOTSG)
+        ! count segments...
+        CALL MAP_DNCOUNT(DNTREE(NSEG),NSEG,NSEGTYPE,UNIT_OPTION,SEGCOUNT,SEGINFO,DNSEG,NSS,IDIVAR,IOTSG)
 
-          ! allocate segment tree to dimension SEGCOUNT...
-          DNTREE(NSEG)%NTREE = SEGCOUNT
-          CALL ALLOC( DNTREE(NSEG)%SEGTREE, SEGCOUNT )
+        ! allocate segment tree to dimension SEGCOUNT...
+        DNTREE(NSEG)%NTREE = SEGCOUNT
+        CALL ALLOC( DNTREE(NSEG)%SEGTREE, SEGCOUNT )
 
-          ! fill segment tree...
-          CALL MAP_DNSTEP(DNTREE(NSEG),NSEG,NSEGTYPE,UNIT_OPTION,COUNTER,SEGINFO,DNSEG,NSS,IDIVAR,IOTSG)
-      END DO !(NSEG  1,NSS)
-!
+        ! fill segment tree...
+        CALL MAP_DNSTEP(DNTREE(NSEG),NSEG,NSEGTYPE,UNIT_OPTION,COUNTER,SEGINFO,DNSEG,NSS,IDIVAR,IOTSG)
+    END DO !(NSEG  1,NSS)
+    !
   END SUBROUTINE MAP_DNTREE
   !
   RECURSIVE SUBROUTINE MAP_DNCOUNT(DNTREE,ISEG,ISEGTYPE,UNIT_OPTION,SEGCOUNT,SEGINFO,DNSEG,NSS,IDIVAR,IOTSG)
@@ -1322,70 +1322,70 @@ MODULE SWO_TREE_BUILDER!, ONLY: MAP_UPTREE, MAP_DNTREE
 !     ------------------------------------------------------------------
 !        ARGUMENTS:
 !     ------------------------------------------------------------------
-      LOGICAL, INTENT(IN)                :: UNIT_OPTION
-      INTEGER, INTENT(IN)                :: ISEG,ISEGTYPE
-      INTEGER, INTENT(INOUT)             :: SEGCOUNT
-      TYPE(SWOPS_SEGTREE), INTENT(INOUT) :: DNTREE
-      TYPE(SEGINFODAT),    DIMENSION(:),CONTIGUOUS,INTENT(IN):: SEGINFO
-      TYPE(SWOPS_SEGLIST), DIMENSION(:),CONTIGUOUS,INTENT(IN):: DNSEG
-      INTEGER,                          INTENT(IN):: NSS
-      INTEGER,DIMENSION(:,:),CONTIGUOUS,INTENT(IN):: IDIVAR
-      INTEGER,DIMENSION(:),  CONTIGUOUS,INTENT(IN):: IOTSG
+    LOGICAL, INTENT(IN)                :: UNIT_OPTION
+    INTEGER, INTENT(IN)                :: ISEG,ISEGTYPE
+    INTEGER, INTENT(INOUT)             :: SEGCOUNT
+    TYPE(SWOPS_SEGTREE), INTENT(INOUT) :: DNTREE
+    TYPE(SEGINFODAT),    DIMENSION(:),CONTIGUOUS,INTENT(IN):: SEGINFO
+    TYPE(SWOPS_SEGLIST), DIMENSION(:),CONTIGUOUS,INTENT(IN):: DNSEG
+    INTEGER,                          INTENT(IN):: NSS
+    INTEGER,DIMENSION(:,:),CONTIGUOUS,INTENT(IN):: IDIVAR
+    INTEGER,DIMENSION(:),  CONTIGUOUS,INTENT(IN):: IOTSG
 !
-!     ------------------------------------------------------------------
-!        LOCAL VARIABLES:
-      INTEGER :: JSEG,JTYPE,I,IUNIT,JUNIT
-!     ------------------------------------------------------------------
+!   ------------------------------------------------------------------
+!      LOCAL VARIABLES:
+    INTEGER :: JSEG,JTYPE,I,IUNIT,JUNIT
+!   ------------------------------------------------------------------
 !
-      ! TODO --
-      ! Added if/then to stop MAP_DNCOUNT / MAP_DNSTP at delivery segments...
-      ! This is needed so that delivery segments appear as "dead ends" in
-      ! segment tree, which in turn is required for accumulation routines
-      ! (e.g., summing TFDR and DELORDER over divsegs, splits, and branches)
-      ! This should be revisited to see if something more elegant can be done...
-      IF (SEGINFO(ISEG)%SegType.NE.3) THEN
-        ! recursive loop to count segments in tree
-        DO I = 1,DNSEG(ISEG)%NLIST
+    ! TODO --
+    ! Added if/then to stop MAP_DNCOUNT / MAP_DNSTP at delivery segments...
+    ! This is needed so that delivery segments appear as "dead ends" in
+    ! segment tree, which in turn is required for accumulation routines
+    ! (e.g., summing TFDR and DELORDER over divsegs, splits, and branches)
+    ! This should be revisited to see if something more elegant can be done...
+    IF (SEGINFO(ISEG)%SegType.NE.3) THEN
+      ! recursive loop to count segments in tree
+      DO I = 1,DNSEG(ISEG)%NLIST
 
-          JSEG  = DNSEG(ISEG)%SEGLIST(I)
-          JTYPE = SEGINFO(JSEG)%SegType
+        JSEG  = DNSEG(ISEG)%SEGLIST(I)
+        JTYPE = SEGINFO(JSEG)%SegType
 
-          IF (UNIT_OPTION) THEN
-              IUNIT = SEGINFO(ISEG)%UnitID
-              JUNIT = SEGINFO(JSEG)%UnitID
-          ELSE
-              IUNIT = 1
-              JUNIT = 1
-          END IF !(UNIT_OPTION)
+        IF (UNIT_OPTION) THEN
+            IUNIT = SEGINFO(ISEG)%UnitID
+            JUNIT = SEGINFO(JSEG)%UnitID
+        ELSE
+            IUNIT = 1
+            JUNIT = 1
+        END IF !(UNIT_OPTION)
 
-          IF (ISEGTYPE.LT.5) THEN                                       ! Single type ...
-              IF (JTYPE.EQ.ISEGTYPE) THEN
-                  IF (IUNIT.EQ.JUNIT) THEN
-                      SEGCOUNT = SEGCOUNT + 1
-                      IF (JTYPE.NE.3) THEN                              ! Stop @ delivery segments!!
-                          CALL MAP_DNCOUNT(DNTREE,JSEG,ISEGTYPE,UNIT_OPTION,SEGCOUNT,SEGINFO,DNSEG,NSS,IDIVAR,IOTSG)
-                      END IF
+        IF (ISEGTYPE.LT.5) THEN                                       ! Single type ...
+            IF (JTYPE.EQ.ISEGTYPE) THEN
+                IF (IUNIT.EQ.JUNIT) THEN
+                    SEGCOUNT = SEGCOUNT + 1
+                    IF (JTYPE.NE.3) THEN                              ! Stop @ delivery segments!!
+                        CALL MAP_DNCOUNT(DNTREE,JSEG,ISEGTYPE,UNIT_OPTION,SEGCOUNT,SEGINFO,DNSEG,NSS,IDIVAR,IOTSG)
+                    END IF
 
-                  END IF !(IUNIT=JUNIT)
-              END IF !(JTYPE)
+                END IF !(IUNIT=JUNIT)
+            END IF !(JTYPE)
 
-          ELSE IF (ISEGTYPE.EQ.5) THEN                                  ! ISEGTYPE=5 --> conveyance *or* delivery!
-              IF ((JTYPE.EQ.2) .OR. (JTYPE.EQ.3)) THEN
-                  IF (IUNIT.EQ.JUNIT) THEN
-                      SEGCOUNT = SEGCOUNT + 1
-                      IF (JTYPE.NE.3) THEN                              ! Stop @ delivery segments!!
-                          CALL MAP_DNCOUNT(DNTREE,JSEG,ISEGTYPE,UNIT_OPTION,SEGCOUNT,SEGINFO,DNSEG,NSS,IDIVAR,IOTSG)
-                      END IF
+        ELSE IF (ISEGTYPE.EQ.5) THEN                                  ! ISEGTYPE=5 --> conveyance *or* delivery!
+            IF ((JTYPE.EQ.2) .OR. (JTYPE.EQ.3)) THEN
+                IF (IUNIT.EQ.JUNIT) THEN
+                    SEGCOUNT = SEGCOUNT + 1
+                    IF (JTYPE.NE.3) THEN                              ! Stop @ delivery segments!!
+                        CALL MAP_DNCOUNT(DNTREE,JSEG,ISEGTYPE,UNIT_OPTION,SEGCOUNT,SEGINFO,DNSEG,NSS,IDIVAR,IOTSG)
+                    END IF
 
-                  END IF !(IUNIT=JUNIT)
-              END IF !(JTYPE)
+                END IF !(IUNIT=JUNIT)
+            END IF !(JTYPE)
 
-          END IF !(ISEGTYPE LT/EQ 5)
+        END IF !(ISEGTYPE LT/EQ 5)
 
-        END DO !(I = 1,DNSEG(ISEG)%NLIST)
+      END DO !(I = 1,DNSEG(ISEG)%NLIST)
 
-      END IF !(SEGTYPE.EQ.3)                                            ! Klugey force @ delivery seg dead-end
-      !
+    END IF !(SEGTYPE.EQ.3)                                            ! Klugey force @ delivery seg dead-end
+    !
   END SUBROUTINE MAP_DNCOUNT
   !
   RECURSIVE SUBROUTINE MAP_DNSTEP(DNTREE,ISEG,ISEGTYPE,UNIT_OPTION,COUNTER,SEGINFO,DNSEG,NSS,IDIVAR,IOTSG)
@@ -1400,78 +1400,78 @@ MODULE SWO_TREE_BUILDER!, ONLY: MAP_UPTREE, MAP_DNTREE
 !     ------------------------------------------------------------------
 !        ARGUMENTS:
 !     ------------------------------------------------------------------
-      LOGICAL, INTENT(IN)                :: UNIT_OPTION
-      INTEGER, INTENT(IN)                :: ISEG,ISEGTYPE
-      INTEGER, INTENT(INOUT)             :: COUNTER
-      TYPE(SWOPS_SEGTREE), INTENT(INOUT) :: DNTREE
-      TYPE(SEGINFODAT),    DIMENSION(:),CONTIGUOUS,INTENT(IN):: SEGINFO
-      TYPE(SWOPS_SEGLIST), DIMENSION(:),CONTIGUOUS,INTENT(IN):: DNSEG
-      INTEGER,                          INTENT(IN):: NSS
-      INTEGER,DIMENSION(:,:),CONTIGUOUS,INTENT(IN):: IDIVAR
-      INTEGER,DIMENSION(:),  CONTIGUOUS,INTENT(IN):: IOTSG
+    LOGICAL, INTENT(IN)                :: UNIT_OPTION
+    INTEGER, INTENT(IN)                :: ISEG,ISEGTYPE
+    INTEGER, INTENT(INOUT)             :: COUNTER
+    TYPE(SWOPS_SEGTREE), INTENT(INOUT) :: DNTREE
+    TYPE(SEGINFODAT),    DIMENSION(:),CONTIGUOUS,INTENT(IN):: SEGINFO
+    TYPE(SWOPS_SEGLIST), DIMENSION(:),CONTIGUOUS,INTENT(IN):: DNSEG
+    INTEGER,                          INTENT(IN):: NSS
+    INTEGER,DIMENSION(:,:),CONTIGUOUS,INTENT(IN):: IDIVAR
+    INTEGER,DIMENSION(:),  CONTIGUOUS,INTENT(IN):: IOTSG
 !
-!     ------------------------------------------------------------------
-!        LOCAL VARIABLES:
-      INTEGER :: JSEG,JTYPE,I,IUNIT,JUNIT
-!     ------------------------------------------------------------------
+!   ------------------------------------------------------------------
+!      LOCAL VARIABLES:
+    INTEGER :: JSEG,JTYPE,I,IUNIT,JUNIT
+!   ------------------------------------------------------------------
 !
-      ! TODO --
-      ! Added if/then to stop MAP_DNCOUNT / MAP_DNSTP at delivery segments...
-      ! This is needed so that delivery segments appear as "dead ends" in
-      ! segment tree, which in turn is required for accumulation routines
-      ! (e.g., summing TFDR and DELORDER over divsegs, splits, and branches)
-      ! This should be revisited to see if something more elegant can be done...
-      IF (SEGINFO(ISEG)%SegType.NE.3) THEN
+    ! TODO --
+    ! Added if/then to stop MAP_DNCOUNT / MAP_DNSTP at delivery segments...
+    ! This is needed so that delivery segments appear as "dead ends" in
+    ! segment tree, which in turn is required for accumulation routines
+    ! (e.g., summing TFDR and DELORDER over divsegs, splits, and branches)
+    ! This should be revisited to see if something more elegant can be done...
+    IF (SEGINFO(ISEG)%SegType.NE.3) THEN
 
-        ! recursive loop to fill segments in tree
-        DO I = 1,DNSEG(ISEG)%NLIST
+      ! recursive loop to fill segments in tree
+      DO I = 1,DNSEG(ISEG)%NLIST
 
-          JSEG  = DNSEG(ISEG)%SEGLIST(I)
-          JTYPE = SEGINFO(JSEG)%SegType
+        JSEG  = DNSEG(ISEG)%SEGLIST(I)
+        JTYPE = SEGINFO(JSEG)%SegType
 
-          IF (UNIT_OPTION) THEN
-              IUNIT = SEGINFO(ISEG)%UnitID
-              JUNIT = SEGINFO(JSEG)%UnitID
-          ELSE
-              IUNIT = 1
-              JUNIT = 1
-          END IF !(UNIT_OPTION)
+        IF (UNIT_OPTION) THEN
+            IUNIT = SEGINFO(ISEG)%UnitID
+            JUNIT = SEGINFO(JSEG)%UnitID
+        ELSE
+            IUNIT = 1
+            JUNIT = 1
+        END IF !(UNIT_OPTION)
 
-          IF (ISEGTYPE.LT.5) THEN                                       ! Single type ...
-              IF (JTYPE.EQ.ISEGTYPE) THEN
-                  IF (IUNIT.EQ.JUNIT) THEN
+        IF (ISEGTYPE.LT.5) THEN                                       ! Single type ...
+            IF (JTYPE.EQ.ISEGTYPE) THEN
+                IF (IUNIT.EQ.JUNIT) THEN
 
-                      COUNTER = COUNTER + 1
-                      DNTREE%SEGTREE(COUNTER) = JSEG
-                      IF (JTYPE.NE.3) THEN                              ! Stop @ delivery segments!!
-                          CALL MAP_DNSTEP(DNTREE,JSEG,ISEGTYPE,UNIT_OPTION,COUNTER,SEGINFO,DNSEG,NSS,IDIVAR,IOTSG)
-                      END IF
-                      ! CALL MAP_DNSTEP(DNTREE,JSEG,ISEGTYPE,UNIT_OPTION,COUNTER,SEGINFO,DNSEG,NSS,IDIVAR,IOTSG)
+                    COUNTER = COUNTER + 1
+                    DNTREE%SEGTREE(COUNTER) = JSEG
+                    IF (JTYPE.NE.3) THEN                              ! Stop @ delivery segments!!
+                        CALL MAP_DNSTEP(DNTREE,JSEG,ISEGTYPE,UNIT_OPTION,COUNTER,SEGINFO,DNSEG,NSS,IDIVAR,IOTSG)
+                    END IF
+                    ! CALL MAP_DNSTEP(DNTREE,JSEG,ISEGTYPE,UNIT_OPTION,COUNTER,SEGINFO,DNSEG,NSS,IDIVAR,IOTSG)
 
-                  END IF !(IUNIT.EQ.JUNIT)
-              END IF !(JTYPE)
+                END IF !(IUNIT.EQ.JUNIT)
+            END IF !(JTYPE)
 
-          ELSE IF (ISEGTYPE.EQ.5) THEN                                  ! ISEGTYPE=5 --> conveyance *or* delivery!
-              IF ((JTYPE.EQ.2) .OR. (JTYPE.EQ.3)) THEN
-                  IF (IUNIT.EQ.JUNIT) THEN
+        ELSE IF (ISEGTYPE.EQ.5) THEN                                  ! ISEGTYPE=5 --> conveyance *or* delivery!
+            IF ((JTYPE.EQ.2) .OR. (JTYPE.EQ.3)) THEN
+                IF (IUNIT.EQ.JUNIT) THEN
 
-                      COUNTER = COUNTER + 1
-                      DNTREE%SEGTREE(COUNTER) = JSEG
-                      IF (JTYPE.NE.3) THEN                              ! Stop @ delivery segments!!
-                          CALL MAP_DNSTEP(DNTREE,JSEG,ISEGTYPE,UNIT_OPTION,COUNTER,SEGINFO,DNSEG,NSS,IDIVAR,IOTSG)
-                      END IF
-                      ! CALL MAP_DNSTEP(DNTREE,JSEG,ISEGTYPE,UNIT_OPTION,COUNTER,SEGINFO,DNSEG,NSS,IDIVAR,IOTSG)
+                    COUNTER = COUNTER + 1
+                    DNTREE%SEGTREE(COUNTER) = JSEG
+                    IF (JTYPE.NE.3) THEN                              ! Stop @ delivery segments!!
+                        CALL MAP_DNSTEP(DNTREE,JSEG,ISEGTYPE,UNIT_OPTION,COUNTER,SEGINFO,DNSEG,NSS,IDIVAR,IOTSG)
+                    END IF
+                    ! CALL MAP_DNSTEP(DNTREE,JSEG,ISEGTYPE,UNIT_OPTION,COUNTER,SEGINFO,DNSEG,NSS,IDIVAR,IOTSG)
 
-                  END IF !(IUNIT.EQ.JUNIT)
-              END IF !(JTYPE)
+                END IF !(IUNIT.EQ.JUNIT)
+            END IF !(JTYPE)
 
-          END IF !(ISEGTYPE LT/EQ 5)
+        END IF !(ISEGTYPE LT/EQ 5)
 
-        END DO !(I = 1,DNSEG(ISEG)%NLIST)
+      END DO !(I = 1,DNSEG(ISEG)%NLIST)
 
-      END IF !(SEGTYPE.EQ.3)                                            ! Klugey force @ delivery seg dead-end
+    END IF !(SEGTYPE.EQ.3)                                            ! Klugey force @ delivery seg dead-end
 
-     !
+    
   END SUBROUTINE MAP_DNSTEP
   !
 END MODULE
@@ -1802,8 +1802,8 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
   CONTAINS
   !
   SUBROUTINE DEALLOCATE_SWO_DATA_FINAL(SWO)
-  TYPE(SWO_DATA)::SWO
-  CALL DEALLOCATE_SWO_DATA(SWO)
+    TYPE(SWO_DATA)::SWO
+    CALL DEALLOCATE_SWO_DATA(SWO)
   END SUBROUTINE
   !
   PURE ELEMENTAL SUBROUTINE DEALLOCATE_SWO_DATA(SWO)
@@ -1980,6 +1980,7 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
     !
     IF(.NOT. HAS_STARTDATE .AND. REALTIM < DZ) CALL WARN_MSG1%ADD('SWO BLOCK REQUIRES THAT THE DIS PACKAGE SPECIFY A STARTING TIME WITH THE KEYWORD "STARTDATE", "LEAPYEARS STARTIME" OR "STARTIME". NOTE THAT "STARTIME" DOES NOT ACCOUNT FOR LEAP YEARS AND IS NOT RECOMMENDED.'//BLN)
     !
+    IF(FDIM%NFARM < ONE)         CALL WARN_MSG1%ADD('SWO BLOCK REQUIRES THAT THE GLOBAL DEMENSION BLOCK SPECIFY NWBS > ZERO'//BLN)
     IF(.NOT. FDIM%HAS_HIERARCHY) CALL WARN_MSG1%ADD('SWO BLOCK REQUIRES THAT THE GLOBAL DEMENSION BLOCK SPECIFY NPROJ, NDIST, AND NUNIT'//BLN)
     IF(FDIM%NPROJ < ONE)         CALL WARN_MSG1%ADD('SWO BLOCK REQUIRES THAT THE GLOBAL DEMENSION BLOCK SPECIFY NPROJ > ZERO'//BLN)
     IF(FDIM%NDIST < ONE)         CALL WARN_MSG1%ADD('SWO BLOCK REQUIRES THAT THE GLOBAL DEMENSION BLOCK SPECIFY NDIST > ZERO'//BLN)
@@ -2262,7 +2263,7 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
           CASE ("DEFINE_SWO_VARIABLE","DEFINE_SWO_VARIABLES","DEFINE_S_VARIABLE","DEFINE_S_VARIABLES","DEFINE_VARIABLE","DEFINE_VARIABLES")
                            WRITE(BL%IOUT,'(A)') LINE(ISTART:ISTOP)//'     KEYWORD FOUND. NOW OPENING EXTERNAL FILE THAT CONTAINS THE FOLLOWING BLOCKS: "VARIABLE", "PROPERTY", "OUTPUT", "LOOKUP", and "RETURN"'
                            CALL FL%OPEN(LINE, LLOC, SWO%IOUT, BL%IU)
-                           IF(FL%IU==Z) CALL STOP_ERROR( LINE,BL%IU,BL%IOUT, MSG= 'SWO BLOCK ERROR: KEYWORD "DEFINE_SWO_VARIABLE" DOES NOT ALLOW FOR THE "INTERNAL" KEYWORD OR IMPLIED INTERNAL (LOADING ON SAME LINE). PLEASE MOVE INTERNAL INPUT TO SEPARATE FILE AND CHANGE KEYWORD TO "OPEN/CLOSE" OR "EXTERNAL".'//NL//'[NOTE THIS IS BECAUSE THE INPUT READ UTILITY CAN NOT DISTINGUISH BETWEEN THE END STATEMENT FOR DECLAIRING THE DECISION VARIABLES COMPARED TO THE END OF THE SWO INPUT BLOCK.]')
+                           IF(FL%IS_INTERNAL) CALL STOP_ERROR( LINE,BL%IU,BL%IOUT, MSG= 'SWO BLOCK ERROR: KEYWORD "DEFINE_SWO_VARIABLE" DOES NOT ALLOW FOR THE "INTERNAL" KEYWORD OR IMPLIED INTERNAL (LOADING ON SAME LINE). PLEASE MOVE INTERNAL INPUT TO SEPARATE FILE AND CHANGE KEYWORD TO "OPEN/CLOSE" OR "EXTERNAL".'//NL//'[NOTE THIS IS BECAUSE THE INPUT READ UTILITY CAN NOT DISTINGUISH BETWEEN THE END STATEMENT FOR DECLAIRING THE DECISION VARIABLES COMPARED TO THE END OF THE SWO INPUT BLOCK.]')
                            CALL SWO%DEC_VAR%LOAD(FL%IU, SWO%IOUT)
                            CALL FL%CLOSE()
          END SELECT
@@ -2594,16 +2595,16 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
                                                  CALL SWO%RELEASE_DMD_FRAC%INIT('REL_FRAC',  DNEG, BL%IOUT, BL%IU, NRES_BAL, ONE, Z, Z)
                         CASE("BY_POTENTIAL_RELEASE")
                                                  WRITE(BL%IOUT,'(A)') '   BY_POTENTIAL_RELEASE KEYWORD FOUND. REQUIRED RELEASES WILL BE APPLIED BASED ON THE RATIO OF THE USUALABLE STORAGE'
-                                                 CALL SWO%RELEASE_DMD_FRAC%INIT('REL_FRAC', -2D0, BL%IOUT, BL%IU, NRES_BAL, ONE, Z, Z)
+                                                 CALL SWO%RELEASE_DMD_FRAC%INIT('REL_FRAC', -2.D0, BL%IOUT, BL%IU, NRES_BAL, ONE, Z, Z)
                         CASE("BY_AVAILABLE_RELEASE")
                                                  WRITE(BL%IOUT,'(A)') '   BY_AVAILABLE_RELEASE KEYWORD FOUND. REQUIRED RELEASES WILL BE APPLIED BASED ON THE RATIO OF THE USUALABLE STORAGE'
-                                                 CALL SWO%RELEASE_DMD_FRAC%INIT('REL_FRAC', -3D0, BL%IOUT, BL%IU, NRES_BAL, ONE, Z, Z)
+                                                 CALL SWO%RELEASE_DMD_FRAC%INIT('REL_FRAC', -3.D0, BL%IOUT, BL%IU, NRES_BAL, ONE, Z, Z)
                         CASE("BY_STORAGE")
                                                  WRITE(BL%IOUT,'(A)') '   BY_STORAGE KEYWORD FOUND. REQUIRED RELEASES WILL BE APPLIED BASED ON THE RATIO OF THE USUALABLE STORAGE'
-                                                 CALL SWO%RELEASE_DMD_FRAC%INIT('REL_FRAC', -4D0, BL%IOUT, BL%IU, NRES_BAL, ONE, Z, Z)
+                                                 CALL SWO%RELEASE_DMD_FRAC%INIT('REL_FRAC', -4.D0, BL%IOUT, BL%IU, NRES_BAL, ONE, Z, Z)
                         CASE("BY_USABLE_STORAGE","BY_USEABLE_STORAGE")
                                                  WRITE(BL%IOUT,'(A)') '   BY_USABLE_STORAGE KEYWORD FOUND. REQUIRED RELEASES WILL BE APPLIED BASED ON THE RATIO OF THE USUALABLE STORAGE'
-                                                 CALL SWO%RELEASE_DMD_FRAC%INIT('REL_FRAC', -5D0, BL%IOUT, BL%IU, NRES_BAL, ONE, Z, Z)
+                                                 CALL SWO%RELEASE_DMD_FRAC%INIT('REL_FRAC', -5.D0, BL%IOUT, BL%IU, NRES_BAL, ONE, Z, Z)
                         CASE DEFAULT
                                                  LLOC = N
                                                  CALL SWO%RELEASE_DMD_FRAC%INIT('REL_FRAC',  LLOC, LINE, BL%IOUT, BL%IU, NRES_BAL, ONE, Z, Z, SCRATCH=BL%SCRATCH)
@@ -2625,16 +2626,16 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
                                                  CALL SWO%RELEASE_REQ_FRAC%INIT('REL_REQ_FRAC',  DNEG, BL%IOUT, BL%IU, NRES_BAL, ONE, Z, Z)
                         CASE("BY_POTENTIAL_RELEASE")
                                                  WRITE(BL%IOUT,'(A)') '   BY_POTENTIAL_RELEASE KEYWORD FOUND. REQUIRED RELEASES WILL BE APPLIED BASED ON THE RATIO OF THE USUALABLE STORAGE'
-                                                 CALL SWO%RELEASE_REQ_FRAC%INIT('REL_REQ_FRAC', -2D0, BL%IOUT, BL%IU, NRES_BAL, ONE, Z, Z)
+                                                 CALL SWO%RELEASE_REQ_FRAC%INIT('REL_REQ_FRAC', -2.D0, BL%IOUT, BL%IU, NRES_BAL, ONE, Z, Z)
                         CASE("BY_AVAILABLE_RELEASE")
                                                  WRITE(BL%IOUT,'(A)') '   BY_AVAILABLE_RELEASE KEYWORD FOUND. REQUIRED RELEASES WILL BE APPLIED BASED ON THE RATIO OF THE USUALABLE STORAGE'
-                                                 CALL SWO%RELEASE_REQ_FRAC%INIT('REL_REQ_FRAC', -3D0, BL%IOUT, BL%IU, NRES_BAL, ONE, Z, Z)
+                                                 CALL SWO%RELEASE_REQ_FRAC%INIT('REL_REQ_FRAC', -3.D0, BL%IOUT, BL%IU, NRES_BAL, ONE, Z, Z)
                         CASE("BY_STORAGE")
                                                  WRITE(BL%IOUT,'(A)') '   BY_STORAGE KEYWORD FOUND. REQUIRED RELEASES WILL BE APPLIED BASED ON THE RATIO OF THE USUALABLE STORAGE'
-                                                 CALL SWO%RELEASE_REQ_FRAC%INIT('REL_REQ_FRAC', -4D0, BL%IOUT, BL%IU, NRES_BAL, ONE, Z, Z)
+                                                 CALL SWO%RELEASE_REQ_FRAC%INIT('REL_REQ_FRAC', -4.D0, BL%IOUT, BL%IU, NRES_BAL, ONE, Z, Z)
                         CASE("BY_USABLE_STORAGE","BY_USEABLE_STORAGE")
                                                  WRITE(BL%IOUT,'(A)') '   BY_USABLE_STORAGE KEYWORD FOUND. REQUIRED RELEASES WILL BE APPLIED BASED ON THE RATIO OF THE USUALABLE STORAGE'
-                                                 CALL SWO%RELEASE_REQ_FRAC%INIT('REL_REQ_FRAC', -5D0, BL%IOUT, BL%IU, NRES_BAL, ONE, Z, Z)
+                                                 CALL SWO%RELEASE_REQ_FRAC%INIT('REL_REQ_FRAC', -5.D0, BL%IOUT, BL%IU, NRES_BAL, ONE, Z, Z)
                         CASE("BY_PROJECT_RELEASE_FRACTION","BY_RELEASE_FRACTION")
                                                  WRITE(BL%IOUT,'(A)') '   BY_RELEASE_DEMAND_FRACTION KEYWORD FOUND. REQUIRED RELEASES WILL USE THE VALUES DEFINED BY "RESERVOIR_MAXIMUM_RELEASE" KEYWORD OR ITs S COUNTERPART'
                                                  CALL SWO%RELEASE_REQ_FRAC%INIT('REL_REQ_FRAC',DZ, BL%IOUT, BL%IU, NRES_BAL, ONE, Z, Z)
@@ -2695,7 +2696,6 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
       CASE ("RESERVOIR_RELEASE_SEGMENT","RELEASE_SEGMENT")
                         WRITE(BL%IOUT,'(A)') 'RESERVOIR_RELEASE_SEGMENT KEYWORD FOUND. NOW LOADING '//STR_NRES_BAL//' RESERVOIR RELEASE SFR SEGMENTS WITH LIST-ARRAY INPUT (ONLY LIST FORMAT ACCEPTED).'
                         CALL SWO%RESBAL_RELSEG%INIT('RESBAL_RELSEG',  LLOC, LINE, BL%IOUT, BL%IU, SCRATCH=BL%SCRATCH, DIM=[NRES_BAL], WILD_IN=SWO%SFR_ID)
-                        !
                         !
       CASE ("RESERVOIR_SFR_INFLOW_SEGMENT","SFR_INFLOW_SEGMENT")
                         WRITE(BL%IOUT,'(A)') 'RESERVOIR_SFR_INFLOW_SEGMENT KEYWORD FOUND. NOW LOADING '//STR_NRES_BAL//' RESERVOIR SFR SEGMENTS, WHOSE OUTFLOW BECOMES INFLOW TO THE RESPECTIVE RESERVOIR, WITH LIST-ARRAY INPUT (ONLY LIST FORMAT ACCEPTED).'
@@ -2803,7 +2803,7 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
                         DO I = ONE, SWO%NPROJ
                               DO J = ONE, SWO%NRES_TOT(I)
                                                         K = K + ONE
-                                                        IF(.NOT. FILES(K)%SKIP) CALL SWOPS_READFRAC(SWO,FILES(K),LINE,I,J, BL%IU)
+                                                        IF(.NOT. FILES(K)%NULL_FILE) CALL SWOPS_READFRAC(SWO,FILES(K),LINE,I,J, BL%IU)
                               END DO
                         END DO
                         DEALLOCATE(FILES)
@@ -2932,13 +2932,13 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
                         ELSEIF( LINE(ISTART:ISTOP) == 'S_TRANSCRIPT' .OR. LINE(ISTART:ISTOP) == 'TRANSCRIPT' ) THEN
                             CALL GET_WORD(LINE,LLOC,ISTART,ISTOP,CUSTOM,TRUE)
                             SELECT CASE ( CUSTOM )
-                            CASE("SIMULATION");                  CALL SWO%PRT_RUL_SIM     %OPEN(LINE, LLOC, BL%IOUT, BL%IU, NOBINARY=TRUE)
-                            CASE("STRESS_PERIOD");               CALL SWO%PRT_RUL_SP      %OPEN(LINE, LLOC, BL%IOUT, BL%IU, NOBINARY=TRUE)
-                            CASE("TIME_STEP");                   CALL SWO%PRT_RUL_TS      %OPEN(LINE, LLOC, BL%IOUT, BL%IU, NOBINARY=TRUE)
-                            CASE("ITERATION");                   CALL SWO%PRT_RUL_IT      %OPEN(LINE, LLOC, BL%IOUT, BL%IU, NOBINARY=TRUE)
-                            CASE("CLOSEOUT_COMMANDS","CLOSEOUT");CALL SWO%PRT_RUL_CLOSEOUT%OPEN(LINE, LLOC, BL%IOUT, BL%IU, NOBINARY=TRUE)
-                            CASE("TIME_STEP_END");               CALL SWO%PRT_RUL_TS_END  %OPEN(LINE, LLOC, BL%IOUT, BL%IU, NOBINARY=TRUE)
-                            CASE("ITERATION_END");               CALL SWO%PRT_RUL_IT_END  %OPEN(LINE, LLOC, BL%IOUT, BL%IU, NOBINARY=TRUE,SPLITMAXCOUNT=21)
+                            CASE("SIMULATION");                  CALL SWO%PRT_RUL_SIM     %OPEN(LINE, LLOC, BL%IOUT, BL%IU, NO_BINARY=TRUE)
+                            CASE("STRESS_PERIOD");               CALL SWO%PRT_RUL_SP      %OPEN(LINE, LLOC, BL%IOUT, BL%IU, NO_BINARY=TRUE)
+                            CASE("TIME_STEP");                   CALL SWO%PRT_RUL_TS      %OPEN(LINE, LLOC, BL%IOUT, BL%IU, NO_BINARY=TRUE)
+                            CASE("ITERATION");                   CALL SWO%PRT_RUL_IT      %OPEN(LINE, LLOC, BL%IOUT, BL%IU, NO_BINARY=TRUE)
+                            CASE("CLOSEOUT_COMMANDS","CLOSEOUT");CALL SWO%PRT_RUL_CLOSEOUT%OPEN(LINE, LLOC, BL%IOUT, BL%IU, NO_BINARY=TRUE)
+                            CASE("TIME_STEP_END");               CALL SWO%PRT_RUL_TS_END  %OPEN(LINE, LLOC, BL%IOUT, BL%IU, NO_BINARY=TRUE)
+                            CASE("ITERATION_END");               CALL SWO%PRT_RUL_IT_END  %OPEN(LINE, LLOC, BL%IOUT, BL%IU, NO_BINARY=TRUE,SPLITMAXCOUNT=21)
                             CASE DEFAULT
                                               CALL STOP_ERROR(LINE=LINE, INFILE=BL%IU, OUTPUT=BL%IOUT,MSG='SWO BLOCK ERROR: FOUND KEYWORD "PRINT S_TRANSCRIPT",'//NL//'WHICH MUST BE FOLLOWED BY "SIMULATION", "STRESS_PERIOD", "TIME_STEP", "ITERATION", "ITERATION_END", "TIME_STEP_END", OR "CLOSEOUT"'//NL//'TO INDICATE WHICH OF THE S LANGAUGE COMMANDS THAT A TRANSCRIPT IS MADE OF.')
                             END SELECT
@@ -2949,16 +2949,16 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
                            END IF
                            !
                            SELECT CASE ( LINE(ISTART:ISTOP) )
-                           CASE("FARM");             CALL SWO%OUTPUT%FARM       %OPEN(LINE, LLOC, BL%IOUT, BL%IU, NOBINARY=TRUE); SWO%OUTPUT%IT_FARM        = BY_IT
-                           CASE("AUXDEM");           CALL SWO%OUTPUT%AUXDEM     %OPEN(LINE, LLOC, BL%IOUT, BL%IU, NOBINARY=TRUE); SWO%OUTPUT%IT_AUXDEM      = BY_IT
-                           CASE("UNIT");             CALL SWO%OUTPUT%UNIT       %OPEN(LINE, LLOC, BL%IOUT, BL%IU, NOBINARY=TRUE); SWO%OUTPUT%IT_UNIT        = BY_IT
-                           CASE("DIST", "DISTRICT"); CALL SWO%OUTPUT%DIST       %OPEN(LINE, LLOC, BL%IOUT, BL%IU, NOBINARY=TRUE); SWO%OUTPUT%IT_DIST        = BY_IT
-                           CASE("PROJ","PROJECT");   CALL SWO%OUTPUT%PROJ       %OPEN(LINE, LLOC, BL%IOUT, BL%IU, NOBINARY=TRUE); SWO%OUTPUT%IT_PROJ        = BY_IT
-                           CASE("DIVSEG");           CALL SWO%OUTPUT%DivSeg     %OPEN(LINE, LLOC, BL%IOUT, BL%IU, NOBINARY=TRUE); SWO%OUTPUT%IT_DivSeg      = BY_IT
-                           CASE("SPLITSEG");         CALL SWO%OUTPUT%SplitSeg   %OPEN(LINE, LLOC, BL%IOUT, BL%IU, NOBINARY=TRUE); SWO%OUTPUT%IT_SplitSeg    = BY_IT
-                           CASE("STORAGE");          CALL SWO%OUTPUT%Storage    %OPEN(LINE, LLOC, BL%IOUT, BL%IU, NOBINARY=TRUE); SWO%OUTPUT%IT_Storage     = BY_IT
-                           CASE("SFR");              CALL SWO%OUTPUT%SFR        %OPEN(LINE, LLOC, BL%IOUT, BL%IU, NOBINARY=TRUE); SWO%OUTPUT%IT_SFR         = BY_IT
-                           CASE("CONVERGENCE");      CALL SWO%OUTPUT%Convergence%OPEN(LINE, LLOC, BL%IOUT, BL%IU, NOBINARY=TRUE); SWO%OUTPUT%IT_Convergence = BY_IT
+                           CASE("FARM");             CALL SWO%OUTPUT%FARM       %OPEN(LINE, LLOC, BL%IOUT, BL%IU, NO_BINARY=TRUE); SWO%OUTPUT%IT_FARM        = BY_IT
+                           CASE("AUXDEM");           CALL SWO%OUTPUT%AUXDEM     %OPEN(LINE, LLOC, BL%IOUT, BL%IU, NO_BINARY=TRUE); SWO%OUTPUT%IT_AUXDEM      = BY_IT
+                           CASE("UNIT");             CALL SWO%OUTPUT%UNIT       %OPEN(LINE, LLOC, BL%IOUT, BL%IU, NO_BINARY=TRUE); SWO%OUTPUT%IT_UNIT        = BY_IT
+                           CASE("DIST", "DISTRICT"); CALL SWO%OUTPUT%DIST       %OPEN(LINE, LLOC, BL%IOUT, BL%IU, NO_BINARY=TRUE); SWO%OUTPUT%IT_DIST        = BY_IT
+                           CASE("PROJ","PROJECT");   CALL SWO%OUTPUT%PROJ       %OPEN(LINE, LLOC, BL%IOUT, BL%IU, NO_BINARY=TRUE); SWO%OUTPUT%IT_PROJ        = BY_IT
+                           CASE("DIVSEG");           CALL SWO%OUTPUT%DivSeg     %OPEN(LINE, LLOC, BL%IOUT, BL%IU, NO_BINARY=TRUE); SWO%OUTPUT%IT_DivSeg      = BY_IT
+                           CASE("SPLITSEG");         CALL SWO%OUTPUT%SplitSeg   %OPEN(LINE, LLOC, BL%IOUT, BL%IU, NO_BINARY=TRUE); SWO%OUTPUT%IT_SplitSeg    = BY_IT
+                           CASE("STORAGE");          CALL SWO%OUTPUT%Storage    %OPEN(LINE, LLOC, BL%IOUT, BL%IU, NO_BINARY=TRUE); SWO%OUTPUT%IT_Storage     = BY_IT
+                           CASE("SFR");              CALL SWO%OUTPUT%SFR        %OPEN(LINE, LLOC, BL%IOUT, BL%IU, NO_BINARY=TRUE); SWO%OUTPUT%IT_SFR         = BY_IT
+                           CASE("CONVERGENCE");      CALL SWO%OUTPUT%Convergence%OPEN(LINE, LLOC, BL%IOUT, BL%IU, NO_BINARY=TRUE); SWO%OUTPUT%IT_Convergence = BY_IT
                            !
                            CASE("CONVERSION_FACTOR_STORAGE"); CALL GET_NUMBER(LINE,LLOC,ISTART,ISTOP,BL%IOUT,BL%IU,SWO%STOR_CNVT, MSG='FAILED TO LOAD AFTER KEYWORD "CONVERSION_FACTOR_STORAGE" THE CONVERSION FACTOR TO APPLY TO OUPUT FILES')
                            CASE("CONVERSION_FACTOR_RATE"   ); CALL GET_NUMBER(LINE,LLOC,ISTART,ISTOP,BL%IOUT,BL%IU,SWO%FLOW_CNVT, MSG='FAILED TO LOAD AFTER KEYWORD "CONVERSION_FACTOR_RATE" THE CONVERSION FACTOR TO APPLY TO OUPUT FILES')
@@ -2981,13 +2981,13 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
       CASE ("S_TRANSCRIPT")
                         CALL PARSE_WORD_UP(LINE,LLOC,ISTART,ISTOP)
                         SELECT CASE ( LINE(ISTART:ISTOP) )
-                        CASE("SIMULATION");                  CALL SWO%PRT_RUL_SIM     %OPEN(LINE, LLOC, BL%IOUT, BL%IU, NOBINARY=TRUE)
-                        CASE("STRESS_PERIOD");               CALL SWO%PRT_RUL_SP      %OPEN(LINE, LLOC, BL%IOUT, BL%IU, NOBINARY=TRUE)
-                        CASE("TIME_STEP");                   CALL SWO%PRT_RUL_TS      %OPEN(LINE, LLOC, BL%IOUT, BL%IU, NOBINARY=TRUE)
-                        CASE("ITERATION");                   CALL SWO%PRT_RUL_IT      %OPEN(LINE, LLOC, BL%IOUT, BL%IU, NOBINARY=TRUE)
-                        CASE("CLOSEOUT","CLOSEOUT_COMMANDS");CALL SWO%PRT_RUL_CLOSEOUT%OPEN(LINE, LLOC, BL%IOUT, BL%IU, NOBINARY=TRUE)
-                        CASE("TIME_STEP_END");               CALL SWO%PRT_RUL_TS_END  %OPEN(LINE, LLOC, BL%IOUT, BL%IU, NOBINARY=TRUE)
-                        CASE("ITERATION_END");               CALL SWO%PRT_RUL_IT_END  %OPEN(LINE, LLOC, BL%IOUT, BL%IU, NOBINARY=TRUE,SPLITMAXCOUNT=21)
+                        CASE("SIMULATION");                  CALL SWO%PRT_RUL_SIM     %OPEN(LINE, LLOC, BL%IOUT, BL%IU, NO_BINARY=TRUE)
+                        CASE("STRESS_PERIOD");               CALL SWO%PRT_RUL_SP      %OPEN(LINE, LLOC, BL%IOUT, BL%IU, NO_BINARY=TRUE)
+                        CASE("TIME_STEP");                   CALL SWO%PRT_RUL_TS      %OPEN(LINE, LLOC, BL%IOUT, BL%IU, NO_BINARY=TRUE)
+                        CASE("ITERATION");                   CALL SWO%PRT_RUL_IT      %OPEN(LINE, LLOC, BL%IOUT, BL%IU, NO_BINARY=TRUE)
+                        CASE("CLOSEOUT","CLOSEOUT_COMMANDS");CALL SWO%PRT_RUL_CLOSEOUT%OPEN(LINE, LLOC, BL%IOUT, BL%IU, NO_BINARY=TRUE)
+                        CASE("TIME_STEP_END");               CALL SWO%PRT_RUL_TS_END  %OPEN(LINE, LLOC, BL%IOUT, BL%IU, NO_BINARY=TRUE)
+                        CASE("ITERATION_END");               CALL SWO%PRT_RUL_IT_END  %OPEN(LINE, LLOC, BL%IOUT, BL%IU, NO_BINARY=TRUE,SPLITMAXCOUNT=21)
                         CASE DEFAULT
                                           CALL STOP_ERROR(LINE=LINE, INFILE=BL%IU, OUTPUT=BL%IOUT,MSG='SWO BLOCK ERROR: FOUND KEYWORD "S_TRANSCRIPT",'//NL//'WHICH MUST BE FOLLOWED BY "SIMULATION", "STRESS_PERIOD", "TIME_STEP", "ITERATION", "ITERATION_END", "TIME_STEP_END", OR "CLOSEOUT"'//NL//'TO INDICATE WHICH OF THE S LANGAUGE COMMANDS THAT A TRANSCRIPT IS MADE OF.')
                         END SELECT
@@ -3216,8 +3216,8 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
         CALL SWO%OUTPUT%Convergence%SET_HEADER('    KPER    KSTP   KITER IPROJ     MAXDEL(RELEASE)        DEL(RELEASE)   MAXDEL(DIVERSION)      DEL(DIVERSION)    MAXDEL(DELIVERY)       DEL(DELIVERY) MAXDIFF(DIV.v.ORDR)    DIFF(DIV.v.ORDR)        MAX(OUTFLOW)             OUTFLOW')
     END IF
     !
-    IF(SWO%PRT_RESDAT_CMPCT %IS_OPEN) CALL SWO%PRT_RESDAT_CMPCT %SET_HEADER('DATE_START            DYEAR_START     DYEAR_END   SP   TS  RES           DELT          STAGE        STORAGE        RELEASE       SPILLWAY        OVERTOP         INFLOW         PRECIP         EVAPOR           AREA       TRANSFER')
-    IF(SWO%PRT_RESDAT_DETAIL%IS_OPEN) CALL SWO%PRT_RESDAT_DETAIL%SET_HEADER('DATE_START            DYEAR_START     DYEAR_END   SP   TS  RES           DELT          STAGE        STORAGE   RELEASE_PROJ   RELEASE_REQF  RELEASE_FLOOD  RELEASE_EXTRA   RELEASE_SPEC    RELEASE_MIN       SPILLWAY        OVERTOP         INFLOW         PRECIP         EVAPOR           AREA       TRANSFER')
+    IF(SWO%PRT_RESDAT_CMPCT %IS_OPEN) CALL SWO%PRT_RESDAT_CMPCT %SET_HEADER('DATE_START            DYEAR_START     DYEAR_END   SP   TS  RES           DELT          STAGE        STORAGE        RELEASE       SPILLWAY        OVERTOP         INFLOW         PRECIP         EVAPOR           AREA       TRANSFER    RELEASE_MAX')
+    IF(SWO%PRT_RESDAT_DETAIL%IS_OPEN) CALL SWO%PRT_RESDAT_DETAIL%SET_HEADER('DATE_START            DYEAR_START     DYEAR_END   SP   TS  RES           DELT          STAGE        STORAGE   RELEASE_PROJ   RELEASE_REQF  RELEASE_FLOOD  RELEASE_EXTRA   RELEASE_SPEC    RELEASE_MIN       SPILLWAY        OVERTOP         INFLOW         PRECIP         EVAPOR           AREA       TRANSFER    RELEASE_MAX')
     !
     IF(SWO%PRT_RESDAT%IS_OPEN) THEN
         CUSTOM = 'DATE_START            DYEAR_START     DYEAR_END   SP   TS           DELT       STAGE_01     STORAGE_01     RELEASE_01    SPILLWAY_01     OVERTOP_01      INFLOW_01      PRECIP_01      EVAPOR_01        AREA_01    TRANSFER_01'
@@ -3493,7 +3493,19 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
       IF(SWO%DEC_VAR%PROP_RET(I)%N > ONE) THEN
         IF( 'PROJ'== SWO%DEC_VAR%PROP_RET(I)%PROP(ONE)) THEN
             !
-            IF    ('RELEASE_FRAC_RES' == SWO%DEC_VAR%PROP_RET(I)%PROP(TWO)) THEN
+            IF('RELEASE_FRAC_RES' == SWO%DEC_VAR%PROP_RET(I)%PROP(TWO)) THEN
+                 !
+                          SWO%S_RELEASE_FRAC%HAS_FRAC = TRUE
+                 ALLOCATE(SWO%S_RELEASE_FRAC%BACK_CALC(SWO%NPROJ), SOURCE = Z)
+                 !ALLOCATE(SWO%S_RELEASE_FRAC%FRAC     (SWO%NPROJ))
+                 ALLOCATE(SWO%S_RELEASE_FRAC%POS      (SWO%NPROJ))
+                 EXIT
+                 !
+            END IF
+        END IF
+        IF( 'RES'== SWO%DEC_VAR%PROP_RET(I)%PROP(ONE)) THEN
+            !
+            IF('PROJ_REL_FRAC' == SWO%DEC_VAR%PROP_RET(I)%PROP(TWO)) THEN
                  !
                           SWO%S_RELEASE_FRAC%HAS_FRAC = TRUE
                  ALLOCATE(SWO%S_RELEASE_FRAC%BACK_CALC(SWO%NPROJ), SOURCE = Z)
@@ -3508,14 +3520,13 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
     !
     IF(SWO%S_RELEASE_FRAC%HAS_FRAC) THEN
        DO I=ONE, SWO%DEC_VAR%NRET
-         IF(SWO%DEC_VAR%PROP_RET(I)%N > ONE) THEN
+         IF(SWO%DEC_VAR%PROP_RET(I)%N > ONE) THEN                               ! Slang Var: PROJ.id.RELEASE_FRAC_RES.id2
            IF( 'PROJ'== SWO%DEC_VAR%PROP_RET(I)%PROP(ONE)) THEN
-               !
-               IF    ('RELEASE_FRAC_RES' == SWO%DEC_VAR%PROP_RET(I)%PROP(TWO)) THEN
+               IF('RELEASE_FRAC_RES' == SWO%DEC_VAR%PROP_RET(I)%PROP(TWO)) THEN
                     !
                     K = SWO%DEC_VAR%PROP_RET(I)%ID(ONE)   !K = IPROJ
                     !IF(SWO%S_RELEASE_FRAC%FRAC(K)%N==Z) CALL SWO%S_RELEASE_FRAC%FRAC%ALLOC(SWO%NRES_BAL(K),  DZ)
-                    IF(SWO%S_RELEASE_FRAC%POS (K)%N==Z) CALL SWO%S_RELEASE_FRAC%POS %ALLOC(SWO%NRES_BAL(K),   Z)
+                    IF(SWO%S_RELEASE_FRAC%POS (K)%N==Z) CALL SWO%S_RELEASE_FRAC%POS %ALLOC(SWO%NRES_BAL(K), Z)
                     !
                     N = SWO%DEC_VAR%PROP_RET(I)%ID(TWO)   !N = IRES
                     !
@@ -3529,6 +3540,36 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
                         CYCLE
                     END IF
                     !SWO%S_RELEASE_FRAC%FRAC(K)%VEC(N) = DZ
+                    SWO%S_RELEASE_FRAC%POS (K)%VEC(N) = SWO%DEC_VAR%PROP_RET(I)%POS
+                    !
+               END IF
+         ELSEIF( 'RES'== SWO%DEC_VAR%PROP_RET(I)%PROP(ONE)) THEN                ! Slang Var: RES.id.PROJ_REL_FRAC
+               !
+               N = SWO%DEC_VAR%PROP_RET(I)%ID(ONE)   ! N = Absolute Res Number, not local
+               !
+               IF(N == Z .AND. SWO%DEC_VAR%PROP_RET(I)%N > TWO) THEN
+                   N = STR_POS( SWO%DEC_VAR%PROP_RET(I)%PROP(TWO), SWO%RESNAM )
+                   !
+                   IF(N == Z) THEN
+                       CALL WARN_MSG1%ADD('FOUND VARIABLE NAME "'//SWO%DEC_VAR%NAM( SWO%DEC_VAR%PROP_RET(I)%POS )//'"'//NL//'BUT FAILED TO IDENTIFY THE EITHER THE RESERVOIR NUMBER OR THE RESERVOIR NAME'//BLN)
+                       CYCLE
+                   END IF
+                   !
+                   SWO%DEC_VAR%PROP_RET(I)%ID(ONE) = N
+                   DO J=3, SWO%DEC_VAR%PROP_RET(I)%N
+                      SWO%DEC_VAR%PROP_RET(I)%PROP(J-1) = SWO%DEC_VAR%PROP_RET(I)%PROP(J)
+                      SWO%DEC_VAR%PROP_RET(I)%ID  (J-1) = SWO%DEC_VAR%PROP_RET(I)%ID  (J)
+                   END DO
+                   SWO%DEC_VAR%PROP_RET(I)%N = SWO%DEC_VAR%PROP_RET(I)%N - ONE
+               END IF
+               !
+               IF('PROJ_REL_FRAC' == SWO%DEC_VAR%PROP_RET(I)%PROP(TWO)) THEN
+                    !
+                    K = SWO%RESBAL2PROJ(ONE,N)         ! Get Proj Number
+                    N = SWO%RESBAL2PROJ(TWO,N)         ! Get Res number in Proj (IRES)
+                    !
+                    IF(SWO%S_RELEASE_FRAC%POS (K)%N==Z) CALL SWO%S_RELEASE_FRAC%POS %ALLOC(SWO%NRES_BAL(K), Z)
+                    !
                     SWO%S_RELEASE_FRAC%POS (K)%VEC(N) = SWO%DEC_VAR%PROP_RET(I)%POS
                     !
                END IF
@@ -6117,6 +6158,8 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
           REQF: DO IREQ = ONE, SWO%REQFLOW%N
              !
              ASSOCIATE(N => SWO%REQFLOW%RES(IREQ)%N, RES => SWO%REQFLOW%RES(IREQ)%VEC)
+                IF(N < ONE) CYCLE REQF
+                !
                 IF(N == ONE) THEN
                     I = SWO%RESBAL2PROJ(ONE,RES(ONE))
                     J = SWO%RESBAL2PROJ(TWO,RES(ONE))
@@ -6210,68 +6253,68 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
 !     ------------------------------------------------------------------
 !        ARGUMENTS:
 !     ------------------------------------------------------------------
-      TYPE(SWOPS_SEGLIST), DIMENSION(:),CONTIGUOUS,INTENT(INOUT):: UPSEG
-      INTEGER,                          INTENT(IN):: NSS
-      INTEGER,DIMENSION(:,:),CONTIGUOUS,INTENT(IN):: IDIVAR
-      INTEGER,DIMENSION(:),  CONTIGUOUS,INTENT(IN):: IOTSG
+    TYPE(SWOPS_SEGLIST), DIMENSION(:),CONTIGUOUS,INTENT(INOUT):: UPSEG
+    INTEGER,                          INTENT(IN):: NSS
+    INTEGER,DIMENSION(:,:),CONTIGUOUS,INTENT(IN):: IDIVAR
+    INTEGER,DIMENSION(:),  CONTIGUOUS,INTENT(IN):: IOTSG
 !
-!     ------------------------------------------------------------------
-!        LOCAL VARIABLES:
-      INTEGER ISEG,JSEG,COUNTER,NN,IDIV
-!     ------------------------------------------------------------------
+!   ------------------------------------------------------------------
+!      LOCAL VARIABLES:
+    INTEGER ISEG,JSEG,COUNTER,NN,IDIV
+!   ------------------------------------------------------------------
 !
-      ! Allocate SWOPS to dimension NSS (number of stream segments in model)
-      !ALLOCATE()
+    ! Allocate SWOPS to dimension NSS (number of stream segments in model)
+    !ALLOCATE()
 !
-       ! Loop over stream segments in model, count immediate upstream segments
-       ! --> segments with OUTSEG = current segment (outflow to segment)
-       ! --> IUPSEG of current segment              (diversion into seg)
-      DO ISEG = ONE,NSS
+     ! Loop over stream segments in model, count immediate upstream segments
+     ! --> segments with OUTSEG = current segment (outflow to segment)
+     ! --> IUPSEG of current segment              (diversion into seg)
+    DO ISEG = ONE,NSS
 !
-          ! COUNT UPSTREAM SEGMENTS
-          COUNTER = Z
-          ! tick counter if segment has IUPSEG (i.e., segment receives diversion)
-          IF (IDIVAR(1,ISEG).NE.Z) THEN
-              IDIV = IDIVAR(1,ISEG)
-              COUNTER = COUNTER + ONE
-          ELSE
-              IDIV = NINER
-          END IF
-          ! loop over all other segments, tick counter once for each segment
-          ! with outseg equal to current segment
-          DO JSEG = ONE,NSS
-              IF (IOTSG(JSEG)==ISEG .AND. JSEG.NE.IDIV) THEN
-                  COUNTER = COUNTER + ONE
-              END IF
-          END DO !(JSEG = 1,NSS)
+        ! COUNT UPSTREAM SEGMENTS
+        COUNTER = Z
+        ! tick counter if segment has IUPSEG (i.e., segment receives diversion)
+        IF (IDIVAR(1,ISEG).NE.Z) THEN
+            IDIV = IDIVAR(1,ISEG)
+            COUNTER = COUNTER + ONE
+        ELSE
+            IDIV = NINER
+        END IF
+        ! loop over all other segments, tick counter once for each segment
+        ! with outseg equal to current segment
+        DO JSEG = ONE,NSS
+            IF (IOTSG(JSEG)==ISEG .AND. JSEG.NE.IDIV) THEN
+                COUNTER = COUNTER + ONE
+            END IF
+        END DO !(JSEG = 1,NSS)
 !
-          ! ASSIGN SEGMENTS IN UPSEG
-          UPSEG(ISEG)%NSEG  = ISEG
-          UPSEG(ISEG)%NLIST = COUNTER
-          !
-          IF(COUNTER>Z) THEN
-             CALL ALLOC( UPSEG(ISEG)%SEGLIST, COUNTER )
-             ! add IUPSEG to list
-             NN = ONE
-             IF (IDIV > Z) THEN
-                 UPSEG(ISEG)%SEGLIST(NN) = IDIV
-                 NN = NN + ONE
-             END IF
-             ! loop again to fill UPSEG list
-             IF(COUNTER > ONE .OR. NN==ONE) THEN
-                 DO JSEG = 1,NSS
-                     IF (IOTSG(JSEG)==ISEG .AND. JSEG.NE.IDIV) THEN
-                         UPSEG(ISEG)%SEGLIST(NN) = JSEG
-                         NN = NN + 1
-                     END IF
-                 END DO !(JSEG = 1,NSS)
-             END IF
-          END IF
-          !
-      END DO !(ISEG = 1,NSS)
-!
+        ! ASSIGN SEGMENTS IN UPSEG
+        UPSEG(ISEG)%NSEG  = ISEG
+        UPSEG(ISEG)%NLIST = COUNTER
+        !
+        IF(COUNTER>Z) THEN
+           CALL ALLOC( UPSEG(ISEG)%SEGLIST, COUNTER )
+           ! add IUPSEG to list
+           NN = ONE
+           IF (IDIV > Z) THEN
+               UPSEG(ISEG)%SEGLIST(NN) = IDIV
+               NN = NN + ONE
+           END IF
+           ! loop again to fill UPSEG list
+           IF(COUNTER > ONE .OR. NN==ONE) THEN
+               DO JSEG = 1,NSS
+                   IF (IOTSG(JSEG)==ISEG .AND. JSEG.NE.IDIV) THEN
+                       UPSEG(ISEG)%SEGLIST(NN) = JSEG
+                       NN = NN + 1
+                   END IF
+               END DO !(JSEG = 1,NSS)
+           END IF
+        END IF
+        !
+    END DO !(ISEG = 1,NSS)
+    !
   END SUBROUTINE MAP_UPSEGS
-!
+  !
   SUBROUTINE MAP_DNSEGS(DNSEG,NSS,IDIVAR,IOTSG)
 !-----VERSION X 2014.07.24 MAP_DNSEGS
 !     ******************************************************************
@@ -6288,65 +6331,65 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
 !     ------------------------------------------------------------------
 !        ARGUMENTS:
 !     ------------------------------------------------------------------
-      TYPE(SWOPS_SEGLIST), DIMENSION(:),CONTIGUOUS,INTENT(INOUT):: DNSEG
-      INTEGER,                          INTENT(IN):: NSS
-      INTEGER,DIMENSION(:,:),CONTIGUOUS,INTENT(IN):: IDIVAR
-      INTEGER,DIMENSION(:),  CONTIGUOUS,INTENT(IN):: IOTSG
-!     ------------------------------------------------------------------
-!        LOCAL VARIABLES:
-      INTEGER ISEG,JSEG,COUNTER,NN,IDWN
-!     ------------------------------------------------------------------
+    TYPE(SWOPS_SEGLIST), DIMENSION(:),CONTIGUOUS,INTENT(INOUT):: DNSEG
+    INTEGER,                          INTENT(IN):: NSS
+    INTEGER,DIMENSION(:,:),CONTIGUOUS,INTENT(IN):: IDIVAR
+    INTEGER,DIMENSION(:),  CONTIGUOUS,INTENT(IN):: IOTSG
+!   ------------------------------------------------------------------
+!      LOCAL VARIABLES:
+    INTEGER ISEG,JSEG,COUNTER,NN,IDWN
+!   ------------------------------------------------------------------
 !
-      ! Allocate SWOPS to dimension NSS (number of stream segments in model)
-      !ALLOCATE( DNSEG(NSS) )
-!      ! Loop over stream segments in model, count immediate downstream segments
-      ! --> OUTSEG of current segment           (receives outflow from current seg)
-      ! --> IUPSEG of segment = current segment (receives diversion from current seg)
-      DO ISEG = ONE,NSS
+    ! Allocate SWOPS to dimension NSS (number of stream segments in model)
+    !ALLOCATE( DNSEG(NSS) )
+!    ! Loop over stream segments in model, count immediate downstream segments
+    ! --> OUTSEG of current segment           (receives outflow from current seg)
+    ! --> IUPSEG of segment = current segment (receives diversion from current seg)
+    DO ISEG = ONE,NSS
 !
-          ! COUNT DOWNSTREAM SEGMENTS
-          COUNTER = Z
-          ! tick counter if segment has OUTSEG!=0 (i.e., segment receives diversion)
-          IF (IOTSG(ISEG).NE.Z) THEN
-              IDWN = IOTSG(ISEG)
-              COUNTER = COUNTER + ONE
-          ELSE
-              IDWN = NINER
-          END IF
-          ! loop over all other segments, tick counter once for each segment
-          ! with IUPSEG equal to current segment
-          DO JSEG = ONE,NSS
-              IF (IDIVAR(1,JSEG).EQ.ISEG .AND. JSEG.NE.IDWN) THEN
-                  COUNTER = COUNTER + ONE
-              END IF
-          END DO !(JSEG = 1,NSS)
+        ! COUNT DOWNSTREAM SEGMENTS
+        COUNTER = Z
+        ! tick counter if segment has OUTSEG!=0 (i.e., segment receives diversion)
+        IF (IOTSG(ISEG).NE.Z) THEN
+            IDWN = IOTSG(ISEG)
+            COUNTER = COUNTER + ONE
+        ELSE
+            IDWN = NINER
+        END IF
+        ! loop over all other segments, tick counter once for each segment
+        ! with IUPSEG equal to current segment
+        DO JSEG = ONE,NSS
+            IF (IDIVAR(1,JSEG).EQ.ISEG .AND. JSEG.NE.IDWN) THEN
+                COUNTER = COUNTER + ONE
+            END IF
+        END DO !(JSEG = 1,NSS)
 !
-          ! ASSIGN SEGMENTS IN DNSEG
-          DNSEG(ISEG)%NSEG  = ISEG
-          DNSEG(ISEG)%NLIST = COUNTER
-          !
-          IF(COUNTER > Z) THEN
-             CALL ALLOC( DNSEG(ISEG)%SEGLIST, COUNTER )
-             ! add OUTSEG to list
-             NN = ONE
-             IF (IDWN > Z) THEN
-                 DNSEG(ISEG)%SEGLIST(NN) = IDWN
-                 NN = NN + ONE
-             END IF
-             !
-             IF(COUNTER > ONE .OR. NN==ONE) THEN
-                ! loop again to fill DNSEG list
-                DO JSEG = ONE,NSS
-                    IF (IDIVAR(1,JSEG).EQ.ISEG .AND. JSEG.NE.IDWN) THEN
-                        DNSEG(ISEG)%SEGLIST(NN) = JSEG
-                        NN = NN + ONE
-                    END IF
-                END DO !(JSEG = 1,NSS)
-             END IF
-          END IF
+        ! ASSIGN SEGMENTS IN DNSEG
+        DNSEG(ISEG)%NSEG  = ISEG
+        DNSEG(ISEG)%NLIST = COUNTER
+        !
+        IF(COUNTER > Z) THEN
+           CALL ALLOC( DNSEG(ISEG)%SEGLIST, COUNTER )
+           ! add OUTSEG to list
+           NN = ONE
+           IF (IDWN > Z) THEN
+               DNSEG(ISEG)%SEGLIST(NN) = IDWN
+               NN = NN + ONE
+           END IF
+           !
+           IF(COUNTER > ONE .OR. NN==ONE) THEN
+              ! loop again to fill DNSEG list
+              DO JSEG = ONE,NSS
+                  IF (IDIVAR(1,JSEG).EQ.ISEG .AND. JSEG.NE.IDWN) THEN
+                      DNSEG(ISEG)%SEGLIST(NN) = JSEG
+                      NN = NN + ONE
+                  END IF
+              END DO !(JSEG = 1,NSS)
+           END IF
+        END IF
 !
-      END DO !(ISEG = 1,NSS)
-  !
+    END DO !(ISEG = 1,NSS)
+    !
   END SUBROUTINE MAP_DNSEGS
   !
   SUBROUTINE SETUP_RESERVOIR_VARIABLES(SWO)
@@ -6384,56 +6427,56 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
           SWO%RESDAT(IPROJ)%RESBAL(1)%RESBAL_RESID     = -99
           SWO%RESDAT(IPROJ)%RESBAL(1)%RESBAL_POOLFLG   = -99
           SWO%RESDAT(IPROJ)%RESBAL(1)%STORAGE_PREV     = DZ
-          SWO%RESDAT(IPROJ)%RESBAL(1)%AREA_PREV        = -99D0
-          SWO%RESDAT(IPROJ)%RESBAL(1)%INFLOW           = -99D0
-          SWO%RESDAT(IPROJ)%RESBAL(1)%PRCP             = -99D0
-          SWO%RESDAT(IPROJ)%RESBAL(1)%EVAP             = -99D0
+          SWO%RESDAT(IPROJ)%RESBAL(1)%AREA_PREV        = -99.D0
+          SWO%RESDAT(IPROJ)%RESBAL(1)%INFLOW           = -99.D0
+          SWO%RESDAT(IPROJ)%RESBAL(1)%PRCP             = -99.D0
+          SWO%RESDAT(IPROJ)%RESBAL(1)%EVAP             = -99.D0
           SWO%RESDAT(IPROJ)%RESBAL(1)%RELEASE_MIN_INPUT= DZ
           SWO%RESDAT(IPROJ)%RESBAL(1)%RELEASE_MIN      = DZ
-          SWO%RESDAT(IPROJ)%RESBAL(1)%RELEASE_SPEC     = -99D0
-          SWO%RESDAT(IPROJ)%RESBAL(1)%RELEASE_ADDF      = -99D0
+          SWO%RESDAT(IPROJ)%RESBAL(1)%RELEASE_SPEC     = -99.D0
+          SWO%RESDAT(IPROJ)%RESBAL(1)%RELEASE_ADDF      = -99.D0
           SWO%RESDAT(IPROJ)%RESBAL(NRES)%MAX_RELEASE_S = SWO%NaN
-          SWO%RESDAT(IPROJ)%RESBAL(NRES)%ADD_RELEASE_S = -99D0
-          SWO%RESDAT(IPROJ)%RESBAL(NRES)%ADD_RELEASE_S_VOL = -99D0
-          SWO%RESDAT(IPROJ)%RESBAL(NRES)%MAX_RELEASE_S_VOL = -99D0
-          SWO%RESDAT(IPROJ)%RESBAL(1)%RELEASE_PROJ_ADD_INI = -99D0
-          SWO%RESDAT(IPROJ)%RESBAL(1)%RELEASE_PROJ_ADD     = -99D0
-          SWO%RESDAT(IPROJ)%RESBAL(1)%RELEASE_PROJ      = -99D0
-          SWO%RESDAT(IPROJ)%RESBAL(1)%RELEASE_FLOD      = -99D0
-          SWO%RESDAT(IPROJ)%RESBAL(1)%SPILL_WAY         = -99D0
-          SWO%RESDAT(IPROJ)%RESBAL(1)%OVER_TOP          = -99D0
-          SWO%RESDAT(IPROJ)%RESBAL(1)%RELEASE_REQF      = -99D0
-          SWO%RESDAT(IPROJ)%RESBAL(1)%RELEASE_REQF_PREV = -99D0
-          SWO%RESDAT(IPROJ)%RESBAL(1)%STORAGE          = -99D0
-          SWO%RESDAT(IPROJ)%RESBAL(1)%AREA             = -99D0
-          SWO%RESDAT(IPROJ)%RESBAL(1)%AREA_DPL         = -99D0
+          SWO%RESDAT(IPROJ)%RESBAL(NRES)%ADD_RELEASE_S = -99.D0
+          SWO%RESDAT(IPROJ)%RESBAL(NRES)%ADD_RELEASE_S_VOL = -99.D0
+          SWO%RESDAT(IPROJ)%RESBAL(NRES)%MAX_RELEASE_S_VOL = -99.D0
+          SWO%RESDAT(IPROJ)%RESBAL(1)%RELEASE_PROJ_ADD_INI = -99.D0
+          SWO%RESDAT(IPROJ)%RESBAL(1)%RELEASE_PROJ_ADD     = -99.D0
+          SWO%RESDAT(IPROJ)%RESBAL(1)%RELEASE_PROJ      = -99.D0
+          SWO%RESDAT(IPROJ)%RESBAL(1)%RELEASE_FLOD      = -99.D0
+          SWO%RESDAT(IPROJ)%RESBAL(1)%SPILL_WAY         = -99.D0
+          SWO%RESDAT(IPROJ)%RESBAL(1)%OVER_TOP          = -99.D0
+          SWO%RESDAT(IPROJ)%RESBAL(1)%RELEASE_REQF      = -99.D0
+          SWO%RESDAT(IPROJ)%RESBAL(1)%RELEASE_REQF_PREV = -99.D0
+          SWO%RESDAT(IPROJ)%RESBAL(1)%STORAGE          = -99.D0
+          SWO%RESDAT(IPROJ)%RESBAL(1)%AREA             = -99.D0
+          SWO%RESDAT(IPROJ)%RESBAL(1)%AREA_DPL         = -99.D0
           SWO%RESDAT(IPROJ)%RESBAL(1)%MAIN_SPLT        = 1
 
           ! RESSPLIT (Lumped/Pooled Reservoir Mass Balance)
           SWO%RESDAT(IPROJ)%RESSPLIT(1)%RESSPLIT_PROJID= -99
           SWO%RESDAT(IPROJ)%RESSPLIT(1)%RESSPLIT_RESID = -99
-          SWO%RESDAT(IPROJ)%RESSPLIT(1)%DOY            = -99D0
-          SWO%RESDAT(IPROJ)%RESSPLIT(1)%STORAGE        = -99D0
-          SWO%RESDAT(IPROJ)%RESSPLIT(1)%AREA           = -99D0
-          SWO%RESDAT(IPROJ)%RESSPLIT(1)%ELEV           = -99D0
-          SWO%RESDAT(IPROJ)%RESSPLIT(1)%ELEV_PREV      = -99D0
+          SWO%RESDAT(IPROJ)%RESSPLIT(1)%DOY            = -99.D0
+          SWO%RESDAT(IPROJ)%RESSPLIT(1)%STORAGE        = -99.D0
+          SWO%RESDAT(IPROJ)%RESSPLIT(1)%AREA           = -99.D0
+          SWO%RESDAT(IPROJ)%RESSPLIT(1)%ELEV           = -99.D0
+          SWO%RESDAT(IPROJ)%RESSPLIT(1)%ELEV_PREV      = -99.D0
           SWO%RESDAT(IPROJ)%RESSPLIT(1)%MAIN_RES       = FALSE
 
           ! ACAP (Area-Capacity-Elevation Table)
           SWO%RESDAT(IPROJ)%ACAP(1)%RESNAME            = "N/A"
           SWO%RESDAT(IPROJ)%ACAP(1)%ACAP_PROJID        = -99
           SWO%RESDAT(IPROJ)%ACAP(1)%ACAP_RESID         = -99
-          SWO%RESDAT(IPROJ)%ACAP(1)%ACAP_STORAGE       = -99D0
-          SWO%RESDAT(IPROJ)%ACAP(1)%ACAP_AREA          = -99D0
-          SWO%RESDAT(IPROJ)%ACAP(1)%ACAP_ELEV          = -99D0
+          SWO%RESDAT(IPROJ)%ACAP(1)%ACAP_STORAGE       = -99.D0
+          SWO%RESDAT(IPROJ)%ACAP(1)%ACAP_AREA          = -99.D0
+          SWO%RESDAT(IPROJ)%ACAP(1)%ACAP_ELEV          = -99.D0
 
           ! FRAC (Reservoir Storage Fraction Table)
           SWO%RESDAT(IPROJ)%FRAC(1)%RESNAME            = "N/A"
           SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_PROJID        = -99
           SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_RESID         = -99
-          !SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_LEAP          = -99D0
-          SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_NOLEAP        = -99D0
-          SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_FRAC          = -99D0
+          !SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_LEAP          = -99.D0
+          SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_NOLEAP        = -99.D0
+          SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_FRAC          = -99.D0
 
           ! HEAD (Reservoir Head Cells)
           SWO%RESDAT(1)%HEAD(1)%HEAD_PROJID            = -99
@@ -6493,23 +6536,23 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
           ! (No pooled reservoirs for IRESFL>0 --> dummy alloc/init)
           SWO%RESDAT(IPROJ)%RESSPLIT(1)%RESSPLIT_PROJID= -99
           SWO%RESDAT(IPROJ)%RESSPLIT(1)%RESSPLIT_RESID = -99
-          SWO%RESDAT(IPROJ)%RESSPLIT(1)%DOY            = -99D0
-          SWO%RESDAT(IPROJ)%RESSPLIT(1)%STORAGE        = -99D0
-          SWO%RESDAT(IPROJ)%RESSPLIT(1)%AREA           = -99D0
-          SWO%RESDAT(IPROJ)%RESSPLIT(1)%ELEV           = -99D0
-          SWO%RESDAT(IPROJ)%RESSPLIT(1)%ELEV_PREV      = -99D0
-          !SWO%RESDAT(IPROJ)%RESSPLIT(1)%MAX_ELEV       = -99D0
-          !SWO%RESDAT(IPROJ)%RESSPLIT(1)%MIN_ELEV       = -99D0
-          !SWO%RESDAT(IPROJ)%RESSPLIT(1)%STOR_SPEC_MIN_ELEV      = -99D0
+          SWO%RESDAT(IPROJ)%RESSPLIT(1)%DOY            = -99.D0
+          SWO%RESDAT(IPROJ)%RESSPLIT(1)%STORAGE        = -99.D0
+          SWO%RESDAT(IPROJ)%RESSPLIT(1)%AREA           = -99.D0
+          SWO%RESDAT(IPROJ)%RESSPLIT(1)%ELEV           = -99.D0
+          SWO%RESDAT(IPROJ)%RESSPLIT(1)%ELEV_PREV      = -99.D0
+          !SWO%RESDAT(IPROJ)%RESSPLIT(1)%MAX_ELEV       = -99.D0
+          !SWO%RESDAT(IPROJ)%RESSPLIT(1)%MIN_ELEV       = -99.D0
+          !SWO%RESDAT(IPROJ)%RESSPLIT(1)%STOR_SPEC_MIN_ELEV      = -99.D0
           SWO%RESDAT(IPROJ)%RESSPLIT(1)%MAIN_RES       = FALSE
 
           ! FRAC (Reservoir Storage Fraction Table)
           SWO%RESDAT(IPROJ)%FRAC(1)%RESNAME            = "N/A"
           SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_PROJID        = -99
           SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_RESID         = -99
-          !SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_LEAP          = -99D0
-          SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_NOLEAP        = -99D0
-          SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_FRAC          = -99D0
+          !SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_LEAP          = -99.D0
+          SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_NOLEAP        = -99.D0
+          SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_FRAC          = -99.D0
 
         ! IRESFL<0
         ! --> One lumped/pooled storage, fractional split to individual reservoirs
@@ -6640,47 +6683,47 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
 !          SWO%RESDAT(IPROJ)%RESBAL(1)%RESBAL_PROJID    = -99
 !          SWO%RESDAT(IPROJ)%RESBAL(1)%RESBAL_RESID     = -99
 !          SWO%RESDAT(IPROJ)%RESBAL(1)%RESBAL_POOLFLG   = -99
-!          SWO%RESDAT(IPROJ)%RESBAL(1)%STORAGE_PREV     = -99D0
-!          SWO%RESDAT(IPROJ)%RESBAL(1)%AREA_PREV        = -99D0
-!          SWO%RESDAT(IPROJ)%RESBAL(1)%INFLOW           = -99D0
-!          SWO%RESDAT(IPROJ)%RESBAL(1)%PRCP             = -99D0
-!          SWO%RESDAT(IPROJ)%RESBAL(1)%EVAP             = -99D0
-!          SWO%RESDAT(IPROJ)%RESBAL(1)%RELEASE_SPEC     = -99D0
-!          SWO%RESDAT(IPROJ)%RESBAL(1)%ADD_RELEASE      = -99D0
-!          SWO%RESDAT(IPROJ)%RESBAL(NRES)%MAX_RELEASE_S = -99D0
-!          SWO%RESDAT(IPROJ)%RESBAL(NRES)%ADD_RELEASE_S = -99D0
-!          SWO%RESDAT(IPROJ)%RESBAL(1)%RELEASE_PROJ      = -99D0
-!          SWO%RESDAT(IPROJ)%RESBAL(1)%RELEASE_FLOD      = -99D0
-!          SWO%RESDAT(IPROJ)%RESBAL(1)%SPILL_WAY        = -99D0
-!          SWO%RESDAT(IPROJ)%RESBAL(1)%STORAGE          = -99D0
-!          SWO%RESDAT(IPROJ)%RESBAL(1)%AREA             = -99D0
-!          SWO%RESDAT(IPROJ)%RESBAL(1)%AREA_DPL         = -99D0
+!          SWO%RESDAT(IPROJ)%RESBAL(1)%STORAGE_PREV     = -99.D0
+!          SWO%RESDAT(IPROJ)%RESBAL(1)%AREA_PREV        = -99.D0
+!          SWO%RESDAT(IPROJ)%RESBAL(1)%INFLOW           = -99.D0
+!          SWO%RESDAT(IPROJ)%RESBAL(1)%PRCP             = -99.D0
+!          SWO%RESDAT(IPROJ)%RESBAL(1)%EVAP             = -99.D0
+!          SWO%RESDAT(IPROJ)%RESBAL(1)%RELEASE_SPEC     = -99.D0
+!          SWO%RESDAT(IPROJ)%RESBAL(1)%ADD_RELEASE      = -99.D0
+!          SWO%RESDAT(IPROJ)%RESBAL(NRES)%MAX_RELEASE_S = -99.D0
+!          SWO%RESDAT(IPROJ)%RESBAL(NRES)%ADD_RELEASE_S = -99.D0
+!          SWO%RESDAT(IPROJ)%RESBAL(1)%RELEASE_PROJ      = -99.D0
+!          SWO%RESDAT(IPROJ)%RESBAL(1)%RELEASE_FLOD      = -99.D0
+!          SWO%RESDAT(IPROJ)%RESBAL(1)%SPILL_WAY        = -99.D0
+!          SWO%RESDAT(IPROJ)%RESBAL(1)%STORAGE          = -99.D0
+!          SWO%RESDAT(IPROJ)%RESBAL(1)%AREA             = -99.D0
+!          SWO%RESDAT(IPROJ)%RESBAL(1)%AREA_DPL         = -99.D0
 !
 !          ! RESSPLIT (Lumped/Pooled Reservoir Mass Balance)
 !          SWO%RESDAT(IPROJ)%RESSPLIT(1)%RESSPLIT_PROJID= -99
 !          SWO%RESDAT(IPROJ)%RESSPLIT(1)%RESSPLIT_RESID = -99
-!          SWO%RESDAT(IPROJ)%RESSPLIT(1)%DOY            = -99D0
-!          SWO%RESDAT(IPROJ)%RESSPLIT(1)%STORAGE        = -99D0
-!          SWO%RESDAT(IPROJ)%RESSPLIT(1)%AREA           = -99D0
-!          SWO%RESDAT(IPROJ)%RESSPLIT(1)%ELEV           = -99D0
-!          SWO%RESDAT(IPROJ)%RESSPLIT(1)%ELEV_PREV      = -99D0
+!          SWO%RESDAT(IPROJ)%RESSPLIT(1)%DOY            = -99.D0
+!          SWO%RESDAT(IPROJ)%RESSPLIT(1)%STORAGE        = -99.D0
+!          SWO%RESDAT(IPROJ)%RESSPLIT(1)%AREA           = -99.D0
+!          SWO%RESDAT(IPROJ)%RESSPLIT(1)%ELEV           = -99.D0
+!          SWO%RESDAT(IPROJ)%RESSPLIT(1)%ELEV_PREV      = -99.D0
 !          SWO%RESDAT(IPROJ)%RESSPLIT(1)%MAIN_RES       = FALSE
 !
 !          ! ACAP (Area-Capacity-Elevation Table)
 !          SWO%RESDAT(IPROJ)%ACAP(1)%RESNAME            = "N/A"
 !          SWO%RESDAT(IPROJ)%ACAP(1)%ACAP_PROJID        = -99
 !          SWO%RESDAT(IPROJ)%ACAP(1)%ACAP_RESID         = -99
-!          SWO%RESDAT(IPROJ)%ACAP(1)%ACAP_STORAGE       = -99D0
-!          SWO%RESDAT(IPROJ)%ACAP(1)%ACAP_AREA          = -99D0
-!          SWO%RESDAT(IPROJ)%ACAP(1)%ACAP_ELEV          = -99D0
+!          SWO%RESDAT(IPROJ)%ACAP(1)%ACAP_STORAGE       = -99.D0
+!          SWO%RESDAT(IPROJ)%ACAP(1)%ACAP_AREA          = -99.D0
+!          SWO%RESDAT(IPROJ)%ACAP(1)%ACAP_ELEV          = -99.D0
 !
 !          ! FRAC (Reservoir Storage Fraction Table)
 !          SWO%RESDAT(IPROJ)%FRAC(1)%RESNAME            = "N/A"
 !          SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_PROJID        = -99
 !          SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_RESID         = -99
-!          !SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_LEAP          = -99D0
-!          SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_NOLEAP        = -99D0
-!          SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_FRAC          = -99D0
+!          !SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_LEAP          = -99.D0
+!          SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_NOLEAP        = -99.D0
+!          SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_FRAC          = -99.D0
 !
 !          ! HEAD (Reservoir Head Cells)
 !          SWO%RESDAT(1)%HEAD(1)%HEAD_PROJID            = -99
@@ -6887,22 +6930,22 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
 !          ! (No pooled reservoirs for IRESFL>0 --> dummy alloc/init)
 !          SWO%RESDAT(IPROJ)%RESSPLIT(1)%RESSPLIT_PROJID= -99
 !          SWO%RESDAT(IPROJ)%RESSPLIT(1)%RESSPLIT_RESID = -99
-!          SWO%RESDAT(IPROJ)%RESSPLIT(1)%DOY            = -99D0
-!          SWO%RESDAT(IPROJ)%RESSPLIT(1)%STORAGE        = -99D0
-!          SWO%RESDAT(IPROJ)%RESSPLIT(1)%AREA           = -99D0
-!          SWO%RESDAT(IPROJ)%RESSPLIT(1)%ELEV           = -99D0
-!          SWO%RESDAT(IPROJ)%RESSPLIT(1)%ELEV_PREV      = -99D0
-!          SWO%RESDAT(IPROJ)%RESSPLIT(1)%MAX_ELEV       = -99D0
-!          SWO%RESDAT(IPROJ)%RESSPLIT(1)%MIN_ELEV       = -99D0
+!          SWO%RESDAT(IPROJ)%RESSPLIT(1)%DOY            = -99.D0
+!          SWO%RESDAT(IPROJ)%RESSPLIT(1)%STORAGE        = -99.D0
+!          SWO%RESDAT(IPROJ)%RESSPLIT(1)%AREA           = -99.D0
+!          SWO%RESDAT(IPROJ)%RESSPLIT(1)%ELEV           = -99.D0
+!          SWO%RESDAT(IPROJ)%RESSPLIT(1)%ELEV_PREV      = -99.D0
+!          SWO%RESDAT(IPROJ)%RESSPLIT(1)%MAX_ELEV       = -99.D0
+!          SWO%RESDAT(IPROJ)%RESSPLIT(1)%MIN_ELEV       = -99.D0
 !          SWO%RESDAT(IPROJ)%RESSPLIT(1)%MAIN_RES       = FALSE
 !
 !          ! FRAC (Reservoir Storage Fraction Table)
 !          SWO%RESDAT(IPROJ)%FRAC(1)%RESNAME            = "N/A"
 !          SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_PROJID        = -99
 !          SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_RESID         = -99
-!          !SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_LEAP          = -99D0
-!          SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_NOLEAP        = -99D0
-!          SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_FRAC          = -99D0
+!          !SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_LEAP          = -99.D0
+!          SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_NOLEAP        = -99.D0
+!          SWO%RESDAT(IPROJ)%FRAC(1)%FRAC_FRAC          = -99.D0
 !
 !          ! Compute initial area from initial storage
 !          DTMP1 = SWO%RESDAT(IPROJ)%RESBAL(NRES)%STORAGE_PREV
@@ -7181,102 +7224,102 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
 !     ------------------------------------------------------------------
 !        ARGUMENTS:
 !     ------------------------------------------------------------------
-      CLASS(SWO_DATA), INTENT(INOUT):: SWO
-      TYPE(GENERIC_INPUT_FILE), INTENT(INOUT):: FL
-      CHARACTER(*),             INTENT(INOUT):: LINE
-      INTEGER,                  INTENT(IN   ):: IPROJ, NRES
-      TYPE(SFAC_DATA),          INTENT(IN   ):: SF
-      TYPE(SFAC_DATA):: SFAC
-      CHARACTER(5):: EXT
+    CLASS(SWO_DATA), INTENT(INOUT):: SWO
+    TYPE(GENERIC_INPUT_FILE), INTENT(INOUT):: FL
+    CHARACTER(*),             INTENT(INOUT):: LINE
+    INTEGER,                  INTENT(IN   ):: IPROJ, NRES
+    TYPE(SFAC_DATA),          INTENT(IN   ):: SF
+    TYPE(SFAC_DATA):: SFAC
+    CHARACTER(5):: EXT
 !
-!     ------------------------------------------------------------------
-!        LOCAL VARIABLES:
-      INTEGER LLOC,ISTART,ISTOP,I,COUNTER
-!     ------------------------------------------------------------------
+!   ------------------------------------------------------------------
+!      LOCAL VARIABLES:
+    INTEGER LLOC,ISTART,ISTOP,I,COUNTER
+!   ------------------------------------------------------------------
 
-      ! Open ACAP file...
-      !LLOC=1
-      !CALL FL%OPEN(LLOC, LINE, SWO%IOUT, IU, REQKEY=TRUE)
-      !IF(FL%IU == Z) CALL STOP_ERROR(INFILE=IU, OUTPUT=SWO%IOUT,MSG='INTERNAL KEYWORD IS NOT ALLOWED FOR ACAP TABLE FOR A SINGLE RESERVOIR. PLEASE USE "EXTERNAL" OR "OPEN/CLOSE". NOTE THAT IF YOU USE "EXTERNAL", IT MUST BE THE ONLY DATA WITHIN THE FILE.')
-      CALL FL%COUNT_LINES(COUNTER)
-      !
-      CALL FL%REWIND()
-      SFAC = SF
-      DO I = 1,COUNTER
-           CALL READ_TO_DATA(LINE, FL%IU, SWO%IOUT)
-           !
-           LLOC = ONE
-           CALL GET_WORD(LINE,LLOC,ISTART,ISTOP,EXT,COM_STOP=TRUE)   !GET VALUE
-           !
-           IF (EXT == 'SFAC') THEN
-               !
-               COUNTER = COUNTER - ONE
-               !
-               CALL SFAC%LOAD(LINE, FL%IU, SWO%IOUT, EX1_WORD='CAPACITY', EX1_DIM=ONE, EX2_WORD='AREA', EX2_DIM=ONE, EX3_WORD='ELEVATION', EX3_DIM=ONE, NO_INTERNAL=TRUE)
-           ELSE
-               CALL FL%BACK()
-               EXIT
-           END IF
-      END DO
-      !
-      WRITE(SWO%IOUT,'(2(A,I3),2A)') 'PROEJCT ',IPROJ,' RESERVOIR ',NRES, " ACAP COUNTER = ", NUM2STR(COUNTER)
+    ! Open ACAP file...
+    !LLOC=1
+    !CALL FL%OPEN(LLOC, LINE, SWO%IOUT, IU, REQKEY=TRUE)
+    !IF(FL%IU == Z) CALL STOP_ERROR(INFILE=IU, OUTPUT=SWO%IOUT,MSG='INTERNAL KEYWORD IS NOT ALLOWED FOR ACAP TABLE FOR A SINGLE RESERVOIR. PLEASE USE "EXTERNAL" OR "OPEN/CLOSE". NOTE THAT IF YOU USE "EXTERNAL", IT MUST BE THE ONLY DATA WITHIN THE FILE.')
+    CALL FL%COUNT_LINES(COUNTER)
+    !
+    CALL FL%REWIND()
+    SFAC = SF
+    DO I = 1,COUNTER
+         CALL READ_TO_DATA(LINE, FL%IU, SWO%IOUT)
+         !
+         LLOC = ONE
+         CALL GET_WORD(LINE,LLOC,ISTART,ISTOP,EXT,COM_STOP=TRUE)   !GET VALUE
+         !
+         IF (EXT == 'SFAC') THEN
+             !
+             COUNTER = COUNTER - ONE
+             !
+             CALL SFAC%LOAD(LINE, FL%IU, SWO%IOUT, EX1_WORD='CAPACITY', EX1_DIM=ONE, EX2_WORD='AREA', EX2_DIM=ONE, EX3_WORD='ELEVATION', EX3_DIM=ONE, NO_INTERNAL=TRUE)
+         ELSE
+             CALL FL%BACK()
+             EXIT
+         END IF
+    END DO
+    !
+    WRITE(SWO%IOUT,'(2(A,I3),2A)') 'PROEJCT ',IPROJ,' RESERVOIR ',NRES, " ACAP COUNTER = ", NUM2STR(COUNTER)
 
-        ! Allocate table vars, read table values
-          WRITE(SWO%IOUT,*) "  --> Allocating Eevation Area Capacity look-up table arrays"
-        SWO%RESDAT(IPROJ)%ACAP(NRES)%ACAP_COUNT = COUNTER
-        ALLOCATE( SWO%RESDAT(IPROJ)%ACAP(NRES)%ACAP_STORAGE(COUNTER), &
-                  SWO%RESDAT(IPROJ)%ACAP(NRES)%ACAP_AREA(COUNTER),    &
-                  SWO%RESDAT(IPROJ)%ACAP(NRES)%ACAP_ELEV(COUNTER) )
-        SWO%RESDAT(IPROJ)%ACAP(NRES)%ACAP_STORAGE(COUNTER) = -99
-        SWO%RESDAT(IPROJ)%ACAP(NRES)%ACAP_AREA(COUNTER)    = -99
-        SWO%RESDAT(IPROJ)%ACAP(NRES)%ACAP_ELEV(COUNTER)    = -99
+    ! Allocate table vars, read table values
+    WRITE(SWO%IOUT,*) "  --> Allocating Eevation Area Capacity look-up table arrays"
+    SWO%RESDAT(IPROJ)%ACAP(NRES)%ACAP_COUNT = COUNTER
+    ALLOCATE( SWO%RESDAT(IPROJ)%ACAP(NRES)%ACAP_STORAGE(COUNTER), &
+              SWO%RESDAT(IPROJ)%ACAP(NRES)%ACAP_AREA(COUNTER),    &
+              SWO%RESDAT(IPROJ)%ACAP(NRES)%ACAP_ELEV(COUNTER) )
+    SWO%RESDAT(IPROJ)%ACAP(NRES)%ACAP_STORAGE(COUNTER) = -99
+    SWO%RESDAT(IPROJ)%ACAP(NRES)%ACAP_AREA(COUNTER)    = -99
+    SWO%RESDAT(IPROJ)%ACAP(NRES)%ACAP_ELEV(COUNTER)    = -99
 
-          WRITE(SWO%IOUT,*) "      ALLOCATION DONE."
+    WRITE(SWO%IOUT,*) "      ALLOCATION DONE."
 
-        ! Read table values
-          WRITE(SWO%IOUT,*) "  --> Reading look-up table values"
-        !
-        DO I = 1,COUNTER
-          CALL READ_TO_DATA(LINE, FL%IU, SWO%IOUT)
-          LLOC = 1
-          CALL GET_NUMBER(LINE,LLOC,ISTART,ISTOP,SWO%IOUT,FL%IU,SWO%RESDAT(IPROJ)%ACAP(NRES)%ACAP_ELEV(I),   MSG='FAILED TO LOAD ACAP ELEVATION')
-          CALL GET_NUMBER(LINE,LLOC,ISTART,ISTOP,SWO%IOUT,FL%IU,SWO%RESDAT(IPROJ)%ACAP(NRES)%ACAP_AREA(I),   MSG='FAILED TO LOAD ACAP AREA')
-          CALL GET_NUMBER(LINE,LLOC,ISTART,ISTOP,SWO%IOUT,FL%IU,SWO%RESDAT(IPROJ)%ACAP(NRES)%ACAP_STORAGE(I),MSG='FAILED TO LOAD ACAP STORARGE')
-          !CALL GET_NUMBER(LINE,LLOC,ISTART,ISTOP,SWO%IOUT,FL%IU,SWO%RESDAT(IPROJ)%ACAP(NRES)%ACAP_STORAGE(I),MSG='FAILED TO LOAD ACAPA STORARGE')
-          !CALL GET_NUMBER(LINE,LLOC,ISTART,ISTOP,SWO%IOUT,FL%IU,SWO%RESDAT(IPROJ)%ACAP(NRES)%ACAP_AREA(I),   MSG='FAILED TO LOAD ACAPA AREA')
-          !CALL GET_NUMBER(LINE,LLOC,ISTART,ISTOP,SWO%IOUT,FL%IU,SWO%RESDAT(IPROJ)%ACAP(NRES)%ACAP_ELEV(I),   MSG='FAILED TO LOAD ACAPA ELEVATION')
-        END DO !(I = 1,COUNTER)
-        !
-        ASSOCIATE(ELEV => SWO%RESDAT(IPROJ)%ACAP(NRES)%ACAP_ELEV, AREA => SWO%RESDAT(IPROJ)%ACAP(NRES)%ACAP_AREA, STORAGE => SWO%RESDAT(IPROJ)%ACAP(NRES)%ACAP_STORAGE)
-           IF(SFAC%HAS_ALL) THEN
-                            ELEV    = SFAC%ALL * ELEV
-                            AREA    = SFAC%ALL * AREA
-                            STORAGE = SFAC%ALL * STORAGE
-           END IF
-           !
-           IF(SFAC%HAS_EX1) STORAGE = SFAC%EX1(ONE) * STORAGE
-           IF(SFAC%HAS_EX2) AREA    = SFAC%EX2(ONE) * AREA
-           IF(SFAC%HAS_EX3) ELEV    = SFAC%EX3(ONE) * ELEV
-        END ASSOCIATE
-        !
-        ! Print values
-!          WRITE(SWO%IOUT,*) "      ACAP TABLE:"
-!          WRITE(SWO%IOUT,*) " "
-!          WRITE(SWO%IOUT,102)
-!          DO I = 1,COUNTER
-!            WRITE(SWO%IOUT,103) SWO%RESDAT(IPROJ)%ACAP(NRES)%ACAP_STORAGE(I),&
-!                            SWO%RESDAT(IPROJ)%ACAP(NRES)%ACAP_AREA(I),   &
-!                            SWO%RESDAT(IPROJ)%ACAP(NRES)%ACAP_ELEV(I)
-!          END DO !(I = 1,COUNTER)
-!102       FORMAT("        STORAGE", &
-!                 "           AREA", &
-!                 "      ELEVATION")
-!103       FORMAT(3D15.4)
-!
+    ! Read table values
+    WRITE(SWO%IOUT,*) "  --> Reading look-up table values"
+    !
+    DO I = 1,COUNTER
+      CALL READ_TO_DATA(LINE, FL%IU, SWO%IOUT)
+      LLOC = 1
+      CALL GET_NUMBER(LINE,LLOC,ISTART,ISTOP,SWO%IOUT,FL%IU,SWO%RESDAT(IPROJ)%ACAP(NRES)%ACAP_ELEV(I),   MSG='FAILED TO LOAD ACAP ELEVATION')
+      CALL GET_NUMBER(LINE,LLOC,ISTART,ISTOP,SWO%IOUT,FL%IU,SWO%RESDAT(IPROJ)%ACAP(NRES)%ACAP_AREA(I),   MSG='FAILED TO LOAD ACAP AREA')
+      CALL GET_NUMBER(LINE,LLOC,ISTART,ISTOP,SWO%IOUT,FL%IU,SWO%RESDAT(IPROJ)%ACAP(NRES)%ACAP_STORAGE(I),MSG='FAILED TO LOAD ACAP STORARGE')
+      !CALL GET_NUMBER(LINE,LLOC,ISTART,ISTOP,SWO%IOUT,FL%IU,SWO%RESDAT(IPROJ)%ACAP(NRES)%ACAP_STORAGE(I),MSG='FAILED TO LOAD ACAPA STORARGE')
+      !CALL GET_NUMBER(LINE,LLOC,ISTART,ISTOP,SWO%IOUT,FL%IU,SWO%RESDAT(IPROJ)%ACAP(NRES)%ACAP_AREA(I),   MSG='FAILED TO LOAD ACAPA AREA')
+      !CALL GET_NUMBER(LINE,LLOC,ISTART,ISTOP,SWO%IOUT,FL%IU,SWO%RESDAT(IPROJ)%ACAP(NRES)%ACAP_ELEV(I),   MSG='FAILED TO LOAD ACAPA ELEVATION')
+    END DO !(I = 1,COUNTER)
+    !
+    ASSOCIATE(ELEV => SWO%RESDAT(IPROJ)%ACAP(NRES)%ACAP_ELEV, AREA => SWO%RESDAT(IPROJ)%ACAP(NRES)%ACAP_AREA, STORAGE => SWO%RESDAT(IPROJ)%ACAP(NRES)%ACAP_STORAGE)
+       IF(SFAC%HAS_ALL) THEN
+                        ELEV    = SFAC%ALL * ELEV
+                        AREA    = SFAC%ALL * AREA
+                        STORAGE = SFAC%ALL * STORAGE
+       END IF
+       !
+       IF(SFAC%HAS_EX1) STORAGE = SFAC%EX1(ONE) * STORAGE
+       IF(SFAC%HAS_EX2) AREA    = SFAC%EX2(ONE) * AREA
+       IF(SFAC%HAS_EX3) ELEV    = SFAC%EX3(ONE) * ELEV
+    END ASSOCIATE
+    !
+    ! Print values
+    !        WRITE(SWO%IOUT,*) "      ACAP TABLE:"
+    !        WRITE(SWO%IOUT,*) " "
+    !        WRITE(SWO%IOUT,102)
+    !        DO I = 1,COUNTER
+    !          WRITE(SWO%IOUT,103) SWO%RESDAT(IPROJ)%ACAP(NRES)%ACAP_STORAGE(I),&
+    !                          SWO%RESDAT(IPROJ)%ACAP(NRES)%ACAP_AREA(I),   &
+    !                          SWO%RESDAT(IPROJ)%ACAP(NRES)%ACAP_ELEV(I)
+    !        END DO !(I = 1,COUNTER)
+    !102     FORMAT("        STORAGE", &
+    !               "           AREA", &
+    !               "      ELEVATION")
+    !103     FORMAT(3D15.4)
+    !
   END SUBROUTINE SWOPS_READACAP
-!
+  !
   SUBROUTINE SWOPS_READFRAC(SWO,FL, LINE,IPROJ,NRES, INFILE)
-      CLASS(SWO_DATA), INTENT(INOUT):: SWO
+    CLASS(SWO_DATA), INTENT(INOUT):: SWO
 !-----VERSION X 2014.07.11 SWOPS_READFRAC
 !     ******************************************************************
 !     OVERVIEW:
@@ -7288,78 +7331,78 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
 !     ------------------------------------------------------------------
 !        ARGUMENTS:
 !     ------------------------------------------------------------------
-      TYPE(GENERIC_INPUT_FILE), INTENT(INOUT):: FL
-      INTEGER,                  INTENT(IN   ):: IPROJ,NRES,INFILE
-      CHARACTER(*):: LINE
+    TYPE(GENERIC_INPUT_FILE), INTENT(INOUT):: FL
+    INTEGER,                  INTENT(IN   ):: IPROJ,NRES,INFILE
+    CHARACTER(*):: LINE
 !
-!     ------------------------------------------------------------------
-!        LOCAL VARIABLES:
-      INTEGER LLOC,ISTART,ISTOP,I,COUNTER
-      TYPE(DATE_OPERATOR):: DATE
-      DOUBLE PRECISION:: TMP
-      LOGICAL:: FOUND
-!     ------------------------------------------------------------------
+!   ------------------------------------------------------------------
+!      LOCAL VARIABLES:
+    INTEGER LLOC,ISTART,ISTOP,I,COUNTER
+    TYPE(DATE_OPERATOR):: DATE
+    DOUBLE PRECISION:: TMP
+    LOGICAL:: FOUND
+!   ------------------------------------------------------------------
 
-      ! Open FRAC file...
-      IF(FL%IS_CONSTANT) THEN
-          COUNTER = ONE
-          ALLOCATE( SWO%RESDAT(IPROJ)%FRAC(NRES)%FRAC_NOLEAP( COUNTER), &
+    ! Open FRAC file...
+    IF(FL%IS_CONSTANT) THEN
+        COUNTER = ONE
+        ALLOCATE( SWO%RESDAT(IPROJ)%FRAC(NRES)%FRAC_NOLEAP( COUNTER), &
+                  !SWO%RESDAT(IPROJ)%FRAC(NRES)%FRAC_LEAP(   COUNTER), &
+                  SWO%RESDAT(IPROJ)%FRAC(NRES)%FRAC_FRAC(COUNTER) )
+        SWO%RESDAT(IPROJ)%FRAC(NRES)%FRAC_COUNT = COUNTER
+        !
+        SWO%RESDAT(IPROJ)%FRAC(NRES)%FRAC_NOLEAP = DOS     !Ensures search always stops on first DOY check
+        SWO%RESDAT(IPROJ)%FRAC(NRES)%FRAC_FRAC   = FL%SCALE
+    ELSE
+        IF(FL%IU == Z .OR. FL%IS_INTERNAL) CALL STOP_ERROR(INFILE=INFILE, OUTPUT=SWO%IOUT,MSG='INTERNAL KEYWORD IS NOT ALLOWED FOR RESERVOIR FRACTION TABLE FOR A SINGLE RESERVOIR. PLEASE USE "EXTERNAL" OR "OPEN/CLOSE". NOTE THAT IF YOU USE "EXTERNAL", IT MUST BE THE ONLY DATA WITHIN THE FILE.')
+        CALL FL%COUNT_LINES(COUNTER)
+        WRITE(SWO%IOUT,'(2(A,I3),2A)') 'PROEJCT ',IPROJ,' RESERVOIR ',NRES, " RESERVOIR FRACTION = ", NUM2STR(COUNTER)
+
+        ! Allocate table vars, read table values
+        WRITE(SWO%IOUT,*) "  --> Allocating look-up table arrays"
+        ALLOCATE( SWO%RESDAT(IPROJ)%FRAC(NRES)%FRAC_NOLEAP( COUNTER), &
                     !SWO%RESDAT(IPROJ)%FRAC(NRES)%FRAC_LEAP(   COUNTER), &
                     SWO%RESDAT(IPROJ)%FRAC(NRES)%FRAC_FRAC(COUNTER) )
-          SWO%RESDAT(IPROJ)%FRAC(NRES)%FRAC_COUNT = COUNTER
+        SWO%RESDAT(IPROJ)%FRAC(NRES)%FRAC_COUNT = COUNTER
+
+        WRITE(SWO%IOUT,*) "      ALLOCATION DONE."
+
+        ! Read table values
+        WRITE(SWO%IOUT,*) "  --> Reading look-up table values"
+        DO I = 1,COUNTER
+          CALL READ_TO_DATA(LINE, FL%IU, SWO%IOUT)
           !
-          SWO%RESDAT(IPROJ)%FRAC(NRES)%FRAC_NOLEAP = DOS     !Ensures search always stops on first DOY check
-          SWO%RESDAT(IPROJ)%FRAC(NRES)%FRAC_FRAC   = FL%SCALE
-      ELSE
-          IF(FL%IU == Z) CALL STOP_ERROR(INFILE=INFILE, OUTPUT=SWO%IOUT,MSG='INTERNAL KEYWORD IS NOT ALLOWED FOR RESERVOIR FRACTION TABLE FOR A SINGLE RESERVOIR. PLEASE USE "EXTERNAL" OR "OPEN/CLOSE". NOTE THAT IF YOU USE "EXTERNAL", IT MUST BE THE ONLY DATA WITHIN THE FILE.')
-          CALL FL%COUNT_LINES(COUNTER)
-              WRITE(SWO%IOUT,'(2(A,I3),2A)') 'PROEJCT ',IPROJ,' RESERVOIR ',NRES, " RESERVOIR FRACTION = ", NUM2STR(COUNTER)
-
-            ! Allocate table vars, read table values
-              WRITE(SWO%IOUT,*) "  --> Allocating look-up table arrays"
-            ALLOCATE( SWO%RESDAT(IPROJ)%FRAC(NRES)%FRAC_NOLEAP( COUNTER), &
-                      !SWO%RESDAT(IPROJ)%FRAC(NRES)%FRAC_LEAP(   COUNTER), &
-                      SWO%RESDAT(IPROJ)%FRAC(NRES)%FRAC_FRAC(COUNTER) )
-            SWO%RESDAT(IPROJ)%FRAC(NRES)%FRAC_COUNT = COUNTER
-
-              WRITE(SWO%IOUT,*) "      ALLOCATION DONE."
-
-            ! Read table values
-              WRITE(SWO%IOUT,*) "  --> Reading look-up table values"
-            DO I = 1,COUNTER
-              CALL READ_TO_DATA(LINE, FL%IU, SWO%IOUT)
-              !
-              LLOC = 1
-              CALL GET_DOUBLE_DATE(LINE,LLOC,ISTART,ISTOP,SWO%IOUT,FL%IU,TMP,DATE,FOUND_DATE=FOUND, MSG='FAILED TO LOAD FRACTION OF NON-LEAP YEAR OR CALENDAR DATE')
-              IF(SWO%LEAP_YEAR) THEN
-                   IF(FOUND) THEN
-                       SWO%RESDAT(IPROJ)%FRAC(NRES)%FRAC_NOLEAP(I) = DATE%YEAR_FRACTION(FALSE)
-                       !SWO%RESDAT(IPROJ)%FRAC(NRES)%FRAC_LEAP  (I) = DATE%YEAR_FRACTION(TRUE )
-                   ELSE
-                       SWO%RESDAT(IPROJ)%FRAC(NRES)%FRAC_NOLEAP(I) = TMP * 365.25D0/365D0
-                       !SWO%RESDAT(IPROJ)%FRAC(NRES)%FRAC_LEAP  (I) = TMP * 365.25D0/366D0
-                   END IF
-              ELSE
-                       SWO%RESDAT(IPROJ)%FRAC(NRES)%FRAC_NOLEAP(I) = TMP
-                       !SWO%RESDAT(IPROJ)%FRAC(NRES)%FRAC_LEAP  (I) = TMP
-              END IF
-              !
-              CALL GET_NUMBER(LINE,LLOC,ISTART,ISTOP,SWO%IOUT,FL%IU,SWO%RESDAT(IPROJ)%FRAC(NRES)%FRAC_FRAC(I),MSG='FAILED TO LOAD Split Fraction')
-            END DO !(I = 1,COUNTER)
-
-!            ! Print values
-!              WRITE(SWO%IOUT,*) "      FRAC TABLE:"
-!              WRITE(SWO%IOUT,*) " "
-!              WRITE(SWO%IOUT,102)
-!              DO I = 1,COUNTER
-!                WRITE(SWO%IOUT,103) SWO%RESDAT(IPROJ)%FRAC(NRES)%FRAC_DOY(I), &
-!                                SWO%RESDAT(IPROJ)%FRAC(NRES)%FRAC_FRAC(I)
-!              END DO !(I = 1,COUNTER)
-!102           FORMAT("    Day-Of-Year", &
-!                     "       Fraction")
-!103           FORMAT(2D15.4)
-      END IF
-      !
+          LLOC = 1
+          CALL GET_DOUBLE_DATE(LINE,LLOC,ISTART,ISTOP,SWO%IOUT,FL%IU,TMP,DATE,FOUND_DATE=FOUND, MSG='FAILED TO LOAD FRACTION OF NON-LEAP YEAR OR CALENDAR DATE')
+          IF(SWO%LEAP_YEAR) THEN
+               IF(FOUND) THEN
+                   SWO%RESDAT(IPROJ)%FRAC(NRES)%FRAC_NOLEAP(I) = DATE%YEAR_FRACTION(FALSE)
+                   !SWO%RESDAT(IPROJ)%FRAC(NRES)%FRAC_LEAP  (I) = DATE%YEAR_FRACTION(TRUE )
+               ELSE
+                   SWO%RESDAT(IPROJ)%FRAC(NRES)%FRAC_NOLEAP(I) = TMP * 365.25D0/365D0
+                   !SWO%RESDAT(IPROJ)%FRAC(NRES)%FRAC_LEAP  (I) = TMP * 365.25D0/366D0
+               END IF
+          ELSE
+                   SWO%RESDAT(IPROJ)%FRAC(NRES)%FRAC_NOLEAP(I) = TMP
+                   !SWO%RESDAT(IPROJ)%FRAC(NRES)%FRAC_LEAP  (I) = TMP
+          END IF
+          !
+          CALL GET_NUMBER(LINE,LLOC,ISTART,ISTOP,SWO%IOUT,FL%IU,SWO%RESDAT(IPROJ)%FRAC(NRES)%FRAC_FRAC(I),MSG='FAILED TO LOAD Split Fraction')
+        END DO !(I = 1,COUNTER)
+        !
+        !          ! Print values
+        !              WRITE(SWO%IOUT,*) "      FRAC TABLE:"
+        !              WRITE(SWO%IOUT,*) " "
+        !              WRITE(SWO%IOUT,102)
+        !              DO I = 1,COUNTER
+        !                WRITE(SWO%IOUT,103) SWO%RESDAT(IPROJ)%FRAC(NRES)%FRAC_DOY(I), &
+        !                                SWO%RESDAT(IPROJ)%FRAC(NRES)%FRAC_FRAC(I)
+        !              END DO !(I = 1,COUNTER)
+        !102           FORMAT("    Day-Of-Year", &
+        !                     "       Fraction")
+        !103           FORMAT(2D15.4)
+    END IF
+    !
   END SUBROUTINE SWOPS_READFRAC
 !
   SUBROUTINE SWOPS_READHEAD(SWO,FL,LINE,NCELL,CELLS,IPROJ,IRES)
@@ -7374,772 +7417,772 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
 !     ------------------------------------------------------------------
 !        ARGUMENTS:
 !     ------------------------------------------------------------------
-      CLASS(SWO_DATA),                   INTENT(INOUT):: SWO
-      TYPE(GENERIC_INPUT_FILE),          INTENT(INOUT):: FL
-      INTEGER,                           INTENT(  OUT):: NCELL
-      CHARACTER(*),                      INTENT(INOUT):: LINE
-      INTEGER,DIMENSION(:,:),ALLOCATABLE,INTENT(INOUT) :: CELLS
-      INTEGER,                           INTENT(IN   ):: IPROJ, IRES
+    CLASS(SWO_DATA),                   INTENT(INOUT):: SWO
+    TYPE(GENERIC_INPUT_FILE),          INTENT(INOUT):: FL
+    INTEGER,                           INTENT(  OUT):: NCELL
+    CHARACTER(*),                      INTENT(INOUT):: LINE
+    INTEGER,DIMENSION(:,:),ALLOCATABLE,INTENT(INOUT) :: CELLS
+    INTEGER,                           INTENT(IN   ):: IPROJ, IRES
 !
-!     ------------------------------------------------------------------
-!        LOCAL VARIABLES:
-      !CHARACTER(24)  :: ANAME
-      INTEGER II,JJ,COUNTER,LLOC, IU
-      INTEGER,DIMENSION(:,:),ALLOCATABLE :: TMPGRID
-!     ------------------------------------------------------------------
-      !
-      SWO%RESDAT(IPROJ)%HEAD(IRES)%HEAD_PROJID = IPROJ
-      SWO%RESDAT(IPROJ)%HEAD(IRES)%HEAD_RESID  = IRES
-      !
-      IF(SWO%IRESFL(IPROJ) > Z) THEN
-          IF(FL%SKIP) THEN
-              SWO%RESDAT(IPROJ)%RESBAL(IRES)%HEADCELL = Z
-          ELSE
-              SWO%RESDAT(IPROJ)%RESBAL(IRES)%HEADCELL = ONE
-          END IF
-      ELSE
-          IF(FL%SKIP) THEN
-              SWO%RESDAT(IPROJ)%RESSPLIT(IRES)%HEADCELL = Z
-          ELSE
-              SWO%RESDAT(IPROJ)%RESSPLIT(IRES)%HEADCELL = ONE
-          END IF
-              SWO%RESDAT(IPROJ)%RESBAL  (1)%HEADCELL = Z
-      END IF
-      !
-      ! Create temporary 2D array ...
-      ALLOCATE( TMPGRID(SWO%NCOL,SWO%NROW) )
-      LLOC = ONE
-      IU = Z
-      CALL ULOAD(TMPGRID, LLOC, LINE, SWO%IOUT, FL%IU, IU, NOID=TRUE, NO_INTERNAL=TRUE)
+!   ------------------------------------------------------------------
+!      LOCAL VARIABLES:
+    !CHARACTER(24)  :: ANAME
+    INTEGER II,JJ,COUNTER,LLOC, IU
+    INTEGER,DIMENSION(:,:),ALLOCATABLE :: TMPGRID
+!   ------------------------------------------------------------------
+    !
+    SWO%RESDAT(IPROJ)%HEAD(IRES)%HEAD_PROJID = IPROJ
+    SWO%RESDAT(IPROJ)%HEAD(IRES)%HEAD_RESID  = IRES
+    !
+    IF(SWO%IRESFL(IPROJ) > Z) THEN
+        IF(FL%NULL_FILE) THEN
+            SWO%RESDAT(IPROJ)%RESBAL(IRES)%HEADCELL = Z
+        ELSE
+            SWO%RESDAT(IPROJ)%RESBAL(IRES)%HEADCELL = ONE
+        END IF
+    ELSE
+        IF(FL%NULL_FILE) THEN
+            SWO%RESDAT(IPROJ)%RESSPLIT(IRES)%HEADCELL = Z
+        ELSE
+            SWO%RESDAT(IPROJ)%RESSPLIT(IRES)%HEADCELL = ONE
+        END IF
+            SWO%RESDAT(IPROJ)%RESBAL  (1)%HEADCELL = Z
+    END IF
+    !
+    ! Create temporary 2D array ...
+    ALLOCATE( TMPGRID(SWO%NCOL,SWO%NROW) )
+    LLOC = ONE
+    IU = Z
+    CALL ULOAD(TMPGRID, LLOC, LINE, SWO%IOUT, FL%IU, IU, NOID=TRUE, NO_INTERNAL=TRUE)
 
-      ! Call U2DINT to read head indicator file ...
-      !ANAME = 'Reservoir Head Boundary'
-      !CALL U2DINT(TMPGRID,ANAME,NROW,NCOL,0,999,IOUT)
+    ! Call U2DINT to read head indicator file ...
+    !ANAME = 'Reservoir Head Boundary'
+    !CALL U2DINT(TMPGRID,ANAME,NROW,NCOL,0,999,IOUT)
 
-      ! Loop to count cells with non-zero value ...
-      NCELL = 0
-      DO II = 1, SWO%NROW
-      DO JJ = 1, SWO%NCOL
-      IF ( TMPGRID(JJ,II).NE.0 ) NCELL = NCELL + 1
-      END DO
-      END DO
-      !
-      ! Allocate CELLS array
-      !
-      IF(NCELL > Z) THEN
-         ALLOCATE( CELLS(2,NCELL) )                                        ! CELLS(1,:) = Rows, CELLS(2,:) = Cols
-         COUNTER = 0
-         DO II = 1,SWO%NROW
-           DO JJ = 1,SWO%NCOL
-             IF (TMPGRID(JJ,II).NE.0) THEN
-               COUNTER = COUNTER + 1
-               CELLS(1,COUNTER) = II                                 ! Row...
-               CELLS(2,COUNTER) = JJ                                 ! Col...
-             END IF !(TMPGRID.NE.0)
-           END DO !(JJ)
-         END DO !(II)
-      END IF
-      !
-      DEALLOCATE( TMPGRID )
-      !
+    ! Loop to count cells with non-zero value ...
+    NCELL = 0
+    DO II = 1, SWO%NROW
+    DO JJ = 1, SWO%NCOL
+    IF ( TMPGRID(JJ,II).NE.0 ) NCELL = NCELL + 1
+    END DO
+    END DO
+    !
+    ! Allocate CELLS array
+    !
+    IF(NCELL > Z) THEN
+       ALLOCATE( CELLS(2,NCELL) )                                        ! CELLS(1,:) = Rows, CELLS(2,:) = Cols
+       COUNTER = 0
+       DO II = 1,SWO%NROW
+         DO JJ = 1,SWO%NCOL
+           IF (TMPGRID(JJ,II).NE.0) THEN
+             COUNTER = COUNTER + 1
+             CELLS(1,COUNTER) = II                                 ! Row...
+             CELLS(2,COUNTER) = JJ                                 ! Col...
+           END IF !(TMPGRID.NE.0)
+         END DO !(JJ)
+       END DO !(II)
+    END IF
+    !
+    DEALLOCATE( TMPGRID )
+    !
   END SUBROUTINE SWOPS_READHEAD
 !
   SUBROUTINE SWO_READ_MAX_SPILL(SWO,FL,LINE,DAT,IPROJ,IRES,SF)
-      CLASS(SWO_DATA),                   INTENT(INOUT):: SWO
-      TYPE(GENERIC_INPUT_FILE),          INTENT(INOUT):: FL
-      CHARACTER(*),                      INTENT(INOUT):: LINE
-      TYPE(DOUBLE_MATRIX),               INTENT(INOUT):: DAT
-      INTEGER,                           INTENT(IN   ):: IPROJ, IRES
-      TYPE(SFAC_DATA),                   INTENT(IN   ):: SF
+    CLASS(SWO_DATA),                   INTENT(INOUT):: SWO
+    TYPE(GENERIC_INPUT_FILE),          INTENT(INOUT):: FL
+    CHARACTER(*),                      INTENT(INOUT):: LINE
+    TYPE(DOUBLE_MATRIX),               INTENT(INOUT):: DAT
+    INTEGER,                           INTENT(IN   ):: IPROJ, IRES
+    TYPE(SFAC_DATA),                   INTENT(IN   ):: SF
 !
-!     ------------------------------------------------------------------
-      TYPE(SFAC_DATA):: SFAC
-      CHARACTER(5):: EXT
+!   ------------------------------------------------------------------
+    TYPE(SFAC_DATA):: SFAC
+    CHARACTER(5):: EXT
 !
-!     ------------------------------------------------------------------
-!        LOCAL VARIABLES:
-      INTEGER LLOC,ISTART,ISTOP,I,DIM
-!     ------------------------------------------------------------------
-      !
-      SFAC = SF
-      !
-      IF(FL%IS_CONSTANT) THEN
-          CALL DAT%ALLOC(ONE,ONE,FL%SCALE)
+!   ------------------------------------------------------------------
+!      LOCAL VARIABLES:
+    INTEGER LLOC,ISTART,ISTOP,I,DIM
+!   ------------------------------------------------------------------
+    !
+    SFAC = SF
+    !
+    IF(FL%IS_CONSTANT) THEN
+        CALL DAT%ALLOC(ONE,ONE,FL%SCALE)
+        !
+        IF(FL%SCALE < D100) THEN
+                            IF(SFAC%HAS_ALL) DAT%MAT = DAT%MAT * SFAC%ALL
+                            IF(SFAC%HAS_EX2) DAT%MAT = DAT%MAT * SFAC%EX2(ONE)
+        END IF
+    ELSEIF(FL%NULL_FILE) THEN
+        CALL DAT%ALLOC(ONE,ONE,inf)
+    ELSE
+        CALL FL%COUNT_LINES(DIM)
+        CALL FL%REWIND()
+        !
+        CALL READ_TO_DATA(LINE, FL%IU, SWO%IOUT)
+        !
+        DO I = 1, 10 !should never hav more then 10 SFAC
+             !
+             LLOC = ONE
+             CALL GET_WORD(LINE,LLOC,ISTART,ISTOP,EXT,COM_STOP=TRUE)   !GET VALUE
+             !
+             IF (EXT == 'SFAC') THEN
+                 !
+                 DIM = DIM - ONE
+                 !
+                 CALL SFAC%LOAD(LINE, FL%IU, SWO%IOUT, EX1_WORD='STORAGE', EX1_DIM=ONE, EX2_WORD='DISCHARGE', EX2_DIM=ONE, EX3_WORD='ELEVATION', NO_INTERNAL=TRUE)
+                 !
+                 CALL READ_TO_DATA(LINE, FL%IU, SWO%IOUT)
+             ELSE
+                 EXIT
+             END IF
+        END DO
+        !
+        CALL DAT%ALLOC(DIM,TWO)
+        !
+        DO I = 1, DIM
           !
-          IF(FL%SCALE < D100) THEN
-                              IF(SFAC%HAS_ALL) DAT%MAT = DAT%MAT * SFAC%ALL
-                              IF(SFAC%HAS_EX2) DAT%MAT = DAT%MAT * SFAC%EX2(ONE)
-          END IF
-      ELSEIF(FL%SKIP) THEN
-          CALL DAT%ALLOC(ONE,ONE,inf)
-      ELSE
-          CALL FL%COUNT_LINES(DIM)
-          CALL FL%REWIND()
+          LLOC = ONE
+          CALL GET_NUMBER(LINE,LLOC,ISTART,ISTOP,SWO%IOUT,FL%IU,DAT%MAT(I, ONE),   MSG='FAILED TO LOAD STORAGE OR ELEVATION PORTION OF SPILLWAY STAGE-DICHARGE TABLE')
+          CALL GET_NUMBER(LINE,LLOC,ISTART,ISTOP,SWO%IOUT,FL%IU,DAT%MAT(I, TWO),   MSG='FAILED TO LOAD DISCHARGE PORTION OF SPILLWAY STAGE-DICHARGE TABLE')
           !
           CALL READ_TO_DATA(LINE, FL%IU, SWO%IOUT)
-          !
-          DO I = 1, 10 !should never hav more then 10 SFAC
-               !
-               LLOC = ONE
-               CALL GET_WORD(LINE,LLOC,ISTART,ISTOP,EXT,COM_STOP=TRUE)   !GET VALUE
-               !
-               IF (EXT == 'SFAC') THEN
-                   !
-                   DIM = DIM - ONE
-                   !
-                   CALL SFAC%LOAD(LINE, FL%IU, SWO%IOUT, EX1_WORD='STORAGE', EX1_DIM=ONE, EX2_WORD='DISCHARGE', EX2_DIM=ONE, EX3_WORD='ELEVATION', NO_INTERNAL=TRUE)
-                   !
-                   CALL READ_TO_DATA(LINE, FL%IU, SWO%IOUT)
-               ELSE
-                   EXIT
-               END IF
-          END DO
-          !
-          CALL DAT%ALLOC(DIM,TWO)
-          !
-          DO I = 1, DIM
-            !
-            LLOC = ONE
-            CALL GET_NUMBER(LINE,LLOC,ISTART,ISTOP,SWO%IOUT,FL%IU,DAT%MAT(I, ONE),   MSG='FAILED TO LOAD STORAGE OR ELEVATION PORTION OF SPILLWAY STAGE-DICHARGE TABLE')
-            CALL GET_NUMBER(LINE,LLOC,ISTART,ISTOP,SWO%IOUT,FL%IU,DAT%MAT(I, TWO),   MSG='FAILED TO LOAD DISCHARGE PORTION OF SPILLWAY STAGE-DICHARGE TABLE')
-            !
-            CALL READ_TO_DATA(LINE, FL%IU, SWO%IOUT)
-          END DO
-          !
-          IF(SFAC%HAS_ALL) DAT%MAT = DAT%MAT * SFAC%ALL
-          !
-          IF(SFAC%HAS_EX1) DAT%MAT(:, ONE) = DAT%MAT(:, ONE) * SFAC%EX1(ONE)
-          IF(SFAC%HAS_EX3) DAT%MAT(:, ONE) = DAT%MAT(:, ONE) * SFAC%EX3(ONE)
-          IF(SFAC%HAS_EX2) DAT%MAT(:, TWO) = DAT%MAT(:, TWO) * SFAC%EX2(ONE)
-      END IF
-      !
+        END DO
+        !
+        IF(SFAC%HAS_ALL) DAT%MAT = DAT%MAT * SFAC%ALL
+        !
+        IF(SFAC%HAS_EX1) DAT%MAT(:, ONE) = DAT%MAT(:, ONE) * SFAC%EX1(ONE)
+        IF(SFAC%HAS_EX3) DAT%MAT(:, ONE) = DAT%MAT(:, ONE) * SFAC%EX3(ONE)
+        IF(SFAC%HAS_EX2) DAT%MAT(:, TWO) = DAT%MAT(:, TWO) * SFAC%EX2(ONE)
+    END IF
+    !
   END SUBROUTINE
   !
   PURE SUBROUTINE SPLIT_RES_FRAC(SWO, IPROJ, IRES, DOY, FRAC, ISLEAP)
 !-----VERSION X 2014.07.24 FRAC_POOL2SPLIT
-!     ******************************************************************
-!     OVERVIEW:
-!     Return fraction of storage for specific reservoir in split
-!     ------------------------------------------------------------------
-      CLASS(SWO_DATA), INTENT(IN   ):: SWO
-      INTEGER,         INTENT(IN   ):: IPROJ,IRES
-      DOUBLE PRECISION,INTENT(IN   ):: DOY
-      LOGICAL,         INTENT(IN   ):: ISLEAP
-      DOUBLE PRECISION,INTENT(  OUT):: FRAC
+!   ******************************************************************
+!   OVERVIEW:
+!   Return fraction of storage for specific reservoir in split
+!   ------------------------------------------------------------------
+    CLASS(SWO_DATA), INTENT(IN   ):: SWO
+    INTEGER,         INTENT(IN   ):: IPROJ,IRES
+    DOUBLE PRECISION,INTENT(IN   ):: DOY
+    LOGICAL,         INTENT(IN   ):: ISLEAP
+    DOUBLE PRECISION,INTENT(  OUT):: FRAC
 !
-!     ------------------------------------------------------------------
-!        LOCAL VARIABLES:
-      INTEGER             I,IMAX
-      DOUBLE PRECISION :: DOY_LUT1,DOY_LUT2,  &
-                          FRAC_LUT1,FRAC_LUT2,&
-                          DFDD, LEAP
-!     ------------------------------------------------------------------
+!   ------------------------------------------------------------------
+!      LOCAL VARIABLES:
+    INTEGER             I,IMAX
+    DOUBLE PRECISION :: DOY_LUT1,DOY_LUT2,  &
+                        FRAC_LUT1,FRAC_LUT2,&
+                        DFDD, LEAP
+!   ------------------------------------------------------------------
 !
-      LEAP = UNO
-      IF(SWO%LEAP_YEAR .AND. ISLEAP) LEAP = 365D0 / 366D0
-      !
-      DFDD = DZ; FRAC = DZ
-      !
-      IMAX = SWO%RESDAT(IPROJ)%FRAC(IRES)%FRAC_COUNT
-      !
-      ASSOCIATE(FRAC_DOY => SWO%RESDAT(IPROJ)%FRAC(IRES)%FRAC_NOLEAP, FRAC_FRAC => SWO%RESDAT(IPROJ)%FRAC(IRES)%FRAC_FRAC)
-          !
-           DO I = 1,IMAX
-               IF (FRAC_DOY(I)*LEAP .GE. DOY) EXIT
-           END DO !(I = 1,IMAX)
+    LEAP = UNO
+    IF(SWO%LEAP_YEAR .AND. ISLEAP) LEAP = 365.D0 / 366.D0
+    !
+    DFDD = DZ; FRAC = DZ
+    !
+    IMAX = SWO%RESDAT(IPROJ)%FRAC(IRES)%FRAC_COUNT
+    !
+    ASSOCIATE(FRAC_DOY => SWO%RESDAT(IPROJ)%FRAC(IRES)%FRAC_NOLEAP, FRAC_FRAC => SWO%RESDAT(IPROJ)%FRAC(IRES)%FRAC_FRAC)
+        !
+         DO I = 1,IMAX
+             IF (FRAC_DOY(I)*LEAP .GE. DOY) EXIT
+         END DO !(I = 1,IMAX)
 
-           IF (I.EQ.1) THEN
-               FRAC           = FRAC_FRAC(I)
-           ELSE IF (I.GE.IMAX) THEN
-               FRAC           = FRAC_FRAC(IMAX)
-           ELSE
-               IF (DOY.EQ.FRAC_DOY(I)*LEAP) THEN
-                   FRAC       = FRAC_FRAC(I)
-               ELSE
-                   DOY_LUT1  = FRAC_DOY(I-1)*LEAP
-                   DOY_LUT2  = FRAC_DOY(I)  *LEAP
-                   FRAC_LUT1 = FRAC_FRAC(I-1)
-                   FRAC_LUT2 = FRAC_FRAC(I)
-                   !
-                   IF (DOY_LUT1.EQ.DOY_LUT2) THEN
-                     FRAC     = (FRAC_LUT2-FRAC_LUT1)/2.
-                   ELSE
-                     DFDD    = (FRAC_LUT2-FRAC_LUT1)/(DOY_LUT2-DOY_LUT1)
-                     FRAC    = FRAC_LUT1 + DFDD*(DOY-DOY_LUT1)               ! linear interpolation between neighboring table values...
-                   END IF !(DOY_LUT1.EQ.DOY_LUT2)
-               END IF !(DOY.EQ.FRAC_DOY)
-           END IF !(I.EQ.1/I.EQ.IMAX/OTHER)
-      END ASSOCIATE
+         IF (I.EQ.1) THEN
+             FRAC           = FRAC_FRAC(I)
+         ELSE IF (I.GE.IMAX) THEN
+             FRAC           = FRAC_FRAC(IMAX)
+         ELSE
+             IF (DOY.EQ.FRAC_DOY(I)*LEAP) THEN
+                 FRAC       = FRAC_FRAC(I)
+             ELSE
+                 DOY_LUT1  = FRAC_DOY(I-1)*LEAP
+                 DOY_LUT2  = FRAC_DOY(I)  *LEAP
+                 FRAC_LUT1 = FRAC_FRAC(I-1)
+                 FRAC_LUT2 = FRAC_FRAC(I)
+                 !
+                 IF (DOY_LUT1.EQ.DOY_LUT2) THEN
+                   FRAC     = (FRAC_LUT2-FRAC_LUT1)/2.
+                 ELSE
+                   DFDD    = (FRAC_LUT2-FRAC_LUT1)/(DOY_LUT2-DOY_LUT1)
+                   FRAC    = FRAC_LUT1 + DFDD*(DOY-DOY_LUT1)               ! linear interpolation between neighboring table values...
+                 END IF !(DOY_LUT1.EQ.DOY_LUT2)
+             END IF !(DOY.EQ.FRAC_DOY)
+         END IF !(I.EQ.1/I.EQ.IMAX/OTHER)
+    END ASSOCIATE
   END SUBROUTINE
   !
   PURE SUBROUTINE ACAP_STOR2AREA(SWO,IPROJ,IRES,STORAGE,AREA)
 !-----VERSION X 2014.07.24 ACAP_STOR2AREA
-!     ******************************************************************
-!     OVERVIEW:
-!     Compute reservoir surface area from reservoir storage based on
-!     linear interpolation of ACAP table.
+!   ******************************************************************
+!   OVERVIEW:
+!   Compute reservoir surface area from reservoir storage based on
+!   linear interpolation of ACAP table.
 !
-!     NOTES:
+!   NOTES:
 !
-!     ******************************************************************
-!        SPECIFICATIONS:
-!     ------------------------------------------------------------------
-      CLASS(SWO_DATA),           INTENT(IN   ):: SWO
-      INTEGER,                   INTENT(IN   ):: IPROJ,IRES
-      DOUBLE PRECISION,          INTENT(IN   ):: STORAGE
-      DOUBLE PRECISION,          INTENT(  OUT):: AREA
+!   ******************************************************************
+!      SPECIFICATIONS:
+!   ------------------------------------------------------------------
+    CLASS(SWO_DATA),           INTENT(IN   ):: SWO
+    INTEGER,                   INTENT(IN   ):: IPROJ,IRES
+    DOUBLE PRECISION,          INTENT(IN   ):: STORAGE
+    DOUBLE PRECISION,          INTENT(  OUT):: AREA
 !
-!     ------------------------------------------------------------------
-!        LOCAL VARIABLES:
-      INTEGER             I,IMAX
-      DOUBLE PRECISION :: STOR_LUT1,AREA_LUT1, STOR_LUT2,AREA_LUT2, DADS
-!     ------------------------------------------------------------------
+!   ------------------------------------------------------------------
+!      LOCAL VARIABLES:
+    INTEGER             I,IMAX
+    DOUBLE PRECISION :: STOR_LUT1,AREA_LUT1, STOR_LUT2,AREA_LUT2, DADS
+!   ------------------------------------------------------------------
 !
-      IMAX = SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_COUNT
-      DO I = 1,IMAX
-          IF (SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_STORAGE(I).GE.STORAGE) EXIT
-      END DO !(I = 1,IMAX)
-      IF(I>IMAX) I = IMAX
+    IMAX = SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_COUNT
+    DO I = 1,IMAX
+        IF (SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_STORAGE(I).GE.STORAGE) EXIT
+    END DO !(I = 1,IMAX)
+    IF(I>IMAX) I = IMAX
 
-      IF (I == ONE) THEN
-          AREA          = SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_AREA(I)
-      ELSE IF (I.EQ.IMAX) THEN
-          AREA          = SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_AREA(I)
-      ELSE
-          IF (STORAGE.EQ.SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_STORAGE(I)) THEN
-              AREA      = SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_AREA(I)
-          ELSE
-              STOR_LUT1 = SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_STORAGE(I-1)
-              STOR_LUT2 = SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_STORAGE(I)
-              AREA_LUT1 = SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_AREA(I-1)
-              AREA_LUT2 = SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_AREA(I)
-              DADS      = (AREA_LUT2-AREA_LUT1)/(STOR_LUT2-STOR_LUT1)
-              !
-              AREA = AREA_LUT1 + DADS*(STORAGE-STOR_LUT1)          ! linear interpolation between neighboring table values...
-          END IF !(STORAGE.EQ.ACAP_STORAGE)
-      END IF !(I.EQ.1/I.EQ.IMAX/OTHER)
-  !
+    IF (I == ONE) THEN
+        AREA          = SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_AREA(I)
+    ELSE IF (I.EQ.IMAX) THEN
+        AREA          = SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_AREA(I)
+    ELSE
+        IF (STORAGE.EQ.SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_STORAGE(I)) THEN
+            AREA      = SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_AREA(I)
+        ELSE
+            STOR_LUT1 = SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_STORAGE(I-1)
+            STOR_LUT2 = SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_STORAGE(I)
+            AREA_LUT1 = SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_AREA(I-1)
+            AREA_LUT2 = SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_AREA(I)
+            DADS      = (AREA_LUT2-AREA_LUT1)/(STOR_LUT2-STOR_LUT1)
+            !
+            AREA = AREA_LUT1 + DADS*(STORAGE-STOR_LUT1)          ! linear interpolation between neighboring table values...
+        END IF !(STORAGE.EQ.ACAP_STORAGE)
+    END IF !(I.EQ.1/I.EQ.IMAX/OTHER)
+    !
   END SUBROUTINE ACAP_STOR2AREA
   !
   PURE SUBROUTINE ACAP_STOR2ELEV(SWO,IPROJ,IRES,STORAGE,ELEV)
 !-----VERSION X 2014.07.24 ACAP_STOR2ELEV
-!     ******************************************************************
-!     OVERVIEW:
-!     Compute reservoir surface ELEV from reservoir storage based on
-!     linear interpolation of ACAP table.
+!   ******************************************************************
+!   OVERVIEW:
+!   Compute reservoir surface ELEV from reservoir storage based on
+!   linear interpolation of ACAP table.
 !
-!     NOTES:
+!   NOTES:
 !
-!     ******************************************************************
-!        SPECIFICATIONS:
-!     ------------------------------------------------------------------
-      CLASS(SWO_DATA),           INTENT(IN   ):: SWO
-      INTEGER,                   INTENT(IN   ):: IPROJ,IRES
-      DOUBLE PRECISION,          INTENT(IN   ):: STORAGE
-      DOUBLE PRECISION,          INTENT(  OUT):: ELEV
+!   ******************************************************************
+!      SPECIFICATIONS:
+!   ------------------------------------------------------------------
+    CLASS(SWO_DATA),           INTENT(IN   ):: SWO
+    INTEGER,                   INTENT(IN   ):: IPROJ,IRES
+    DOUBLE PRECISION,          INTENT(IN   ):: STORAGE
+    DOUBLE PRECISION,          INTENT(  OUT):: ELEV
 !
-!     ------------------------------------------------------------------
-!        LOCAL VARIABLES:
-      INTEGER             I,IMAX
-      DOUBLE PRECISION :: STOR_LUT1,ELEV_LUT1, STOR_LUT2,ELEV_LUT2, DADS
-!     ------------------------------------------------------------------
+!   ------------------------------------------------------------------
+!      LOCAL VARIABLES:
+    INTEGER             I,IMAX
+    DOUBLE PRECISION :: STOR_LUT1,ELEV_LUT1, STOR_LUT2,ELEV_LUT2, DADS
+!   ------------------------------------------------------------------
 !
-      IMAX = SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_COUNT
-      DO I = 1,IMAX
-          IF (SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_STORAGE(I).GE.STORAGE) EXIT
-      END DO !(I = 1,IMAX)
-      IF(I>IMAX) I = IMAX
+    IMAX = SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_COUNT
+    DO I = 1,IMAX
+        IF (SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_STORAGE(I).GE.STORAGE) EXIT
+    END DO !(I = 1,IMAX)
+    IF(I>IMAX) I = IMAX
 
-      IF (I == ONE) THEN
-          ELEV          = SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_ELEV(I)
-      ELSE IF (I.EQ.IMAX) THEN
-          ELEV          = SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_ELEV(I)
-      ELSE
-          IF (STORAGE.EQ.SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_STORAGE(I)) THEN
-              ELEV      = SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_ELEV(I)
-          ELSE
-              STOR_LUT1 = SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_STORAGE(I-1)
-              STOR_LUT2 = SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_STORAGE(I)
-              ELEV_LUT1 = SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_ELEV(I-1)
-              ELEV_LUT2 = SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_ELEV(I)
-              DADS      = (ELEV_LUT2-ELEV_LUT1)/(STOR_LUT2-STOR_LUT1)
-              !
-              ELEV = ELEV_LUT1 + DADS*(STORAGE-STOR_LUT1)          ! linear interpolation between neighboring table values...
-              !
-          END IF !(STORAGE.EQ.ACAP_STORAGE)
-      END IF !(I.EQ.1/I.EQ.IMAX/OTHER)
-  !
+    IF (I == ONE) THEN
+        ELEV          = SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_ELEV(I)
+    ELSE IF (I.EQ.IMAX) THEN
+        ELEV          = SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_ELEV(I)
+    ELSE
+        IF (STORAGE.EQ.SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_STORAGE(I)) THEN
+            ELEV      = SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_ELEV(I)
+        ELSE
+            STOR_LUT1 = SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_STORAGE(I-1)
+            STOR_LUT2 = SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_STORAGE(I)
+            ELEV_LUT1 = SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_ELEV(I-1)
+            ELEV_LUT2 = SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_ELEV(I)
+            DADS      = (ELEV_LUT2-ELEV_LUT1)/(STOR_LUT2-STOR_LUT1)
+            !
+            ELEV = ELEV_LUT1 + DADS*(STORAGE-STOR_LUT1)          ! linear interpolation between neighboring table values...
+            !
+        END IF !(STORAGE.EQ.ACAP_STORAGE)
+    END IF !(I.EQ.1/I.EQ.IMAX/OTHER)
+    !
   END SUBROUTINE ACAP_STOR2ELEV
   !
   PURE SUBROUTINE ACAP_ELEV2STOR(SWO,IPROJ,IRES,ELEV,STORAGE)
 !-----VERSION X 2014.07.24 ACAP_STOR2ELEV
-!     ******************************************************************
-!     OVERVIEW:
-!     Compute reservoir storage from surface elevation based on
-!     linear interpolation of ACAP table.
+!   ******************************************************************
+!   OVERVIEW:
+!   Compute reservoir storage from surface elevation based on
+!   linear interpolation of ACAP table.
 !
-!     NOTES:
+!   NOTES:
 !
-!     ******************************************************************
-!        SPECIFICATIONS:
-!     ------------------------------------------------------------------
-      CLASS(SWO_DATA),           INTENT(IN   ):: SWO
-      INTEGER,                   INTENT(IN   ):: IPROJ,IRES
-      DOUBLE PRECISION,          INTENT(IN   ):: ELEV
-      DOUBLE PRECISION,          INTENT(  OUT):: STORAGE
+!   ******************************************************************
+!      SPECIFICATIONS:
+!   ------------------------------------------------------------------
+    CLASS(SWO_DATA),           INTENT(IN   ):: SWO
+    INTEGER,                   INTENT(IN   ):: IPROJ,IRES
+    DOUBLE PRECISION,          INTENT(IN   ):: ELEV
+    DOUBLE PRECISION,          INTENT(  OUT):: STORAGE
 !
-!     ------------------------------------------------------------------
-!        LOCAL VARIABLES:
-      INTEGER             I,IMAX
-      DOUBLE PRECISION :: STOR_LUT1,ELEV_LUT1, STOR_LUT2,ELEV_LUT2, DADS
-!     ------------------------------------------------------------------
+!   ------------------------------------------------------------------
+!      LOCAL VARIABLES:
+    INTEGER             I,IMAX
+    DOUBLE PRECISION :: STOR_LUT1,ELEV_LUT1, STOR_LUT2,ELEV_LUT2, DADS
+!   ------------------------------------------------------------------
 !
-      IMAX = SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_COUNT
-      DO I = 1,IMAX
-          IF (SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_ELEV(I).GE.ELEV) EXIT
-      END DO !(I = 1,IMAX)
-      IF(I>IMAX) I = IMAX
+    IMAX = SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_COUNT
+    DO I = 1,IMAX
+        IF (SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_ELEV(I).GE.ELEV) EXIT
+    END DO !(I = 1,IMAX)
+    IF(I>IMAX) I = IMAX
 
-      IF (I == ONE) THEN
-          STORAGE       = SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_STORAGE(I)
-      ELSE IF (I.EQ.IMAX) THEN
-          STORAGE       = SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_STORAGE(I)
-      ELSE
-          IF (STORAGE.EQ.SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_STORAGE(I)) THEN
-              STORAGE       = SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_STORAGE(I)
-          ELSE
-              ELEV_LUT1 = SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_ELEV(I-1)
-              ELEV_LUT2 = SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_ELEV(I)
-              STOR_LUT1 = SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_STORAGE(I-1)
-              STOR_LUT2 = SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_STORAGE(I)
-              DADS      = (STOR_LUT2-STOR_LUT1)/(ELEV_LUT2-ELEV_LUT1)
-              !
-              STORAGE = STOR_LUT1 + DADS*(ELEV-ELEV_LUT1)          ! linear interpolation between neighboring table values...
-              !
-          END IF !(STORAGE.EQ.ACAP_STORAGE)
-      END IF !(I.EQ.1/I.EQ.IMAX/OTHER)
-  !
+    IF (I == ONE) THEN
+        STORAGE       = SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_STORAGE(I)
+    ELSE IF (I.EQ.IMAX) THEN
+        STORAGE       = SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_STORAGE(I)
+    ELSE
+        IF (STORAGE.EQ.SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_STORAGE(I)) THEN
+            STORAGE       = SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_STORAGE(I)
+        ELSE
+            ELEV_LUT1 = SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_ELEV(I-1)
+            ELEV_LUT2 = SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_ELEV(I)
+            STOR_LUT1 = SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_STORAGE(I-1)
+            STOR_LUT2 = SWO%RESDAT(IPROJ)%ACAP(IRES)%ACAP_STORAGE(I)
+            DADS      = (STOR_LUT2-STOR_LUT1)/(ELEV_LUT2-ELEV_LUT1)
+            !
+            STORAGE = STOR_LUT1 + DADS*(ELEV-ELEV_LUT1)          ! linear interpolation between neighboring table values...
+            !
+        END IF !(STORAGE.EQ.ACAP_STORAGE)
+    END IF !(I.EQ.1/I.EQ.IMAX/OTHER)
+    !
   END SUBROUTINE ACAP_ELEV2STOR
   !
   SUBROUTINE ACAP_CHECK(SWO,IOUT,IN)
-!     ******************************************************************
-!     OVERVIEW:
-!     Check to see if ACAP is properly formatted
+!   ******************************************************************
+!   OVERVIEW:
+!   Check to see if ACAP is properly formatted
 !
-!     NOTES:
+!   NOTES:
 !
-!     ******************************************************************
-!        SPECIFICATIONS:
-!     ------------------------------------------------------------------
-      CLASS(SWO_DATA),           INTENT(IN):: SWO
-      INTEGER,                   INTENT(IN):: IOUT,IN
+!   ******************************************************************
+!      SPECIFICATIONS:
+!   ------------------------------------------------------------------
+    CLASS(SWO_DATA),           INTENT(IN):: SWO
+    INTEGER,                   INTENT(IN):: IOUT,IN
 !
-!     ------------------------------------------------------------------
-!        LOCAL VARIABLES:
-      INTEGER             I,J,K, ICAP
-      CHARACTER(:), ALLOCATABLE:: ERROR
-!     ------------------------------------------------------------------
+!   ------------------------------------------------------------------
+!      LOCAL VARIABLES:
+    INTEGER             I,J,K, ICAP
+    CHARACTER(:), ALLOCATABLE:: ERROR
+!   ------------------------------------------------------------------
 !
-      ERROR = NL
-      ICAP = Z
-      DO I=ONE, SWO%NPROJ
-      DO J=ONE, SWO%NRES_TOT(I)
-        ICAP = ICAP + ONE
-        !
-        ASSOCIATE(ELEV => SWO%RESDAT(I)%ACAP(J)%ACAP_ELEV, AREA => SWO%RESDAT(I)%ACAP(J)%ACAP_AREA, STOR => SWO%RESDAT(I)%ACAP(J)%ACAP_STORAGE, IMAX => SWO%RESDAT(I)%ACAP(J)%ACAP_COUNT)
-           DO K = TWO, IMAX
-               IF(ELEV(K) <= ELEV(K-ONE)) ERROR = ERROR//'THE ELEVATION WAS NOT ORDERED FROM SMALLEST TO LARGEST FOR PROJECT '//NUM2STR(I,3)//' AND RES ID '//NUM2STR(J,3)//' AND ERROR HAPPENED AT THE THE Ith POSITION '//NUM2STR(K,4)//' FOR ACAP TABLE NUMBER '//NUM2STR(ICAP)//NL
-           END DO
-           DO K = TWO, IMAX
-               IF( NEAR_ZERO( STOR(K) - STOR(K-ONE) )) THEN
-                   ERROR = ERROR//'TWO STORAGE VALUES ARE THE SAME VALUE FOR PROJECT '//NUM2STR(I,3)//' AND RES ID '//NUM2STR(J,3)//' AND ERROR HAPPENED AT THE THE Ith POSITION '//NUM2STR(K,4)//' FOR ACAP TABLE NUMBER '//NUM2STR(ICAP)//NL
-               ELSEIF( (ELEV(K)-ELEV(K-ONE))/(STOR(K)-STOR(K-ONE)) < DZ ) THEN
-                   ERROR = ERROR//'THE CHANGE IN ELEVATION WITH RESPECT TO STORAGE (dELEV/dSTOR) IS NEGATIVE FOR PROJECT '//NUM2STR(I,3)//' AND RES ID '//NUM2STR(J,3)//' AND ERROR HAPPENED AT THE THE Ith POSITION '//NUM2STR(K,4)//' FOR ACAP TABLE NUMBER '//NUM2STR(ICAP)//NL
-               END IF
-           END DO
-           DO K = TWO, IMAX
-               IF( NEAR_ZERO( AREA(K) - AREA(K-ONE) )) THEN
-                   ERROR = ERROR//'TWO AREA VALUES ARE THE SAME VALUE FOR PROJECT '//NUM2STR(I,3)//' AND RES ID '//NUM2STR(J,3)//' AND ERROR HAPPENED AT THE THE Ith POSITION '//NUM2STR(K,4)//' FOR ACAP TABLE NUMBER '//NUM2STR(ICAP)//NL
-               ELSEIF( (ELEV(K)-ELEV(K-ONE))/(AREA(K)-AREA(K-ONE)) < DZ ) THEN
-                   ERROR = ERROR//'THE CHANGE IN ELEVATION WITH RESPECT TO AREA (dELEV/dAREA) IS NEGATIVE FOR PROJECT '//NUM2STR(I,3)//' AND RES ID '//NUM2STR(J,3)//' AND ERROR HAPPENED AT THE THE Ith POSITION '//NUM2STR(K,4)//' FOR ACAP TABLE NUMBER '//NUM2STR(ICAP)//NL
-               END IF
-           END DO
-           !
-        END ASSOCIATE
-      END DO
-      END DO
+    ERROR = NL
+    ICAP = Z
+    DO I=ONE, SWO%NPROJ
+    DO J=ONE, SWO%NRES_TOT(I)
+      ICAP = ICAP + ONE
       !
-      IF(ERROR.NE.NL) CALL STOP_ERROR(INFILE=IN, OUTPUT=IOUT,MSG='SWO BLOCK ERROR: THE FOLLOWING ERRORS WERE PRESENT IN THE ELEVATION_AREA_CAPACITY TABLES:'//ERROR)
-      !
+      ASSOCIATE(ELEV => SWO%RESDAT(I)%ACAP(J)%ACAP_ELEV, AREA => SWO%RESDAT(I)%ACAP(J)%ACAP_AREA, STOR => SWO%RESDAT(I)%ACAP(J)%ACAP_STORAGE, IMAX => SWO%RESDAT(I)%ACAP(J)%ACAP_COUNT)
+         DO K = TWO, IMAX
+             IF(ELEV(K) <= ELEV(K-ONE)) ERROR = ERROR//'THE ELEVATION WAS NOT ORDERED FROM SMALLEST TO LARGEST FOR PROJECT '//NUM2STR(I,3)//' AND RES ID '//NUM2STR(J,3)//' AND ERROR HAPPENED AT THE THE Ith POSITION '//NUM2STR(K,4)//' FOR ACAP TABLE NUMBER '//NUM2STR(ICAP)//NL
+         END DO
+         DO K = TWO, IMAX
+             IF( NEAR_ZERO( STOR(K) - STOR(K-ONE) )) THEN
+                 ERROR = ERROR//'TWO STORAGE VALUES ARE THE SAME VALUE FOR PROJECT '//NUM2STR(I,3)//' AND RES ID '//NUM2STR(J,3)//' AND ERROR HAPPENED AT THE THE Ith POSITION '//NUM2STR(K,4)//' FOR ACAP TABLE NUMBER '//NUM2STR(ICAP)//NL
+             ELSEIF( (ELEV(K)-ELEV(K-ONE))/(STOR(K)-STOR(K-ONE)) < DZ ) THEN
+                 ERROR = ERROR//'THE CHANGE IN ELEVATION WITH RESPECT TO STORAGE (dELEV/dSTOR) IS NEGATIVE FOR PROJECT '//NUM2STR(I,3)//' AND RES ID '//NUM2STR(J,3)//' AND ERROR HAPPENED AT THE THE Ith POSITION '//NUM2STR(K,4)//' FOR ACAP TABLE NUMBER '//NUM2STR(ICAP)//NL
+             END IF
+         END DO
+         DO K = TWO, IMAX
+             IF( NEAR_ZERO( AREA(K) - AREA(K-ONE) )) THEN
+                 ERROR = ERROR//'TWO AREA VALUES ARE THE SAME VALUE FOR PROJECT '//NUM2STR(I,3)//' AND RES ID '//NUM2STR(J,3)//' AND ERROR HAPPENED AT THE THE Ith POSITION '//NUM2STR(K,4)//' FOR ACAP TABLE NUMBER '//NUM2STR(ICAP)//NL
+             ELSEIF( (ELEV(K)-ELEV(K-ONE))/(AREA(K)-AREA(K-ONE)) < DZ ) THEN
+                 ERROR = ERROR//'THE CHANGE IN ELEVATION WITH RESPECT TO AREA (dELEV/dAREA) IS NEGATIVE FOR PROJECT '//NUM2STR(I,3)//' AND RES ID '//NUM2STR(J,3)//' AND ERROR HAPPENED AT THE THE Ith POSITION '//NUM2STR(K,4)//' FOR ACAP TABLE NUMBER '//NUM2STR(ICAP)//NL
+             END IF
+         END DO
+         !
+      END ASSOCIATE
+    END DO
+    END DO
+    !
+    IF(ERROR.NE.NL) CALL STOP_ERROR(INFILE=IN, OUTPUT=IOUT,MSG='SWO BLOCK ERROR: THE FOLLOWING ERRORS WERE PRESENT IN THE ELEVATION_AREA_CAPACITY TABLES:'//ERROR)
+    !
   END SUBROUTINE
   !
   PURE SUBROUTINE FRAC_POOL2SPLIT(SWO,IPROJ,IRES,DOY,STOR_POOL,STOR_SPLIT, ISLEAP)
 !-----VERSION X 2014.07.24 FRAC_POOL2SPLIT
-!     ******************************************************************
-!     OVERVIEW:
-!     Compute storage in split reservoir from storage in lumped (pooled)
-!     project storage based on linear interpolation reservoir FRAC table
+!   ******************************************************************
+!   OVERVIEW:
+!   Compute storage in split reservoir from storage in lumped (pooled)
+!   project storage based on linear interpolation reservoir FRAC table
 !
-!     NOTES:
+!   NOTES:
 !
-!     ******************************************************************
-!        SPECIFICATIONS:
-!     ------------------------------------------------------------------
-!     ------------------------------------------------------------------
-!        ARGUMENTS:
-!     ------------------------------------------------------------------
-      CLASS(SWO_DATA), INTENT(IN   ):: SWO
-      INTEGER,         INTENT(IN   ):: IPROJ,IRES
-      DOUBLE PRECISION,INTENT(IN   ):: STOR_POOL,DOY
-      LOGICAL,         INTENT(IN   ):: ISLEAP
-      DOUBLE PRECISION,INTENT(  OUT):: STOR_SPLIT
+!   ******************************************************************
+!      SPECIFICATIONS:
+!   ------------------------------------------------------------------
+!   ------------------------------------------------------------------
+!      ARGUMENTS:
+!   ------------------------------------------------------------------
+    CLASS(SWO_DATA), INTENT(IN   ):: SWO
+    INTEGER,         INTENT(IN   ):: IPROJ,IRES
+    DOUBLE PRECISION,INTENT(IN   ):: STOR_POOL,DOY
+    LOGICAL,         INTENT(IN   ):: ISLEAP
+    DOUBLE PRECISION,INTENT(  OUT):: STOR_SPLIT
 !
-!     ------------------------------------------------------------------
-!        LOCAL VARIABLES:
-      INTEGER             I,IMAX
-      DOUBLE PRECISION :: FRC,            &
-                          DOY_LUT1,DOY_LUT2,  &
-                          FRAC_LUT1,FRAC_LUT2,&
-                          DFDD, LEAP
-!     ------------------------------------------------------------------
+!   ------------------------------------------------------------------
+!      LOCAL VARIABLES:
+    INTEGER             I,IMAX
+    DOUBLE PRECISION :: FRC,            &
+                        DOY_LUT1,DOY_LUT2,  &
+                        FRAC_LUT1,FRAC_LUT2,&
+                        DFDD, LEAP
+!   ------------------------------------------------------------------
 !
-      LEAP = UNO
-      IF(SWO%LEAP_YEAR .AND. ISLEAP) LEAP = 365D0 / 366D0
-      !
-      DFDD = DZ; FRC = DZ
-      !
-      IMAX = SWO%RESDAT(IPROJ)%FRAC(IRES)%FRAC_COUNT
-      !
-      ASSOCIATE(FRAC_DOY => SWO%RESDAT(IPROJ)%FRAC(IRES)%FRAC_NOLEAP, FRAC_FRAC => SWO%RESDAT(IPROJ)%FRAC(IRES)%FRAC_FRAC)
-          !
-           DO I = 1,IMAX
-               IF (FRAC_DOY(I)*LEAP .GE. DOY) EXIT
-           END DO !(I = 1,IMAX)
+    LEAP = UNO
+    IF(SWO%LEAP_YEAR .AND. ISLEAP) LEAP = 365.D0 / 366.D0
+    !
+    DFDD = DZ; FRC = DZ
+    !
+    IMAX = SWO%RESDAT(IPROJ)%FRAC(IRES)%FRAC_COUNT
+    !
+    ASSOCIATE(FRAC_DOY => SWO%RESDAT(IPROJ)%FRAC(IRES)%FRAC_NOLEAP, FRAC_FRAC => SWO%RESDAT(IPROJ)%FRAC(IRES)%FRAC_FRAC)
+        !
+         DO I = 1,IMAX
+             IF (FRAC_DOY(I)*LEAP .GE. DOY) EXIT
+         END DO !(I = 1,IMAX)
 
-           IF (I.EQ.1) THEN
-               FRC           = FRAC_FRAC(I)
-           ELSE IF (I.GE.IMAX) THEN
-               FRC           = FRAC_FRAC(IMAX)
-           ELSE
-               IF (DOY.EQ.FRAC_DOY(I)*LEAP) THEN
-                   FRC       = FRAC_FRAC(I)
-               ELSE
-                   DOY_LUT1  = FRAC_DOY(I-1)*LEAP
-                   DOY_LUT2  = FRAC_DOY(I)  *LEAP
-                   FRAC_LUT1 = FRAC_FRAC(I-1)
-                   FRAC_LUT2 = FRAC_FRAC(I)
-                   !
-                   IF (DOY_LUT1.EQ.DOY_LUT2) THEN
-                     FRC     = (FRAC_LUT2-FRAC_LUT1)/2.
-                   ELSE
-                     DFDD    = (FRAC_LUT2-FRAC_LUT1)/(DOY_LUT2-DOY_LUT1)
-                     FRC     = FRAC_LUT1 + DFDD*(DOY-DOY_LUT1)               ! linear interpolation between neighboring table values...
-                   END IF !(DOY_LUT1.EQ.DOY_LUT2)
-               END IF !(DOY.EQ.FRAC_DOY)
-           END IF !(I.EQ.1/I.EQ.IMAX/OTHER)
-      END ASSOCIATE
-      !
-      STOR_SPLIT = STOR_POOL * FRC
+         IF (I.EQ.1) THEN
+             FRC           = FRAC_FRAC(I)
+         ELSE IF (I.GE.IMAX) THEN
+             FRC           = FRAC_FRAC(IMAX)
+         ELSE
+             IF (DOY.EQ.FRAC_DOY(I)*LEAP) THEN
+                 FRC       = FRAC_FRAC(I)
+             ELSE
+                 DOY_LUT1  = FRAC_DOY(I-1)*LEAP
+                 DOY_LUT2  = FRAC_DOY(I)  *LEAP
+                 FRAC_LUT1 = FRAC_FRAC(I-1)
+                 FRAC_LUT2 = FRAC_FRAC(I)
+                 !
+                 IF (DOY_LUT1.EQ.DOY_LUT2) THEN
+                   FRC     = (FRAC_LUT2-FRAC_LUT1)/2.
+                 ELSE
+                   DFDD    = (FRAC_LUT2-FRAC_LUT1)/(DOY_LUT2-DOY_LUT1)
+                   FRC     = FRAC_LUT1 + DFDD*(DOY-DOY_LUT1)               ! linear interpolation between neighboring table values...
+                 END IF !(DOY_LUT1.EQ.DOY_LUT2)
+             END IF !(DOY.EQ.FRAC_DOY)
+         END IF !(I.EQ.1/I.EQ.IMAX/OTHER)
+    END ASSOCIATE
+    !
+    STOR_SPLIT = STOR_POOL * FRC
 
-!      WRITE(IOUT,*) " "
-!      WRITE(IOUT,*) "PRINT CHECK @ FRAC_POOL2SPLIT"
-!      WRITE(IOUT,*) "IPROJ          =", IPROJ
-!      WRITE(IOUT,*) "IRES           =", IRES
-!      WRITE(IOUT,*) "DOY            =", DOY
-!      WRITE(IOUT,*) "POOLED STORAGE =", STOR_POOL
-!      WRITE(IOUT,*) "DOY_LUT1       =", DOY_LUT1
-!      WRITE(IOUT,*) "DOY_LUT2       =", DOY_LUT2
-!      WRITE(IOUT,*) "FRAC_LUT1      =", FRAC_LUT1
-!      WRITE(IOUT,*) "FRAC_LUT2      =", FRAC_LUT2
-!      WRITE(IOUT,*) "DFDD           =", DFDD
-!      WRITE(IOUT,*) "FRC            =", FRC
-!      WRITE(IOUT,*) "STOR_SPLIT     =", STOR_SPLIT
-!
+    !WRITE(IOUT,*) " "
+    !WRITE(IOUT,*) "PRINT CHECK @ FRAC_POOL2SPLIT"
+    !WRITE(IOUT,*) "IPROJ          =", IPROJ
+    !WRITE(IOUT,*) "IRES           =", IRES
+    !WRITE(IOUT,*) "DOY            =", DOY
+    !WRITE(IOUT,*) "POOLED STORAGE =", STOR_POOL
+    !WRITE(IOUT,*) "DOY_LUT1       =", DOY_LUT1
+    !WRITE(IOUT,*) "DOY_LUT2       =", DOY_LUT2
+    !WRITE(IOUT,*) "FRAC_LUT1      =", FRAC_LUT1
+    !WRITE(IOUT,*) "FRAC_LUT2      =", FRAC_LUT2
+    !WRITE(IOUT,*) "DFDD           =", DFDD
+    !WRITE(IOUT,*) "FRC            =", FRC
+    !WRITE(IOUT,*) "STOR_SPLIT     =", STOR_SPLIT
+    !
   END SUBROUTINE FRAC_POOL2SPLIT
   !
   SUBROUTINE ALLOCATE_INITIALIZE_ADDITIONAL_VARIABLES(SWO,ISTRM)  !MOSTLY ALLOCATES MODULE SWO_GLOBAL_VARIABLES
-      CLASS(SWO_DATA),                     INTENT(INOUT):: SWO
-      INTEGER, DIMENSION(:,:), CONTIGUOUS, INTENT(IN   ):: ISTRM
-      INTEGER:: NSEG, NSTRM, NRCH, ISEG, IRCH
-      INTEGER:: IFARM, IUNIT, IDIST, IPROJ, IAUX
+    CLASS(SWO_DATA),                     INTENT(INOUT):: SWO
+    INTEGER, DIMENSION(:,:), CONTIGUOUS, INTENT(IN   ):: ISTRM
+    INTEGER:: NSEG, NSTRM, NRCH, ISEG, IRCH
+    INTEGER:: IFARM, IUNIT, IDIST, IPROJ, IAUX
 
-      !
-      NSEG  = SWO%NSEG
-      NSTRM = SWO%NSTRM
-      !
-      ! Allocate and initialize regular variables...
-      !SWO%TSTART  = DZ; SWO%TSTOP  = DZ
-      !SWO%YRSTART = DZ; SWO%YRSTOP = DZ
-      !
-      SWO%TS_START = DZ
-      SWO%TS_STOP  = REALTIM
-      SWO%SP_START = DZ
-      SWO%SP_STOP  = REALTIM_PER
-      !
-      SWO%FRSTART  = DZ
-      SWO%FRSTOP      = YEAR_FRACTION(REALTIM)
-      SWO%IS_LEAP_END = ISLEAPYEAR(INT(REALTIM))
-      SWO%DIVCOUNT = ONE
-      SWO%SPTCOUNT = ONE
+    !
+    NSEG  = SWO%NSEG
+    NSTRM = SWO%NSTRM
+    !
+    ! Allocate and initialize regular variables...
+    !SWO%TSTART  = DZ; SWO%TSTOP  = DZ
+    !SWO%YRSTART = DZ; SWO%YRSTOP = DZ
+    !
+    SWO%TS_START = DZ
+    SWO%TS_STOP  = REALTIM
+    SWO%SP_START = DZ
+    SWO%SP_STOP  = REALTIM_PER
+    !
+    SWO%FRSTART  = DZ
+    SWO%FRSTOP      = YEAR_FRACTION(REALTIM)
+    SWO%IS_LEAP_END = ISLEAPYEAR(INT(REALTIM))
+    SWO%DIVCOUNT = ONE
+    SWO%SPTCOUNT = ONE
 
-      ! Allocate and initialize SEGDATA/RCHDATA types
-      ALLOCATE(SWO%SEGRCH_IN(NSEG),SWO%SEGRCH_OUT(NSEG))
-      ALLOCATE(SWO%RCHDATA(NSTRM),SWO%SEGDATA(NSEG))
-      ALLOCATE(SWO%RCHDATA_PREV(NSTRM),SWO%SEGDATA_PREV(NSEG))
-      ALLOCATE(SWO%RCHDATA_SAVE(NSTRM),SWO%SEGDATA_SAVE(NSEG))
-      !
-      ALLOCATE( SWO%SEGINFO(NSEG))
-      !
-      ALLOCATE( SWO%UPSEG(NSEG), SWO%DNSEG(NSEG) )
-      ALLOCATE( SWO%UPTREE_NAT(NSEG), SWO%UPTREE_CON1(NSEG), SWO%UPTREE_CON2(NSEG), SWO%UPTREE_RET(NSEG) )
-      ALLOCATE( SWO%DNTREE_NAT(NSEG), SWO%DNTREE_CON1(NSEG), SWO%DNTREE_CON2(NSEG), SWO%DNTREE_RET(NSEG) )
-      !
-      IF(SWO%HAS_FMP_SW_LIMIT_RULZ) ALLOCATE(SWO%FMP_SW_LIMIT_RULZ(SWO%NFARM), SOURCE=inf)
-      !
-      DO ISEG = 1,NSEG
+    ! Allocate and initialize SEGDATA/RCHDATA types
+    ALLOCATE(SWO%SEGRCH_IN(NSEG),SWO%SEGRCH_OUT(NSEG))
+    ALLOCATE(SWO%RCHDATA(NSTRM),SWO%SEGDATA(NSEG))
+    ALLOCATE(SWO%RCHDATA_PREV(NSTRM),SWO%SEGDATA_PREV(NSEG))
+    ALLOCATE(SWO%RCHDATA_SAVE(NSTRM),SWO%SEGDATA_SAVE(NSEG))
+    !
+    ALLOCATE( SWO%SEGINFO(NSEG))
+    !
+    ALLOCATE( SWO%UPSEG(NSEG), SWO%DNSEG(NSEG) )
+    ALLOCATE( SWO%UPTREE_NAT(NSEG), SWO%UPTREE_CON1(NSEG), SWO%UPTREE_CON2(NSEG), SWO%UPTREE_RET(NSEG) )
+    ALLOCATE( SWO%DNTREE_NAT(NSEG), SWO%DNTREE_CON1(NSEG), SWO%DNTREE_CON2(NSEG), SWO%DNTREE_RET(NSEG) )
+    !
+    IF(SWO%HAS_FMP_SW_LIMIT_RULZ) ALLOCATE(SWO%FMP_SW_LIMIT_RULZ(SWO%NFARM), SOURCE=inf)
+    !
+    DO ISEG = 1,NSEG
 
-        ! Count number of reaches in segment
-        NRCH = 0
-        DO IRCH = 1,NSTRM
-          IF (ISTRM(4,IRCH).EQ.ISEG) THEN
-            NRCH = NRCH + 1
-            IF (ISTRM(5,IRCH).EQ.1) SWO%SEGRCH_IN(ISEG) = IRCH
-          END IF !(ISTRM(4,IRCH).EQ.ISEG)
-        END DO !(IRCH)
-        SWO%SEGRCH_OUT(ISEG) = SWO%SEGRCH_IN(ISEG) + NRCH - 1
+      ! Count number of reaches in segment
+      NRCH = 0
+      DO IRCH = 1,NSTRM
+        IF (ISTRM(4,IRCH).EQ.ISEG) THEN
+          NRCH = NRCH + 1
+          IF (ISTRM(5,IRCH).EQ.1) SWO%SEGRCH_IN(ISEG) = IRCH
+        END IF !(ISTRM(4,IRCH).EQ.ISEG)
+      END DO !(IRCH)
+      SWO%SEGRCH_OUT(ISEG) = SWO%SEGRCH_IN(ISEG) + NRCH - 1
 
-        ! Assign seg info, initialize remaining vars
-        SWO%SEGDATA(ISEG)%SegID           = ISEG
-        SWO%SEGDATA(ISEG)%RchIDX          = SWO%SEGRCH_IN(ISEG)
-        SWO%SEGDATA(ISEG)%NRCH            = NRCH
-        SWO%SEGDATA(ISEG)%IUPSEG          = -99
-        SWO%SEGDATA(ISEG)%OUTSEG          = -99
-        SWO%SEGDATA(ISEG)%IPRIOR          = -99
-        SWO%SEGDATA(ISEG)%DDFLAG          = -99
-        SWO%SEGDATA(ISEG)%RRFLAG          = -99
-        SWO%SEGDATA(ISEG)%LENGTH          = -99.D0
-        SWO%SEGDATA(ISEG)%FLOW            = -99.D0
-        SWO%SEGDATA(ISEG)%INFLOW          = -99.D0
-        !SWO%SEGDATA(ISEG)%OUTFLOW         = -99.D0
-        SWO%SEGDATA(ISEG)%SEEPAGE         = -99.D0
-        SWO%SEGDATA(ISEG)%RUNOFF          = -99.D0
-        SWO%SEGDATA(ISEG)%STRM_ET         = -99.D0
-        SWO%SEGDATA(ISEG)%STRM_PRCP       = -99.D0
-        SWO%SEGDATA(ISEG)%EFFICIENCY      = -99.D0
-        SWO%SEGDATA_PREV(ISEG)%SegID      = ISEG
-        SWO%SEGDATA_PREV(ISEG)%RchIDX     = SWO%SEGRCH_IN(ISEG)
-        SWO%SEGDATA_PREV(ISEG)%NRCH       = NRCH
-        SWO%SEGDATA_PREV(ISEG)%IUPSEG     = -99
-        SWO%SEGDATA_PREV(ISEG)%OUTSEG     = -99
-        SWO%SEGDATA_PREV(ISEG)%IPRIOR     = -99
-        SWO%SEGDATA_PREV(ISEG)%DDFLAG     = -99
-        SWO%SEGDATA_PREV(ISEG)%RRFLAG     = -99
-        SWO%SEGDATA_PREV(ISEG)%LENGTH     = -99.D0
-        SWO%SEGDATA_PREV(ISEG)%FLOW       = -99.D0
-        SWO%SEGDATA_PREV(ISEG)%INFLOW     = -99.D0
-        !SWO%SEGDATA_PREV(ISEG)%OUTFLOW    = -99.D0
-        SWO%SEGDATA_PREV(ISEG)%SEEPAGE    = -99.D0
-        SWO%SEGDATA_PREV(ISEG)%RUNOFF     = -99.D0
-        SWO%SEGDATA_PREV(ISEG)%STRM_ET    = -99.D0
-        SWO%SEGDATA_PREV(ISEG)%STRM_PRCP  = -99.D0
-        SWO%SEGDATA_PREV(ISEG)%EFFICIENCY = -99.D0
-        SWO%SEGDATA_SAVE(ISEG)%SegID      = ISEG
-        SWO%SEGDATA_SAVE(ISEG)%RchIDX     = SWO%SEGRCH_IN(ISEG)
-        SWO%SEGDATA_SAVE(ISEG)%NRCH       = NRCH
-        SWO%SEGDATA_SAVE(ISEG)%IUPSEG     = -99
-        SWO%SEGDATA_SAVE(ISEG)%OUTSEG     = -99
-        SWO%SEGDATA_SAVE(ISEG)%IPRIOR     = -99
-        SWO%SEGDATA_SAVE(ISEG)%DDFLAG     = -99
-        SWO%SEGDATA_SAVE(ISEG)%RRFLAG     = -99
-        SWO%SEGDATA_SAVE(ISEG)%LENGTH     = -99.D0
-        SWO%SEGDATA_SAVE(ISEG)%FLOW       = -99.D0
-        SWO%SEGDATA_SAVE(ISEG)%INFLOW     = -99.D0
-        !SWO%SEGDATA_SAVE(ISEG)%OUTFLOW    = -99.D0
-        SWO%SEGDATA_SAVE(ISEG)%SEEPAGE    = -99.D0
-        SWO%SEGDATA_SAVE(ISEG)%RUNOFF     = -99.D0
-        SWO%SEGDATA_SAVE(ISEG)%STRM_ET    = -99.D0
-        SWO%SEGDATA_SAVE(ISEG)%STRM_PRCP  = -99.D0
-        SWO%SEGDATA_SAVE(ISEG)%EFFICIENCY = -99.D0
+      ! Assign seg info, initialize remaining vars
+      SWO%SEGDATA(ISEG)%SegID           = ISEG
+      SWO%SEGDATA(ISEG)%RchIDX          = SWO%SEGRCH_IN(ISEG)
+      SWO%SEGDATA(ISEG)%NRCH            = NRCH
+      SWO%SEGDATA(ISEG)%IUPSEG          = -99
+      SWO%SEGDATA(ISEG)%OUTSEG          = -99
+      SWO%SEGDATA(ISEG)%IPRIOR          = -99
+      SWO%SEGDATA(ISEG)%DDFLAG          = -99
+      SWO%SEGDATA(ISEG)%RRFLAG          = -99
+      SWO%SEGDATA(ISEG)%LENGTH          = -99.D0
+      SWO%SEGDATA(ISEG)%FLOW            = -99.D0
+      SWO%SEGDATA(ISEG)%INFLOW          = -99.D0
+      !SWO%SEGDATA(ISEG)%OUTFLOW         = -99.D0
+      SWO%SEGDATA(ISEG)%SEEPAGE         = -99.D0
+      SWO%SEGDATA(ISEG)%RUNOFF          = -99.D0
+      SWO%SEGDATA(ISEG)%STRM_ET         = -99.D0
+      SWO%SEGDATA(ISEG)%STRM_PRCP       = -99.D0
+      SWO%SEGDATA(ISEG)%EFFICIENCY      = -99.D0
+      SWO%SEGDATA_PREV(ISEG)%SegID      = ISEG
+      SWO%SEGDATA_PREV(ISEG)%RchIDX     = SWO%SEGRCH_IN(ISEG)
+      SWO%SEGDATA_PREV(ISEG)%NRCH       = NRCH
+      SWO%SEGDATA_PREV(ISEG)%IUPSEG     = -99
+      SWO%SEGDATA_PREV(ISEG)%OUTSEG     = -99
+      SWO%SEGDATA_PREV(ISEG)%IPRIOR     = -99
+      SWO%SEGDATA_PREV(ISEG)%DDFLAG     = -99
+      SWO%SEGDATA_PREV(ISEG)%RRFLAG     = -99
+      SWO%SEGDATA_PREV(ISEG)%LENGTH     = -99.D0
+      SWO%SEGDATA_PREV(ISEG)%FLOW       = -99.D0
+      SWO%SEGDATA_PREV(ISEG)%INFLOW     = -99.D0
+      !SWO%SEGDATA_PREV(ISEG)%OUTFLOW    = -99.D0
+      SWO%SEGDATA_PREV(ISEG)%SEEPAGE    = -99.D0
+      SWO%SEGDATA_PREV(ISEG)%RUNOFF     = -99.D0
+      SWO%SEGDATA_PREV(ISEG)%STRM_ET    = -99.D0
+      SWO%SEGDATA_PREV(ISEG)%STRM_PRCP  = -99.D0
+      SWO%SEGDATA_PREV(ISEG)%EFFICIENCY = -99.D0
+      SWO%SEGDATA_SAVE(ISEG)%SegID      = ISEG
+      SWO%SEGDATA_SAVE(ISEG)%RchIDX     = SWO%SEGRCH_IN(ISEG)
+      SWO%SEGDATA_SAVE(ISEG)%NRCH       = NRCH
+      SWO%SEGDATA_SAVE(ISEG)%IUPSEG     = -99
+      SWO%SEGDATA_SAVE(ISEG)%OUTSEG     = -99
+      SWO%SEGDATA_SAVE(ISEG)%IPRIOR     = -99
+      SWO%SEGDATA_SAVE(ISEG)%DDFLAG     = -99
+      SWO%SEGDATA_SAVE(ISEG)%RRFLAG     = -99
+      SWO%SEGDATA_SAVE(ISEG)%LENGTH     = -99.D0
+      SWO%SEGDATA_SAVE(ISEG)%FLOW       = -99.D0
+      SWO%SEGDATA_SAVE(ISEG)%INFLOW     = -99.D0
+      !SWO%SEGDATA_SAVE(ISEG)%OUTFLOW    = -99.D0
+      SWO%SEGDATA_SAVE(ISEG)%SEEPAGE    = -99.D0
+      SWO%SEGDATA_SAVE(ISEG)%RUNOFF     = -99.D0
+      SWO%SEGDATA_SAVE(ISEG)%STRM_ET    = -99.D0
+      SWO%SEGDATA_SAVE(ISEG)%STRM_PRCP  = -99.D0
+      SWO%SEGDATA_SAVE(ISEG)%EFFICIENCY = -99.D0
 
-        ! Assign rch info, initialize remaining vars
-        NRCH    = 0
-        DO IRCH = SWO%SEGRCH_IN(ISEG),SWO%SEGRCH_OUT(ISEG)
-          NRCH  = NRCH + 1
-          SWO%RCHDATA(IRCH)%RchID           = IRCH
-          SWO%RCHDATA(IRCH)%RchSeg          = ISEG
-          SWO%RCHDATA(IRCH)%RchCnt          = NRCH
-          SWO%RCHDATA(IRCH)%LENGTH          = -99.D0
-          SWO%RCHDATA(IRCH)%INFLOW          = -99.D0
-          !SWO%RCHDATA(IRCH)%OUTFLOW         = -99.D0
-          SWO%RCHDATA(IRCH)%SEEPAGE         = -99.D0
-          SWO%RCHDATA(IRCH)%RUNOFF          = -99.D0
-          SWO%RCHDATA(IRCH)%STRM_ET         = -99.D0
-          SWO%RCHDATA(IRCH)%STRM_PRCP       = -99.D0
-          SWO%RCHDATA(IRCH)%EFFICIENCY      = -99.D0
-          SWO%RCHDATA_PREV(IRCH)%RchID      = IRCH
-          SWO%RCHDATA_PREV(IRCH)%RchSeg     = ISEG
-          SWO%RCHDATA_PREV(IRCH)%RchCnt     = NRCH
-          SWO%RCHDATA_PREV(IRCH)%LENGTH     = -99.D0
-          SWO%RCHDATA_PREV(IRCH)%INFLOW     = -99.D0
-          !SWO%RCHDATA_PREV(IRCH)%OUTFLOW    = -99.D0
-          SWO%RCHDATA_PREV(IRCH)%SEEPAGE    = -99.D0
-          SWO%RCHDATA_PREV(IRCH)%RUNOFF     = -99.D0
-          SWO%RCHDATA_PREV(IRCH)%STRM_ET    = -99.D0
-          SWO%RCHDATA_PREV(IRCH)%STRM_PRCP  = -99.D0
-          SWO%RCHDATA_PREV(IRCH)%EFFICIENCY = -99.D0
-          SWO%RCHDATA_SAVE(IRCH)%RchID      = IRCH
-          SWO%RCHDATA_SAVE(IRCH)%RchSeg     = ISEG
-          SWO%RCHDATA_SAVE(IRCH)%RchCnt     = NRCH
-          SWO%RCHDATA_SAVE(IRCH)%LENGTH     = -99.D0
-          SWO%RCHDATA_SAVE(IRCH)%INFLOW     = -99.D0
-          !SWO%RCHDATA_SAVE(IRCH)%OUTFLOW    = -99.D0
-          SWO%RCHDATA_SAVE(IRCH)%SEEPAGE    = -99.D0
-          SWO%RCHDATA_SAVE(IRCH)%RUNOFF     = -99.D0
-          SWO%RCHDATA_SAVE(IRCH)%STRM_ET    = -99.D0
-          SWO%RCHDATA_SAVE(IRCH)%STRM_PRCP  = -99.D0
-          SWO%RCHDATA_SAVE(IRCH)%EFFICIENCY = -99.D0
-        END DO !(IRCH)
-      END DO !(ISEG)
+      ! Assign rch info, initialize remaining vars
+      NRCH    = 0
+      DO IRCH = SWO%SEGRCH_IN(ISEG),SWO%SEGRCH_OUT(ISEG)
+        NRCH  = NRCH + 1
+        SWO%RCHDATA(IRCH)%RchID           = IRCH
+        SWO%RCHDATA(IRCH)%RchSeg          = ISEG
+        SWO%RCHDATA(IRCH)%RchCnt          = NRCH
+        SWO%RCHDATA(IRCH)%LENGTH          = -99.D0
+        SWO%RCHDATA(IRCH)%INFLOW          = -99.D0
+        !SWO%RCHDATA(IRCH)%OUTFLOW         = -99.D0
+        SWO%RCHDATA(IRCH)%SEEPAGE         = -99.D0
+        SWO%RCHDATA(IRCH)%RUNOFF          = -99.D0
+        SWO%RCHDATA(IRCH)%STRM_ET         = -99.D0
+        SWO%RCHDATA(IRCH)%STRM_PRCP       = -99.D0
+        SWO%RCHDATA(IRCH)%EFFICIENCY      = -99.D0
+        SWO%RCHDATA_PREV(IRCH)%RchID      = IRCH
+        SWO%RCHDATA_PREV(IRCH)%RchSeg     = ISEG
+        SWO%RCHDATA_PREV(IRCH)%RchCnt     = NRCH
+        SWO%RCHDATA_PREV(IRCH)%LENGTH     = -99.D0
+        SWO%RCHDATA_PREV(IRCH)%INFLOW     = -99.D0
+        !SWO%RCHDATA_PREV(IRCH)%OUTFLOW    = -99.D0
+        SWO%RCHDATA_PREV(IRCH)%SEEPAGE    = -99.D0
+        SWO%RCHDATA_PREV(IRCH)%RUNOFF     = -99.D0
+        SWO%RCHDATA_PREV(IRCH)%STRM_ET    = -99.D0
+        SWO%RCHDATA_PREV(IRCH)%STRM_PRCP  = -99.D0
+        SWO%RCHDATA_PREV(IRCH)%EFFICIENCY = -99.D0
+        SWO%RCHDATA_SAVE(IRCH)%RchID      = IRCH
+        SWO%RCHDATA_SAVE(IRCH)%RchSeg     = ISEG
+        SWO%RCHDATA_SAVE(IRCH)%RchCnt     = NRCH
+        SWO%RCHDATA_SAVE(IRCH)%LENGTH     = -99.D0
+        SWO%RCHDATA_SAVE(IRCH)%INFLOW     = -99.D0
+        !SWO%RCHDATA_SAVE(IRCH)%OUTFLOW    = -99.D0
+        SWO%RCHDATA_SAVE(IRCH)%SEEPAGE    = -99.D0
+        SWO%RCHDATA_SAVE(IRCH)%RUNOFF     = -99.D0
+        SWO%RCHDATA_SAVE(IRCH)%STRM_ET    = -99.D0
+        SWO%RCHDATA_SAVE(IRCH)%STRM_PRCP  = -99.D0
+        SWO%RCHDATA_SAVE(IRCH)%EFFICIENCY = -99.D0
+      END DO !(IRCH)
+    END DO !(ISEG)
 
-      ! Initialize remaining components of FARM, UNIT, DIST, PROJ
-      DO IFARM = 1, SWO%NFARM
-        SWO%FARM(IFARM)%AreaTot           = DZ
-        SWO%FARM(IFARM)%AreaIrr           = DZ
-        SWO%FARM(IFARM)%TFDR              = DZ
-        SWO%FARM(IFARM)%ALLOTMENT         = DZ
-        SWO%FARM(IFARM)%BALANCE           = DZ
-        SWO%FARM(IFARM)%DELORDER          = DZ
-        SWO%FARM(IFARM)%DELIVERY          = DZ
-        SWO%FARM(IFARM)%DELIVERY_YTD      = DZ
-        SWO%FARM(IFARM)%REQ_DELIVERY_VOL  = DZ
-      END DO !(IFARM)
+    ! Initialize remaining components of FARM, UNIT, DIST, PROJ
+    DO IFARM = 1, SWO%NFARM
+      SWO%FARM(IFARM)%AreaTot           = DZ
+      SWO%FARM(IFARM)%AreaIrr           = DZ
+      SWO%FARM(IFARM)%TFDR              = DZ
+      SWO%FARM(IFARM)%ALLOTMENT         = DZ
+      SWO%FARM(IFARM)%BALANCE           = DZ
+      SWO%FARM(IFARM)%DELORDER          = DZ
+      SWO%FARM(IFARM)%DELIVERY          = DZ
+      SWO%FARM(IFARM)%DELIVERY_YTD      = DZ
+      SWO%FARM(IFARM)%REQ_DELIVERY_VOL  = DZ
+    END DO !(IFARM)
 
-      DO IUNIT = 1,SWO%NUNIT
-        SWO%UNIT(IUNIT)%AreaTot            = DZ
-        SWO%UNIT(IUNIT)%AreaIrr            = DZ
-        SWO%UNIT(IUNIT)%DELORDER           = DZ
-        SWO%UNIT(IUNIT)%DIVORDER           = DZ
-        SWO%UNIT(IUNIT)%DIVERSION          = DZ
-        SWO%UNIT(IUNIT)%DELIVERY           = DZ
-        SWO%UNIT(IUNIT)%BYPASS             = DZ
-        SWO%UNIT(IUNIT)%CHARGE             = DZ
-        SWO%UNIT(IUNIT)%CREDIT             = DZ
-        SWO%UNIT(IUNIT)%DELIVEFF           = UNO !0.75 !THIS WILL BE UPDATED BY CONVERGENCE CHECK
-        SWO%UNIT(IUNIT)%CHGRATIO           = UNO
-        SWO%UNIT(IUNIT)%NETCHGRATIO        = UNO
-        SWO%UNIT(IUNIT)%DIVIN              = DZ
-        SWO%UNIT(IUNIT)%SUMIN              = DZ
-        SWO%UNIT(IUNIT)%SUMOUT             = DZ
-        SWO%UNIT(IUNIT)%DIVERSION_YTD      = DZ
-        SWO%UNIT(IUNIT)%DELIVERY_YTD       = DZ
-        SWO%UNIT(IUNIT)%BYPASS_YTD         = DZ
-        SWO%UNIT(IUNIT)%CHARGE_YTD         = DZ
-        SWO%UNIT(IUNIT)%CREDIT_YTD         = DZ
-        SWO%UNIT(IUNIT)%DELIVEFF_YTD       = UNO !0.75
-        SWO%UNIT(IUNIT)%CHGRATIO_YTD       = UNO
-        SWO%UNIT(IUNIT)%NETCHGRATIO_YTD    = UNO
-        SWO%UNIT(IUNIT)%DIVIN_YTD          = DZ
-        SWO%UNIT(IUNIT)%SUMIN_YTD          = DZ
-        SWO%UNIT(IUNIT)%SUMOUT_YTD         = DZ
-        SWO%UNIT(IUNIT)%ALLOTMENT          = DZ
-        SWO%UNIT(IUNIT)%BALANCE            = DZ
-      END DO !(IUNIT)
+    DO IUNIT = 1,SWO%NUNIT
+      SWO%UNIT(IUNIT)%AreaTot            = DZ
+      SWO%UNIT(IUNIT)%AreaIrr            = DZ
+      SWO%UNIT(IUNIT)%DELORDER           = DZ
+      SWO%UNIT(IUNIT)%DIVORDER           = DZ
+      SWO%UNIT(IUNIT)%DIVERSION          = DZ
+      SWO%UNIT(IUNIT)%DELIVERY           = DZ
+      SWO%UNIT(IUNIT)%BYPASS             = DZ
+      SWO%UNIT(IUNIT)%CHARGE             = DZ
+      SWO%UNIT(IUNIT)%CREDIT             = DZ
+      SWO%UNIT(IUNIT)%DELIVEFF           = UNO !0.75 !THIS WILL BE UPDATED BY CONVERGENCE CHECK
+      SWO%UNIT(IUNIT)%CHGRATIO           = UNO
+      SWO%UNIT(IUNIT)%NETCHGRATIO        = UNO
+      SWO%UNIT(IUNIT)%DIVIN              = DZ
+      SWO%UNIT(IUNIT)%SUMIN              = DZ
+      SWO%UNIT(IUNIT)%SUMOUT             = DZ
+      SWO%UNIT(IUNIT)%DIVERSION_YTD      = DZ
+      SWO%UNIT(IUNIT)%DELIVERY_YTD       = DZ
+      SWO%UNIT(IUNIT)%BYPASS_YTD         = DZ
+      SWO%UNIT(IUNIT)%CHARGE_YTD         = DZ
+      SWO%UNIT(IUNIT)%CREDIT_YTD         = DZ
+      SWO%UNIT(IUNIT)%DELIVEFF_YTD       = UNO !0.75
+      SWO%UNIT(IUNIT)%CHGRATIO_YTD       = UNO
+      SWO%UNIT(IUNIT)%NETCHGRATIO_YTD    = UNO
+      SWO%UNIT(IUNIT)%DIVIN_YTD          = DZ
+      SWO%UNIT(IUNIT)%SUMIN_YTD          = DZ
+      SWO%UNIT(IUNIT)%SUMOUT_YTD         = DZ
+      SWO%UNIT(IUNIT)%ALLOTMENT          = DZ
+      SWO%UNIT(IUNIT)%BALANCE            = DZ
+    END DO !(IUNIT)
 
-      DO IDIST = 1,SWO%NDIST
-        SWO%DIST(IDIST)%NFARM              = Z
-        SWO%DIST(IDIST)%NAUXDEM            = Z
-        SWO%DIST(IDIST)%ALLOC_ANN          = DZ
-        SWO%DIST(IDIST)%ALLOC_CO           = DZ
-        SWO%DIST(IDIST)%ALLOC_TOTAL        = DZ
-        SWO%DIST(IDIST)%EQ_ALLOTMENT       = DZ
-        SWO%DIST(IDIST)%AreaTot            = DZ
-        SWO%DIST(IDIST)%AreaIrr            = DZ
-        SWO%DIST(IDIST)%AreaAlloc          = DZ
-        SWO%DIST(IDIST)%DELORDER           = DZ
-        SWO%DIST(IDIST)%DIVORDER           = DZ
-        SWO%DIST(IDIST)%DIVERSION          = DZ
-        SWO%DIST(IDIST)%DELIVERY           = DZ
-        SWO%DIST(IDIST)%BYPASS             = DZ
-        SWO%DIST(IDIST)%CHARGE             = DZ
-        SWO%DIST(IDIST)%CREDIT             = DZ
-        SWO%DIST(IDIST)%DELIVEFF           = UNO !0.75 !THIS WILL BE UPDATED BY CONVERGENCE CHECK
-        SWO%DIST(IDIST)%CHGRATIO           = UNO
-        SWO%DIST(IDIST)%NETCHGRATIO        = UNO
-        SWO%DIST(IDIST)%DIVIN              = DZ
-        SWO%DIST(IDIST)%SUMIN              = DZ
-        SWO%DIST(IDIST)%SUMOUT             = DZ
-        SWO%DIST(IDIST)%DIVERSION_YTD      = DZ
-        SWO%DIST(IDIST)%DELIVERY_YTD       = DZ
-        SWO%DIST(IDIST)%BYPASS_YTD         = DZ
-        SWO%DIST(IDIST)%CHARGE_YTD         = DZ
-        SWO%DIST(IDIST)%CREDIT_YTD         = DZ
-        SWO%DIST(IDIST)%DELIVEFF_YTD       = UNO !0.75
-        SWO%DIST(IDIST)%CHGRATIO_YTD       = UNO
-        SWO%DIST(IDIST)%NETCHGRATIO_YTD    = UNO
-        SWO%DIST(IDIST)%DIVIN_YTD          = DZ
-        SWO%DIST(IDIST)%SUMIN_YTD          = DZ
-        SWO%DIST(IDIST)%SUMOUT_YTD         = DZ
-        SWO%DIST(IDIST)%BALANCE            = DZ
-        SWO%DIST(IDIST)%TFDR               = DZ
-      END DO !(IDIST)
+    DO IDIST = 1,SWO%NDIST
+      SWO%DIST(IDIST)%NFARM              = Z
+      SWO%DIST(IDIST)%NAUXDEM            = Z
+      SWO%DIST(IDIST)%ALLOC_ANN          = DZ
+      SWO%DIST(IDIST)%ALLOC_CO           = DZ
+      SWO%DIST(IDIST)%ALLOC_TOTAL        = DZ
+      SWO%DIST(IDIST)%EQ_ALLOTMENT       = DZ
+      SWO%DIST(IDIST)%AreaTot            = DZ
+      SWO%DIST(IDIST)%AreaIrr            = DZ
+      SWO%DIST(IDIST)%AreaAlloc          = DZ
+      SWO%DIST(IDIST)%DELORDER           = DZ
+      SWO%DIST(IDIST)%DIVORDER           = DZ
+      SWO%DIST(IDIST)%DIVERSION          = DZ
+      SWO%DIST(IDIST)%DELIVERY           = DZ
+      SWO%DIST(IDIST)%BYPASS             = DZ
+      SWO%DIST(IDIST)%CHARGE             = DZ
+      SWO%DIST(IDIST)%CREDIT             = DZ
+      SWO%DIST(IDIST)%DELIVEFF           = UNO !0.75 !THIS WILL BE UPDATED BY CONVERGENCE CHECK
+      SWO%DIST(IDIST)%CHGRATIO           = UNO
+      SWO%DIST(IDIST)%NETCHGRATIO        = UNO
+      SWO%DIST(IDIST)%DIVIN              = DZ
+      SWO%DIST(IDIST)%SUMIN              = DZ
+      SWO%DIST(IDIST)%SUMOUT             = DZ
+      SWO%DIST(IDIST)%DIVERSION_YTD      = DZ
+      SWO%DIST(IDIST)%DELIVERY_YTD       = DZ
+      SWO%DIST(IDIST)%BYPASS_YTD         = DZ
+      SWO%DIST(IDIST)%CHARGE_YTD         = DZ
+      SWO%DIST(IDIST)%CREDIT_YTD         = DZ
+      SWO%DIST(IDIST)%DELIVEFF_YTD       = UNO !0.75
+      SWO%DIST(IDIST)%CHGRATIO_YTD       = UNO
+      SWO%DIST(IDIST)%NETCHGRATIO_YTD    = UNO
+      SWO%DIST(IDIST)%DIVIN_YTD          = DZ
+      SWO%DIST(IDIST)%SUMIN_YTD          = DZ
+      SWO%DIST(IDIST)%SUMOUT_YTD         = DZ
+      SWO%DIST(IDIST)%BALANCE            = DZ
+      SWO%DIST(IDIST)%TFDR               = DZ
+    END DO !(IDIST)
 
-      DO IPROJ = 1,SWO%NPROJ
-        SWO%PROJ(IPROJ)%AreaTot            = DZ
-        SWO%PROJ(IPROJ)%AreaIrr            = DZ
-        SWO%PROJ(IPROJ)%DELORDER           = DZ
-        SWO%PROJ(IPROJ)%DIVORDER           = DZ
-        SWO%PROJ(IPROJ)%DIVERSION          = DZ
-        !SWO%PROJ(IPROJ)%OUTFLOW            = DZ
-        SWO%PROJ(IPROJ)%DELIVERY           = DZ
-        SWO%PROJ(IPROJ)%BYPASS             = DZ
-        SWO%PROJ(IPROJ)%CHARGE             = DZ
-        SWO%PROJ(IPROJ)%CREDIT             = DZ
-        SWO%PROJ(IPROJ)%DELIVEFF           = UNO
-        SWO%PROJ(IPROJ)%RELEASE            = DZ
-        SWO%PROJ(IPROJ)%DIVRATIO           = UNO
-        SWO%PROJ(IPROJ)%CHGRATIO           = UNO
-        SWO%PROJ(IPROJ)%NETCHGRATIO        = UNO
-        SWO%PROJ(IPROJ)%DIVIN              = DZ
-        SWO%PROJ(IPROJ)%SUMIN              = DZ
-        SWO%PROJ(IPROJ)%SUMOUT             = DZ
-        SWO%PROJ(IPROJ)%DIVERSION_YTD      = DZ
-        !SWO%PROJ(IPROJ)%OUTFLOW_YTD        = DZ
-        SWO%PROJ(IPROJ)%DELIVERY_YTD       = DZ
-        SWO%PROJ(IPROJ)%BYPASS_YTD         = DZ
-        SWO%PROJ(IPROJ)%CHARGE_YTD         = DZ
-        SWO%PROJ(IPROJ)%CREDIT_YTD         = DZ
-        SWO%PROJ(IPROJ)%DELIVEFF_YTD       = UNO
-        SWO%PROJ(IPROJ)%RELEASE_YTD        = DZ
-        SWO%PROJ(IPROJ)%DIVRATIO_YTD       = UNO
-        SWO%PROJ(IPROJ)%CHGRATIO_YTD       = UNO
-        SWO%PROJ(IPROJ)%NETCHGRATIO_YTD    = UNO
-        SWO%PROJ(IPROJ)%DIVIN_YTD          = DZ
-        SWO%PROJ(IPROJ)%SUMIN_YTD          = DZ
-        SWO%PROJ(IPROJ)%SUMOUT_YTD         = DZ
-      END DO !(IPROJ)
+    DO IPROJ = 1,SWO%NPROJ
+      SWO%PROJ(IPROJ)%AreaTot            = DZ
+      SWO%PROJ(IPROJ)%AreaIrr            = DZ
+      SWO%PROJ(IPROJ)%DELORDER           = DZ
+      SWO%PROJ(IPROJ)%DIVORDER           = DZ
+      SWO%PROJ(IPROJ)%DIVERSION          = DZ
+      !SWO%PROJ(IPROJ)%OUTFLOW            = DZ
+      SWO%PROJ(IPROJ)%DELIVERY           = DZ
+      SWO%PROJ(IPROJ)%BYPASS             = DZ
+      SWO%PROJ(IPROJ)%CHARGE             = DZ
+      SWO%PROJ(IPROJ)%CREDIT             = DZ
+      SWO%PROJ(IPROJ)%DELIVEFF           = UNO
+      SWO%PROJ(IPROJ)%RELEASE            = DZ
+      SWO%PROJ(IPROJ)%DIVRATIO           = UNO
+      SWO%PROJ(IPROJ)%CHGRATIO           = UNO
+      SWO%PROJ(IPROJ)%NETCHGRATIO        = UNO
+      SWO%PROJ(IPROJ)%DIVIN              = DZ
+      SWO%PROJ(IPROJ)%SUMIN              = DZ
+      SWO%PROJ(IPROJ)%SUMOUT             = DZ
+      SWO%PROJ(IPROJ)%DIVERSION_YTD      = DZ
+      !SWO%PROJ(IPROJ)%OUTFLOW_YTD        = DZ
+      SWO%PROJ(IPROJ)%DELIVERY_YTD       = DZ
+      SWO%PROJ(IPROJ)%BYPASS_YTD         = DZ
+      SWO%PROJ(IPROJ)%CHARGE_YTD         = DZ
+      SWO%PROJ(IPROJ)%CREDIT_YTD         = DZ
+      SWO%PROJ(IPROJ)%DELIVEFF_YTD       = UNO
+      SWO%PROJ(IPROJ)%RELEASE_YTD        = DZ
+      SWO%PROJ(IPROJ)%DIVRATIO_YTD       = UNO
+      SWO%PROJ(IPROJ)%CHGRATIO_YTD       = UNO
+      SWO%PROJ(IPROJ)%NETCHGRATIO_YTD    = UNO
+      SWO%PROJ(IPROJ)%DIVIN_YTD          = DZ
+      SWO%PROJ(IPROJ)%SUMIN_YTD          = DZ
+      SWO%PROJ(IPROJ)%SUMOUT_YTD         = DZ
+    END DO !(IPROJ)
 
-      DO IAUX = 1,SWO%NAUXDEM
-        SWO%AUXDEM(IAUX)%AREA              = DZ
-        SWO%AUXDEM(IAUX)%ALLOTMENT         = DZ
-        SWO%AUXDEM(IAUX)%BALANCE           = DZ
-        SWO%AUXDEM(IAUX)%DELORDER          = DZ
-        SWO%AUXDEM(IAUX)%DELIVERY          = DZ
-        SWO%AUXDEM(IAUX)%DELIVERY_YTD      = DZ
-        SWO%AUXDEM_PREV(IAUX)%ALLOTMENT    = DZ
-        SWO%AUXDEM_PREV(IAUX)%BALANCE      = DZ
-        SWO%AUXDEM_PREV(IAUX)%DELORDER     = DZ
-        SWO%AUXDEM_PREV(IAUX)%DELIVERY     = DZ
-        SWO%AUXDEM_PREV(IAUX)%DELIVERY_YTD = DZ
-      END DO !(IAUX)
-      !
-      ! SET PREVIOUS VARIABLS
-      !
-      SWO%FARM_PREV = SWO%FARM
-      SWO%UNIT_PREV = SWO%UNIT
-      SWO%DIST_PREV = SWO%DIST
-      SWO%PROJ_PREV = SWO%PROJ
-      !
-      !
+    DO IAUX = 1,SWO%NAUXDEM
+      SWO%AUXDEM(IAUX)%AREA              = DZ
+      SWO%AUXDEM(IAUX)%ALLOTMENT         = DZ
+      SWO%AUXDEM(IAUX)%BALANCE           = DZ
+      SWO%AUXDEM(IAUX)%DELORDER          = DZ
+      SWO%AUXDEM(IAUX)%DELIVERY          = DZ
+      SWO%AUXDEM(IAUX)%DELIVERY_YTD      = DZ
+      SWO%AUXDEM_PREV(IAUX)%ALLOTMENT    = DZ
+      SWO%AUXDEM_PREV(IAUX)%BALANCE      = DZ
+      SWO%AUXDEM_PREV(IAUX)%DELORDER     = DZ
+      SWO%AUXDEM_PREV(IAUX)%DELIVERY     = DZ
+      SWO%AUXDEM_PREV(IAUX)%DELIVERY_YTD = DZ
+    END DO !(IAUX)
+    !
+    ! SET PREVIOUS VARIABLS
+    !
+    SWO%FARM_PREV = SWO%FARM
+    SWO%UNIT_PREV = SWO%UNIT
+    SWO%DIST_PREV = SWO%DIST
+    SWO%PROJ_PREV = SWO%PROJ
+    !
+    !
 !###############################################################################################
 !###############################################################################################
 !###############################################################################################
@@ -8152,215 +8195,215 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
 !!! ! Uncomment after updating SWOPS1PSV in SWOPS_GLOBAL.f
 !!! ! Save pointers ...
 !!! ! CALL SWOPS1PSV(IGRID)
-    END SUBROUTINE
-    !
-    SUBROUTINE SETUP_NEXT_TIME_STEP(SWO,WBS,KPER,KSTP,SEG)
+  END SUBROUTINE
+  !
+  SUBROUTINE SETUP_NEXT_TIME_STEP(SWO,WBS,KPER,KSTP,SEG)
 !-----VERSION X 2014.06.30 SWOPS1AD
-!     ******************************************************************
-!     OVERVIEW:
-!     ADVANCE FOR TIMESTEP ...
-!     Handles updates and calculations for timestep that do NOT change
-!     during iterations.
+!   ******************************************************************
+!   OVERVIEW:
+!   ADVANCE FOR TIMESTEP ...
+!   Handles updates and calculations for timestep that do NOT change
+!   during iterations.
 !
-!     NOTES:
-!     - update TABFILE vars for timestep
-!     - others to come...
+!   NOTES:
+!   - update TABFILE vars for timestep
+!   - others to come...
 !
-!     ******************************************************************
-!        SPECIFICATIONS:
-!     ------------------------------------------------------------------
-      USE TABLEFILE_INTERFACE
-      IMPLICIT NONE
-!     ------------------------------------------------------------------
-!        ARGUMENTS:
-!     ------------------------------------------------------------------
-      CLASS(SWO_DATA),                INTENT(INOUT):: SWO
-      CLASS(WBS_DATA),                INTENT(IN   ):: WBS
-      INTEGER,                        INTENT(IN   ):: KPER, KSTP
-      REAL, DIMENSION(:,:),CONTIGUOUS,INTENT(INOUT):: SEG
-      !DOUBLE PRECISION,INTENT(IN   ):: DELT
-      !DOUBLE PRECISION,INTENT(IN   ):: REALTIM
+!   ******************************************************************
+!      SPECIFICATIONS:
+!   ------------------------------------------------------------------
+    USE TABLEFILE_INTERFACE
+    IMPLICIT NONE
+!   ------------------------------------------------------------------
+!      ARGUMENTS:
+!   ------------------------------------------------------------------
+    CLASS(SWO_DATA),                INTENT(INOUT):: SWO
+    CLASS(WBS_DATA),                INTENT(IN   ):: WBS
+    INTEGER,                        INTENT(IN   ):: KPER, KSTP
+    REAL, DIMENSION(:,:),CONTIGUOUS,INTENT(INOUT):: SEG
+    !DOUBLE PRECISION,INTENT(IN   ):: DELT
+    !DOUBLE PRECISION,INTENT(IN   ):: REALTIM
 !
-!     ------------------------------------------------------------------
-!        LOCAL VARIABLES:
-!     ------------------------------------------------------------------
-      INTEGER:: I,J,K,N,IRES,JRES,IPROJ,IDIST,IUNIT,IFARM,IAUX,ISEG,IRCH,IDVS,ISPT,IBRC,POOLFLG,NBRANCH, JSEG
-      INTEGER:: NPROJ, NDIST, NUNIT, NFARM, ITMUNI
-      DOUBLE PRECISION:: AREA_SOS,DTMP1,DTMP2,STORAGE_SOS, ELEV
-      !DOUBLE PRECISION:: SIMTIM0, SIMTIM
-      CHARACTER(:), ALLOCATABLE:: ERROR
-      INTEGER:: YR_START, YR_STOP1, YR_STOP2
-      INTEGER:: SP1,SP2,TS1, TS2
-      LOGICAL:: HAS_DATE_SP
+!   ------------------------------------------------------------------
+!      LOCAL VARIABLES:
+!   ------------------------------------------------------------------
+    INTEGER:: I,J,K,N,IRES,JRES,IPROJ,IDIST,IUNIT,IFARM,IAUX,ISEG,IRCH,IDVS,ISPT,IBRC,POOLFLG,NBRANCH, JSEG
+    INTEGER:: NPROJ, NDIST, NUNIT, NFARM, ITMUNI
+    DOUBLE PRECISION:: AREA_SOS,DTMP1,DTMP2,STORAGE_SOS, ELEV
+    !DOUBLE PRECISION:: SIMTIM0, SIMTIM
+    CHARACTER(:), ALLOCATABLE:: ERROR
+    INTEGER:: YR_START, YR_STOP1, YR_STOP2
+    INTEGER:: SP1,SP2,TS1, TS2
+    LOGICAL:: HAS_DATE_SP
 !
-!     ------------------------------------------------------------------
-      !DDELT = DBLE(DELT)
-      ITMUNI= SWO%ITMUNI
-      NFARM = SWO%NFARM
-      NPROJ = SWO%NPROJ
-      NDIST = SWO%NDIST
-      NUNIT = SWO%NUNIT
-      !
-      DO CONCURRENT(I = 1:SWO%NFARM  ); SWO%FARM(I)  %DEL_TOL_CNT = Z
-      END DO
-      !
-      DO CONCURRENT(I = 1:SWO%NAUXDEM); SWO%AUXDEM(I)%DEL_TOL_CNT = Z
-      END DO
-      !
-      HAS_DATE_SP  = DATE_SP(1)%TS(0)%IS_SET()
-      !
-      IF(KSTP==ONE) THEN
-          IF( HAS_DATE_SP) THEN
-              I = NSTP(KPER)
-              SWO%SP_START = SWO%SP_STOP
-              SWO%SP_STOP  = DATE_SP(KPER)%TS(I)%DYEAR
-          ELSE
+!   ------------------------------------------------------------------
+    !DDELT = DBLE(DELT)
+    ITMUNI= SWO%ITMUNI
+    NFARM = SWO%NFARM
+    NPROJ = SWO%NPROJ
+    NDIST = SWO%NDIST
+    NUNIT = SWO%NUNIT
+    !
+    DO CONCURRENT(I = 1:SWO%NFARM  ); SWO%FARM(I)  %DEL_TOL_CNT = Z
+    END DO
+    !
+    DO CONCURRENT(I = 1:SWO%NAUXDEM); SWO%AUXDEM(I)%DEL_TOL_CNT = Z
+    END DO
+    !
+    HAS_DATE_SP  = DATE_SP(1)%TS(0)%IS_SET()
+    !
+    IF(KSTP==ONE) THEN
+        IF( HAS_DATE_SP) THEN
+            I = NSTP(KPER)
+            SWO%SP_START = SWO%SP_STOP
+            SWO%SP_STOP  = DATE_SP(KPER)%TS(I)%DYEAR
+        ELSE
 
-                 SWO%SP_START = SWO%SP_STOP
-                 SWO%SP_STOP  = REALTIM_PER
-          END IF
-      END IF
-      !
-      SWO%TS_START    = SWO%TS_STOP
-      SWO%TS_STOP     = REALTIM
-      !
-      SWO%FRSTART     = SWO%FRSTOP
-      SWO%FRSTOP      = YEAR_FRACTION(REALTIM)
-      !
-      SWO%IS_LEAP_START = SWO%IS_LEAP_END
-      SWO%IS_LEAP_END   = ISLEAPYEAR(INT(REALTIM))
-      !
-      !
-      SWO%DELT = SPTIM(KPER)%DT(KSTP)
-      !
-      IF(SWO%DELT < NEARZERO_30) THEN
-          SWO%DELT_INV = DZ
-      ELSE
-          SWO%DELT_INV = UNO/SWO%DELT
-      END IF
-      !
-      !SIMTIM  = SIMTIME
-      !SIMTIM0 = SIMTIME - DELT
-      !
-      !DATE_SP(SP1)%TS(TS1-1) ! TIME STEP START
-      !DATE_SP(SP1)%TS(TS1)   ! TIME STEP END
-      !DATE_SP(SP2)%TS(TS2)   ! NEXT TIME STEP END
-      SP1 = KPER
-      TS1 = KSTP
-      TS2 = ONE
-      IF( KSTP+ONE > SIZE(SPTIM(KPER)%DT) ) THEN
-          IF(KPER<NPER) THEN
-              SWO%DELT2 = SPTIM(KPER+1)%DT(1)
-              SP2 = KPER+1
-          ELSE
-              SWO%DELT2 = D100
-              SP2 = 1
-          END IF
-      ELSE
-              SP2 = KPER
-              TS2 = KSTP+1
-              SWO%DELT2 = SPTIM(KPER)%DT(KSTP+1)
-      END IF
-      !
-      ! ****************************************************************
-      ! Compute time values ... start/end of step
-      ! Determine if timestep contains start/end of water year ...
-      ! ****************************************************************
-      !
-      DO CONCURRENT(I = ONE:SWO%NPROJ);      SWO%PROJ(I)%AllocStart = 0
-      END DO
-      IF(SWO%DELT2.GE.1D99) THEN
-          DO CONCURRENT(I = ONE:SWO%NPROJ);  SWO%PROJ(I)%AllocClose = 1
-          END DO
-      ELSE
-          DO CONCURRENT(I = ONE:SWO%NPROJ);  SWO%PROJ(I)%AllocClose = 0
-          END DO
-      END IF
-      !
-      IF(SWO%DELT2.GE.1D99) THEN
-          SWO%TS_STOP_NEXT = SWO%DELT2
-      ELSEIF  (HAS_DATE_SP) THEN
-          SWO%TS_STOP_NEXT = DATE_SP(SP2)%TS(TS2)%DYEAR
-      ELSE
-          SWO%TS_STOP_NEXT= SWO%TS_STOP
-          CALL DECIMAL_YEAR(SWO%TS_STOP_NEXT,SWO%DELT2,ITMUNI,FALSE)
-      END IF
-      !
-      IF(SWO%DELT2.GE.1D99) THEN
-          SWO%FRSTOP_NEXT      = 0.0
-          SWO%IS_LEAP_END_NEXT = FALSE
-      ELSE
-          SWO%FRSTOP_NEXT      = YEAR_FRACTION(SWO%TS_STOP_NEXT)
-          SWO%IS_LEAP_END_NEXT = ISLEAPYEAR(INT(SWO%TS_STOP_NEXT))
-      END IF
-      !
-      !DATE_SP(SP1)%TS(TS1-1) ! TIME STEP START
-      !DATE_SP(SP1)%TS(TS1)   ! TIME STEP END
-      !DATE_SP(SP2)%TS(TS2)   ! NEXT TIME STEP END
-      DO I = ONE,SWO%NPROJ
-         IF( SWO%PROJ(I)%AllocDate%IS_SET() ) THEN
-           IF(SWO%DELT2.GE.1D99) THEN                                               !MODEL HAS ENDED
-                                            SWO%PROJ(I)%AllocClose = 1
-                                            !
-           ELSEIF( HAS_DATE_SP) THEN
-               !
-               ASSOCIATE (AllocDate  => SWO%PROJ(I)%AllocDate,   AllocStart=> SWO%PROJ(I)%AllocStart, AllocClose    => SWO%PROJ(I)%AllocClose, &
-                          DATE_START => DATE_SP(SP1)%TS(TS1-1),  DATE_END  => DATE_SP(SP1)%TS(TS1),   DATE_NEXT_END => DATE_SP(SP2)%TS(TS2))
-                  !
-                  IF( DATE_START%CONTAIN_MD(AllocDate, DATE_END) ) THEN         !TIME STEP CONTAINS ALLOCATION DATE
-                                                                        AllocStart = 1
-                  ELSEIF( DATE_END%CONTAIN_MD(AllocDate, DATE_NEXT_END) ) THEN  !NEXT TIME STEP CONTAINS ALLOCATION DATE
-                                                                        AllocClose = 1
-                  END IF
-                  !
-                  IF(AllocStart == ONE) THEN
-                      SWO%PROJ(I)%AllocDate_At_TS = DATE_START
-                      !
-                      SWO%PROJ(I)%AllocDateFrac_At_TS = SWO%PROJ(I)%AllocDate_At_TS%DYEAR_FRACTION()
-                      !
-                  END IF
-                  !
-               END ASSOCIATE
-           ELSE
-               ASSOCIATE(FRAC => SWO%PROJ(I)%AllocDateFrac, AllocStart => SWO%PROJ(I)%AllocStart, AllocClose => SWO%PROJ(I)%AllocClose, &
-                         TSTART => SWO%TS_START,            TSTOP => SWO%TS_STOP,                 TSTOP2 => SWO%TS_STOP_NEXT,           &
-                         FSTART => SWO%FRSTART,             FSTOP => SWO%FRSTOP,                  FSTOP2 => SWO%FRSTOP_NEXT             )
-                  !
-                  YR_START = INT(TSTART)
-                  YR_STOP1 = INT(TSTOP)
-                  YR_STOP2 = INT(TSTOP2)
-                  !
-                  IF(YR_STOP1 - YR_START > ONE) THEN
-                      AllocStart = 1
-                  ELSEIF(YR_START == YR_STOP1 .AND. FSTART <= FRAC .AND. FRAC < FSTOP) THEN
-                      AllocStart = 1
-                  ELSEIF( FSTART <= FRAC .OR. FRAC < FSTOP) THEN
-                      AllocStart = 1
-                  !------------------------------------------------
-                  ELSEIF(YR_STOP2 - YR_STOP1 > ONE) THEN
-                      AllocClose = 1
-                  ELSEIF(YR_STOP1 == YR_STOP2 .AND. FSTOP <= FRAC .AND. FRAC < FSTOP2) THEN
-                      AllocClose = 1
-                  ELSEIF( FSTOP <= FRAC .OR. FRAC < FSTOP2) THEN
-                      AllocClose = 1
-                  END IF
-                  !
-                  IF(AllocStart == ONE)  SWO%PROJ(I)%AllocDateFrac_At_TS = YEAR_FRACTION(TSTART)
-                  !
-               END ASSOCIATE
-           END IF
+               SWO%SP_START = SWO%SP_STOP
+               SWO%SP_STOP  = REALTIM_PER
+        END IF
+    END IF
+    !
+    SWO%TS_START    = SWO%TS_STOP
+    SWO%TS_STOP     = REALTIM
+    !
+    SWO%FRSTART     = SWO%FRSTOP
+    SWO%FRSTOP      = YEAR_FRACTION(REALTIM)
+    !
+    SWO%IS_LEAP_START = SWO%IS_LEAP_END
+    SWO%IS_LEAP_END   = ISLEAPYEAR(INT(REALTIM))
+    !
+    !
+    SWO%DELT = SPTIM(KPER)%DT(KSTP)
+    !
+    IF(SWO%DELT < NEARZERO_30) THEN
+        SWO%DELT_INV = DZ
+    ELSE
+        SWO%DELT_INV = UNO/SWO%DELT
+    END IF
+    !
+    !SIMTIM  = SIMTIME
+    !SIMTIM0 = SIMTIME - DELT
+    !
+    !DATE_SP(SP1)%TS(TS1-1) ! TIME STEP START
+    !DATE_SP(SP1)%TS(TS1)   ! TIME STEP END
+    !DATE_SP(SP2)%TS(TS2)   ! NEXT TIME STEP END
+    SP1 = KPER
+    TS1 = KSTP
+    TS2 = ONE
+    IF( KSTP+ONE > SIZE(SPTIM(KPER)%DT) ) THEN
+        IF(KPER<NPER) THEN
+            SWO%DELT2 = SPTIM(KPER+1)%DT(1)
+            SP2 = KPER+1
+        ELSE
+            SWO%DELT2 = D100
+            SP2 = 1
+        END IF
+    ELSE
+            SP2 = KPER
+            TS2 = KSTP+1
+            SWO%DELT2 = SPTIM(KPER)%DT(KSTP+1)
+    END IF
+    !
+    ! ****************************************************************
+    ! Compute time values ... start/end of step
+    ! Determine if timestep contains start/end of water year ...
+    ! ****************************************************************
+    !
+    DO CONCURRENT(I = ONE:SWO%NPROJ);      SWO%PROJ(I)%AllocStart = 0
+    END DO
+    IF(SWO%DELT2.GE.1D99) THEN
+        DO CONCURRENT(I = ONE:SWO%NPROJ);  SWO%PROJ(I)%AllocClose = 1
+        END DO
+    ELSE
+        DO CONCURRENT(I = ONE:SWO%NPROJ);  SWO%PROJ(I)%AllocClose = 0
+        END DO
+    END IF
+    !
+    IF(SWO%DELT2.GE.1D99) THEN
+        SWO%TS_STOP_NEXT = SWO%DELT2
+    ELSEIF  (HAS_DATE_SP) THEN
+        SWO%TS_STOP_NEXT = DATE_SP(SP2)%TS(TS2)%DYEAR
+    ELSE
+        SWO%TS_STOP_NEXT= SWO%TS_STOP
+        CALL DECIMAL_YEAR(SWO%TS_STOP_NEXT,SWO%DELT2,ITMUNI,FALSE)
+    END IF
+    !
+    IF(SWO%DELT2.GE.1D99) THEN
+        SWO%FRSTOP_NEXT      = 0.0
+        SWO%IS_LEAP_END_NEXT = FALSE
+    ELSE
+        SWO%FRSTOP_NEXT      = YEAR_FRACTION(SWO%TS_STOP_NEXT)
+        SWO%IS_LEAP_END_NEXT = ISLEAPYEAR(INT(SWO%TS_STOP_NEXT))
+    END IF
+    !
+    !DATE_SP(SP1)%TS(TS1-1) ! TIME STEP START
+    !DATE_SP(SP1)%TS(TS1)   ! TIME STEP END
+    !DATE_SP(SP2)%TS(TS2)   ! NEXT TIME STEP END
+    DO I = ONE,SWO%NPROJ
+       IF( SWO%PROJ(I)%AllocDate%IS_SET() ) THEN
+         IF(SWO%DELT2.GE.1D99) THEN                                               !MODEL HAS ENDED
+                                          SWO%PROJ(I)%AllocClose = 1
+                                          !
+         ELSEIF( HAS_DATE_SP) THEN
+             !
+             ASSOCIATE (AllocDate  => SWO%PROJ(I)%AllocDate,   AllocStart=> SWO%PROJ(I)%AllocStart, AllocClose    => SWO%PROJ(I)%AllocClose, &
+                        DATE_START => DATE_SP(SP1)%TS(TS1-1),  DATE_END  => DATE_SP(SP1)%TS(TS1),   DATE_NEXT_END => DATE_SP(SP2)%TS(TS2))
+                !
+                IF( DATE_START%CONTAIN_MD(AllocDate, DATE_END) ) THEN         !TIME STEP CONTAINS ALLOCATION DATE
+                                                                      AllocStart = 1
+                ELSEIF( DATE_END%CONTAIN_MD(AllocDate, DATE_NEXT_END) ) THEN  !NEXT TIME STEP CONTAINS ALLOCATION DATE
+                                                                      AllocClose = 1
+                END IF
+                !
+                IF(AllocStart == ONE) THEN
+                    SWO%PROJ(I)%AllocDate_At_TS = DATE_START
+                    !
+                    SWO%PROJ(I)%AllocDateFrac_At_TS = SWO%PROJ(I)%AllocDate_At_TS%DYEAR_FRACTION()
+                    !
+                END IF
+                !
+             END ASSOCIATE
+         ELSE
+             ASSOCIATE(FRAC => SWO%PROJ(I)%AllocDateFrac, AllocStart => SWO%PROJ(I)%AllocStart, AllocClose => SWO%PROJ(I)%AllocClose, &
+                       TSTART => SWO%TS_START,            TSTOP => SWO%TS_STOP,                 TSTOP2 => SWO%TS_STOP_NEXT,           &
+                       FSTART => SWO%FRSTART,             FSTOP => SWO%FRSTOP,                  FSTOP2 => SWO%FRSTOP_NEXT             )
+                !
+                YR_START = INT(TSTART)
+                YR_STOP1 = INT(TSTOP)
+                YR_STOP2 = INT(TSTOP2)
+                !
+                IF(YR_STOP1 - YR_START > ONE) THEN
+                    AllocStart = 1
+                ELSEIF(YR_START == YR_STOP1 .AND. FSTART <= FRAC .AND. FRAC < FSTOP) THEN
+                    AllocStart = 1
+                ELSEIF( FSTART <= FRAC .OR. FRAC < FSTOP) THEN
+                    AllocStart = 1
+                !------------------------------------------------
+                ELSEIF(YR_STOP2 - YR_STOP1 > ONE) THEN
+                    AllocClose = 1
+                ELSEIF(YR_STOP1 == YR_STOP2 .AND. FSTOP <= FRAC .AND. FRAC < FSTOP2) THEN
+                    AllocClose = 1
+                ELSEIF( FSTOP <= FRAC .OR. FRAC < FSTOP2) THEN
+                    AllocClose = 1
+                END IF
+                !
+                IF(AllocStart == ONE)  SWO%PROJ(I)%AllocDateFrac_At_TS = YEAR_FRACTION(TSTART)
+                !
+             END ASSOCIATE
          END IF
-      END DO
-      !
-      !
-      ! SET UP MINIM CONSTRAINT VOLUMES ------------------------------------------------------
-      !
-      DO CONCURRENT(I = ONE:SWO%NPROJ);  SWO%MIN_PROJ_ORDER(I) = SWO%MIN_PROJ_ORDER_RAT(I)*SWO%DELT
-      END DO
-      !
-      N = SWO%NFARM+SWO%NAUXDEM
-      DO CONCURRENT(I = ONE:N);  SWO%MIN_DELORDER(I) = SWO%MIN_DELORDER_RAT(I)*SWO%DELT
-      END DO
+       END IF
+    END DO
+    !
+    !
+    ! SET UP MINIM CONSTRAINT VOLUMES ------------------------------------------------------
+    !
+    DO CONCURRENT(I = ONE:SWO%NPROJ);  SWO%MIN_PROJ_ORDER(I) = SWO%MIN_PROJ_ORDER_RAT(I)*SWO%DELT
+    END DO
+    !
+    N = SWO%NFARM+SWO%NAUXDEM
+    DO CONCURRENT(I = ONE:N);  SWO%MIN_DELORDER(I) = SWO%MIN_DELORDER_RAT(I)*SWO%DELT
+    END DO
 
     I     = -1
     J     = -1
@@ -8379,216 +8422,216 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
     IFARM = -1
     IAUX  = -1
 
-      ! ****************************************************************
-      ! Compute reservoir area at start of step
-      ! (compute area corresponding to STORAGE_PREV)
-      ! ****************************************************************
-      !
-      DO IPROJ= 1, NPROJ
-      DO IRES = 1, SWO%NRES_BAL(IPROJ)
-      IF ( SWO%RESDAT(IPROJ)%RESBAL(IRES)%INUSE ) THEN      ! Later periods/steps, ensure that storage at start of step (STORAGE_PREV) is equal to storage at end of previous step (STORAGE)
-          !
-          IF(SWO%RESDAT(IPROJ)%RESBAL(IRES)%STORAGE < DZ) SWO%RESDAT(IPROJ)%RESBAL(IRES)%STORAGE = DZ
-          !
-          SWO%RESDAT(IPROJ)%RESBAL(IRES)%STORAGE_PREV = SWO%RESDAT(IPROJ)%RESBAL(IRES)%STORAGE ! Storage @ start of current step... = Storage @ end of previous step...(from last CNVG)
-          !
-      END IF
-      END DO
-      END DO
-      !
-      ERROR = NL
-      DO IPROJ = 1,NPROJ
-        DO IRES = 1,SWO%NRES_BAL(IPROJ)
-          IF(SWO%RESDAT(IPROJ)%RESBAL(IRES)%INUSE) THEN
+    ! ****************************************************************
+    ! Compute reservoir area at start of step
+    ! (compute area corresponding to STORAGE_PREV)
+    ! ****************************************************************
+    !
+    DO IPROJ= 1, NPROJ
+    DO IRES = 1, SWO%NRES_BAL(IPROJ)
+    IF ( SWO%RESDAT(IPROJ)%RESBAL(IRES)%INUSE ) THEN      ! Later periods/steps, ensure that storage at start of step (STORAGE_PREV) is equal to storage at end of previous step (STORAGE)
+        !
+        IF(SWO%RESDAT(IPROJ)%RESBAL(IRES)%STORAGE < DZ) SWO%RESDAT(IPROJ)%RESBAL(IRES)%STORAGE = DZ
+        !
+        SWO%RESDAT(IPROJ)%RESBAL(IRES)%STORAGE_PREV = SWO%RESDAT(IPROJ)%RESBAL(IRES)%STORAGE ! Storage @ start of current step... = Storage @ end of previous step...(from last CNVG)
+        !
+    END IF
+    END DO
+    END DO
+    !
+    ERROR = NL
+    DO IPROJ = 1,NPROJ
+      DO IRES = 1,SWO%NRES_BAL(IPROJ)
+        IF(SWO%RESDAT(IPROJ)%RESBAL(IRES)%INUSE) THEN
+           !
+           STORAGE_SOS = SWO%RESDAT(IPROJ)%RESBAL(IRES)%STORAGE_PREV
+           POOLFLG     = SWO%RESDAT(IPROJ)%RESBAL(IRES)%RESBAL_POOLFLG
+           !
+           IF (POOLFLG.EQ.1) THEN
+             ! loop over split reservoirs ...
+             AREA_SOS    = DZ
+             DO JRES = 1,SWO%NRES_SPT(IPROJ)
+               DTMP1 = DZ; DTMP2 = DZ
+               CALL FRAC_POOL2SPLIT(SWO,IPROJ,JRES,SWO%FRSTOP,STORAGE_SOS,DTMP1,SWO%IS_LEAP_END)
+               CALL ACAP_STOR2AREA(SWO,IPROJ,JRES,DTMP1,DTMP2)
+               AREA_SOS = AREA_SOS + DTMP2
+               !
+               SWO%RESDAT(IPROJ)%RESSPLIT(JRES)%ELEV_PREV = SWO%RESDAT(IPROJ)%RESSPLIT(JRES)%ELEV
+               !
+               CALL ACAP_STOR2ELEV(SWO,IPROJ,JRES,DTMP1,ELEV)
+               SWO%RESDAT(IPROJ)%RESSPLIT(JRES)%ELEV = ELEV
+               !
+               IF(SWO%RESDAT(IPROJ)%RESSPLIT(JRES)%MAIN_RES) THEN
+                   SWO%RESDAT(IPROJ)%RESBAL(IRES)%ELEV_PREV = SWO%RESDAT(IPROJ)%RESBAL(IRES)%ELEV
+                   SWO%RESDAT(IPROJ)%RESBAL(IRES)%ELEV      = ELEV
+               END IF
+               !
+             END DO !(JRES)
+           ELSE
+             ! compute area for mass balance reservoir
+             CALL ACAP_STOR2AREA(SWO,IPROJ,IRES,STORAGE_SOS,AREA_SOS)
+             CALL ACAP_STOR2ELEV(SWO,IPROJ,IRES,STORAGE_SOS,ELEV)
              !
-             STORAGE_SOS = SWO%RESDAT(IPROJ)%RESBAL(IRES)%STORAGE_PREV
-             POOLFLG     = SWO%RESDAT(IPROJ)%RESBAL(IRES)%RESBAL_POOLFLG
+             SWO%RESDAT(IPROJ)%RESBAL(IRES)%ELEV_PREV = SWO%RESDAT(IPROJ)%RESBAL(IRES)%ELEV
+             SWO%RESDAT(IPROJ)%RESBAL(IRES)%ELEV      = ELEV
              !
-             IF (POOLFLG.EQ.1) THEN
-               ! loop over split reservoirs ...
-               AREA_SOS    = DZ
+           END IF !(POOLFLG.EQ.1)
+           SWO%RESDAT(IPROJ)%RESBAL(IRES)%AREA_PREV = AREA_SOS
+           !
+        END IF
+      END DO !(IRES)
+    END DO !(IPROJ)
+    !
+    IF(ERROR.NE.NL) CALL STOP_ERROR( OUTPUT=SWO%IOUT, MSG=ERROR)
+    !
+    ASSOCIATE(TS_START => SWO%TS_START, TS_STOP => SWO%TS_STOP)
+       !
+       !
+       ! ****************************************************************
+       ! Update TABFILES @ AUX DEMAND
+       ! ****************************************************************
+       !
+       !DO I = 1,SWO%NAUXDEM
+       !    IF(SWO%AUXDEM_TSF_SIMTIM) THEN
+       !        CALL SWO%AUXDEM_TSF (I)%GET(SIMTIM,  SWO%AUXDEM(I)%DEMAND, SIMTIM0)
+       !    ELSE
+       !        CALL SWO%AUXDEM_TSF (I)%GET(TS_STOP, SWO%AUXDEM(I)%DEMAND, TS_START)
+       !    END IF
+       !    SWO%AUXDEM(I)%DEMAND = SWO%AUXDEM(I)%DEMAND * SWO%DELT
+       !    !
+       !    IF(SWO%AUXAREA_TSF_SIMTIM) THEN
+       !      CALL SWO%AUXAREA_TSF(I)%GET(SIMTIM,  SWO%AUXDEM(I)%AREA, SIMTIM0  )
+       !    ELSE
+       !      CALL SWO%AUXAREA_TSF(I)%GET(TS_STOP, SWO%AUXDEM(I)%AREA, TS_START  )
+       !    END IF
+       !END DO
+       DO I = 1,SWO%NAUXDEM
+           !
+           CALL SWO%AUXDEM_TSF (I)%GET(TS_STOP, SWO%AUXDEM(I)%DEMAND, TS_START)
+           SWO%AUXDEM(I)%DEMAND = SWO%AUXDEM(I)%DEMAND * SWO%DELT
+           !
+           CALL SWO%AUXAREA_TSF(I)%GET(TS_STOP, SWO%AUXDEM(I)%AREA, TS_START  )
+       END DO
+       !
+       ! ****************************************************************
+       ! Update TABFILES @ Reservoirs
+       ! (INFLOW, PRCP, EVAP, STORAGE_SPEC_MIN, RELEASE_SPEC)
+       ! ****************************************************************
+
+       ! NOTE --
+       ! Updates to mass balance inputs carried out at timestep, not stress period!
+       !
+       I = Z
+       DO IPROJ = 1,NPROJ
+           DO IRES = 1,SWO%NRES_BAL(IPROJ)
+               I = I + ONE
+               IF(SWO%RESDAT(IPROJ)%RESBAL(IRES)%INUSE) THEN
+                  !
+                  CALL SWO%RES_INFLOW(I)%GET(TS_STOP, SWO%RESDAT(IPROJ)%RESBAL(IRES)%INFLOW, TS_START)
+                  !
+                  CALL SWO%RES_PRECIP(I)%GET(TS_STOP, SWO%RESDAT(IPROJ)%RESBAL(IRES)%PRCP, TS_START)
+                  !
+                  CALL SWO%RES_EVAP  (I)%GET(TS_STOP, SWO%RESDAT(IPROJ)%RESBAL(IRES)%EVAP, TS_START)
+                  !
+                  CALL SWO%RES_RELEASE_SPEC(I)%GET(TS_STOP, SWO%RESDAT(IPROJ)%RESBAL(IRES)%RELEASE_SPEC, TS_START)
+                  !
+                  CALL SWO%RES_STORAGE_MIN(I)%GET(TS_STOP, SWO%RESDAT(IPROJ)%RESBAL(IRES)%STORAGE_SPEC_MIN, TS_START)
+                  !
+                  CALL SWO%RES_RELEASE_MIN(I)%GET(TS_STOP, SWO%RESDAT(IPROJ)%RESBAL(IRES)%RELEASE_MIN_INPUT, TS_START)
+                  !
+                  IF(SWO%RESDAT(IPROJ)%RESBAL(IRES)%STORAGE_SPEC_MIN < SWO%RESDAT(IPROJ)%RESBAL(IRES)%STORAGE_DPL) SWO%RESDAT(IPROJ)%RESBAL(IRES)%STORAGE_SPEC_MIN = SWO%RESDAT(IPROJ)%RESBAL(IRES)%STORAGE_DPL
+                  !
+                  ! SWO OPERATORS WITH VOLUMES SO CONVERT RATES
+                  SWO%RESDAT(IPROJ)%RESBAL(IRES)%INFLOW       = SWO%RESDAT(IPROJ)%RESBAL(IRES)%INFLOW       * SWO%DELT
+                  SWO%RESDAT(IPROJ)%RESBAL(IRES)%PRCP         = SWO%RESDAT(IPROJ)%RESBAL(IRES)%PRCP         * SWO%DELT
+                  SWO%RESDAT(IPROJ)%RESBAL(IRES)%EVAP         = SWO%RESDAT(IPROJ)%RESBAL(IRES)%EVAP         * SWO%DELT
+                  SWO%RESDAT(IPROJ)%RESBAL(IRES)%RELEASE_SPEC = SWO%RESDAT(IPROJ)%RESBAL(IRES)%RELEASE_SPEC * SWO%DELT
+                  !
+                  SWO%RESDAT(IPROJ)%RESBAL(IRES)%RELEASE_MIN_INPUT = SWO%RESDAT(IPROJ)%RESBAL(IRES)%RELEASE_MIN_INPUT * SWO%DELT
+               END IF
+           END DO
+       END DO
+       !DO IPROJ = 1,NPROJ
+       !    DO IRES = 1,SWO%NRES_BAL(IPROJ)
+       !        I = I + ONE
+       !        IF(SWO%RESDAT(IPROJ)%RESBAL(IRES)%INUSE) THEN
+       !           !
+       !           IF(SWO%RES_INFLOW_SIMTIM      ) THEN
+       !               CALL SWO%RES_INFLOW(I)%GET(SIMTIM,  SWO%RESDAT(IPROJ)%RESBAL(IRES)%INFLOW, SIMTIM0)
+       !           ELSE
+       !               CALL SWO%RES_INFLOW(I)%GET(TS_STOP, SWO%RESDAT(IPROJ)%RESBAL(IRES)%INFLOW, TS_START)
+       !           END IF
+       !           !
+       !           IF(SWO%RES_PRECIP_SIMTIM      ) THEN
+       !               CALL SWO%RES_PRECIP(I)%GET(SIMTIM,  SWO%RESDAT(IPROJ)%RESBAL(IRES)%PRCP, SIMTIM0)
+       !           ELSE
+       !               CALL SWO%RES_PRECIP(I)%GET(TS_STOP, SWO%RESDAT(IPROJ)%RESBAL(IRES)%PRCP, TS_START)
+       !           END IF
+       !           !
+       !           IF(SWO%RES_EVAP_SIMTIM        ) THEN
+       !               CALL SWO%RES_EVAP  (I)%GET(SIMTIM,  SWO%RESDAT(IPROJ)%RESBAL(IRES)%EVAP, SIMTIM0)
+       !           ELSE
+       !               CALL SWO%RES_EVAP  (I)%GET(TS_STOP, SWO%RESDAT(IPROJ)%RESBAL(IRES)%EVAP, TS_START)
+       !           END IF
+       !           !
+       !           IF(SWO%RES_RELEASE_SPEC_SIMTIM) THEN
+       !               CALL SWO%RES_RELEASE_SPEC(I)%GET(SIMTIM,  SWO%RESDAT(IPROJ)%RESBAL(IRES)%RELEASE_SPEC, SIMTIM0)
+       !           ELSE
+       !               CALL SWO%RES_RELEASE_SPEC(I)%GET(TS_STOP, SWO%RESDAT(IPROJ)%RESBAL(IRES)%RELEASE_SPEC, TS_START)
+       !           END IF
+       !           !
+       !           IF(SWO%RES_STORAGE_SPEC_MIN_SIMTIM) THEN
+       !               CALL SWO%RES_STORAGE_SPEC_MIN(I)%GET(SIMTIM,  SWO%RESDAT(IPROJ)%RESBAL(IRES)%STORAGE_SPEC_MIN, SIMTIM0)
+       !           ELSE
+       !               CALL SWO%RES_STORAGE_SPEC_MIN(I)%GET(TS_STOP, SWO%RESDAT(IPROJ)%RESBAL(IRES)%STORAGE_SPEC_MIN, TS_START)
+       !           END IF
+       !           !
+       !           ! SWO OPERATORS WITH VOLUMES SO CONVERT RATES
+       !           SWO%RESDAT(IPROJ)%RESBAL(IRES)%INFLOW       = SWO%RESDAT(IPROJ)%RESBAL(IRES)%INFLOW       * SWO%DELT
+       !           SWO%RESDAT(IPROJ)%RESBAL(IRES)%PRCP         = SWO%RESDAT(IPROJ)%RESBAL(IRES)%PRCP         * SWO%DELT
+       !           SWO%RESDAT(IPROJ)%RESBAL(IRES)%EVAP         = SWO%RESDAT(IPROJ)%RESBAL(IRES)%EVAP         * SWO%DELT
+       !           SWO%RESDAT(IPROJ)%RESBAL(IRES)%RELEASE_SPEC = SWO%RESDAT(IPROJ)%RESBAL(IRES)%RELEASE_SPEC * SWO%DELT
+       !        END IF
+       !    END DO
+       !END DO
+    END ASSOCIATE
+    !
+    ! CALCULATE NPROJ AREA/DEAD POOL AREA IF IT IS THE ONLY STORAGE IN RESERVOIR
+    !
+    DO IPROJ = 1,NPROJ
+        IF (SWO%IRESFL(IPROJ) > Z) THEN
+            DO IRES = 1,SWO%NRES_BAL(IPROJ)
+                IF(SWO%RESDAT(IPROJ)%RESBAL(IRES)%INUSE) THEN
+                  !
+                  CALL ACAP_STOR2AREA(SWO,IPROJ,IRES,SWO%RESDAT(IPROJ)%RESBAL(IRES)%STORAGE_SPEC_MIN, SWO%RESDAT(IPROJ)%RESBAL(IRES)%AREA_DPL)
+                  !
+                  CALL ACAP_STOR2ELEV(SWO,IPROJ,IRES,SWO%RESDAT(IPROJ)%RESBAL(IRES)%STORAGE_SPEC_MIN,ELEV)
+                  SWO%RESDAT(IPROJ)%RESBAL(IRES)%STOR_SPEC_MIN_ELEV = ELEV
+                END IF
+            END DO
+        ELSEIF(SWO%IRESFL(IPROJ) < Z) THEN
+            IRES = 1
+            IF(SWO%RESDAT(IPROJ)%RESBAL(IRES)%INUSE) THEN
+               !
+               SWO%RESDAT(IPROJ)%RESBAL(IRES)%AREA_DPL = DZ
                DO JRES = 1,SWO%NRES_SPT(IPROJ)
+                 ! Area @ non-project storage only
                  DTMP1 = DZ; DTMP2 = DZ
-                 CALL FRAC_POOL2SPLIT(SWO,IPROJ,JRES,SWO%FRSTOP,STORAGE_SOS,DTMP1,SWO%IS_LEAP_END)
-                 CALL ACAP_STOR2AREA(SWO,IPROJ,JRES,DTMP1,DTMP2)
-                 AREA_SOS = AREA_SOS + DTMP2
+                 CALL FRAC_POOL2SPLIT(SWO,IPROJ,JRES,SWO%FRSTOP,SWO%RESDAT(IPROJ)%RESBAL(IRES)%STORAGE_SPEC_MIN,DTMP1,SWO%IS_LEAP_END)  ! DTMP1 = SPLIT_STORAGE
+                 CALL ACAP_STOR2AREA(SWO,IPROJ,JRES,DTMP1,DTMP2)                                                                        ! DTMP2 = SPLIT_AREA
                  !
-                 SWO%RESDAT(IPROJ)%RESSPLIT(JRES)%ELEV_PREV = SWO%RESDAT(IPROJ)%RESSPLIT(JRES)%ELEV
-                 !
-                 CALL ACAP_STOR2ELEV(SWO,IPROJ,JRES,DTMP1,ELEV)
-                 SWO%RESDAT(IPROJ)%RESSPLIT(JRES)%ELEV = ELEV
+                 SWO%RESDAT(IPROJ)%RESBAL(IRES)%AREA_DPL = SWO%RESDAT(IPROJ)%RESBAL(IRES)%AREA_DPL + DTMP2
                  !
                  IF(SWO%RESDAT(IPROJ)%RESSPLIT(JRES)%MAIN_RES) THEN
-                     SWO%RESDAT(IPROJ)%RESBAL(IRES)%ELEV_PREV = SWO%RESDAT(IPROJ)%RESBAL(IRES)%ELEV
-                     SWO%RESDAT(IPROJ)%RESBAL(IRES)%ELEV      = ELEV
+                     CALL ACAP_STOR2ELEV(SWO,IPROJ,JRES,DTMP1,ELEV)
+                     SWO%RESDAT(IPROJ)%RESBAL(IRES)%STOR_SPEC_MIN_ELEV = ELEV
                  END IF
-                 !
-               END DO !(JRES)
-             ELSE
-               ! compute area for mass balance reservoir
-               CALL ACAP_STOR2AREA(SWO,IPROJ,IRES,STORAGE_SOS,AREA_SOS)
-               CALL ACAP_STOR2ELEV(SWO,IPROJ,IRES,STORAGE_SOS,ELEV)
-               !
-               SWO%RESDAT(IPROJ)%RESBAL(IRES)%ELEV_PREV = SWO%RESDAT(IPROJ)%RESBAL(IRES)%ELEV
-               SWO%RESDAT(IPROJ)%RESBAL(IRES)%ELEV      = ELEV
-               !
-             END IF !(POOLFLG.EQ.1)
-             SWO%RESDAT(IPROJ)%RESBAL(IRES)%AREA_PREV = AREA_SOS
-             !
-          END IF
-        END DO !(IRES)
-      END DO !(IPROJ)
-      !
-      IF(ERROR.NE.NL) CALL STOP_ERROR( OUTPUT=SWO%IOUT, MSG=ERROR)
-      !
-      ASSOCIATE(TS_START => SWO%TS_START, TS_STOP => SWO%TS_STOP)
-         !
-         !
-         ! ****************************************************************
-         ! Update TABFILES @ AUX DEMAND
-         ! ****************************************************************
-         !
-         !DO I = 1,SWO%NAUXDEM
-         !    IF(SWO%AUXDEM_TSF_SIMTIM) THEN
-         !        CALL SWO%AUXDEM_TSF (I)%GET(SIMTIM,  SWO%AUXDEM(I)%DEMAND, SIMTIM0)
-         !    ELSE
-         !        CALL SWO%AUXDEM_TSF (I)%GET(TS_STOP, SWO%AUXDEM(I)%DEMAND, TS_START)
-         !    END IF
-         !    SWO%AUXDEM(I)%DEMAND = SWO%AUXDEM(I)%DEMAND * SWO%DELT
-         !    !
-         !    IF(SWO%AUXAREA_TSF_SIMTIM) THEN
-         !      CALL SWO%AUXAREA_TSF(I)%GET(SIMTIM,  SWO%AUXDEM(I)%AREA, SIMTIM0  )
-         !    ELSE
-         !      CALL SWO%AUXAREA_TSF(I)%GET(TS_STOP, SWO%AUXDEM(I)%AREA, TS_START  )
-         !    END IF
-         !END DO
-         DO I = 1,SWO%NAUXDEM
-             !
-             CALL SWO%AUXDEM_TSF (I)%GET(TS_STOP, SWO%AUXDEM(I)%DEMAND, TS_START)
-             SWO%AUXDEM(I)%DEMAND = SWO%AUXDEM(I)%DEMAND * SWO%DELT
-             !
-             CALL SWO%AUXAREA_TSF(I)%GET(TS_STOP, SWO%AUXDEM(I)%AREA, TS_START  )
-         END DO
-         !
-         ! ****************************************************************
-         ! Update TABFILES @ Reservoirs
-         ! (INFLOW, PRCP, EVAP, STORAGE_SPEC_MIN, RELEASE_SPEC)
-         ! ****************************************************************
-
-         ! NOTE --
-         ! Updates to mass balance inputs carried out at timestep, not stress period!
-         !
-         I = Z
-         DO IPROJ = 1,NPROJ
-             DO IRES = 1,SWO%NRES_BAL(IPROJ)
-                 I = I + ONE
-                 IF(SWO%RESDAT(IPROJ)%RESBAL(IRES)%INUSE) THEN
-                    !
-                    CALL SWO%RES_INFLOW(I)%GET(TS_STOP, SWO%RESDAT(IPROJ)%RESBAL(IRES)%INFLOW, TS_START)
-                    !
-                    CALL SWO%RES_PRECIP(I)%GET(TS_STOP, SWO%RESDAT(IPROJ)%RESBAL(IRES)%PRCP, TS_START)
-                    !
-                    CALL SWO%RES_EVAP  (I)%GET(TS_STOP, SWO%RESDAT(IPROJ)%RESBAL(IRES)%EVAP, TS_START)
-                    !
-                    CALL SWO%RES_RELEASE_SPEC(I)%GET(TS_STOP, SWO%RESDAT(IPROJ)%RESBAL(IRES)%RELEASE_SPEC, TS_START)
-                    !
-                    CALL SWO%RES_STORAGE_MIN(I)%GET(TS_STOP, SWO%RESDAT(IPROJ)%RESBAL(IRES)%STORAGE_SPEC_MIN, TS_START)
-                    !
-                    CALL SWO%RES_RELEASE_MIN(I)%GET(TS_STOP, SWO%RESDAT(IPROJ)%RESBAL(IRES)%RELEASE_MIN_INPUT, TS_START)
-                    !
-                    IF(SWO%RESDAT(IPROJ)%RESBAL(IRES)%STORAGE_SPEC_MIN < SWO%RESDAT(IPROJ)%RESBAL(IRES)%STORAGE_DPL) SWO%RESDAT(IPROJ)%RESBAL(IRES)%STORAGE_SPEC_MIN = SWO%RESDAT(IPROJ)%RESBAL(IRES)%STORAGE_DPL
-                    !
-                    ! SWO OPERATORS WITH VOLUMES SO CONVERT RATES
-                    SWO%RESDAT(IPROJ)%RESBAL(IRES)%INFLOW       = SWO%RESDAT(IPROJ)%RESBAL(IRES)%INFLOW       * SWO%DELT
-                    SWO%RESDAT(IPROJ)%RESBAL(IRES)%PRCP         = SWO%RESDAT(IPROJ)%RESBAL(IRES)%PRCP         * SWO%DELT
-                    SWO%RESDAT(IPROJ)%RESBAL(IRES)%EVAP         = SWO%RESDAT(IPROJ)%RESBAL(IRES)%EVAP         * SWO%DELT
-                    SWO%RESDAT(IPROJ)%RESBAL(IRES)%RELEASE_SPEC = SWO%RESDAT(IPROJ)%RESBAL(IRES)%RELEASE_SPEC * SWO%DELT
-                    !
-                    SWO%RESDAT(IPROJ)%RESBAL(IRES)%RELEASE_MIN_INPUT = SWO%RESDAT(IPROJ)%RESBAL(IRES)%RELEASE_MIN_INPUT * SWO%DELT
-                 END IF
-             END DO
-         END DO
-         !DO IPROJ = 1,NPROJ
-         !    DO IRES = 1,SWO%NRES_BAL(IPROJ)
-         !        I = I + ONE
-         !        IF(SWO%RESDAT(IPROJ)%RESBAL(IRES)%INUSE) THEN
-         !           !
-         !           IF(SWO%RES_INFLOW_SIMTIM      ) THEN
-         !               CALL SWO%RES_INFLOW(I)%GET(SIMTIM,  SWO%RESDAT(IPROJ)%RESBAL(IRES)%INFLOW, SIMTIM0)
-         !           ELSE
-         !               CALL SWO%RES_INFLOW(I)%GET(TS_STOP, SWO%RESDAT(IPROJ)%RESBAL(IRES)%INFLOW, TS_START)
-         !           END IF
-         !           !
-         !           IF(SWO%RES_PRECIP_SIMTIM      ) THEN
-         !               CALL SWO%RES_PRECIP(I)%GET(SIMTIM,  SWO%RESDAT(IPROJ)%RESBAL(IRES)%PRCP, SIMTIM0)
-         !           ELSE
-         !               CALL SWO%RES_PRECIP(I)%GET(TS_STOP, SWO%RESDAT(IPROJ)%RESBAL(IRES)%PRCP, TS_START)
-         !           END IF
-         !           !
-         !           IF(SWO%RES_EVAP_SIMTIM        ) THEN
-         !               CALL SWO%RES_EVAP  (I)%GET(SIMTIM,  SWO%RESDAT(IPROJ)%RESBAL(IRES)%EVAP, SIMTIM0)
-         !           ELSE
-         !               CALL SWO%RES_EVAP  (I)%GET(TS_STOP, SWO%RESDAT(IPROJ)%RESBAL(IRES)%EVAP, TS_START)
-         !           END IF
-         !           !
-         !           IF(SWO%RES_RELEASE_SPEC_SIMTIM) THEN
-         !               CALL SWO%RES_RELEASE_SPEC(I)%GET(SIMTIM,  SWO%RESDAT(IPROJ)%RESBAL(IRES)%RELEASE_SPEC, SIMTIM0)
-         !           ELSE
-         !               CALL SWO%RES_RELEASE_SPEC(I)%GET(TS_STOP, SWO%RESDAT(IPROJ)%RESBAL(IRES)%RELEASE_SPEC, TS_START)
-         !           END IF
-         !           !
-         !           IF(SWO%RES_STORAGE_SPEC_MIN_SIMTIM) THEN
-         !               CALL SWO%RES_STORAGE_SPEC_MIN(I)%GET(SIMTIM,  SWO%RESDAT(IPROJ)%RESBAL(IRES)%STORAGE_SPEC_MIN, SIMTIM0)
-         !           ELSE
-         !               CALL SWO%RES_STORAGE_SPEC_MIN(I)%GET(TS_STOP, SWO%RESDAT(IPROJ)%RESBAL(IRES)%STORAGE_SPEC_MIN, TS_START)
-         !           END IF
-         !           !
-         !           ! SWO OPERATORS WITH VOLUMES SO CONVERT RATES
-         !           SWO%RESDAT(IPROJ)%RESBAL(IRES)%INFLOW       = SWO%RESDAT(IPROJ)%RESBAL(IRES)%INFLOW       * SWO%DELT
-         !           SWO%RESDAT(IPROJ)%RESBAL(IRES)%PRCP         = SWO%RESDAT(IPROJ)%RESBAL(IRES)%PRCP         * SWO%DELT
-         !           SWO%RESDAT(IPROJ)%RESBAL(IRES)%EVAP         = SWO%RESDAT(IPROJ)%RESBAL(IRES)%EVAP         * SWO%DELT
-         !           SWO%RESDAT(IPROJ)%RESBAL(IRES)%RELEASE_SPEC = SWO%RESDAT(IPROJ)%RESBAL(IRES)%RELEASE_SPEC * SWO%DELT
-         !        END IF
-         !    END DO
-         !END DO
-      END ASSOCIATE
-      !
-      ! CALCULATE NPROJ AREA/DEAD POOL AREA IF IT IS THE ONLY STORAGE IN RESERVOIR
-      !
-      DO IPROJ = 1,NPROJ
-          IF (SWO%IRESFL(IPROJ) > Z) THEN
-              DO IRES = 1,SWO%NRES_BAL(IPROJ)
-                  IF(SWO%RESDAT(IPROJ)%RESBAL(IRES)%INUSE) THEN
-                    !
-                    CALL ACAP_STOR2AREA(SWO,IPROJ,IRES,SWO%RESDAT(IPROJ)%RESBAL(IRES)%STORAGE_SPEC_MIN, SWO%RESDAT(IPROJ)%RESBAL(IRES)%AREA_DPL)
-                    !
-                    CALL ACAP_STOR2ELEV(SWO,IPROJ,IRES,SWO%RESDAT(IPROJ)%RESBAL(IRES)%STORAGE_SPEC_MIN,ELEV)
-                    SWO%RESDAT(IPROJ)%RESBAL(IRES)%STOR_SPEC_MIN_ELEV = ELEV
-                  END IF
-              END DO
-          ELSEIF(SWO%IRESFL(IPROJ) < Z) THEN
-              IRES = 1
-              IF(SWO%RESDAT(IPROJ)%RESBAL(IRES)%INUSE) THEN
-                 !
-                 SWO%RESDAT(IPROJ)%RESBAL(IRES)%AREA_DPL = DZ
-                 DO JRES = 1,SWO%NRES_SPT(IPROJ)
-                   ! Area @ non-project storage only
-                   DTMP1 = DZ; DTMP2 = DZ
-                   CALL FRAC_POOL2SPLIT(SWO,IPROJ,JRES,SWO%FRSTOP,SWO%RESDAT(IPROJ)%RESBAL(IRES)%STORAGE_SPEC_MIN,DTMP1,SWO%IS_LEAP_END)  ! DTMP1 = SPLIT_STORAGE
-                   CALL ACAP_STOR2AREA(SWO,IPROJ,JRES,DTMP1,DTMP2)                                                                        ! DTMP2 = SPLIT_AREA
-                   !
-                   SWO%RESDAT(IPROJ)%RESBAL(IRES)%AREA_DPL = SWO%RESDAT(IPROJ)%RESBAL(IRES)%AREA_DPL + DTMP2
-                   !
-                   IF(SWO%RESDAT(IPROJ)%RESSPLIT(JRES)%MAIN_RES) THEN
-                       CALL ACAP_STOR2ELEV(SWO,IPROJ,JRES,DTMP1,ELEV)
-                       SWO%RESDAT(IPROJ)%RESBAL(IRES)%STOR_SPEC_MIN_ELEV = ELEV
-                   END IF
-                 END DO
-              END IF
-          END IF
-      END DO
-      !
-      IF(ERROR.NE.NL) CALL STOP_ERROR( OUTPUT=SWO%IOUT, MSG='SWO HAD FATAL ERRORS.'//NL//ERROR)
+               END DO
+            END IF
+        END IF
+    END DO
+    !
+    IF(ERROR.NE.NL) CALL STOP_ERROR( OUTPUT=SWO%IOUT, MSG='SWO HAD FATAL ERRORS.'//NL//ERROR)
 
 
 !    I     = -1
@@ -8623,7 +8666,7 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
 !          END IF
 !
 !          IF (.NOT.ALLOCATED(TMPDAT)) THEN
-!            ALLOCATE(TMPDAT(1)); TMPDAT= -99D0
+!            ALLOCATE(TMPDAT(1)); TMPDAT= -99.D0
 !          END IF
 !
 !          DO IRES = 1,SWO%NRES_BAL(IPROJ)
@@ -8702,7 +8745,7 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
 !          END IF
 !
 !          IF (.NOT.ALLOCATED(TMPDAT)) THEN
-!            ALLOCATE(TMPDAT(1)); TMPDAT= (/-99D0/)
+!            ALLOCATE(TMPDAT(1)); TMPDAT= (/-99.D0/)
 !          END IF
 !
 !!          ! Print status
@@ -8828,41 +8871,41 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
     IUNIT = -1
     IFARM = -1
     IAUX  = -1
+    !
+    ! ****************************************************************
+    ! COMPUTE AREAS @ FARMS, UNITS, DISTRICTS, PROJECTS ...
+    ! ****************************************************************
+    !
+    ! Area @ Farms
+    DO IFARM = 1,NFARM
+      SWO%FARM(IFARM)%AreaTot = WBS%FID(IFARM)%AREA
+      SWO%FARM(IFARM)%AreaIrr = WBS%IRR_AREA(IFARM)
       !
-      ! ****************************************************************
-      ! COMPUTE AREAS @ FARMS, UNITS, DISTRICTS, PROJECTS ...
-      ! ****************************************************************
+      IF(SWO%FARM(IFARM)%AreaTot < NEARZERO_5) SWO%FARM(IFARM)%AreaTot = DZ
+      IF(SWO%FARM(IFARM)%AreaIrr < NEARZERO_5) SWO%FARM(IFARM)%AreaIrr = DZ
       !
-      ! Area @ Farms
-      DO IFARM = 1,NFARM
-        SWO%FARM(IFARM)%AreaTot = WBS%FID(IFARM)%AREA
-        SWO%FARM(IFARM)%AreaIrr = WBS%IRR_AREA(IFARM)
-        !
-        IF(SWO%FARM(IFARM)%AreaTot < NEARZERO_5) SWO%FARM(IFARM)%AreaTot = DZ
-        IF(SWO%FARM(IFARM)%AreaIrr < NEARZERO_5) SWO%FARM(IFARM)%AreaIrr = DZ
-        !
-        IF(SWO%FARM(IFARM)%DelSeg.NE.Z) THEN
-            SWO%FARM(IFARM)%AreaSwIrr = WBS%IRR_AREA(IFARM)
-            IF(SWO%FARM(IFARM)%AreaSwIrr < NEARZERO_5) SWO%FARM(IFARM)%AreaIrr = DZ
-        ELSE
-            SWO%FARM(IFARM)%AreaSwIrr = DZ
-        END IF
+      IF(SWO%FARM(IFARM)%DelSeg.NE.Z) THEN
+          SWO%FARM(IFARM)%AreaSwIrr = WBS%IRR_AREA(IFARM)
+          IF(SWO%FARM(IFARM)%AreaSwIrr < NEARZERO_5) SWO%FARM(IFARM)%AreaIrr = DZ
+      ELSE
+          SWO%FARM(IFARM)%AreaSwIrr = DZ
+      END IF
 
-!        DO I = 1,NCOL
-!          DO J = 1,NROW
-!            IF (FarmID(I,J).EQ.IFARM) THEN
-!              FARM(IFARM)%AreaTot = FARM(IFARM)%AreaTot  + (DELR(I)*DELC(J))
-!            END IF !(FarmID)
-!            IF ((FarmID(I,J).EQ.IFARM).AND.(CropID(I,J).GT.0)) THEN
-!              FARM(IFARM)%AreaIrr = FARM(IFARM)%AreaIrr
-!     +                              + (DELR(I)*DELC(J))
-!            END IF !((FarmID).AND.(CropID))
-!          END DO !(J)
-!        END DO !(I)
-      END DO !(IFARM)
+!      DO I = 1,NCOL
+!        DO J = 1,NROW
+!          IF (FarmID(I,J).EQ.IFARM) THEN
+!            FARM(IFARM)%AreaTot = FARM(IFARM)%AreaTot  + (DELR(I)*DELC(J))
+!          END IF !(FarmID)
+!          IF ((FarmID(I,J).EQ.IFARM).AND.(CropID(I,J).GT.0)) THEN
+!            FARM(IFARM)%AreaIrr = FARM(IFARM)%AreaIrr
+!   +                              + (DELR(I)*DELC(J))
+!          END IF !((FarmID).AND.(CropID))
+!        END DO !(J)
+!      END DO !(I)
+    END DO !(IFARM)
 
-      ! Area @ Units (sum over farms/auxs in each unit)
-      ! NOTE -- updated to exclude GW-only farms!
+    ! Area @ Units (sum over farms/auxs in each unit)
+    ! NOTE -- updated to exclude GW-only farms!
     I     = -1
     J     = -1
     IPROJ = -1
@@ -8879,92 +8922,50 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
     IUNIT = -1
     IFARM = -1
     IAUX  = -1
-      !
-      DO IUNIT = 1,NUNIT
-            SWO%UNIT(IUNIT)%AreaTot = DZ
-            SWO%UNIT(IUNIT)%AreaIrr = DZ
-            DO I=ONE, WBS%UNIT(IUNIT)%NFARM
-                  IFARM = WBS%UNIT(IUNIT)%FARM(I)
-                  IF(SWO%FARM(IFARM)%DelSeg.NE.Z) THEN                                     ! SCOTT WHAT ABOUT FARMS WITH OUT SFR SEG?
-                     SWO%UNIT(IUNIT)%AreaTot = SWO%UNIT(IUNIT)%AreaTot + SWO%FARM(IFARM)%AreaTot
-                     SWO%UNIT(IUNIT)%AreaIrr = SWO%UNIT(IUNIT)%AreaIrr + SWO%FARM(IFARM)%AreaSwIrr
-                  END IF
-            END DO
-            DO I=ONE, WBS%UNIT(IUNIT)%NAUX
-                  IAUX = WBS%UNIT(IUNIT)%AUX(I)
-                  IF(SWO%AUXDEM(IAUX)%AuxSeg.NE.Z) THEN
-                     SWO%UNIT(IUNIT)%AreaTot = SWO%UNIT(IUNIT)%AreaTot + SWO%AUXDEM(IAUX)%AREA
-                     SWO%UNIT(IUNIT)%AreaIrr = SWO%UNIT(IUNIT)%AreaIrr + SWO%AUXDEM(IAUX)%AREA
-                  END IF
-            END DO
-            !
-            IF(SWO%UNIT(IUNIT)%AreaTot < NEARZERO_5) SWO%UNIT(IUNIT)%AreaTot = DZ
-            IF(SWO%UNIT(IUNIT)%AreaIrr < NEARZERO_5) SWO%UNIT(IUNIT)%AreaIrr = DZ
-      END DO
-!      DO IUNIT = 1,NUNIT
-!        UNIT(IUNIT)%AreaTot = DZ
-!        UNIT(IUNIT)%AreaIrr = DZ
-!        ! Farm area ...
-!        DO IFARM = 1,NFARM
-!          IF ((FARM(IFARM)%UnitID.EQ.IUNIT)
-!     +        .AND.
-!     +        (FARM(IFARM)%DelSeg.NE.0)) THEN
-!            UNIT(IUNIT)%AreaTot = UNIT(IUNIT)%AreaTot
-!     +                            + FARM(IFARM)%AreaTot
-!            UNIT(IUNIT)%AreaIrr = UNIT(IUNIT)%AreaIrr
-!     +                            + FARM(IFARM)%AreaIrr
-!          END IF !(FARM%UnitID.EQ.IUNIT / FARM%DelSeg.NE.0)
-!        END DO !(IFARM)
-!        ! Aux area ...
-!        DO IAUX = 1,NAUXDEM
-!          IF ((SWO%AUXDEM(IAUX)%UnitID.EQ.IUNIT) .AND. (SWO%AUXDEM(IAUX)%AuxSeg.NE.0)) THEN
-!            UNIT(IUNIT)%AreaIrr = UNIT(IUNIT)%AreaIrr + SWO%AUXDEM(IAUX)%AREA
-!            UNIT(IUNIT)%AreaTot = UNIT(IUNIT)%AreaTot + SWO%AUXDEM(IAUX)%AREA
-!          END IF !(AUX%UnitID.EQ.IUNIT / AUX%AuxSeg.NE.0)
-!        END DO !(IAUX)
-!      END DO !(IUNIT)
-    I     = -1
-    J     = -1
-    IPROJ = -1
-    IRES  = -1
-    ISEG  = -1
-    IRCH  = -1
-    IDVS  = -1
-    ISPT  = -1
-    IBRC  = -1
-    IRES  = -1
-    JRES  = -1
-    IPROJ = -1
-    IDIST = -1
-    IUNIT = -1
-    IFARM = -1
-    IAUX  = -1
-
-      ! Area @ Districts (sum over units in each district)
-      DO IDIST = 1,NDIST
-        SWO%DIST(IDIST)%AreaTot = DZ
-        SWO%DIST(IDIST)%AreaIrr = DZ
-        DO I = 1, WBS%DIST(IDIST)%NUNIT
-            IUNIT = WBS%DIST(IDIST)%UNIT(I)
-            SWO%DIST(IDIST)%AreaTot = SWO%DIST(IDIST)%AreaTot + SWO%UNIT(IUNIT)%AreaTot
-            SWO%DIST(IDIST)%AreaIrr = SWO%DIST(IDIST)%AreaIrr + SWO%UNIT(IUNIT)%AreaIrr
-        END DO !(IUNIT)
-        !
-        IF(SWO%DIST(IDIST)%AreaTot < NEARZERO_5) SWO%DIST(IDIST)%AreaTot = DZ
-        IF(SWO%DIST(IDIST)%AreaIrr < NEARZERO_5) SWO%DIST(IDIST)%AreaIrr = DZ
-      END DO !(IDIST)
-!      DO IDIST = 1,NDIST
-!        DIST(IDIST)%AreaTot = DZ
-!        DIST(IDIST)%AreaIrr = DZ
-!        DO IUNIT = 1,NUNIT
-!          IF (UNIT(IUNIT)%DistID.EQ.IDIST) THEN
-!            DIST(IDIST)%AreaTot = DIST(IDIST)%AreaTot
-!     +                            + UNIT(IUNIT)%AreaTot
-!            DIST(IDIST)%AreaIrr = DIST(IDIST)%AreaIrr
-!     +                            + UNIT(IUNIT)%AreaIrr
-!          END IF !(UNIT%DistID.EQ.IDIST)
-!        END DO !(IUNIT)
-!      END DO !(IDIST)
+    !
+    DO IUNIT = 1,NUNIT
+          SWO%UNIT(IUNIT)%AreaTot = DZ
+          SWO%UNIT(IUNIT)%AreaIrr = DZ
+          DO I=ONE, WBS%UNIT(IUNIT)%NFARM
+                IFARM = WBS%UNIT(IUNIT)%FARM(I)
+                IF(SWO%FARM(IFARM)%DelSeg.NE.Z) THEN                                     ! SCOTT WHAT ABOUT FARMS WITH OUT SFR SEG?
+                   SWO%UNIT(IUNIT)%AreaTot = SWO%UNIT(IUNIT)%AreaTot + SWO%FARM(IFARM)%AreaTot
+                   SWO%UNIT(IUNIT)%AreaIrr = SWO%UNIT(IUNIT)%AreaIrr + SWO%FARM(IFARM)%AreaSwIrr
+                END IF
+          END DO
+          DO I=ONE, WBS%UNIT(IUNIT)%NAUX
+                IAUX = WBS%UNIT(IUNIT)%AUX(I)
+                IF(SWO%AUXDEM(IAUX)%AuxSeg.NE.Z) THEN
+                   SWO%UNIT(IUNIT)%AreaTot = SWO%UNIT(IUNIT)%AreaTot + SWO%AUXDEM(IAUX)%AREA
+                   SWO%UNIT(IUNIT)%AreaIrr = SWO%UNIT(IUNIT)%AreaIrr + SWO%AUXDEM(IAUX)%AREA
+                END IF
+          END DO
+          !
+          IF(SWO%UNIT(IUNIT)%AreaTot < NEARZERO_5) SWO%UNIT(IUNIT)%AreaTot = DZ
+          IF(SWO%UNIT(IUNIT)%AreaIrr < NEARZERO_5) SWO%UNIT(IUNIT)%AreaIrr = DZ
+    END DO
+!    DO IUNIT = 1,NUNIT
+!      UNIT(IUNIT)%AreaTot = DZ
+!      UNIT(IUNIT)%AreaIrr = DZ
+!      ! Farm area ...
+!      DO IFARM = 1,NFARM
+!        IF ((FARM(IFARM)%UnitID.EQ.IUNIT)
+!   +        .AND.
+!   +        (FARM(IFARM)%DelSeg.NE.0)) THEN
+!          UNIT(IUNIT)%AreaTot = UNIT(IUNIT)%AreaTot
+!   +                            + FARM(IFARM)%AreaTot
+!          UNIT(IUNIT)%AreaIrr = UNIT(IUNIT)%AreaIrr
+!   +                            + FARM(IFARM)%AreaIrr
+!        END IF !(FARM%UnitID.EQ.IUNIT / FARM%DelSeg.NE.0)
+!      END DO !(IFARM)
+!      ! Aux area ...
+!      DO IAUX = 1,NAUXDEM
+!        IF ((SWO%AUXDEM(IAUX)%UnitID.EQ.IUNIT) .AND. (SWO%AUXDEM(IAUX)%AuxSeg.NE.0)) THEN
+!          UNIT(IUNIT)%AreaIrr = UNIT(IUNIT)%AreaIrr + SWO%AUXDEM(IAUX)%AREA
+!          UNIT(IUNIT)%AreaTot = UNIT(IUNIT)%AreaTot + SWO%AUXDEM(IAUX)%AREA
+!        END IF !(AUX%UnitID.EQ.IUNIT / AUX%AuxSeg.NE.0)
+!      END DO !(IAUX)
+!    END DO !(IUNIT)
     I     = -1
     J     = -1
     IPROJ = -1
@@ -8982,301 +8983,31 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
     IFARM = -1
     IAUX  = -1
 
-      ! Area @ Project (sum over districts in each project)
-      DO IPROJ = 1,NPROJ
-        SWO%PROJ(IPROJ)%AreaTot = DZ
-        SWO%PROJ(IPROJ)%AreaIrr = DZ
-        DO I = 1,WBS%PROJ(IPROJ)%NDIST
-            IDIST = WBS%PROJ(IPROJ)%DIST(I)
-            SWO%PROJ(IPROJ)%AreaTot = SWO%PROJ(IPROJ)%AreaTot + SWO%DIST(IDIST)%AreaTot
-            SWO%PROJ(IPROJ)%AreaIrr = SWO%PROJ(IPROJ)%AreaIrr + SWO%DIST(IDIST)%AreaIrr
-        END DO !(IDIST)
-        !
-        IF(SWO%PROJ(IPROJ)%AreaTot < NEARZERO_5) SWO%PROJ(IPROJ)%AreaTot = DZ
-        IF(SWO%PROJ(IPROJ)%AreaIrr < NEARZERO_5) SWO%PROJ(IPROJ)%AreaIrr = DZ
-      END DO !(IPROJ)
-!      DO IPROJ = 1,NPROJ
-!        SWO%PROJ(IPROJ)%AreaTot = DZ
-!        SWO%PROJ(IPROJ)%AreaIrr = DZ
-!        DO IDIST = 1,NDIST
-!          IF (DIST(IDIST)%ProjID.EQ.IPROJ) THEN
-!            SWO%PROJ(IPROJ)%AreaTot = SWO%PROJ(IPROJ)%AreaTot
-!     +                            + DIST(IDIST)%AreaTot
-!            SWO%PROJ(IPROJ)%AreaIrr = SWO%PROJ(IPROJ)%AreaIrr
-!     +                            + DIST(IDIST)%AreaIrr
-!          END IF !(DIST%ProjID.EQ.IPROJ)
-!
-!        END DO !(IDIST)
-!      END DO !(IPROJ)
-      !
-      ! SET UP HOW DISTRICTS WILL SPLIT THEIR ALLOCATIONS ACROSS FARMS AND AUXDEMS
-      !
-      IF    (SWO%DIST_ALLOC_FRAC_TYP == Z) THEN  !Even Split
-          !
-          DO CONCURRENT (I=ONE:NFARM  ); SWO%FARM(I)%DIST_ALLOC_FRAC = DZ
-          END DO
-          DO CONCURRENT (I=ONE:SWO%NAUXDEM); SWO%AUXDEM(I)%DIST_ALLOC_FRAC = DZ
-          END DO
-          !
-          DO IDIST = 1,NDIST
-              I = WBS%DIST(IDIST)%NFARM + WBS%DIST(IDIST)%NAUX
-              IF(I > Z) THEN
-                  DTMP1 = UNO/DBLE(I)
-              ELSE
-                  CYCLE
-              END IF
-              !
-              DO J =ONE, WBS%DIST(IDIST)%NFARM
-                 I = WBS%DIST(IDIST)%FARM(J)
-                 SWO%FARM(I)%DIST_ALLOC_FRAC = DTMP1
-              END DO
-              !
-              DO J =ONE, WBS%DIST(IDIST)%NAUX
-                 I = WBS%DIST(IDIST)%AUX(J)
-                 SWO%AUXDEM(I)%DIST_ALLOC_FRAC = DTMP1
-              END DO
-          END DO
-          !
-      ELSEIF(SWO%DIST_ALLOC_FRAC_TYP == ONE) THEN  !BY IRRIGATED AREA
-          !
-          DO CONCURRENT (I=ONE:NFARM); SWO%FARM(I)%DIST_ALLOC_FRAC = DZ
-          END DO
-          DO CONCURRENT (I=ONE:SWO%NAUXDEM); SWO%AUXDEM(I)%DIST_ALLOC_FRAC = DZ
-          END DO
-          !
-          DO IDIST = 1,NDIST
-              I = WBS%DIST(IDIST)%NFARM + WBS%DIST(IDIST)%NAUX
-              IF(I == Z .OR. SWO%DIST(IDIST)%AreaIrr < NEARZERO_5) CYCLE
-              !
-              !
-              DO J =ONE, WBS%DIST(IDIST)%NFARM
-                 I = WBS%DIST(IDIST)%FARM(J)
-                 SWO%FARM(I)%DIST_ALLOC_FRAC = SWO%FARM(I)%AreaSwIrr / SWO%DIST(IDIST)%AreaIrr
-              END DO
-              !
-              DO J =ONE, WBS%DIST(IDIST)%NAUX
-                 I = WBS%DIST(IDIST)%AUX(J)
-                 SWO%AUXDEM(I)%DIST_ALLOC_FRAC = SWO%AUXDEM(I)%AREA / SWO%DIST(IDIST)%AreaIrr
-              END DO
-          END DO
-          !
-      ELSEIF(SWO%DIST_ALLOC_FRAC_TYP==TWO) THEN ! Specified Fractions
-          !
-          DO IDIST = 1,NDIST
-              !
-              IF(WBS%DIST(IDIST)%NFARM + WBS%DIST(IDIST)%NAUX == Z) CYCLE
-              !
-              DTMP1 = DZ
-              !
-              DO J =ONE, WBS%DIST(IDIST)%NFARM
-                 I = WBS%DIST(IDIST)%FARM(J)
-                 SWO%FARM(I)%DIST_ALLOC_FRAC = SWO%DIST_ALLOC_FRAC%LIST(I)
-                 !
-                 DTMP1 = DTMP1 + SWO%FARM(I)%DIST_ALLOC_FRAC  !SUM CHECK
-              END DO
-              !
-              DO J =ONE, WBS%DIST(IDIST)%NAUX
-                 I = WBS%DIST(IDIST)%AUX(J)
-                 SWO%AUXDEM(I)%DIST_ALLOC_FRAC = SWO%DIST_ALLOC_FRAC%LIST(I+NFARM)
-                 !
-                 DTMP1 = DTMP1 + SWO%FARM(I)%DIST_ALLOC_FRAC  !SUM CHECK
-              END DO
-              !
-              IF(DTMP1 < SUB_ONE .OR. NEAR_ONE < DTMP1) THEN                 !Should sum to 1
-                  !
-                  DO J =ONE, WBS%DIST(IDIST)%NFARM
-                     I = WBS%DIST(IDIST)%FARM(J)
-                     SWO%FARM(I)%DIST_ALLOC_FRAC =     SWO%FARM(I)%DIST_ALLOC_FRAC / DTMP1
-                  END DO
-                  !
-                  DO J =ONE, WBS%DIST(IDIST)%NAUX
-                     I = WBS%DIST(IDIST)%AUX(J)
-                     SWO%AUXDEM(I)%DIST_ALLOC_FRAC = SWO%AUXDEM(I)%DIST_ALLOC_FRAC / DTMP1
-                  END DO
-              END IF
-          END DO
-      END IF !IF SWO%DIST_ALLOC_FRAC_TYP == 3 then set by S-LANGUAGE
-
-
-      ! ****************************************************************
-      ! RESET CURRENT VALUES
-      ! (reset current flow, efficiency, demand, etc., at start of timestep)
-      ! ****************************************************************
-    I     = -1
-    J     = -1
-    IPROJ = -1
-    IRES  = -1
-    ISEG  = -1
-    IRCH  = -1
-    IDVS  = -1
-    ISPT  = -1
-    IBRC  = -1
-    IRES  = -1
-    JRES  = -1
-    IPROJ = -1
-    IDIST = -1
-    IUNIT = -1
-    IFARM = -1
-    IAUX  = -1
-
-      ! TODO ...
-      ! Is this really needed?
-      ! And if so, is this being done correctly?
-
-      ! FLOW DATA
-      ! (only reset values computed/manipulated by SWOPS1FM ...
-      !  update values computed outside of SWOPS1FM in SWOPS1BD routine)
-      DO CONCURRENT (ISEG = ONE:SWO%NSEG); SWO%SEGDATA(ISEG)%EFFICIENCY = SWO%SEGDATA_PREV(ISEG)%EFFICIENCY
-      END DO !(ISEG)
-
-      DO CONCURRENT (IRCH = ONE:SWO%NSTRM); SWO%RCHDATA(IRCH)%EFFICIENCY = SWO%RCHDATA_PREV(IRCH)%EFFICIENCY
-      END DO !(IRCH)
-
-      ! SUPPLY / DEMAND / ACCOUNTING
-      ! (set current flow/acct values to zero...)
-      ! (set current conveyance/performance parameters to latest/greatest)
-      ! (set current YTD values to end of previous step)
-    I     = -1
-    J     = -1
-    IPROJ = -1
-    IRES  = -1
-    ISEG  = -1
-    IRCH  = -1
-    IDVS  = -1
-    ISPT  = -1
-    IBRC  = -1
-    IRES  = -1
-    JRES  = -1
-    IPROJ = -1
-    IDIST = -1
-    IUNIT = -1
-    IFARM = -1
-    IAUX  = -1
-      DO IPROJ = 1,NPROJ
-        SWO%PROJ(IPROJ)%TFDR          = DZ
-        SWO%PROJ(IPROJ)%DELORDER      = DZ
-        SWO%PROJ(IPROJ)%DIVORDER      = DZ
-        SWO%PROJ(IPROJ)%RELEASE       = DZ
-        SWO%PROJ(IPROJ)%DIVERSION     = DZ
-        !SWO%PROJ(IPROJ)%OUTFLOW       = DZ
-        SWO%PROJ(IPROJ)%DELIVERY      = DZ
-        SWO%PROJ(IPROJ)%BYPASS        = DZ
-        SWO%PROJ(IPROJ)%CHARGE        = DZ
-        SWO%PROJ(IPROJ)%CREDIT        = DZ
-        SWO%PROJ(IPROJ)%DIVIN         = DZ
-        SWO%PROJ(IPROJ)%SUMIN         = DZ
-        SWO%PROJ(IPROJ)%SUMOUT        = DZ
-        SWO%PROJ(IPROJ)%DELIVEFF      = SWO%PROJ_PREV(IPROJ)%DELIVEFF
-        SWO%PROJ(IPROJ)%DIVRATIO      = SWO%PROJ_PREV(IPROJ)%DIVRATIO
-        SWO%PROJ(IPROJ)%CHGRATIO      = SWO%PROJ_PREV(IPROJ)%CHGRATIO
-        SWO%PROJ(IPROJ)%NETCHGRATIO   = SWO%PROJ_PREV(IPROJ)%NETCHGRATIO
-        SWO%PROJ(IPROJ)%RELEASE_YTD   = SWO%PROJ_PREV(IPROJ)%RELEASE_YTD
-        SWO%PROJ(IPROJ)%DIVERSION_YTD = SWO%PROJ_PREV(IPROJ)%DIVERSION_YTD
-        !SWO%PROJ(IPROJ)%OUTFLOW_YTD   = SWO%PROJ_PREV(IPROJ)%OUTFLOW_YTD
-        SWO%PROJ(IPROJ)%DELIVERY_YTD  = SWO%PROJ_PREV(IPROJ)%DELIVERY_YTD
-        SWO%PROJ(IPROJ)%BYPASS_YTD    = SWO%PROJ_PREV(IPROJ)%BYPASS_YTD
-        SWO%PROJ(IPROJ)%CHARGE_YTD    = SWO%PROJ_PREV(IPROJ)%CHARGE_YTD
-        SWO%PROJ(IPROJ)%CREDIT_YTD    = SWO%PROJ_PREV(IPROJ)%CREDIT_YTD
-        SWO%PROJ(IPROJ)%DELIVEFF_YTD  = SWO%PROJ_PREV(IPROJ)%DELIVEFF_YTD
-        SWO%PROJ(IPROJ)%DIVRATIO_YTD  = SWO%PROJ_PREV(IPROJ)%DIVRATIO_YTD
-        SWO%PROJ(IPROJ)%CHGRATIO_YTD  = SWO%PROJ_PREV(IPROJ)%CHGRATIO_YTD
-        SWO%PROJ(IPROJ)%DIVIN_YTD     = SWO%PROJ_PREV(IPROJ)%DIVIN_YTD
-        SWO%PROJ(IPROJ)%SUMIN_YTD     = SWO%PROJ_PREV(IPROJ)%SUMIN_YTD
-        SWO%PROJ(IPROJ)%SUMOUT_YTD    = SWO%PROJ_PREV(IPROJ)%SUMOUT_YTD
-        SWO%PROJ(IPROJ)%NETCHGRATIO_YTD= SWO%PROJ_PREV(IPROJ)%NETCHGRATIO_YTD
-      END DO !(IPROJ)
-    I     = -1
-    J     = -1
-    IPROJ = -1
-    IRES  = -1
-    ISEG  = -1
-    IRCH  = -1
-    IDVS  = -1
-    ISPT  = -1
-    IBRC  = -1
-    IRES  = -1
-    JRES  = -1
-    IPROJ = -1
-    IDIST = -1
-    IUNIT = -1
-    IFARM = -1
-    IAUX  = -1
-
-      DO IDIST = 1,NDIST
-        SWO%DIST(IDIST)%TFDR          = DZ
-        SWO%DIST(IDIST)%DELORDER      = DZ
-        SWO%DIST(IDIST)%DIVORDER      = DZ
-        SWO%DIST(IDIST)%DIVERSION     = DZ
-        SWO%DIST(IDIST)%DELIVERY      = DZ
-        SWO%DIST(IDIST)%BYPASS        = DZ
-        SWO%DIST(IDIST)%CHARGE        = DZ
-        SWO%DIST(IDIST)%CREDIT        = DZ
-        SWO%DIST(IDIST)%DIVIN         = DZ
-        SWO%DIST(IDIST)%SUMIN         = DZ
-        SWO%DIST(IDIST)%SUMOUT        = DZ
-        SWO%DIST(IDIST)%BALANCE       = SWO%DIST_PREV(IDIST)%BALANCE
-        SWO%DIST(IDIST)%DELIVEFF      = SWO%DIST_PREV(IDIST)%DELIVEFF
-        SWO%DIST(IDIST)%CHGRATIO      = SWO%DIST_PREV(IDIST)%CHGRATIO
-        SWO%DIST(IDIST)%NETCHGRATIO   = SWO%DIST_PREV(IDIST)%NETCHGRATIO
-        SWO%DIST(IDIST)%DIVERSION_YTD = SWO%DIST_PREV(IDIST)%DIVERSION_YTD
-        SWO%DIST(IDIST)%DELIVERY_YTD  = SWO%DIST_PREV(IDIST)%DELIVERY_YTD
-        SWO%DIST(IDIST)%BYPASS_YTD    = SWO%DIST_PREV(IDIST)%BYPASS_YTD
-        SWO%DIST(IDIST)%CHARGE_YTD    = SWO%DIST_PREV(IDIST)%CHARGE_YTD
-        SWO%DIST(IDIST)%CREDIT_YTD    = SWO%DIST_PREV(IDIST)%CREDIT_YTD
-        SWO%DIST(IDIST)%DELIVEFF_YTD  = SWO%DIST_PREV(IDIST)%DELIVEFF_YTD
-        SWO%DIST(IDIST)%CHGRATIO_YTD  = SWO%DIST_PREV(IDIST)%CHGRATIO_YTD
-        SWO%DIST(IDIST)%DIVIN_YTD     = SWO%DIST_PREV(IDIST)%DIVIN_YTD
-        SWO%DIST(IDIST)%SUMIN_YTD     = SWO%DIST_PREV(IDIST)%SUMIN_YTD
-        SWO%DIST(IDIST)%SUMOUT_YTD    = SWO%DIST_PREV(IDIST)%SUMOUT_YTD
-        SWO%DIST(IDIST)%NETCHGRATIO_YTD= SWO%DIST_PREV(IDIST)%NETCHGRATIO_YTD
-      END DO !(IDIST)
-
-    I     = -1
-    J     = -1
-    IPROJ = -1
-    IRES  = -1
-    ISEG  = -1
-    IRCH  = -1
-    IDVS  = -1
-    ISPT  = -1
-    IBRC  = -1
-    IRES  = -1
-    JRES  = -1
-    IPROJ = -1
-    IDIST = -1
-    IUNIT = -1
-    IFARM = -1
-    IAUX  = -1
-      DO IUNIT = 1,NUNIT
-        SWO%UNIT(IUNIT)%TFDR          = DZ
-        SWO%UNIT(IUNIT)%DELORDER      = DZ
-        SWO%UNIT(IUNIT)%DIVORDER      = DZ
-        SWO%UNIT(IUNIT)%DIVERSION     = DZ
-        SWO%UNIT(IUNIT)%DELIVERY      = DZ
-        SWO%UNIT(IUNIT)%BYPASS        = DZ
-        SWO%UNIT(IUNIT)%CHARGE        = DZ
-        SWO%UNIT(IUNIT)%CREDIT        = DZ
-        SWO%UNIT(IUNIT)%DIVIN         = DZ
-        SWO%UNIT(IUNIT)%SUMIN         = DZ
-        SWO%UNIT(IUNIT)%SUMOUT        = DZ
-        SWO%UNIT(IUNIT)%DELIVEFF      = SWO%UNIT_PREV(IUNIT)%DELIVEFF
-        SWO%UNIT(IUNIT)%CHGRATIO      = SWO%UNIT_PREV(IUNIT)%CHGRATIO
-        SWO%UNIT(IUNIT)%NETCHGRATIO   = SWO%UNIT_PREV(IUNIT)%NETCHGRATIO
-        SWO%UNIT(IUNIT)%DIVERSION_YTD = SWO%UNIT_PREV(IUNIT)%DIVERSION_YTD
-        SWO%UNIT(IUNIT)%DELIVERY_YTD  = SWO%UNIT_PREV(IUNIT)%DELIVERY_YTD
-        SWO%UNIT(IUNIT)%BYPASS_YTD    = SWO%UNIT_PREV(IUNIT)%BYPASS_YTD
-        SWO%UNIT(IUNIT)%CHARGE_YTD    = SWO%UNIT_PREV(IUNIT)%CHARGE_YTD
-        SWO%UNIT(IUNIT)%CREDIT_YTD    = SWO%UNIT_PREV(IUNIT)%CREDIT_YTD
-        SWO%UNIT(IUNIT)%DELIVEFF_YTD  = SWO%UNIT_PREV(IUNIT)%DELIVEFF_YTD
-        SWO%UNIT(IUNIT)%CHGRATIO_YTD  = SWO%UNIT_PREV(IUNIT)%CHGRATIO_YTD
-        SWO%UNIT(IUNIT)%DIVIN_YTD     = SWO%UNIT_PREV(IUNIT)%DIVIN_YTD
-        SWO%UNIT(IUNIT)%SUMIN_YTD     = SWO%UNIT_PREV(IUNIT)%SUMIN_YTD
-        SWO%UNIT(IUNIT)%SUMOUT_YTD    = SWO%UNIT_PREV(IUNIT)%SUMOUT_YTD
-        SWO%UNIT(IUNIT)%NETCHGRATIO_YTD= SWO%UNIT_PREV(IUNIT)%NETCHGRATIO_YTD
-        SWO%UNIT(IUNIT)%ALLOTMENT     = SWO%UNIT_PREV(IUNIT)%ALLOTMENT
-        SWO%UNIT(IUNIT)%BALANCE       = SWO%UNIT_PREV(IUNIT)%BALANCE
+    ! Area @ Districts (sum over units in each district)
+    DO IDIST = 1,NDIST
+      SWO%DIST(IDIST)%AreaTot = DZ
+      SWO%DIST(IDIST)%AreaIrr = DZ
+      DO I = 1, WBS%DIST(IDIST)%NUNIT
+          IUNIT = WBS%DIST(IDIST)%UNIT(I)
+          SWO%DIST(IDIST)%AreaTot = SWO%DIST(IDIST)%AreaTot + SWO%UNIT(IUNIT)%AreaTot
+          SWO%DIST(IDIST)%AreaIrr = SWO%DIST(IDIST)%AreaIrr + SWO%UNIT(IUNIT)%AreaIrr
       END DO !(IUNIT)
-
+      !
+      IF(SWO%DIST(IDIST)%AreaTot < NEARZERO_5) SWO%DIST(IDIST)%AreaTot = DZ
+      IF(SWO%DIST(IDIST)%AreaIrr < NEARZERO_5) SWO%DIST(IDIST)%AreaIrr = DZ
+    END DO !(IDIST)
+!    DO IDIST = 1,NDIST
+!      DIST(IDIST)%AreaTot = DZ
+!      DIST(IDIST)%AreaIrr = DZ
+!      DO IUNIT = 1,NUNIT
+!        IF (UNIT(IUNIT)%DistID.EQ.IDIST) THEN
+!          DIST(IDIST)%AreaTot = DIST(IDIST)%AreaTot
+!   +                            + UNIT(IUNIT)%AreaTot
+!          DIST(IDIST)%AreaIrr = DIST(IDIST)%AreaIrr
+!   +                            + UNIT(IUNIT)%AreaIrr
+!        END IF !(UNIT%DistID.EQ.IDIST)
+!      END DO !(IUNIT)
+!    END DO !(IDIST)
     I     = -1
     J     = -1
     IPROJ = -1
@@ -9293,197 +9024,509 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
     IUNIT = -1
     IFARM = -1
     IAUX  = -1
-      DO IFARM = 1,NFARM
-        SWO%FARM(IFARM)%TFDR          = DZ
-        SWO%FARM(IFARM)%ALLOTMENT     = DZ
-        SWO%FARM(IFARM)%DELORDER      = DZ
-        SWO%FARM(IFARM)%DELIVERY      = DZ
-        SWO%FARM(IFARM)%BALANCE       = DZ !SWO%FARM_PREV(IFARM)%BALANCE
-        SWO%FARM(IFARM)%DELIVERY_YTD  = SWO%FARM_PREV(IFARM)%DELIVERY_YTD
-      END DO !(IFARM)
 
-    I     = -1
-    J     = -1
-    IPROJ = -1
-    IRES  = -1
-    ISEG  = -1
-    IRCH  = -1
-    IDVS  = -1
-    ISPT  = -1
-    IBRC  = -1
-    IRES  = -1
-    JRES  = -1
-    IPROJ = -1
-    IDIST = -1
-    IUNIT = -1
-    IFARM = -1
-    IAUX  = -1
-      DO IAUX = 1,SWO%NAUXDEM
-        SWO%AUXDEM(IAUX)%ALLOTMENT    = DZ
-        SWO%AUXDEM(IAUX)%DELORDER     = DZ
-        SWO%AUXDEM(IAUX)%DELIVERY     = DZ
-        SWO%AUXDEM(IAUX)%BALANCE      = SWO%AUXDEM_PREV(IAUX)%BALANCE
-        SWO%AUXDEM(IAUX)%DELIVERY_YTD = SWO%AUXDEM_PREV(IAUX)%DELIVERY_YTD
-      END DO !(IAUX)
-
-    I     = -1
-    J     = -1
-    IPROJ = -1
-    IRES  = -1
-    ISEG  = -1
-    IRCH  = -1
-    IDVS  = -1
-    ISPT  = -1
-    IBRC  = -1
-    IRES  = -1
-    JRES  = -1
-    IPROJ = -1
-    IDIST = -1
-    IUNIT = -1
-    IFARM = -1
-    IAUX  = -1
-      DO IDVS = 1,SWO%DIVCOUNT
-        SWO%DIVSEG(IDVS)%TFDR        = DZ
-        SWO%DIVSEG(IDVS)%DELORDER    = DZ
-        SWO%DIVSEG(IDVS)%DIVORDER    = DZ
-        SWO%DIVSEG(IDVS)%DIVERSION   = DZ
-        SWO%DIVSEG(IDVS)%DELIVERY    = DZ
-        SWO%DIVSEG(IDVS)%DELIVEFF    = SWO%DIVSEG_PREV(IDVS)%DELIVEFF
-        SWO%DIVSEG(IDVS)%DSEEP       = DZ  !ORIGINALL ISPT
-        SWO%DIVSEG(IDVS)%DFLOW_IN    = DZ
-        SWO%DIVSEG(IDVS)%DFLOW_RT    = DZ
-        SWO%DIVSEG(IDVS)%UP_DIVORDER = DZ
-        SWO%DIVSEG(IDVS)%UP_DSEEP    = DZ
-        SWO%DIVSEG(IDVS)%UP_DFLOW_IN = DZ
-        SWO%DIVSEG(IDVS)%UP_DFLOW_RT = DZ
-        SWO%DIVSEG(IDVS)%UP_DFLOW_RN = DZ
-        SWO%DIVSEG(IDVS)%UP_DFLOW_ET = DZ
-      END DO !(IDVS)
-
-    I     = -1
-    J     = -1
-    IPROJ = -1
-    IRES  = -1
-    ISEG  = -1
-    IRCH  = -1
-    IDVS  = -1
-    ISPT  = -1
-    IBRC  = -1
-    IRES  = -1
-    JRES  = -1
-    IPROJ = -1
-    IDIST = -1
-    IUNIT = -1
-    IFARM = -1
-    IAUX  = -1
-      DO ISPT = 1,SWO%SPTCOUNT
-        SWO%SPTSEG(ISPT)%TFDR       = DZ
-        SWO%SPTSEG(ISPT)%DELORDER   = DZ
-        SWO%SPTSEG(ISPT)%DIVORDER   = DZ
-        SWO%SPTSEG(ISPT)%DIVERSION  = DZ
-        SWO%SPTSEG(ISPT)%DELIVERY   = DZ
-        SWO%SPTSEG(ISPT)%DELIVEFF   = SWO%SPTSEG_PREV(ISPT)%DELIVEFF
-        SWO%SPTSEG(ISPT)%DSEEP      = DZ
-        SWO%SPTSEG(ISPT)%DFLOW_IN   = DZ
-        SWO%SPTSEG(ISPT)%DFLOW_RT   = DZ
-        DO IBRC = 1,SWO%SPTSEG(ISPT)%NBRANCH
-          SWO%SPTSEG(ISPT)%BrcTFDR(IBRC)      = DZ
-          SWO%SPTSEG(ISPT)%BrcDELORDER(IBRC)  = DZ
-          SWO%SPTSEG(ISPT)%BrcDIVORDER(IBRC)  = DZ
-          SWO%SPTSEG(ISPT)%BrcDIVERSION(IBRC) = DZ
-          SWO%SPTSEG(ISPT)%BrcDELIVERY(IBRC)  = DZ
-          SWO%SPTSEG(ISPT)%BrcDELIVEFF(IBRC)  = SWO%SPTSEG_PREV(ISPT)%BrcDELIVEFF(IBRC)
-          SWO%SPTSEG(ISPT)%BrcDSEEP(IBRC)     = DZ
-          SWO%SPTSEG(ISPT)%BrcDFLOW_IN(IBRC)  = DZ
-          SWO%SPTSEG(ISPT)%BrcDFLOW_RT(IBRC)  = DZ
-        END DO !(IBRC)
-      END DO !(ISPT)
+    ! Area @ Project (sum over districts in each project)
+    DO IPROJ = 1,NPROJ
+      SWO%PROJ(IPROJ)%AreaTot = DZ
+      SWO%PROJ(IPROJ)%AreaIrr = DZ
+      DO I = 1,WBS%PROJ(IPROJ)%NDIST
+          IDIST = WBS%PROJ(IPROJ)%DIST(I)
+          SWO%PROJ(IPROJ)%AreaTot = SWO%PROJ(IPROJ)%AreaTot + SWO%DIST(IDIST)%AreaTot
+          SWO%PROJ(IPROJ)%AreaIrr = SWO%PROJ(IPROJ)%AreaIrr + SWO%DIST(IDIST)%AreaIrr
+      END DO !(IDIST)
       !
-      ! INITIALIZE ANY REQUIRED FLOWS
-      !
-      IF(SWO%REQFLOW%HAS_REQ ) THEN
-          !
-          DO IPROJ=1, NPROJ
-          DO IRES =1, SWO%NRES_BAL(IPROJ)
-              SWO%RESDAT(IPROJ)%RESBAL(IRES)%RELEASE_REQF      = DZ
-              SWO%RESDAT(IPROJ)%RESBAL(IRES)%RELEASE_REQF_PREV = DZ
-          END DO
-          END DO
-          !
-          SWO%REQFLOW%REL     = DZ
-          SWO%REQFLOW%REL_OLD = DZ
-      END IF
-      !DO CONCURRENT ( IPROJ = 1:NPROJ, IRES = 1:SWO%NRES_BAL(IPROJ) )
-      !    !
-      !    IF(SWO%RESDAT(IPROJ)%RESBAL(IRES)%MAX_RELEASE < NEAR_inf) THEN
-      !        !
-      !        SWO%RESDAT(IPROJ)%RESBAL(IRES)%MAX_RELEASE_VOL = SWO%RESDAT(IPROJ)%RESBAL(IRES)%MAX_RELEASE * SWO%DELT
-      !    ELSE
-      !        SWO%RESDAT(IPROJ)%RESBAL(IRES)%MAX_RELEASE_VOL = inf
-      !    END IF
-      !END DO
-      !
-      ! ****************************************************************
-      ! COMPUTE MINIMUM ALLOWED RESERVOIR STORAGE STEP 1 (SPECIFIED OR DEAD POOL STORAGE IS FIRST MIN VALUE)
-      !
-      ! ****************************************************************
-      !
-      DO IPROJ= 1, NPROJ
-      DO IRES = 1, SWO%NRES_BAL(IPROJ)
-      IF ( SWO%RESDAT(IPROJ)%RESBAL(IRES)%INUSE ) THEN
-         SWO%RESDAT(IPROJ)%RESBAL(IRES)%STORAGE_MIN = SWO%RESDAT(IPROJ)%RESBAL(IRES)%STORAGE_SPEC_MIN
-         SWO%RESDAT(IPROJ)%RESBAL(IRES)%MIN_ELEV    = SWO%RESDAT(IPROJ)%RESBAL(IRES)%STOR_SPEC_MIN_ELEV
-      END IF
-      END DO
-      END DO
-      !
-      ! Initialize SFR related veriables. Set all diversions to zero---------------------------------------
-      !
-      DO CONCURRENT (IDVS = 1:SWO%DIVCOUNT);  SWO%DIVSEG(IDVS)%DIVORDER = DZ
-      END DO
-      !
-      DO ISPT=1, SWO%SPTCOUNT
-        SWO%SPTSEG(ISPT)%DIVORDER = DZ
-        DO CONCURRENT (J = 1:SWO%SPTSEG(ISPT)%NBRANCH);  SWO%SPTSEG(ISPT)%BrcDIVORDER(J) = DZ
-        END DO
-      END DO
-      !
-      !
-      DO CONCURRENT   (I = ONE:NPROJ)
-        DO CONCURRENT (J = ONE:SWO%NRES_BAL(I), SWO%RESDAT(I)%RESBAL(J)%RESBAL_RELSEG > Z)
-            !
-            SEG(2,SWO%RESDAT(I)%RESBAL(J)%RESBAL_RELSEG) = DZ
-            !
-        END DO
-      END DO
-      !
-      ! (13) Loop over diversion segments ... zero diversion flow values
-      DO IDVS=1, SWO%DIVCOUNT
-      IF ( SWO%DIVSEG(IDVS)%DivSeg > Z ) THEN
-        ISEG  = SWO%DIVSEG(IDVS)%DivSeg
+      IF(SWO%PROJ(IPROJ)%AreaTot < NEARZERO_5) SWO%PROJ(IPROJ)%AreaTot = DZ
+      IF(SWO%PROJ(IPROJ)%AreaIrr < NEARZERO_5) SWO%PROJ(IPROJ)%AreaIrr = DZ
+    END DO !(IPROJ)
+!    DO IPROJ = 1,NPROJ
+!      SWO%PROJ(IPROJ)%AreaTot = DZ
+!      SWO%PROJ(IPROJ)%AreaIrr = DZ
+!      DO IDIST = 1,NDIST
+!        IF (DIST(IDIST)%ProjID.EQ.IPROJ) THEN
+!          SWO%PROJ(IPROJ)%AreaTot = SWO%PROJ(IPROJ)%AreaTot
+!   +                            + DIST(IDIST)%AreaTot
+!          SWO%PROJ(IPROJ)%AreaIrr = SWO%PROJ(IPROJ)%AreaIrr
+!   +                            + DIST(IDIST)%AreaIrr
+!        END IF !(DIST%ProjID.EQ.IPROJ)
+!
+!      END DO !(IDIST)
+!    END DO !(IPROJ)
+    !
+    ! SET UP HOW DISTRICTS WILL SPLIT THEIR ALLOCATIONS ACROSS FARMS AND AUXDEMS
+    !
+    IF    (SWO%DIST_ALLOC_FRAC_TYP == Z) THEN  !Even Split
         !
-        SWO%SEGDATA(ISEG)%FLOW = DZ
-        !
-        SEG(2,ISEG)            = DZ
-      END IF
-      END DO
-      !
-      !
-      ! (14) Loop over splits ... ZERO split values (fractional or gross)
-      DO ISPT = 1,SWO%SPTCOUNT
-        ISEG    = SWO%SPTSEG(ISPT)%SplitSeg
-        NBRANCH = SWO%SPTSEG(ISPT)%NBRANCH
-        DO IBRC = 1,NBRANCH
-          JSEG  = SWO%SPTSEG(ISPT)%BrcSeg(IBRC)
-          !
-          SWO%SEGDATA(JSEG)%FLOW = DZ
-          !
-          SEG(2,JSEG)            = DZ
+        DO CONCURRENT (I=ONE:NFARM  ); SWO%FARM(I)%DIST_ALLOC_FRAC = DZ
         END DO
+        DO CONCURRENT (I=ONE:SWO%NAUXDEM); SWO%AUXDEM(I)%DIST_ALLOC_FRAC = DZ
+        END DO
+        !
+        DO IDIST = 1,NDIST
+            I = WBS%DIST(IDIST)%NFARM + WBS%DIST(IDIST)%NAUX
+            IF(I > Z) THEN
+                DTMP1 = UNO/DBLE(I)
+            ELSE
+                CYCLE
+            END IF
+            !
+            DO J =ONE, WBS%DIST(IDIST)%NFARM
+               I = WBS%DIST(IDIST)%FARM(J)
+               SWO%FARM(I)%DIST_ALLOC_FRAC = DTMP1
+            END DO
+            !
+            DO J =ONE, WBS%DIST(IDIST)%NAUX
+               I = WBS%DIST(IDIST)%AUX(J)
+               SWO%AUXDEM(I)%DIST_ALLOC_FRAC = DTMP1
+            END DO
+        END DO
+        !
+    ELSEIF(SWO%DIST_ALLOC_FRAC_TYP == ONE) THEN  !BY IRRIGATED AREA
+        !
+        DO CONCURRENT (I=ONE:NFARM); SWO%FARM(I)%DIST_ALLOC_FRAC = DZ
+        END DO
+        DO CONCURRENT (I=ONE:SWO%NAUXDEM); SWO%AUXDEM(I)%DIST_ALLOC_FRAC = DZ
+        END DO
+        !
+        DO IDIST = 1,NDIST
+            I = WBS%DIST(IDIST)%NFARM + WBS%DIST(IDIST)%NAUX
+            IF(I == Z .OR. SWO%DIST(IDIST)%AreaIrr < NEARZERO_5) CYCLE
+            !
+            !
+            DO J =ONE, WBS%DIST(IDIST)%NFARM
+               I = WBS%DIST(IDIST)%FARM(J)
+               SWO%FARM(I)%DIST_ALLOC_FRAC = SWO%FARM(I)%AreaSwIrr / SWO%DIST(IDIST)%AreaIrr
+            END DO
+            !
+            DO J =ONE, WBS%DIST(IDIST)%NAUX
+               I = WBS%DIST(IDIST)%AUX(J)
+               SWO%AUXDEM(I)%DIST_ALLOC_FRAC = SWO%AUXDEM(I)%AREA / SWO%DIST(IDIST)%AreaIrr
+            END DO
+        END DO
+        !
+    ELSEIF(SWO%DIST_ALLOC_FRAC_TYP==TWO) THEN ! Specified Fractions
+        !
+        DO IDIST = 1,NDIST
+            !
+            IF(WBS%DIST(IDIST)%NFARM + WBS%DIST(IDIST)%NAUX == Z) CYCLE
+            !
+            DTMP1 = DZ
+            !
+            DO J =ONE, WBS%DIST(IDIST)%NFARM
+               I = WBS%DIST(IDIST)%FARM(J)
+               SWO%FARM(I)%DIST_ALLOC_FRAC = SWO%DIST_ALLOC_FRAC%LIST(I)
+               !
+               DTMP1 = DTMP1 + SWO%FARM(I)%DIST_ALLOC_FRAC  !SUM CHECK
+            END DO
+            !
+            DO J =ONE, WBS%DIST(IDIST)%NAUX
+               I = WBS%DIST(IDIST)%AUX(J)
+               SWO%AUXDEM(I)%DIST_ALLOC_FRAC = SWO%DIST_ALLOC_FRAC%LIST(I+NFARM)
+               !
+               DTMP1 = DTMP1 + SWO%FARM(I)%DIST_ALLOC_FRAC  !SUM CHECK
+            END DO
+            !
+            IF(DTMP1 < SUB_ONE .OR. NEAR_ONE < DTMP1) THEN                 !Should sum to 1
+                !
+                DO J =ONE, WBS%DIST(IDIST)%NFARM
+                   I = WBS%DIST(IDIST)%FARM(J)
+                   SWO%FARM(I)%DIST_ALLOC_FRAC =     SWO%FARM(I)%DIST_ALLOC_FRAC / DTMP1
+                END DO
+                !
+                DO J =ONE, WBS%DIST(IDIST)%NAUX
+                   I = WBS%DIST(IDIST)%AUX(J)
+                   SWO%AUXDEM(I)%DIST_ALLOC_FRAC = SWO%AUXDEM(I)%DIST_ALLOC_FRAC / DTMP1
+                END DO
+            END IF
+        END DO
+    END IF !IF SWO%DIST_ALLOC_FRAC_TYP == 3 then set by S-LANGUAGE
+
+
+    ! ****************************************************************
+    ! RESET CURRENT VALUES
+    ! (reset current flow, efficiency, demand, etc., at start of timestep)
+    ! ****************************************************************
+    I     = -1
+    J     = -1
+    IPROJ = -1
+    IRES  = -1
+    ISEG  = -1
+    IRCH  = -1
+    IDVS  = -1
+    ISPT  = -1
+    IBRC  = -1
+    IRES  = -1
+    JRES  = -1
+    IPROJ = -1
+    IDIST = -1
+    IUNIT = -1
+    IFARM = -1
+    IAUX  = -1
+
+    ! TODO ...
+    ! Is this really needed?
+    ! And if so, is this being done correctly?
+
+    ! FLOW DATA
+    ! (only reset values computed/manipulated by SWOPS1FM ...
+    !  update values computed outside of SWOPS1FM in SWOPS1BD routine)
+    DO CONCURRENT (ISEG = ONE:SWO%NSEG); SWO%SEGDATA(ISEG)%EFFICIENCY = SWO%SEGDATA_PREV(ISEG)%EFFICIENCY
+    END DO !(ISEG)
+
+    DO CONCURRENT (IRCH = ONE:SWO%NSTRM); SWO%RCHDATA(IRCH)%EFFICIENCY = SWO%RCHDATA_PREV(IRCH)%EFFICIENCY
+    END DO !(IRCH)
+
+    ! SUPPLY / DEMAND / ACCOUNTING
+    ! (set current flow/acct values to zero...)
+    ! (set current conveyance/performance parameters to latest/greatest)
+    ! (set current YTD values to end of previous step)
+    I     = -1
+    J     = -1
+    IPROJ = -1
+    IRES  = -1
+    ISEG  = -1
+    IRCH  = -1
+    IDVS  = -1
+    ISPT  = -1
+    IBRC  = -1
+    IRES  = -1
+    JRES  = -1
+    IPROJ = -1
+    IDIST = -1
+    IUNIT = -1
+    IFARM = -1
+    IAUX  = -1
+    DO IPROJ = 1,NPROJ
+      SWO%PROJ(IPROJ)%TFDR          = DZ
+      SWO%PROJ(IPROJ)%DELORDER      = DZ
+      SWO%PROJ(IPROJ)%DIVORDER      = DZ
+      SWO%PROJ(IPROJ)%RELEASE       = DZ
+      SWO%PROJ(IPROJ)%DIVERSION     = DZ
+      !SWO%PROJ(IPROJ)%OUTFLOW       = DZ
+      SWO%PROJ(IPROJ)%DELIVERY      = DZ
+      SWO%PROJ(IPROJ)%BYPASS        = DZ
+      SWO%PROJ(IPROJ)%CHARGE        = DZ
+      SWO%PROJ(IPROJ)%CREDIT        = DZ
+      SWO%PROJ(IPROJ)%DIVIN         = DZ
+      SWO%PROJ(IPROJ)%SUMIN         = DZ
+      SWO%PROJ(IPROJ)%SUMOUT        = DZ
+      SWO%PROJ(IPROJ)%DELIVEFF      = SWO%PROJ_PREV(IPROJ)%DELIVEFF
+      SWO%PROJ(IPROJ)%DIVRATIO      = SWO%PROJ_PREV(IPROJ)%DIVRATIO
+      SWO%PROJ(IPROJ)%CHGRATIO      = SWO%PROJ_PREV(IPROJ)%CHGRATIO
+      SWO%PROJ(IPROJ)%NETCHGRATIO   = SWO%PROJ_PREV(IPROJ)%NETCHGRATIO
+      SWO%PROJ(IPROJ)%RELEASE_YTD   = SWO%PROJ_PREV(IPROJ)%RELEASE_YTD
+      SWO%PROJ(IPROJ)%DIVERSION_YTD = SWO%PROJ_PREV(IPROJ)%DIVERSION_YTD
+      !SWO%PROJ(IPROJ)%OUTFLOW_YTD   = SWO%PROJ_PREV(IPROJ)%OUTFLOW_YTD
+      SWO%PROJ(IPROJ)%DELIVERY_YTD  = SWO%PROJ_PREV(IPROJ)%DELIVERY_YTD
+      SWO%PROJ(IPROJ)%BYPASS_YTD    = SWO%PROJ_PREV(IPROJ)%BYPASS_YTD
+      SWO%PROJ(IPROJ)%CHARGE_YTD    = SWO%PROJ_PREV(IPROJ)%CHARGE_YTD
+      SWO%PROJ(IPROJ)%CREDIT_YTD    = SWO%PROJ_PREV(IPROJ)%CREDIT_YTD
+      SWO%PROJ(IPROJ)%DELIVEFF_YTD  = SWO%PROJ_PREV(IPROJ)%DELIVEFF_YTD
+      SWO%PROJ(IPROJ)%DIVRATIO_YTD  = SWO%PROJ_PREV(IPROJ)%DIVRATIO_YTD
+      SWO%PROJ(IPROJ)%CHGRATIO_YTD  = SWO%PROJ_PREV(IPROJ)%CHGRATIO_YTD
+      SWO%PROJ(IPROJ)%DIVIN_YTD     = SWO%PROJ_PREV(IPROJ)%DIVIN_YTD
+      SWO%PROJ(IPROJ)%SUMIN_YTD     = SWO%PROJ_PREV(IPROJ)%SUMIN_YTD
+      SWO%PROJ(IPROJ)%SUMOUT_YTD    = SWO%PROJ_PREV(IPROJ)%SUMOUT_YTD
+      SWO%PROJ(IPROJ)%NETCHGRATIO_YTD= SWO%PROJ_PREV(IPROJ)%NETCHGRATIO_YTD
+    END DO !(IPROJ)
+    I     = -1
+    J     = -1
+    IPROJ = -1
+    IRES  = -1
+    ISEG  = -1
+    IRCH  = -1
+    IDVS  = -1
+    ISPT  = -1
+    IBRC  = -1
+    IRES  = -1
+    JRES  = -1
+    IPROJ = -1
+    IDIST = -1
+    IUNIT = -1
+    IFARM = -1
+    IAUX  = -1
+
+    DO IDIST = 1,NDIST
+      SWO%DIST(IDIST)%TFDR          = DZ
+      SWO%DIST(IDIST)%DELORDER      = DZ
+      SWO%DIST(IDIST)%DIVORDER      = DZ
+      SWO%DIST(IDIST)%DIVERSION     = DZ
+      SWO%DIST(IDIST)%DELIVERY      = DZ
+      SWO%DIST(IDIST)%BYPASS        = DZ
+      SWO%DIST(IDIST)%CHARGE        = DZ
+      SWO%DIST(IDIST)%CREDIT        = DZ
+      SWO%DIST(IDIST)%DIVIN         = DZ
+      SWO%DIST(IDIST)%SUMIN         = DZ
+      SWO%DIST(IDIST)%SUMOUT        = DZ
+      SWO%DIST(IDIST)%BALANCE       = SWO%DIST_PREV(IDIST)%BALANCE
+      SWO%DIST(IDIST)%DELIVEFF      = SWO%DIST_PREV(IDIST)%DELIVEFF
+      SWO%DIST(IDIST)%CHGRATIO      = SWO%DIST_PREV(IDIST)%CHGRATIO
+      SWO%DIST(IDIST)%NETCHGRATIO   = SWO%DIST_PREV(IDIST)%NETCHGRATIO
+      SWO%DIST(IDIST)%DIVERSION_YTD = SWO%DIST_PREV(IDIST)%DIVERSION_YTD
+      SWO%DIST(IDIST)%DELIVERY_YTD  = SWO%DIST_PREV(IDIST)%DELIVERY_YTD
+      SWO%DIST(IDIST)%BYPASS_YTD    = SWO%DIST_PREV(IDIST)%BYPASS_YTD
+      SWO%DIST(IDIST)%CHARGE_YTD    = SWO%DIST_PREV(IDIST)%CHARGE_YTD
+      SWO%DIST(IDIST)%CREDIT_YTD    = SWO%DIST_PREV(IDIST)%CREDIT_YTD
+      SWO%DIST(IDIST)%DELIVEFF_YTD  = SWO%DIST_PREV(IDIST)%DELIVEFF_YTD
+      SWO%DIST(IDIST)%CHGRATIO_YTD  = SWO%DIST_PREV(IDIST)%CHGRATIO_YTD
+      SWO%DIST(IDIST)%DIVIN_YTD     = SWO%DIST_PREV(IDIST)%DIVIN_YTD
+      SWO%DIST(IDIST)%SUMIN_YTD     = SWO%DIST_PREV(IDIST)%SUMIN_YTD
+      SWO%DIST(IDIST)%SUMOUT_YTD    = SWO%DIST_PREV(IDIST)%SUMOUT_YTD
+      SWO%DIST(IDIST)%NETCHGRATIO_YTD= SWO%DIST_PREV(IDIST)%NETCHGRATIO_YTD
+    END DO !(IDIST)
+
+    I     = -1
+    J     = -1
+    IPROJ = -1
+    IRES  = -1
+    ISEG  = -1
+    IRCH  = -1
+    IDVS  = -1
+    ISPT  = -1
+    IBRC  = -1
+    IRES  = -1
+    JRES  = -1
+    IPROJ = -1
+    IDIST = -1
+    IUNIT = -1
+    IFARM = -1
+    IAUX  = -1
+    DO IUNIT = 1,NUNIT
+      SWO%UNIT(IUNIT)%TFDR          = DZ
+      SWO%UNIT(IUNIT)%DELORDER      = DZ
+      SWO%UNIT(IUNIT)%DIVORDER      = DZ
+      SWO%UNIT(IUNIT)%DIVERSION     = DZ
+      SWO%UNIT(IUNIT)%DELIVERY      = DZ
+      SWO%UNIT(IUNIT)%BYPASS        = DZ
+      SWO%UNIT(IUNIT)%CHARGE        = DZ
+      SWO%UNIT(IUNIT)%CREDIT        = DZ
+      SWO%UNIT(IUNIT)%DIVIN         = DZ
+      SWO%UNIT(IUNIT)%SUMIN         = DZ
+      SWO%UNIT(IUNIT)%SUMOUT        = DZ
+      SWO%UNIT(IUNIT)%DELIVEFF      = SWO%UNIT_PREV(IUNIT)%DELIVEFF
+      SWO%UNIT(IUNIT)%CHGRATIO      = SWO%UNIT_PREV(IUNIT)%CHGRATIO
+      SWO%UNIT(IUNIT)%NETCHGRATIO   = SWO%UNIT_PREV(IUNIT)%NETCHGRATIO
+      SWO%UNIT(IUNIT)%DIVERSION_YTD = SWO%UNIT_PREV(IUNIT)%DIVERSION_YTD
+      SWO%UNIT(IUNIT)%DELIVERY_YTD  = SWO%UNIT_PREV(IUNIT)%DELIVERY_YTD
+      SWO%UNIT(IUNIT)%BYPASS_YTD    = SWO%UNIT_PREV(IUNIT)%BYPASS_YTD
+      SWO%UNIT(IUNIT)%CHARGE_YTD    = SWO%UNIT_PREV(IUNIT)%CHARGE_YTD
+      SWO%UNIT(IUNIT)%CREDIT_YTD    = SWO%UNIT_PREV(IUNIT)%CREDIT_YTD
+      SWO%UNIT(IUNIT)%DELIVEFF_YTD  = SWO%UNIT_PREV(IUNIT)%DELIVEFF_YTD
+      SWO%UNIT(IUNIT)%CHGRATIO_YTD  = SWO%UNIT_PREV(IUNIT)%CHGRATIO_YTD
+      SWO%UNIT(IUNIT)%DIVIN_YTD     = SWO%UNIT_PREV(IUNIT)%DIVIN_YTD
+      SWO%UNIT(IUNIT)%SUMIN_YTD     = SWO%UNIT_PREV(IUNIT)%SUMIN_YTD
+      SWO%UNIT(IUNIT)%SUMOUT_YTD    = SWO%UNIT_PREV(IUNIT)%SUMOUT_YTD
+      SWO%UNIT(IUNIT)%NETCHGRATIO_YTD= SWO%UNIT_PREV(IUNIT)%NETCHGRATIO_YTD
+      SWO%UNIT(IUNIT)%ALLOTMENT     = SWO%UNIT_PREV(IUNIT)%ALLOTMENT
+      SWO%UNIT(IUNIT)%BALANCE       = SWO%UNIT_PREV(IUNIT)%BALANCE
+    END DO !(IUNIT)
+
+    I     = -1
+    J     = -1
+    IPROJ = -1
+    IRES  = -1
+    ISEG  = -1
+    IRCH  = -1
+    IDVS  = -1
+    ISPT  = -1
+    IBRC  = -1
+    IRES  = -1
+    JRES  = -1
+    IPROJ = -1
+    IDIST = -1
+    IUNIT = -1
+    IFARM = -1
+    IAUX  = -1
+    DO IFARM = 1,NFARM
+      SWO%FARM(IFARM)%TFDR          = DZ
+      SWO%FARM(IFARM)%ALLOTMENT     = DZ
+      SWO%FARM(IFARM)%DELORDER      = DZ
+      SWO%FARM(IFARM)%DELIVERY      = DZ
+      SWO%FARM(IFARM)%BALANCE       = DZ !SWO%FARM_PREV(IFARM)%BALANCE
+      SWO%FARM(IFARM)%DELIVERY_YTD  = SWO%FARM_PREV(IFARM)%DELIVERY_YTD
+    END DO !(IFARM)
+
+    I     = -1
+    J     = -1
+    IPROJ = -1
+    IRES  = -1
+    ISEG  = -1
+    IRCH  = -1
+    IDVS  = -1
+    ISPT  = -1
+    IBRC  = -1
+    IRES  = -1
+    JRES  = -1
+    IPROJ = -1
+    IDIST = -1
+    IUNIT = -1
+    IFARM = -1
+    IAUX  = -1
+    DO IAUX = 1,SWO%NAUXDEM
+      SWO%AUXDEM(IAUX)%ALLOTMENT    = DZ
+      SWO%AUXDEM(IAUX)%DELORDER     = DZ
+      SWO%AUXDEM(IAUX)%DELIVERY     = DZ
+      SWO%AUXDEM(IAUX)%BALANCE      = SWO%AUXDEM_PREV(IAUX)%BALANCE
+      SWO%AUXDEM(IAUX)%DELIVERY_YTD = SWO%AUXDEM_PREV(IAUX)%DELIVERY_YTD
+    END DO !(IAUX)
+
+    I     = -1
+    J     = -1
+    IPROJ = -1
+    IRES  = -1
+    ISEG  = -1
+    IRCH  = -1
+    IDVS  = -1
+    ISPT  = -1
+    IBRC  = -1
+    IRES  = -1
+    JRES  = -1
+    IPROJ = -1
+    IDIST = -1
+    IUNIT = -1
+    IFARM = -1
+    IAUX  = -1
+    DO IDVS = 1,SWO%DIVCOUNT
+      SWO%DIVSEG(IDVS)%TFDR        = DZ
+      SWO%DIVSEG(IDVS)%DELORDER    = DZ
+      SWO%DIVSEG(IDVS)%DIVORDER    = DZ
+      SWO%DIVSEG(IDVS)%DIVERSION   = DZ
+      SWO%DIVSEG(IDVS)%DELIVERY    = DZ
+      SWO%DIVSEG(IDVS)%DELIVEFF    = SWO%DIVSEG_PREV(IDVS)%DELIVEFF
+      SWO%DIVSEG(IDVS)%DSEEP       = DZ  !ORIGINALL ISPT
+      SWO%DIVSEG(IDVS)%DFLOW_IN    = DZ
+      SWO%DIVSEG(IDVS)%DFLOW_RT    = DZ
+      SWO%DIVSEG(IDVS)%UP_DIVORDER = DZ
+      SWO%DIVSEG(IDVS)%UP_DSEEP    = DZ
+      SWO%DIVSEG(IDVS)%UP_DFLOW_IN = DZ
+      SWO%DIVSEG(IDVS)%UP_DFLOW_RT = DZ
+      SWO%DIVSEG(IDVS)%UP_DFLOW_RN = DZ
+      SWO%DIVSEG(IDVS)%UP_DFLOW_ET = DZ
+    END DO !(IDVS)
+
+    I     = -1
+    J     = -1
+    IPROJ = -1
+    IRES  = -1
+    ISEG  = -1
+    IRCH  = -1
+    IDVS  = -1
+    ISPT  = -1
+    IBRC  = -1
+    IRES  = -1
+    JRES  = -1
+    IPROJ = -1
+    IDIST = -1
+    IUNIT = -1
+    IFARM = -1
+    IAUX  = -1
+    DO ISPT = 1,SWO%SPTCOUNT
+      SWO%SPTSEG(ISPT)%TFDR       = DZ
+      SWO%SPTSEG(ISPT)%DELORDER   = DZ
+      SWO%SPTSEG(ISPT)%DIVORDER   = DZ
+      SWO%SPTSEG(ISPT)%DIVERSION  = DZ
+      SWO%SPTSEG(ISPT)%DELIVERY   = DZ
+      SWO%SPTSEG(ISPT)%DELIVEFF   = SWO%SPTSEG_PREV(ISPT)%DELIVEFF
+      SWO%SPTSEG(ISPT)%DSEEP      = DZ
+      SWO%SPTSEG(ISPT)%DFLOW_IN   = DZ
+      SWO%SPTSEG(ISPT)%DFLOW_RT   = DZ
+      DO IBRC = 1,SWO%SPTSEG(ISPT)%NBRANCH
+        SWO%SPTSEG(ISPT)%BrcTFDR(IBRC)      = DZ
+        SWO%SPTSEG(ISPT)%BrcDELORDER(IBRC)  = DZ
+        SWO%SPTSEG(ISPT)%BrcDIVORDER(IBRC)  = DZ
+        SWO%SPTSEG(ISPT)%BrcDIVERSION(IBRC) = DZ
+        SWO%SPTSEG(ISPT)%BrcDELIVERY(IBRC)  = DZ
+        SWO%SPTSEG(ISPT)%BrcDELIVEFF(IBRC)  = SWO%SPTSEG_PREV(ISPT)%BrcDELIVEFF(IBRC)
+        SWO%SPTSEG(ISPT)%BrcDSEEP(IBRC)     = DZ
+        SWO%SPTSEG(ISPT)%BrcDFLOW_IN(IBRC)  = DZ
+        SWO%SPTSEG(ISPT)%BrcDFLOW_RT(IBRC)  = DZ
+      END DO !(IBRC)
+    END DO !(ISPT)
+    !
+    ! INITIALIZE ANY REQUIRED FLOWS
+    !
+    IF(SWO%REQFLOW%HAS_REQ ) THEN
+        !
+        DO IPROJ=1, NPROJ
+        DO IRES =1, SWO%NRES_BAL(IPROJ)
+            SWO%RESDAT(IPROJ)%RESBAL(IRES)%RELEASE_REQF      = DZ
+            SWO%RESDAT(IPROJ)%RESBAL(IRES)%RELEASE_REQF_PREV = DZ
+        END DO
+        END DO
+        !
+        SWO%REQFLOW%REL     = DZ
+        SWO%REQFLOW%REL_OLD = DZ
+    END IF
+    !DO CONCURRENT ( IPROJ = 1:NPROJ, IRES = 1:SWO%NRES_BAL(IPROJ) )
+    !    !
+    !    IF(SWO%RESDAT(IPROJ)%RESBAL(IRES)%MAX_RELEASE < NEAR_inf) THEN
+    !        !
+    !        SWO%RESDAT(IPROJ)%RESBAL(IRES)%MAX_RELEASE_VOL = SWO%RESDAT(IPROJ)%RESBAL(IRES)%MAX_RELEASE * SWO%DELT
+    !    ELSE
+    !        SWO%RESDAT(IPROJ)%RESBAL(IRES)%MAX_RELEASE_VOL = inf
+    !    END IF
+    !END DO
+    !
+    ! ****************************************************************
+    ! COMPUTE MINIMUM ALLOWED RESERVOIR STORAGE STEP 1 (SPECIFIED OR DEAD POOL STORAGE IS FIRST MIN VALUE)
+    !
+    ! ****************************************************************
+    !
+    DO IPROJ= 1, NPROJ
+    DO IRES = 1, SWO%NRES_BAL(IPROJ)
+    IF ( SWO%RESDAT(IPROJ)%RESBAL(IRES)%INUSE ) THEN
+       SWO%RESDAT(IPROJ)%RESBAL(IRES)%STORAGE_MIN = SWO%RESDAT(IPROJ)%RESBAL(IRES)%STORAGE_SPEC_MIN
+       SWO%RESDAT(IPROJ)%RESBAL(IRES)%MIN_ELEV    = SWO%RESDAT(IPROJ)%RESBAL(IRES)%STOR_SPEC_MIN_ELEV
+    END IF
+    END DO
+    END DO
+    !
+    ! Initialize SFR related veriables. Set all diversions to zero---------------------------------------
+    !
+    DO CONCURRENT (IDVS = 1:SWO%DIVCOUNT);  SWO%DIVSEG(IDVS)%DIVORDER = DZ
+    END DO
+    !
+    DO ISPT=1, SWO%SPTCOUNT
+      SWO%SPTSEG(ISPT)%DIVORDER = DZ
+      DO CONCURRENT (J = 1:SWO%SPTSEG(ISPT)%NBRANCH);  SWO%SPTSEG(ISPT)%BrcDIVORDER(J) = DZ
       END DO
+    END DO
+    !
+    !
+    DO CONCURRENT   (I = ONE:NPROJ)
+      DO CONCURRENT (J = ONE:SWO%NRES_BAL(I), SWO%RESDAT(I)%RESBAL(J)%RESBAL_RELSEG > Z)
+          !
+          SEG(2,SWO%RESDAT(I)%RESBAL(J)%RESBAL_RELSEG) = DZ
+          !
+      END DO
+    END DO
+    !
+    ! (13) Loop over diversion segments ... zero diversion flow values
+    DO IDVS=1, SWO%DIVCOUNT
+    IF ( SWO%DIVSEG(IDVS)%DivSeg > Z ) THEN
+      ISEG  = SWO%DIVSEG(IDVS)%DivSeg
       !
-      IF(ERROR.NE.NL) CALL STOP_ERROR( OUTPUT=SWO%IOUT, MSG='SWO HAD FATAL ERRORS.'//NL//'THE FOLLOWING ARE EITHER VARIABLE NAMES NOT FOUND WHEN PULLING AN OWHM PROPERTY FOR THE S-LANGUAGE'//NL//'OR SETTING AN OWHM PROPERTY WITH THE S-LANGUAGE'//NL//ERROR)
+      SWO%SEGDATA(ISEG)%FLOW = DZ
       !
+      SEG(2,ISEG)            = DZ
+    END IF
+    END DO
+    !
+    !
+    ! (14) Loop over splits ... ZERO split values (fractional or gross)
+    DO ISPT = 1,SWO%SPTCOUNT
+      ISEG    = SWO%SPTSEG(ISPT)%SplitSeg
+      NBRANCH = SWO%SPTSEG(ISPT)%NBRANCH
+      DO IBRC = 1,NBRANCH
+        JSEG  = SWO%SPTSEG(ISPT)%BrcSeg(IBRC)
+        !
+        SWO%SEGDATA(JSEG)%FLOW = DZ
+        !
+        SEG(2,JSEG)            = DZ
+      END DO
+    END DO
+    !
+    IF(ERROR.NE.NL) CALL STOP_ERROR( OUTPUT=SWO%IOUT, MSG='SWO HAD FATAL ERRORS.'//NL//'THE FOLLOWING ARE EITHER VARIABLE NAMES NOT FOUND WHEN PULLING AN OWHM PROPERTY FOR THE S-LANGUAGE'//NL//'OR SETTING AN OWHM PROPERTY WITH THE S-LANGUAGE'//NL//ERROR)
+    !
   END SUBROUTINE
   !
   !########################################################################################
@@ -10380,104 +10423,102 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
     !
     !
     IF(SWO%DIST_ALLOC_FRAC_TYP==THREE) THEN ! Specified Fractions BY S-LANGUAGE
-          !
-          DO K = ONE, SWO%NDIST
-              !
-              IF(SWO%DIST(K)%NFARM + SWO%DIST(K)%NAUXDEM == Z) CYCLE
-              !
-              DTMP = DZ
-              !
-              DO J=ONE, SWO%DIST(K)%NFARM
-                 DTMP = DTMP + SWO%FARM( SWO%DIST(K)%FARM(J) )%DIST_ALLOC_FRAC
-              END DO
-              !
-              DO J=ONE, SWO%DIST(K)%NAUXDEM
-                 DTMP = DTMP + SWO%FARM( SWO%DIST(K)%AUXDEM(J) )%DIST_ALLOC_FRAC  !SUM CHECK
-              END DO
-              !
-              IF(DTMP < SUB_ONE .OR. NEAR_ONE < DTMP) THEN                 !Should sum to 1
-                  !
-                  DO J = ONE, SWO%DIST(K)%NFARM
-                     I = SWO%DIST(K)%FARM(J)
-                     SWO%FARM(I)%DIST_ALLOC_FRAC =   SWO%FARM(I)%DIST_ALLOC_FRAC / DTMP
-                  END DO
-                  !
-                  DO J = ONE, SWO%DIST(K)%NAUXDEM
-                     I = SWO%DIST(K)%AUXDEM(J)
-                     SWO%AUXDEM(I)%DIST_ALLOC_FRAC = SWO%AUXDEM(I)%DIST_ALLOC_FRAC / DTMP
-                  END DO
-              END IF
-          END DO
-      END IF
-
+        !
+        DO K = ONE, SWO%NDIST
+            !
+            IF(SWO%DIST(K)%NFARM + SWO%DIST(K)%NAUXDEM == Z) CYCLE
+            !
+            DTMP = DZ
+            !
+            DO J=ONE, SWO%DIST(K)%NFARM
+               DTMP = DTMP + SWO%FARM( SWO%DIST(K)%FARM(J) )%DIST_ALLOC_FRAC
+            END DO
+            !
+            DO J=ONE, SWO%DIST(K)%NAUXDEM
+               DTMP = DTMP + SWO%FARM( SWO%DIST(K)%AUXDEM(J) )%DIST_ALLOC_FRAC  !SUM CHECK
+            END DO
+            !
+            IF(DTMP < SUB_ONE .OR. NEAR_ONE < DTMP) THEN                 !Should sum to 1
+                !
+                DO J = ONE, SWO%DIST(K)%NFARM
+                   I = SWO%DIST(K)%FARM(J)
+                   SWO%FARM(I)%DIST_ALLOC_FRAC =   SWO%FARM(I)%DIST_ALLOC_FRAC / DTMP
+                END DO
+                !
+                DO J = ONE, SWO%DIST(K)%NAUXDEM
+                   I = SWO%DIST(K)%AUXDEM(J)
+                   SWO%AUXDEM(I)%DIST_ALLOC_FRAC = SWO%AUXDEM(I)%DIST_ALLOC_FRAC / DTMP
+                END DO
+            END IF
+        END DO
+    END IF
 
   END SUBROUTINE
   !
   SUBROUTINE COMPUTE_ALLOCATION_AND_RELEASE(SWO,KPER,KSTP,KITER,IDIVAR,STRM,SEG,SITER)   !FM ROUTINE
-      IMPLICIT NONE
-!-----VERSION X 2014.06.30 SWOPS1FM
-!     ******************************************************************
-!     OVERVIEW:
-!     FORMULATE+SOLVE TIMESTEP...
+    IMPLICIT NONE
+!   ******************************************************************
+!   OVERVIEW:
+!   FORMULATE+SOLVE TIMESTEP...
 !
-!     ******************************************************************
-!        SPECIFICATIONS:
-!     ------------------------------------------------------------------
-      !USE SWOPSMODULE
-      !USE SWOPSUTIL
-      !USE GWFSFRMODULE, ONLY:IDIVAR,STRM,SEG
-      !USE OPENSPEC
-!     ------------------------------------------------------------------
-!        ARGUMENTS:
-!     ------------------------------------------------------------------
-      CLASS(SWO_DATA),                            INTENT(INOUT):: SWO
-      INTEGER,          DIMENSION(:,:),CONTIGUOUS,INTENT(IN   ):: IDIVAR
-      REAL,             DIMENSION(:,:),CONTIGUOUS,INTENT(IN   ):: STRM
-      REAL,             DIMENSION(:,:),CONTIGUOUS,INTENT(INOUT):: SEG
-      INTEGER,                                    INTENT(IN   ):: KPER,KSTP,KITER, SITER
+!   ******************************************************************
+!      SPECIFICATIONS:
+!   ------------------------------------------------------------------
+    !USE SWOPSMODULE
+    !USE SWOPSUTIL
+    !USE GWFSFRMODULE, ONLY:IDIVAR,STRM,SEG
+    !USE OPENSPEC
+!   ------------------------------------------------------------------
+!      ARGUMENTS:
+!   ------------------------------------------------------------------
+    CLASS(SWO_DATA),                            INTENT(INOUT):: SWO
+    INTEGER,          DIMENSION(:,:),CONTIGUOUS,INTENT(IN   ):: IDIVAR
+    REAL,             DIMENSION(:,:),CONTIGUOUS,INTENT(IN   ):: STRM
+    REAL,             DIMENSION(:,:),CONTIGUOUS,INTENT(INOUT):: SEG
+    INTEGER,                                    INTENT(IN   ):: KPER,KSTP,KITER, SITER
 !
-!     ------------------------------------------------------------------
-!        LOCAL VARIABLES:
-!     ------------------------------------------------------------------
-      INTEGER                                                             &
-          :: I,J,K,F,P,ITYP,IREQ,IPROJ,IDIST,IUNIT,IFARM,IAUX,TMPSEG,     &
-             ISEG,JSEG,KSEG,LSEG,NTREE,NLIST,TMP,ITREE,IBRC,ISPT,IDVS,    &
-             IRES,JRES,ITER,NBRANCH,ISTR,JSTR,  &
-             IRCH,JRCH,ILIST,JDVS,NUPSEG_IDVS,NUPSEG_JDVS,NSS
-      DOUBLE PRECISION                                                    &
-          :: DTMP,DTMP1,DTMP2,DTMP3,EFF,STOR_TRAN1,STOR_TRAN2,            &
-             INFLOW,SPILL_WAY_PREV,                                       &
-             STORAGE_END_PREV,AREA_AVG,PRCP_AREA,TOT_RELEASE,TOT_RELEASE_PREV, RTOL,   &
-             UnderRelease,OverRelease,DFLOW,DFLOW_IN,DFLOW_RT,DFLOW_RN,DFLOW_ET,DSEEP,DDIVO, RATIO, ALLOTMENT,REQ_FLOW_RELEASE, CHARGE_CREDIT
-      INTEGER:: NFARM, NPROJ, NDIST, NUNIT, NAUXDEM
-      !TYPE(VAR_POINTER_LIST):: RES_RELEASES
-      DOUBLE PRECISION, DIMENSION(SIX):: RES_RELEASES
-      CHARACTER(:), ALLOCATABLE:: ERROR
-      LOGICAL:: UPDATE, HAS_CONVERGED, EVEN_ITER, FIVE_ITER
-      !
-      ! SWOPS1OUT/XCHECK
-      !CHARACTER(4) :: XOPT
-      NSS = SWO%NSEG
-      !
-      !DDELT = DBLE(DELT)
-      ERROR = NL
-      !
-      !IF(KPER>3)WRITE(123,'(3I4,*(1x F7.1))') KPER,KSTP,KITER,                                                                                                                                     &
-      !                SWO%RESDAT(1)%RESBAL(1)%RELEASE_PROJ/86400./DELT,SWO%RESDAT(1)%RESBAL(1)%RELEASE_REQF/86400./DELT,SWO%RESDAT(1)%RESBAL(2)%RELEASE_PROJ/86400./DELT,SWO%RESDAT(1)%RESBAL(2)%RELEASE_REQF/86400./DELT, &
-      !                STRM(10,3976 )/86400.,STRM(10,5171 )/86400.,STRM(10,6180 )/86400.,STRM(10,6885 )/86400.,STRM(10,6887 )/86400.,STRM(10,6890 )/86400.,STRM(10,6958 )/86400.,SWO%DIVSEG(1)%DIVORDER*DELT_INV/86400.,SWO%DIVSEG(1)%UP_DFLOW_IN*DELT_INV/86400.,SWO%DIVSEG(1)%UP_DFLOW_RT*DELT_INV/86400.,SWO%DIVSEG(1)%UP_DSEEP*DELT_INV/86400.,SWO%DIVSEG(1)%UP_DFLOW_RN*DELT_INV/86400.,SWO%DIVSEG(1)%UP_DFLOW_ET*DELT_INV/86400.
+!   ------------------------------------------------------------------
+!      LOCAL VARIABLES:
+!   ------------------------------------------------------------------
+    INTEGER                                                             &
+        :: I,J,K,F,P,ITYP,IREQ,IPROJ,IDIST,IUNIT,IFARM,IAUX,TMPSEG,     &
+           ISEG,JSEG,KSEG,LSEG,NTREE,NLIST,TMP,ITREE,IBRC,ISPT,IDVS,    &
+           IRES,JRES,ITER,NBRANCH,ISTR,JSTR,  &
+           IRCH,JRCH,ILIST,JDVS,NUPSEG_IDVS,NUPSEG_JDVS,NSS
+    DOUBLE PRECISION                                                    &
+        :: DTMP,DTMP1,DTMP2,DTMP3,EFF,STOR_TRAN1,STOR_TRAN2,            &
+           INFLOW,SPILL_WAY_PREV,                                       &
+           STORAGE_END_PREV,AREA_AVG,PRCP_AREA,TOT_RELEASE,TOT_RELEASE_PREV, RTOL,   &
+           UnderRelease,OverRelease,DFLOW,DFLOW_IN,DFLOW_RT,DFLOW_RN,DFLOW_ET,DSEEP,DDIVO, RATIO, ALLOTMENT,REQ_FLOW_RELEASE, CHARGE_CREDIT
+    INTEGER:: NFARM, NPROJ, NDIST, NUNIT, NAUXDEM
+    !TYPE(VAR_POINTER_LIST):: RES_RELEASES
+    DOUBLE PRECISION, DIMENSION(SIX):: RES_RELEASES
+    CHARACTER(:), ALLOCATABLE:: ERROR
+    LOGICAL:: UPDATE, HAS_CONVERGED, EVEN_ITER, FIVE_ITER
+    !
+    ! SWOPS1OUT/XCHECK
+    !CHARACTER(4) :: XOPT
+    NSS = SWO%NSEG
+    !
+    !DDELT = DBLE(DELT)
+    ERROR = NL
+    !
+    !IF(KPER>3)WRITE(123,'(3I4,*(1x F7.1))') KPER,KSTP,KITER,                                                                                                                                     &
+    !                SWO%RESDAT(1)%RESBAL(1)%RELEASE_PROJ/86400./DELT,SWO%RESDAT(1)%RESBAL(1)%RELEASE_REQF/86400./DELT,SWO%RESDAT(1)%RESBAL(2)%RELEASE_PROJ/86400./DELT,SWO%RESDAT(1)%RESBAL(2)%RELEASE_REQF/86400./DELT, &
+    !                STRM(10,3976 )/86400.,STRM(10,5171 )/86400.,STRM(10,6180 )/86400.,STRM(10,6885 )/86400.,STRM(10,6887 )/86400.,STRM(10,6890 )/86400.,STRM(10,6958 )/86400.,SWO%DIVSEG(1)%DIVORDER*DELT_INV/86400.,SWO%DIVSEG(1)%UP_DFLOW_IN*DELT_INV/86400.,SWO%DIVSEG(1)%UP_DFLOW_RT*DELT_INV/86400.,SWO%DIVSEG(1)%UP_DSEEP*DELT_INV/86400.,SWO%DIVSEG(1)%UP_DFLOW_RN*DELT_INV/86400.,SWO%DIVSEG(1)%UP_DFLOW_ET*DELT_INV/86400.
 
-      !
-      NAUXDEM= SWO%NAUXDEM
-      NFARM = SWO%NFARM
-      NPROJ = SWO%NPROJ
-      NDIST = SWO%NDIST
-      NUNIT = SWO%NUNIT
-      !
-      EVEN_ITER = MODULO(KITER,TWO) == Z
-      !
-      FIVE_ITER = MODULO(KITER,FIVE) == Z
-      !
-      !CALL RES_RELEASES%INIT(FIVE)  ! RELEASE_PROJ, RELEASE_ADD, RELEASE_REQF, RELEASE_SPEC, RELEASE_FLOD  --USED FOR REDUCTING TO MAX RELEASE AND GET SUM OF RELEASES
+    !
+    NAUXDEM= SWO%NAUXDEM
+    NFARM = SWO%NFARM
+    NPROJ = SWO%NPROJ
+    NDIST = SWO%NDIST
+    NUNIT = SWO%NUNIT
+    !
+    EVEN_ITER = MODULO(KITER,TWO) == Z
+    !
+    FIVE_ITER = MODULO(KITER,FIVE) == Z
+    !
+    !CALL RES_RELEASES%INIT(FIVE)  ! RELEASE_PROJ, RELEASE_ADD, RELEASE_REQF, RELEASE_SPEC, RELEASE_FLOD  --USED FOR REDUCTING TO MAX RELEASE AND GET SUM OF RELEASES
     !
     IF(.TRUE.) THEN !SITER == ONE
 
@@ -10703,7 +10744,7 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
     END DO
     !
     !
-      IF(TRUE) THEN !SITER == ONE
+    IF(TRUE) THEN !SITER == ONE
          !
          ! ****************************************************************
          ! ****************************************************************
@@ -10738,9 +10779,9 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
          !
          UPDATE = UPDATE .OR. SWO%DEC_RUL_IT%INUSE .OR. SWO%DEC_RUL_IT_END%INUSE
 
-         IF(SWO%PRT_RUL_SP%IS_OPEN .AND. KSTP==ONE .AND. KITER == TWO) WRITE(SWO%PRT_RUL_SP%IU,'(// 16x A,// 16x A)') '    FOR STRESS PERIOD '//NUM2STR(KPER),'WITH A STARTING CALENDAR DATE '//DATE_SP(KPER)%TS(KSTP-1)%PRETTYPRINT('  ')//' ('//DATE_SP(KPER)%TS(KSTP-1)%STR_DYEAR()//')'
-         IF(SWO%PRT_RUL_TS%IS_OPEN                 .AND. KITER == TWO) WRITE(SWO%PRT_RUL_TS%IU,'(// 16x A,// 16x A)') '    FOR STRESS PERIOD '//NUM2STR(KPER,-6)//' AND TIME STEP '//NUM2STR(KSTP),'WITH A STARTING CALENDAR DATE '//DATE_SP(KPER)%TS(KSTP-1)%PRETTYPRINT('  ')//' AND ENDING CALENDAR DATE '//DATE_SP(KPER)%TS(KSTP)%PRETTYPRINT('  ')//'  ('//DATE_SP(KPER)%TS(KSTP-1)%STR_DYEAR()//' - '//DATE_SP(KPER)%TS(KSTP)%STR_DYEAR()//')'
-         IF(SWO%PRT_RUL_IT%IS_OPEN                 .AND. KITER >= TWO) WRITE(SWO%PRT_RUL_TS%IU,'(// 16x A,// 16x A)') '    FOR STRESS PERIOD '//NUM2STR(KPER,-6)//' AND TIME STEP '//NUM2STR(KSTP)//' AND SOLVER ITERATION '//NUM2STR(KITER),'WITH A STARTING CALENDAR DATE '//DATE_SP(KPER)%TS(KSTP-1)%PRETTYPRINT('  ')//' AND ENDING CALENDAR DATE '//DATE_SP(KPER)%TS(KSTP)%PRETTYPRINT('  ')//'  ('//DATE_SP(KPER)%TS(KSTP-1)%STR_DYEAR()//' - '//DATE_SP(KPER)%TS(KSTP)%STR_DYEAR()//')'
+         IF(SWO%PRT_RUL_SP%IS_OPEN .AND. KSTP==ONE .AND. KITER == TWO) WRITE(SWO%PRT_RUL_SP%IU,'(// A, // 16x, A,// 16x, A)') REPEAT('-', 150), '    FOR STRESS PERIOD '//NUM2STR(KPER),'WITH A STARTING CALENDAR DATE '//DATE_SP(KPER)%TS(KSTP-1)%PRETTYPRINT('  ')//' ('//DATE_SP(KPER)%TS(KSTP-1)%STR_DYEAR()//')'
+         IF(SWO%PRT_RUL_TS%IS_OPEN                 .AND. KITER == TWO) WRITE(SWO%PRT_RUL_TS%IU,'(// A, // 16x, A,// 16x, A)') REPEAT('-', 150), '    FOR STRESS PERIOD '//NUM2STR(KPER,-6)//' AND TIME STEP '//NUM2STR(KSTP),'WITH A STARTING CALENDAR DATE '//DATE_SP(KPER)%TS(KSTP-1)%PRETTYPRINT('  ')//' AND ENDING CALENDAR DATE '//DATE_SP(KPER)%TS(KSTP)%PRETTYPRINT('  ')//'  ('//DATE_SP(KPER)%TS(KSTP-1)%STR_DYEAR()//' - '//DATE_SP(KPER)%TS(KSTP)%STR_DYEAR()//')'
+         IF(SWO%PRT_RUL_IT%IS_OPEN                 .AND. KITER >= TWO) WRITE(SWO%PRT_RUL_TS%IU,'(// A, // 16x, A,// 16x, A)') REPEAT('-', 150), '    FOR STRESS PERIOD '//NUM2STR(KPER,-6)//' AND TIME STEP '//NUM2STR(KSTP)//' AND SOLVER ITERATION '//NUM2STR(KITER),'WITH A STARTING CALENDAR DATE '//DATE_SP(KPER)%TS(KSTP-1)%PRETTYPRINT('  ')//' AND ENDING CALENDAR DATE '//DATE_SP(KPER)%TS(KSTP)%PRETTYPRINT('  ')//'  ('//DATE_SP(KPER)%TS(KSTP-1)%STR_DYEAR()//' - '//DATE_SP(KPER)%TS(KSTP)%STR_DYEAR()//')'
          !
          IF(UPDATE) CALL VARIABLE_GET_GLOBAL_MODEL_PROPERTY(SWO%DEC_VAR, SWO%DEC_VAR%PROP_PUL, KPER, KSTP, KITER, Z, ERROR) ! PULL VALUES FROM GLOBAL VARIABLES
 
@@ -11010,7 +11051,7 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
                                              DO K=ONE, N
                                                    ASSOCIATE(II => SWO%RESBAL2PROJ(ONE,RES(K)), JJ => SWO%RESBAL2PROJ(TWO,RES(K)))
                                                      !
-                                                     RESDAT(II)%RESBAL(JJ)%REL_REQ_FRAC = RESDAT(II)%RESBAL(JJ)%RELEASE_DMD_FRAC_INI
+                                                     RESDAT(II)%RESBAL(JJ)%REL_REQ_FRAC = RESDAT(II)%RESBAL(JJ)%RELEASE_REQ_FRAC_INI
                                                      !
                                                    END ASSOCIATE
                                              END DO
@@ -11031,385 +11072,385 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
              !
          END IF    ! (UPDATE .OR. KITER == TWO .OR. SWO%RESBAL_INFLOW_SEG%INUSE)
          !
-      END IF !SITER == 1
+    END IF !SITER == 1
+    !
+    !CHECK FOR REQUIRED DELIERVERY RATES
+    !
+    DO CONCURRENT (I = 1:NFARM, SWO%FARM(I)%TFDR < SWO%FARM(I)%REQ_DELIVERY_VOL)  !REQUESTED DEMAND IS LESS THEN REQURIED DELIVERY, INCREASE SWO DEMAND (TFDR) TO PUSH WATER THROUGH, WHICH FMP WILL NOT USE AND IT WILL BY PASS
+          !
+          SWO%FARM(I)%TFDR = SWO%FARM(I)%REQ_DELIVERY_VOL
+    END DO
+    !
+    ! SET UP ALLOTMENT CONSTRAINTS
+    !
+    IF( SWO%HAS_FMP_SW_LIMIT_RULZ ) THEN
+        DO CONCURRENT (I=ONE:NFARM)
+           IF( SWO%FMP_SW_LIMIT_RULZ(I) < D100) THEN
+             SWO%FMP_SW_LIMIT(I) = SWO%FMP_SW_LIMIT_RULZ(I)*SWO%DELT  !CONVERT TO VOLUME
+           ELSE
+             SWO%FMP_SW_LIMIT(I) = inf
+           END IF
+        END DO
+    ELSE
+             SWO%FMP_SW_LIMIT = inf
+    END IF
+    !
+    DO CONCURRENT (I=ONE:NFARM, SWO%FMP_SW_ALLOTMENT(I) < SWO%FMP_SW_LIMIT(I));  SWO%FMP_SW_LIMIT(I) = SWO%FMP_SW_ALLOTMENT(I)
+    END DO
+    !
+    ! CHECK FOR FORCED DELIVERY WHICH OVERRIDES ALLOWMENTS
+    !
+    DO CONCURRENT (I=ONE:NFARM, SWO%FMP_SW_LIMIT(I) < SWO%FARM(I)%REQ_DELIVERY_VOL);  SWO%FMP_SW_LIMIT(I) = SWO%FARM(I)%REQ_DELIVERY_VOL
+    END DO
+    !
+    ! ****************************************************************
+    ! ****************************************************************
+    ! ****************************************************************
+    ! ****************************************************************
+    ! COMPUTE ALLOCATION
+    ! (initial or updated allocation, depending on REALTIM of timestep)
+    ! ****************************************************************
+    ! ****************************************************************
+    ! ****************************************************************
+    ! ****************************************************************
+    ! ****************************************************************
+    !
+    ! ****************************************************************
+    ! COMPUTE DISTRIBUTION OF DISTRICT ALLOCATION ...
+    ! (1) Compute allotment to lands
+    !     Uniform allotment per unit area of district
+    ! (2) Compute allotment to farms, aux demands
+    !     Farm area x uniform allotment
+    !     Aux area  x uniform allotment
+    ! (3) Compute allotment balance of each farm, aux demand
+    !     Balance = allotment - delivery_YTD
+    ! (4) Compute delivery request to farms/aux, units, districts, projects
+    !     DelReq = min( TFDR, Balance )
+    ! (5) Compute diversion request to units, districts, projects
+    !     DivReq = DelReq/DelivEff
+    ! (6) Compute diversion request to diversion segments
+    !     DivReq = sum(DelReq)/DelivEff
+    !     NOTE -- Computed based on diversion segments,
+    !             not computed for individual units ...
+    !             Required for cases where bypass occurs
+    !             (i.e., where multiple units served by common diversion segment)
+    ! (7) Compute diversion requests throughout network
+    ! ****************************************************************
+
+    ! (1) Compute allotment to lands ...
+    !     ALLOTMENT(DIST) = ALLOCATION(DIST)
+    !                       x DelivEff(DIST)              --> account for losses or gains
+    !                       x (1/NetChgRatio(DIST))       --> account for wet water vs. accounting
+    !                       x (1/AreaIrr(DIST))           --> distribute equally to all IRRIGATED lands in district
+    !                                                         (NOTE: AreaIrr(DIST) includes farm area + area associated with each aux demand!)
+    !
+    !
+    ASSOCIATE( PROJ=>SWO%PROJ, DIST => SWO%DIST, UNIT=>SWO%UNIT, FARM=>SWO%FARM,                     &
+               FARM_PREV=>SWO%FARM_PREV, AUXDEM=>SWO%AUXDEM, AUXDEM_PREV=>SWO%AUXDEM_PREV,           &
+               SEGINFO=>SWO%SEGINFO, SEGDATA=> SWO%SEGDATA,                                          &
+               DIVSEG=>SWO%DIVSEG,  DIVSEG_PREV=>SWO%DIVSEG_PREV, SPTSEG=>SWO%SPTSEG,                &
+               DIST_DELTOL=>SWO%DIST_DELTOL, SEGRCH_IN=>SWO%SEGRCH_IN, SEGRCH_OUT=>SWO%SEGRCH_OUT )
       !
-      !CHECK FOR REQUIRED DELIERVERY RATES
-      !
-      DO CONCURRENT (I = 1:NFARM, SWO%FARM(I)%TFDR < SWO%FARM(I)%REQ_DELIVERY_VOL)  !REQUESTED DEMAND IS LESS THEN REQURIED DELIVERY, INCREASE SWO DEMAND (TFDR) TO PUSH WATER THROUGH, WHICH FMP WILL NOT USE AND IT WILL BY PASS
+      IF(.TRUE.) THEN !SITER == ONE-----------------------------------------------------------------------------------------------------------------
+        DO I = 1,NDIST
+          !
+          CHARGE_CREDIT = DIST(I)%CHARGE_YTD - DIST(I)%CREDIT_YTD
+          !
+          DIST(I)%BALANCE = DIST(I)%ALLOC_TOTAL - CHARGE_CREDIT  !<= DIST(I)%BALANCE = DIST(I)%ALLOC_TOTAL - DIST(IDIST)%CHARGE_YTD + DIST(I)%CREDIT_YTD
+          !
+          EFF = DIST(I)%DELIVEFF
+          IF(EFF > UNO) EFF = UNO
+          !
+          IF      (DIST(I)%S_ALLOTMENT_BYBEN) THEN
+                                                   DTMP = DZ
+                                                   DO F = ONE, DIST(I)%NFARM
+                                                             DTMP = DTMP + SWO%FARM( DIST(I)%FARM(F) )%S_ALLOTMENT
+                                                   END DO
+                                                   !
+                                                   DO J = ONE, DIST(I)%NAUXDEM
+                                                             DTMP = DTMP + SWO%AUXDEM( DIST(I)%AUXDEM(J) )%S_ALLOTMENT
+                                                   END DO
+                                                   !
+                                                   ALLOTMENT = DTMP * SWO%DELT
+                                                   !
+                                                   DIST(I)%BALANCE      = ALLOTMENT
+                                                   DIST(I)%EQ_ALLOTMENT = ALLOTMENT + DIST(I)%DELIVERY_YTD
+                                                   DIST(I)%ALLOC_TOTAL  = ALLOTMENT + CHARGE_CREDIT
+          ELSE IF(DIST(I)%S_ALLOTMENT.GE.DZ) THEN
+                                                   ALLOTMENT = DIST(I)%S_ALLOTMENT * SWO%DELT ! S Allotment Override
+                                                   !
+                                                   DIST(I)%BALANCE      = ALLOTMENT
+                                                   DIST(I)%EQ_ALLOTMENT = ALLOTMENT + DIST(I)%DELIVERY_YTD !* (UNO / DIST(I)%NETCHGRATIO) * EFF
+                                                   DIST(I)%ALLOC_TOTAL  = ALLOTMENT + CHARGE_CREDIT
+          ELSE IF(DIST(I)%S_ALLOTMENT_VOL.GE.DZ) THEN
+                                                   ALLOTMENT = DIST(I)%S_ALLOTMENT_VOL   ! S Allotment Override
+                                                   !
+                                                   DIST(I)%BALANCE      = ALLOTMENT
+                                                   DIST(I)%EQ_ALLOTMENT = ALLOTMENT + DIST(I)%DELIVERY_YTD   !* (UNO / DIST(I)%NETCHGRATIO) * EFF
+                                                   DIST(I)%ALLOC_TOTAL  = ALLOTMENT + CHARGE_CREDIT
+          ELSE IF (DIST(I)%ALLOC_TOTAL.LE.DZ) THEN                        ! No allocation --> no eq. allotment
+                                                   DIST(I)%EQ_ALLOTMENT = DZ
+          ELSE IF (DIST(I)%AreaIrr.EQ.DZ) THEN                       ! No irrigated acreage --> no eq. allotment
+                                                   DIST(I)%EQ_ALLOTMENT = DZ
+          ELSE IF (DIST(I)%BALANCE.LE.DZ) THEN                       ! District already used full diversion allocation --> use previous eq. allotment
+                                                   DIST(I)%EQ_ALLOTMENT = SWO%DIST_PREV(I)%EQ_ALLOTMENT
+          !ELSE IF (DIST(I)%DELIVEFF    > 0.99  .AND.  &
+          !         DIST(I)%NETCHGRATIO < 0.25D0 ) THEN                ! System is too efficient, which is causing low charges and high credits -- Use total NetCHARg
+          !                                         DIST(I)%EQ_ALLOTMENT = SWO%DIST_PREV(I)%EQ_ALLOTMENT
+          ELSE
             !
-            SWO%FARM(I)%TFDR = SWO%FARM(I)%REQ_DELIVERY_VOL
-      END DO
-      !
-      ! SET UP ALLOTMENT CONSTRAINTS
-      !
-      IF( SWO%HAS_FMP_SW_LIMIT_RULZ ) THEN
-          DO CONCURRENT (I=ONE:NFARM)
-             IF( SWO%FMP_SW_LIMIT_RULZ(I) < D100) THEN
-               SWO%FMP_SW_LIMIT(I) = SWO%FMP_SW_LIMIT_RULZ(I)*SWO%DELT  !CONVERT TO VOLUME
-             ELSE
-               SWO%FMP_SW_LIMIT(I) = inf
-             END IF
-          END DO
-      ELSE
-               SWO%FMP_SW_LIMIT = inf
-      END IF
-      !
-      DO CONCURRENT (I=ONE:NFARM, SWO%FMP_SW_ALLOTMENT(I) < SWO%FMP_SW_LIMIT(I));  SWO%FMP_SW_LIMIT(I) = SWO%FMP_SW_ALLOTMENT(I)
-      END DO
-      !
-      ! CHECK FOR FORCED DELIVERY WHICH OVERRIDES ALLOWMENTS
-      !
-      DO CONCURRENT (I=ONE:NFARM, SWO%FMP_SW_LIMIT(I) < SWO%FARM(I)%REQ_DELIVERY_VOL);  SWO%FMP_SW_LIMIT(I) = SWO%FARM(I)%REQ_DELIVERY_VOL
-      END DO
-      !
-      ! ****************************************************************
-      ! ****************************************************************
-      ! ****************************************************************
-      ! ****************************************************************
-      ! COMPUTE ALLOCATION
-      ! (initial or updated allocation, depending on REALTIM of timestep)
-      ! ****************************************************************
-      ! ****************************************************************
-      ! ****************************************************************
-      ! ****************************************************************
-      ! ****************************************************************
-         !
-         ! ****************************************************************
-         ! COMPUTE DISTRIBUTION OF DISTRICT ALLOCATION ...
-         ! (1) Compute allotment to lands
-         !     Uniform allotment per unit area of district
-         ! (2) Compute allotment to farms, aux demands
-         !     Farm area x uniform allotment
-         !     Aux area  x uniform allotment
-         ! (3) Compute allotment balance of each farm, aux demand
-         !     Balance = allotment - delivery_YTD
-         ! (4) Compute delivery request to farms/aux, units, districts, projects
-         !     DelReq = min( TFDR, Balance )
-         ! (5) Compute diversion request to units, districts, projects
-         !     DivReq = DelReq/DelivEff
-         ! (6) Compute diversion request to diversion segments
-         !     DivReq = sum(DelReq)/DelivEff
-         !     NOTE -- Computed based on diversion segments,
-         !             not computed for individual units ...
-         !             Required for cases where bypass occurs
-         !             (i.e., where multiple units served by common diversion segment)
-         ! (7) Compute diversion requests throughout network
-         ! ****************************************************************
+            DIST(I)%EQ_ALLOTMENT = DIST(I)%DELIVERY_YTD                            &      ! water already delivered ...
+                                     + ZERO_OR_GREATER(                            &      ! estimated additional water available for delivery, assuming current delivery efficiency ...
+                                           ( DIST(I)%ALLOC_TOTAL - CHARGE_CREDIT ) &      ! Remaining allocation (alloc - charge + credit)
+                                              * (UNO / DIST(I)%NETCHGRATIO)        &      ! x (1 / current-step net charge ratio)
+                                              * EFF                             )         ! x (current-step delivery efficiency)
+              !
+            !!DIST(I)%EQ_ALLOTMENT = DIST(I)%DELIVERY_YTD / DIST(I)%AreaIrr    & ! water already delivered ...
+            !!                         + ZERO_OR_GREATER(                                  &                                             ! estimated additional water available for delivery, assuming current delivery efficiency ...
+            !!                               ( DIST(I)%ALLOC_TOTAL - DIST(I)%CHARGE_YTD + DIST(I)%CREDIT_YTD ) &    ! Remaining allocation (alloc - charge + credit)
+            !!                                  * (UNO / DIST(I)%NETCHGRATIO) &         ! x (1 / current-step net charge ratio)
+            !!                                  * DIST(I)%DELIVEFF            &         ! x (current-step delivery efficiency)
+            !!                                  * (UNO / DIST(I)%AreaIrr) )             ! x (1 / area)
+              !
+              !IF(MAXALLOT < DIST(I)%EQ_ALLOTMENT) DIST(I)%EQ_ALLOTMENT = MAXALLOT! Constrain US allotment to MAXALLOT AS A HIEGHT (100 UNITS HIGH!)
+              !
+          END IF !(ALLOC_TOT.EQ.0 / AreaTot.EQ.0 / ELSE)
+          !
+          ! CHECK FOR ALLOTMENT LIMITS - EQ_ALLOTMENT_LIMIT IS A MULTIPLIER THAT DETMINERS THE MAX EQ_ALLOT WITH REGARDS TO ALLOC_TOT
+          IF(UNO < SWO%DIST(I)%EQ_ALLOTMENT_LIMIT .AND. SWO%DIST(I)%EQ_ALLOTMENT_LIMIT < D29) THEN
+                                                           DTMP = DIST(I)%ALLOC_TOTAL * SWO%DIST(I)%EQ_ALLOTMENT_LIMIT
+                                                           !
+                                                           IF(DIST(I)%EQ_ALLOTMENT > DTMP) THEN
+                                                              DIST(I)%EQ_ALLOTMENT = DTMP
+                                                           END IF
+          END IF
+        END DO !(IDIST)
+        !
+        ! RESET TOTAL ALLOTMENT ASSIGNED TO EACH UNIT -- Only for book keeping. Will sum from benicfiaries allotments
+        !
+        DO CONCURRENT (I=ONE:NUNIT)
+          SWO%UNIT(I)%ALLOTMENT = DZ
+          SWO%UNIT(I)%BALANCE   = DZ
+        END DO
+        !
+        !
+        ! (2) Compute allotment to farms, aux demands ...
+        !     ALLOTMENT(FARM) = ALLOTMENT(DIST) * AreaTot(FARM)
+        !     ALLOTMENT(AUX)  = ALLOTMENT(DIST) * AreaTot(Aux)
+        DO F = ONE, NFARM
+          IF(FARM(F)%DistID>Z .AND. FARM(F)%DelSeg>Z) THEN ! Must have delivery segment
+              !
+              I = FARM(F)%DistID
+              J = FARM(F)%UnitID
+              !
+              IF(     DIST(I)%S_ALLOTMENT_BYBEN) THEN
+                                                     FARM(F)%ALLOTMENT = SWO%FARM( F )%S_ALLOTMENT  * SWO%DELT + FARM(F)%DELIVERY_YTD
+              ELSE IF(DIST(I)%S_ALLOTMENT.GE.DZ) THEN
+                                                     FARM(F)%ALLOTMENT = DIST(I)%S_ALLOTMENT * SWO%DELT * FARM(F)%DIST_ALLOC_FRAC + FARM(F)%DELIVERY_YTD
+              ELSE IF(DIST(I)%S_ALLOTMENT_VOL.GE.DZ) THEN
+                                                     FARM(F)%ALLOTMENT = DIST(I)%S_ALLOTMENT_VOL    * FARM(F)%DIST_ALLOC_FRAC + FARM(F)%DELIVERY_YTD
+              ELSE
+                    FARM(F)%ALLOTMENT = DIST(I)%EQ_ALLOTMENT * FARM(F)%DIST_ALLOC_FRAC
+              END IF
+              !
+              ! District already used full diversion allocation
+              IF (DIST(I)%BALANCE.LE.DZ) FARM(F)%ALLOTMENT = FARM(F)%DELIVERY_YTD        ! --> Set allotment equal to deliveries year-to-date ... farms can't call for additional water.
+              !
+              UNIT(J)%ALLOTMENT = UNIT(J)%ALLOTMENT + FARM(F)%ALLOTMENT
+          END IF
+        END DO
 
-         ! (1) Compute allotment to lands ...
-         !     ALLOTMENT(DIST) = ALLOCATION(DIST)
-         !                       x DelivEff(DIST)              --> account for losses or gains
-         !                       x (1/NetChgRatio(DIST))       --> account for wet water vs. accounting
-         !                       x (1/AreaIrr(DIST))           --> distribute equally to all IRRIGATED lands in district
-         !                                                         (NOTE: AreaIrr(DIST) includes farm area + area associated with each aux demand!)
-         !
-         !
-         ASSOCIATE( PROJ=>SWO%PROJ, DIST => SWO%DIST, UNIT=>SWO%UNIT, FARM=>SWO%FARM,                     &
-                    FARM_PREV=>SWO%FARM_PREV, AUXDEM=>SWO%AUXDEM, AUXDEM_PREV=>SWO%AUXDEM_PREV,           &
-                    SEGINFO=>SWO%SEGINFO, SEGDATA=> SWO%SEGDATA,                                          &
-                    DIVSEG=>SWO%DIVSEG,  DIVSEG_PREV=>SWO%DIVSEG_PREV, SPTSEG=>SWO%SPTSEG,                &
-                    DIST_DELTOL=>SWO%DIST_DELTOL, SEGRCH_IN=>SWO%SEGRCH_IN, SEGRCH_OUT=>SWO%SEGRCH_OUT )
-           !
-           IF(.TRUE.) THEN !SITER == ONE-----------------------------------------------------------------------------------------------------------------
-             DO I = 1,NDIST
+        !DO IFARM = 1,NFARM
+        !  IDIST = FARM(IFARM)%DistID
+        !  IF (IDIST.EQ.0) THEN                                       ! No district
+        !    FARM(IFARM)%ALLOTMENT = DZ                              ! --> Farm not in a district ... farm doesn't get SW delivery
+        !  ELSE IF (DIST(IDIST)%BALANCE.LE.DZ) THEN                  ! District already used full diversion allocation
+        !    FARM(IFARM)%ALLOTMENT = FARM(IFARM)%DELIVERY_YTD         ! --> Set allotment equal to deliveries year-to-date ... farms can't call for additional water.
+        !  ELSE IF (FARM(IFARM)%DelSeg.EQ.0) THEN                     ! No farm delivery segment
+        !    FARM(IFARM)%ALLOTMENT = DZ                              ! --> Set allotment to zero ... farm doesn't get SW delivery
+        !  ELSE
+        !    FARM(IFARM)%ALLOTMENT = DIST(IDIST)%EQ_ALLOTMENT * FARM(IFARM)%DIST_ALLOC_FRAC !FARM(IFARM)%AreaIrr
+        !  END IF !(IDIST.NE.0)
+        !END DO !(IFARM)
+        !
+        !
+        DO IAUX=1, NAUXDEM
+           IF(AUXDEM(IAUX)%DistID>Z .AND. AUXDEM(IAUX)%AuxSeg>Z) THEN
+              I = AUXDEM(IAUX)%DistID
+              J = AUXDEM(IAUX)%UnitID
+              IF(     DIST(I)%S_ALLOTMENT_BYBEN) THEN
+                   AUXDEM(IAUX)%ALLOTMENT = SWO%AUXDEM( IAUX )%S_ALLOTMENT * SWO%DELT + (AUXDEM(IAUX)%DELIVERY_YTD*AUXDEM(IAUX)%FACTOR)
+              ELSEIF (DIST(I)%BALANCE.LE.0) THEN                           ! District already used full diversion allocation
+                   AUXDEM(IAUX)%ALLOTMENT = AUXDEM(IAUX)%DELIVERY_YTD*AUXDEM(IAUX)%FACTOR      ! --> Set allotment equal to deliveries year-to-date ... auxs can't call for additional water.
+              ELSE
+                   AUXDEM(IAUX)%ALLOTMENT = DIST(I)%EQ_ALLOTMENT * SWO%AUXDEM(IAUX)%DIST_ALLOC_FRAC !AUXDEM(IAUX)%AREA
+              END IF
+              UNIT(J)%ALLOTMENT = UNIT(J)%ALLOTMENT + AUXDEM(IAUX)%ALLOTMENT
+           END IF
+        END DO
+        !DO IAUX = 1,NAUXDEM
+        !  IDIST = AUXDEM(IAUX)%DistID
+        !  IF (IDIST.EQ.0) THEN                                      ! No district
+        !    AUXDEM(IAUX)%ALLOTMENT = DZ                            ! --> Set allotment to zero ... aux doesn't get SW delivery
+        !  ELSE IF (DIST(IDIST)%BALANCE.LE.0) THEN                   ! District already used full diversion allocation
+        !    AUXDEM(IAUX)%ALLOTMENT = AUXDEM(IAUX)%DELIVERY_YTD      ! --> Set allotment equal to deliveries year-to-date ... auxs can't call for additional water.
+        !  ELSE IF (AUXDEM(IAUX)%AuxSeg.EQ.0) THEN                   ! No aux segment
+        !    AUXDEM(IAUX)%ALLOTMENT = DZ                            ! --> Set allotment to zero ... aux doesn't get SW delivery
+        !  ELSE
+        !    AUXDEM(IAUX)%ALLOTMENT = DIST(IDIST)%EQ_ALLOTMENT * SWO%AUXDEM(IAUX)%DIST_ALLOC_FRAC !AUXDEM(IAUX)%AREA
+        !  END IF !(IDIST.NE.0)
+        !END DO !(IAUX)
+        !
+        !
+        !
+        ! (3) Compute allotment balance for each farm, aux demand ...
+        !     BALANCE(FARM) = ALLOTMENT(FARM) - DELIVERY_YTD(FARM)
+        !     BALANCE(AUX)  = ALLOTMENT(AUX)  - DELIVERY_YTD(AUX)
+        DO F=1, NFARM
+        IF(FARM(F)%DistID>Z .AND. FARM(F)%DelSeg>Z) THEN
+          !
+          I = FARM(F)%DistID
+          J = FARM(F)%UnitID
+          !
+          IF     (DIST(I)%S_ALLOTMENT_BYBEN) THEN
+                                                   FARM(F)%BALANCE = SWO%FARM( DIST(I)%FARM(F) )%S_ALLOTMENT * SWO%DELT
+          ELSE IF(DIST(I)%S_ALLOTMENT.GE.DZ) THEN
+                                                   FARM(F)%BALANCE = DIST(I)%S_ALLOTMENT     * FARM(F)%DIST_ALLOC_FRAC * SWO%DELT
+          ELSE IF(DIST(I)%S_ALLOTMENT_VOL.GE.DZ) THEN
+                                                   FARM(F)%BALANCE = DIST(I)%S_ALLOTMENT_VOL * FARM(F)%DIST_ALLOC_FRAC
+          ELSE
+                                                   FARM(F)%BALANCE = FARM(F)%ALLOTMENT-FARM(F)%DELIVERY_YTD
+          ENDIF
+          !
+          IF(FARM(F)%BALANCE < NEARZERO_5) FARM(F)%BALANCE = DZ
+          !
+          UNIT(J)%BALANCE = UNIT(J)%BALANCE + FARM(F)%BALANCE
+        END IF
+        END DO
+        !
+        !
+        DO IAUX=1, NAUXDEM
+          IF(AUXDEM(IAUX)%DistID>Z .AND. AUXDEM(IAUX)%AuxSeg>Z) THEN
+             AUXDEM(IAUX)%BALANCE = AUXDEM(IAUX)%ALLOTMENT - (AUXDEM(IAUX)%DELIVERY_YTD*AUXDEM(IAUX)%FACTOR)
+             IF(AUXDEM(IAUX)%BALANCE < NEARZERO_5) AUXDEM(IAUX)%BALANCE = DZ
+             !
+             UNIT(AUXDEM(IAUX)%UnitID)%BALANCE = UNIT(AUXDEM(IAUX)%UnitID)%BALANCE + AUXDEM(IAUX)%BALANCE
+          END IF
+        END DO
+        !
+        ! (4) Compute delivery request to farms/auxs, units, districts, projects
+        !     DELREQ(FARM) = MIN( TFDR(FARM), BALANCE(FARM) )
+        !     DELREQ(AUX)  = MIN( DEMAND(AUX),BALANCE(AUX) )
+        DO F=1, NFARM
+          IF(FARM(F)%DelSeg>Z .AND. FARM(F)%UnitID>Z .AND. FARM(F)%TFDR>NEARZERO_6 .AND.  FARM(F)%BALANCE>NEARZERO_6) THEN
+               IUNIT = FARM(F)%UnitID
+               IDIST = FARM(F)%DistID
+               IPROJ = FARM(F)%ProjID
                !
-               CHARGE_CREDIT = DIST(I)%CHARGE_YTD - DIST(I)%CREDIT_YTD
-               !
-               DIST(I)%BALANCE = DIST(I)%ALLOC_TOTAL - CHARGE_CREDIT  !<= DIST(I)%BALANCE = DIST(I)%ALLOC_TOTAL - DIST(IDIST)%CHARGE_YTD + DIST(I)%CREDIT_YTD
-               !
-               EFF = DIST(I)%DELIVEFF
-               IF(EFF > UNO) EFF = UNO
-               !
-               IF      (DIST(I)%S_ALLOTMENT_BYBEN) THEN
-                                                        DTMP = DZ
-                                                        DO F = ONE, DIST(I)%NFARM
-                                                                  DTMP = DTMP + SWO%FARM( DIST(I)%FARM(F) )%S_ALLOTMENT
-                                                        END DO
-                                                        !
-                                                        DO J = ONE, DIST(I)%NAUXDEM
-                                                                  DTMP = DTMP + SWO%AUXDEM( DIST(I)%AUXDEM(J) )%S_ALLOTMENT
-                                                        END DO
-                                                        !
-                                                        ALLOTMENT = DTMP * SWO%DELT
-                                                        !
-                                                        DIST(I)%BALANCE      = ALLOTMENT
-                                                        DIST(I)%EQ_ALLOTMENT = ALLOTMENT + DIST(I)%DELIVERY_YTD
-                                                        DIST(I)%ALLOC_TOTAL  = ALLOTMENT + CHARGE_CREDIT
-               ELSE IF(DIST(I)%S_ALLOTMENT.GE.DZ) THEN
-                                                        ALLOTMENT = DIST(I)%S_ALLOTMENT * SWO%DELT ! S Allotment Override
-                                                        !
-                                                        DIST(I)%BALANCE      = ALLOTMENT
-                                                        DIST(I)%EQ_ALLOTMENT = ALLOTMENT + DIST(I)%DELIVERY_YTD !* (UNO / DIST(I)%NETCHGRATIO) * EFF
-                                                        DIST(I)%ALLOC_TOTAL  = ALLOTMENT + CHARGE_CREDIT
-               ELSE IF(DIST(I)%S_ALLOTMENT_VOL.GE.DZ) THEN
-                                                        ALLOTMENT = DIST(I)%S_ALLOTMENT_VOL   ! S Allotment Override
-                                                        !
-                                                        DIST(I)%BALANCE      = ALLOTMENT
-                                                        DIST(I)%EQ_ALLOTMENT = ALLOTMENT + DIST(I)%DELIVERY_YTD   !* (UNO / DIST(I)%NETCHGRATIO) * EFF
-                                                        DIST(I)%ALLOC_TOTAL  = ALLOTMENT + CHARGE_CREDIT
-               ELSE IF (DIST(I)%ALLOC_TOTAL.LE.DZ) THEN                        ! No allocation --> no eq. allotment
-                                                        DIST(I)%EQ_ALLOTMENT = DZ
-               ELSE IF (DIST(I)%AreaIrr.EQ.DZ) THEN                       ! No irrigated acreage --> no eq. allotment
-                                                        DIST(I)%EQ_ALLOTMENT = DZ
-               ELSE IF (DIST(I)%BALANCE.LE.DZ) THEN                       ! District already used full diversion allocation --> use previous eq. allotment
-                                                        DIST(I)%EQ_ALLOTMENT = SWO%DIST_PREV(I)%EQ_ALLOTMENT
-               !ELSE IF (DIST(I)%DELIVEFF    > 0.99  .AND.  &
-               !         DIST(I)%NETCHGRATIO < 0.25D0 ) THEN                ! System is too efficient, which is causing low charges and high credits -- Use total NetCHARg
-               !                                         DIST(I)%EQ_ALLOTMENT = SWO%DIST_PREV(I)%EQ_ALLOTMENT
-               ELSE
+               ! Iteration spin-up period ...
+               IF (KITER.LE.SWO%SWMXITER(1) ) THEN            !.OR. SWO%FMP_SW_DEMAND(F) * DELT <= SWO%FARM(F)%REQ_DELIVERY_VOL
+                 FARM(F)%DELORDER = MIN( FARM(F)%TFDR, FARM(F)%BALANCE, SWO%FMP_SW_LIMIT(F) )
                  !
-                 DIST(I)%EQ_ALLOTMENT = DIST(I)%DELIVERY_YTD                            &      ! water already delivered ...
-                                          + ZERO_OR_GREATER(                            &      ! estimated additional water available for delivery, assuming current delivery efficiency ...
-                                                ( DIST(I)%ALLOC_TOTAL - CHARGE_CREDIT ) &      ! Remaining allocation (alloc - charge + credit)
-                                                   * (UNO / DIST(I)%NETCHGRATIO)        &      ! x (1 / current-step net charge ratio)
-                                                   * EFF                             )         ! x (current-step delivery efficiency)
-                   !
-                 !!DIST(I)%EQ_ALLOTMENT = DIST(I)%DELIVERY_YTD / DIST(I)%AreaIrr    & ! water already delivered ...
-                 !!                         + ZERO_OR_GREATER(                                  &                                             ! estimated additional water available for delivery, assuming current delivery efficiency ...
-                 !!                               ( DIST(I)%ALLOC_TOTAL - DIST(I)%CHARGE_YTD + DIST(I)%CREDIT_YTD ) &    ! Remaining allocation (alloc - charge + credit)
-                 !!                                  * (UNO / DIST(I)%NETCHGRATIO) &         ! x (1 / current-step net charge ratio)
-                 !!                                  * DIST(I)%DELIVEFF            &         ! x (current-step delivery efficiency)
-                 !!                                  * (UNO / DIST(I)%AreaIrr) )             ! x (1 / area)
-                   !
-                   !IF(MAXALLOT < DIST(I)%EQ_ALLOTMENT) DIST(I)%EQ_ALLOTMENT = MAXALLOT! Constrain US allotment to MAXALLOT AS A HIEGHT (100 UNITS HIGH!)
-                   !
-               END IF !(ALLOC_TOT.EQ.0 / AreaTot.EQ.0 / ELSE)
-               !
-               ! CHECK FOR ALLOTMENT LIMITS - EQ_ALLOTMENT_LIMIT IS A MULTIPLIER THAT DETMINERS THE MAX EQ_ALLOT WITH REGARDS TO ALLOC_TOT
-               IF(UNO < SWO%DIST(I)%EQ_ALLOTMENT_LIMIT .AND. SWO%DIST(I)%EQ_ALLOTMENT_LIMIT < D29) THEN
-                                                                DTMP = DIST(I)%ALLOC_TOTAL * SWO%DIST(I)%EQ_ALLOTMENT_LIMIT
-                                                                !
-                                                                IF(DIST(I)%EQ_ALLOTMENT > DTMP) THEN
-                                                                   DIST(I)%EQ_ALLOTMENT = DTMP
-                                                                END IF
-               END IF
-             END DO !(IDIST)
-             !
-             ! RESET TOTAL ALLOTMENT ASSIGNED TO EACH UNIT -- Only for book keeping. Will sum from benicfiaries allotments
-             !
-             DO CONCURRENT (I=ONE:NUNIT)
-               SWO%UNIT(I)%ALLOTMENT = DZ
-               SWO%UNIT(I)%BALANCE   = DZ
-             END DO
-             !
-             !
-             ! (2) Compute allotment to farms, aux demands ...
-             !     ALLOTMENT(FARM) = ALLOTMENT(DIST) * AreaTot(FARM)
-             !     ALLOTMENT(AUX)  = ALLOTMENT(DIST) * AreaTot(Aux)
-             DO F = ONE, NFARM
-               IF(FARM(F)%DistID>Z .AND. FARM(F)%DelSeg>Z) THEN ! Must have delivery segment
-                   !
-                   I = FARM(F)%DistID
-                   J = FARM(F)%UnitID
-                   !
-                   IF(     DIST(I)%S_ALLOTMENT_BYBEN) THEN
-                                                          FARM(F)%ALLOTMENT = SWO%FARM( F )%S_ALLOTMENT  * SWO%DELT + FARM(F)%DELIVERY_YTD
-                   ELSE IF(DIST(I)%S_ALLOTMENT.GE.DZ) THEN
-                                                          FARM(F)%ALLOTMENT = DIST(I)%S_ALLOTMENT * SWO%DELT * FARM(F)%DIST_ALLOC_FRAC + FARM(F)%DELIVERY_YTD
-                   ELSE IF(DIST(I)%S_ALLOTMENT_VOL.GE.DZ) THEN
-                                                          FARM(F)%ALLOTMENT = DIST(I)%S_ALLOTMENT_VOL    * FARM(F)%DIST_ALLOC_FRAC + FARM(F)%DELIVERY_YTD
-                   ELSE
-                         FARM(F)%ALLOTMENT = DIST(I)%EQ_ALLOTMENT * FARM(F)%DIST_ALLOC_FRAC
-                   END IF
-                   !
-                   ! District already used full diversion allocation
-                   IF (DIST(I)%BALANCE.LE.DZ) FARM(F)%ALLOTMENT = FARM(F)%DELIVERY_YTD        ! --> Set allotment equal to deliveries year-to-date ... farms can't call for additional water.
-                   !
-                   UNIT(J)%ALLOTMENT = UNIT(J)%ALLOTMENT + FARM(F)%ALLOTMENT
-               END IF
-             END DO
-
-             !DO IFARM = 1,NFARM
-             !  IDIST = FARM(IFARM)%DistID
-             !  IF (IDIST.EQ.0) THEN                                       ! No district
-             !    FARM(IFARM)%ALLOTMENT = DZ                              ! --> Farm not in a district ... farm doesn't get SW delivery
-             !  ELSE IF (DIST(IDIST)%BALANCE.LE.DZ) THEN                  ! District already used full diversion allocation
-             !    FARM(IFARM)%ALLOTMENT = FARM(IFARM)%DELIVERY_YTD         ! --> Set allotment equal to deliveries year-to-date ... farms can't call for additional water.
-             !  ELSE IF (FARM(IFARM)%DelSeg.EQ.0) THEN                     ! No farm delivery segment
-             !    FARM(IFARM)%ALLOTMENT = DZ                              ! --> Set allotment to zero ... farm doesn't get SW delivery
-             !  ELSE
-             !    FARM(IFARM)%ALLOTMENT = DIST(IDIST)%EQ_ALLOTMENT * FARM(IFARM)%DIST_ALLOC_FRAC !FARM(IFARM)%AreaIrr
-             !  END IF !(IDIST.NE.0)
-             !END DO !(IFARM)
-             !
-             !
-             DO IAUX=1, NAUXDEM
-                IF(AUXDEM(IAUX)%DistID>Z .AND. AUXDEM(IAUX)%AuxSeg>Z) THEN
-                   I = AUXDEM(IAUX)%DistID
-                   J = AUXDEM(IAUX)%UnitID
-                   IF(     DIST(I)%S_ALLOTMENT_BYBEN) THEN
-                        AUXDEM(IAUX)%ALLOTMENT = SWO%AUXDEM( IAUX )%S_ALLOTMENT * SWO%DELT + (AUXDEM(IAUX)%DELIVERY_YTD*AUXDEM(IAUX)%FACTOR)
-                   ELSEIF (DIST(I)%BALANCE.LE.0) THEN                           ! District already used full diversion allocation
-                        AUXDEM(IAUX)%ALLOTMENT = AUXDEM(IAUX)%DELIVERY_YTD*AUXDEM(IAUX)%FACTOR      ! --> Set allotment equal to deliveries year-to-date ... auxs can't call for additional water.
-                   ELSE
-                        AUXDEM(IAUX)%ALLOTMENT = DIST(I)%EQ_ALLOTMENT * SWO%AUXDEM(IAUX)%DIST_ALLOC_FRAC !AUXDEM(IAUX)%AREA
-                   END IF
-                   UNIT(J)%ALLOTMENT = UNIT(J)%ALLOTMENT + AUXDEM(IAUX)%ALLOTMENT
-                END IF
-             END DO
-             !DO IAUX = 1,NAUXDEM
-             !  IDIST = AUXDEM(IAUX)%DistID
-             !  IF (IDIST.EQ.0) THEN                                      ! No district
-             !    AUXDEM(IAUX)%ALLOTMENT = DZ                            ! --> Set allotment to zero ... aux doesn't get SW delivery
-             !  ELSE IF (DIST(IDIST)%BALANCE.LE.0) THEN                   ! District already used full diversion allocation
-             !    AUXDEM(IAUX)%ALLOTMENT = AUXDEM(IAUX)%DELIVERY_YTD      ! --> Set allotment equal to deliveries year-to-date ... auxs can't call for additional water.
-             !  ELSE IF (AUXDEM(IAUX)%AuxSeg.EQ.0) THEN                   ! No aux segment
-             !    AUXDEM(IAUX)%ALLOTMENT = DZ                            ! --> Set allotment to zero ... aux doesn't get SW delivery
-             !  ELSE
-             !    AUXDEM(IAUX)%ALLOTMENT = DIST(IDIST)%EQ_ALLOTMENT * SWO%AUXDEM(IAUX)%DIST_ALLOC_FRAC !AUXDEM(IAUX)%AREA
-             !  END IF !(IDIST.NE.0)
-             !END DO !(IAUX)
-             !
-             !
-             !
-             ! (3) Compute allotment balance for each farm, aux demand ...
-             !     BALANCE(FARM) = ALLOTMENT(FARM) - DELIVERY_YTD(FARM)
-             !     BALANCE(AUX)  = ALLOTMENT(AUX)  - DELIVERY_YTD(AUX)
-             DO F=1, NFARM
-             IF(FARM(F)%DistID>Z .AND. FARM(F)%DelSeg>Z) THEN
-               !
-               I = FARM(F)%DistID
-               J = FARM(F)%UnitID
-               !
-               IF     (DIST(I)%S_ALLOTMENT_BYBEN) THEN
-                                                        FARM(F)%BALANCE = SWO%FARM( DIST(I)%FARM(F) )%S_ALLOTMENT * SWO%DELT
-               ELSE IF(DIST(I)%S_ALLOTMENT.GE.DZ) THEN
-                                                        FARM(F)%BALANCE = DIST(I)%S_ALLOTMENT     * FARM(F)%DIST_ALLOC_FRAC * SWO%DELT
-               ELSE IF(DIST(I)%S_ALLOTMENT_VOL.GE.DZ) THEN
-                                                        FARM(F)%BALANCE = DIST(I)%S_ALLOTMENT_VOL * FARM(F)%DIST_ALLOC_FRAC
+               ! Iteration stagger or hold period ...
+               ELSEIF(FARM(F)%DEL_TOL_CNT >= 25) THEN
+                                                     FARM(F)%DELORDER = DZ
                ELSE
-                                                        FARM(F)%BALANCE = FARM(F)%ALLOTMENT-FARM(F)%DELIVERY_YTD
-               ENDIF
-               !
-               IF(FARM(F)%BALANCE < NEARZERO_5) FARM(F)%BALANCE = DZ
-               !
-               UNIT(J)%BALANCE = UNIT(J)%BALANCE + FARM(F)%BALANCE
-             END IF
-             END DO
-             !
-             !
-             DO IAUX=1, NAUXDEM
-               IF(AUXDEM(IAUX)%DistID>Z .AND. AUXDEM(IAUX)%AuxSeg>Z) THEN
-                  AUXDEM(IAUX)%BALANCE = AUXDEM(IAUX)%ALLOTMENT - (AUXDEM(IAUX)%DELIVERY_YTD*AUXDEM(IAUX)%FACTOR)
-                  IF(AUXDEM(IAUX)%BALANCE < NEARZERO_5) AUXDEM(IAUX)%BALANCE = DZ
-                  !
-                  UNIT(AUXDEM(IAUX)%UnitID)%BALANCE = UNIT(AUXDEM(IAUX)%UnitID)%BALANCE + AUXDEM(IAUX)%BALANCE
-               END IF
-             END DO
-             !
-             ! (4) Compute delivery request to farms/auxs, units, districts, projects
-             !     DELREQ(FARM) = MIN( TFDR(FARM), BALANCE(FARM) )
-             !     DELREQ(AUX)  = MIN( DEMAND(AUX),BALANCE(AUX) )
-             DO F=1, NFARM
-               IF(FARM(F)%DelSeg>Z .AND. FARM(F)%UnitID>Z .AND. FARM(F)%TFDR>NEARZERO_6 .AND.  FARM(F)%BALANCE>NEARZERO_6) THEN
-                    IUNIT = FARM(F)%UnitID
-                    IDIST = FARM(F)%DistID
-                    IPROJ = FARM(F)%ProjID
-                    !
-                    ! Iteration spin-up period ...
-                    IF (KITER.LE.SWO%SWMXITER(1) ) THEN            !.OR. SWO%FMP_SW_DEMAND(F) * DELT <= SWO%FARM(F)%REQ_DELIVERY_VOL
-                      FARM(F)%DELORDER = MIN( FARM(F)%TFDR, FARM(F)%BALANCE, SWO%FMP_SW_LIMIT(F) )
-                      !
-                    ! Iteration stagger or hold period ...
-                    ELSEIF(FARM(F)%DEL_TOL_CNT >= 25) THEN
-                                                          FARM(F)%DELORDER = DZ
-                    ELSE
-                      DTMP1 = FARM_PREV(F)%DELORDER
-                      DTMP2 = FARM_PREV(F)%DELIVERY
-                      IF (DTMP1.NE.DZ) THEN
-                        DTMP3 = DTMP2/DTMP1
-                      ELSE
-                        DTMP3 = DZ
-                      END IF !(DTMP2.EQ.DZ)
-                      ! SCOTT THIS USED TO CHECK FOR IDIST.NE.3
+                 DTMP1 = FARM_PREV(F)%DELORDER
+                 DTMP2 = FARM_PREV(F)%DELIVERY
+                 IF (DTMP1.NE.DZ) THEN
+                   DTMP3 = DTMP2/DTMP1
+                 ELSE
+                   DTMP3 = DZ
+                 END IF !(DTMP2.EQ.DZ)
+                 ! SCOTT THIS USED TO CHECK FOR IDIST.NE.3
 
-                      IF ( DTMP3.LT.DIST_DELTOL(IDIST) .AND. FARM(F)%TFDR > SWO%FARM(F)%REQ_DELIVERY_VOL ) THEN  !Required Deliv not in effect and loses too much water
-                        FARM(F)%DEL_TOL_CNT =  FARM(F)%DEL_TOL_CNT + ONE
-                      ELSE
-                        FARM(F)%DELORDER = MIN( FARM(F)%TFDR,  FARM(F)%BALANCE, SWO%FMP_SW_LIMIT(F) )
-                      END IF !(DTMP1.EQ.0 | DTMP1/DTMP2.LT.0.5)
-                    END IF !(KITER.LE.SWMXITER(1))
-                    !
-                    ! Impose minimum delivery order ...
-                    IF ( FARM(F)%DELORDER.LT.SWO%MIN_DELORDER(F) ) FARM(F)%DELORDER = DZ
-                    !
-                    UNIT(IUNIT)%TFDR      = UNIT(IUNIT)%TFDR + FARM(F)%TFDR
-                    UNIT(IUNIT)%DELORDER  = UNIT(IUNIT)%DELORDER + FARM(F)%DELORDER
-                    !
-                    DIST(IDIST)%TFDR      = DIST(IDIST)%TFDR + FARM(F)%TFDR
-                    DIST(IDIST)%DELORDER  = DIST(IDIST)%DELORDER + FARM(F)%DELORDER
-                    !
-                    PROJ(IPROJ)%TFDR      = PROJ(IPROJ)%TFDR + FARM(F)%TFDR
-                    PROJ(IPROJ)%DELORDER  = PROJ(IPROJ)%DELORDER + FARM(F)%DELORDER
-               ELSE
-                   FARM(F)%DELORDER = DZ
-               END IF
-             END DO
-             !DO IFARM = 1,NFARM
-             !  !
-             !  IUNIT = FARM(IFARM)%UnitID
-             !  IDIST = FARM(IFARM)%DistID
-             !  IPROJ = FARM(IFARM)%ProjID
-             !  IF (FARM(IFARM)%DelSeg.EQ.0) THEN
-             !    FARM(IFARM)%DELORDER = DZ                                    ! GW only farm!
-             !  ELSE
-             !    ! Iteration spin-up period ...
-             !    IF (KITER.LE.SWO%SWMXITER(1)) THEN
-             !      FARM(IFARM)%DELORDER = MIN( FARM(IFARM)%TFDR, FARM(IFARM)%BALANCE, SWO%FMP_SW_LIMIT(IFARM) )
-             !      !
-             !    ! Iteration stagger or hold period ...
-             !    ELSE
-             !      DTMP1 = FARM_PREV(IFARM)%DELORDER
-             !      DTMP2 = FARM_PREV(IFARM)%DELIVERY
-             !      IF (DTMP1.NE.DZ) THEN
-             !        DTMP3 = DTMP2/DTMP1
-             !      ELSE
-             !        DTMP3 = DZ
-             !      END IF !(DTMP2.EQ.DZ)
-             !      ! SCOTT THIS USED TO CHECK FOR IDIST.NE.3
-             !      IF (DTMP1 < SWO%MIN_DELORDER(IFARM) .OR. DTMP3.LT.DIST_DELTOL(IDIST) ) THEN
-             !        FARM(IFARM)%DELORDER = DZ
-             !      ELSE
-             !        FARM(IFARM)%DELORDER = MIN( FARM(IFARM)%TFDR,  FARM(IFARM)%BALANCE, SWO%FMP_SW_LIMIT(IFARM) )
-             !      END IF !(DTMP1.EQ.0 | DTMP1/DTMP2.LT.0.5)
-             !    END IF !(KITER.LE.SWMXITER(1))
-             !    !
-             !    ! Impose minimum delivery order ...
-             !    IF ( FARM(IFARM)%DELORDER.LT.SWO%MIN_DELORDER(IFARM) ) FARM(IFARM)%DELORDER = DZ
-             !  END IF !(DelSeg.EQ.0)
-             !  !
-             !  IF (IUNIT.NE.0) THEN
-             !    UNIT(IUNIT)%TFDR      = UNIT(IUNIT)%TFDR + FARM(IFARM)%TFDR
-             !    UNIT(IUNIT)%DELORDER  = UNIT(IUNIT)%DELORDER + FARM(IFARM)%DELORDER
-             !  END IF !(IUNIT.NE.0)
-             !
-             !  IF (IDIST.NE.0) THEN
-             !    DIST(IDIST)%TFDR      = DIST(IDIST)%TFDR + FARM(IFARM)%TFDR
-             !    DIST(IDIST)%DELORDER  = DIST(IDIST)%DELORDER + FARM(IFARM)%DELORDER
-             !  END IF !(IDIST.NE.0)
-             !
-             !  IF (IPROJ.NE.0) THEN
-             !    PROJ(IPROJ)%TFDR      = PROJ(IPROJ)%TFDR + FARM(IFARM)%TFDR
-             !    PROJ(IPROJ)%DELORDER  = PROJ(IPROJ)%DELORDER + FARM(IFARM)%DELORDER
-             !  END IF !(IPROJ.NE.0)
-             !  !
-             !END DO !(IFARM)
-       I     = -1
-       J     = -1
-       IPROJ = -1
-       IRES  = -1
-       ISEG  = -1
-       IRCH  = -1
-       IDVS  = -1
-       ISPT  = -1
-       IBRC  = -1
-       IRES  = -1
-       JRES  = -1
-       IPROJ = -1
-       IDIST = -1
-       IUNIT = -1
-       IFARM = -1
-       IAUX  = -1
+                 IF ( DTMP3.LT.DIST_DELTOL(IDIST) .AND. FARM(F)%TFDR > SWO%FARM(F)%REQ_DELIVERY_VOL ) THEN  !Required Deliv not in effect and loses too much water
+                   FARM(F)%DEL_TOL_CNT =  FARM(F)%DEL_TOL_CNT + ONE
+                 ELSE
+                   FARM(F)%DELORDER = MIN( FARM(F)%TFDR,  FARM(F)%BALANCE, SWO%FMP_SW_LIMIT(F) )
+                 END IF !(DTMP1.EQ.0 | DTMP1/DTMP2.LT.0.5)
+               END IF !(KITER.LE.SWMXITER(1))
+               !
+               ! Impose minimum delivery order ...
+               IF ( FARM(F)%DELORDER.LT.SWO%MIN_DELORDER(F) ) FARM(F)%DELORDER = DZ
+               !
+               UNIT(IUNIT)%TFDR      = UNIT(IUNIT)%TFDR + FARM(F)%TFDR
+               UNIT(IUNIT)%DELORDER  = UNIT(IUNIT)%DELORDER + FARM(F)%DELORDER
+               !
+               DIST(IDIST)%TFDR      = DIST(IDIST)%TFDR + FARM(F)%TFDR
+               DIST(IDIST)%DELORDER  = DIST(IDIST)%DELORDER + FARM(F)%DELORDER
+               !
+               PROJ(IPROJ)%TFDR      = PROJ(IPROJ)%TFDR + FARM(F)%TFDR
+               PROJ(IPROJ)%DELORDER  = PROJ(IPROJ)%DELORDER + FARM(F)%DELORDER
+          ELSE
+              FARM(F)%DELORDER = DZ
+          END IF
+        END DO
+        !DO IFARM = 1,NFARM
+        !  !
+        !  IUNIT = FARM(IFARM)%UnitID
+        !  IDIST = FARM(IFARM)%DistID
+        !  IPROJ = FARM(IFARM)%ProjID
+        !  IF (FARM(IFARM)%DelSeg.EQ.0) THEN
+        !    FARM(IFARM)%DELORDER = DZ                                    ! GW only farm!
+        !  ELSE
+        !    ! Iteration spin-up period ...
+        !    IF (KITER.LE.SWO%SWMXITER(1)) THEN
+        !      FARM(IFARM)%DELORDER = MIN( FARM(IFARM)%TFDR, FARM(IFARM)%BALANCE, SWO%FMP_SW_LIMIT(IFARM) )
+        !      !
+        !    ! Iteration stagger or hold period ...
+        !    ELSE
+        !      DTMP1 = FARM_PREV(IFARM)%DELORDER
+        !      DTMP2 = FARM_PREV(IFARM)%DELIVERY
+        !      IF (DTMP1.NE.DZ) THEN
+        !        DTMP3 = DTMP2/DTMP1
+        !      ELSE
+        !        DTMP3 = DZ
+        !      END IF !(DTMP2.EQ.DZ)
+        !      ! SCOTT THIS USED TO CHECK FOR IDIST.NE.3
+        !      IF (DTMP1 < SWO%MIN_DELORDER(IFARM) .OR. DTMP3.LT.DIST_DELTOL(IDIST) ) THEN
+        !        FARM(IFARM)%DELORDER = DZ
+        !      ELSE
+        !        FARM(IFARM)%DELORDER = MIN( FARM(IFARM)%TFDR,  FARM(IFARM)%BALANCE, SWO%FMP_SW_LIMIT(IFARM) )
+        !      END IF !(DTMP1.EQ.0 | DTMP1/DTMP2.LT.0.5)
+        !    END IF !(KITER.LE.SWMXITER(1))
+        !    !
+        !    ! Impose minimum delivery order ...
+        !    IF ( FARM(IFARM)%DELORDER.LT.SWO%MIN_DELORDER(IFARM) ) FARM(IFARM)%DELORDER = DZ
+        !  END IF !(DelSeg.EQ.0)
+        !  !
+        !  IF (IUNIT.NE.0) THEN
+        !    UNIT(IUNIT)%TFDR      = UNIT(IUNIT)%TFDR + FARM(IFARM)%TFDR
+        !    UNIT(IUNIT)%DELORDER  = UNIT(IUNIT)%DELORDER + FARM(IFARM)%DELORDER
+        !  END IF !(IUNIT.NE.0)
+        !
+        !  IF (IDIST.NE.0) THEN
+        !    DIST(IDIST)%TFDR      = DIST(IDIST)%TFDR + FARM(IFARM)%TFDR
+        !    DIST(IDIST)%DELORDER  = DIST(IDIST)%DELORDER + FARM(IFARM)%DELORDER
+        !  END IF !(IDIST.NE.0)
+        !
+        !  IF (IPROJ.NE.0) THEN
+        !    PROJ(IPROJ)%TFDR      = PROJ(IPROJ)%TFDR + FARM(IFARM)%TFDR
+        !    PROJ(IPROJ)%DELORDER  = PROJ(IPROJ)%DELORDER + FARM(IFARM)%DELORDER
+        !  END IF !(IPROJ.NE.0)
+        !  !
+        !END DO !(IFARM)
+        I     = -1
+        J     = -1
+        IPROJ = -1
+        IRES  = -1
+        ISEG  = -1
+        IRCH  = -1
+        IDVS  = -1
+        ISPT  = -1
+        IBRC  = -1
+        IRES  = -1
+        JRES  = -1
+        IPROJ = -1
+        IDIST = -1
+        IUNIT = -1
+        IFARM = -1
+        IAUX  = -1
              !
              !
              DO IAUX=1, NAUXDEM
@@ -11589,994 +11630,997 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
              END IF
              END DO !(ISEG)
              !
-       END IF !  SITER == ONE --------------------------------------------
-    I     = -1
-    J     = -1
-    IPROJ = -1
-    IRES  = -1
-    ISEG  = -1
-    IRCH  = -1
-    IDVS  = -1
-    ISPT  = -1
-    IBRC  = -1
-    IRES  = -1
-    JRES  = -1
-    IPROJ = -1
-    IDIST = -1
-    IUNIT = -1
-    IFARM = -1
-    IAUX  = -1
+      END IF !  SITER == ONE --------------------------------------------
+      I     = -1
+      J     = -1
+      IPROJ = -1
+      IRES  = -1
+      ISEG  = -1
+      IRCH  = -1
+      IDVS  = -1
+      ISPT  = -1
+      IBRC  = -1
+      IRES  = -1
+      JRES  = -1
+      IPROJ = -1
+      IDIST = -1
+      IUNIT = -1
+      IFARM = -1
+      IAUX  = -1
+      !
+      ! (5) Compute diversion request for each diversion segment
+      !     DIVREQ(DIVSEG) = sum( DELREQ(FARM+AUX) ) - sum( gains ) - sum( inflows/input ) - sum( inflows/routed )
+      DO IDVS = 1,SWO%DIVCOUNT
+        !
+        ISEG  = DIVSEG(IDVS)%DivSeg
+        !
+        ! Zero out sums...
+        DIVSEG(IDVS)%TFDR      = DZ
+        DIVSEG(IDVS)%DELORDER  = DZ
+        DIVSEG(IDVS)%DIVORDER  = DZ
+        DIVSEG(IDVS)%DSEEP     = DZ
+        DIVSEG(IDVS)%DFLOW_IN  = DZ
+        DIVSEG(IDVS)%DFLOW_RT  = DZ
+        !
+        ! Add @ diversion segment ...
+        !
+        ! -- TFDR / DELORDER
+        IF (SEGINFO(ISEG)%SegType.EQ.THREE) THEN
+          IFARM = SEGINFO(ISEG)%FarmID
+          IAUX  = SEGINFO(ISEG)%AuxID
+          IF (IFARM.NE.0) THEN
+            DIVSEG(IDVS)%TFDR     = DIVSEG(IDVS)%TFDR + SWO%FARM(IFARM)%TFDR
+            DIVSEG(IDVS)%DELORDER = DIVSEG(IDVS)%DELORDER + FARM(IFARM)%DELORDER
+          END IF !(IFARM.NE.0)
+          IF (IAUX.NE.0) THEN
+            DIVSEG(IDVS)%TFDR     = DIVSEG(IDVS)%TFDR + AUXDEM(IAUX)%DEMAND
+            DIVSEG(IDVS)%DELORDER = DIVSEG(IDVS)%DELORDER + AUXDEM(IAUX)%DELORDER
+          END IF !(IAUX.NE.0)
+        END IF !(SegType.EQ.3)
+        !
+        IF (SEGDATA(ISEG)%DDFLAG.NE.0) THEN
           !
-          ! (5) Compute diversion request for each diversion segment
-          !     DIVREQ(DIVSEG) = sum( DELREQ(FARM+AUX) ) - sum( gains ) - sum( inflows/input ) - sum( inflows/routed )
-          DO IDVS = 1,SWO%DIVCOUNT
+          ! -- DSEEP
+          IRCH    = SEGRCH_IN(ISEG)                                     ! reach index @ rch 1 of DIVSEG
+          JRCH    = SEGRCH_OUT(ISEG)                                    ! reach index @ last reach of DIVSEG
+          DO CONCURRENT (ISTR = IRCH:JRCH)
+            DIVSEG(IDVS)%DSEEP     = DIVSEG(IDVS)%DSEEP - STRM(11,ISTR) * SWO%DELT             ! NOTE: SFR specifies seepage LOSS as POSITIVE ... reverse here so GAIN is POSITIVE
+          END DO !(ISTR)
+          !
+          ! -- DFLOW_IN  (inflow @ SFR input file)
+          IF (IDIVAR(1,ISEG).EQ.0 .AND. SEGDATA(ISEG)%RRFLAG.NE.1) THEN
+            DIVSEG(IDVS)%DFLOW_IN  = DIVSEG(IDVS)%DFLOW_IN + SEG(2,ISEG) * SWO%DELT               ! Inflow specified in SFR (applies only to non-diversion segments!)
+          END IF !(IDIVAR(1).EQ.0)
+          !
+          ! -- DFLOW_RT (inflow @ SFR simulated)
+          NLIST   = SWO%UPSEG(ISEG)%NLIST
+          DO ILIST=1, NLIST
+            KSEG   = SWO%UPSEG(ISEG)%SEGLIST(ILIST)
+            JRCH   = SEGRCH_OUT(KSEG)
+            IF (SEGINFO(KSEG)%SegType.NE.TWO .AND.  SEGINFO(KSEG)%SegType.NE.THREE .AND. SEGDATA(KSEG)%OUTSEG.EQ.ISEG) THEN
+              DIVSEG(IDVS)%DFLOW_RT = DIVSEG(IDVS)%DFLOW_RT + STRM(9,JRCH) * SWO%DELT                                 ! Inflow simulated in SFR (i.e., simulated flow from upstream segment that is NOT in conveyance network)
+            END IF !(SegType.NE.2 / OUTSEG.EQ.ISEG)
+          END DO !(ILIST)
+          !
+        END IF !(SEGDATA(ISEG)%DDFLAG.NE.0)
+        !
+        ! Add downstream segments
+        NTREE   = SWO%DNTREE_CON2(ISEG)%NTREE
+        DO ITREE=1, NTREE
+          JSEG  = SWO%DNTREE_CON2(ISEG)%SEGTREE(ITREE)
+          !
+          ! -- TFDR / DELORDER
+          IF (SEGINFO(JSEG)%SegType.EQ.THREE) THEN
+            IFARM = SEGINFO(JSEG)%FarmID
+            IAUX  = SEGINFO(JSEG)%AuxID
+            IF (IFARM.NE.0) THEN
+              DIVSEG(IDVS)%TFDR     = DIVSEG(IDVS)%TFDR + FARM(IFARM)%TFDR
+              DIVSEG(IDVS)%DELORDER = DIVSEG(IDVS)%DELORDER + FARM(IFARM)%DELORDER
+            END IF !(IFARM.NE.0)
+            IF (IAUX.NE.0) THEN
+              DIVSEG(IDVS)%TFDR     = DIVSEG(IDVS)%TFDR + AUXDEM(IAUX)%DEMAND
+              DIVSEG(IDVS)%DELORDER = DIVSEG(IDVS)%DELORDER + AUXDEM(IAUX)%DELORDER
+            END IF !(IAUX.NE.0)
+          END IF !(SegType.EQ.3)
+          !
+          IF (SEGDATA(JSEG)%DDFLAG.NE.0) THEN
             !
-            ISEG  = DIVSEG(IDVS)%DivSeg
+            ! -- DSEEP
+            IRCH     = SEGRCH_IN(JSEG)                                  ! reach index @ rch 1 of DIVSEG
+            JRCH     = SEGRCH_OUT(JSEG)                                 ! reach index @ last reach of DIVSEG
+            DO CONCURRENT (JSTR  = IRCH:JRCH)
+              DIVSEG(IDVS)%DSEEP    = DIVSEG(IDVS)%DSEEP - STRM(11,JSTR) * SWO%DELT            ! NOTE: SFR specifies seepage LOSS as POSITIVE ... reverse here so GAIN is POSITIVE
+            END DO !(JSTR)
             !
-            ! Zero out sums...
-            DIVSEG(IDVS)%TFDR      = DZ
-            DIVSEG(IDVS)%DELORDER  = DZ
-            DIVSEG(IDVS)%DIVORDER  = DZ
-            DIVSEG(IDVS)%DSEEP     = DZ
-            DIVSEG(IDVS)%DFLOW_IN  = DZ
-            DIVSEG(IDVS)%DFLOW_RT  = DZ
+            ! -- DFLOW_IN  (inflow @ SFR input file)
+            IF (IDIVAR(1,JSEG).EQ.0 .AND. SEGDATA(JSEG)%RRFLAG.NE.1) THEN
+              DIVSEG(IDVS)%DFLOW_IN = DIVSEG(IDVS)%DFLOW_IN + SEG(2,JSEG) * SWO%DELT              ! Inflow specified in SFR (applies only to non-diversion segments!)
+            END IF !(IDIVAR(1).EQ.0)
             !
-            ! Add @ diversion segment ...
+            ! -- DFLOW_RT (inflow @ SFR simulated)
+            NLIST    = SWO%UPSEG(JSEG)%NLIST
+            DO ILIST=1, NLIST
+              KSEG   = SWO%UPSEG(JSEG)%SEGLIST(ILIST)
+              JRCH   = SEGRCH_OUT(KSEG)
+              IF (SEGINFO(KSEG)%SegType.NE.2 .AND. SEGINFO(KSEG)%SegType.NE.3 .AND. SEGDATA(KSEG)%OUTSEG.EQ.JSEG) THEN
+                DIVSEG(IDVS)%DFLOW_RT = DIVSEG(IDVS)%DFLOW_RT + STRM(9,JRCH) * SWO%DELT                               ! Inflow simulated in SFR (i.e., simulated flow from upstream segment that is NOT in conveyance network)
+              END IF !(SegType.NE.2 / OUTSEG.EQ.JSEG)
+            END DO !(ILIST)
+          END IF !(SEGINFO(JSEG)%DDFLAG.NE.0)
+        END DO !(ITREE/JSEG)
+        !
+        ! Compute diversion order ...
+        ! DivOrder = DelOrder - Gains - Inflow(input) - Inflow(simulated)
+        IF (DIVSEG(IDVS)%DELORDER.EQ.DZ) THEN
+            DIVSEG(IDVS)%DIVORDER   = DZ
+        ELSE
+            DIVSEG(IDVS)%DIVORDER   = DIVSEG(IDVS)%DELORDER - DIVSEG(IDVS)%DSEEP - DIVSEG(IDVS)%DFLOW_IN - DIVSEG(IDVS)%DFLOW_RT
+            IF(DIVSEG(IDVS)%DIVORDER < NEARZERO_5) DIVSEG(IDVS)%DIVORDER = DZ
+        END IF !(DELORDER.EQ.0)
+        !
+        ! IMF DEBUG --
+        ! Impose incremental update of diversion orders to reduce oscillation ...
+        IF(KITER < THREE) THEN !NO ADJUSTMENT FOR FIRST DIVERSION REQUESTS
+            CONTINUE
+        ELSEIF (DIVSEG(IDVS)%TFDR > NEARZERO_6) THEN
+            CALL RELAX_IT(DIVSEG(IDVS)%DIVORDER, DIVSEG_PREV(IDVS)%DIVORDER, SWO%WTFACTOR(1))
+            !CALL DAMP_IT(DIVSEG(IDVS)%DIVORDER, DIVSEG_PREV(IDVS)%DIVORDER, A, 0.9D0)
+        ELSE
+            CALL RELAX_IT(DIVSEG(IDVS)%DIVORDER, DIVSEG_PREV(IDVS)%DIVORDER, SWO%WTFACTOR(2))
+        END IF !(TFDR.GT.0)
+      END DO !(IDVS)
+      I     = -1
+      J     = -1
+      IPROJ = -1
+      IRES  = -1
+      ISEG  = -1
+      IRCH  = -1
+      IDVS  = -1
+      ISPT  = -1
+      IBRC  = -1
+      IRES  = -1
+      JRES  = -1
+      IPROJ = -1
+      IDIST = -1
+      IUNIT = -1
+      IFARM = -1
+      IAUX  = -1
+      !
+      ! (6) Compute fractional diversions through distribution network ...
+      !     Fractional diversion at each junction in the distribution network
+      !     is based on total *delivery request*,
+      !     accounting for cumulative gains/losses/inflows down each branch ...
+      DO ISPT = 1,SWO%SPTCOUNT
+
+        ISEG                    = SPTSEG(ISPT)%SplitSeg
+        NBRANCH                 = SPTSEG(ISPT)%NBRANCH
+
+        ! Zero out sums...
+        SPTSEG(ISPT)%TFDR       = DZ
+        SPTSEG(ISPT)%DELORDER   = DZ
+        SPTSEG(ISPT)%DIVORDER   = DZ
+        SPTSEG(ISPT)%DSEEP      = DZ
+        SPTSEG(ISPT)%DFLOW_IN   = DZ
+        SPTSEG(ISPT)%DFLOW_RT   = DZ
+        !
+        ! Add split segment
+        !
+        ! -- TFDR / DELORDER
+        IF (SEGINFO(ISEG)%SegType.EQ.THREE) THEN
+          IFARM = SEGINFO(ISEG)%FarmID
+          IAUX  = SEGINFO(ISEG)%AuxID
+          IF (IFARM.NE.0) THEN
+            SPTSEG(ISPT)%TFDR     = SPTSEG(ISPT)%TFDR + FARM(IFARM)%TFDR
+            SPTSEG(ISPT)%DELORDER = SPTSEG(ISPT)%DELORDER + FARM(IFARM)%DELORDER
+          END IF !(IFARM.NE.0)
+          IF (IAUX.NE.0) THEN
+            SPTSEG(ISPT)%TFDR     = SPTSEG(ISPT)%TFDR + AUXDEM(IAUX)%DEMAND
+            SPTSEG(ISPT)%DELORDER = SPTSEG(ISPT)%DELORDER + AUXDEM(IAUX)%DELORDER
+          END IF !(IAUX.NE.0)
+        END IF !(SegType.EQ.3)
+        !
+        IF (SEGDATA(ISEG)%DDFLAG.NE.0) THEN
+          !
+          ! -- DSEEP
+          IRCH    = SEGRCH_IN(ISEG)                                     ! reach index @ rch 1 of SPTSEG
+          JRCH    = SEGRCH_OUT(ISEG)                                    ! reach index @ last reach of SPTSEG
+          DO CONCURRENT (ISTR = IRCH:JRCH)
+            SPTSEG(ISPT)%DSEEP    = SPTSEG(ISPT)%DSEEP - STRM(11,ISTR) * SWO%DELT              ! NOTE: SFR specifies seepage LOSS as POSITIVE ... reverse here so GAIN is POSITIVE
+          END DO !(ISTR)
+          !
+          ! -- DFLOW_IN  (inflow @ SFR input file)
+          IF (IDIVAR(1,ISEG).EQ.0 .AND. SEGDATA(ISEG)%RRFLAG.NE.1) THEN
+            SPTSEG(ISPT)%DFLOW_IN  = SPTSEG(ISPT)%DFLOW_IN + SEG(2,ISEG) * SWO%DELT               ! Inflow specified in SFR (applies only to non-diversion segments!)
+          END IF !(IDIVAR(1).EQ.0)
+          !
+          ! -- DFLOW_RT (inflow @ SFR simulated)
+          NLIST    = SWO%UPSEG(ISEG)%NLIST
+          DO ILIST=1, NLIST
+            KSEG  = SWO%UPSEG(ISEG)%SEGLIST(ILIST)
+            JRCH  = SEGRCH_OUT(KSEG)
+            IF (SEGINFO(KSEG)%SegType.NE.2 .AND. SEGINFO(KSEG)%SegType.NE.3 .AND. SEGDATA(KSEG)%OUTSEG.EQ.ISEG) THEN
+              SPTSEG(ISPT)%DFLOW_RT = SPTSEG(ISPT)%DFLOW_RT + STRM(9,JRCH) * SWO%DELT                                 ! Inflow simulated in SFR (i.e., simulated flow from upstream segment that is NOT in conveyance network)
+            END IF !(SegType.NE.2 / OUTSEG.EQ.ISEG)
+          END DO !(ILIST)
+          !
+        END IF !(SEGDATA(ISEG)%DDFLAG.NE.0)
+        !
+        ! Loop down branches
+        DO J = 1,NBRANCH
+          !
+          JSEG  = SPTSEG(ISPT)%BrcSeg(J)
+          SPTSEG(ISPT)%BrcTFDR(J)      = DZ
+          SPTSEG(ISPT)%BrcDELORDER(J)  = DZ
+          SPTSEG(ISPT)%BrcDIVORDER(J)  = DZ
+          SPTSEG(ISPT)%BrcDSEEP(J)     = DZ
+          SPTSEG(ISPT)%BrcDFLOW_IN(J)  = DZ
+          SPTSEG(ISPT)%BrcDFLOW_RT(J)  = DZ
+          !
+          ! Add branch segment
+          !
+          ! -- TFDR / DELORDER
+          IF (SEGINFO(JSEG)%SegType.EQ.THREE) THEN
+            IFARM = SEGINFO(JSEG)%FarmID
+            IAUX  = SEGINFO(JSEG)%AuxID
+            IF (IFARM.NE.0) THEN
+              SPTSEG(ISPT)%TFDR          = SPTSEG(ISPT)%TFDR          + FARM(IFARM)%TFDR
+              SPTSEG(ISPT)%DELORDER      = SPTSEG(ISPT)%DELORDER      + FARM(IFARM)%DELORDER
+              SPTSEG(ISPT)%BrcTFDR(J) = SPTSEG(ISPT)%BrcTFDR(J) + FARM(IFARM)%TFDR
+              SPTSEG(ISPT)%BrcDELORDER(J) = SPTSEG(ISPT)%BrcDELORDER(J) + FARM(IFARM)%DELORDER
+            END IF !(IFARM.NE.0)
+            IF (IAUX.NE.0) THEN
+              SPTSEG(ISPT)%TFDR     = SPTSEG(ISPT)%TFDR + AUXDEM(IAUX)%DEMAND
+              SPTSEG(ISPT)%DELORDER = SPTSEG(ISPT)%DELORDER + AUXDEM(IAUX)%DELORDER
+              SPTSEG(ISPT)%BrcTFDR(J) = SPTSEG(ISPT)%BrcTFDR(J) + AUXDEM(IAUX)%DEMAND
+              SPTSEG(ISPT)%BrcDELORDER(J) = SPTSEG(ISPT)%BrcDELORDER(J) + AUXDEM(IAUX)%DELORDER
+            END IF !(IAUX.NE.0)
+          END IF !(SegType.EQ.3)
+          !
+          IF (SEGDATA(JSEG)%DDFLAG.NE.0) THEN
+            !
+            ! -- DSEEP
+            IRCH   =SEGRCH_IN(JSEG)                                     ! reach index @ rch 1 of branch segment
+            JRCH   =SEGRCH_OUT(JSEG)                                    ! reach index @ last reach of branch segment
+            DO ISTR=IRCH, JRCH
+              SPTSEG(ISPT)%DSEEP          = SPTSEG(ISPT)%DSEEP - STRM(11,ISTR) * SWO%DELT              ! NOTE: SFR specifies seepage LOSS as POSITIVE ... reverse here so GAIN is POSITIVE
+              SPTSEG(ISPT)%BrcDSEEP(J) = SPTSEG(ISPT)%BrcDSEEP(J) - STRM(11,ISTR) * SWO%DELT
+            END DO !(ISTR)
+            !
+            ! -- DFLOW_IN  (inflow @ SFR input file)
+            IF (IDIVAR(1,JSEG).EQ.0 .AND. SEGDATA(JSEG)%RRFLAG.NE.1) THEN
+              SPTSEG(ISPT)%DFLOW_IN  = SPTSEG(ISPT)%DFLOW_IN + SEG(2,JSEG) * SWO%DELT               ! Inflow specified in SFR (applies only to non-diversion segments!)
+              SPTSEG(ISPT)%BrcDFLOW_IN(J) = SPTSEG(ISPT)%BrcDFLOW_IN(J) + SEG(2,JSEG) * SWO%DELT
+            END IF !(IDIVAR(1).EQ.0)
+            !
+            ! -- DFLOW_RT (inflow @ SFR simulated)
+            NLIST    = SWO%UPSEG(JSEG)%NLIST
+            DO ILIST=1, NLIST
+              KSEG   = SWO%UPSEG(JSEG)%SEGLIST(ILIST)
+              JRCH   = SEGRCH_OUT(KSEG)
+              IF (SEGINFO(KSEG)%SegType.NE.2 .AND. SEGINFO(KSEG)%SegType.NE.3 .AND. SEGDATA(KSEG)%OUTSEG.EQ.JSEG) THEN
+                SPTSEG(ISPT)%DFLOW_RT = SPTSEG(ISPT)%DFLOW_RT + STRM(9,JRCH) * SWO%DELT                                 ! Inflow simulated in SFR (i.e., simulated flow from upstream segment that is NOT in conveyance network)
+                SPTSEG(ISPT)%BrcDFLOW_RT(J) = SPTSEG(ISPT)%BrcDFLOW_RT(J) + STRM(9,JRCH) * SWO%DELT
+              END IF !(SegType.NE.2 / OUTSEG.EQ.JSEG)
+            END DO !(ILIST)
+            !
+          END IF !(SEGDATA(JSEG)%DDFLAG.NE.0)
+          !
+          ! Add downstream tree below branch segment
+          NTREE = SWO%DNTREE_CON2(JSEG)%NTREE
+          DO ITREE=1, NTREE
+            !
+            KSEG   = SWO%DNTREE_CON2(JSEG)%SEGTREE(ITREE)
             !
             ! -- TFDR / DELORDER
-            IF (SEGINFO(ISEG)%SegType.EQ.THREE) THEN
-              IFARM = SEGINFO(ISEG)%FarmID
-              IAUX  = SEGINFO(ISEG)%AuxID
-              IF (IFARM.NE.0) THEN
-                DIVSEG(IDVS)%TFDR     = DIVSEG(IDVS)%TFDR + SWO%FARM(IFARM)%TFDR
-                DIVSEG(IDVS)%DELORDER = DIVSEG(IDVS)%DELORDER + FARM(IFARM)%DELORDER
-              END IF !(IFARM.NE.0)
-              IF (IAUX.NE.0) THEN
-                DIVSEG(IDVS)%TFDR     = DIVSEG(IDVS)%TFDR + AUXDEM(IAUX)%DEMAND
-                DIVSEG(IDVS)%DELORDER = DIVSEG(IDVS)%DELORDER + AUXDEM(IAUX)%DELORDER
-              END IF !(IAUX.NE.0)
-            END IF !(SegType.EQ.3)
-            !
-            IF (SEGDATA(ISEG)%DDFLAG.NE.0) THEN
-              !
-              ! -- DSEEP
-              IRCH    = SEGRCH_IN(ISEG)                                     ! reach index @ rch 1 of DIVSEG
-              JRCH    = SEGRCH_OUT(ISEG)                                    ! reach index @ last reach of DIVSEG
-              DO CONCURRENT (ISTR = IRCH:JRCH)
-                DIVSEG(IDVS)%DSEEP     = DIVSEG(IDVS)%DSEEP - STRM(11,ISTR) * SWO%DELT             ! NOTE: SFR specifies seepage LOSS as POSITIVE ... reverse here so GAIN is POSITIVE
-              END DO !(ISTR)
-              !
-              ! -- DFLOW_IN  (inflow @ SFR input file)
-              IF (IDIVAR(1,ISEG).EQ.0 .AND. SEGDATA(ISEG)%RRFLAG.NE.1) THEN
-                DIVSEG(IDVS)%DFLOW_IN  = DIVSEG(IDVS)%DFLOW_IN + SEG(2,ISEG) * SWO%DELT               ! Inflow specified in SFR (applies only to non-diversion segments!)
-              END IF !(IDIVAR(1).EQ.0)
-              !
-              ! -- DFLOW_RT (inflow @ SFR simulated)
-              NLIST   = SWO%UPSEG(ISEG)%NLIST
-              DO ILIST=1, NLIST
-                KSEG   = SWO%UPSEG(ISEG)%SEGLIST(ILIST)
-                JRCH   = SEGRCH_OUT(KSEG)
-                IF (SEGINFO(KSEG)%SegType.NE.TWO .AND.  SEGINFO(KSEG)%SegType.NE.THREE .AND. SEGDATA(KSEG)%OUTSEG.EQ.ISEG) THEN
-                  DIVSEG(IDVS)%DFLOW_RT = DIVSEG(IDVS)%DFLOW_RT + STRM(9,JRCH) * SWO%DELT                                 ! Inflow simulated in SFR (i.e., simulated flow from upstream segment that is NOT in conveyance network)
-                END IF !(SegType.NE.2 / OUTSEG.EQ.ISEG)
-              END DO !(ILIST)
-              !
-            END IF !(SEGDATA(ISEG)%DDFLAG.NE.0)
-            !
-            ! Add downstream segments
-            NTREE   = SWO%DNTREE_CON2(ISEG)%NTREE
-            DO ITREE=1, NTREE
-              JSEG  = SWO%DNTREE_CON2(ISEG)%SEGTREE(ITREE)
-              !
-              ! -- TFDR / DELORDER
-              IF (SEGINFO(JSEG)%SegType.EQ.THREE) THEN
-                IFARM = SEGINFO(JSEG)%FarmID
-                IAUX  = SEGINFO(JSEG)%AuxID
-                IF (IFARM.NE.0) THEN
-                  DIVSEG(IDVS)%TFDR     = DIVSEG(IDVS)%TFDR + FARM(IFARM)%TFDR
-                  DIVSEG(IDVS)%DELORDER = DIVSEG(IDVS)%DELORDER + FARM(IFARM)%DELORDER
-                END IF !(IFARM.NE.0)
-                IF (IAUX.NE.0) THEN
-                  DIVSEG(IDVS)%TFDR     = DIVSEG(IDVS)%TFDR + AUXDEM(IAUX)%DEMAND
-                  DIVSEG(IDVS)%DELORDER = DIVSEG(IDVS)%DELORDER + AUXDEM(IAUX)%DELORDER
-                END IF !(IAUX.NE.0)
-              END IF !(SegType.EQ.3)
-              !
-              IF (SEGDATA(JSEG)%DDFLAG.NE.0) THEN
-                !
-                ! -- DSEEP
-                IRCH     = SEGRCH_IN(JSEG)                                  ! reach index @ rch 1 of DIVSEG
-                JRCH     = SEGRCH_OUT(JSEG)                                 ! reach index @ last reach of DIVSEG
-                DO CONCURRENT (JSTR  = IRCH:JRCH)
-                  DIVSEG(IDVS)%DSEEP    = DIVSEG(IDVS)%DSEEP - STRM(11,JSTR) * SWO%DELT            ! NOTE: SFR specifies seepage LOSS as POSITIVE ... reverse here so GAIN is POSITIVE
-                END DO !(JSTR)
-                !
-                ! -- DFLOW_IN  (inflow @ SFR input file)
-                IF (IDIVAR(1,JSEG).EQ.0 .AND. SEGDATA(JSEG)%RRFLAG.NE.1) THEN
-                  DIVSEG(IDVS)%DFLOW_IN = DIVSEG(IDVS)%DFLOW_IN + SEG(2,JSEG) * SWO%DELT              ! Inflow specified in SFR (applies only to non-diversion segments!)
-                END IF !(IDIVAR(1).EQ.0)
-                !
-                ! -- DFLOW_RT (inflow @ SFR simulated)
-                NLIST    = SWO%UPSEG(JSEG)%NLIST
-                DO ILIST=1, NLIST
-                  KSEG   = SWO%UPSEG(JSEG)%SEGLIST(ILIST)
-                  JRCH   = SEGRCH_OUT(KSEG)
-                  IF (SEGINFO(KSEG)%SegType.NE.2 .AND. SEGINFO(KSEG)%SegType.NE.3 .AND. SEGDATA(KSEG)%OUTSEG.EQ.JSEG) THEN
-                    DIVSEG(IDVS)%DFLOW_RT = DIVSEG(IDVS)%DFLOW_RT + STRM(9,JRCH) * SWO%DELT                               ! Inflow simulated in SFR (i.e., simulated flow from upstream segment that is NOT in conveyance network)
-                  END IF !(SegType.NE.2 / OUTSEG.EQ.JSEG)
-                END DO !(ILIST)
-              END IF !(SEGINFO(JSEG)%DDFLAG.NE.0)
-            END DO !(ITREE/JSEG)
-            !
-            ! Compute diversion order ...
-            ! DivOrder = DelOrder - Gains - Inflow(input) - Inflow(simulated)
-            IF (DIVSEG(IDVS)%DELORDER.EQ.DZ) THEN
-                DIVSEG(IDVS)%DIVORDER   = DZ
-            ELSE
-                DIVSEG(IDVS)%DIVORDER   = DIVSEG(IDVS)%DELORDER - DIVSEG(IDVS)%DSEEP - DIVSEG(IDVS)%DFLOW_IN - DIVSEG(IDVS)%DFLOW_RT
-                IF(DIVSEG(IDVS)%DIVORDER < NEARZERO_5) DIVSEG(IDVS)%DIVORDER = DZ
-            END IF !(DELORDER.EQ.0)
-            !
-            ! IMF DEBUG --
-            ! Impose incremental update of diversion orders to reduce oscillation ...
-            IF(KITER < THREE) THEN !NO ADJUSTMENT FOR FIRST DIVERSION REQUESTS
-                CONTINUE
-            ELSEIF (DIVSEG(IDVS)%TFDR > NEARZERO_6) THEN
-                CALL RELAX_IT(DIVSEG(IDVS)%DIVORDER, DIVSEG_PREV(IDVS)%DIVORDER, SWO%WTFACTOR(1))
-                !CALL DAMP_IT(DIVSEG(IDVS)%DIVORDER, DIVSEG_PREV(IDVS)%DIVORDER, A, 0.9D0)
-            ELSE
-                CALL RELAX_IT(DIVSEG(IDVS)%DIVORDER, DIVSEG_PREV(IDVS)%DIVORDER, SWO%WTFACTOR(2))
-            END IF !(TFDR.GT.0)
-          END DO !(IDVS)
-    I     = -1
-    J     = -1
-    IPROJ = -1
-    IRES  = -1
-    ISEG  = -1
-    IRCH  = -1
-    IDVS  = -1
-    ISPT  = -1
-    IBRC  = -1
-    IRES  = -1
-    JRES  = -1
-    IPROJ = -1
-    IDIST = -1
-    IUNIT = -1
-    IFARM = -1
-    IAUX  = -1
-          !
-          ! (6) Compute fractional diversions through distribution network ...
-          !     Fractional diversion at each junction in the distribution network
-          !     is based on total *delivery request*,
-          !     accounting for cumulative gains/losses/inflows down each branch ...
-          DO ISPT = 1,SWO%SPTCOUNT
-
-            ISEG                    = SPTSEG(ISPT)%SplitSeg
-            NBRANCH                 = SPTSEG(ISPT)%NBRANCH
-
-            ! Zero out sums...
-            SPTSEG(ISPT)%TFDR       = DZ
-            SPTSEG(ISPT)%DELORDER   = DZ
-            SPTSEG(ISPT)%DIVORDER   = DZ
-            SPTSEG(ISPT)%DSEEP      = DZ
-            SPTSEG(ISPT)%DFLOW_IN   = DZ
-            SPTSEG(ISPT)%DFLOW_RT   = DZ
-            !
-            ! Add split segment
-            !
-            ! -- TFDR / DELORDER
-            IF (SEGINFO(ISEG)%SegType.EQ.THREE) THEN
-              IFARM = SEGINFO(ISEG)%FarmID
-              IAUX  = SEGINFO(ISEG)%AuxID
+            IF (SWO%SEGINFO(KSEG)%SegType.EQ.3) THEN
+              IFARM = SEGINFO(KSEG)%FarmID
+              IAUX  = SEGINFO(KSEG)%AuxID
               IF (IFARM.NE.0) THEN
                 SPTSEG(ISPT)%TFDR     = SPTSEG(ISPT)%TFDR + FARM(IFARM)%TFDR
                 SPTSEG(ISPT)%DELORDER = SPTSEG(ISPT)%DELORDER + FARM(IFARM)%DELORDER
+                SPTSEG(ISPT)%BrcTFDR(J) = SPTSEG(ISPT)%BrcTFDR(J) + FARM(IFARM)%TFDR
+                SPTSEG(ISPT)%BrcDELORDER(J) = SPTSEG(ISPT)%BrcDELORDER(J) + FARM(IFARM)%DELORDER
               END IF !(IFARM.NE.0)
               IF (IAUX.NE.0) THEN
                 SPTSEG(ISPT)%TFDR     = SPTSEG(ISPT)%TFDR + AUXDEM(IAUX)%DEMAND
                 SPTSEG(ISPT)%DELORDER = SPTSEG(ISPT)%DELORDER + AUXDEM(IAUX)%DELORDER
+                SPTSEG(ISPT)%BrcTFDR(J) = SPTSEG(ISPT)%BrcTFDR(J) + AUXDEM(IAUX)%DEMAND
+                SPTSEG(ISPT)%BrcDELORDER(J) = SPTSEG(ISPT)%BrcDELORDER(J) + AUXDEM(IAUX)%DELORDER
               END IF !(IAUX.NE.0)
             END IF !(SegType.EQ.3)
-            !
-            IF (SEGDATA(ISEG)%DDFLAG.NE.0) THEN
+
+            IF (SEGDATA(KSEG)%DDFLAG.NE.0) THEN
               !
               ! -- DSEEP
-              IRCH    = SEGRCH_IN(ISEG)                                     ! reach index @ rch 1 of SPTSEG
-              JRCH    = SEGRCH_OUT(ISEG)                                    ! reach index @ last reach of SPTSEG
-              DO CONCURRENT (ISTR = IRCH:JRCH)
-                SPTSEG(ISPT)%DSEEP    = SPTSEG(ISPT)%DSEEP - STRM(11,ISTR) * SWO%DELT              ! NOTE: SFR specifies seepage LOSS as POSITIVE ... reverse here so GAIN is POSITIVE
+              IRCH   =SEGRCH_IN(KSEG)                                   ! reach index @ rch 1 of branch segment
+              JRCH   =SEGRCH_OUT(KSEG)                                  ! reach index @ last reach of branch segment
+              DO ISTR=IRCH, JRCH
+                SPTSEG(ISPT)%DSEEP       = SPTSEG(ISPT)%DSEEP - STRM(11,ISTR) * SWO%DELT            ! NOTE: SFR specifies seepage LOSS as POSITIVE ... reverse here so GAIN is POSITIVE
+                SPTSEG(ISPT)%BrcDSEEP(J) = SPTSEG(ISPT)%BrcDSEEP(J) - STRM(11,ISTR) * SWO%DELT
               END DO !(ISTR)
               !
               ! -- DFLOW_IN  (inflow @ SFR input file)
-              IF (IDIVAR(1,ISEG).EQ.0 .AND. SEGDATA(ISEG)%RRFLAG.NE.1) THEN
-                SPTSEG(ISPT)%DFLOW_IN  = SPTSEG(ISPT)%DFLOW_IN + SEG(2,ISEG) * SWO%DELT               ! Inflow specified in SFR (applies only to non-diversion segments!)
+              IF (IDIVAR(1,KSEG).EQ.0 .AND. SEGDATA(KSEG)%RRFLAG.NE.1) THEN
+                SPTSEG(ISPT)%DFLOW_IN = SPTSEG(ISPT)%DFLOW_IN + SEG(2,KSEG) * SWO%DELT            ! Inflow specified in SFR (applies only to non-diversion segments!)
+                SPTSEG(ISPT)%BrcDFLOW_IN(J) = SPTSEG(ISPT)%BrcDFLOW_IN(J) + SEG(2,KSEG) * SWO%DELT
               END IF !(IDIVAR(1).EQ.0)
               !
               ! -- DFLOW_RT (inflow @ SFR simulated)
-              NLIST    = SWO%UPSEG(ISEG)%NLIST
+              NLIST   =SWO%UPSEG(KSEG)%NLIST
               DO ILIST=1, NLIST
-                KSEG  = SWO%UPSEG(ISEG)%SEGLIST(ILIST)
-                JRCH  = SEGRCH_OUT(KSEG)
-                IF (SEGINFO(KSEG)%SegType.NE.2 .AND. SEGINFO(KSEG)%SegType.NE.3 .AND. SEGDATA(KSEG)%OUTSEG.EQ.ISEG) THEN
-                  SPTSEG(ISPT)%DFLOW_RT = SPTSEG(ISPT)%DFLOW_RT + STRM(9,JRCH) * SWO%DELT                                 ! Inflow simulated in SFR (i.e., simulated flow from upstream segment that is NOT in conveyance network)
-                END IF !(SegType.NE.2 / OUTSEG.EQ.ISEG)
+                LSEG  = SWO%UPSEG(KSEG)%SEGLIST(ILIST)
+                JRCH  = SEGRCH_OUT(LSEG)
+                IF (SEGINFO(LSEG)%SegType.NE.2 .AND. SEGINFO(LSEG)%SegType.NE.3 .AND. SEGDATA(LSEG)%OUTSEG.EQ.KSEG) THEN
+                  SPTSEG(ISPT)%DFLOW_RT = SPTSEG(ISPT)%DFLOW_RT + STRM(9,JRCH) * SWO%DELT                               ! Inflow simulated in SFR (i.e., simulated flow from upstream segment that is NOT in conveyance network)
+                  SPTSEG(ISPT)%BrcDFLOW_RT(J) = SPTSEG(ISPT)%BrcDFLOW_RT(J) + STRM(9,JRCH) * SWO%DELT
+                END IF !(SegType.NE.2 / OUTSEG.EQ.KSEG)
               END DO !(ILIST)
               !
-            END IF !(SEGDATA(ISEG)%DDFLAG.NE.0)
+            END IF !(SEGDATA(KSEG)%DDFLAG.NE.0)
             !
-            ! Loop down branches
-            DO J = 1,NBRANCH
-              !
-              JSEG  = SPTSEG(ISPT)%BrcSeg(J)
-              SPTSEG(ISPT)%BrcTFDR(J)      = DZ
-              SPTSEG(ISPT)%BrcDELORDER(J)  = DZ
-              SPTSEG(ISPT)%BrcDIVORDER(J)  = DZ
-              SPTSEG(ISPT)%BrcDSEEP(J)     = DZ
-              SPTSEG(ISPT)%BrcDFLOW_IN(J)  = DZ
-              SPTSEG(ISPT)%BrcDFLOW_RT(J)  = DZ
-              !
-              ! Add branch segment
-              !
-              ! -- TFDR / DELORDER
-              IF (SEGINFO(JSEG)%SegType.EQ.THREE) THEN
-                IFARM = SEGINFO(JSEG)%FarmID
-                IAUX  = SEGINFO(JSEG)%AuxID
-                IF (IFARM.NE.0) THEN
-                  SPTSEG(ISPT)%TFDR          = SPTSEG(ISPT)%TFDR          + FARM(IFARM)%TFDR
-                  SPTSEG(ISPT)%DELORDER      = SPTSEG(ISPT)%DELORDER      + FARM(IFARM)%DELORDER
-                  SPTSEG(ISPT)%BrcTFDR(J) = SPTSEG(ISPT)%BrcTFDR(J) + FARM(IFARM)%TFDR
-                  SPTSEG(ISPT)%BrcDELORDER(J) = SPTSEG(ISPT)%BrcDELORDER(J) + FARM(IFARM)%DELORDER
-                END IF !(IFARM.NE.0)
-                IF (IAUX.NE.0) THEN
-                  SPTSEG(ISPT)%TFDR     = SPTSEG(ISPT)%TFDR + AUXDEM(IAUX)%DEMAND
-                  SPTSEG(ISPT)%DELORDER = SPTSEG(ISPT)%DELORDER + AUXDEM(IAUX)%DELORDER
-                  SPTSEG(ISPT)%BrcTFDR(J) = SPTSEG(ISPT)%BrcTFDR(J) + AUXDEM(IAUX)%DEMAND
-                  SPTSEG(ISPT)%BrcDELORDER(J) = SPTSEG(ISPT)%BrcDELORDER(J) + AUXDEM(IAUX)%DELORDER
-                END IF !(IAUX.NE.0)
-              END IF !(SegType.EQ.3)
-              !
-              IF (SEGDATA(JSEG)%DDFLAG.NE.0) THEN
-                !
-                ! -- DSEEP
-                IRCH   =SEGRCH_IN(JSEG)                                     ! reach index @ rch 1 of branch segment
-                JRCH   =SEGRCH_OUT(JSEG)                                    ! reach index @ last reach of branch segment
-                DO ISTR=IRCH, JRCH
-                  SPTSEG(ISPT)%DSEEP          = SPTSEG(ISPT)%DSEEP - STRM(11,ISTR) * SWO%DELT              ! NOTE: SFR specifies seepage LOSS as POSITIVE ... reverse here so GAIN is POSITIVE
-                  SPTSEG(ISPT)%BrcDSEEP(J) = SPTSEG(ISPT)%BrcDSEEP(J) - STRM(11,ISTR) * SWO%DELT
-                END DO !(ISTR)
-                !
-                ! -- DFLOW_IN  (inflow @ SFR input file)
-                IF (IDIVAR(1,JSEG).EQ.0 .AND. SEGDATA(JSEG)%RRFLAG.NE.1) THEN
-                  SPTSEG(ISPT)%DFLOW_IN  = SPTSEG(ISPT)%DFLOW_IN + SEG(2,JSEG) * SWO%DELT               ! Inflow specified in SFR (applies only to non-diversion segments!)
-                  SPTSEG(ISPT)%BrcDFLOW_IN(J) = SPTSEG(ISPT)%BrcDFLOW_IN(J) + SEG(2,JSEG) * SWO%DELT
-                END IF !(IDIVAR(1).EQ.0)
-                !
-                ! -- DFLOW_RT (inflow @ SFR simulated)
-                NLIST    = SWO%UPSEG(JSEG)%NLIST
-                DO ILIST=1, NLIST
-                  KSEG   = SWO%UPSEG(JSEG)%SEGLIST(ILIST)
-                  JRCH   = SEGRCH_OUT(KSEG)
-                  IF (SEGINFO(KSEG)%SegType.NE.2 .AND. SEGINFO(KSEG)%SegType.NE.3 .AND. SEGDATA(KSEG)%OUTSEG.EQ.JSEG) THEN
-                    SPTSEG(ISPT)%DFLOW_RT = SPTSEG(ISPT)%DFLOW_RT + STRM(9,JRCH) * SWO%DELT                                 ! Inflow simulated in SFR (i.e., simulated flow from upstream segment that is NOT in conveyance network)
-                    SPTSEG(ISPT)%BrcDFLOW_RT(J) = SPTSEG(ISPT)%BrcDFLOW_RT(J) + STRM(9,JRCH) * SWO%DELT
-                  END IF !(SegType.NE.2 / OUTSEG.EQ.JSEG)
-                END DO !(ILIST)
-                !
-              END IF !(SEGDATA(JSEG)%DDFLAG.NE.0)
-              !
-              ! Add downstream tree below branch segment
-              NTREE = SWO%DNTREE_CON2(JSEG)%NTREE
-              DO ITREE=1, NTREE
-                !
-                KSEG   = SWO%DNTREE_CON2(JSEG)%SEGTREE(ITREE)
-                !
-                ! -- TFDR / DELORDER
-                IF (SWO%SEGINFO(KSEG)%SegType.EQ.3) THEN
-                  IFARM = SEGINFO(KSEG)%FarmID
-                  IAUX  = SEGINFO(KSEG)%AuxID
-                  IF (IFARM.NE.0) THEN
-                    SPTSEG(ISPT)%TFDR     = SPTSEG(ISPT)%TFDR + FARM(IFARM)%TFDR
-                    SPTSEG(ISPT)%DELORDER = SPTSEG(ISPT)%DELORDER + FARM(IFARM)%DELORDER
-                    SPTSEG(ISPT)%BrcTFDR(J) = SPTSEG(ISPT)%BrcTFDR(J) + FARM(IFARM)%TFDR
-                    SPTSEG(ISPT)%BrcDELORDER(J) = SPTSEG(ISPT)%BrcDELORDER(J) + FARM(IFARM)%DELORDER
-                  END IF !(IFARM.NE.0)
-                  IF (IAUX.NE.0) THEN
-                    SPTSEG(ISPT)%TFDR     = SPTSEG(ISPT)%TFDR + AUXDEM(IAUX)%DEMAND
-                    SPTSEG(ISPT)%DELORDER = SPTSEG(ISPT)%DELORDER + AUXDEM(IAUX)%DELORDER
-                    SPTSEG(ISPT)%BrcTFDR(J) = SPTSEG(ISPT)%BrcTFDR(J) + AUXDEM(IAUX)%DEMAND
-                    SPTSEG(ISPT)%BrcDELORDER(J) = SPTSEG(ISPT)%BrcDELORDER(J) + AUXDEM(IAUX)%DELORDER
-                  END IF !(IAUX.NE.0)
-                END IF !(SegType.EQ.3)
-
-                IF (SEGDATA(KSEG)%DDFLAG.NE.0) THEN
-                  !
-                  ! -- DSEEP
-                  IRCH   =SEGRCH_IN(KSEG)                                   ! reach index @ rch 1 of branch segment
-                  JRCH   =SEGRCH_OUT(KSEG)                                  ! reach index @ last reach of branch segment
-                  DO ISTR=IRCH, JRCH
-                    SPTSEG(ISPT)%DSEEP       = SPTSEG(ISPT)%DSEEP - STRM(11,ISTR) * SWO%DELT            ! NOTE: SFR specifies seepage LOSS as POSITIVE ... reverse here so GAIN is POSITIVE
-                    SPTSEG(ISPT)%BrcDSEEP(J) = SPTSEG(ISPT)%BrcDSEEP(J) - STRM(11,ISTR) * SWO%DELT
-                  END DO !(ISTR)
-                  !
-                  ! -- DFLOW_IN  (inflow @ SFR input file)
-                  IF (IDIVAR(1,KSEG).EQ.0 .AND. SEGDATA(KSEG)%RRFLAG.NE.1) THEN
-                    SPTSEG(ISPT)%DFLOW_IN = SPTSEG(ISPT)%DFLOW_IN + SEG(2,KSEG) * SWO%DELT            ! Inflow specified in SFR (applies only to non-diversion segments!)
-                    SPTSEG(ISPT)%BrcDFLOW_IN(J) = SPTSEG(ISPT)%BrcDFLOW_IN(J) + SEG(2,KSEG) * SWO%DELT
-                  END IF !(IDIVAR(1).EQ.0)
-                  !
-                  ! -- DFLOW_RT (inflow @ SFR simulated)
-                  NLIST   =SWO%UPSEG(KSEG)%NLIST
-                  DO ILIST=1, NLIST
-                    LSEG  = SWO%UPSEG(KSEG)%SEGLIST(ILIST)
-                    JRCH  = SEGRCH_OUT(LSEG)
-                    IF (SEGINFO(LSEG)%SegType.NE.2 .AND. SEGINFO(LSEG)%SegType.NE.3 .AND. SEGDATA(LSEG)%OUTSEG.EQ.KSEG) THEN
-                      SPTSEG(ISPT)%DFLOW_RT = SPTSEG(ISPT)%DFLOW_RT + STRM(9,JRCH) * SWO%DELT                               ! Inflow simulated in SFR (i.e., simulated flow from upstream segment that is NOT in conveyance network)
-                      SPTSEG(ISPT)%BrcDFLOW_RT(J) = SPTSEG(ISPT)%BrcDFLOW_RT(J) + STRM(9,JRCH) * SWO%DELT
-                    END IF !(SegType.NE.2 / OUTSEG.EQ.KSEG)
-                  END DO !(ILIST)
-                  !
-                END IF !(SEGDATA(KSEG)%DDFLAG.NE.0)
-                !
-              END DO !(ITREE)
-              !
-              ! Compute diversion order @ branch
-              ! DivOrder = DelOrder - Gains - Inflow(input) - Inflow(simulated)
-              IF (SPTSEG(ISPT)%BrcDELORDER(J).EQ.DZ) THEN
-                SPTSEG(ISPT)%BrcDIVORDER(J)   = DZ
-              ELSE
-                SPTSEG(ISPT)%BrcDIVORDER(J) = SPTSEG(ISPT)%BrcDELORDER(J) - SPTSEG(ISPT)%BrcDSEEP(J)   &
-                                               - SPTSEG(ISPT)%BrcDFLOW_IN(J) - SPTSEG(ISPT)%BrcDFLOW_RT(J)
-                IF(SPTSEG(ISPT)%BrcDIVORDER(J) < DZ) SPTSEG(ISPT)%BrcDIVORDER(J) = DZ
-              END IF !(DELORDER.EQ.0)
-              !
-            END DO !(IBRC)
-            !
-            ! Compute diversion order @ split
-            ! DivOrder = DelOrder - Gains - Inflow(input) - Inflow(simulated)
-            IF (SPTSEG(ISPT)%DELORDER.EQ.DZ) THEN
-              SPTSEG(ISPT)%DIVORDER   = DZ
-            ELSE
-              SPTSEG(ISPT)%DIVORDER = SPTSEG(ISPT)%DELORDER - SPTSEG(ISPT)%DSEEP     &
-                                    - SPTSEG(ISPT)%DFLOW_IN - SPTSEG(ISPT)%DFLOW_RT
-              IF(SPTSEG(ISPT)%DIVORDER < DZ) SPTSEG(ISPT)%DIVORDER = DZ
-            END IF !(DELORDER.EQ.0)
-
-            ! Impose incremental update of diversion orders to reduce oscillation ...
-            IF(KITER < THREE) THEN !NO ADJUSTMENT FOR FIRST DIVERSION REQUESTS
-                CONTINUE
-            ELSEIF (SPTSEG(ISPT)%TFDR.GT.DZ) THEN
-                CALL RELAX_IT(SPTSEG(ISPT)%DIVORDER, SWO%SPTSEG_PREV(ISPT)%DIVORDER, SWO%WTFACTOR(1))
-            ELSE
-              CALL RELAX_IT(SPTSEG(ISPT)%DIVORDER, SWO%SPTSEG_PREV(ISPT)%DIVORDER, SWO%WTFACTOR(2))
-            END IF !(TFDR.GT.0)
-            DO J=1, NBRANCH
-              IF(KITER < THREE) THEN !NO ADJUSTMENT FOR FIRST DIVERSION REQUESTS
-                CONTINUE
-              ELSEIF (SPTSEG(ISPT)%BrcTFDR(J).GT.DZ) THEN
-                  CALL RELAX_IT(SPTSEG(ISPT)%BrcDIVORDER(J), SWO%SPTSEG_PREV(ISPT)%BrcDIVORDER(J), SWO%WTFACTOR(1))
-              ELSE
-                  CALL RELAX_IT(SPTSEG(ISPT)%BrcDIVORDER(J), SWO%SPTSEG_PREV(ISPT)%BrcDIVORDER(J), SWO%WTFACTOR(2))
-              END IF !(TFDR.GT.0)
-            END DO !(IBRC)
-          END DO !(ISPT)
-    I     = -1
-    J     = -1
-    IPROJ = -1
-    IRES  = -1
-    ISEG  = -1
-    IRCH  = -1
-    IDVS  = -1
-    ISPT  = -1
-    IBRC  = -1
-    IRES  = -1
-    JRES  = -1
-    IPROJ = -1
-    IDIST = -1
-    IUNIT = -1
-    IFARM = -1
-    IAUX  = -1
+          END DO !(ITREE)
           !
-          ! (7) Compute diversion request to units, districts, projects
-          !     DIVREQ = DELREQ / DELIVEFF
-          ! Unit DivOrder not actually used in routing ...
-          DO CONCURRENT (IUNIT = 1:NUNIT)
-            UNIT(IUNIT)%DIVORDER  = UNIT(IUNIT)%DELORDER / UNIT(IUNIT)%DELIVEFF
-          END DO !(IUNIT)
+          ! Compute diversion order @ branch
+          ! DivOrder = DelOrder - Gains - Inflow(input) - Inflow(simulated)
+          IF (SPTSEG(ISPT)%BrcDELORDER(J).EQ.DZ) THEN
+            SPTSEG(ISPT)%BrcDIVORDER(J)   = DZ
+          ELSE
+            SPTSEG(ISPT)%BrcDIVORDER(J) = SPTSEG(ISPT)%BrcDELORDER(J) - SPTSEG(ISPT)%BrcDSEEP(J)   &
+                                           - SPTSEG(ISPT)%BrcDFLOW_IN(J) - SPTSEG(ISPT)%BrcDFLOW_RT(J)
+            IF(SPTSEG(ISPT)%BrcDIVORDER(J) < DZ) SPTSEG(ISPT)%BrcDIVORDER(J) = DZ
+          END IF !(DELORDER.EQ.0)
           !
-          ! Distric DivOrder not actually used in routing ...
-          DO CONCURRENT (IDIST = 1:NDIST)
-            DIST(IDIST)%DIVORDER  = DIST(IDIST)%DELORDER / DIST(IDIST)%DELIVEFF
-          END DO !(IDIST)
-          !
-          ! Project DivOrder used to estimate release ...
-          ! Computed as sum of DivSeg DivOrders ...
-          DO P=1, NPROJ
-            PROJ(P)%DIVORDER     = DZ
-            DO IDVS=1, SWO%DIVCOUNT
-            IF(DIVSEG(IDVS)%ProjID.EQ.P) PROJ(P)%DIVORDER = PROJ(P)%DIVORDER + DIVSEG(IDVS)%DIVORDER
-            END DO
-          END DO
-          !
-      END ASSOCIATE
-      !
-      !
-      !----------------------------------------------------------------------------------------------
-      !
-      ! DETERMINE MAXIMUM POTENTIAL RELASE FROM RESERVOIR GIVEN CURRENT CONDITIONS
-      ! (ASSUMING IT IS DRAINED TO NON-PROJECT STORAGE LEVELS)
-      !
-      !CALL SWO%RESDAT%SET_RELEASE_POT() --CALLED IN SET_ADJUSTIBLE_PROPERTIES
-      !
-      !----------------------------------------------------------------------------------------------
-      !DO CONCURRENT(IPROJ = 1:NPROJ)
-      !DO CONCURRENT(IRES = 1:SWO%NRES_BAL(IPROJ))
-      !    IF(SWO%RESDAT(IPROJ)%RESBAL(IRES)%INUSE) THEN
-      !       !
-      !       ASSOCIATE(                                                                 &
-      !                 STORAGE      => SWO%RESDAT(IPROJ)%RESBAL(IRES)%STORAGE_PREV    , &   ! STORAGE_PREV = end of previous step ... = start of current step.  [L3]
-      !                 INFLOW       => SWO%RESDAT(IPROJ)%RESBAL(IRES)%INFLOW          , &   ! INFLOW       during current step (updated @ AD routine!)          [L3]
-      !                 PRCP_LENTH   => SWO%RESDAT(IPROJ)%RESBAL(IRES)%PRCP            , &   ! PRCP         during current step (updated @ AD routine!)          [L]
-      !                 EVAP_LENTH   => SWO%RESDAT(IPROJ)%RESBAL(IRES)%EVAP            , &   ! EVAP         during current step (updated @ AD routine!)          [L]
-      !                 STORAGE_MIN  => SWO%RESDAT(IPROJ)%RESBAL(IRES)%STORAGE_MIN     , &   ! Min allowed storage (either STORAGE_SPEC_MIN or greater) --Furthers point that can be released too
-      !                 AREA_START   => SWO%RESDAT(IPROJ)%RESBAL(IRES)%AREA_PREV       , &
-      !                 AREA_END     => SWO%RESDAT(IPROJ)%RESBAL(IRES)%AREA_DPL        , &   ! AREA_END @ non-project storage only ...
-      !                 AREA_MAX     => SWO%RESDAT(IPROJ)%RESBAL(IRES)%MAX_AREA        , &   ! Maximum area the reservoir could have (also represents maximum area precep falls on and makes its way to the reservoir)
-      !                 PRCP_FRAC    => SWO%RESDAT(IPROJ)%RESBAL(IRES)%PRECIP_AREA_FRAC, &   ! FRACTION OF TOTAL AREA TO AVERAGE AREA THAT PRECIP FALLS OVER
-      !                 !
-      !                 RELEASE_LIMIT=> SWO%RESDAT(IPROJ)%RESBAL(IRES)%MAX_RELEASE_VOL , &   !STRUCTURAL LIMIT TO RESERVOIR RELEASE
-      !                 RELEASE_LIM_S=> SWO%RESDAT(IPROJ)%RESBAL(IRES)%MAX_RELEASE_S   , &   ! ANY LIMIT IMPOSED FROM THE S-LANGAGE
-      !                 !
-      !                 RELEASE_POT  => SWO%RESDAT(IPROJ)%RESBAL(IRES)%RELEASE_POT       &   ! FINAL POTENTIAL RELEASE FOR RESERVOIR
-      !                )
-      !                !
-      !                AREA_AVG  = (AREA_START + AREA_END) * HALF
-      !                !
-      !                PRCP_AREA = PRCP_FRAC*(AREA_MAX - AREA_AVG) + AREA_AVG
-      !                !
-      !                PRCP = PRCP_LENTH*PRCP_AREA;  EVAP = EVAP_LENTH*AREA_AVG
-      !                !
-      !                RELEASE_POT = STORAGE - STORAGE_MIN + INFLOW + PRCP - EVAP !CONTINUITY
-      !                !
-      !                IF(RELEASE_POT > RELEASE_LIMIT) RELEASE_POT = RELEASE_LIMIT
-      !                IF(RELEASE_POT > RELEASE_LIM_S) RELEASE_POT = RELEASE_LIM_S
-      !                IF(RELEASE_POT < DZ           ) RELEASE_POT = DZ
-      !                !
-      !       END ASSOCIATE
-      !    ELSE
-      !        SWO%RESDAT(IPROJ)%RESBAL(IRES)%RELEASE_POT = DZ
-      !    END IF
-      !END DO
-      !END DO
-      !
-      ! Set up any additional releases that maybe availible -------------------------------------------------------------------------
-      !
-      DO CONCURRENT(I = 1:NPROJ)
-      DO CONCURRENT(J = 1:SWO%NRES_BAL(I))
-          SWO%RESDAT(I)%RESBAL(J)%RELEASE_ADDF_INI = DZ
-      END DO
-      END DO
-      !
-      ! ADD ADDITIONAL RELEASES -----------------------------------------------------------------------------------------------------
-      !
-      IF(SWO%HAS_ADD_RELEASE_S) THEN
-         DO I=1, NPROJ
-         DO J=1, SWO%NRES_BAL(I)
-           IF(SWO%RESDAT(I)%RESBAL(J)%INUSE) SWO%RESDAT(I)%RESBAL(J)%RELEASE_ADDF_INI = SWO%RESDAT(I)%RESBAL(J)%RELEASE_ADDF_INI + SWO%RESDAT(I)%RESBAL(J)%ADD_RELEASE_S_VOL !+...
-         END DO
-         END DO
-      END IF
-      !
-      ! ESTABLISH THE INTIAL GUESS FOR ADDITIONAL RELEASES -------------------------------------------------------------------------
-      !
-      DO CONCURRENT(I = 1:NPROJ)
-      DO CONCURRENT(J = 1:SWO%NRES_BAL(I), SWO%RESDAT(I)%RESBAL(J)%INUSE)
-          !
-          SWO%RESDAT(I)%RESBAL(J)%RELEASE_ADDF = SWO%RESDAT(I)%RESBAL(J)%RELEASE_ADDF_INI
-          !
-      END DO
-      END DO
-      !
-      ! PROJECT releated additional releases - Reset
-      !
-      !
-      IF(SWO%HAS_PROJ_RELEASE_ADD) THEN
-         DO CONCURRENT (I = 1:NPROJ)
-                             SWO%RESDAT(I)%PROJ_RELEASE_ADD = SWO%RESDAT(I)%PROJ_RELEASE_ADD_S * SWO%DELT  !Covert rate to volume
-         END DO
-      ELSE
-          DO CONCURRENT (I = 1:NPROJ)
-                             SWO%RESDAT(I)%PROJ_RELEASE_ADD = DZ
-          END DO
-      END IF
-
-      !  --------------------------------------------------------------------- -----------------------------------------------------
-      !
-      !
-      ! COMPUTE ANY REQURIED RELEASES TO MAINTAIN STREAM FLOWS
-      !
-      IF(SWO%REQFLOW%HAS_REQ) THEN
+        END DO !(IBRC)
         !
-        IF(KITER > NINE) THEN                ! START REQUIRED FLOWS ON 8th ITERATION
-          !
-          SWO%REQFLOW%REL = DZ  !NECESSARY RELEASE FOR REQUIRED FLOW --TOTAL SHORTFALL PER "ORDER" UNIQUE REQUIRED PATHWAYS
-          !
-          IF(TRUE) THEN               ! Have 8 iterations that use full network to determine release, then make adjustments afterwards
-            !
-            DO ITER=ONE, SIZE(SWO%REQFLOW%ORDER)  !NUMBER OF UNIQUE REQUIRED PATHWAYS
-                UnderRelease = DZ   !LARGEST  SHORTFALL
-                OverRelease = inf   !SMALLEST Overshoot of required flow
-                !
-                !!!DO TMP = SWO%REQFLOW%ORDER(ITER)%N, ONE, NEG  ! ONE, SWO%REQFLOW%ORDER(ITER)%N  !NUMBER OF REQUIRED FLOWS ALONG SAME STREAM
-                !!!    !
-                !!!    IREQ = SWO%REQFLOW%ORDER(ITER)%VEC(TMP)  !ITER = PATHWAY, TMP IS THE SPECIFIC "IREQ" IN THE PATHWAY
-                !!!    !
-                !!!    IF(SWO%REQFLOW%REQ(IREQ) > NEARZERO_5) THEN
-                !!!        !
-                !!!        ISTR = SWO%SEGRCH_IN(SWO%REQFLOW%HEDSEG(IREQ)) !Upper Most common Seg
-                !!!        !
-                !!!        JSTR = SWO%REQFLOW%ISTRM(IREQ)
-                !!!        !
-                !!!        DSEEP = STRM(10, ISTR) - STRM(10, JSTR) !Gains and Losses from Common Seg to Required Seg
-                !!!        !
-                !!!        IF(DSEEP < NEARZERO_5) DSEEP = DZ  !Only care if its losing
-                !!!        !
-                !!!        DFLOW = SWO%REQFLOW%REQ(IREQ) - STRM(10, JSTR)   !SHORTFALL OF CURRENT FLOW TO REQUIRED FLOW
-                !!!        !
-                !!!        IF(DFLOW > DZ) THEN !SHORTFALL
-                !!!            !
-                !!!            IF( DFLOW + DSEEP - SWO%REQFLOW%REL_OLD(ITER) > NEARZERO_5) THEN  !INclude seepage + previous release
-                !!!                !
-                !!!                DFLOW = DFLOW + DSEEP - SWO%REQFLOW%REL_OLD(ITER)
-                !!!            END IF
-                !!!            !
-                !!!            IF(UnderRelease < DFLOW) UnderRelease = DFLOW
-                !!!        ELSE
-                !!!             DFLOW = DNEG*DFLOW  !It is an over release
-                !!!             !
-                !!!             IF ( DFLOW/SWO%REQFLOW%REQ(IREQ) > TENTH) THEN  !Over Release is greather than 10% of target required release
-                !!!                  !
-                !!!                  IF(OverRelease > DFLOW) OverRelease = DFLOW  !Store smallest over release for correction
-                !!!             END IF
-                !!!        END IF
-                !!!    END IF
-                !!!END DO
-                !
-                DO TMP = SWO%REQFLOW%ORDER(ITER)%N, ONE, NEG   ! Move from upper most required flow to downstream most
-                    !
-                    IREQ = SWO%REQFLOW%ORDER(ITER)%VEC(TMP)  !ITER = PATHWAY, TMP IS THE SPECIFIC "IREQ" IN THE PATHWAY
-                    !
-                    IF(SWO%REQFLOW%REQ(IREQ) > NEARZERO_5) THEN
-                          !
-                          INFLOW = DBLE( STRM(10,SWO%REQFLOW%ISTRM(IREQ)) ) !GET FLOW THAT COMES INTO REACH
-                          !
-                          DFLOW = SWO%REQFLOW%REQ(IREQ) - INFLOW            !SHORTFALL OF CURRENT FLOW TO REQUIRED FLOW
-                          !
-                          JSEG = SWO%REQFLOW%SEG(IREQ)  !Required Flow Seg
-                          !
-                          IF(DFLOW > DZ) THEN !SHORTFALL - Calc additional release
-                             !
-                             !!!!!!DSEEP = DZ
-                             !!!!!!RATIO = DZ
-                             !!!!!!!
-                             !!!!!!IF(SWO%REQFLOW%RCH(IREQ).NE.ONE) THEN
-                             !!!!!!    !
-                             !!!!!!    !ISTR = SWO%SEGRCH_IN(JSEG)
-                             !!!!!!    !JSTR = SWO%REQFLOW%ISTRM(IREQ)
-                             !!!!!!    !
-                             !!!!!!    !DSEEP = DSEEP + STRM(10,ISTR) - STRM(10,JSTR)  ! Seg Inflow - Flow at Required PointReach's IN - OUT
-                             !!!!!!    DO ISTR = SWO%SEGRCH_IN(JSEG), SWO%REQFLOW%ISTRM(IREQ)-ONE !Add partial segment parts
-                             !!!!!!       !
-                             !!!!!!       RTOL = STRM(10,ISTR)
-                             !!!!!!       IF(RTOL < NEGNEARZERO_12 .OR. NEGNEARZERO_12 < RTOL) THEN
-                             !!!!!!           !
-                             !!!!!!           RATIO = RATIO + STRM(1,ISTR)
-                             !!!!!!           DSEEP = DSEEP + STRM(1,ISTR)*STRM(11,ISTR)/RTOL  ! NOTE: SFR specifies seepage LOSS as POSITIVE
-                             !!!!!!       END IF
-                             !!!!!!       !
-                             !!!!!!    END DO
-                             !!!!!!END IF
-                             !!!!!!!
-                             !!!!!!ISEG  = SWO%REQFLOW%HEDSEG(IREQ)  !Search from upper most common point to required flow segment
-                             !!!!!!NTREE = SWO%DNTREE_NAT(ISEG)%NTREE
-                             !!!!!!IF(ISEG .NE. JSEG) THEN
-                             !!!!!!    !
-                             !!!!!!    !ISTR = SWO%SEGRCH_IN (ISEG)
-                             !!!!!!    !JSTR = SWO%SEGRCH_OUT(ISEG)
-                             !!!!!!    !DSEEP = DSEEP + STRM(10,ISTR) - STRM(9, JSTR)
-                             !!!!!!    DO CONCURRENT (ISTR = SWO%SEGRCH_IN(ISEG):SWO%SEGRCH_OUT(ISEG))
-                             !!!!!!        !
-                             !!!!!!        RTOL = STRM(10,ISTR)
-                             !!!!!!        IF(RTOL < NEGNEARZERO_12 .OR. NEGNEARZERO_12 < RTOL) THEN
-                             !!!!!!            !
-                             !!!!!!            RATIO = RATIO + STRM(1,ISTR)
-                             !!!!!!            DSEEP = DSEEP + STRM(1,ISTR)*STRM(11,ISTR)/RTOL  ! NOTE: SFR specifies seepage LOSS as POSITIVE
-                             !!!!!!        END IF
-                             !!!!!!    END DO
-                             !!!!!!    !
-                             !!!!!!    DO J=ONE, NTREE
-                             !!!!!!        !
-                             !!!!!!        KSEG = SWO%UPTREE_NAT(ISEG)%SEGTREE(J)  !NEXT DNSTREAM NATURAL SEGMENT
-                             !!!!!!        !
-                             !!!!!!        IF( KSEG == JSEG ) EXIT
-                             !!!!!!        !
-                             !!!!!!        !ISTR = SWO%SEGRCH_IN (KSEG)
-                             !!!!!!        !JSTR = SWO%SEGRCH_OUT(KSEG)
-                             !!!!!!        !DSEEP = DSEEP + STRM(10,ISTR) - STRM(9, JSTR)
-                             !!!!!!        DO CONCURRENT (ISTR = SWO%SEGRCH_IN(KSEG):SWO%SEGRCH_OUT(KSEG))
-                             !!!!!!            !
-                             !!!!!!            RTOL = STRM(10,ISTR)
-                             !!!!!!            IF(RTOL < NEGNEARZERO_12 .OR. NEGNEARZERO_12 < RTOL) THEN
-                             !!!!!!                !
-                             !!!!!!                RATIO = RATIO + STRM(1,ISTR)
-                             !!!!!!                DSEEP = DSEEP + STRM(1,ISTR)*STRM(11,ISTR)/RTOL  ! NOTE: SFR specifies seepage LOSS as POSITIVE
-                             !!!!!!            END IF
-                             !!!!!!        END DO
-                             !!!!!!    END DO
-                             !!!!!!END IF
-                             !!!!!!IF(RATIO < NEGNEARZERO_12 .OR. NEARZERO_12 < RATIO) THEN
-                             !!!!!!    DSEEP = DSEEP/RATIO
-                             !!!!!!ELSE
-                             !!!!!!    DSEEP = UNO
-                             !!!!!!END IF
-                             !!!!!!IF(TENTH < DSEEP .AND. DSEEP < UNO ) THEN
-                             !!!!!!                                      DFLOW = DFLOW / DSEEP  !Only care if its losing
-                             !!!!!!ELSEIF(DSEEP <=TENTH ) THEN
-                             !!!!!!                                      DFLOW = DFLOW / DIEZ  !Only care if its losing
-                             !!!!!!END IF
-                             !!!
-                             !!IF(DSEEP < NEARZERO_5) DSEEP = DZ  !Only care if its losing
-                             !!!
-                             !!IF( DFLOW + DSEEP - SWO%REQFLOW%REL_OLD(ITER) > NEARZERO_5) THEN  !INclude seepage + previous release
-                             !!    !
-                             !!    DFLOW = DFLOW + DSEEP - SWO%REQFLOW%REL_OLD(ITER)
-                             !!END IF
-                             !!!
-                             !
-                             IF(UnderRelease < DFLOW) UnderRelease = DFLOW
-                          ELSE
-                             DFLOW = DNEG*DFLOW  !It is an over release
-                             !
-                             IF(OverRelease > DFLOW) OverRelease = DFLOW  !Store smallest over release for correction
-                             !
-                             !IF ( DFLOW > TENTH) THEN  !Over Release is greather than 0.1 L3/T
-                             !     !
-                             !     IF(OverRelease > DFLOW) OverRelease = DFLOW  !Store smallest over release for correction
-                             !END IF
-                          END IF
-                          !DTMP=86400D0
-                          !RELEASE_MAX =  DELT_INV * (SWO%RESDAT(1)%RESBAL(1)%RELEASE_TOT + SWO%RESDAT(1)%RESBAL(2)%RELEASE_TOT)/DTMP
-                          !IF(OverRelease> 1D30) THEN
-                          !WRITE(123,'(3I5,*(2x F9.3))') KPER, KSTP, KITER,RELEASE_MAX, SWO%REQFLOW%REL_OLD(ITER)/DTMP,INFLOW/DTMP,SWO%REQFLOW%REQ(IREQ)/DTMP, DSEEP/DTMP, UnderRelease/DTMP, 0.0, DELT_INV *SWO%RESDAT(1)%RESBAL(1)%RELEASE_TOT/DTMP, DELT_INV *SWO%RESDAT(1)%RESBAL(2)%RELEASE_TOT/DTMP
-                          !ELSE
-                          !WRITE(123,'(3I5,*(2x F9.3))') KPER, KSTP, KITER,RELEASE_MAX, SWO%REQFLOW%REL_OLD(ITER)/DTMP,INFLOW/DTMP,SWO%REQFLOW%REQ(IREQ)/DTMP, DSEEP/DTMP, UnderRelease/DTMP, OverRelease/DTMP, DELT_INV *SWO%RESDAT(1)%RESBAL(1)%RELEASE_TOT/DTMP, DELT_INV *SWO%RESDAT(1)%RESBAL(2)%RELEASE_TOT/DTMP
-                          !END IF
-                          !
-                    END IF ! (SWO%REQFLOW%REQ(IREQ) > NEARZERO_5) THEN
-                END DO     ! TMP = SWO%REQFLOW%ORDER(ITER)%N, ONE, NEG
-                !
-                !IF(OverRelease  < NEARZERO_5) OverRelease = DZ
-                IF(OverRelease  > D100      ) OverRelease = DZ
-                !
-                I = ITER ! UNIQUE REQUIRED PATHWAYS GROUP
-                !
-                IF(UnderRelease > NEARZERO_5) THEN !HAVE TO RELEASE MORE WATER -- NO SHORTFALLS ACCEPTIBLE
-                    !
-                    !IF(KITER < 12) UnderRelease = UnderRelease * FOURTH
-                    !
-                    SWO%REQFLOW%REL(I) = SWO%REQFLOW%REL_OLD(I) + UnderRelease     !NOTE IS THE AMMOUNT OF SHORTFALL FROM THE PREIVOUS SET OF RELEASES
-                    !
-                ELSEIF(SWO%REQFLOW%REL_OLD(I) < NEARZERO_5 ) THEN                  !REQUIRED FLOW TOO SMALL TO BE WORTH RELEASING
-                    !
-                    SWO%REQFLOW%REL(I) = DZ
-                    !
-                ELSEIF(OverRelease > NEARZERO_5) THEN                 !OverRelease MAKES UP MORE THEN 0.1% OF OLD REQUIRED RELEASE
-                    !
-                    DFLOW = SWO%REQFLOW_RELAX*OverRelease                 ! DECREASE RELEASE BY SWO%REQFLOW_RELAX % OF THE OverRelease
-                    !
-                    IF(DFLOW > SWO%REQFLOW%REL_OLD(I)) THEN   ! Correction turns off required releases
-                               SWO%REQFLOW%REL(I) = DZ
-                    ELSE
-                               SWO%REQFLOW%REL(I) = SWO%REQFLOW%REL_OLD(I) - DFLOW !Reduce release by Overrelease
-                    END IF
-                ELSE
-                    SWO%REQFLOW%REL(I) = SWO%REQFLOW%REL_OLD(I) !REUSE RELEASE
-                END IF
-            END DO
-            !
-          ELSE !IF(KITER >= 12) THEN        ! Only make adjustments based on shortfall -------------------------------------
-            !
-            DO ITER=ONE, SIZE(SWO%REQFLOW%ORDER)  !NUMBER OF UNIQUE REQUIRED PATHWAYS
-                UnderRelease = DZ   !LARGEST  SHORTFALL
-                OverRelease = inf   !SMALLEST Overshoot of required flow
-                DO TMP = ONE, SWO%REQFLOW%ORDER(ITER)%N  !NUMBER OF REQUIRED FLOWS ALONG SAME STREAM
-                    !
-                    IREQ = SWO%REQFLOW%ORDER(ITER)%VEC(TMP)  !ITER = PATHWAY, TMP IS THE SPECIFIC "IREQ" IN THE PATHWAY
-                    !
-                    IF(SWO%REQFLOW%REQ(IREQ) > NEARZERO_5) THEN
-                          !
-                          INFLOW = DBLE( STRM(10,SWO%REQFLOW%ISTRM(IREQ)) ) !GET FLOW THAT COMES INTO REACH
-                          !
-                          DFLOW = SWO%REQFLOW%REQ(IREQ) - INFLOW            !SHORTFALL OF CURRENT FLOW TO REQUIRED FLOW
-                          !
-                          IF(DFLOW > DZ) THEN !SHORTFALL
-                               !RELEASE_REQF = RELEASE_REQF + DFLOW
-                               IF(UnderRelease < DFLOW) UnderRelease = DFLOW
-                               !
-                          ELSEIF(FIVE_ITER) THEN
-                               DFLOW = DNEG*DFLOW  !It is an over release
-                               !
-                               IF ( DFLOW/SWO%REQFLOW%REQ(IREQ) > TENTH) THEN  !Over Release is greather than 10% of target required release
-                                    !
-                                    IF(OverRelease > DFLOW) OverRelease = DFLOW  !Store smallest over release for correction
-                               END IF
-                          END IF
-                    END IF
-                END DO
-                !
-                IF(OverRelease < NEARZERO_5) OverRelease = DZ
-                IF(OverRelease > D100      ) OverRelease = DZ
-                !
-                I = ITER ! UNIQUE REQUIRED PATHWAYS GROUP
-                !
-                IF(UnderRelease > NEARZERO_5) THEN !HAVE TO RELEASE MORE WATER -- NO SHORTFALLS ACCEPTIBLE
-                    !
-                    SWO%REQFLOW%REL(I) = SWO%REQFLOW%REL_OLD(I) + UnderRelease     !NOTE IS THE AMMOUNT OF SHORTFALL FROM THE PREIVOUS SET OF RELEASES
-                    !
-                ELSEIF(SWO%REQFLOW%REL_OLD(I) < NEARZERO_5 ) THEN                  !REQUIRED FLOW TOO SMALL TO BE WORTH RELEASING
-                    !
-                    SWO%REQFLOW%REL(I) = DZ
-                    !
-                ELSEIF(OverRelease/SWO%REQFLOW%REL_OLD(I) > FIFTH ) THEN                 !OverRelease MAKES UP MORE THEN 20% OF OLD REQUIRED RELEASE
-                    !
-                    DFLOW = SWO%REQFLOW_RELAX*OverRelease                 ! DECREASE RELEASE BY SWO%REQFLOW_RELAX % OF THE OverRelease
-                    !
-                    IF(DFLOW > SWO%REQFLOW%REL_OLD(I)) THEN   ! Correction turns off required releases
-                               SWO%REQFLOW%REL(I) = DZ
-                    ELSE
-                               SWO%REQFLOW%REL(I) = SWO%REQFLOW%REL_OLD(I) - DFLOW !Reduce release by Overrelease
-                    END IF
-                    !
-                    !!!!
-                    !!!SWO%REQFLOW%REL(I) = SWO%REQFLOW%REL_OLD(I) - FIFTH*OverRelease !ONLY DECRESS RELEASE BY 20% OF THE OVER RELEASE
-                    !!!!
-                    !!!IF(SWO%REQFLOW%REL(I) < DZ) SWO%REQFLOW%REL(I) = FIFTH*SWO%REQFLOW%REL_OLD(I)  !NEGATIVE FLOW IS AN OVER CORRECTION, SO USE 20% OF PREVIOUS RELEASE
-                ELSE
-                    SWO%REQFLOW%REL(I) = SWO%REQFLOW%REL_OLD(I) !REUSE RELEASE
-                END IF
-            END DO
-            !
-          END IF  ! (KITER < 12) THEN
-          !
-          ! DETERMINE SPREAD OF REQUIRED FLOW RELEASES FROM RESERVOIRS (RELEASE_REQF)
-          !
-          DO CONCURRENT(I = 1:NPROJ)
-          DO CONCURRENT (J = 1:SWO%NRES_BAL(I)); SWO%RESDAT(I)%RESBAL(J)%RELEASE_REQF = DZ
-          END DO;END DO
+        ! Compute diversion order @ split
+        ! DivOrder = DelOrder - Gains - Inflow(input) - Inflow(simulated)
+        IF (SPTSEG(ISPT)%DELORDER.EQ.DZ) THEN
+          SPTSEG(ISPT)%DIVORDER   = DZ
+        ELSE
+          SPTSEG(ISPT)%DIVORDER = SPTSEG(ISPT)%DELORDER - SPTSEG(ISPT)%DSEEP     &
+                                - SPTSEG(ISPT)%DFLOW_IN - SPTSEG(ISPT)%DFLOW_RT
+          IF(SPTSEG(ISPT)%DIVORDER < DZ) SPTSEG(ISPT)%DIVORDER = DZ
+        END IF !(DELORDER.EQ.0)
+
+        ! Impose incremental update of diversion orders to reduce oscillation ...
+        IF(KITER < THREE) THEN !NO ADJUSTMENT FOR FIRST DIVERSION REQUESTS
+            CONTINUE
+        ELSEIF (SPTSEG(ISPT)%TFDR.GT.DZ) THEN
+            CALL RELAX_IT(SPTSEG(ISPT)%DIVORDER, SWO%SPTSEG_PREV(ISPT)%DIVORDER, SWO%WTFACTOR(1))
+        ELSE
+          CALL RELAX_IT(SPTSEG(ISPT)%DIVORDER, SWO%SPTSEG_PREV(ISPT)%DIVORDER, SWO%WTFACTOR(2))
+        END IF !(TFDR.GT.0)
+        DO J=1, NBRANCH
+          IF(KITER < THREE) THEN !NO ADJUSTMENT FOR FIRST DIVERSION REQUESTS
+            CONTINUE
+          ELSEIF (SPTSEG(ISPT)%BrcTFDR(J).GT.DZ) THEN
+              CALL RELAX_IT(SPTSEG(ISPT)%BrcDIVORDER(J), SWO%SPTSEG_PREV(ISPT)%BrcDIVORDER(J), SWO%WTFACTOR(1))
+          ELSE
+              CALL RELAX_IT(SPTSEG(ISPT)%BrcDIVORDER(J), SWO%SPTSEG_PREV(ISPT)%BrcDIVORDER(J), SWO%WTFACTOR(2))
+          END IF !(TFDR.GT.0)
+        END DO !(IBRC)
+      END DO !(ISPT)
+      I     = -1
+      J     = -1
+      IPROJ = -1
+      IRES  = -1
+      ISEG  = -1
+      IRCH  = -1
+      IDVS  = -1
+      ISPT  = -1
+      IBRC  = -1
+      IRES  = -1
+      JRES  = -1
+      IPROJ = -1
+      IDIST = -1
+      IUNIT = -1
+      IFARM = -1
+      IAUX  = -1
+      !
+      ! (7) Compute diversion request to units, districts, projects
+      !     DIVREQ = DELREQ / DELIVEFF
+      ! Unit DivOrder not actually used in routing ...
+      DO CONCURRENT (IUNIT = 1:NUNIT)
+        UNIT(IUNIT)%DIVORDER  = UNIT(IUNIT)%DELORDER / UNIT(IUNIT)%DELIVEFF
+      END DO !(IUNIT)
+      !
+      ! Distric DivOrder not actually used in routing ...
+      DO CONCURRENT (IDIST = 1:NDIST)
+        DIST(IDIST)%DIVORDER  = DIST(IDIST)%DELORDER / DIST(IDIST)%DELIVEFF
+      END DO !(IDIST)
+      !
+      ! Project DivOrder used to estimate release ...
+      ! Computed as sum of DivSeg DivOrders ...
+      DO P=1, NPROJ
+        PROJ(P)%DIVORDER     = DZ
+        DO IDVS=1, SWO%DIVCOUNT
+        IF(DIVSEG(IDVS)%ProjID.EQ.P) PROJ(P)%DIVORDER = PROJ(P)%DIVORDER + DIVSEG(IDVS)%DIVORDER
+        END DO
+      END DO
+      !
+    END ASSOCIATE
+    !
+    !
+    !----------------------------------------------------------------------------------------------
+    !
+    ! DETERMINE MAXIMUM POTENTIAL RELASE FROM RESERVOIR GIVEN CURRENT CONDITIONS
+    ! (ASSUMING IT IS DRAINED TO NON-PROJECT STORAGE LEVELS)
+    !
+    !CALL SWO%RESDAT%SET_RELEASE_POT() --CALLED IN SET_ADJUSTIBLE_PROPERTIES
+    !
+    !----------------------------------------------------------------------------------------------
+    !DO CONCURRENT(IPROJ = 1:NPROJ)
+    !DO CONCURRENT(IRES = 1:SWO%NRES_BAL(IPROJ))
+    !    IF(SWO%RESDAT(IPROJ)%RESBAL(IRES)%INUSE) THEN
+    !       !
+    !       ASSOCIATE(                                                                 &
+    !                 STORAGE      => SWO%RESDAT(IPROJ)%RESBAL(IRES)%STORAGE_PREV    , &   ! STORAGE_PREV = end of previous step ... = start of current step.  [L3]
+    !                 INFLOW       => SWO%RESDAT(IPROJ)%RESBAL(IRES)%INFLOW          , &   ! INFLOW       during current step (updated @ AD routine!)          [L3]
+    !                 PRCP_LENTH   => SWO%RESDAT(IPROJ)%RESBAL(IRES)%PRCP            , &   ! PRCP         during current step (updated @ AD routine!)          [L]
+    !                 EVAP_LENTH   => SWO%RESDAT(IPROJ)%RESBAL(IRES)%EVAP            , &   ! EVAP         during current step (updated @ AD routine!)          [L]
+    !                 STORAGE_MIN  => SWO%RESDAT(IPROJ)%RESBAL(IRES)%STORAGE_MIN     , &   ! Min allowed storage (either STORAGE_SPEC_MIN or greater) --Furthers point that can be released too
+    !                 AREA_START   => SWO%RESDAT(IPROJ)%RESBAL(IRES)%AREA_PREV       , &
+    !                 AREA_END     => SWO%RESDAT(IPROJ)%RESBAL(IRES)%AREA_DPL        , &   ! AREA_END @ non-project storage only ...
+    !                 AREA_MAX     => SWO%RESDAT(IPROJ)%RESBAL(IRES)%MAX_AREA        , &   ! Maximum area the reservoir could have (also represents maximum area precep falls on and makes its way to the reservoir)
+    !                 PRCP_FRAC    => SWO%RESDAT(IPROJ)%RESBAL(IRES)%PRECIP_AREA_FRAC, &   ! FRACTION OF TOTAL AREA TO AVERAGE AREA THAT PRECIP FALLS OVER
+    !                 !
+    !                 RELEASE_LIMIT=> SWO%RESDAT(IPROJ)%RESBAL(IRES)%MAX_RELEASE_VOL , &   !STRUCTURAL LIMIT TO RESERVOIR RELEASE
+    !                 RELEASE_LIM_S=> SWO%RESDAT(IPROJ)%RESBAL(IRES)%MAX_RELEASE_S   , &   ! ANY LIMIT IMPOSED FROM THE S-LANGAGE
+    !                 !
+    !                 RELEASE_POT  => SWO%RESDAT(IPROJ)%RESBAL(IRES)%RELEASE_POT       &   ! FINAL POTENTIAL RELEASE FOR RESERVOIR
+    !                )
+    !                !
+    !                AREA_AVG  = (AREA_START + AREA_END) * HALF
+    !                !
+    !                PRCP_AREA = PRCP_FRAC*(AREA_MAX - AREA_AVG) + AREA_AVG
+    !                !
+    !                PRCP = PRCP_LENTH*PRCP_AREA;  EVAP = EVAP_LENTH*AREA_AVG
+    !                !
+    !                RELEASE_POT = STORAGE - STORAGE_MIN + INFLOW + PRCP - EVAP !CONTINUITY
+    !                !
+    !                IF(RELEASE_POT > RELEASE_LIMIT) RELEASE_POT = RELEASE_LIMIT
+    !                IF(RELEASE_POT > RELEASE_LIM_S) RELEASE_POT = RELEASE_LIM_S
+    !                IF(RELEASE_POT < DZ           ) RELEASE_POT = DZ
+    !                !
+    !       END ASSOCIATE
+    !    ELSE
+    !        SWO%RESDAT(IPROJ)%RESBAL(IRES)%RELEASE_POT = DZ
+    !    END IF
+    !END DO
+    !END DO
+    !
+    ! Set up any additional releases that maybe availible -------------------------------------------------------------------------
+    !
+    DO CONCURRENT(I = 1:NPROJ)
+    DO CONCURRENT(J = 1:SWO%NRES_BAL(I))
+        SWO%RESDAT(I)%RESBAL(J)%RELEASE_ADDF_INI = DZ
+    END DO
+    END DO
+    !
+    ! ADD ADDITIONAL RELEASES -----------------------------------------------------------------------------------------------------
+    !
+    IF(SWO%HAS_ADD_RELEASE_S) THEN
+       DO I=1, NPROJ
+       DO J=1, SWO%NRES_BAL(I)
+         IF(SWO%RESDAT(I)%RESBAL(J)%INUSE) SWO%RESDAT(I)%RESBAL(J)%RELEASE_ADDF_INI = SWO%RESDAT(I)%RESBAL(J)%RELEASE_ADDF_INI + SWO%RESDAT(I)%RESBAL(J)%ADD_RELEASE_S_VOL !+...
+       END DO
+       END DO
+    END IF
+    !
+    ! ESTABLISH THE INTIAL GUESS FOR ADDITIONAL RELEASES -------------------------------------------------------------------------
+    !
+    DO CONCURRENT(I = 1:NPROJ)
+    DO CONCURRENT(J = 1:SWO%NRES_BAL(I), SWO%RESDAT(I)%RESBAL(J)%INUSE)
+        !
+        SWO%RESDAT(I)%RESBAL(J)%RELEASE_ADDF = SWO%RESDAT(I)%RESBAL(J)%RELEASE_ADDF_INI
+        !
+    END DO
+    END DO
+    !
+    ! PROJECT releated additional releases - Reset
+    !
+    !
+    IF(SWO%HAS_PROJ_RELEASE_ADD) THEN
+       DO CONCURRENT (I = 1:NPROJ)
+                           SWO%RESDAT(I)%PROJ_RELEASE_ADD = SWO%RESDAT(I)%PROJ_RELEASE_ADD_S * SWO%DELT  !Covert rate to volume
+       END DO
+       DO CONCURRENT (I = 1:NPROJ, SWO%RESDAT(I)%PROJ_RELEASE_ADD < NEARZERO_5)
+                                   SWO%RESDAT(I)%PROJ_RELEASE_ADD = DZ
+       END DO
+    ELSE
+        DO CONCURRENT (I = 1:NPROJ)
+                           SWO%RESDAT(I)%PROJ_RELEASE_ADD = DZ
+        END DO
+    END IF
+
+    !  --------------------------------------------------------------------- -----------------------------------------------------
+    !
+    !
+    ! COMPUTE ANY REQURIED RELEASES TO MAINTAIN STREAM FLOWS
+    !
+    IF(SWO%REQFLOW%HAS_REQ) THEN
+      !
+      IF(KITER > NINE) THEN                ! START REQUIRED FLOWS ON 8th ITERATION
+        !
+        SWO%REQFLOW%REL = DZ  !NECESSARY RELEASE FOR REQUIRED FLOW --TOTAL SHORTFALL PER "ORDER" UNIQUE REQUIRED PATHWAYS
+        !
+        IF(TRUE) THEN               ! Have 8 iterations that use full network to determine release, then make adjustments afterwards
           !
           DO ITER=ONE, SIZE(SWO%REQFLOW%ORDER)  !NUMBER OF UNIQUE REQUIRED PATHWAYS
+              UnderRelease = DZ   !LARGEST  SHORTFALL
+              OverRelease = inf   !SMALLEST Overshoot of required flow
+              !
+              !!!DO TMP = SWO%REQFLOW%ORDER(ITER)%N, ONE, NEG  ! ONE, SWO%REQFLOW%ORDER(ITER)%N  !NUMBER OF REQUIRED FLOWS ALONG SAME STREAM
+              !!!    !
+              !!!    IREQ = SWO%REQFLOW%ORDER(ITER)%VEC(TMP)  !ITER = PATHWAY, TMP IS THE SPECIFIC "IREQ" IN THE PATHWAY
+              !!!    !
+              !!!    IF(SWO%REQFLOW%REQ(IREQ) > NEARZERO_5) THEN
+              !!!        !
+              !!!        ISTR = SWO%SEGRCH_IN(SWO%REQFLOW%HEDSEG(IREQ)) !Upper Most common Seg
+              !!!        !
+              !!!        JSTR = SWO%REQFLOW%ISTRM(IREQ)
+              !!!        !
+              !!!        DSEEP = STRM(10, ISTR) - STRM(10, JSTR) !Gains and Losses from Common Seg to Required Seg
+              !!!        !
+              !!!        IF(DSEEP < NEARZERO_5) DSEEP = DZ  !Only care if its losing
+              !!!        !
+              !!!        DFLOW = SWO%REQFLOW%REQ(IREQ) - STRM(10, JSTR)   !SHORTFALL OF CURRENT FLOW TO REQUIRED FLOW
+              !!!        !
+              !!!        IF(DFLOW > DZ) THEN !SHORTFALL
+              !!!            !
+              !!!            IF( DFLOW + DSEEP - SWO%REQFLOW%REL_OLD(ITER) > NEARZERO_5) THEN  !INclude seepage + previous release
+              !!!                !
+              !!!                DFLOW = DFLOW + DSEEP - SWO%REQFLOW%REL_OLD(ITER)
+              !!!            END IF
+              !!!            !
+              !!!            IF(UnderRelease < DFLOW) UnderRelease = DFLOW
+              !!!        ELSE
+              !!!             DFLOW = DNEG*DFLOW  !It is an over release
+              !!!             !
+              !!!             IF ( DFLOW/SWO%REQFLOW%REQ(IREQ) > TENTH) THEN  !Over Release is greather than 10% of target required release
+              !!!                  !
+              !!!                  IF(OverRelease > DFLOW) OverRelease = DFLOW  !Store smallest over release for correction
+              !!!             END IF
+              !!!        END IF
+              !!!    END IF
+              !!!END DO
+              !
+              DO TMP = SWO%REQFLOW%ORDER(ITER)%N, ONE, NEG   ! Move from upper most required flow to downstream most
                   !
-                  REQ_FLOW_RELEASE = SWO%REQFLOW%REL(ITER) * SWO%DELT   ! REQUIRED RELEASE DEMANDED --AS A VOLUME!!!
+                  IREQ = SWO%REQFLOW%ORDER(ITER)%VEC(TMP)  !ITER = PATHWAY, TMP IS THE SPECIFIC "IREQ" IN THE PATHWAY
                   !
-                  IREQ = SWO%REQFLOW%ORDER(ITER)%VEC(ONE)  !ITER = PATHWAY, ---EACH OF THE IREQ SHOULD HAVE THE SAME RESERVOIRS SO ONLY USE FURTHEST DOWNSTREAM "ONE"
+                  IF(SWO%REQFLOW%REQ(IREQ) > NEARZERO_5) THEN
+                        !
+                        INFLOW = DBLE( STRM(10,SWO%REQFLOW%ISTRM(IREQ)) ) !GET FLOW THAT COMES INTO REACH
+                        !
+                        DFLOW = SWO%REQFLOW%REQ(IREQ) - INFLOW            !SHORTFALL OF CURRENT FLOW TO REQUIRED FLOW
+                        !
+                        JSEG = SWO%REQFLOW%SEG(IREQ)  !Required Flow Seg
+                        !
+                        IF(DFLOW > DZ) THEN !SHORTFALL - Calc additional release
+                           !
+                           !!!!!!DSEEP = DZ
+                           !!!!!!RATIO = DZ
+                           !!!!!!!
+                           !!!!!!IF(SWO%REQFLOW%RCH(IREQ).NE.ONE) THEN
+                           !!!!!!    !
+                           !!!!!!    !ISTR = SWO%SEGRCH_IN(JSEG)
+                           !!!!!!    !JSTR = SWO%REQFLOW%ISTRM(IREQ)
+                           !!!!!!    !
+                           !!!!!!    !DSEEP = DSEEP + STRM(10,ISTR) - STRM(10,JSTR)  ! Seg Inflow - Flow at Required PointReach's IN - OUT
+                           !!!!!!    DO ISTR = SWO%SEGRCH_IN(JSEG), SWO%REQFLOW%ISTRM(IREQ)-ONE !Add partial segment parts
+                           !!!!!!       !
+                           !!!!!!       RTOL = STRM(10,ISTR)
+                           !!!!!!       IF(RTOL < NEGNEARZERO_12 .OR. NEGNEARZERO_12 < RTOL) THEN
+                           !!!!!!           !
+                           !!!!!!           RATIO = RATIO + STRM(1,ISTR)
+                           !!!!!!           DSEEP = DSEEP + STRM(1,ISTR)*STRM(11,ISTR)/RTOL  ! NOTE: SFR specifies seepage LOSS as POSITIVE
+                           !!!!!!       END IF
+                           !!!!!!       !
+                           !!!!!!    END DO
+                           !!!!!!END IF
+                           !!!!!!!
+                           !!!!!!ISEG  = SWO%REQFLOW%HEDSEG(IREQ)  !Search from upper most common point to required flow segment
+                           !!!!!!NTREE = SWO%DNTREE_NAT(ISEG)%NTREE
+                           !!!!!!IF(ISEG .NE. JSEG) THEN
+                           !!!!!!    !
+                           !!!!!!    !ISTR = SWO%SEGRCH_IN (ISEG)
+                           !!!!!!    !JSTR = SWO%SEGRCH_OUT(ISEG)
+                           !!!!!!    !DSEEP = DSEEP + STRM(10,ISTR) - STRM(9, JSTR)
+                           !!!!!!    DO CONCURRENT (ISTR = SWO%SEGRCH_IN(ISEG):SWO%SEGRCH_OUT(ISEG))
+                           !!!!!!        !
+                           !!!!!!        RTOL = STRM(10,ISTR)
+                           !!!!!!        IF(RTOL < NEGNEARZERO_12 .OR. NEGNEARZERO_12 < RTOL) THEN
+                           !!!!!!            !
+                           !!!!!!            RATIO = RATIO + STRM(1,ISTR)
+                           !!!!!!            DSEEP = DSEEP + STRM(1,ISTR)*STRM(11,ISTR)/RTOL  ! NOTE: SFR specifies seepage LOSS as POSITIVE
+                           !!!!!!        END IF
+                           !!!!!!    END DO
+                           !!!!!!    !
+                           !!!!!!    DO J=ONE, NTREE
+                           !!!!!!        !
+                           !!!!!!        KSEG = SWO%UPTREE_NAT(ISEG)%SEGTREE(J)  !NEXT DNSTREAM NATURAL SEGMENT
+                           !!!!!!        !
+                           !!!!!!        IF( KSEG == JSEG ) EXIT
+                           !!!!!!        !
+                           !!!!!!        !ISTR = SWO%SEGRCH_IN (KSEG)
+                           !!!!!!        !JSTR = SWO%SEGRCH_OUT(KSEG)
+                           !!!!!!        !DSEEP = DSEEP + STRM(10,ISTR) - STRM(9, JSTR)
+                           !!!!!!        DO CONCURRENT (ISTR = SWO%SEGRCH_IN(KSEG):SWO%SEGRCH_OUT(KSEG))
+                           !!!!!!            !
+                           !!!!!!            RTOL = STRM(10,ISTR)
+                           !!!!!!            IF(RTOL < NEGNEARZERO_12 .OR. NEGNEARZERO_12 < RTOL) THEN
+                           !!!!!!                !
+                           !!!!!!                RATIO = RATIO + STRM(1,ISTR)
+                           !!!!!!                DSEEP = DSEEP + STRM(1,ISTR)*STRM(11,ISTR)/RTOL  ! NOTE: SFR specifies seepage LOSS as POSITIVE
+                           !!!!!!            END IF
+                           !!!!!!        END DO
+                           !!!!!!    END DO
+                           !!!!!!END IF
+                           !!!!!!IF(RATIO < NEGNEARZERO_12 .OR. NEARZERO_12 < RATIO) THEN
+                           !!!!!!    DSEEP = DSEEP/RATIO
+                           !!!!!!ELSE
+                           !!!!!!    DSEEP = UNO
+                           !!!!!!END IF
+                           !!!!!!IF(TENTH < DSEEP .AND. DSEEP < UNO ) THEN
+                           !!!!!!                                      DFLOW = DFLOW / DSEEP  !Only care if its losing
+                           !!!!!!ELSEIF(DSEEP <=TENTH ) THEN
+                           !!!!!!                                      DFLOW = DFLOW / DIEZ  !Only care if its losing
+                           !!!!!!END IF
+                           !!!
+                           !!IF(DSEEP < NEARZERO_5) DSEEP = DZ  !Only care if its losing
+                           !!!
+                           !!IF( DFLOW + DSEEP - SWO%REQFLOW%REL_OLD(ITER) > NEARZERO_5) THEN  !INclude seepage + previous release
+                           !!    !
+                           !!    DFLOW = DFLOW + DSEEP - SWO%REQFLOW%REL_OLD(ITER)
+                           !!END IF
+                           !!!
+                           !
+                           IF(UnderRelease < DFLOW) UnderRelease = DFLOW
+                        ELSE
+                           DFLOW = DNEG*DFLOW  !It is an over release
+                           !
+                           IF(OverRelease > DFLOW) OverRelease = DFLOW  !Store smallest over release for correction
+                           !
+                           !IF ( DFLOW > TENTH) THEN  !Over Release is greather than 0.1 L3/T
+                           !     !
+                           !     IF(OverRelease > DFLOW) OverRelease = DFLOW  !Store smallest over release for correction
+                           !END IF
+                        END IF
+                        !DTMP=86400D0
+                        !RELEASE_MAX =  DELT_INV * (SWO%RESDAT(1)%RESBAL(1)%RELEASE_TOT + SWO%RESDAT(1)%RESBAL(2)%RELEASE_TOT)/DTMP
+                        !IF(OverRelease> 1D30) THEN
+                        !WRITE(123,'(3I5,*(2x F9.3))') KPER, KSTP, KITER,RELEASE_MAX, SWO%REQFLOW%REL_OLD(ITER)/DTMP,INFLOW/DTMP,SWO%REQFLOW%REQ(IREQ)/DTMP, DSEEP/DTMP, UnderRelease/DTMP, 0.0, DELT_INV *SWO%RESDAT(1)%RESBAL(1)%RELEASE_TOT/DTMP, DELT_INV *SWO%RESDAT(1)%RESBAL(2)%RELEASE_TOT/DTMP
+                        !ELSE
+                        !WRITE(123,'(3I5,*(2x F9.3))') KPER, KSTP, KITER,RELEASE_MAX, SWO%REQFLOW%REL_OLD(ITER)/DTMP,INFLOW/DTMP,SWO%REQFLOW%REQ(IREQ)/DTMP, DSEEP/DTMP, UnderRelease/DTMP, OverRelease/DTMP, DELT_INV *SWO%RESDAT(1)%RESBAL(1)%RELEASE_TOT/DTMP, DELT_INV *SWO%RESDAT(1)%RESBAL(2)%RELEASE_TOT/DTMP
+                        !END IF
+                        !
+                  END IF ! (SWO%REQFLOW%REQ(IREQ) > NEARZERO_5) THEN
+              END DO     ! TMP = SWO%REQFLOW%ORDER(ITER)%N, ONE, NEG
+              !
+              !IF(OverRelease  < NEARZERO_5) OverRelease = DZ
+              IF(OverRelease  > D100      ) OverRelease = DZ
+              !
+              I = ITER ! UNIQUE REQUIRED PATHWAYS GROUP
+              !
+              IF(UnderRelease > NEARZERO_5) THEN !HAVE TO RELEASE MORE WATER -- NO SHORTFALLS ACCEPTIBLE
                   !
-                  DTMP = DZ                             !RESIDUAL RELEASE -- BECOMES ZERO WHEN REQ_FLOW_RELEASE IS FULLY MET
-                  I = Z                                 !NUMBER OF RES THAT ARE NOT AT RELEASE_POT
-                  DO TMP = ONE, SWO%REQFLOW%RES(IREQ)%N !NUMBER OF RES ASSOCIATED WITH IREQ
-                         !
-                         IPROJ = SWO%RESBAL2PROJ(ONE, SWO%REQFLOW%RES(IREQ)%VEC(TMP))  ! RES ID = SWO%REQFLOW%RES(IREQ)%VEC(TMP)
-                         IRES  = SWO%RESBAL2PROJ(TWO, SWO%REQFLOW%RES(IREQ)%VEC(TMP))
-                         !
-                         ASSOCIATE(RESBAL => SWO%RESDAT(IPROJ)%RESBAL(IRES))
-                                IF(RESBAL%INUSE) THEN
-                                      !
-                                      RESBAL%RELEASE_REQF = RESBAL%RELEASE_REQF + REQ_FLOW_RELEASE * RESBAL%REL_REQ_FRAC  !MAXED OUT THE RELEASES
-                                      IF( RESBAL%RELEASE_REQF > RESBAL%RELEASE_POT) THEN
-                                          DTMP = DTMP + RESBAL%RELEASE_REQF - RESBAL%RELEASE_POT
-                                          RESBAL%RELEASE_REQF = RESBAL%RELEASE_POT
-                                      ELSE
-                                          I = I + ONE
-                                      END IF
-                                END IF
-                         END ASSOCIATE
-                  END DO
+                  !IF(KITER < 12) UnderRelease = UnderRelease * FOURTH
                   !
-                  DO WHILE (DTMP > NEARZERO_5 .AND. I > Z)
-                      IF(I==ONE) THEN !ONLY ONE RERVOIR HAS ROOM FOR MORE RELEASE
-                                    DO TMP = ONE, SWO%REQFLOW%RES(IREQ)%N
-                                           !
-                                           IPROJ = SWO%RESBAL2PROJ(ONE, SWO%REQFLOW%RES(IREQ)%VEC(TMP))
-                                           IRES  = SWO%RESBAL2PROJ(TWO, SWO%REQFLOW%RES(IREQ)%VEC(TMP))
-                                           !
-                                           ASSOCIATE(RESBAL => SWO%RESDAT(IPROJ)%RESBAL(IRES))
-                                              IF(RESBAL%RELEASE_REQF .NE. RESBAL%RELEASE_POT .AND. RESBAL%INUSE) THEN
-                                                   !
-                                                   RESBAL%RELEASE_REQF = RESBAL%RELEASE_REQF + DTMP
-                                                   !
-                                                   IF( RESBAL%RELEASE_REQF > RESBAL%RELEASE_POT) THEN
-                                                       DTMP = RESBAL%RELEASE_REQF - RESBAL%RELEASE_POT
-                                                       RESBAL%RELEASE_REQF = RESBAL%RELEASE_POT
-                                                   END IF
-                                              END IF
-                                           END ASSOCIATE
-                                    END DO
-                                    I = Z    !EXIT LOOP
-                      ELSE
-                          DTMP3 = DZ  !PRORATE EXCESS BY OTHER RESERVOIRS MAX RELEASE
-                          DO TMP = ONE, SWO%REQFLOW%RES(IREQ)%N
-                                 !
-                                 IPROJ = SWO%RESBAL2PROJ(ONE, SWO%REQFLOW%RES(IREQ)%VEC(TMP))
-                                 IRES  = SWO%RESBAL2PROJ(TWO, SWO%REQFLOW%RES(IREQ)%VEC(TMP))
-                                 !
-                                 ASSOCIATE(RESBAL => SWO%RESDAT(IPROJ)%RESBAL(IRES))
-                                    IF(RESBAL%RELEASE_REQF .NE. RESBAL%RELEASE_POT .AND. RESBAL%INUSE) THEN
-                                        DTMP3 = DTMP3 + RESBAL%REL_REQ_FRAC
+                  SWO%REQFLOW%REL(I) = SWO%REQFLOW%REL_OLD(I) + UnderRelease     !NOTE IS THE AMMOUNT OF SHORTFALL FROM THE PREIVOUS SET OF RELEASES
+                  !
+              ELSEIF(SWO%REQFLOW%REL_OLD(I) < NEARZERO_5 ) THEN                  !REQUIRED FLOW TOO SMALL TO BE WORTH RELEASING
+                  !
+                  SWO%REQFLOW%REL(I) = DZ
+                  !
+              ELSEIF(OverRelease > NEARZERO_5) THEN                 !OverRelease MAKES UP MORE THEN 0.1% OF OLD REQUIRED RELEASE
+                  !
+                  DFLOW = SWO%REQFLOW_RELAX*OverRelease                 ! DECREASE RELEASE BY SWO%REQFLOW_RELAX % OF THE OverRelease
+                  !
+                  IF(DFLOW > SWO%REQFLOW%REL_OLD(I)) THEN   ! Correction turns off required releases
+                             SWO%REQFLOW%REL(I) = DZ
+                  ELSE
+                             SWO%REQFLOW%REL(I) = SWO%REQFLOW%REL_OLD(I) - DFLOW !Reduce release by Overrelease
+                  END IF
+              ELSE
+                  SWO%REQFLOW%REL(I) = SWO%REQFLOW%REL_OLD(I) !REUSE RELEASE
+              END IF
+          END DO
+          !
+        ELSE !IF(KITER >= 12) THEN        ! Only make adjustments based on shortfall -------------------------------------
+          !
+          DO ITER=ONE, SIZE(SWO%REQFLOW%ORDER)  !NUMBER OF UNIQUE REQUIRED PATHWAYS
+              UnderRelease = DZ   !LARGEST  SHORTFALL
+              OverRelease = inf   !SMALLEST Overshoot of required flow
+              DO TMP = ONE, SWO%REQFLOW%ORDER(ITER)%N  !NUMBER OF REQUIRED FLOWS ALONG SAME STREAM
+                  !
+                  IREQ = SWO%REQFLOW%ORDER(ITER)%VEC(TMP)  !ITER = PATHWAY, TMP IS THE SPECIFIC "IREQ" IN THE PATHWAY
+                  !
+                  IF(SWO%REQFLOW%REQ(IREQ) > NEARZERO_5) THEN
+                        !
+                        INFLOW = DBLE( STRM(10,SWO%REQFLOW%ISTRM(IREQ)) ) !GET FLOW THAT COMES INTO REACH
+                        !
+                        DFLOW = SWO%REQFLOW%REQ(IREQ) - INFLOW            !SHORTFALL OF CURRENT FLOW TO REQUIRED FLOW
+                        !
+                        IF(DFLOW > DZ) THEN !SHORTFALL
+                             !RELEASE_REQF = RELEASE_REQF + DFLOW
+                             IF(UnderRelease < DFLOW) UnderRelease = DFLOW
+                             !
+                        ELSEIF(FIVE_ITER) THEN
+                             DFLOW = DNEG*DFLOW  !It is an over release
+                             !
+                             IF ( DFLOW/SWO%REQFLOW%REQ(IREQ) > TENTH) THEN  !Over Release is greather than 10% of target required release
+                                  !
+                                  IF(OverRelease > DFLOW) OverRelease = DFLOW  !Store smallest over release for correction
+                             END IF
+                        END IF
+                  END IF
+              END DO
+              !
+              IF(OverRelease < NEARZERO_5) OverRelease = DZ
+              IF(OverRelease > D100      ) OverRelease = DZ
+              !
+              I = ITER ! UNIQUE REQUIRED PATHWAYS GROUP
+              !
+              IF(UnderRelease > NEARZERO_5) THEN !HAVE TO RELEASE MORE WATER -- NO SHORTFALLS ACCEPTIBLE
+                  !
+                  SWO%REQFLOW%REL(I) = SWO%REQFLOW%REL_OLD(I) + UnderRelease     !NOTE IS THE AMMOUNT OF SHORTFALL FROM THE PREIVOUS SET OF RELEASES
+                  !
+              ELSEIF(SWO%REQFLOW%REL_OLD(I) < NEARZERO_5 ) THEN                  !REQUIRED FLOW TOO SMALL TO BE WORTH RELEASING
+                  !
+                  SWO%REQFLOW%REL(I) = DZ
+                  !
+              ELSEIF(OverRelease/SWO%REQFLOW%REL_OLD(I) > FIFTH ) THEN                 !OverRelease MAKES UP MORE THEN 20% OF OLD REQUIRED RELEASE
+                  !
+                  DFLOW = SWO%REQFLOW_RELAX*OverRelease                 ! DECREASE RELEASE BY SWO%REQFLOW_RELAX % OF THE OverRelease
+                  !
+                  IF(DFLOW > SWO%REQFLOW%REL_OLD(I)) THEN   ! Correction turns off required releases
+                             SWO%REQFLOW%REL(I) = DZ
+                  ELSE
+                             SWO%REQFLOW%REL(I) = SWO%REQFLOW%REL_OLD(I) - DFLOW !Reduce release by Overrelease
+                  END IF
+                  !
+                  !!!!
+                  !!!SWO%REQFLOW%REL(I) = SWO%REQFLOW%REL_OLD(I) - FIFTH*OverRelease !ONLY DECRESS RELEASE BY 20% OF THE OVER RELEASE
+                  !!!!
+                  !!!IF(SWO%REQFLOW%REL(I) < DZ) SWO%REQFLOW%REL(I) = FIFTH*SWO%REQFLOW%REL_OLD(I)  !NEGATIVE FLOW IS AN OVER CORRECTION, SO USE 20% OF PREVIOUS RELEASE
+              ELSE
+                  SWO%REQFLOW%REL(I) = SWO%REQFLOW%REL_OLD(I) !REUSE RELEASE
+              END IF
+          END DO
+          !
+        END IF  ! (KITER < 12) THEN
+        !
+        ! DETERMINE SPREAD OF REQUIRED FLOW RELEASES FROM RESERVOIRS (RELEASE_REQF)
+        !
+        DO CONCURRENT(I = 1:NPROJ)
+        DO CONCURRENT (J = 1:SWO%NRES_BAL(I)); SWO%RESDAT(I)%RESBAL(J)%RELEASE_REQF = DZ
+        END DO;END DO
+        !
+        DO ITER=ONE, SIZE(SWO%REQFLOW%ORDER)  !NUMBER OF UNIQUE REQUIRED PATHWAYS
+                !
+                REQ_FLOW_RELEASE = SWO%REQFLOW%REL(ITER) * SWO%DELT   ! REQUIRED RELEASE DEMANDED --AS A VOLUME!!!
+                !
+                IREQ = SWO%REQFLOW%ORDER(ITER)%VEC(ONE)  !ITER = PATHWAY, ---EACH OF THE IREQ SHOULD HAVE THE SAME RESERVOIRS SO ONLY USE FURTHEST DOWNSTREAM "ONE"
+                !
+                DTMP = DZ                             !RESIDUAL RELEASE -- BECOMES ZERO WHEN REQ_FLOW_RELEASE IS FULLY MET
+                I = Z                                 !NUMBER OF RES THAT ARE NOT AT RELEASE_POT
+                DO TMP = ONE, SWO%REQFLOW%RES(IREQ)%N !NUMBER OF RES ASSOCIATED WITH IREQ
+                       !
+                       IPROJ = SWO%RESBAL2PROJ(ONE, SWO%REQFLOW%RES(IREQ)%VEC(TMP))  ! RES ID = SWO%REQFLOW%RES(IREQ)%VEC(TMP)
+                       IRES  = SWO%RESBAL2PROJ(TWO, SWO%REQFLOW%RES(IREQ)%VEC(TMP))
+                       !
+                       ASSOCIATE(RESBAL => SWO%RESDAT(IPROJ)%RESBAL(IRES))
+                              IF(RESBAL%INUSE) THEN
+                                    !
+                                    RESBAL%RELEASE_REQF = RESBAL%RELEASE_REQF + REQ_FLOW_RELEASE * RESBAL%REL_REQ_FRAC  !MAXED OUT THE RELEASES
+                                    IF( RESBAL%RELEASE_REQF > RESBAL%RELEASE_POT) THEN
+                                        DTMP = DTMP + RESBAL%RELEASE_REQF - RESBAL%RELEASE_POT
+                                        RESBAL%RELEASE_REQF = RESBAL%RELEASE_POT
+                                    ELSE
+                                        I = I + ONE
                                     END IF
-                                 END ASSOCIATE
-                          END DO
-                          !
-                          IF( DTMP3 > DZ) THEN
-                              DTMP1 = DTMP
-                              DTMP  = DZ
-                              I = Z
-                              DO TMP = ONE, SWO%REQFLOW%RES(IREQ)%N
-                                     K     = SWO%REQFLOW%RES(IREQ)%VEC(TMP)
-                                     IPROJ = SWO%RESBAL2PROJ(ONE,K)
-                                     IRES  = SWO%RESBAL2PROJ(TWO,K)
-                                     !
-                                     ASSOCIATE(RESBAL => SWO%RESDAT(IPROJ)%RESBAL(IRES))
-                                        IF(RESBAL%RELEASE_REQF .NE. RESBAL%RELEASE_POT .AND. RESBAL%INUSE) THEN
-                                            !
-                                            DTMP2 = RESBAL%REL_REQ_FRAC/DTMP3  !RATIO OF REL_REQ_FRAC/ SUM OF NOT MAXED RES RELEASE FRACs
-                                            !
-                                            RESBAL%RELEASE_REQF = RESBAL%RELEASE_REQF + (DTMP1*DTMP2)  ! DTMP1 = RELEASE SHORTFALL, DTMP2 = FRACTION OF RELEASE FOR RES
-                                            !
-                                            IF( RESBAL%RELEASE_REQF > RESBAL%RELEASE_POT) THEN
-                                                DTMP = DTMP + RESBAL%RELEASE_REQF - RESBAL%RELEASE_POT
-                                                RESBAL%RELEASE_REQF = RESBAL%RELEASE_POT
-                                            ELSE
-                                                I = I + ONE
+                              END IF
+                       END ASSOCIATE
+                END DO
+                !
+                DO WHILE (DTMP > NEARZERO_5 .AND. I > Z)
+                    IF(I==ONE) THEN !ONLY ONE RERVOIR HAS ROOM FOR MORE RELEASE
+                                  DO TMP = ONE, SWO%REQFLOW%RES(IREQ)%N
+                                         !
+                                         IPROJ = SWO%RESBAL2PROJ(ONE, SWO%REQFLOW%RES(IREQ)%VEC(TMP))
+                                         IRES  = SWO%RESBAL2PROJ(TWO, SWO%REQFLOW%RES(IREQ)%VEC(TMP))
+                                         !
+                                         ASSOCIATE(RESBAL => SWO%RESDAT(IPROJ)%RESBAL(IRES))
+                                            IF(RESBAL%RELEASE_REQF .NE. RESBAL%RELEASE_POT .AND. RESBAL%INUSE) THEN
+                                                 !
+                                                 RESBAL%RELEASE_REQF = RESBAL%RELEASE_REQF + DTMP
+                                                 !
+                                                 IF( RESBAL%RELEASE_REQF > RESBAL%RELEASE_POT) THEN
+                                                     DTMP = RESBAL%RELEASE_REQF - RESBAL%RELEASE_POT
+                                                     RESBAL%RELEASE_REQF = RESBAL%RELEASE_POT
+                                                 END IF
                                             END IF
-                                        END IF
-                                     END ASSOCIATE
-                              END DO
-                          ELSE
-                              I = Z  !EXIT LOOP --MAXED OUT RELEASES
-                          END IF
-                      END IF
-                  END DO
-          END DO  ! ITER=ONE, SIZE(SWO%REQFLOW%ORDER)  !NUMBER OF UNIQUE REQUIRED PATHWAYS
-        END IF  ! KITER > SEV
-        END IF ! SWO%REQFLOW%HAS_REQ
-      !!!!!IF(SWO%REQFLOW%HAS_REQ) THEN
-      !!!!!  !
-      !!!!!  IF(KITER > SEV) THEN   !START REQUIRED FLOWS ON 8th ITERATION
-      !!!!!      !
-      !!!!!      DO CONCURRENT(IPROJ = 1:NPROJ)
-      !!!!!      DO CONCURRENT (IRES = 1:SWO%NRES_BAL(IPROJ)); SWO%RESDAT(IPROJ)%RESBAL(IRES)%RELEASE_REQF = DZ
-      !!!!!      END DO;END DO
-      !!!!!      !
-      !!!!!      SWO%REQFLOW%REL = DZ  !NECESSARY RELEASE FOR REQUIRED FLOW
-      !!!!!      !
-      !!!!!      DO I=ONE, SWO%REQFLOW%N
-      !!!!!         IF(SWO%REQFLOW%REQ(I) > NEARZERO_5) THEN
-      !!!!!               !
-      !!!!!               INFLOW = STRM(10,SWO%REQFLOW%ISTRM(I))  !GET FLOW THAT COMES INTO REACH
-      !!!!!               !
-      !!!!!               ISEG = SWO%REQFLOW%SEG(I)   !ISEG
-      !!!!!               !IRCH = SWO%REQFLOW%SEGRCH(TWO,I)  !IRCH
-      !!!!!               !
-      !!!!!               DFLOW = INFLOW - SWO%REQFLOW%REQ(I)  !DEMANDED REQUIRED FLOW
-      !!!!!               !
-      !!!!!               IF(DFLOW < DZ) THEN !SHORTFALL
-      !!!!!                   !
-      !!!!!                   ! sum seepage over upstream river network ... to common point
-      !!!!!                   ! ... divseg's iupseg ...
-      !!!!!
-      !!!!!                   DSEEP    = DZ
-      !!!!!                   IRCH     = SWO%SEGRCH_IN(ISEG)                                ! reach index @ rch 1 of seg
-      !!!!!                   JRCH     = SWO%REQFLOW%ISTRM(I)
-      !!!!!                   !
-      !!!!!                   IF(JRCH>ONE) JRCH = JRCH - ONE
-      !!!!!                   !
-      !!!!!                   DO CONCURRENT (ISTR  = IRCH:JRCH)
-      !!!!!                     DSEEP  = DSEEP - STRM(11,ISTR)                          ! NOTE: SFR specifies seepage LOSS as POSITIVE ... reverse here so GAIN is POSITIVE
-      !!!!!                   END DO
-      !!!!!                   ! ... uptree @ iupseg ...
-      !!!!!                   !
-      !!!!!                   DO ITREE = ONE, SWO%UPTREE_NAT(ISEG)%NTREE
-      !!!!!                     !
-      !!!!!                     KSEG   = SWO%UPTREE_NAT(ISEG)%SEGTREE(ITREE)
-      !!!!!                     IRCH   = SWO%SEGRCH_IN(KSEG)
-      !!!!!                     JRCH   = SWO%SEGRCH_OUT(KSEG)
-      !!!!!                     DO CONCURRENT (ISTR = IRCH:JRCH);  DSEEP = DSEEP - STRM(11,ISTR)  ! NOTE: SFR specifies seepage LOSS as POSITIVE ... reverse here so LOSS is NEGATIVE
-      !!!!!                     END DO !(ISTR)
-      !!!!!                     !
-      !!!!!                     IF(KSEG == SWO%REQFLOW%HEDSEG(I)) EXIT  !REACHED COMMON POINT FROM RESERVOIR RELEASES
-      !!!!!                   END DO !(ITREE)
-      !!!!!                   !
-      !!!!!                   ! sum specified inflows to upstream river network ...
-      !!!!!                   !
-      !!!!!                   DFLOW_IN = DZ
-      !!!!!                   ! ... divseg ...              !RRFLAG = 1 if RES release seg
-      !!!!!                   IF (IDIVAR(1,ISEG) == Z .AND. SWO%SEGDATA(ISEG)%RRFLAG.NE.ONE ) DFLOW_IN = DFLOW_IN + SEG(2,ISEG)
-      !!!!!                   !
-      !!!!!                   DO ITREE = ONE, SWO%UPTREE_NAT(ISEG)%NTREE
-      !!!!!                     KSEG   = SWO%UPTREE_NAT(ISEG)%SEGTREE(ITREE)
-      !!!!!                     IF ( IDIVAR(1,KSEG) == Z .AND. SWO%SEGDATA(KSEG)%RRFLAG.NE.ONE )  DFLOW_IN = DFLOW_IN + SEG(2,KSEG)
-      !!!!!                     !
-      !!!!!                     IF(KSEG == SWO%REQFLOW%HEDSEG(I)) EXIT  !REACHED COMMON POINT FROM RESERVOIR RELEASES
-      !!!!!                   END DO !(ITREE)
-      !!!!!                   !
-      !!!!!                   ! sum routed inflows to upstream river network ...
-      !!!!!                   !
-      !!!!!                   DFLOW_RT = DZ
-      !!!!!                   ! ... divseg's iupseg ...
-      !!!!!                   NLIST    = SWO%UPSEG(ISEG)%NLIST
-      !!!!!                   DO CONCURRENT (ILIST = 1:NLIST)
-      !!!!!                     KSEG   = SWO%UPSEG(ISEG)%SEGLIST(ILIST)
-      !!!!!                     JRCH   = SWO%SEGRCH_OUT(KSEG)
-      !!!!!                     IF ( SWO%SEGDATA(KSEG)%OUTSEG.EQ.ISEG .AND. (SWO%SEGINFO(KSEG)%SegType.NE.1)) THEN  ! routed inflow to divseg's iupseg (ISEG) ... EXCLUDING inflow from upstream river segments!
-      !!!!!                           DFLOW_RT = DFLOW_RT + STRM(9,JRCH)
-      !!!!!                     END IF !(SegType.NE.1 / OUTSEG.EQ.ISEG)
-      !!!!!                   END DO !(ILIST)
-      !!!!!                   ! ... uptree @ iupseg ...
-      !!!!!                   NTREE    = SWO%UPTREE_NAT(ISEG)%NTREE
-      !!!!!                   DO ITREE = ONE, NTREE
-      !!!!!                     KSEG   = SWO%UPTREE_NAT(ISEG)%SEGTREE(ITREE)
-      !!!!!                     NLIST  = SWO%UPSEG(KSEG)%NLIST
-      !!!!!                     DO CONCURRENT (ILIST = 1:NLIST)
-      !!!!!                       LSEG   = SWO%UPSEG(KSEG)%SEGLIST(ILIST)
-      !!!!!                       JRCH   = SWO%SEGRCH_OUT(LSEG)
-      !!!!!                       IF ( SWO%SEGDATA(LSEG)%OUTSEG.EQ.KSEG .AND. SWO%SEGINFO(LSEG)%SegType.NE.1 ) THEN ! routed inflow to segment in uptree @ iupseg (JSEG) ... EXCLUDING inflow from upstream river segments!
-      !!!!!                         DFLOW_RT = DFLOW_RT + STRM(9,JRCH)
-      !!!!!                       END IF !(SegType.NE.1 / OUTSEG.EQ.KSEG)
-      !!!!!                     END DO !(ILIST)
-      !!!!!                     !
-      !!!!!                     IF(KSEG == SWO%REQFLOW%HEDSEG(I)) EXIT  !REACHED COMMON POINT FROM RESERVOIR RELEASES
-      !!!!!                   END DO !(ITREE)
-      !!!!!                   !
-      !!!!!                   DTMP  = (DFLOW - DSEEP - DFLOW_IN - DFLOW_RT)
-      !!!!!                   !
-      !!!!!               ELSEIF(SWO%RESDAT(IPROJ)%RESBAL(IRES)%RELEASE_REQF_PEV > DZ) THEN
-      !!!!!                   SWO%RESDAT(IPROJ)%RESBAL(IRES)%RELEASE_REQF = SWO%RESDAT(IPROJ)%RESBAL(IRES)%RELEASE_REQF_PEV
-      !!!!!               END IF
-      !!!!!         END IF
-      !!!!!      END DO
-      !!!!!  END IF
-      !!!!!END IF
-      !
-      !
-      ! ****************************************************************
-      ! COMPUTE RESERVOIR RELEASE, RESERVOIR MASS BALANCE ...
-      ! (8)  Compute maximum possible release ...
-      !      MaxRelease  = STORAGE[t]                   (end of prev step)
-      !                    - STORAGE_NPROJ[t]           (current step)
-      !                    - RELEASE_SPEC[t]            (current step)
-      !                    + Inflow + Prcp*A - Evap*A   (current step, iterate @ A)
-      ! (9)  Compute demand-driven release
-      !      ReleaseDMND = PROJ_DIVREQ                  (demand-driven diversion request, constrained by allotments)
-      !                    / PROJ_DIVRATIO              (project diversion ratio)
-      ! (10) Compute estimated Project release
-      !      ReleaseEst  = max( 0., min( MaxRelease, ReleaseDMND) )
-      !      NOTE -- Diversion request should be constrained such that
-      !              ReleaseDMND is always less than MaxRelease ...
-      !              If ReleaseEst < ReleaseDMND, may indicate bug in code...!
-      ! (11) Compute reservoir mass balance
-      !      (initial guess, first update, then iterate to closure)
-      !      (includes iterative calculation of reservoir spills)
-      !      Storage[t+1]= STORAGE[t]                    (end of prev step)
-      !                  + Inflow[t] + Prcp[t]*A[t]
-      !                  - ReleasePRJ[t] - ReleaseNPRJ[t] - ReleaseFLD- Evap[t]*A[t]
-      ! ****************************************************************
-      !
-      ! TODO
-      ! Current release calculation doesn't account for multiple releases
-      ! supporting a given project ... need to constrain release from each
-      ! reservoir for general use. Currently allows release up to full
-      ! allocation (or demand) from *EACH* reservoir, rather than from
-      ! *ALL* reservoirs.
-      !
-      ! Loop over projects, mass-balance reservoirs
+                                         END ASSOCIATE
+                                  END DO
+                                  I = Z    !EXIT LOOP
+                    ELSE
+                        DTMP3 = DZ  !PRORATE EXCESS BY OTHER RESERVOIRS MAX RELEASE
+                        DO TMP = ONE, SWO%REQFLOW%RES(IREQ)%N
+                               !
+                               IPROJ = SWO%RESBAL2PROJ(ONE, SWO%REQFLOW%RES(IREQ)%VEC(TMP))
+                               IRES  = SWO%RESBAL2PROJ(TWO, SWO%REQFLOW%RES(IREQ)%VEC(TMP))
+                               !
+                               ASSOCIATE(RESBAL => SWO%RESDAT(IPROJ)%RESBAL(IRES))
+                                  IF(RESBAL%RELEASE_REQF .NE. RESBAL%RELEASE_POT .AND. RESBAL%INUSE) THEN
+                                      DTMP3 = DTMP3 + RESBAL%REL_REQ_FRAC
+                                  END IF
+                               END ASSOCIATE
+                        END DO
+                        !
+                        IF( DTMP3 > DZ) THEN
+                            DTMP1 = DTMP
+                            DTMP  = DZ
+                            I = Z
+                            DO TMP = ONE, SWO%REQFLOW%RES(IREQ)%N
+                                   K     = SWO%REQFLOW%RES(IREQ)%VEC(TMP)
+                                   IPROJ = SWO%RESBAL2PROJ(ONE,K)
+                                   IRES  = SWO%RESBAL2PROJ(TWO,K)
+                                   !
+                                   ASSOCIATE(RESBAL => SWO%RESDAT(IPROJ)%RESBAL(IRES))
+                                      IF(RESBAL%RELEASE_REQF .NE. RESBAL%RELEASE_POT .AND. RESBAL%INUSE) THEN
+                                          !
+                                          DTMP2 = RESBAL%REL_REQ_FRAC/DTMP3  !RATIO OF REL_REQ_FRAC/ SUM OF NOT MAXED RES RELEASE FRACs
+                                          !
+                                          RESBAL%RELEASE_REQF = RESBAL%RELEASE_REQF + (DTMP1*DTMP2)  ! DTMP1 = RELEASE SHORTFALL, DTMP2 = FRACTION OF RELEASE FOR RES
+                                          !
+                                          IF( RESBAL%RELEASE_REQF > RESBAL%RELEASE_POT) THEN
+                                              DTMP = DTMP + RESBAL%RELEASE_REQF - RESBAL%RELEASE_POT
+                                              RESBAL%RELEASE_REQF = RESBAL%RELEASE_POT
+                                          ELSE
+                                              I = I + ONE
+                                          END IF
+                                      END IF
+                                   END ASSOCIATE
+                            END DO
+                        ELSE
+                            I = Z  !EXIT LOOP --MAXED OUT RELEASES
+                        END IF
+                    END IF
+                END DO
+        END DO  ! ITER=ONE, SIZE(SWO%REQFLOW%ORDER)  !NUMBER OF UNIQUE REQUIRED PATHWAYS
+      END IF  ! KITER > SEV
+      END IF ! SWO%REQFLOW%HAS_REQ
+    !!!!!IF(SWO%REQFLOW%HAS_REQ) THEN
+    !!!!!  !
+    !!!!!  IF(KITER > SEV) THEN   !START REQUIRED FLOWS ON 8th ITERATION
+    !!!!!      !
+    !!!!!      DO CONCURRENT(IPROJ = 1:NPROJ)
+    !!!!!      DO CONCURRENT (IRES = 1:SWO%NRES_BAL(IPROJ)); SWO%RESDAT(IPROJ)%RESBAL(IRES)%RELEASE_REQF = DZ
+    !!!!!      END DO;END DO
+    !!!!!      !
+    !!!!!      SWO%REQFLOW%REL = DZ  !NECESSARY RELEASE FOR REQUIRED FLOW
+    !!!!!      !
+    !!!!!      DO I=ONE, SWO%REQFLOW%N
+    !!!!!         IF(SWO%REQFLOW%REQ(I) > NEARZERO_5) THEN
+    !!!!!               !
+    !!!!!               INFLOW = STRM(10,SWO%REQFLOW%ISTRM(I))  !GET FLOW THAT COMES INTO REACH
+    !!!!!               !
+    !!!!!               ISEG = SWO%REQFLOW%SEG(I)   !ISEG
+    !!!!!               !IRCH = SWO%REQFLOW%SEGRCH(TWO,I)  !IRCH
+    !!!!!               !
+    !!!!!               DFLOW = INFLOW - SWO%REQFLOW%REQ(I)  !DEMANDED REQUIRED FLOW
+    !!!!!               !
+    !!!!!               IF(DFLOW < DZ) THEN !SHORTFALL
+    !!!!!                   !
+    !!!!!                   ! sum seepage over upstream river network ... to common point
+    !!!!!                   ! ... divseg's iupseg ...
+    !!!!!
+    !!!!!                   DSEEP    = DZ
+    !!!!!                   IRCH     = SWO%SEGRCH_IN(ISEG)                                ! reach index @ rch 1 of seg
+    !!!!!                   JRCH     = SWO%REQFLOW%ISTRM(I)
+    !!!!!                   !
+    !!!!!                   IF(JRCH>ONE) JRCH = JRCH - ONE
+    !!!!!                   !
+    !!!!!                   DO CONCURRENT (ISTR  = IRCH:JRCH)
+    !!!!!                     DSEEP  = DSEEP - STRM(11,ISTR)                          ! NOTE: SFR specifies seepage LOSS as POSITIVE ... reverse here so GAIN is POSITIVE
+    !!!!!                   END DO
+    !!!!!                   ! ... uptree @ iupseg ...
+    !!!!!                   !
+    !!!!!                   DO ITREE = ONE, SWO%UPTREE_NAT(ISEG)%NTREE
+    !!!!!                     !
+    !!!!!                     KSEG   = SWO%UPTREE_NAT(ISEG)%SEGTREE(ITREE)
+    !!!!!                     IRCH   = SWO%SEGRCH_IN(KSEG)
+    !!!!!                     JRCH   = SWO%SEGRCH_OUT(KSEG)
+    !!!!!                     DO CONCURRENT (ISTR = IRCH:JRCH);  DSEEP = DSEEP - STRM(11,ISTR)  ! NOTE: SFR specifies seepage LOSS as POSITIVE ... reverse here so LOSS is NEGATIVE
+    !!!!!                     END DO !(ISTR)
+    !!!!!                     !
+    !!!!!                     IF(KSEG == SWO%REQFLOW%HEDSEG(I)) EXIT  !REACHED COMMON POINT FROM RESERVOIR RELEASES
+    !!!!!                   END DO !(ITREE)
+    !!!!!                   !
+    !!!!!                   ! sum specified inflows to upstream river network ...
+    !!!!!                   !
+    !!!!!                   DFLOW_IN = DZ
+    !!!!!                   ! ... divseg ...              !RRFLAG = 1 if RES release seg
+    !!!!!                   IF (IDIVAR(1,ISEG) == Z .AND. SWO%SEGDATA(ISEG)%RRFLAG.NE.ONE ) DFLOW_IN = DFLOW_IN + SEG(2,ISEG)
+    !!!!!                   !
+    !!!!!                   DO ITREE = ONE, SWO%UPTREE_NAT(ISEG)%NTREE
+    !!!!!                     KSEG   = SWO%UPTREE_NAT(ISEG)%SEGTREE(ITREE)
+    !!!!!                     IF ( IDIVAR(1,KSEG) == Z .AND. SWO%SEGDATA(KSEG)%RRFLAG.NE.ONE )  DFLOW_IN = DFLOW_IN + SEG(2,KSEG)
+    !!!!!                     !
+    !!!!!                     IF(KSEG == SWO%REQFLOW%HEDSEG(I)) EXIT  !REACHED COMMON POINT FROM RESERVOIR RELEASES
+    !!!!!                   END DO !(ITREE)
+    !!!!!                   !
+    !!!!!                   ! sum routed inflows to upstream river network ...
+    !!!!!                   !
+    !!!!!                   DFLOW_RT = DZ
+    !!!!!                   ! ... divseg's iupseg ...
+    !!!!!                   NLIST    = SWO%UPSEG(ISEG)%NLIST
+    !!!!!                   DO CONCURRENT (ILIST = 1:NLIST)
+    !!!!!                     KSEG   = SWO%UPSEG(ISEG)%SEGLIST(ILIST)
+    !!!!!                     JRCH   = SWO%SEGRCH_OUT(KSEG)
+    !!!!!                     IF ( SWO%SEGDATA(KSEG)%OUTSEG.EQ.ISEG .AND. (SWO%SEGINFO(KSEG)%SegType.NE.1)) THEN  ! routed inflow to divseg's iupseg (ISEG) ... EXCLUDING inflow from upstream river segments!
+    !!!!!                           DFLOW_RT = DFLOW_RT + STRM(9,JRCH)
+    !!!!!                     END IF !(SegType.NE.1 / OUTSEG.EQ.ISEG)
+    !!!!!                   END DO !(ILIST)
+    !!!!!                   ! ... uptree @ iupseg ...
+    !!!!!                   NTREE    = SWO%UPTREE_NAT(ISEG)%NTREE
+    !!!!!                   DO ITREE = ONE, NTREE
+    !!!!!                     KSEG   = SWO%UPTREE_NAT(ISEG)%SEGTREE(ITREE)
+    !!!!!                     NLIST  = SWO%UPSEG(KSEG)%NLIST
+    !!!!!                     DO CONCURRENT (ILIST = 1:NLIST)
+    !!!!!                       LSEG   = SWO%UPSEG(KSEG)%SEGLIST(ILIST)
+    !!!!!                       JRCH   = SWO%SEGRCH_OUT(LSEG)
+    !!!!!                       IF ( SWO%SEGDATA(LSEG)%OUTSEG.EQ.KSEG .AND. SWO%SEGINFO(LSEG)%SegType.NE.1 ) THEN ! routed inflow to segment in uptree @ iupseg (JSEG) ... EXCLUDING inflow from upstream river segments!
+    !!!!!                         DFLOW_RT = DFLOW_RT + STRM(9,JRCH)
+    !!!!!                       END IF !(SegType.NE.1 / OUTSEG.EQ.KSEG)
+    !!!!!                     END DO !(ILIST)
+    !!!!!                     !
+    !!!!!                     IF(KSEG == SWO%REQFLOW%HEDSEG(I)) EXIT  !REACHED COMMON POINT FROM RESERVOIR RELEASES
+    !!!!!                   END DO !(ITREE)
+    !!!!!                   !
+    !!!!!                   DTMP  = (DFLOW - DSEEP - DFLOW_IN - DFLOW_RT)
+    !!!!!                   !
+    !!!!!               ELSEIF(SWO%RESDAT(IPROJ)%RESBAL(IRES)%RELEASE_REQF_PEV > DZ) THEN
+    !!!!!                   SWO%RESDAT(IPROJ)%RESBAL(IRES)%RELEASE_REQF = SWO%RESDAT(IPROJ)%RESBAL(IRES)%RELEASE_REQF_PEV
+    !!!!!               END IF
+    !!!!!         END IF
+    !!!!!      END DO
+    !!!!!  END IF
+    !!!!!END IF
+    !
+    !
+    ! ****************************************************************
+    ! COMPUTE RESERVOIR RELEASE, RESERVOIR MASS BALANCE ...
+    ! (8)  Compute maximum possible release ...
+    !      MaxRelease  = STORAGE[t]                   (end of prev step)
+    !                    - STORAGE_NPROJ[t]           (current step)
+    !                    - RELEASE_SPEC[t]            (current step)
+    !                    + Inflow + Prcp*A - Evap*A   (current step, iterate @ A)
+    ! (9)  Compute demand-driven release
+    !      ReleaseDMND = PROJ_DIVREQ                  (demand-driven diversion request, constrained by allotments)
+    !                    / PROJ_DIVRATIO              (project diversion ratio)
+    ! (10) Compute estimated Project release
+    !      ReleaseEst  = max( 0., min( MaxRelease, ReleaseDMND) )
+    !      NOTE -- Diversion request should be constrained such that
+    !              ReleaseDMND is always less than MaxRelease ...
+    !              If ReleaseEst < ReleaseDMND, may indicate bug in code...!
+    ! (11) Compute reservoir mass balance
+    !      (initial guess, first update, then iterate to closure)
+    !      (includes iterative calculation of reservoir spills)
+    !      Storage[t+1]= STORAGE[t]                    (end of prev step)
+    !                  + Inflow[t] + Prcp[t]*A[t]
+    !                  - ReleasePRJ[t] - ReleaseNPRJ[t] - ReleaseFLD- Evap[t]*A[t]
+    ! ****************************************************************
+    !
+    ! TODO
+    ! Current release calculation doesn't account for multiple releases
+    ! supporting a given project ... need to constrain release from each
+    ! reservoir for general use. Currently allows release up to full
+    ! allocation (or demand) from *EACH* reservoir, rather than from
+    ! *ALL* reservoirs.
+    !
+    ! Loop over projects, mass-balance reservoirs
     !
     DO CONCURRENT (IDVS = ONE:SWO%DIVCOUNT)
           ! zero gain/loss and inflow components ...
@@ -14059,137 +14103,137 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
     IUNIT = -1
     IFARM = -1
     IAUX  = -1
-      !
-      ! ****************************************************************
-      ! COPY FLOW VALUES TO SFR ARRAYS ...
-      ! (12) Reservoir releases     [L3/T]
-      ! (13) Diversions to units    [L3/T]
-      ! (14) Diversions to branches [frac]
-      !
-      ! ****************************************************************
-      !
-      ! (12) Reservoir releases ...
+    !
+    ! ****************************************************************
+    ! COPY FLOW VALUES TO SFR ARRAYS ...
+    ! (12) Reservoir releases     [L3/T]
+    ! (13) Diversions to units    [L3/T]
+    ! (14) Diversions to branches [frac]
+    !
+    ! ****************************************************************
+    !
+    ! (12) Reservoir releases ...
 
-      DO CONCURRENT   (I = ONE:NPROJ)
-        DO CONCURRENT (J = ONE:SWO%NRES_BAL(I), SWO%RESDAT(I)%RESBAL(J)%RESBAL_RELSEG > Z)
-            !
-            SWO%SEGDATA(SWO%RESDAT(I)%RESBAL(J)%RESBAL_RELSEG)%FLOW = DZ
-            !
-        END DO
+    DO CONCURRENT   (I = ONE:NPROJ)
+      DO CONCURRENT (J = ONE:SWO%NRES_BAL(I), SWO%RESDAT(I)%RESBAL(J)%RESBAL_RELSEG > Z)
+          !
+          SWO%SEGDATA(SWO%RESDAT(I)%RESBAL(J)%RESBAL_RELSEG)%FLOW = DZ
+          !
       END DO
+    END DO
 
-      DO I = ONE, NPROJ
-      DO J = ONE, SWO%NRES_BAL(I)
-      IF(SWO%RESDAT(I)%RESBAL(J)%INUSE .AND. SWO%RESDAT(I)%RESBAL(J)%RESBAL_RELSEG > Z) THEN
+    DO I = ONE, NPROJ
+    DO J = ONE, SWO%NRES_BAL(I)
+    IF(SWO%RESDAT(I)%RESBAL(J)%INUSE .AND. SWO%RESDAT(I)%RESBAL(J)%RESBAL_RELSEG > Z) THEN
+      ISEG = SWO%RESDAT(I)%RESBAL(J)%RESBAL_RELSEG
+      !
+      ! IMF DEBUG --
+      ! Non-project release does NOT go to project RELSEG here ...
+      ! Make non-project water disappear (per alloc committee) ...
+      ! TODO --
+      ! Klugey fix only works in cases like Rio Grande where
+      ! non-project release does NOT go to river ...
+      ! Revise for universal applicability ... e.g., specify non-project relseg...)
+      ! --SCOTT ADDED RELEASE_SPEC
+      SWO%SEGDATA(ISEG)%FLOW = SWO%SEGDATA(ISEG)%FLOW + SWO%RESDAT(I)%RESBAL(J)%RELEASE_ALL * SWO%DELT_INV !/ DELT
+      !
+    END IF
+    END DO
+    END DO
+    !
+    DO I = ONE, NPROJ
+    DO J = ONE, SWO%NRES_BAL(I)
+    IF(SWO%RESDAT(I)%RESBAL(J)%RESBAL_RELSEG > Z) THEN
+        !
         ISEG = SWO%RESDAT(I)%RESBAL(J)%RESBAL_RELSEG
         !
-        ! IMF DEBUG --
-        ! Non-project release does NOT go to project RELSEG here ...
-        ! Make non-project water disappear (per alloc committee) ...
-        ! TODO --
-        ! Klugey fix only works in cases like Rio Grande where
-        ! non-project release does NOT go to river ...
-        ! Revise for universal applicability ... e.g., specify non-project relseg...)
-        ! --SCOTT ADDED RELEASE_SPEC
-        SWO%SEGDATA(ISEG)%FLOW = SWO%SEGDATA(ISEG)%FLOW + SWO%RESDAT(I)%RESBAL(J)%RELEASE_ALL * SWO%DELT_INV !/ DELT
+        IF( SWO%SEGDATA(ISEG)%FLOW < NEARZERO_5) THEN
+            SWO%SEGDATA(ISEG)%FLOW = DZ
+            SEG(2,ISEG)            = 0.0  !Single Precision Number
+        ELSE
+            SEG(2,ISEG) = SNGL(SWO%SEGDATA(ISEG)%FLOW)
+        END IF
         !
-      END IF
-      END DO
-      END DO
+    END IF
+    END DO
+    END DO
+    !
+    ! (13) Loop over diversion segments ... copy diversion flow values
+    DO IDVS = 1, SWO%DIVCOUNT
+      ISEG  = SWO%DIVSEG(IDVS)%DivSeg
       !
-      DO I = ONE, NPROJ
-      DO J = ONE, SWO%NRES_BAL(I)
-      IF(SWO%RESDAT(I)%RESBAL(J)%RESBAL_RELSEG > Z) THEN
-          !
-          ISEG = SWO%RESDAT(I)%RESBAL(J)%RESBAL_RELSEG
-          !
-          IF( SWO%SEGDATA(ISEG)%FLOW < NEARZERO_5) THEN
-              SWO%SEGDATA(ISEG)%FLOW = DZ
-              SEG(2,ISEG)            = 0.0  !Single Precision Number
+      SWO%SEGDATA(ISEG)%FLOW = SWO%DIVSEG(IDVS)%DIVORDER * SWO%DELT_INV   !/DELT
+      IF(SWO%SEGDATA(ISEG)%FLOW < NEARZERO_5) SWO%SEGDATA(ISEG)%FLOW = DZ
+      !
+      SEG(2,ISEG)        = SNGL(SWO%SEGDATA(ISEG)%FLOW)
+    END DO
+    !
+    !
+    ! (14) Loop over splits ... copy split values (fractional or gross)
+    DO ISPT = 1,SWO%SPTCOUNT
+      ISEG    = SWO%SPTSEG(ISPT)%SplitSeg
+      NBRANCH = SWO%SPTSEG(ISPT)%NBRANCH
+      DO IBRC = 1,NBRANCH
+        JSEG  = SWO%SPTSEG(ISPT)%BrcSeg(IBRC)
+        ! Error trap
+        IF ( SWO%SEGDATA(JSEG)%IUPSEG.NE.Z .AND. SWO%SEGDATA(JSEG)%IUPSEG .NE. ISEG )THEN
+          WRITE(SWO%IOUT,*) " "
+          WRITE(SWO%IOUT,*) "ERROR:"
+          WRITE(SWO%IOUT,*) "Branch segment has IUPSEG.NE.0,"
+          WRITE(SWO%IOUT,*) "But IUPSEG does not equal Split Segment"
+          WRITE(SWO%IOUT,*) "Check network ... ?"
+          WRITE(SWO%IOUT,*) " "
+          WRITE(SWO%IOUT,*) "Stopping Program..."
+          CALL USTOP( ' ' )
+        END IF !(IUPSEG.NE.0 .AND. IUPSEG.NE.ISEG)
+        ! Compute diversion ...
+        IF ( SWO%SEGDATA(JSEG)%IUPSEG == ISEG ) THEN
+          ! if no diversion order, then no diversion
+          IF (SWO%SPTSEG(ISPT)%DIVORDER.LE.NEARZERO_5) THEN
+            SWO%SEGDATA(JSEG)%FLOW = DZ
+          ! otherwise, compute diversion ...
           ELSE
-              SEG(2,ISEG) = SNGL(SWO%SEGDATA(ISEG)%FLOW)
-          END IF
-          !
-      END IF
-      END DO
-      END DO
-      !
-      ! (13) Loop over diversion segments ... copy diversion flow values
-      DO IDVS = 1, SWO%DIVCOUNT
-        ISEG  = SWO%DIVSEG(IDVS)%DivSeg
-        !
-        SWO%SEGDATA(ISEG)%FLOW = SWO%DIVSEG(IDVS)%DIVORDER * SWO%DELT_INV   !/DELT
-        IF(SWO%SEGDATA(ISEG)%FLOW < NEARZERO_5) SWO%SEGDATA(ISEG)%FLOW = DZ
-        !
-        SEG(2,ISEG)        = SNGL(SWO%SEGDATA(ISEG)%FLOW)
-      END DO
-      !
-      !
-      ! (14) Loop over splits ... copy split values (fractional or gross)
-      DO ISPT = 1,SWO%SPTCOUNT
-        ISEG    = SWO%SPTSEG(ISPT)%SplitSeg
-        NBRANCH = SWO%SPTSEG(ISPT)%NBRANCH
-        DO IBRC = 1,NBRANCH
-          JSEG  = SWO%SPTSEG(ISPT)%BrcSeg(IBRC)
-          ! Error trap
-          IF ( SWO%SEGDATA(JSEG)%IUPSEG.NE.Z .AND. SWO%SEGDATA(JSEG)%IUPSEG .NE. ISEG )THEN
-            WRITE(SWO%IOUT,*) " "
-            WRITE(SWO%IOUT,*) "ERROR:"
-            WRITE(SWO%IOUT,*) "Branch segment has IUPSEG.NE.0,"
-            WRITE(SWO%IOUT,*) "But IUPSEG does not equal Split Segment"
-            WRITE(SWO%IOUT,*) "Check network ... ?"
-            WRITE(SWO%IOUT,*) " "
-            WRITE(SWO%IOUT,*) "Stopping Program..."
-            CALL USTOP( ' ' )
-          END IF !(IUPSEG.NE.0 .AND. IUPSEG.NE.ISEG)
-          ! Compute diversion ...
-          IF ( SWO%SEGDATA(JSEG)%IUPSEG == ISEG ) THEN
-            ! if no diversion order, then no diversion
-            IF (SWO%SPTSEG(ISPT)%DIVORDER.LE.NEARZERO_5) THEN
-              SWO%SEGDATA(JSEG)%FLOW = DZ
-            ! otherwise, compute diversion ...
+            ! volumetric diversion
+            IF (SWO%SEGDATA(JSEG)%IPRIOR.EQ.Z) THEN
+                 SWO%SEGDATA(JSEG)%FLOW = SWO%SPTSEG(ISPT)%BrcDIVORDER(IBRC) * SWO%DELT_INV  !/ DELT
+              IF(SWO%SEGDATA(JSEG)%FLOW < NEARZERO_5) SWO%SEGDATA(JSEG)%FLOW = DZ
+            ! fractional diversion
+            ELSE IF (SWO%SEGDATA(JSEG)%IPRIOR.EQ.-2) THEN
+                 SWO%SEGDATA(JSEG)%FLOW = SWO%SPTSEG(ISPT)%BrcDIVORDER(IBRC) / SWO%SPTSEG(ISPT)%DIVORDER
+              IF(SWO%SEGDATA(JSEG)%FLOW < NEARZERO_5) SWO%SEGDATA(JSEG)%FLOW = DZ
             ELSE
-              ! volumetric diversion
-              IF (SWO%SEGDATA(JSEG)%IPRIOR.EQ.Z) THEN
-                   SWO%SEGDATA(JSEG)%FLOW = SWO%SPTSEG(ISPT)%BrcDIVORDER(IBRC) * SWO%DELT_INV  !/ DELT
-                IF(SWO%SEGDATA(JSEG)%FLOW < NEARZERO_5) SWO%SEGDATA(JSEG)%FLOW = DZ
-              ! fractional diversion
-              ELSE IF (SWO%SEGDATA(JSEG)%IPRIOR.EQ.-2) THEN
-                   SWO%SEGDATA(JSEG)%FLOW = SWO%SPTSEG(ISPT)%BrcDIVORDER(IBRC) / SWO%SPTSEG(ISPT)%DIVORDER
-                IF(SWO%SEGDATA(JSEG)%FLOW < NEARZERO_5) SWO%SEGDATA(JSEG)%FLOW = DZ
-              ELSE
-                WRITE(SWO%IOUT,*) " "
-                WRITE(SWO%IOUT,*) "ERROR:"
-                WRITE(SWO%IOUT,*) "SWO water distribution only supports diversions with IPRIOR=0 or IPRIOR=-2."
-                WRITE(SWO%IOUT,*) "Sorry..."
-                WRITE(SWO%IOUT,*) "Blame the developer."
-                WRITE(SWO%IOUT,*) "Or perhaps he was just under a ridiculous and unrealistic deadline."
-                WRITE(SWO%IOUT,*) " "
-                WRITE(SWO%IOUT,*) "Stopping Program..."
-                CALL USTOP( ' ' )
-              END IF !(IPRIOR.EQ.0 / IPRIOR.EQ.-2)
-            END IF !(DIVORDER.EQ.0)
-            SEG(2,JSEG)        = SNGL(SWO%SEGDATA(JSEG)%FLOW)
-          END IF !(IUPSEG.EQ.ISEG)
-        END DO !(IBRC)
-      END DO !(ISPT)
-      !
-      ! Check if S overrides diversions or inflows
-      IF(SWO%S_SFR_SPEC_DIV%N > Z) THEN
-          !
-          DO I=ONE, SWO%S_SFR_SPEC_DIV%N
-              !
-              IF( SWO%S_SFR_SPEC_DIV%DIV(I) >= DZ ) THEN
-                  !
-                  ISEG = SWO%S_SFR_SPEC_DIV%SEG(I)
-                  !
-                  SWO%SEGDATA(ISEG)%FLOW = SWO%S_SFR_SPEC_DIV%DIV(I)
-                  !
-                  SEG(2,ISEG)            = SWO%S_SFR_SPEC_DIV%DIV(I)
-              END IF
-          END DO
-      END IF
-      !
+              WRITE(SWO%IOUT,*) " "
+              WRITE(SWO%IOUT,*) "ERROR:"
+              WRITE(SWO%IOUT,*) "SWO water distribution only supports diversions with IPRIOR=0 or IPRIOR=-2."
+              WRITE(SWO%IOUT,*) "Sorry..."
+              WRITE(SWO%IOUT,*) "Blame the developer."
+              WRITE(SWO%IOUT,*) "Or perhaps he was just under a ridiculous and unrealistic deadline."
+              WRITE(SWO%IOUT,*) " "
+              WRITE(SWO%IOUT,*) "Stopping Program..."
+              CALL USTOP( ' ' )
+            END IF !(IPRIOR.EQ.0 / IPRIOR.EQ.-2)
+          END IF !(DIVORDER.EQ.0)
+          SEG(2,JSEG)        = SNGL(SWO%SEGDATA(JSEG)%FLOW)
+        END IF !(IUPSEG.EQ.ISEG)
+      END DO !(IBRC)
+    END DO !(ISPT)
+    !
+    ! Check if S overrides diversions or inflows
+    IF(SWO%S_SFR_SPEC_DIV%N > Z) THEN
+        !
+        DO I=ONE, SWO%S_SFR_SPEC_DIV%N
+            !
+            IF( SWO%S_SFR_SPEC_DIV%DIV(I) >= DZ ) THEN
+                !
+                ISEG = SWO%S_SFR_SPEC_DIV%SEG(I)
+                !
+                SWO%SEGDATA(ISEG)%FLOW = SWO%S_SFR_SPEC_DIV%DIV(I)
+                !
+                SEG(2,ISEG)            = SWO%S_SFR_SPEC_DIV%DIV(I)
+            END IF
+        END DO
+    END IF
+    !
   END SUBROUTINE
   !
   !!!!PURE FUNCTION STORAGE_TO_AREA(SWO,IPROJ,IRES,TIME, STORAGE, ERROR) RESULT(AREA)
@@ -15185,6 +15229,10 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
 !            = 1.0 - (sum[segin]-sum[segout])/(diversion)
       !
       DO IUNIT = 1,NUNIT
+        !
+        DIVIN = DZ
+        SUMIN = DZ
+        SUMOUT = DZ
         !
         ! If no diversion, use previous value
         IF ( UNIT(IUNIT)%DIVORDER.EQ.DZ .OR. UNIT(IUNIT)%DIVERSION.EQ.DZ ) THEN
@@ -16507,12 +16555,12 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
         !
       END IF
       !
-      END ASSOCIATE !-------------------------------------------------------------------------------------------------------------------------------
+    END ASSOCIATE !-------------------------------------------------------------------------------------------------------------------------------
     !
     IF(SWO%DEC_RUL_IT_END%INUSE) THEN
        IF( KITER >= TWO .AND. ICNVG .NE. NEG ) THEN
           !
-          IF(SWO%PRT_RUL_IT_END%IS_OPEN) WRITE(SWO%PRT_RUL_TS%IU,'(// 16x A,// 16x A)') '    FOR STRESS PERIOD '//NUM2STR(KPER,-6)//' AND TIME STEP '//NUM2STR(KSTP)//' AND SOLVER ITERATION '//NUM2STR(KITER),'WITH A STARTING CALENDAR DATE '//DATE_SP(KPER)%TS(KSTP-1)%PRETTYPRINT('  ')//' AND ENDING CALENDAR DATE '//DATE_SP(KPER)%TS(KSTP)%PRETTYPRINT('  ')//'  ('//DATE_SP(KPER)%TS(KSTP-1)%STR_DYEAR()//' - '//DATE_SP(KPER)%TS(KSTP)%STR_DYEAR()//')'
+          IF(SWO%PRT_RUL_IT_END%IS_OPEN) WRITE(SWO%PRT_RUL_TS%IU,'(// A, // 16x, A,// 16x, A)') REPEAT('-', 150), '    FOR STRESS PERIOD '//NUM2STR(KPER,-6)//' AND TIME STEP '//NUM2STR(KSTP)//' AND SOLVER ITERATION '//NUM2STR(KITER),'WITH A STARTING CALENDAR DATE '//DATE_SP(KPER)%TS(KSTP-1)%PRETTYPRINT('  ')//' AND ENDING CALENDAR DATE '//DATE_SP(KPER)%TS(KSTP)%PRETTYPRINT('  ')//'  ('//DATE_SP(KPER)%TS(KSTP-1)%STR_DYEAR()//' - '//DATE_SP(KPER)%TS(KSTP)%STR_DYEAR()//')'
           !
           CALL VARIABLE_GET_GLOBAL_MODEL_PROPERTY(SWO%DEC_VAR, SWO%DEC_VAR%PROP_PUL, KPER, KSTP, KITER, TWO, ERROR) ! PULL VALUES FROM GLOBAL VARIABLES
           !
@@ -16530,642 +16578,656 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
   !
   SUBROUTINE SWO_FINALIZE_TIMESTEP(SWO,KPER,KSTP,KITER,STRM,SEG)
 !-----VERSION X 2014.06.30 SWOPS1BD
-!     ******************************************************************
-!     OVERVIEW:
-!     UPDATE SAVE CONVERGED VALUES TO PREV VARS...
-!     WRITE OUTPUT
+!   ******************************************************************
+!   OVERVIEW:
+!   UPDATE SAVE CONVERGED VALUES TO PREV VARS...
+!   WRITE OUTPUT
 !
-!     ******************************************************************
-!        SPECIFICATIONS:
-!     ------------------------------------------------------------------
-      !USE SWOPSMODULE
-      !USE SWOPSUTIL
-      !USE GWFSFRMODULE, ONLY:SEG
-!     ------------------------------------------------------------------
-!        ARGUMENTS:
-!     ------------------------------------------------------------------
-      CLASS(SWO_DATA),                            INTENT(INOUT):: SWO
-      INTEGER,                                    INTENT(IN   ):: KPER,KSTP,KITER
-      REAL,             DIMENSION(:,:),CONTIGUOUS,INTENT(IN   ):: STRM
-      REAL,             DIMENSION(:,:),CONTIGUOUS,INTENT(IN   ):: SEG
+!   ******************************************************************
+!      SPECIFICATIONS:
+!   ------------------------------------------------------------------
+    !USE SWOPSMODULE
+    !USE SWOPSUTIL
+    !USE GWFSFRMODULE, ONLY:SEG
+!   ------------------------------------------------------------------
+!      ARGUMENTS:
+!   ------------------------------------------------------------------
+    CLASS(SWO_DATA),                            INTENT(INOUT):: SWO
+    INTEGER,                                    INTENT(IN   ):: KPER,KSTP,KITER
+    REAL,             DIMENSION(:,:),CONTIGUOUS,INTENT(IN   ):: STRM
+    REAL,             DIMENSION(:,:),CONTIGUOUS,INTENT(IN   ):: SEG
 !
-!     ------------------------------------------------------------------
-!        LOCAL VARIABLES:
-!     ------------------------------------------------------------------
-      INTEGER:: IU, I,J,K,IPROJ,IDIST,IUNIT,IFARM,IAUX, ISEG,IBRC,ISPT,IDVS
-      CHARACTER(:), ALLOCATABLE:: ERROR
-      LOGICAL:: HAS_CLOSEOUT, HAS_TS_END
-      DOUBLE PRECISION:: DYEAR, DYEAR2, STOR, AREA, ELEV, REL_TOT, REL_SPL, REL_OT, INFLOW, PRECIP, EVAP, TRANSF
-      DOUBLE PRECISION:: REL_P, REL_R, REL_S, REL_M, REL_E, REL_F
-      CHARACTER(19):: DATE
-      LOGICAL:: BIN
-!     DOUBLE PRECISION, DIMENSION(:,:), ALLOCATABLE ::
-!    +       DCNVG
+!   ------------------------------------------------------------------
+!      LOCAL VARIABLES:
+!   ------------------------------------------------------------------
+    INTEGER:: IU, I,J,K,IPROJ,IDIST,IUNIT,IFARM,IAUX, ISEG,IBRC,ISPT,IDVS
+    CHARACTER(:), ALLOCATABLE:: ERROR
+    LOGICAL:: HAS_CLOSEOUT, HAS_TS_END
+    DOUBLE PRECISION:: DYEAR, DYEAR2, STOR, AREA, ELEV, REL_TOT, REL_SPL, REL_OT, INFLOW, PRECIP, EVAP, TRANSF
+    DOUBLE PRECISION:: REL_P, REL_R, REL_S, REL_M, REL_E, REL_F
+    CHARACTER(15):: REL_MAX
+    CHARACTER(19):: DATE
+    LOGICAL:: BIN
+!   DOUBLE PRECISION, DIMENSION(:,:), ALLOCATABLE :: DCNVG
 !
-      ! SWOPS1OUT/XCHECK
-      !CHARACTER(4) :: XOPT
-      !
-      !BACKUP SFR FLOWS
-      !
-      IF( SWO%NSFR_OLD_FLO > Z ) THEN  !THERE ARE VARIABLES THAT SET TO SFR_INPUT_DATA_TYPES IN OR OUT FLOW
-          !
-          DO CONCURRENT (I=ONE:SWO%NSFR_OLD_FLO)
-              !
-              IF(SWO%SFR_OLD_FLO(I)%IS_INFLOW) THEN
-                  !
-                  SWO%SFR_OLD_FLO(I)%FLO  = STRM(10,SWO%SFR_OLD_FLO(I)%ISTRM)
-              ELSE
-                  SWO%SFR_OLD_FLO(I)%FLO  = STRM( 9,SWO%SFR_OLD_FLO(I)%ISTRM)
-              ENDIF
-          END DO
-      END IF
-!
-!     ------------------------------------------------------------------
-!
-      HAS_CLOSEOUT = ANY(SWO%PROJ(:)%AllocClose == ONE) .AND. SWO%DEC_RUL_CLOSEOUT%INUSE .AND. .NOT. SWO%DEC_RUL_CLOSEOUT%SKIP
-      HAS_TS_END   = SWO%DEC_RUL_TS_END%INUSE .AND. .NOT. SWO%DEC_RUL_TS_END%SKIP
-      !
-      IF(HAS_STARTDATE) THEN  !SET SP STARTING DATE
-          DATE = DATE_SP(KPER)%TS(KSTP-1)%STR('T')
-          DYEAR= DATE_SP(KPER)%TS(KSTP-1)%DYEAR
-          DYEAR2=DATE_SP(KPER)%TS(KSTP  )%DYEAR
-      ELSE
-          DATE='   NaN'
-          DYEAR = SIMTIME
-          DYEAR2= SIMTIME
-      END IF
-      !
-      ! OUTPUT
-      IF (SWO%HAS_OUTPUT) THEN
-        IF(SWO%OUTPUT%FARM       %IS_OPEN ) CALL SWO_OUTPUT_WRITE(SWO, SWO%OUTPUT%FARM       %IU, KPER, KSTP, KITER, "FARM")
-        IF(SWO%OUTPUT%AUXDEM     %IS_OPEN ) CALL SWO_OUTPUT_WRITE(SWO, SWO%OUTPUT%AUXDEM     %IU, KPER, KSTP, KITER, "AUXD")
-        IF(SWO%OUTPUT%UNIT       %IS_OPEN ) CALL SWO_OUTPUT_WRITE(SWO, SWO%OUTPUT%UNIT       %IU, KPER, KSTP, KITER, "UNIT")
-        IF(SWO%OUTPUT%DIST       %IS_OPEN ) CALL SWO_OUTPUT_WRITE(SWO, SWO%OUTPUT%DIST       %IU, KPER, KSTP, KITER, "DIST")
-        IF(SWO%OUTPUT%PROJ       %IS_OPEN ) CALL SWO_OUTPUT_WRITE(SWO, SWO%OUTPUT%PROJ       %IU, KPER, KSTP, KITER, "PROJ")
-        IF(SWO%OUTPUT%DivSeg     %IS_OPEN ) CALL SWO_OUTPUT_WRITE(SWO, SWO%OUTPUT%DivSeg     %IU, KPER, KSTP, KITER, "DIVS")
-        IF(SWO%OUTPUT%SplitSeg   %IS_OPEN ) CALL SWO_OUTPUT_WRITE(SWO, SWO%OUTPUT%SplitSeg   %IU, KPER, KSTP, KITER, "SPLT")
-        IF(SWO%OUTPUT%Storage    %IS_OPEN ) CALL SWO_OUTPUT_WRITE(SWO, SWO%OUTPUT%Storage    %IU, KPER, KSTP, KITER, "STOR")
-        IF(SWO%OUTPUT%SFR        %IS_OPEN ) CALL SWO_OUTPUT_WRITE(SWO, SWO%OUTPUT%SFR        %IU, KPER, KSTP, KITER, "XSFR")
-        IF(SWO%OUTPUT%Convergence%IS_OPEN ) CALL SWO_OUTPUT_WRITE(SWO, SWO%OUTPUT%Convergence%IU, KPER, KSTP, KITER, "CNVG")
-        !XOPT = ; CALL XCHECK(IGRID,KPER,KSTP,KITER,"ALLC")
-      END IF
-      !
-      !RELEASE_MIN
-      !RELEASE_FLOD
-      !RELEASE_PROJ
-      !RELEASE_ADDF
-      !RELEASE_REQF
-      !RELEASE_SPEC
-
-      IF(SWO%PRT_RESDAT%IS_OPEN) THEN
-          IU = SWO%PRT_RESDAT%IU
-          BIN= SWO%PRT_RESDAT%BINARY
-          !
-          IF(BIN) THEN
-              WRITE(IU) DATE,DYEAR,DYEAR2,KPER,KSTP,SWO%DELT
-          ELSE
-              WRITE(IU, '(A, 1x F13.7, 1x F13.7, 2I5, A15)', ADVANCE='NO') DATE,DYEAR,DYEAR2,KPER,KSTP,NUM2STR(SWO%DELT)
-          END IF
-
-          DO I = ONE,SWO%NPROJ
-          DO J = ONE,SWO%NRES_BAL(I)
-                STOR = SWO%RESDAT(I)%RESBAL(J)%STORAGE
-                !
-                CALL ACAP_STOR2AREA(SWO,I,J,STOR,AREA)
-                CALL ACAP_STOR2ELEV(SWO,I,J,STOR,ELEV)
-                STOR = STOR * SWO%STOR_CNVT
-                AREA = AREA * SWO%AREA_CNVT
-                ELEV = ELEV * SWO%LEN_CNVT
-                !
-                REL_TOT = SWO%RESDAT(I)%RESBAL(J)%RELEASE_TOT * SWO%DELT_INV * SWO%FLOW_CNVT
-                REL_SPL = SWO%RESDAT(I)%RESBAL(J)%SPILL_WAY   * SWO%DELT_INV * SWO%FLOW_CNVT
-                REL_OT  = SWO%RESDAT(I)%RESBAL(J)%OVER_TOP    * SWO%DELT_INV * SWO%FLOW_CNVT
-                !
-                INFLOW = SWO%RESDAT(I)%RESBAL(J)%INFLOW + SWO%RESDAT(I)%RESBAL(J)%SFR_INFLOW
-                INFLOW = INFLOW* SWO%DELT_INV * SWO%FLOW_CNVT
-                !
-                PRECIP = SWO%RESDAT(I)%RESBAL(J)%PRCP_FIN * SWO%DELT_INV * SWO%FLOW_CNVT
-                EVAP   = SWO%RESDAT(I)%RESBAL(J)%EVAP_FIN * SWO%DELT_INV * SWO%FLOW_CNVT
-                !
-                TRANSF = SWO%RESDAT(I)%RESBAL(J)%STORAGE_TRANSFER * SWO%DELT_INV * SWO%FLOW_CNVT
-                !
-                IF(BIN) THEN
-                    WRITE(IU) ELEV,STOR,REL_TOT,REL_SPL,REL_OT,INFLOW,PRECIP,EVAP,AREA,TRANSF
-                ELSE
-                    WRITE(IU, '(*(A15))', ADVANCE='NO') NUM2STR(ELEV), NUM2STR(STOR), NUM2STR(REL_TOT), NUM2STR(REL_SPL), NUM2STR(REL_OT), NUM2STR(INFLOW), NUM2STR(PRECIP), NUM2STR(EVAP), NUM2STR(AREA), NUM2STR(TRANSF)
-                END IF
-          END DO
-          END DO
-          !
-          IF(.NOT. BIN) WRITE(IU, '(A)')
-      END IF
-      !
-      IF(SWO%PRT_RESDAT_CMPCT%IS_OPEN) THEN
-          IU = SWO%PRT_RESDAT_CMPCT%IU
-          BIN= SWO%PRT_RESDAT_CMPCT%BINARY
-          K = Z
-          !'DATE_START           DYEAR_START      SP     TS RES_ID           DELT          STAGE        STORAGE        RELEASE       SPILLWAY        OVERTOP         INFLOW         PRECIP         EVAPOR           AREA       TRANSFER')
-
-          DO I = ONE,SWO%NPROJ
-          DO J = ONE,SWO%NRES_BAL(I)
-                K = K + ONE
-                !
-                STOR = SWO%RESDAT(I)%RESBAL(J)%STORAGE
-                !
-                CALL ACAP_STOR2AREA(SWO,I,J,STOR,AREA)
-                CALL ACAP_STOR2ELEV(SWO,I,J,STOR,ELEV)
-                STOR = STOR * SWO%STOR_CNVT
-                AREA = AREA * SWO%AREA_CNVT
-                ELEV = ELEV * SWO%LEN_CNVT
-                !
-                REL_TOT = SWO%RESDAT(I)%RESBAL(J)%RELEASE_TOT * SWO%DELT_INV * SWO%FLOW_CNVT
-                REL_SPL = SWO%RESDAT(I)%RESBAL(J)%SPILL_WAY   * SWO%DELT_INV * SWO%FLOW_CNVT
-                REL_OT  = SWO%RESDAT(I)%RESBAL(J)%OVER_TOP    * SWO%DELT_INV * SWO%FLOW_CNVT
-                !
-                INFLOW = SWO%RESDAT(I)%RESBAL(J)%INFLOW + SWO%RESDAT(I)%RESBAL(J)%SFR_INFLOW
-                INFLOW = INFLOW* SWO%DELT_INV * SWO%FLOW_CNVT
-                !
-                PRECIP = SWO%RESDAT(I)%RESBAL(J)%PRCP_FIN * SWO%DELT_INV * SWO%FLOW_CNVT
-                EVAP   = SWO%RESDAT(I)%RESBAL(J)%EVAP_FIN * SWO%DELT_INV * SWO%FLOW_CNVT
-                !
-                TRANSF = SWO%RESDAT(I)%RESBAL(J)%STORAGE_TRANSFER * SWO%DELT_INV * SWO%FLOW_CNVT
-                !
-                IF(BIN) THEN
-                    WRITE(IU) DATE,DYEAR,DYEAR2,KPER,KSTP,K,SWO%DELT, ELEV, STOR, REL_TOT, REL_SPL, REL_OT, INFLOW, PRECIP, EVAP, AREA, TRANSF
-                ELSE
-                    WRITE(IU, '(A, 1x F13.7, 1x F13.7, 3I5, *(A15))') DATE,DYEAR,DYEAR2,KPER,KSTP,K,NUM2STR(SWO%DELT), NUM2STR(ELEV), NUM2STR(STOR), NUM2STR(REL_TOT), NUM2STR(REL_SPL), NUM2STR(REL_OT), NUM2STR(INFLOW), NUM2STR(PRECIP), NUM2STR(EVAP), NUM2STR(AREA), NUM2STR(TRANSF)
-                END IF
-          END DO
-          END DO
-      END IF
-      !
-      IF(SWO%PRT_RESDAT_DETAIL%IS_OPEN) THEN
-          IU = SWO%PRT_RESDAT_DETAIL%IU
-          BIN= SWO%PRT_RESDAT_DETAIL%BINARY
-          K = Z
-          !'DATE_START            DYEAR_START   SP   TS  RES           DELT          STAGE        STORAGE   RELEASE_PROJ   RELEASE_REQF  RELEASE_FLOOD  RELEASE_EXTRA   RELEASE_SPEC   RELEASE_MIN        SPILLWAY        OVERTOP         INFLOW         PRECIP         EVAPOR           AREA       TRANSFER')
-
-          DO I = ONE,SWO%NPROJ
-          DO J = ONE,SWO%NRES_BAL(I)
-                K = K + ONE
-                !
-                STOR = SWO%RESDAT(I)%RESBAL(J)%STORAGE
-                !
-                CALL ACAP_STOR2AREA(SWO,I,J,STOR,AREA)
-                CALL ACAP_STOR2ELEV(SWO,I,J,STOR,ELEV)
-                STOR = STOR * SWO%STOR_CNVT
-                AREA = AREA * SWO%AREA_CNVT
-                ELEV = ELEV * SWO%LEN_CNVT
-                !
-                REL_P   = SWO%RESDAT(I)%RESBAL(J)%RELEASE_PROJ * SWO%DELT_INV * SWO%FLOW_CNVT - SWO%RESDAT(I)%RESBAL(J)%RELEASE_PROJ_ADD * SWO%DELT_INV * SWO%FLOW_CNVT  !Keep track of additional demand by project in EXTRA catagory
-                REL_R   = SWO%RESDAT(I)%RESBAL(J)%RELEASE_REQF * SWO%DELT_INV * SWO%FLOW_CNVT
-                REL_S   = SWO%RESDAT(I)%RESBAL(J)%RELEASE_SPEC * SWO%DELT_INV * SWO%FLOW_CNVT
-                REL_E   = SWO%RESDAT(I)%RESBAL(J)%RELEASE_ADDF * SWO%DELT_INV * SWO%FLOW_CNVT + SWO%RESDAT(I)%RESBAL(J)%RELEASE_PROJ_ADD * SWO%DELT_INV * SWO%FLOW_CNVT  !+ ...
-                REL_F   = SWO%RESDAT(I)%RESBAL(J)%RELEASE_FLOD * SWO%DELT_INV * SWO%FLOW_CNVT
-                REL_M   = SWO%RESDAT(I)%RESBAL(J)%RELEASE_MIN  * SWO%DELT_INV * SWO%FLOW_CNVT
-                !
-                REL_SPL = SWO%RESDAT(I)%RESBAL(J)%SPILL_WAY   * SWO%DELT_INV * SWO%FLOW_CNVT
-                REL_OT  = SWO%RESDAT(I)%RESBAL(J)%OVER_TOP    * SWO%DELT_INV * SWO%FLOW_CNVT
-                !
-                REL_SPL = SWO%RESDAT(I)%RESBAL(J)%SPILL_WAY   * SWO%DELT_INV * SWO%FLOW_CNVT
-                REL_OT  = SWO%RESDAT(I)%RESBAL(J)%OVER_TOP    * SWO%DELT_INV * SWO%FLOW_CNVT
-                !
-                INFLOW = SWO%RESDAT(I)%RESBAL(J)%INFLOW + SWO%RESDAT(I)%RESBAL(J)%SFR_INFLOW
-                INFLOW = INFLOW* SWO%DELT_INV * SWO%FLOW_CNVT
-                !
-                PRECIP = SWO%RESDAT(I)%RESBAL(J)%PRCP_FIN * SWO%DELT_INV * SWO%FLOW_CNVT
-                EVAP   = SWO%RESDAT(I)%RESBAL(J)%EVAP_FIN * SWO%DELT_INV * SWO%FLOW_CNVT
-                !
-                TRANSF = SWO%RESDAT(I)%RESBAL(J)%STORAGE_TRANSFER * SWO%DELT_INV * SWO%FLOW_CNVT
-                !
-                IF(BIN) THEN   !                    STORAGE        RELEASE_PROJ  RELEASE_SPEC  RELEASE_FLOD  RELEASE_REQF  RELEASE_EXTRA       SPILLWAY        OVERTOP         INFLOW         PRECIP         EVAPOR           AREA       TRANSFER')
-                    WRITE(IU) DATE,DYEAR,DYEAR2,KPER,KSTP,K,SWO%DELT, ELEV, STOR, REL_P, REL_R, REL_F, REL_E, REL_S, REL_M, REL_SPL, REL_OT, INFLOW, PRECIP, EVAP, AREA, TRANSF
-                ELSE
-                    WRITE(IU, '(A, 1x F13.7, 1x F13.7, 3I5, *(A15))') DATE,DYEAR,DYEAR2,KPER,KSTP,K,NUM2STR(SWO%DELT), NUM2STR(ELEV), NUM2STR(STOR), NUM2STR(REL_P), NUM2STR(REL_R), NUM2STR(REL_F), NUM2STR(REL_E), NUM2STR(REL_S), NUM2STR(REL_M), NUM2STR(REL_SPL), NUM2STR(REL_OT), NUM2STR(INFLOW), NUM2STR(PRECIP), NUM2STR(EVAP), NUM2STR(AREA), NUM2STR(TRANSF)
-                END IF
-          END DO
-          END DO
-      END IF
-      !
-      ! Save latest flow, accounting, and parameter values
-      ! for use as initial value in next step
-      ! --- Project
-      DO CONCURRENT (IPROJ = 1:SWO%NPROJ)
-        ! wet-water
-        SWO%PROJ_PREV(IPROJ)%RELEASE         = SWO%PROJ(IPROJ)%RELEASE
-        SWO%PROJ_PREV(IPROJ)%DIVERSION       = SWO%PROJ(IPROJ)%DIVERSION
-        SWO%PROJ_PREV(IPROJ)%DELIVERY        = SWO%PROJ(IPROJ)%DELIVERY
-        SWO%PROJ_PREV(IPROJ)%BYPASS          = SWO%PROJ(IPROJ)%BYPASS
-        SWO%PROJ_PREV(IPROJ)%DELIVEFF        = SWO%PROJ(IPROJ)%DELIVEFF
-        SWO%PROJ_PREV(IPROJ)%DIVRATIO        = SWO%PROJ(IPROJ)%DIVRATIO
-        SWO%PROJ_PREV(IPROJ)%RELEASE_YTD     = SWO%PROJ(IPROJ)%RELEASE_YTD
-        SWO%PROJ_PREV(IPROJ)%DIVERSION_YTD   = SWO%PROJ(IPROJ)%DIVERSION_YTD
-        SWO%PROJ_PREV(IPROJ)%DELIVERY_YTD    = SWO%PROJ(IPROJ)%DELIVERY_YTD
-        SWO%PROJ_PREV(IPROJ)%BYPASS_YTD      = SWO%PROJ(IPROJ)%BYPASS_YTD
-        SWO%PROJ_PREV(IPROJ)%DELIVEFF_YTD    = SWO%PROJ(IPROJ)%DELIVEFF_YTD
-        SWO%PROJ_PREV(IPROJ)%DIVRATIO_YTD    = SWO%PROJ(IPROJ)%DIVRATIO_YTD
-        ! accounting
-        SWO%PROJ_PREV(IPROJ)%ALLOCATION      = SWO%PROJ(IPROJ)%ALLOCATION
-        SWO%PROJ_PREV(IPROJ)%TFDR            = SWO%PROJ(IPROJ)%TFDR
-        SWO%PROJ_PREV(IPROJ)%DELORDER        = SWO%PROJ(IPROJ)%DELORDER
-        SWO%PROJ_PREV(IPROJ)%DIVORDER        = SWO%PROJ(IPROJ)%DIVORDER
-        SWO%PROJ_PREV(IPROJ)%CHARGE          = SWO%PROJ(IPROJ)%CHARGE
-        SWO%PROJ_PREV(IPROJ)%CREDIT          = SWO%PROJ(IPROJ)%CREDIT
-        SWO%PROJ_PREV(IPROJ)%CHGRATIO        = SWO%PROJ(IPROJ)%CHGRATIO
-        SWO%PROJ_PREV(IPROJ)%NETCHGRATIO     = SWO%PROJ(IPROJ)%NETCHGRATIO
-        SWO%PROJ_PREV(IPROJ)%CHARGE_YTD      = SWO%PROJ(IPROJ)%CHARGE_YTD
-        SWO%PROJ_PREV(IPROJ)%CREDIT_YTD      = SWO%PROJ(IPROJ)%CREDIT_YTD
-        SWO%PROJ_PREV(IPROJ)%CHGRATIO_YTD    = SWO%PROJ(IPROJ)%CHGRATIO_YTD
-        SWO%PROJ_PREV(IPROJ)%NETCHGRATIO_YTD = SWO%PROJ(IPROJ)%NETCHGRATIO_YTD
-      END DO !(IPROJ)
-      ! --- District
-      DO CONCURRENT (IDIST = 1:SWO%NDIST)
-        ! wet-water
-        SWO%DIST_PREV(IDIST)%DIVERSION       = SWO%DIST(IDIST)%DIVERSION
-        SWO%DIST_PREV(IDIST)%DELIVERY        = SWO%DIST(IDIST)%DELIVERY
-        SWO%DIST_PREV(IDIST)%BYPASS          = SWO%DIST(IDIST)%BYPASS
-        SWO%DIST_PREV(IDIST)%DELIVEFF        = SWO%DIST(IDIST)%DELIVEFF
-        SWO%DIST_PREV(IDIST)%DIVERSION_YTD   = SWO%DIST(IDIST)%DIVERSION_YTD
-        SWO%DIST_PREV(IDIST)%DELIVERY_YTD    = SWO%DIST(IDIST)%DELIVERY_YTD
-        SWO%DIST_PREV(IDIST)%BYPASS_YTD      = SWO%DIST(IDIST)%BYPASS_YTD
-        SWO%DIST_PREV(IDIST)%DELIVEFF_YTD    = SWO%DIST(IDIST)%DELIVEFF_YTD
-        ! accounting
-        SWO%DIST_PREV(IDIST)%ALLOC_ANN       = SWO%DIST(IDIST)%ALLOC_ANN
-        SWO%DIST_PREV(IDIST)%ALLOC_CO        = SWO%DIST(IDIST)%ALLOC_CO
-        SWO%DIST_PREV(IDIST)%ALLOC_TOTAL     = SWO%DIST(IDIST)%ALLOC_TOTAL
-        SWO%DIST_PREV(IDIST)%EQ_ALLOTMENT    = SWO%DIST(IDIST)%EQ_ALLOTMENT
-        SWO%DIST_PREV(IDIST)%BALANCE         = SWO%DIST(IDIST)%BALANCE
-        SWO%DIST_PREV(IDIST)%TFDR            = SWO%DIST(IDIST)%TFDR
-        SWO%DIST_PREV(IDIST)%DELORDER        = SWO%DIST(IDIST)%DELORDER
-        SWO%DIST_PREV(IDIST)%DIVORDER        = SWO%DIST(IDIST)%DIVORDER
-        SWO%DIST_PREV(IDIST)%CHARGE          = SWO%DIST(IDIST)%CHARGE
-        SWO%DIST_PREV(IDIST)%CREDIT          = SWO%DIST(IDIST)%CREDIT
-        SWO%DIST_PREV(IDIST)%CHGRATIO        = SWO%DIST(IDIST)%CHGRATIO
-        SWO%DIST_PREV(IDIST)%NETCHGRATIO     = SWO%DIST(IDIST)%NETCHGRATIO
-        SWO%DIST_PREV(IDIST)%CHARGE_YTD      = SWO%DIST(IDIST)%CHARGE_YTD
-        SWO%DIST_PREV(IDIST)%CREDIT_YTD      = SWO%DIST(IDIST)%CREDIT_YTD
-        SWO%DIST_PREV(IDIST)%CHGRATIO_YTD    = SWO%DIST(IDIST)%CHGRATIO_YTD
-        SWO%DIST_PREV(IDIST)%NETCHGRATIO_YTD = SWO%DIST(IDIST)%NETCHGRATIO_YTD
-      END DO !(IDIST)
-      ! --- Unit
-      DO CONCURRENT (IUNIT = 1:SWO%NUNIT)
-        ! wet-water
-        SWO%UNIT_PREV(IUNIT)%DIVERSION       = SWO%UNIT(IUNIT)%DIVERSION
-        SWO%UNIT_PREV(IUNIT)%DELIVERY        = SWO%UNIT(IUNIT)%DELIVERY
-        SWO%UNIT_PREV(IUNIT)%BYPASS          = SWO%UNIT(IUNIT)%BYPASS
-        SWO%UNIT_PREV(IUNIT)%DELIVEFF        = SWO%UNIT(IUNIT)%DELIVEFF
-        SWO%UNIT_PREV(IUNIT)%DIVERSION_YTD   = SWO%UNIT(IUNIT)%DIVERSION_YTD
-        SWO%UNIT_PREV(IUNIT)%DELIVERY_YTD    = SWO%UNIT(IUNIT)%DELIVERY_YTD
-        SWO%UNIT_PREV(IUNIT)%BYPASS_YTD      = SWO%UNIT(IUNIT)%BYPASS_YTD
-        SWO%UNIT_PREV(IUNIT)%DIVIN_YTD       = SWO%UNIT(IUNIT)%DIVIN_YTD
-        SWO%UNIT_PREV(IUNIT)%SUMIN_YTD       = SWO%UNIT(IUNIT)%SUMIN_YTD
-        SWO%UNIT_PREV(IUNIT)%SUMOUT_YTD      = SWO%UNIT(IUNIT)%SUMOUT_YTD
-        SWO%UNIT_PREV(IUNIT)%DELIVEFF_YTD    = SWO%UNIT(IUNIT)%DELIVEFF_YTD
-        ! accounting
-        SWO%UNIT_PREV(IUNIT)%TFDR            = SWO%UNIT(IUNIT)%TFDR
-        SWO%UNIT_PREV(IUNIT)%DELORDER        = SWO%UNIT(IUNIT)%DELORDER
-        SWO%UNIT_PREV(IUNIT)%DIVORDER        = SWO%UNIT(IUNIT)%DIVORDER
-        SWO%UNIT_PREV(IUNIT)%CHARGE          = SWO%UNIT(IUNIT)%CHARGE
-        SWO%UNIT_PREV(IUNIT)%CREDIT          = SWO%UNIT(IUNIT)%CREDIT
-        SWO%UNIT_PREV(IUNIT)%CHGRATIO        = SWO%UNIT(IUNIT)%CHGRATIO
-        SWO%UNIT_PREV(IUNIT)%NETCHGRATIO     = SWO%UNIT(IUNIT)%NETCHGRATIO
-        SWO%UNIT_PREV(IUNIT)%CHARGE_YTD      = SWO%UNIT(IUNIT)%CHARGE_YTD
-        SWO%UNIT_PREV(IUNIT)%CREDIT_YTD      = SWO%UNIT(IUNIT)%CREDIT_YTD
-        SWO%UNIT_PREV(IUNIT)%CHGRATIO_YTD    = SWO%UNIT(IUNIT)%CHGRATIO_YTD
-        SWO%UNIT_PREV(IUNIT)%NETCHGRATIO_YTD = SWO%UNIT(IUNIT)%NETCHGRATIO_YTD
-      END DO !(IUNIT)
-      ! --- Farm
-      DO CONCURRENT (IFARM = 1:SWO%NFARM)
-        SWO%FARM_PREV(IFARM)%TFDR            = SWO%FARM(IFARM)%TFDR
-        SWO%FARM_PREV(IFARM)%ALLOTMENT       = SWO%FARM(IFARM)%ALLOTMENT
-        SWO%FARM_PREV(IFARM)%BALANCE         = SWO%FARM(IFARM)%BALANCE
-        SWO%FARM_PREV(IFARM)%DELORDER        = SWO%FARM(IFARM)%DELORDER
-        SWO%FARM_PREV(IFARM)%DELIVERY        = SWO%FARM(IFARM)%DELIVERY
-        SWO%FARM_PREV(IFARM)%DELIVERY_YTD    = SWO%FARM(IFARM)%DELIVERY_YTD
-      END DO !(IFARM)
-      ! --- Aux
-      DO CONCURRENT (IAUX = 1:SWO%NAUXDEM)
-        SWO%AUXDEM_PREV(IAUX)%DEMAND         = SWO%AUXDEM(IAUX)%DEMAND
-        SWO%AUXDEM_PREV(IAUX)%ALLOTMENT      = SWO%AUXDEM(IAUX)%ALLOTMENT
-        SWO%AUXDEM_PREV(IAUX)%BALANCE        = SWO%AUXDEM(IAUX)%BALANCE
-        SWO%AUXDEM_PREV(IAUX)%DELORDER       = SWO%AUXDEM(IAUX)%DELORDER
-        SWO%AUXDEM_PREV(IAUX)%DELIVERY       = SWO%AUXDEM(IAUX)%DELIVERY
-        SWO%AUXDEM_PREV(IAUX)%DELIVERY_YTD   = SWO%AUXDEM(IAUX)%DELIVERY_YTD
-      END DO
-      ! --- Segment
-      DO CONCURRENT (ISEG = 1:SWO%NSEG)
-        SWO%SEGDATA_PREV(ISEG)%FLOW          = SWO%SEGDATA(ISEG)%FLOW
-        SWO%SEGDATA_PREV(ISEG)%INFLOW        = SWO%SEGDATA(ISEG)%INFLOW
-        SWO%SEGDATA_PREV(ISEG)%OUTFLOW       = SWO%SEGDATA(ISEG)%OUTFLOW
-        SWO%SEGDATA_PREV(ISEG)%SEEPAGE       = SWO%SEGDATA(ISEG)%SEEPAGE
-        SWO%SEGDATA_PREV(ISEG)%RUNOFF        = SWO%SEGDATA(ISEG)%RUNOFF
-        SWO%SEGDATA_PREV(ISEG)%STRM_ET       = SWO%SEGDATA(ISEG)%STRM_ET
-        SWO%SEGDATA_PREV(ISEG)%STRM_PRCP     = SWO%SEGDATA(ISEG)%STRM_PRCP
-        SWO%SEGDATA_PREV(ISEG)%DIVERSION     = SWO%SEGDATA(ISEG)%DIVERSION
-        SWO%SEGDATA_PREV(ISEG)%DELIVERY      = SWO%SEGDATA(ISEG)%DELIVERY
-        SWO%SEGDATA_PREV(ISEG)%EFFICIENCY    = SWO%SEGDATA(ISEG)%EFFICIENCY
-      END DO !(ISEG)
-      ! --- DivSeg
-      DO CONCURRENT (IDVS = 1:SWO%DIVCOUNT)
-        SWO%DIVSEG_PREV(IDVS)%TFDR           = SWO%DIVSEG(IDVS)%TFDR
-        SWO%DIVSEG_PREV(IDVS)%DELORDER       = SWO%DIVSEG(IDVS)%DELORDER
-        SWO%DIVSEG_PREV(IDVS)%DIVORDER       = SWO%DIVSEG(IDVS)%DIVORDER
-        SWO%DIVSEG_PREV(IDVS)%DIVERSION      = SWO%DIVSEG(IDVS)%DIVERSION
-        SWO%DIVSEG_PREV(IDVS)%DELIVERY       = SWO%DIVSEG(IDVS)%DELIVERY
-        SWO%DIVSEG_PREV(IDVS)%DELIVEFF       = SWO%DIVSEG(IDVS)%DELIVEFF
-      END DO !(IDVS)
-      ! --- SptSeg
-      DO CONCURRENT (ISPT = 1:SWO%SPTCOUNT)
-        SWO%SPTSEG_PREV(ISPT)%TFDR           = SWO%SPTSEG(ISPT)%TFDR
-        SWO%SPTSEG_PREV(ISPT)%DELORDER       = SWO%SPTSEG(ISPT)%DELORDER
-        SWO%SPTSEG_PREV(ISPT)%DIVORDER       = SWO%SPTSEG(ISPT)%DIVORDER
-        SWO%SPTSEG_PREV(ISPT)%DIVERSION      = SWO%SPTSEG(ISPT)%DIVERSION
-        SWO%SPTSEG_PREV(ISPT)%DELIVERY       = SWO%SPTSEG(ISPT)%DELIVERY
-        SWO%SPTSEG_PREV(ISPT)%DELIVEFF       = SWO%SPTSEG(ISPT)%DELIVEFF
+    ! SWOPS1OUT/XCHECK
+    !CHARACTER(4) :: XOPT
+    !
+    !BACKUP SFR FLOWS
+    !
+    IF( SWO%NSFR_OLD_FLO > Z ) THEN  !THERE ARE VARIABLES THAT SET TO SFR_INPUT_DATA_TYPES IN OR OUT FLOW
         !
-        DO CONCURRENT (IBRC = 1:SWO%SPTSEG(ISPT)%NBRANCH)
-          SWO%SPTSEG_PREV(ISPT)%BrcTFDR(IBRC)     = SWO%SPTSEG(ISPT)%BrcTFDR(IBRC)
-          SWO%SPTSEG_PREV(ISPT)%BrcDELORDER(IBRC) = SWO%SPTSEG(ISPT)%BrcDELORDER(IBRC)
-          SWO%SPTSEG_PREV(ISPT)%BrcDIVORDER(IBRC) = SWO%SPTSEG(ISPT)%BrcDIVORDER(IBRC)
-          SWO%SPTSEG_PREV(ISPT)%BrcDIVERSION(IBRC)= SWO%SPTSEG(ISPT)%BrcDIVERSION(IBRC)
-          SWO%SPTSEG_PREV(ISPT)%BrcDELIVERY(IBRC) = SWO%SPTSEG(ISPT)%BrcDELIVERY(IBRC)
-          SWO%SPTSEG_PREV(ISPT)%BrcDELIVEFF(IBRC) = SWO%SPTSEG(ISPT)%BrcDELIVEFF(IBRC)
-        END DO !(IBRC)
-      END DO !(ISPT)
-      !
-      ! UPDATE NECESSARY S-VARIABLES
-      !
-      ERROR = NL
-      IF( SWO%NUM_PRNT_VAR > Z .OR. HAS_CLOSEOUT .OR. HAS_TS_END) THEN
-          SWO%FMP_SW_LIMIT_RULZ = inf
-          CALL VARIABLE_GET_GLOBAL_MODEL_PROPERTY(SWO%DEC_VAR, SWO%DEC_VAR%PROP_PUL, KPER, KSTP, KITER, TWO, ERROR) ! PULL VALUES FROM GLOBAL VARIABLES
-      END IF
-      IF(ERROR.NE.NL) CALL STOP_ERROR( OUTPUT=SWO%IOUT, MSG='SWO HAD FATAL ERRORS.'//NL//'THE FOLLOWING ARE VARIABLE NAMES NOT FOUND WHEN PULLING AN OWHM PROPERTY FOR THE S-LANGUAGE OUTPUT'//NL//ERROR)
-      !
-      ! CHECK FOR TIME STEP OUTPUT OPTIONS
-      !
-      IF(SWO%NUM_PRNT_VAR > Z) THEN
-          IF(KSTP < NSTP(KPER)) THEN  !SWO%PRNT_VAR_FLG => TS 2  SP 1
-              K = TWO
-          ELSE
-              K = ONE
-          END IF
-          DO I=ONE, SWO%NUM_PRNT_VAR
-                                    IF(K .LE. SWO%PRNT_VAR_FLG(I)) CALL SWO%DEC_VAR%PRINT( SWO%PRNT_VAR_NAM(I) )
-          END DO
-      END IF
-      !
-      ! RUN END OF TIME STEP INSTRUCTIONS
-      IF(HAS_TS_END) THEN
+        DO CONCURRENT (I=ONE:SWO%NSFR_OLD_FLO)
             !
-            IF(SWO%PRT_RUL_TS_END%IS_OPEN) WRITE(SWO%PRT_RUL_TS_END%IU,'(// 16x A,// 16x A)') '    FOR STRESS PERIOD '//NUM2STR(KPER,-6)//' AND TIME STEP '//NUM2STR(KSTP),'WITH A STARTING CALENDAR DATE '//DATE_SP(KPER)%TS(KSTP-1)%PRETTYPRINT('  ')//' AND ENDING CALENDAR DATE '//DATE_SP(KPER)%TS(KSTP)%PRETTYPRINT('  ')//'  ('//DATE_SP(KPER)%TS(KSTP-1)%STR_DYEAR()//' - '//DATE_SP(KPER)%TS(KSTP)%STR_DYEAR()//')'
-            !
-            CALL SWO%DEC_RUL_TS_END%RUN_S_LANG( SWO%DEC_VAR, SWO%PRT_RUL_TS_END%IU )
-            !
-            CALL VARIABLE_SET_RETURN_VALUES(SWO%DEC_VAR, SWO%DEC_VAR%PROP_RET, KPER, KSTP, ERROR)
-            !
-            IF(ERROR.NE.NL) CALL STOP_ERROR( OUTPUT=SWO%IOUT, MSG=ERROR)
-            !
-            IF(SWO%PRT_RUL_TS_END%IS_OPEN) CALL SWO%PRT_RUL_TS_END%SIZE_CHECK()
-      END IF
-      !
-      !------------------------------------------------------------------------------------------------------------
-      !
-      ! CHECK FOR CLOSEOUT FLAG AND RUN CUSTOM CLOSE OUT INFO
-      !
-      IF(HAS_CLOSEOUT) THEN
-            !
-            IF(SWO%PRT_RUL_CLOSEOUT%IS_OPEN) WRITE(SWO%PRT_RUL_CLOSEOUT%IU,'(// 16x A,// 16x A)') '    CLOSE OUT FOR STRESS PERIOD '//NUM2STR(KPER,-6)//' AND TIME STEP '//NUM2STR(KSTP),'THAT HAS AN ENDING CALENDAR DATE '//DATE_SP(KPER)%TS(KSTP)%PRETTYPRINT('  ')//' ('//DATE_SP(KPER)%TS(KSTP)%STR_DYEAR()//')'
-            !
-            CALL SWO%DEC_RUL_CLOSEOUT%RUN_S_LANG( SWO%DEC_VAR, SWO%PRT_RUL_CLOSEOUT%IU )
-            !
-            CALL VARIABLE_SET_RETURN_VALUES(SWO%DEC_VAR, SWO%DEC_VAR%PROP_RET, KPER, KSTP, ERROR)
-            !
-            IF(ERROR.NE.NL) CALL STOP_ERROR( OUTPUT=SWO%IOUT, MSG=ERROR)
-            !
-            IF(SWO%PRT_RUL_CLOSEOUT%IS_OPEN) CALL SWO%PRT_RUL_CLOSEOUT%SIZE_CHECK()
-      END IF
-      !
-      !------------------------------------------------------------------------------------------------------------
-      !
-      DO IPROJ = 1, SWO%NPROJ
-         IF (SWO%PROJ(IPROJ)%AllocClose == ONE) THEN
-             !
-             ! RESET YEAR-TO-DATE VARIABLES
-             SWO%PROJ(IPROJ)%DIVERSION_YTD        = DZ
-             SWO%PROJ(IPROJ)%DELIVERY_YTD         = DZ
-             SWO%PROJ(IPROJ)%BYPASS_YTD           = DZ
-             SWO%PROJ(IPROJ)%CHARGE_YTD           = DZ
-             SWO%PROJ(IPROJ)%CREDIT_YTD           = DZ
-             SWO%PROJ(IPROJ)%RELEASE_YTD          = DZ
-             SWO%PROJ_PREV(IPROJ)%DIVERSION_YTD   = DZ
-             SWO%PROJ_PREV(IPROJ)%DELIVERY_YTD    = DZ
-             SWO%PROJ_PREV(IPROJ)%BYPASS_YTD      = DZ
-             SWO%PROJ_PREV(IPROJ)%CHARGE_YTD      = DZ
-             SWO%PROJ_PREV(IPROJ)%CREDIT_YTD      = DZ
-             SWO%PROJ_PREV(IPROJ)%RELEASE_YTD     = DZ
-             SWO%PROJ(IPROJ)%DELIVEFF_YTD    = SWO%PROJ_PREV(IPROJ)%DELIVEFF_YTD
-             SWO%PROJ(IPROJ)%DIVRATIO_YTD    = SWO%PROJ_PREV(IPROJ)%DIVRATIO_YTD
-             SWO%PROJ(IPROJ)%CHGRATIO_YTD    = SWO%PROJ_PREV(IPROJ)%CHGRATIO_YTD
-             SWO%PROJ(IPROJ)%NETCHGRATIO_YTD = SWO%PROJ_PREV(IPROJ)%NETCHGRATIO_YTD
+            IF(SWO%SFR_OLD_FLO(I)%IS_INFLOW) THEN
+                !
+                SWO%SFR_OLD_FLO(I)%FLO  = STRM(10,SWO%SFR_OLD_FLO(I)%ISTRM)
+            ELSE
+                SWO%SFR_OLD_FLO(I)%FLO  = STRM( 9,SWO%SFR_OLD_FLO(I)%ISTRM)
+            ENDIF
+        END DO
+    END IF
+!
+!   ------------------------------------------------------------------
+!
+    HAS_CLOSEOUT = ANY(SWO%PROJ(:)%AllocClose == ONE) .AND. SWO%DEC_RUL_CLOSEOUT%INUSE .AND. .NOT. SWO%DEC_RUL_CLOSEOUT%SKIP
+    HAS_TS_END   = SWO%DEC_RUL_TS_END%INUSE .AND. .NOT. SWO%DEC_RUL_TS_END%SKIP
+    !
+    IF(HAS_STARTDATE) THEN  !SET SP STARTING DATE
+        DATE = DATE_SP(KPER)%TS(KSTP-1)%STR('T')
+        DYEAR= DATE_SP(KPER)%TS(KSTP-1)%DYEAR
+        DYEAR2=DATE_SP(KPER)%TS(KSTP  )%DYEAR
+    ELSE
+        DATE='   NaN'
+        DYEAR = SIMTIME
+        DYEAR2= SIMTIME
+    END IF
+    !
+    ! OUTPUT
+    IF (SWO%HAS_OUTPUT) THEN
+      IF(SWO%OUTPUT%FARM       %IS_OPEN ) CALL SWO_OUTPUT_WRITE(SWO, SWO%OUTPUT%FARM       %IU, KPER, KSTP, KITER, "FARM")
+      IF(SWO%OUTPUT%AUXDEM     %IS_OPEN ) CALL SWO_OUTPUT_WRITE(SWO, SWO%OUTPUT%AUXDEM     %IU, KPER, KSTP, KITER, "AUXD")
+      IF(SWO%OUTPUT%UNIT       %IS_OPEN ) CALL SWO_OUTPUT_WRITE(SWO, SWO%OUTPUT%UNIT       %IU, KPER, KSTP, KITER, "UNIT")
+      IF(SWO%OUTPUT%DIST       %IS_OPEN ) CALL SWO_OUTPUT_WRITE(SWO, SWO%OUTPUT%DIST       %IU, KPER, KSTP, KITER, "DIST")
+      IF(SWO%OUTPUT%PROJ       %IS_OPEN ) CALL SWO_OUTPUT_WRITE(SWO, SWO%OUTPUT%PROJ       %IU, KPER, KSTP, KITER, "PROJ")
+      IF(SWO%OUTPUT%DivSeg     %IS_OPEN ) CALL SWO_OUTPUT_WRITE(SWO, SWO%OUTPUT%DivSeg     %IU, KPER, KSTP, KITER, "DIVS")
+      IF(SWO%OUTPUT%SplitSeg   %IS_OPEN ) CALL SWO_OUTPUT_WRITE(SWO, SWO%OUTPUT%SplitSeg   %IU, KPER, KSTP, KITER, "SPLT")
+      IF(SWO%OUTPUT%Storage    %IS_OPEN ) CALL SWO_OUTPUT_WRITE(SWO, SWO%OUTPUT%Storage    %IU, KPER, KSTP, KITER, "STOR")
+      IF(SWO%OUTPUT%SFR        %IS_OPEN ) CALL SWO_OUTPUT_WRITE(SWO, SWO%OUTPUT%SFR        %IU, KPER, KSTP, KITER, "XSFR")
+      IF(SWO%OUTPUT%Convergence%IS_OPEN ) CALL SWO_OUTPUT_WRITE(SWO, SWO%OUTPUT%Convergence%IU, KPER, KSTP, KITER, "CNVG")
+      !XOPT = ; CALL XCHECK(IGRID,KPER,KSTP,KITER,"ALLC")
+    END IF
+    !
+    !RELEASE_MIN
+    !RELEASE_FLOD
+    !RELEASE_PROJ
+    !RELEASE_ADDF
+    !RELEASE_REQF
+    !RELEASE_SPEC
 
-             DO CONCURRENT (IDIST = 1:SWO%NDIST, SWO%DIST(IDIST)%ProjID == IPROJ)
-                 SWO%DIST(IDIST)%DIVERSION_YTD      = DZ
-                 SWO%DIST(IDIST)%DELIVERY_YTD       = DZ
-                 SWO%DIST(IDIST)%BYPASS_YTD         = DZ
-                 SWO%DIST(IDIST)%CHARGE_YTD         = DZ
-                 SWO%DIST(IDIST)%CREDIT_YTD         = DZ
-                 SWO%DIST(IDIST)%BALANCE            = DZ !DIST(IDIST)%ALLOC_TOTAL  ! If start of new allocation year, balance = allocation (no charges yet!)
-                 SWO%DIST_PREV(IDIST)%DIVERSION_YTD = DZ
-                 SWO%DIST_PREV(IDIST)%DELIVERY_YTD  = DZ
-                 SWO%DIST_PREV(IDIST)%BYPASS_YTD    = DZ
-                 SWO%DIST_PREV(IDIST)%CHARGE_YTD    = DZ
-                 SWO%DIST_PREV(IDIST)%CREDIT_YTD    = DZ
-                 SWO%DIST_PREV(IDIST)%BALANCE       = DZ !DIST(IDIST)%ALLOC_TOTAL  ! If start of new allocation year, balance = allocation (no charges yet!)
-                 SWO%DIST(IDIST)%DELIVEFF_YTD  = SWO%DIST_PREV(IDIST)%DELIVEFF_YTD
-             END DO !(IDIST)
+    IF(SWO%PRT_RESDAT%IS_OPEN) THEN
+        IU = SWO%PRT_RESDAT%IU
+        BIN= SWO%PRT_RESDAT%BINARY
+        !
+        IF(BIN) THEN
+            WRITE(IU) DATE,DYEAR,DYEAR2,KPER,KSTP,SWO%DELT
+        ELSE
+            WRITE(IU, '(A, 1x F13.7, 1x F13.7, 2I5, A15)', ADVANCE='NO') DATE,DYEAR,DYEAR2,KPER,KSTP,NUM2STR(SWO%DELT)
+        END IF
 
-             DO CONCURRENT (IUNIT = 1:SWO%NUNIT, SWO%UNIT(IUNIT)%ProjID == IPROJ)
-                 SWO%UNIT(IUNIT)%DIVERSION_YTD      = DZ
-                 SWO%UNIT(IUNIT)%DELIVERY_YTD       = DZ
-                 SWO%UNIT(IUNIT)%BYPASS_YTD         = DZ
-                 SWO%UNIT(IUNIT)%CHARGE_YTD         = DZ
-                 SWO%UNIT(IUNIT)%CREDIT_YTD         = DZ
-                 SWO%UNIT_PREV(IUNIT)%DIVERSION_YTD = DZ
-                 SWO%UNIT_PREV(IUNIT)%DELIVERY_YTD  = DZ
-                 SWO%UNIT_PREV(IUNIT)%BYPASS_YTD    = DZ
-                 SWO%UNIT_PREV(IUNIT)%CHARGE_YTD    = DZ
-                 SWO%UNIT_PREV(IUNIT)%CREDIT_YTD    = DZ
-                 SWO%UNIT(IUNIT)%DELIVEFF_YTD       = SWO%UNIT_PREV(IUNIT)%DELIVEFF
-             END DO !(IUNIT)
+        DO I = ONE,SWO%NPROJ
+        DO J = ONE,SWO%NRES_BAL(I)
+              STOR = SWO%RESDAT(I)%RESBAL(J)%STORAGE
+              !
+              CALL ACAP_STOR2AREA(SWO,I,J,STOR,AREA)
+              CALL ACAP_STOR2ELEV(SWO,I,J,STOR,ELEV)
+              STOR = STOR * SWO%STOR_CNVT
+              AREA = AREA * SWO%AREA_CNVT
+              ELEV = ELEV * SWO%LEN_CNVT
+              !
+              REL_TOT = SWO%RESDAT(I)%RESBAL(J)%RELEASE_TOT * SWO%DELT_INV * SWO%FLOW_CNVT
+              REL_SPL = SWO%RESDAT(I)%RESBAL(J)%SPILL_WAY   * SWO%DELT_INV * SWO%FLOW_CNVT
+              REL_OT  = SWO%RESDAT(I)%RESBAL(J)%OVER_TOP    * SWO%DELT_INV * SWO%FLOW_CNVT
+              !
+              INFLOW = SWO%RESDAT(I)%RESBAL(J)%INFLOW + SWO%RESDAT(I)%RESBAL(J)%SFR_INFLOW
+              INFLOW = INFLOW* SWO%DELT_INV * SWO%FLOW_CNVT
+              !
+              PRECIP = SWO%RESDAT(I)%RESBAL(J)%PRCP_FIN * SWO%DELT_INV * SWO%FLOW_CNVT
+              EVAP   = SWO%RESDAT(I)%RESBAL(J)%EVAP_FIN * SWO%DELT_INV * SWO%FLOW_CNVT
+              !
+              TRANSF = SWO%RESDAT(I)%RESBAL(J)%STORAGE_TRANSFER * SWO%DELT_INV * SWO%FLOW_CNVT
+              !
+              IF(BIN) THEN
+                  WRITE(IU) ELEV,STOR,REL_TOT,REL_SPL,REL_OT,INFLOW,PRECIP,EVAP,AREA,TRANSF
+              ELSE
+                  WRITE(IU, '(*(A15))', ADVANCE='NO') NUM2STR(ELEV), NUM2STR(STOR), NUM2STR(REL_TOT), NUM2STR(REL_SPL), NUM2STR(REL_OT), NUM2STR(INFLOW), NUM2STR(PRECIP), NUM2STR(EVAP), NUM2STR(AREA), NUM2STR(TRANSF)
+              END IF
+        END DO
+        END DO
+        !
+        IF(.NOT. BIN) WRITE(IU, '(A)')
+    END IF
+    !
+    IF(SWO%PRT_RESDAT_CMPCT%IS_OPEN) THEN
+        IU = SWO%PRT_RESDAT_CMPCT%IU
+        BIN= SWO%PRT_RESDAT_CMPCT%BINARY
+        K = Z
+        !'DATE_START           DYEAR_START      SP     TS RES_ID           DELT          STAGE        STORAGE        RELEASE       SPILLWAY        OVERTOP         INFLOW         PRECIP         EVAPOR           AREA       TRANSFER')
 
-             DO CONCURRENT (IFARM = 1:SWO%NFARM, SWO%FARM(IFARM)%ProjID == IPROJ)
-                 SWO%FARM(IFARM)%BALANCE           = DZ
-                 SWO%FARM(IFARM)%DELIVERY_YTD      = DZ
-                 SWO%FARM_PREV(IFARM)%BALANCE      = DZ
-                 SWO%FARM_PREV(IFARM)%DELIVERY_YTD = DZ
-             END DO !(IFARM)
+        DO I = ONE,SWO%NPROJ
+        DO J = ONE,SWO%NRES_BAL(I)
+              K = K + ONE
+              !
+              STOR = SWO%RESDAT(I)%RESBAL(J)%STORAGE
+              !
+              CALL ACAP_STOR2AREA(SWO,I,J,STOR,AREA)
+              CALL ACAP_STOR2ELEV(SWO,I,J,STOR,ELEV)
+              STOR = STOR * SWO%STOR_CNVT
+              AREA = AREA * SWO%AREA_CNVT
+              ELEV = ELEV * SWO%LEN_CNVT
+              !
+              REL_TOT = SWO%RESDAT(I)%RESBAL(J)%RELEASE_TOT * SWO%DELT_INV * SWO%FLOW_CNVT
+              REL_SPL = SWO%RESDAT(I)%RESBAL(J)%SPILL_WAY   * SWO%DELT_INV * SWO%FLOW_CNVT
+              REL_OT  = SWO%RESDAT(I)%RESBAL(J)%OVER_TOP    * SWO%DELT_INV * SWO%FLOW_CNVT
+              !
+              INFLOW = SWO%RESDAT(I)%RESBAL(J)%INFLOW + SWO%RESDAT(I)%RESBAL(J)%SFR_INFLOW
+              INFLOW = INFLOW* SWO%DELT_INV * SWO%FLOW_CNVT
+              !
+              PRECIP = SWO%RESDAT(I)%RESBAL(J)%PRCP_FIN * SWO%DELT_INV * SWO%FLOW_CNVT
+              EVAP   = SWO%RESDAT(I)%RESBAL(J)%EVAP_FIN * SWO%DELT_INV * SWO%FLOW_CNVT
+              !
+              TRANSF = SWO%RESDAT(I)%RESBAL(J)%STORAGE_TRANSFER * SWO%DELT_INV * SWO%FLOW_CNVT
+              !
+              IF(DZ < SWO%RESDAT(I)%RESBAL(J)%MAX_RELEASE .AND. SWO%RESDAT(I)%RESBAL(J)%MAX_RELEASE < D100) THEN
+                  REL_MAX = NUM2STR(SWO%RESDAT(I)%RESBAL(J)%MAX_RELEASE * SWO%FLOW_CNVT)
+              ELSE
+                  REL_MAX = 'inf'
+              END IF
+              REL_MAX = ADJUSTR(REL_MAX)
+              !
+              IF(BIN) THEN
+                  WRITE(IU) DATE,DYEAR,DYEAR2,KPER,KSTP,K,SWO%DELT, ELEV, STOR, REL_TOT, REL_SPL, REL_OT, INFLOW, PRECIP, EVAP, AREA, TRANSF, SWO%RESDAT(I)%RESBAL(J)%MAX_RELEASE
+              ELSE
+                  WRITE(IU, '(A, 1x F13.7, 1x F13.7, 3I5, *(A15))') DATE,DYEAR,DYEAR2,KPER,KSTP,K,NUM2STR(SWO%DELT), NUM2STR(ELEV), NUM2STR(STOR), NUM2STR(REL_TOT), NUM2STR(REL_SPL), NUM2STR(REL_OT), NUM2STR(INFLOW), NUM2STR(PRECIP), NUM2STR(EVAP), NUM2STR(AREA), NUM2STR(TRANSF), REL_MAX
+              END IF
+        END DO
+        END DO
+    END IF
+    !
+    IF(SWO%PRT_RESDAT_DETAIL%IS_OPEN) THEN
+        IU = SWO%PRT_RESDAT_DETAIL%IU
+        BIN= SWO%PRT_RESDAT_DETAIL%BINARY
+        K = Z
+        !'DATE_START            DYEAR_START   SP   TS  RES           DELT          STAGE        STORAGE   RELEASE_PROJ   RELEASE_REQF  RELEASE_FLOOD  RELEASE_EXTRA   RELEASE_SPEC   RELEASE_MIN        SPILLWAY        OVERTOP         INFLOW         PRECIP         EVAPOR           AREA       TRANSFER')
 
-             DO CONCURRENT (IAUX = 1:SWO%NAUXDEM, SWO%AUXDEM(IAUX)%ProjID == IPROJ)
-                 SWO%AUXDEM(IAUX)%BALANCE           = DZ
-                 SWO%AUXDEM(IAUX)%DELIVERY_YTD      = DZ
-                 SWO%AUXDEM_PREV(IAUX)%BALANCE      = DZ
-                 SWO%AUXDEM_PREV(IAUX)%DELIVERY_YTD = DZ
-             END DO !(IAUX)
-             !
-         END IF
-      END DO
+        DO I = ONE,SWO%NPROJ
+        DO J = ONE,SWO%NRES_BAL(I)
+              K = K + ONE
+              !
+              STOR = SWO%RESDAT(I)%RESBAL(J)%STORAGE
+              !
+              CALL ACAP_STOR2AREA(SWO,I,J,STOR,AREA)
+              CALL ACAP_STOR2ELEV(SWO,I,J,STOR,ELEV)
+              STOR = STOR * SWO%STOR_CNVT
+              AREA = AREA * SWO%AREA_CNVT
+              ELEV = ELEV * SWO%LEN_CNVT
+              !
+              REL_P   = SWO%RESDAT(I)%RESBAL(J)%RELEASE_PROJ * SWO%DELT_INV * SWO%FLOW_CNVT - SWO%RESDAT(I)%RESBAL(J)%RELEASE_PROJ_ADD * SWO%DELT_INV * SWO%FLOW_CNVT  !Keep track of additional demand by project in EXTRA catagory
+              REL_R   = SWO%RESDAT(I)%RESBAL(J)%RELEASE_REQF * SWO%DELT_INV * SWO%FLOW_CNVT
+              REL_S   = SWO%RESDAT(I)%RESBAL(J)%RELEASE_SPEC * SWO%DELT_INV * SWO%FLOW_CNVT
+              REL_E   = SWO%RESDAT(I)%RESBAL(J)%RELEASE_ADDF * SWO%DELT_INV * SWO%FLOW_CNVT + SWO%RESDAT(I)%RESBAL(J)%RELEASE_PROJ_ADD * SWO%DELT_INV * SWO%FLOW_CNVT  !+ ...
+              REL_F   = SWO%RESDAT(I)%RESBAL(J)%RELEASE_FLOD * SWO%DELT_INV * SWO%FLOW_CNVT
+              REL_M   = SWO%RESDAT(I)%RESBAL(J)%RELEASE_MIN  * SWO%DELT_INV * SWO%FLOW_CNVT
+              !
+              REL_SPL = SWO%RESDAT(I)%RESBAL(J)%SPILL_WAY   * SWO%DELT_INV * SWO%FLOW_CNVT
+              REL_OT  = SWO%RESDAT(I)%RESBAL(J)%OVER_TOP    * SWO%DELT_INV * SWO%FLOW_CNVT
+              !
+              REL_SPL = SWO%RESDAT(I)%RESBAL(J)%SPILL_WAY   * SWO%DELT_INV * SWO%FLOW_CNVT
+              REL_OT  = SWO%RESDAT(I)%RESBAL(J)%OVER_TOP    * SWO%DELT_INV * SWO%FLOW_CNVT
+              !
+              INFLOW = SWO%RESDAT(I)%RESBAL(J)%INFLOW + SWO%RESDAT(I)%RESBAL(J)%SFR_INFLOW
+              INFLOW = INFLOW* SWO%DELT_INV * SWO%FLOW_CNVT
+              !
+              PRECIP = SWO%RESDAT(I)%RESBAL(J)%PRCP_FIN * SWO%DELT_INV * SWO%FLOW_CNVT
+              EVAP   = SWO%RESDAT(I)%RESBAL(J)%EVAP_FIN * SWO%DELT_INV * SWO%FLOW_CNVT
+              !
+              TRANSF = SWO%RESDAT(I)%RESBAL(J)%STORAGE_TRANSFER * SWO%DELT_INV * SWO%FLOW_CNVT
+              !
+              IF(DZ < SWO%RESDAT(I)%RESBAL(J)%MAX_RELEASE .AND. SWO%RESDAT(I)%RESBAL(J)%MAX_RELEASE < D100) THEN
+                  REL_MAX = NUM2STR(SWO%RESDAT(I)%RESBAL(J)%MAX_RELEASE * SWO%FLOW_CNVT)
+              ELSE
+                  REL_MAX = 'inf'
+              END IF
+              REL_MAX = ADJUSTR(REL_MAX)
+              !
+              IF(BIN) THEN   !                    STORAGE        RELEASE_PROJ  RELEASE_SPEC  RELEASE_FLOD  RELEASE_REQF  RELEASE_EXTRA       SPILLWAY        OVERTOP         INFLOW         PRECIP         EVAPOR           AREA       TRANSFER')
+                  WRITE(IU) DATE,DYEAR,DYEAR2,KPER,KSTP,K,SWO%DELT, ELEV, STOR, REL_P, REL_R, REL_F, REL_E, REL_S, REL_M, REL_SPL, REL_OT, INFLOW, PRECIP, EVAP, AREA, TRANSF, SWO%RESDAT(I)%RESBAL(J)%MAX_RELEASE
+              ELSE
+                  WRITE(IU, '(A, 1x F13.7, 1x F13.7, 3I5, *(A15))') DATE,DYEAR,DYEAR2,KPER,KSTP,K,NUM2STR(SWO%DELT), NUM2STR(ELEV), NUM2STR(STOR), NUM2STR(REL_P), NUM2STR(REL_R), NUM2STR(REL_F), NUM2STR(REL_E), NUM2STR(REL_S), NUM2STR(REL_M), NUM2STR(REL_SPL), NUM2STR(REL_OT), NUM2STR(INFLOW), NUM2STR(PRECIP), NUM2STR(EVAP), NUM2STR(AREA), NUM2STR(TRANSF), REL_MAX
+              END IF
+        END DO
+        END DO
+    END IF
+    !
+    ! Save latest flow, accounting, and parameter values
+    ! for use as initial value in next step
+    ! --- Project
+    DO CONCURRENT (IPROJ = 1:SWO%NPROJ)
+      ! wet-water
+      SWO%PROJ_PREV(IPROJ)%RELEASE         = SWO%PROJ(IPROJ)%RELEASE
+      SWO%PROJ_PREV(IPROJ)%DIVERSION       = SWO%PROJ(IPROJ)%DIVERSION
+      SWO%PROJ_PREV(IPROJ)%DELIVERY        = SWO%PROJ(IPROJ)%DELIVERY
+      SWO%PROJ_PREV(IPROJ)%BYPASS          = SWO%PROJ(IPROJ)%BYPASS
+      SWO%PROJ_PREV(IPROJ)%DELIVEFF        = SWO%PROJ(IPROJ)%DELIVEFF
+      SWO%PROJ_PREV(IPROJ)%DIVRATIO        = SWO%PROJ(IPROJ)%DIVRATIO
+      SWO%PROJ_PREV(IPROJ)%RELEASE_YTD     = SWO%PROJ(IPROJ)%RELEASE_YTD
+      SWO%PROJ_PREV(IPROJ)%DIVERSION_YTD   = SWO%PROJ(IPROJ)%DIVERSION_YTD
+      SWO%PROJ_PREV(IPROJ)%DELIVERY_YTD    = SWO%PROJ(IPROJ)%DELIVERY_YTD
+      SWO%PROJ_PREV(IPROJ)%BYPASS_YTD      = SWO%PROJ(IPROJ)%BYPASS_YTD
+      SWO%PROJ_PREV(IPROJ)%DELIVEFF_YTD    = SWO%PROJ(IPROJ)%DELIVEFF_YTD
+      SWO%PROJ_PREV(IPROJ)%DIVRATIO_YTD    = SWO%PROJ(IPROJ)%DIVRATIO_YTD
+      ! accounting
+      SWO%PROJ_PREV(IPROJ)%ALLOCATION      = SWO%PROJ(IPROJ)%ALLOCATION
+      SWO%PROJ_PREV(IPROJ)%TFDR            = SWO%PROJ(IPROJ)%TFDR
+      SWO%PROJ_PREV(IPROJ)%DELORDER        = SWO%PROJ(IPROJ)%DELORDER
+      SWO%PROJ_PREV(IPROJ)%DIVORDER        = SWO%PROJ(IPROJ)%DIVORDER
+      SWO%PROJ_PREV(IPROJ)%CHARGE          = SWO%PROJ(IPROJ)%CHARGE
+      SWO%PROJ_PREV(IPROJ)%CREDIT          = SWO%PROJ(IPROJ)%CREDIT
+      SWO%PROJ_PREV(IPROJ)%CHGRATIO        = SWO%PROJ(IPROJ)%CHGRATIO
+      SWO%PROJ_PREV(IPROJ)%NETCHGRATIO     = SWO%PROJ(IPROJ)%NETCHGRATIO
+      SWO%PROJ_PREV(IPROJ)%CHARGE_YTD      = SWO%PROJ(IPROJ)%CHARGE_YTD
+      SWO%PROJ_PREV(IPROJ)%CREDIT_YTD      = SWO%PROJ(IPROJ)%CREDIT_YTD
+      SWO%PROJ_PREV(IPROJ)%CHGRATIO_YTD    = SWO%PROJ(IPROJ)%CHGRATIO_YTD
+      SWO%PROJ_PREV(IPROJ)%NETCHGRATIO_YTD = SWO%PROJ(IPROJ)%NETCHGRATIO_YTD
+    END DO !(IPROJ)
+    ! --- District
+    DO CONCURRENT (IDIST = 1:SWO%NDIST)
+      ! wet-water
+      SWO%DIST_PREV(IDIST)%DIVERSION       = SWO%DIST(IDIST)%DIVERSION
+      SWO%DIST_PREV(IDIST)%DELIVERY        = SWO%DIST(IDIST)%DELIVERY
+      SWO%DIST_PREV(IDIST)%BYPASS          = SWO%DIST(IDIST)%BYPASS
+      SWO%DIST_PREV(IDIST)%DELIVEFF        = SWO%DIST(IDIST)%DELIVEFF
+      SWO%DIST_PREV(IDIST)%DIVERSION_YTD   = SWO%DIST(IDIST)%DIVERSION_YTD
+      SWO%DIST_PREV(IDIST)%DELIVERY_YTD    = SWO%DIST(IDIST)%DELIVERY_YTD
+      SWO%DIST_PREV(IDIST)%BYPASS_YTD      = SWO%DIST(IDIST)%BYPASS_YTD
+      SWO%DIST_PREV(IDIST)%DELIVEFF_YTD    = SWO%DIST(IDIST)%DELIVEFF_YTD
+      ! accounting
+      SWO%DIST_PREV(IDIST)%ALLOC_ANN       = SWO%DIST(IDIST)%ALLOC_ANN
+      SWO%DIST_PREV(IDIST)%ALLOC_CO        = SWO%DIST(IDIST)%ALLOC_CO
+      SWO%DIST_PREV(IDIST)%ALLOC_TOTAL     = SWO%DIST(IDIST)%ALLOC_TOTAL
+      SWO%DIST_PREV(IDIST)%EQ_ALLOTMENT    = SWO%DIST(IDIST)%EQ_ALLOTMENT
+      SWO%DIST_PREV(IDIST)%BALANCE         = SWO%DIST(IDIST)%BALANCE
+      SWO%DIST_PREV(IDIST)%TFDR            = SWO%DIST(IDIST)%TFDR
+      SWO%DIST_PREV(IDIST)%DELORDER        = SWO%DIST(IDIST)%DELORDER
+      SWO%DIST_PREV(IDIST)%DIVORDER        = SWO%DIST(IDIST)%DIVORDER
+      SWO%DIST_PREV(IDIST)%CHARGE          = SWO%DIST(IDIST)%CHARGE
+      SWO%DIST_PREV(IDIST)%CREDIT          = SWO%DIST(IDIST)%CREDIT
+      SWO%DIST_PREV(IDIST)%CHGRATIO        = SWO%DIST(IDIST)%CHGRATIO
+      SWO%DIST_PREV(IDIST)%NETCHGRATIO     = SWO%DIST(IDIST)%NETCHGRATIO
+      SWO%DIST_PREV(IDIST)%CHARGE_YTD      = SWO%DIST(IDIST)%CHARGE_YTD
+      SWO%DIST_PREV(IDIST)%CREDIT_YTD      = SWO%DIST(IDIST)%CREDIT_YTD
+      SWO%DIST_PREV(IDIST)%CHGRATIO_YTD    = SWO%DIST(IDIST)%CHGRATIO_YTD
+      SWO%DIST_PREV(IDIST)%NETCHGRATIO_YTD = SWO%DIST(IDIST)%NETCHGRATIO_YTD
+    END DO !(IDIST)
+    ! --- Unit
+    DO CONCURRENT (IUNIT = 1:SWO%NUNIT)
+      ! wet-water
+      SWO%UNIT_PREV(IUNIT)%DIVERSION       = SWO%UNIT(IUNIT)%DIVERSION
+      SWO%UNIT_PREV(IUNIT)%DELIVERY        = SWO%UNIT(IUNIT)%DELIVERY
+      SWO%UNIT_PREV(IUNIT)%BYPASS          = SWO%UNIT(IUNIT)%BYPASS
+      SWO%UNIT_PREV(IUNIT)%DELIVEFF        = SWO%UNIT(IUNIT)%DELIVEFF
+      SWO%UNIT_PREV(IUNIT)%DIVERSION_YTD   = SWO%UNIT(IUNIT)%DIVERSION_YTD
+      SWO%UNIT_PREV(IUNIT)%DELIVERY_YTD    = SWO%UNIT(IUNIT)%DELIVERY_YTD
+      SWO%UNIT_PREV(IUNIT)%BYPASS_YTD      = SWO%UNIT(IUNIT)%BYPASS_YTD
+      SWO%UNIT_PREV(IUNIT)%DIVIN_YTD       = SWO%UNIT(IUNIT)%DIVIN_YTD
+      SWO%UNIT_PREV(IUNIT)%SUMIN_YTD       = SWO%UNIT(IUNIT)%SUMIN_YTD
+      SWO%UNIT_PREV(IUNIT)%SUMOUT_YTD      = SWO%UNIT(IUNIT)%SUMOUT_YTD
+      SWO%UNIT_PREV(IUNIT)%DELIVEFF_YTD    = SWO%UNIT(IUNIT)%DELIVEFF_YTD
+      ! accounting
+      SWO%UNIT_PREV(IUNIT)%TFDR            = SWO%UNIT(IUNIT)%TFDR
+      SWO%UNIT_PREV(IUNIT)%DELORDER        = SWO%UNIT(IUNIT)%DELORDER
+      SWO%UNIT_PREV(IUNIT)%DIVORDER        = SWO%UNIT(IUNIT)%DIVORDER
+      SWO%UNIT_PREV(IUNIT)%CHARGE          = SWO%UNIT(IUNIT)%CHARGE
+      SWO%UNIT_PREV(IUNIT)%CREDIT          = SWO%UNIT(IUNIT)%CREDIT
+      SWO%UNIT_PREV(IUNIT)%CHGRATIO        = SWO%UNIT(IUNIT)%CHGRATIO
+      SWO%UNIT_PREV(IUNIT)%NETCHGRATIO     = SWO%UNIT(IUNIT)%NETCHGRATIO
+      SWO%UNIT_PREV(IUNIT)%CHARGE_YTD      = SWO%UNIT(IUNIT)%CHARGE_YTD
+      SWO%UNIT_PREV(IUNIT)%CREDIT_YTD      = SWO%UNIT(IUNIT)%CREDIT_YTD
+      SWO%UNIT_PREV(IUNIT)%CHGRATIO_YTD    = SWO%UNIT(IUNIT)%CHGRATIO_YTD
+      SWO%UNIT_PREV(IUNIT)%NETCHGRATIO_YTD = SWO%UNIT(IUNIT)%NETCHGRATIO_YTD
+    END DO !(IUNIT)
+    ! --- Farm
+    DO CONCURRENT (IFARM = 1:SWO%NFARM)
+      SWO%FARM_PREV(IFARM)%TFDR            = SWO%FARM(IFARM)%TFDR
+      SWO%FARM_PREV(IFARM)%ALLOTMENT       = SWO%FARM(IFARM)%ALLOTMENT
+      SWO%FARM_PREV(IFARM)%BALANCE         = SWO%FARM(IFARM)%BALANCE
+      SWO%FARM_PREV(IFARM)%DELORDER        = SWO%FARM(IFARM)%DELORDER
+      SWO%FARM_PREV(IFARM)%DELIVERY        = SWO%FARM(IFARM)%DELIVERY
+      SWO%FARM_PREV(IFARM)%DELIVERY_YTD    = SWO%FARM(IFARM)%DELIVERY_YTD
+    END DO !(IFARM)
+    ! --- Aux
+    DO CONCURRENT (IAUX = 1:SWO%NAUXDEM)
+      SWO%AUXDEM_PREV(IAUX)%DEMAND         = SWO%AUXDEM(IAUX)%DEMAND
+      SWO%AUXDEM_PREV(IAUX)%ALLOTMENT      = SWO%AUXDEM(IAUX)%ALLOTMENT
+      SWO%AUXDEM_PREV(IAUX)%BALANCE        = SWO%AUXDEM(IAUX)%BALANCE
+      SWO%AUXDEM_PREV(IAUX)%DELORDER       = SWO%AUXDEM(IAUX)%DELORDER
+      SWO%AUXDEM_PREV(IAUX)%DELIVERY       = SWO%AUXDEM(IAUX)%DELIVERY
+      SWO%AUXDEM_PREV(IAUX)%DELIVERY_YTD   = SWO%AUXDEM(IAUX)%DELIVERY_YTD
+    END DO
+    ! --- Segment
+    DO CONCURRENT (ISEG = 1:SWO%NSEG)
+      SWO%SEGDATA_PREV(ISEG)%FLOW          = SWO%SEGDATA(ISEG)%FLOW
+      SWO%SEGDATA_PREV(ISEG)%INFLOW        = SWO%SEGDATA(ISEG)%INFLOW
+      SWO%SEGDATA_PREV(ISEG)%OUTFLOW       = SWO%SEGDATA(ISEG)%OUTFLOW
+      SWO%SEGDATA_PREV(ISEG)%SEEPAGE       = SWO%SEGDATA(ISEG)%SEEPAGE
+      SWO%SEGDATA_PREV(ISEG)%RUNOFF        = SWO%SEGDATA(ISEG)%RUNOFF
+      SWO%SEGDATA_PREV(ISEG)%STRM_ET       = SWO%SEGDATA(ISEG)%STRM_ET
+      SWO%SEGDATA_PREV(ISEG)%STRM_PRCP     = SWO%SEGDATA(ISEG)%STRM_PRCP
+      SWO%SEGDATA_PREV(ISEG)%DIVERSION     = SWO%SEGDATA(ISEG)%DIVERSION
+      SWO%SEGDATA_PREV(ISEG)%DELIVERY      = SWO%SEGDATA(ISEG)%DELIVERY
+      SWO%SEGDATA_PREV(ISEG)%EFFICIENCY    = SWO%SEGDATA(ISEG)%EFFICIENCY
+    END DO !(ISEG)
+    ! --- DivSeg
+    DO CONCURRENT (IDVS = 1:SWO%DIVCOUNT)
+      SWO%DIVSEG_PREV(IDVS)%TFDR           = SWO%DIVSEG(IDVS)%TFDR
+      SWO%DIVSEG_PREV(IDVS)%DELORDER       = SWO%DIVSEG(IDVS)%DELORDER
+      SWO%DIVSEG_PREV(IDVS)%DIVORDER       = SWO%DIVSEG(IDVS)%DIVORDER
+      SWO%DIVSEG_PREV(IDVS)%DIVERSION      = SWO%DIVSEG(IDVS)%DIVERSION
+      SWO%DIVSEG_PREV(IDVS)%DELIVERY       = SWO%DIVSEG(IDVS)%DELIVERY
+      SWO%DIVSEG_PREV(IDVS)%DELIVEFF       = SWO%DIVSEG(IDVS)%DELIVEFF
+    END DO !(IDVS)
+    ! --- SptSeg
+    DO CONCURRENT (ISPT = 1:SWO%SPTCOUNT)
+      SWO%SPTSEG_PREV(ISPT)%TFDR           = SWO%SPTSEG(ISPT)%TFDR
+      SWO%SPTSEG_PREV(ISPT)%DELORDER       = SWO%SPTSEG(ISPT)%DELORDER
+      SWO%SPTSEG_PREV(ISPT)%DIVORDER       = SWO%SPTSEG(ISPT)%DIVORDER
+      SWO%SPTSEG_PREV(ISPT)%DIVERSION      = SWO%SPTSEG(ISPT)%DIVERSION
+      SWO%SPTSEG_PREV(ISPT)%DELIVERY       = SWO%SPTSEG(ISPT)%DELIVERY
+      SWO%SPTSEG_PREV(ISPT)%DELIVEFF       = SWO%SPTSEG(ISPT)%DELIVEFF
       !
+      DO CONCURRENT (IBRC = 1:SWO%SPTSEG(ISPT)%NBRANCH)
+        SWO%SPTSEG_PREV(ISPT)%BrcTFDR(IBRC)     = SWO%SPTSEG(ISPT)%BrcTFDR(IBRC)
+        SWO%SPTSEG_PREV(ISPT)%BrcDELORDER(IBRC) = SWO%SPTSEG(ISPT)%BrcDELORDER(IBRC)
+        SWO%SPTSEG_PREV(ISPT)%BrcDIVORDER(IBRC) = SWO%SPTSEG(ISPT)%BrcDIVORDER(IBRC)
+        SWO%SPTSEG_PREV(ISPT)%BrcDIVERSION(IBRC)= SWO%SPTSEG(ISPT)%BrcDIVERSION(IBRC)
+        SWO%SPTSEG_PREV(ISPT)%BrcDELIVERY(IBRC) = SWO%SPTSEG(ISPT)%BrcDELIVERY(IBRC)
+        SWO%SPTSEG_PREV(ISPT)%BrcDELIVEFF(IBRC) = SWO%SPTSEG(ISPT)%BrcDELIVEFF(IBRC)
+      END DO !(IBRC)
+    END DO !(ISPT)
+    !
+    ! UPDATE NECESSARY S-VARIABLES
+    !
+    ERROR = NL
+    IF( SWO%NUM_PRNT_VAR > Z .OR. HAS_CLOSEOUT .OR. HAS_TS_END) THEN
+        SWO%FMP_SW_LIMIT_RULZ = inf
+        CALL VARIABLE_GET_GLOBAL_MODEL_PROPERTY(SWO%DEC_VAR, SWO%DEC_VAR%PROP_PUL, KPER, KSTP, KITER, TWO, ERROR) ! PULL VALUES FROM GLOBAL VARIABLES
+    END IF
+    IF(ERROR.NE.NL) CALL STOP_ERROR( OUTPUT=SWO%IOUT, MSG='SWO HAD FATAL ERRORS.'//NL//'THE FOLLOWING ARE VARIABLE NAMES NOT FOUND WHEN PULLING AN OWHM PROPERTY FOR THE S-LANGUAGE OUTPUT'//NL//ERROR)
+    !
+    ! CHECK FOR TIME STEP OUTPUT OPTIONS
+    !
+    IF(SWO%NUM_PRNT_VAR > Z) THEN
+        IF(KSTP < NSTP(KPER)) THEN  !SWO%PRNT_VAR_FLG => TS 2  SP 1
+            K = TWO
+        ELSE
+            K = ONE
+        END IF
+        DO I=ONE, SWO%NUM_PRNT_VAR
+                                  IF(K .LE. SWO%PRNT_VAR_FLG(I)) CALL SWO%DEC_VAR%PRINT( SWO%PRNT_VAR_NAM(I) )
+        END DO
+    END IF
+    !
+    ! RUN END OF TIME STEP INSTRUCTIONS
+    IF(HAS_TS_END) THEN
+          !
+          IF(SWO%PRT_RUL_TS_END%IS_OPEN) WRITE(SWO%PRT_RUL_TS_END%IU,'(// A, // 16x, A,// 16x, A)') REPEAT('-', 150), '    FOR STRESS PERIOD '//NUM2STR(KPER,-6)//' AND TIME STEP '//NUM2STR(KSTP),'WITH A STARTING CALENDAR DATE '//DATE_SP(KPER)%TS(KSTP-1)%PRETTYPRINT('  ')//' AND ENDING CALENDAR DATE '//DATE_SP(KPER)%TS(KSTP)%PRETTYPRINT('  ')//'  ('//DATE_SP(KPER)%TS(KSTP-1)%STR_DYEAR()//' - '//DATE_SP(KPER)%TS(KSTP)%STR_DYEAR()//')'
+          !
+          CALL SWO%DEC_RUL_TS_END%RUN_S_LANG( SWO%DEC_VAR, SWO%PRT_RUL_TS_END%IU )
+          !
+          CALL VARIABLE_SET_RETURN_VALUES(SWO%DEC_VAR, SWO%DEC_VAR%PROP_RET, KPER, KSTP, ERROR)
+          !
+          IF(ERROR.NE.NL) CALL STOP_ERROR( OUTPUT=SWO%IOUT, MSG=ERROR)
+          !
+          IF(SWO%PRT_RUL_TS_END%IS_OPEN) CALL SWO%PRT_RUL_TS_END%SIZE_CHECK()
+    END IF
+    !
+    !------------------------------------------------------------------------------------------------------------
+    !
+    ! CHECK FOR CLOSEOUT FLAG AND RUN CUSTOM CLOSE OUT INFO
+    !
+    IF(HAS_CLOSEOUT) THEN
+          !
+          IF(SWO%PRT_RUL_CLOSEOUT%IS_OPEN) WRITE(SWO%PRT_RUL_CLOSEOUT%IU,'(// A, // 16x A,// 16x A)') REPEAT('-', 150), '    CLOSE OUT FOR STRESS PERIOD '//NUM2STR(KPER,-6)//' AND TIME STEP '//NUM2STR(KSTP),'THAT HAS AN ENDING CALENDAR DATE '//DATE_SP(KPER)%TS(KSTP)%PRETTYPRINT('  ')//' ('//DATE_SP(KPER)%TS(KSTP)%STR_DYEAR()//')'
+          !
+          CALL SWO%DEC_RUL_CLOSEOUT%RUN_S_LANG( SWO%DEC_VAR, SWO%PRT_RUL_CLOSEOUT%IU )
+          !
+          CALL VARIABLE_SET_RETURN_VALUES(SWO%DEC_VAR, SWO%DEC_VAR%PROP_RET, KPER, KSTP, ERROR)
+          !
+          IF(ERROR.NE.NL) CALL STOP_ERROR( OUTPUT=SWO%IOUT, MSG=ERROR)
+          !
+          IF(SWO%PRT_RUL_CLOSEOUT%IS_OPEN) CALL SWO%PRT_RUL_CLOSEOUT%SIZE_CHECK()
+    END IF
+    !
+    !------------------------------------------------------------------------------------------------------------
+    !
+    DO IPROJ = 1, SWO%NPROJ
+       IF (SWO%PROJ(IPROJ)%AllocClose == ONE) THEN
+           !
+           ! RESET YEAR-TO-DATE VARIABLES
+           SWO%PROJ(IPROJ)%DIVERSION_YTD        = DZ
+           SWO%PROJ(IPROJ)%DELIVERY_YTD         = DZ
+           SWO%PROJ(IPROJ)%BYPASS_YTD           = DZ
+           SWO%PROJ(IPROJ)%CHARGE_YTD           = DZ
+           SWO%PROJ(IPROJ)%CREDIT_YTD           = DZ
+           SWO%PROJ(IPROJ)%RELEASE_YTD          = DZ
+           SWO%PROJ_PREV(IPROJ)%DIVERSION_YTD   = DZ
+           SWO%PROJ_PREV(IPROJ)%DELIVERY_YTD    = DZ
+           SWO%PROJ_PREV(IPROJ)%BYPASS_YTD      = DZ
+           SWO%PROJ_PREV(IPROJ)%CHARGE_YTD      = DZ
+           SWO%PROJ_PREV(IPROJ)%CREDIT_YTD      = DZ
+           SWO%PROJ_PREV(IPROJ)%RELEASE_YTD     = DZ
+           SWO%PROJ(IPROJ)%DELIVEFF_YTD    = SWO%PROJ_PREV(IPROJ)%DELIVEFF_YTD
+           SWO%PROJ(IPROJ)%DIVRATIO_YTD    = SWO%PROJ_PREV(IPROJ)%DIVRATIO_YTD
+           SWO%PROJ(IPROJ)%CHGRATIO_YTD    = SWO%PROJ_PREV(IPROJ)%CHGRATIO_YTD
+           SWO%PROJ(IPROJ)%NETCHGRATIO_YTD = SWO%PROJ_PREV(IPROJ)%NETCHGRATIO_YTD
+
+           DO CONCURRENT (IDIST = 1:SWO%NDIST, SWO%DIST(IDIST)%ProjID == IPROJ)
+               SWO%DIST(IDIST)%DIVERSION_YTD      = DZ
+               SWO%DIST(IDIST)%DELIVERY_YTD       = DZ
+               SWO%DIST(IDIST)%BYPASS_YTD         = DZ
+               SWO%DIST(IDIST)%CHARGE_YTD         = DZ
+               SWO%DIST(IDIST)%CREDIT_YTD         = DZ
+               SWO%DIST(IDIST)%BALANCE            = DZ !DIST(IDIST)%ALLOC_TOTAL  ! If start of new allocation year, balance = allocation (no charges yet!)
+               SWO%DIST_PREV(IDIST)%DIVERSION_YTD = DZ
+               SWO%DIST_PREV(IDIST)%DELIVERY_YTD  = DZ
+               SWO%DIST_PREV(IDIST)%BYPASS_YTD    = DZ
+               SWO%DIST_PREV(IDIST)%CHARGE_YTD    = DZ
+               SWO%DIST_PREV(IDIST)%CREDIT_YTD    = DZ
+               SWO%DIST_PREV(IDIST)%BALANCE       = DZ !DIST(IDIST)%ALLOC_TOTAL  ! If start of new allocation year, balance = allocation (no charges yet!)
+               SWO%DIST(IDIST)%DELIVEFF_YTD  = SWO%DIST_PREV(IDIST)%DELIVEFF_YTD
+           END DO !(IDIST)
+
+           DO CONCURRENT (IUNIT = 1:SWO%NUNIT, SWO%UNIT(IUNIT)%ProjID == IPROJ)
+               SWO%UNIT(IUNIT)%DIVERSION_YTD      = DZ
+               SWO%UNIT(IUNIT)%DELIVERY_YTD       = DZ
+               SWO%UNIT(IUNIT)%BYPASS_YTD         = DZ
+               SWO%UNIT(IUNIT)%CHARGE_YTD         = DZ
+               SWO%UNIT(IUNIT)%CREDIT_YTD         = DZ
+               SWO%UNIT_PREV(IUNIT)%DIVERSION_YTD = DZ
+               SWO%UNIT_PREV(IUNIT)%DELIVERY_YTD  = DZ
+               SWO%UNIT_PREV(IUNIT)%BYPASS_YTD    = DZ
+               SWO%UNIT_PREV(IUNIT)%CHARGE_YTD    = DZ
+               SWO%UNIT_PREV(IUNIT)%CREDIT_YTD    = DZ
+               SWO%UNIT(IUNIT)%DELIVEFF_YTD       = SWO%UNIT_PREV(IUNIT)%DELIVEFF
+           END DO !(IUNIT)
+
+           DO CONCURRENT (IFARM = 1:SWO%NFARM, SWO%FARM(IFARM)%ProjID == IPROJ)
+               SWO%FARM(IFARM)%BALANCE           = DZ
+               SWO%FARM(IFARM)%DELIVERY_YTD      = DZ
+               SWO%FARM_PREV(IFARM)%BALANCE      = DZ
+               SWO%FARM_PREV(IFARM)%DELIVERY_YTD = DZ
+           END DO !(IFARM)
+
+           DO CONCURRENT (IAUX = 1:SWO%NAUXDEM, SWO%AUXDEM(IAUX)%ProjID == IPROJ)
+               SWO%AUXDEM(IAUX)%BALANCE           = DZ
+               SWO%AUXDEM(IAUX)%DELIVERY_YTD      = DZ
+               SWO%AUXDEM_PREV(IAUX)%BALANCE      = DZ
+               SWO%AUXDEM_PREV(IAUX)%DELIVERY_YTD = DZ
+           END DO !(IAUX)
+           !
+       END IF
+    END DO
+    !
   END SUBROUTINE
   !
   SUBROUTINE SWO_OUTPUT_WRITE(SWO,IU,KPER,KSTP,KITER,XOPT)
 !-----VERSION X 2014.06.30 SWOPS1BD
-!     ******************************************************************
-!     OVERVIEW:
-!     Write intensive output for debugging, etc.
-!     XOPT:
-!     INIT --> Initialize files
-!     FARM --> Farm data                                      (1)
-!     AUXD --> Aux data                                       (2)
-!     EXTD --> Ext data                                       (3)
-!     UNIT --> Unit data                                      (4)
-!     DIST --> District data                                  (5)
-!     PROJ --> Project data                                   (6)
-!     DIVS --> Diversion segment (service area)               (7)
-!     SPLT --> Split segment (sub-area), including branches   (8)
-!     STOR --> Storage data (reservoir mass balance)          (9)
-!     XSFR --> SFR data @ end of FM iteration                 (10)
-!     ALLC --> Allocation (based on start-of-step conditions) (11)
-!     CNVG --> Convergence output                             (12)
+!   ******************************************************************
+!   OVERVIEW:
+!   Write intensive output for debugging, etc.
+!   XOPT:
+!   INIT --> Initialize files
+!   FARM --> Farm data                                      (1)
+!   AUXD --> Aux data                                       (2)
+!   EXTD --> Ext data                                       (3)
+!   UNIT --> Unit data                                      (4)
+!   DIST --> District data                                  (5)
+!   PROJ --> Project data                                   (6)
+!   DIVS --> Diversion segment (service area)               (7)
+!   SPLT --> Split segment (sub-area), including branches   (8)
+!   STOR --> Storage data (reservoir mass balance)          (9)
+!   XSFR --> SFR data @ end of FM iteration                 (10)
+!   ALLC --> Allocation (based on start-of-step conditions) (11)
+!   CNVG --> Convergence output                             (12)
 !
-!     ******************************************************************
-!        SPECIFICATIONS:
-!     ------------------------------------------------------------------
-      !USE SWOPSMODULE
-      USE GWFSFRMODULE, ONLY:ISTRM,STRM
-!     ------------------------------------------------------------------
-!        ARGUMENTS:
-!     ------------------------------------------------------------------
-      CLASS(SWO_DATA), INTENT(INOUT):: SWO
-      CHARACTER(*),    INTENT(IN   ):: XOPT
-      INTEGER,         INTENT(IN   ):: IU,KPER,KSTP,KITER
+!   ******************************************************************
+!      SPECIFICATIONS:
+!   ------------------------------------------------------------------
+    !USE SWOPSMODULE
+    USE GWFSFRMODULE, ONLY:ISTRM,STRM
+!   ------------------------------------------------------------------
+!      ARGUMENTS:
+!   ------------------------------------------------------------------
+    CLASS(SWO_DATA), INTENT(INOUT):: SWO
+    CHARACTER(*),    INTENT(IN   ):: XOPT
+    INTEGER,         INTENT(IN   ):: IU,KPER,KSTP,KITER
 !
-!     ------------------------------------------------------------------
-!        LOCAL VARIABLES:
-!     ------------------------------------------------------------------
-      INTEGER::IPROJ,IDIST,IUNTT,IFARM,IAUX,ISTR, IDVS,ISPT,IBRC,IRES
-      DOUBLE PRECISION:: DTMP1,DTMP2
+!   ------------------------------------------------------------------
+!      LOCAL VARIABLES:
+!   ------------------------------------------------------------------
+    INTEGER::IPROJ,IDIST,IUNTT,IFARM,IAUX,ISTR, IDVS,ISPT,IBRC,IRES
+    DOUBLE PRECISION:: DTMP1,DTMP2
 !
-!     ------------------------------------------------------------------
+!   ------------------------------------------------------------------
 
-      SELECT CASE(XOPT)
-      ! XOPT='FARM' --> Write farm values for current period/step/iteration
-      CASE ("FARM")
-        DO IFARM = 1,SWO%NFARM
-                           WRITE(IU, 1001) KPER, KSTP, KITER, IFARM, SWO%FARM(IFARM)%UnitID, SWO%FARM(IFARM)%DistID, SWO%FARM(IFARM)%ProjID, SWO%FARM(IFARM)%DelSeg, SWO%FARM(IFARM)%DelRch, SWO%FARM(IFARM)%AreaTot, SWO%FARM(IFARM)%AreaIrr, SWO%FARM(IFARM)%TFDR, SWO%FARM(IFARM)%ALLOTMENT, SWO%FARM_PREV(IFARM)%DELIVERY_YTD, SWO%FARM(IFARM)%ALLOTMENT-SWO%FARM_PREV(IFARM)%DELIVERY_YTD, SWO%FARM(IFARM)%DELORDER, SWO%FARM(IFARM)%DELIVERY
-        END DO
+    SELECT CASE(XOPT)
+    ! XOPT='FARM' --> Write farm values for current period/step/iteration
+    CASE ("FARM")
+      DO IFARM = 1,SWO%NFARM
+                         WRITE(IU, 1001) KPER, KSTP, KITER, IFARM, SWO%FARM(IFARM)%UnitID, SWO%FARM(IFARM)%DistID, SWO%FARM(IFARM)%ProjID, SWO%FARM(IFARM)%DelSeg, SWO%FARM(IFARM)%DelRch, SWO%FARM(IFARM)%AreaTot, SWO%FARM(IFARM)%AreaIrr, SWO%FARM(IFARM)%TFDR, SWO%FARM(IFARM)%ALLOTMENT, SWO%FARM_PREV(IFARM)%DELIVERY_YTD, SWO%FARM(IFARM)%ALLOTMENT-SWO%FARM_PREV(IFARM)%DELIVERY_YTD, SWO%FARM(IFARM)%DELORDER, SWO%FARM(IFARM)%DELIVERY
+      END DO
 
-      ! XOPT='AUXD' --> Write aux values for current period/step/iteration
-      CASE ('AUXD')
-        DO IAUX = 1,SWO%NAUXDEM
-                           WRITE(IU, 2001) KPER,KSTP,KITER,IAUX,SWO%AUXDEM(IAUX)%UnitID,SWO%AUXDEM(IAUX)%DistID,SWO%AUXDEM(IAUX)%ProjID,SWO%AUXDEM(IAUX)%AuxSeg,SWO%AUXDEM(IAUX)%AuxRch,SWO%AUXDEM(IAUX)%AREA,SWO%AUXDEM(IAUX)%DEMAND,SWO%AUXDEM(IAUX)%ALLOTMENT,SWO%AUXDEM(IAUX)%DELIVERY_YTD,SWO%AUXDEM(IAUX)%BALANCE,SWO%AUXDEM(IAUX)%DELORDER,SWO%AUXDEM(IAUX)%DELIVERY
-        END DO !(IAUX)
+    ! XOPT='AUXD' --> Write aux values for current period/step/iteration
+    CASE ('AUXD')
+      DO IAUX = 1,SWO%NAUXDEM
+                         WRITE(IU, 2001) KPER,KSTP,KITER,IAUX,SWO%AUXDEM(IAUX)%UnitID,SWO%AUXDEM(IAUX)%DistID,SWO%AUXDEM(IAUX)%ProjID,SWO%AUXDEM(IAUX)%AuxSeg,SWO%AUXDEM(IAUX)%AuxRch,SWO%AUXDEM(IAUX)%AREA,SWO%AUXDEM(IAUX)%DEMAND,SWO%AUXDEM(IAUX)%ALLOTMENT,SWO%AUXDEM(IAUX)%DELIVERY_YTD,SWO%AUXDEM(IAUX)%BALANCE,SWO%AUXDEM(IAUX)%DELORDER,SWO%AUXDEM(IAUX)%DELIVERY
+      END DO !(IAUX)
 
-      ! XOPT='UNIT' --> Write unit values for current period/step/iteration
-      CASE ("UNIT")
-        DO IUNTT = 1,SWO%NUNIT
-                          WRITE(IU,4001) KPER,KSTP,KITER,IUNTT,SWO%UNIT(IUNTT)%DistID,SWO%UNIT(IUNTT)%ProjID,SWO%UNIT(IUNTT)%DivSeg,SWO%UNIT(IUNTT)%DivRch,SWO%UNIT(IUNTT)%ChgSeg,SWO%UNIT(IUNTT)%ChgRch,SWO%UNIT(IUNTT)%NBySeg,SWO%UNIT(IUNTT)%NCrdSeg,SWO%UNIT(IUNTT)%DivFactor,SWO%UNIT(IUNTT)%ChgFactor,SWO%UNIT(IUNTT)%AreaTot,SWO%UNIT(IUNTT)%AreaIrr,SWO%UNIT(IUNTT)%TFDR,SWO%UNIT(IUNTT)%DELORDER,SWO%UNIT_PREV(IUNTT)%DELIVEFF,SWO%UNIT(IUNTT)%DIVORDER,SWO%UNIT(IUNTT)%DIVERSION,SWO%UNIT(IUNTT)%DELIVERY,SWO%UNIT(IUNTT)%BYPASS,SWO%UNIT(IUNTT)%DELIVEFF,SWO%UNIT(IUNTT)%CHARGE,SWO%UNIT(IUNTT)%CREDIT,SWO%UNIT(IUNTT)%CHGRATIO,SWO%UNIT(IUNTT)%NETCHGRATIO,SWO%UNIT(IUNTT)%DIVERSION_YTD,SWO%UNIT(IUNTT)%DELIVERY_YTD,SWO%UNIT(IUNTT)%BYPASS_YTD,SWO%UNIT(IUNTT)%DELIVEFF_YTD,SWO%UNIT(IUNTT)%CHARGE_YTD,SWO%UNIT(IUNTT)%CREDIT_YTD,SWO%UNIT(IUNTT)%CHGRATIO_YTD,SWO%UNIT(IUNTT)%NETCHGRATIO_YTD
-        END DO !(IUNTT)
+    ! XOPT='UNIT' --> Write unit values for current period/step/iteration
+    CASE ("UNIT")
+      DO IUNTT = 1,SWO%NUNIT
+                        WRITE(IU,4001) KPER,KSTP,KITER,IUNTT,SWO%UNIT(IUNTT)%DistID,SWO%UNIT(IUNTT)%ProjID,SWO%UNIT(IUNTT)%DivSeg,SWO%UNIT(IUNTT)%DivRch,SWO%UNIT(IUNTT)%ChgSeg,SWO%UNIT(IUNTT)%ChgRch,SWO%UNIT(IUNTT)%NBySeg,SWO%UNIT(IUNTT)%NCrdSeg,SWO%UNIT(IUNTT)%DivFactor,SWO%UNIT(IUNTT)%ChgFactor,SWO%UNIT(IUNTT)%AreaTot,SWO%UNIT(IUNTT)%AreaIrr,SWO%UNIT(IUNTT)%TFDR,SWO%UNIT(IUNTT)%DELORDER,SWO%UNIT_PREV(IUNTT)%DELIVEFF,SWO%UNIT(IUNTT)%DIVORDER,SWO%UNIT(IUNTT)%DIVERSION,SWO%UNIT(IUNTT)%DELIVERY,SWO%UNIT(IUNTT)%BYPASS,SWO%UNIT(IUNTT)%DELIVEFF,SWO%UNIT(IUNTT)%CHARGE,SWO%UNIT(IUNTT)%CREDIT,SWO%UNIT(IUNTT)%CHGRATIO,SWO%UNIT(IUNTT)%NETCHGRATIO,SWO%UNIT(IUNTT)%DIVERSION_YTD,SWO%UNIT(IUNTT)%DELIVERY_YTD,SWO%UNIT(IUNTT)%BYPASS_YTD,SWO%UNIT(IUNTT)%DELIVEFF_YTD,SWO%UNIT(IUNTT)%CHARGE_YTD,SWO%UNIT(IUNTT)%CREDIT_YTD,SWO%UNIT(IUNTT)%CHGRATIO_YTD,SWO%UNIT(IUNTT)%NETCHGRATIO_YTD
+      END DO !(IUNTT)
 
-      ! XOPT='DIST' --> Write district values for current period/step/iteration
-      CASE ("DIST")
-        DO IDIST = 1,SWO%NDIST
-                          WRITE(IU,5001) KPER,KSTP,KITER,IDIST,SWO%DIST(IDIST)%ProjID,SWO%DIST(IDIST)%AreaTot,SWO%DIST(IDIST)%AreaIrr,SWO%DIST(IDIST)%ALLOC_ANN,SWO%DIST(IDIST)%ALLOC_CO,SWO%DIST(IDIST)%ALLOC_TOTAL,SWO%DIST(IDIST)%DELIVEFF_YTD,SWO%DIST(IDIST)%NETCHGRATIO_YTD,SWO%DIST(IDIST)%EQ_ALLOTMENT,SWO%DIST(IDIST)%BALANCE,SWO%DIST(IDIST)%TFDR,SWO%DIST(IDIST)%DELORDER,SWO%DIST_PREV(IDIST)%DELIVEFF,SWO%DIST(IDIST)%DIVORDER,SWO%DIST(IDIST)%DIVERSION,SWO%DIST(IDIST)%DELIVERY,SWO%DIST(IDIST)%BYPASS,SWO%DIST(IDIST)%DELIVEFF,SWO%DIST(IDIST)%CHARGE,SWO%DIST(IDIST)%CREDIT,SWO%DIST(IDIST)%CHGRATIO,SWO%DIST(IDIST)%NETCHGRATIO,SWO%DIST(IDIST)%DIVERSION_YTD,SWO%DIST(IDIST)%DELIVERY_YTD,SWO%DIST(IDIST)%BYPASS_YTD,SWO%DIST(IDIST)%DELIVEFF_YTD,SWO%DIST(IDIST)%CHARGE_YTD,SWO%DIST(IDIST)%CREDIT_YTD,SWO%DIST(IDIST)%CHGRATIO_YTD,SWO%DIST(IDIST)%NETCHGRATIO_YTD
-        END DO !(IDIST)
+    ! XOPT='DIST' --> Write district values for current period/step/iteration
+    CASE ("DIST")
+      DO IDIST = 1,SWO%NDIST
+                        WRITE(IU,5001) KPER,KSTP,KITER,IDIST,SWO%DIST(IDIST)%ProjID,SWO%DIST(IDIST)%AreaTot,SWO%DIST(IDIST)%AreaIrr,SWO%DIST(IDIST)%ALLOC_ANN,SWO%DIST(IDIST)%ALLOC_CO,SWO%DIST(IDIST)%ALLOC_TOTAL,SWO%DIST(IDIST)%DELIVEFF_YTD,SWO%DIST(IDIST)%NETCHGRATIO_YTD,SWO%DIST(IDIST)%EQ_ALLOTMENT,SWO%DIST(IDIST)%BALANCE,SWO%DIST(IDIST)%TFDR,SWO%DIST(IDIST)%DELORDER,SWO%DIST_PREV(IDIST)%DELIVEFF,SWO%DIST(IDIST)%DIVORDER,SWO%DIST(IDIST)%DIVERSION,SWO%DIST(IDIST)%DELIVERY,SWO%DIST(IDIST)%BYPASS,SWO%DIST(IDIST)%DELIVEFF,SWO%DIST(IDIST)%CHARGE,SWO%DIST(IDIST)%CREDIT,SWO%DIST(IDIST)%CHGRATIO,SWO%DIST(IDIST)%NETCHGRATIO,SWO%DIST(IDIST)%DIVERSION_YTD,SWO%DIST(IDIST)%DELIVERY_YTD,SWO%DIST(IDIST)%BYPASS_YTD,SWO%DIST(IDIST)%DELIVEFF_YTD,SWO%DIST(IDIST)%CHARGE_YTD,SWO%DIST(IDIST)%CREDIT_YTD,SWO%DIST(IDIST)%CHGRATIO_YTD,SWO%DIST(IDIST)%NETCHGRATIO_YTD
+      END DO !(IDIST)
 
-      ! XOPT='PROJ' --> Write project values for current period/step/iteration
-      CASE ("PROJ")
-        DO IPROJ = 1,SWO%NPROJ
-                          WRITE(IU,6001) KPER,KSTP,KITER,IPROJ,SWO%PROJ(IPROJ)%AreaTot,SWO%PROJ(IPROJ)%AreaIrr,SWO%PROJ(IPROJ)%ALLOCATION,SWO%PROJ(IPROJ)%TFDR,SWO%PROJ(IPROJ)%DELORDER,SWO%PROJ(IPROJ)%DIVORDER,SWO%PROJ(IPROJ)%RELEASE,SWO%PROJ(IPROJ)%RELEASE_YTD,SWO%PROJ(IPROJ)%DIVERSION,SWO%PROJ(IPROJ)%DIVERSION_YTD,SWO%PROJ(IPROJ)%DELIVERY,SWO%PROJ(IPROJ)%DELIVERY_YTD,SWO%PROJ(IPROJ)%DELIVEFF,SWO%PROJ(IPROJ)%DELIVEFF_YTD,SWO%PROJ(IPROJ)%DIVRATIO,SWO%PROJ(IPROJ)%DIVRATIO_YTD,SWO%PROJ(IPROJ)%BYPASS,SWO%PROJ(IPROJ)%BYPASS_YTD,SWO%PROJ(IPROJ)%CHARGE,SWO%PROJ(IPROJ)%CHARGE_YTD,SWO%PROJ(IPROJ)%CREDIT,SWO%PROJ(IPROJ)%CREDIT_YTD,SWO%PROJ(IPROJ)%CHGRATIO,SWO%PROJ(IPROJ)%CHGRATIO_YTD,SWO%PROJ(IPROJ)%NETCHGRATIO,SWO%PROJ(IPROJ)%NETCHGRATIO_YTD
-        END DO !(IPROJ)
+    ! XOPT='PROJ' --> Write project values for current period/step/iteration
+    CASE ("PROJ")
+      DO IPROJ = 1,SWO%NPROJ
+                        WRITE(IU,6001) KPER,KSTP,KITER,IPROJ,SWO%PROJ(IPROJ)%AreaTot,SWO%PROJ(IPROJ)%AreaIrr,SWO%PROJ(IPROJ)%ALLOCATION,SWO%PROJ(IPROJ)%TFDR,SWO%PROJ(IPROJ)%DELORDER,SWO%PROJ(IPROJ)%DIVORDER,SWO%PROJ(IPROJ)%RELEASE,SWO%PROJ(IPROJ)%RELEASE_YTD,SWO%PROJ(IPROJ)%DIVERSION,SWO%PROJ(IPROJ)%DIVERSION_YTD,SWO%PROJ(IPROJ)%DELIVERY,SWO%PROJ(IPROJ)%DELIVERY_YTD,SWO%PROJ(IPROJ)%DELIVEFF,SWO%PROJ(IPROJ)%DELIVEFF_YTD,SWO%PROJ(IPROJ)%DIVRATIO,SWO%PROJ(IPROJ)%DIVRATIO_YTD,SWO%PROJ(IPROJ)%BYPASS,SWO%PROJ(IPROJ)%BYPASS_YTD,SWO%PROJ(IPROJ)%CHARGE,SWO%PROJ(IPROJ)%CHARGE_YTD,SWO%PROJ(IPROJ)%CREDIT,SWO%PROJ(IPROJ)%CREDIT_YTD,SWO%PROJ(IPROJ)%CHGRATIO,SWO%PROJ(IPROJ)%CHGRATIO_YTD,SWO%PROJ(IPROJ)%NETCHGRATIO,SWO%PROJ(IPROJ)%NETCHGRATIO_YTD
+      END DO !(IPROJ)
 
-      ! XOPT='DIVS' --> Write diversion segment values for current period/step/iteration
-      CASE ("DIVS")
-        DO IDVS = 1,SWO%DIVCOUNT
-                           WRITE(IU,7001) KPER,KSTP,KITER,IDVS,SWO%DIVSEG(IDVS)%DivSeg,SWO%DIVSEG(IDVS)%ProjID,SWO%DIVSEG(IDVS)%NUnit,SWO%DIVSEG(IDVS)%TFDR,SWO%DIVSEG(IDVS)%DELORDER,SWO%DIVSEG(IDVS)%DIVORDER,SWO%DIVSEG(IDVS)%DIVERSION,SWO%DIVSEG(IDVS)%DELIVERY,SWO%DIVSEG(IDVS)%DELIVEFF,SWO%DIVSEG(IDVS)%DSEEP,SWO%DIVSEG(IDVS)%DFLOW_IN,SWO%DIVSEG(IDVS)%DFLOW_RT,SWO%DIVSEG(IDVS)%UP_DIVORDER,SWO%DIVSEG(IDVS)%UP_DSEEP,SWO%DIVSEG(IDVS)%UP_DFLOW_IN,SWO%DIVSEG(IDVS)%UP_DFLOW_RT
-        END DO !(IDVS)
+    ! XOPT='DIVS' --> Write diversion segment values for current period/step/iteration
+    CASE ("DIVS")
+      DO IDVS = 1,SWO%DIVCOUNT
+                         WRITE(IU,7001) KPER,KSTP,KITER,IDVS,SWO%DIVSEG(IDVS)%DivSeg,SWO%DIVSEG(IDVS)%ProjID,SWO%DIVSEG(IDVS)%NUnit,SWO%DIVSEG(IDVS)%TFDR,SWO%DIVSEG(IDVS)%DELORDER,SWO%DIVSEG(IDVS)%DIVORDER,SWO%DIVSEG(IDVS)%DIVERSION,SWO%DIVSEG(IDVS)%DELIVERY,SWO%DIVSEG(IDVS)%DELIVEFF,SWO%DIVSEG(IDVS)%DSEEP,SWO%DIVSEG(IDVS)%DFLOW_IN,SWO%DIVSEG(IDVS)%DFLOW_RT,SWO%DIVSEG(IDVS)%UP_DIVORDER,SWO%DIVSEG(IDVS)%UP_DSEEP,SWO%DIVSEG(IDVS)%UP_DFLOW_IN,SWO%DIVSEG(IDVS)%UP_DFLOW_RT
+      END DO !(IDVS)
 
-      ! XOPT='SPLT' --> Write split segment values for current period/step/iteration
-      CASE ("SPLT")
-        DO ISPT = 1,SWO%SPTCOUNT
-            WRITE(IU,8101) KPER,KSTP,KITER,SWO%SPTSEG(ISPT)%DivID,SWO%SPTSEG(ISPT)%DivSeg,SWO%SPTSEG(ISPT)%SplitID,SWO%SPTSEG(ISPT)%SplitSeg,SWO%SEGINFO(SWO%SPTSEG(ISPT)%SplitSeg)%SegType,SWO%SPTSEG(ISPT)%TFDR,SWO%SPTSEG(ISPT)%DELORDER,SWO%SPTSEG(ISPT)%DIVORDER,SWO%SPTSEG(ISPT)%DIVERSION,SWO%SPTSEG(ISPT)%DELIVERY,SWO%SPTSEG(ISPT)%DELIVEFF,SWO%SPTSEG(ISPT)%DSEEP,SWO%SPTSEG(ISPT)%DFLOW_IN,SWO%SPTSEG(ISPT)%DFLOW_RT,'SPT'
-          DO IBRC = 1,SWO%SPTSEG(ISPT)%NBRANCH
-            WRITE(IU,8101) KPER,KSTP,KITER,SWO%SPTSEG(ISPT)%DivID,SWO%SPTSEG(ISPT)%DivSeg,SWO%SPTSEG(ISPT)%SplitID,SWO%SPTSEG(ISPT)%BrcSeg(IBRC),SWO%SPTSEG(ISPT)%BrcType(IBRC),SWO%SPTSEG(ISPT)%BrcTFDR(IBRC),SWO%SPTSEG(ISPT)%BrcDELORDER(IBRC),SWO%SPTSEG(ISPT)%BrcDIVORDER(IBRC),SWO%SPTSEG(ISPT)%BrcDIVERSION(IBRC),SWO%SPTSEG(ISPT)%BrcDELIVERY(IBRC),SWO%SPTSEG(ISPT)%BrcDELIVEFF(IBRC),SWO%SPTSEG(ISPT)%BrcDSEEP(IBRC),SWO%SPTSEG(ISPT)%BrcDFLOW_IN(IBRC),SWO%SPTSEG(ISPT)%BrcDFLOW_RT(IBRC),'BRC'
-          END DO !(IBRC)
-        END DO !(ISPT)
+    ! XOPT='SPLT' --> Write split segment values for current period/step/iteration
+    CASE ("SPLT")
+      DO ISPT = 1,SWO%SPTCOUNT
+          WRITE(IU,8101) KPER,KSTP,KITER,SWO%SPTSEG(ISPT)%DivID,SWO%SPTSEG(ISPT)%DivSeg,SWO%SPTSEG(ISPT)%SplitID,SWO%SPTSEG(ISPT)%SplitSeg,SWO%SEGINFO(SWO%SPTSEG(ISPT)%SplitSeg)%SegType,SWO%SPTSEG(ISPT)%TFDR,SWO%SPTSEG(ISPT)%DELORDER,SWO%SPTSEG(ISPT)%DIVORDER,SWO%SPTSEG(ISPT)%DIVERSION,SWO%SPTSEG(ISPT)%DELIVERY,SWO%SPTSEG(ISPT)%DELIVEFF,SWO%SPTSEG(ISPT)%DSEEP,SWO%SPTSEG(ISPT)%DFLOW_IN,SWO%SPTSEG(ISPT)%DFLOW_RT,'SPT'
+        DO IBRC = 1,SWO%SPTSEG(ISPT)%NBRANCH
+          WRITE(IU,8101) KPER,KSTP,KITER,SWO%SPTSEG(ISPT)%DivID,SWO%SPTSEG(ISPT)%DivSeg,SWO%SPTSEG(ISPT)%SplitID,SWO%SPTSEG(ISPT)%BrcSeg(IBRC),SWO%SPTSEG(ISPT)%BrcType(IBRC),SWO%SPTSEG(ISPT)%BrcTFDR(IBRC),SWO%SPTSEG(ISPT)%BrcDELORDER(IBRC),SWO%SPTSEG(ISPT)%BrcDIVORDER(IBRC),SWO%SPTSEG(ISPT)%BrcDIVERSION(IBRC),SWO%SPTSEG(ISPT)%BrcDELIVERY(IBRC),SWO%SPTSEG(ISPT)%BrcDELIVEFF(IBRC),SWO%SPTSEG(ISPT)%BrcDSEEP(IBRC),SWO%SPTSEG(ISPT)%BrcDFLOW_IN(IBRC),SWO%SPTSEG(ISPT)%BrcDFLOW_RT(IBRC),'BRC'
+        END DO !(IBRC)
+      END DO !(ISPT)
 
-      ! XOPT='STOR' --> Write storage values for current period/step/iteration
-      CASE ("STOR")
-        DO  IPROJ = 1,SWO%NPROJ
-          DO IRES = 1,SWO%NRES_BAL(IPROJ)
-            DTMP1 = (SWO%RESDAT(IPROJ)%RESBAL(IRES)%AREA_PREV    + SWO%RESDAT(IPROJ)%RESBAL(IRES)%AREA) * HALF
-            DTMP2 = (SWO%RESDAT(IPROJ)%RESBAL(IRES)%STORAGE_PREV - SWO%RESDAT(IPROJ)%RESBAL(IRES)%STORAGE_MIN)
-            WRITE(IU,9001)KPER,KSTP,KITER,IPROJ,IRES,SWO%RESDAT(IPROJ)%RESBAL(IRES)%RESBAL_RELSEG,SWO%RESDAT(IPROJ)%RESBAL(IRES)%STORAGE_PREV,SWO%RESDAT(IPROJ)%RESBAL(IRES)%AREA_PREV,SWO%RESDAT(IPROJ)%RESBAL(IRES)%AREA_DPL,SWO%RESDAT(IPROJ)%RESBAL(IRES)%INFLOW,SWO%RESDAT(IPROJ)%RESBAL(IRES)%PRCP,SWO%RESDAT(IPROJ)%RESBAL(IRES)%EVAP,SWO%RESDAT(IPROJ)%RESBAL(IRES)%AREA,DTMP1,SWO%RESDAT(IPROJ)%RESBAL(IRES)%PRCP*DTMP1,SWO%RESDAT(IPROJ)%RESBAL(IRES)%EVAP*DTMP1,SWO%RESDAT(IPROJ)%RESBAL(IRES)%STORAGE_MIN,DTMP2,SWO%RESDAT(IPROJ)%RESBAL(IRES)%RELEASE_SPEC,SWO%RESDAT(IPROJ)%RESBAL(IRES)%RELEASE_PMAX,SWO%RESDAT(IPROJ)%RESBAL(IRES)%RELEASE_DMND,SWO%RESDAT(IPROJ)%RESBAL(IRES)%RELEASE_PROJ,SWO%RESDAT(IPROJ)%RESBAL(IRES)%RELEASE_FLOD,SWO%RESDAT(IPROJ)%RESBAL(IRES)%STORAGE
-          END DO !(IRES)
-        END DO !(IPROJ)
+    ! XOPT='STOR' --> Write storage values for current period/step/iteration
+    CASE ("STOR")
+      DO  IPROJ = 1,SWO%NPROJ
+        DO IRES = 1,SWO%NRES_BAL(IPROJ)
+          DTMP1 = (SWO%RESDAT(IPROJ)%RESBAL(IRES)%AREA_PREV    + SWO%RESDAT(IPROJ)%RESBAL(IRES)%AREA) * HALF
+          DTMP2 = (SWO%RESDAT(IPROJ)%RESBAL(IRES)%STORAGE_PREV - SWO%RESDAT(IPROJ)%RESBAL(IRES)%STORAGE_MIN)
+          WRITE(IU,9001)KPER,KSTP,KITER,IPROJ,IRES,SWO%RESDAT(IPROJ)%RESBAL(IRES)%RESBAL_RELSEG,SWO%RESDAT(IPROJ)%RESBAL(IRES)%STORAGE_PREV,SWO%RESDAT(IPROJ)%RESBAL(IRES)%AREA_PREV,SWO%RESDAT(IPROJ)%RESBAL(IRES)%AREA_DPL,SWO%RESDAT(IPROJ)%RESBAL(IRES)%INFLOW,SWO%RESDAT(IPROJ)%RESBAL(IRES)%PRCP,SWO%RESDAT(IPROJ)%RESBAL(IRES)%EVAP,SWO%RESDAT(IPROJ)%RESBAL(IRES)%AREA,DTMP1,SWO%RESDAT(IPROJ)%RESBAL(IRES)%PRCP*DTMP1,SWO%RESDAT(IPROJ)%RESBAL(IRES)%EVAP*DTMP1,SWO%RESDAT(IPROJ)%RESBAL(IRES)%STORAGE_MIN,DTMP2,SWO%RESDAT(IPROJ)%RESBAL(IRES)%RELEASE_SPEC,SWO%RESDAT(IPROJ)%RESBAL(IRES)%RELEASE_PMAX,SWO%RESDAT(IPROJ)%RESBAL(IRES)%RELEASE_DMND,SWO%RESDAT(IPROJ)%RESBAL(IRES)%RELEASE_PROJ,SWO%RESDAT(IPROJ)%RESBAL(IRES)%RELEASE_FLOD,SWO%RESDAT(IPROJ)%RESBAL(IRES)%STORAGE
+        END DO !(IRES)
+      END DO !(IPROJ)
 
 !! REMOVE FOR LONGER TESTING ...
-      ! XOPT='XSFR' --> Write SFR values for current period/step/iteration
-      CASE ("XSFR")  !NO MORE XOUT_SFR
-        DO ISTR = 1,SWO%NSTRM
-          WRITE(IU,1901)KPER,KSTP,KITER,ISTRM(4,ISTR),ISTRM(5,ISTR),ISTRM(2,ISTR),ISTRM(3,ISTR),ISTRM(1,ISTR),STRM(10,ISTR),STRM(11,ISTR),STRM(12,ISTR)+STRM(24,ISTR),STRM(14,ISTR),STRM(13,ISTR),STRM(9,ISTR)
-        END DO
+    ! XOPT='XSFR' --> Write SFR values for current period/step/iteration
+    CASE ("XSFR")  !NO MORE XOUT_SFR
+      DO ISTR = 1,SWO%NSTRM
+        WRITE(IU,1901)KPER,KSTP,KITER,ISTRM(4,ISTR),ISTRM(5,ISTR),ISTRM(2,ISTR),ISTRM(3,ISTR),ISTRM(1,ISTR),STRM(10,ISTR),STRM(11,ISTR),STRM(12,ISTR)+STRM(24,ISTR),STRM(14,ISTR),STRM(13,ISTR),STRM(9,ISTR)
+      END DO
 
-      ! XOPT='ALLC' --> Write allocation components at end of current step
-!      CASE ("ALLC")
+    ! XOPT='ALLC' --> Write allocation components at end of current step
+!    CASE ("ALLC")
 !
-!        ! TODO -- Currently, XOUT_ALLC and XOUT_ALLF aren't set up for multiple projects...
-!        !         Need to add dimension for project.
+!      ! TODO -- Currently, XOUT_ALLC and XOUT_ALLF aren't set up for multiple projects...
+!      !         Need to add dimension for project.
 !
-!        DO IPROJ = 1,NPROJ
+!      DO IPROJ = 1,NPROJ
 !
-!          ! before first allocation ...
-!          IF (PROJ(IPROJ)%AllocInit.EQ.0) THEN
-!            IF ((KPER.EQ.1).AND.(KSTP.EQ.1).AND.(KITER.EQ.1.OR.2)) THEN
-!              WRITE(XCHKOUT(11),2900)
-!            END IF !(KPER.EQ.1 .AND. KSTP.EQ.1 .AND. KITER.EQ.1)
-!            WRITE(XCHKOUT(11),2901) KPER,KSTP
-!          END IF !(AllocInit.EQ.0)
+!        ! before first allocation ...
+!        IF (PROJ(IPROJ)%AllocInit.EQ.0) THEN
+!          IF ((KPER.EQ.1).AND.(KSTP.EQ.1).AND.(KITER.EQ.1.OR.2)) THEN
+!            WRITE(XCHKOUT(11),2900)
+!          END IF !(KPER.EQ.1 .AND. KSTP.EQ.1 .AND. KITER.EQ.1)
+!          WRITE(XCHKOUT(11),2901) KPER,KSTP
+!        END IF !(AllocInit.EQ.0)
 !
-!          ! allocation close-out / init
-!          IF ((PROJ(IPROJ)%AllocInit.NE.0) .AND. (PROJ(IPROJ)%AllocStart.EQ.1)) THEN
-!            WRITE(XCHKOUT(11),2902)                                       ! Allocation close-out
-!     +        KPER,KSTP,1, (XOUT_ALLF(I),I=1,29)
-!            WRITE(XCHKOUT(11),'(//)')
-!            WRITE(XCHKOUT(11),2900)                                       ! Header
-!            WRITE(XCHKOUT(11),2902)                                       ! Initial allocation of new year (start of first step)
-!     +        KPER,KSTP,0,
-!     +        (XOUT_ALLC(I),I=1,29)
-!          END IF !(AllocInit.NE.0 .AND. AllocStart.EQ.1)
+!        ! allocation close-out / init
+!        IF ((PROJ(IPROJ)%AllocInit.NE.0) .AND. (PROJ(IPROJ)%AllocStart.EQ.1)) THEN
+!          WRITE(XCHKOUT(11),2902)                                       ! Allocation close-out
+!   +        KPER,KSTP,1, (XOUT_ALLF(I),I=1,29)
+!          WRITE(XCHKOUT(11),'(//)')
+!          WRITE(XCHKOUT(11),2900)                                       ! Header
+!          WRITE(XCHKOUT(11),2902)                                       ! Initial allocation of new year (start of first step)
+!   +        KPER,KSTP,0,
+!   +        (XOUT_ALLC(I),I=1,29)
+!        END IF !(AllocInit.NE.0 .AND. AllocStart.EQ.1)
 !
-!          ! regular allocation updates
-!          IF ((PROJ(IPROJ)%AllocInit.NE.0)
-!     +         .AND. (PROJ(IPROJ)%AllocStart.NE.1)) THEN
-!            WRITE(XCHKOUT(11),2902)
-!     +        KPER,KSTP,0,
-!     +        (XOUT_ALLC(I),I=1,29)
-!          END IF !(AllocInit.NE.0 .AND. AllocStart.NE.1)
-!        END DO !(IPROJ)
+!        ! regular allocation updates
+!        IF ((PROJ(IPROJ)%AllocInit.NE.0)
+!   +         .AND. (PROJ(IPROJ)%AllocStart.NE.1)) THEN
+!          WRITE(XCHKOUT(11),2902)
+!   +        KPER,KSTP,0,
+!   +        (XOUT_ALLC(I),I=1,29)
+!        END IF !(AllocInit.NE.0 .AND. AllocStart.NE.1)
+!      END DO !(IPROJ)
 
-      ! XOPT='CNVG' --> Write convergence checks...
-      CASE ("CNVG")
-        DO IPROJ = 1,SWO%NPROJ
-          WRITE(IU,2801) KPER,KSTP,KITER,IPROJ,SWO%ABS_CNVG_CHK(1),SWO%REL_CNVG_CHK(1),SWO%ABS_CNVG_CHK(2),SWO%REL_CNVG_CHK(2),SWO%ABS_CNVG_CHK(3),SWO%REL_CNVG_CHK(3),SWO%ABS_CNVG_CHK(4),SWO%REL_CNVG_CHK(4),SWO%ABS_CNVG_CHK(5),SWO%REL_CNVG_CHK(5)
-        END DO !(IPROJ)
+    ! XOPT='CNVG' --> Write convergence checks...
+    CASE ("CNVG")
+      DO IPROJ = 1,SWO%NPROJ
+        WRITE(IU,2801) KPER,KSTP,KITER,IPROJ,SWO%ABS_CNVG_CHK(1),SWO%REL_CNVG_CHK(1),SWO%ABS_CNVG_CHK(2),SWO%REL_CNVG_CHK(2),SWO%ABS_CNVG_CHK(3),SWO%REL_CNVG_CHK(3),SWO%ABS_CNVG_CHK(4),SWO%REL_CNVG_CHK(4),SWO%ABS_CNVG_CHK(5),SWO%REL_CNVG_CHK(5)
+      END DO !(IPROJ)
 
-      CASE DEFAULT
-        ERROR STOP 'XCHECK ERROR, BAD KEYWORD PASSED INTO SUBROUTINE...THIS SHOULD NOT HAPPEN!'
-      END SELECT
+    CASE DEFAULT
+      ERROR STOP 'XCHECK ERROR, BAD KEYWORD PASSED INTO SUBROUTINE...THIS SHOULD NOT HAPPEN!'
+    END SELECT
 
 
       ! Format @ Farms ... SWOUT(1)
@@ -17221,9 +17283,9 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
       ! Format @ CNVG ... XCHKOUT(12)
 2801  FORMAT(4(I6),F10.6,24(F20.4))
       !
-    END SUBROUTINE
-    !
-      END MODULE
+  END SUBROUTINE
+  !
+END MODULE
 
 
 

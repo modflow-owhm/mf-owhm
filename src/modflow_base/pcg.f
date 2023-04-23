@@ -55,7 +55,6 @@ C     ------------------------------------------------------------------
 C
       CHARACTER(768):: LINE
       INTEGER:: IN, MXITER
-      DOUBLE PRECISION:: DTMP
 C     ------------------------------------------------------------------
       ALLOCATE(ITER1,NPCOND,NBPOL,IPRPCG,MUTPCG,NITER)
       ALLOCATE(HCLOSEPCG,RCLOSEPCG,RELAXPCG,DAMPPCG,DAMPPCGT,BPOLY)
@@ -216,7 +215,7 @@ C     ------------------------------------------------------------------
       USE CONSTANTS,                ONLY: DZ, UNO, BLNK, NLc=>NL, BLN
       USE NUM2STR_INTERFACE,        ONLY: NUM2STR
       USE WARNING_TYPE_INSTRUCTION, ONLY: WARNING_TYPE
-      USE GLOBAL,    ONLY: KND, HCloseBAS, RCloseL2BAS
+      USE GLOBAL,    ONLY: KND
       REAL BIGH, BIGR, BPOLY, C0, C1, C2, CD, CD1, DAMP, 
      +     HCHG, HCLOSE, RCHG, RCLOSE, RELAX, T,
      +     DAMPSS, DAMPTR,HDRY
@@ -956,8 +955,7 @@ C
      +                 NLAY,NODES,RELAX,IOUT,MUTPCG,IT1,DAMPSS,RES,
      +                 HCSV,IERR,HPCG,DAMPTR,ISS,HDRY,
      +                   IHCOFADD,BPOLY)
-        USE GLOBAL,    ONLY: HCloseBAS, RCloseL2BAS, 
-     +                       MAX_RELATIVE_VOL_ERROR
+        USE GLOBAL,    ONLY: MAX_RELATIVE_VOL_ERROR
         USE NUM2STR_INTERFACE,        ONLY: NUM2STR
         IMPLICIT NONE
         INTEGER:: KITER,NITER
@@ -970,7 +968,6 @@ C
         INTEGER, DIMENSION(3,MXITER*ITER1)::LHCH,LRCH
         REAL:: HCLOSE,RCLOSE,BPOLY
         REAL:: RELAX, DAMPSS,DAMPTR,HDRY
-        DOUBLE PRECISION:: VOLERR
 C
 C-------IF END OF TIME STEP, PRINT # OF ITERATIONS THIS STEP
         IF (MUTPCG.LT.2) THEN

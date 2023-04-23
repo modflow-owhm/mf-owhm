@@ -12,6 +12,318 @@
 
 &nbsp;
 
+## 2.3.0
+
+2023-4-23
+
+### `HYD` supports the `SWT` package
+
+The HydMod package provides time series observation output for various packages (`SFR`, `STR`, `SUB`, `IBS`, and `BAS`). HydMod package now supports observations from the Subsidence Water Table (`SWT`) package.
+
+The input for HydMod remains the same, but Data Set 2 now supports the following new options:
+
+`PCKG ARR INTYP KLAY XL YL HYDLBL  # Data Set 2`
+
+New Options:
+
+Set `PCKG` = `"SWT"` to use the `SWT` package
+
+and `ARR` supports the following `CHARACTER(len=2)` options:
+
+```
+  "SB" -> subsidence from KLAY to lay 1
+  "CP" -> total compaction        for layer KLAY
+  "HC" -> preconsolidation stress for layer KLAY
+  "GS" -> geostatic stress        for layer KLAY
+  "ES" -> effective stress        for layer KLAY
+  "VR" -> void ratio              for layer KLAY
+```
+
+### `HYD` added `DOUBLE_PRECISION_BINARY` option
+
+The HydMod package now supports an optional keyword `DOUBLE_PRECISION_BINARY`. If this keyword is present, then Hydmod writes all variables to the unformatted binary file using double precision (14 digits) instead of single precision (7 digits). This keyword is specified at the start of the input file before the regular input. The following is the new input structure:
+
+```
+[DOUBLE_PRECISION_BINARY]  # Optional Keyword
+NHYD IHYDUN HYDNOH
+PCKG ARR INTYP KLAY XL YL HYDLBL # Repeat as needed
+```
+
+The following is an input example without the keyword:
+
+```
+3  70  -999                    # NHYD IHYDUN HYDNOH
+BAS  HD  I  1  1.  1.  Label1  # PCKG ARR INTYP KLAY XL YL HYDLBL 
+BAS  HD  I  1  3.  2.  Label2     
+BAS  HD  I  1  5.  2.  Label3
+```
+
+and with the option enabled:
+
+```
+DOUBLE_PRECISION_BINARY
+3  70  -999                    # NHYD IHYDUN HYDNOH
+BAS  HD  I  1  1.  1.  Label1  # PCKG ARR INTYP KLAY XL YL HYDLBL 
+BAS  HD  I  1  3.  2.  Label2     
+BAS  HD  I  1  5.  2.  Label3
+```
+
+### `RCH` modified to produce similar to results to `MF-NWT` `RCH` package
+
+This reverts a feature added in version [2.0.1](#2.0.1) under the header "`RCH` can set `NRCHOP` to `-1` "  to reflect how it originally operated in MODFLOW-NWT. 
+
+In summary, when using the `NWT` solver the IBOUND array is never changed from the `BAS` package. When `NWT` is not in use, any layer marked as `CONVERTIBLE` and has the head drops below the cell bottom changes the IBOUND to zero; the so called *DRY* cell (IBOUND=0). Because `NWT` does not vary vertical conductance (that is, it is held constant at the saturated value), any water added to a *DRY* cell percolates downward roughly at the rate of  
+C<sub>v</sub>(h<sub>cell_below</sub> - h<sub>dry_cell</sub>)
+
+For the `RCH` package, it checks for IBOUND=0 to determine if a cell should not receive recharge or not; it does not apply recharge to *DRY* cells. However, since `NWT` never changes the IBOUND array, recharge is applied to cells that are considered *DRY* by other packages (and `NWT` will output `HDRY` for those cells). This particularly important for the `NRCHOP=3` option in `RCH`, which applies recharge to the upper most active cell. 
+
+For example, assume there is a two layer model with both layers set to `CONVERTIBLE` and have `IBOUND>0`.  
+Assume RCH applies 1 unit of recharge and the following is the state of the model: 
+
+- Lay 1 has the head less than its bottom (`HNEW(1) < BOTM(1)`)
+  - If `NWT` not used, then MODFLOW sets IBOUND to zero (`IBOUND(1) = 0`)
+- Lay 2 has the head greater than its bottom (`HNEW(2) > BOTM(2)`)
+
+When using `NWT` the IBOUND array is not changed so the 1 unit of recharge is applied to Lay 1, which would percolate downward to Lay 2.  
+When using any other solver the recharge is placed in Lay 2 because Lay 1 has `IBOUND(1)=0`.
+
+This subtle difference lead to the a fix released in version 2.0.1 that only applied recharge if the cell was `CONFINE` or `CONVERTIBLE` and `HNEW > BOTM`. However, models that calibrated to this feature resulted in a significant different result when using MODFLOW-NWT and MODFLOW-OWHM, so it was decided to revert back to the method used by MODFLOW-NWT. 
+
+If you want to apply the recharge only to the water table, please see the next feature.
+
+### `RCH` supports `NRCHOP = 4`  and `5` ➣ Apply recharge to water table cell
+
+As discussed in the previous feature, when using the `NWT` solver with a DRY cell can result in a difference in how the recharge is applied to the model. Since the fix applied in version [2.0.1](#2.0.1) was removed, recharge is applied to the upper most `IBOUND /= 0` cell rather than the water table. To allow users to still apply recharge to the water table a new option was added. 
+
+If `RCH` sets the `NRCHOP = 4`:
+
+- `CONFINE` layers are exactly like `NRCHOP = 3` (upper most active cell)
+- `CONVERTIBLE` layers apply recharge to the upper most cell that has the head above the cell bottom (water table cell)
+
+If `RCH` sets the `NRCHOP = 5`:
+
+- `CONFINE` and `CONVERTIBLE` layers apply recharge to the upper most cell that has the head above the cell bottom (water table cell)
+
+Using the example presented in the previous feature, the following happens (independent of the solver):
+
+- `NRCHOP = 4`
+  - `CONFINE` ➣ Lay 1
+  - `CONVERTIBLE` ➣ Lay 2
+- `NRCHOP = 5`
+  - `CONFINE` ➣ Lay 2
+  - `CONVERTIBLE` ➣ Lay 2
+
+
+### `LPF` and `UPW` Improved #Comment Support
+
+* Expanded comment support in the package input. If `LPF`/`UPW` properties are defined with parameters, then the packages used list-directed reads for the print factor `IPRN`. This caused problems if there are empty lines or commented lines between reading different `IPRN` values. Also added comment support when reading the `WET`ting parameters.
+
+### `BAS`, `FMP`, `MNW2` Output File Header Description
+
+* `doc/Output_Header_Defintion/*` 
+* Describes  `BAS`, `FMP`, and `MNW2` common output files and defines the file headers.
+* See [doc/Output_Header_Defintion/README.md](doc/Output_Header_Defintion/README.md) for a description of how the files are named and formatted.
+
+### `GHB` Block Input Cheat Sheet – `GHB_Options_All.ghb`
+
+* The file `doc/Option_Block_Cheatsheets/GHB_Options_All.ghb` is added to help users develop the GHB package.  
+  This file includes documentation for:
+  * `OPTIONS` block
+  * `BudgetGroups` block
+  * `LineFeed` Alternative Input
+
+### `FMP` Improvements
+
+* `SUPPLY_WELL` Block new output option: `PRINT ByWBS_ByLAYER`
+  * This output option writes for each Water Balance Subregion (WBS) the total pumpage in and out of groundwater from each model layer from FMP Supply Wells, FMP Linked to MNW2 Wells, Non-Lined MNW2 Wells, and Non-Lined Well Package wells.
+  * Note that FMP supply wells are any well linked to the WBS, consequently they may NOT be within the WBS area.  
+    The non-FMP wells are those located within the WBS area.
+
+* `SUPPLY_WELL` Block ignores row and column read in for supply wells that are linked to `MNW2`. Their input is still required, but is not used. Instead the row and column are copied over from the `MNW2` input.
+* `SUPPLY_WELL` Block now checks if non-MNW2 linked wells are within model grid and raises an error if a well is not.
+* Improved reading in the spatial location of the Water Balance Subregion (WBS). This input is read in the`WATER_BALANCE_SUBREGION` Block with the the keyword `LOCATION`, as an integer array, with a value of `0` to indicate no WBS and non-zero to indicate the WBS that is associated with that (row, col) loocation. If the number specified in the input is greater than the total number (`>NWBS`) or less than `0`, then the WBS number is changed to `0` and the model cell location is ignored. 
+* `CLIMATE` Block `DIRECT_RECHARGE` keyword can be specified multiple times. The sum of the recharge arrays are applied to deep percolations.  
+  For example:  
+  `DIRECT_RECHARGE  FLUX  STATIC ARRAY OPEN/CLOSE rch1.txt`  
+  `DIRECT_RECHARGE  FLUX  STATIC ARRAY OPEN/CLOSE rch2.txt`  
+  `DIRECT_RECHARGE  RATE  STATIC ARRAY OPEN/CLOSE rch3.txt`  
+  would apply to deep percolation the sum from the arrays read in from rch1.txt, rch2.txt, and rch3.txt
+* Part of runoff can be defined to leave the model.
+  * Runoff that is generated from FMP either flows to SFR or leaves the model as lost runoff. The SFR locations are either defined explicitly as a semi-routed return (`SRR`) points or automatically as fully-routed return (`FRR`). `FRR` just searched for any SFR segments/reaches that reside in a Water Balance Subregion (WBS) and set then as `SRR` locations.
+  * The code was updated to allow defining `SRR`  locations with the segment = 0 to indicate that runoff is supposed to leave the model. There is no limit for how many `SRR` locations that remove water from the model, but it is recommended to only have one per WBS.
+  * For example,  given that `NSFR_RETURN` = 2 and the user wants WBS 4 to have 60% of the runoff to go to segment 5, reach 1 and 40% of the runoff to leave the model domain. The input would have the following format:  
+    `SEMI_ROUTED_RETURN  STATIC  LIST  INTERNAL`  
+    `# ISRR, WBS_ID, SEGMENT, REACH, [FRAC]`  
+    `     1  4       5        1      0.6   # 60% runoff applied to Seg 5, Reach 1`  
+    `     2  4       0        0      0.4   # 40% runoff removed from model domain` 
+
+* `GLOBAL DIMENSION` block can now set `NWBS` to `0` and not include the `WATER_BALANCE_SUBREGION`. Internally, this just sets `NWBS` to `1` and assumes the entire model grid is associated with WBS 1.  
+  That is:  
+  `BEGIN GLOBAL DIMENSION `  
+  `  NWBS  0 `  
+  `END`  
+  becomes internally to FMP:  
+  `BEGIN GLOBAL DIMENSION `  
+  `  NWBS  1 `  
+  `END`  
+  `BEGIN WATER_BALANCE_SUBREGION `  
+  `  LOCATION STATIC LIST CONSTANT 1 `  
+  `END`
+
+### `HOB` Improvements
+
+* Drawdown observations must be in chronological order or an error is raised. Either the user will need to fix the order or change the observation order or change to head observations.
+
+* Head observations that are not within the simulation are set to a null value.
+  * Set to the `NOT_OBSERVED_VALUE`, if it is specified, otherwise set to `HOBDRY`.
+  * Allows simulation to continue with an HOB file that includes observations that are not within the simulation timeframe.
+    * Typically occurs if you want to run the model with feature stress periods than it was designed for, or when using the `FASTFORWARD` option.
+
+* Drawdown observations that have the first head observation not within the simulation have all the observations set to the `HOBDRY` value.
+* The HOB supports keywords that are specified at the start o the input file, one per line and in any order.  
+  Keywords supported:
+  * `TIME_STEP_PRINT`  *Generic_Output*
+    * Writes head observations to file when they are simulated.
+    * The order of the observations is the order they appear in the simulation.
+
+  * `TIME_STEP_PRINT_ALL`  *Generic_Output*
+    * Writes all head observations to file at the end of each time step.
+      * The file is replaced after each time step.
+
+    * This is useful to obtain the head observations when the simulation crashes.
+
+  * `OBSNAM_LENGTH` *ilen*
+    * Specifies the character length, *ilen*, of observation names, `OBSNAM`.
+      * `CHARACTER( len=ilen ):: OBSNAM`
+
+    * If not specified, the default size is 12 characters.
+      * `CHARACTER( len=12 ):: OBSNAM`
+
+  * `NOT_OBSERVED_VALUE` *value*
+    * Value to set observation points that are not within the simulation timeframe or have yet to be simulated.
+    * If not specified, then they ware set to `HOBDRY`
+
+* It is recommended for simulations to use the keywords `TIME_STEP_PRINT_ALL`  and `NOT_OBSERVED_VALUE`.
+
+**Keyword Input Example:**
+
+```
+#
+# HOB input file for MODFLOW-OWHM v2
+#
+TIME_STEP_PRINT_ALL  ./output/head_obs.txt 
+NOT_OBSERVED_VALUE  -8888.   # Value if obs point is never observed
+OBSNAM_LENGTH          16    # Observation names will have a length of 16
+168190 5310 12 0    -9999.   # NH, MOBS, MAXM, IUHOBSV, HOBDRY
+```
+
+**Example output:**  
+Lets assume a model with 1 stress period and  4 time steps that are 10 days long.   
+The `BAS` package has the option "`START_DATE 10/1/2000`" .  
+The total simulation time is from 0.0 days to 40.0 days  
+or from 10/01/2000 to 11/10/2000.
+
+Lets assume the HOB defines the observation location `XYZ`, that measures the following simulation times:
+
+```
+# Starting Date:   10/01/2000  (note this date is at 00:00:00, aka midnight)
+# Starting SimTim: 0.0
+#
+# OBSNAM  SimTime    Equivalent_Date
+  XYZ_1     3.    #  10/04/2000
+  XYZ_2     5.    #  10/06/2000
+  XYZ_3     18.   #  10/19/2000
+  XYZ_4     32.   #  11/02/2000
+  XYZ_5     35.   #  11/05/2000
+  XYZ_6     38.   #  11/08/2000
+  XYZ_7     100.  #  01/09/2001
+```
+
+The observation names will be printed with a length of 16, such as:
+`"XYZ_1           "`
+
+After time step 1 (simulation time from 0.0 to 10.0), the the file `./output/head_obs.txt` will contain:
+
+```
+"SIMULATED EQUIVALENT"   "OBSERVED VALUE"    "OBSERVATION NAME"      DATE    DECIMAL_YEAR
+   8.62315256343E-01   8.90000000000E-01       XYZ_1            2000-10-04     2000.756831
+   1.21231151577E+00   1.31000000000E+00       XYZ_2            2000-10-06     2000.762295
+  -8.88800000000E+03   3.10000000000E-01       XYZ_3            2000-10-19     2000.797814
+  -8.88800000000E+03   1.22000000000E+00       XYZ_4            2000-11-02     2000.836066
+  -8.88800000000E+03   1.16000000000E+00       XYZ_5            2000-11-05     2000.844262
+  -8.88800000000E+03   1.13000000000E+00       XYZ_6            2000-11-08     2000.852459
+  -8.88800000000E+03   1.50000000000E+00       XYZ_7            2001-01-09     2001.021918
+```
+
+After time step 2 (simulation time from 10.0 to 20.0), the the file `./output/head_obs.txt` will contain:
+
+```
+"SIMULATED EQUIVALENT"   "OBSERVED VALUE"    "OBSERVATION NAME"      DATE    DECIMAL_YEAR
+   8.62315256343E-01   8.90000000000E-01       XYZ_1            2000-10-04     2000.756831
+   1.21231151577E+00   1.31000000000E+00       XYZ_2            2000-10-06     2000.762295
+   4.13250847373E+03   3.10000000000E-01       XYZ_3            2000-10-19     2000.797814
+  -8.88800000000E+03   1.22000000000E+00       XYZ_4            2000-11-02     2000.836066
+  -8.88800000000E+03   1.16000000000E+00       XYZ_5            2000-11-05     2000.844262
+  -8.88800000000E+03   1.13000000000E+00       XYZ_6            2000-11-08     2000.852459
+  -8.88800000000E+03   1.50000000000E+00       XYZ_7            2001-01-09     2001.021918
+```
+
+After time step 3 (simulation time from 20.0 to 30.0), the the file `./output/head_obs.txt` will contain (same as Time Step 2):
+
+```
+"SIMULATED EQUIVALENT"   "OBSERVED VALUE"    "OBSERVATION NAME"      DATE    DECIMAL_YEAR
+   8.62315256343E-01   8.90000000000E-01       XYZ_1            2000-10-04     2000.756831
+   1.21231151577E+00   1.31000000000E+00       XYZ_2            2000-10-06     2000.762295
+   4.13250847373E+03   3.10000000000E-01       XYZ_3            2000-10-19     2000.797814
+  -8.88800000000E+03   1.22000000000E+00       XYZ_4            2000-11-02     2000.836066
+  -8.88800000000E+03   1.16000000000E+00       XYZ_5            2000-11-05     2000.844262
+  -8.88800000000E+03   1.13000000000E+00       XYZ_6            2000-11-08     2000.852459
+  -8.88800000000E+03   1.50000000000E+00       XYZ_7            2001-01-09     2001.021918
+```
+
+After time step 4 (simulation time from 30.0 to 40.0), the the **final version of the file** `./output/head_obs.txt` will contain:
+
+```
+"SIMULATED EQUIVALENT"   "OBSERVED VALUE"    "OBSERVATION NAME"      DATE    DECIMAL_YEAR
+   8.62315256343E-01   8.90000000000E-01       XYZ_1            2000-10-04     2000.756831
+   1.21231151577E+00   1.31000000000E+00       XYZ_2            2000-10-06     2000.762295
+   4.13250847373E+03   3.10000000000E-01       XYZ_3            2000-10-19     2000.797814
+   1.28547769725E+03   1.22000000000E+00       XYZ_4            2000-11-02     2000.836066
+   1.22985850204E+03   1.16000000000E+00       XYZ_5            2000-11-05     2000.844262
+   1.21408626843E+03   1.13000000000E+00       XYZ_6            2000-11-08     2000.852459
+  -8.88800000000E+03   1.50000000000E+00       XYZ_7            2001-01-09     2001.021918
+```
+
+Observation point `XYZ_7` is always set to the `NO_OBS_VALUE` because it is beyond the simulation.
+
+### `ZoneBudget` Improved Zone Number Output Formatting
+
+* Changed text output from standard Fortran formatting to MODFLOW-OWHM `INT2STR` function for writing the zone numbers to the command prompt and the ZoneBudget output file.  
+  This prevents truncation of zone numbers to `****` if they exceed `999`.   
+  Now any positive `int32` zone number will work.
+
+### `Tabfile` Improved Open File Keyword Support
+
+* The `Tabfile` module previously would previously read a set of filenames to open or use the keyword `EXTERNAL` read a *unit* number. However if the user used another keyword, such as `OPEN/CLOSE`, the program would stop and not raise an ambiguous error message.
+* The `Tabfile` code can now just read the tabfile files as:  
+  `EXTERAL` *unit*  
+  *filename*  
+  `OPEN/CLOSE` *filename*  
+  `DATAFILE` *filename*
+
+### Misc. Options Added
+
+* The `SFR` package added the option `SEGOUTPUT` that is followed by a unit number to write segment flow output to.
+  * That is the input structure is:  
+    `SEGOUTPUT  iu`  
+    where `iu` is a unit number declared in the name file as:  
+    `DATA  iu filename`
+* The `UZF` package added the option `SAVEFINF`.
+
+&nbsp; 
+
+------
+
 ## 2.2.0
 
 2022-01-20
@@ -229,7 +541,6 @@ MONTHLY  -4   SS        # MONTHLY input with 4 time steps, and first stress peri
   * `Rel-Vol-Err`
     * Largest relative volume error (`|r/vol|`<sub>∞</sub>)
     * `r` is the residual error vector, `vol`  is a vector of the model cell's volume. 
-  
 
 &nbsp; 
 
@@ -279,6 +590,7 @@ and can be used when `CNSTNT`, `FMTIN`, and `IPRN` are not specified.
 
   * For example, `OPEN/CLOSE ./IC.txt 1 (FREE) -1 SHIFT 15 SHIFT -5` would add 10 to the input read in `IC.txt`
   * For example, `OPEN/CLOSE ./IC.txt             SHIFT 15 SHIFT -5` would add 10 to the input read in `IC.txt`
+
 &nbsp; 
 
 ------
@@ -384,7 +696,7 @@ and can be used when `CNSTNT`, `FMTIN`, and `IPRN` are not specified.
     * `PRINT_WELL_NODE_FLOW` &nbsp; &nbsp; &nbsp; &nbsp;                                    *GENERIC_OUTPUT*
     * `PRINT_WELL_INOUT`     &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;        *GENERIC_OUTPUT*
 
-### `RCH` can set `NRCHOP` to `-1` 
+### `RCH` can set `NRCHOP` to `-1`  ➣ Removed in 2.3.0
 
 * This indicates that the initial upper most non-zero `IBOUND` is used. This is a hybrid between `NRCHOP` as `1` and `3`.
 * This option was created to mimic the original behavior of `RCH` with the `NWT` solver and  `NRCHOP=3`.  

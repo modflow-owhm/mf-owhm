@@ -49,9 +49,9 @@
       END MODULE GMRESMODULE
 !C------------------------------------------------------------------
       SUBROUTINE GMRES7AR(IN,IGRID)
-      USE GLOBAL, ONLY: IOUT,STRT,IBOUND
+      USE GLOBAL, ONLY: IOUT
       USE GMRESMODULE
-      USE GWFNWTMODULE,      ONLY: IPRNWT,NUMACTIVE,IA,JA,NJA,IFDPARAM
+      USE GWFNWTMODULE,      ONLY: NJA,IFDPARAM
       USE FILE_IO_INTERFACE, ONLY: READ_TO_DATA
       IMPLICIT NONE
 !     ------------------------------------------------------------------

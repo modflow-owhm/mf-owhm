@@ -51,7 +51,7 @@ C     ******************************************************************
 C        SPECIFICATIONS:
 C     ------------------------------------------------------------------
       USE GLOBAL,  ONLY:IOUT,NPER,NSTP,PERLEN,TSMULT,ISSFLG,
-     1                  NCOL,NROW,NLAY,ITRSS
+     1                  NCOL,NROW,ITRSS
       USE OBSDRNMODULE
       CHARACTER(768):: LINE
       CHARACTER(10)::DATE
@@ -90,7 +90,9 @@ Cx------Read items 0 and 1.
       DO
          CALL URWORD(LINE,LLOC,ISTART,ISTOP,1,IDUM,DUM,IOUT,IUDROB)
          IF    (LINE(ISTART:ISTOP)=='TIME_STEP_PRINT') THEN
-             CALL FN_PRN%OPEN(LINE,LLOC,IOUT,IUDROB,NOBINARY=.TRUE.)
+             CALL FN_PRN%OPEN(LINE,LLOC,IOUT,IUDROB,
+     +                        NO_BINARY=.TRUE., NO_INTERNAL=.TRUE., 
+     +                        ALLOW_ONLY_UNIT=.TRUE.)
              !CALL URWORD(LINE,LLOC,ISTART,ISTOP,0,IDUM,DUM,IOUT,IUDROB)
              !READ(LINE(ISTART:ISTOP),*,IOSTAT=IERR) FN_PRN
              !IF(IERR.NE.0) THEN
@@ -99,8 +101,9 @@ Cx------Read items 0 and 1.
              !END IF
             CALL URDCOM(IUDROB,IOUT,LINE)
          ELSEIF(LINE(ISTART:ISTOP)=='TIME_STEP_PRINT_ALL') THEN
-             CALL FN_PRN_ALL%OPEN(LINE,LLOC,IOUT,IUDROB,NOBINARY=.TRUE.,
-     +                            NO_INTERNAL=.TRUE.)
+             CALL FN_PRN_ALL%OPEN(LINE,LLOC,IOUT,IUDROB,
+     +                            NO_BINARY=.TRUE., NO_INTERNAL=.TRUE., 
+     +                            ALLOW_ONLY_UNIT=.TRUE.)
              !CALL URWORD(LINE,LLOC,ISTART,ISTOP,0,IDUM,DUM,IOUT,IUDROB)
              !READ(LINE(ISTART:ISTOP),*,IOSTAT=IERR) FN_PRN_ALL
              !IF(IERR.NE.0) THEN

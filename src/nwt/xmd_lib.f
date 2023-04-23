@@ -296,11 +296,11 @@ c     nullify(jafwk0, levptr)
 
       use xmdcmn
       use xmdalloc
-
+      
+      integer n, nja, njaf, ierr, level, nblack
       integer ia(n+1), ja(nja), idiagf(nblack),
      [        iaf(nblack+1),
-     [        icolour(n), RBorder(n), iblackend(n),
-     [        n, nja, njaf, ierr, level, nblack
+     [        icolour(n), RBorder(n), iblackend(n)
 
       double precision a(nja), b(n), epsrn
 c
@@ -353,7 +353,7 @@ c
 c     local variables
 c
       integer :: itemp, ii, first, iold, iend, num, next,
-     [        maxint, iblck, id, kk, idk, idkk
+     [        maxint, iblck, id, kk, idk, idkk, ierror
       double precision temp, epsmin
 
       double precision, dimension(:), allocatable :: row
@@ -576,8 +576,8 @@ c        lorder()      ordering vector
 c                         lorder(new_number) = old_number
 c        ierr          error flag
 c
-      integer :: ia(neq+1), ja(nja), lorder(neq),
-     [         neq, norder, nja, ierr
+      integer :: neq, nja
+      integer :: ia(neq+1), ja(nja), lorder(neq), norder, ierr
 c
 c     local variables
 c
@@ -962,11 +962,11 @@ c     get [a]{x} -- note: use t as tmp
 
 c     save x into soln and use x as temporary(n) array
 
-c      do i = 1, nblack
-c        soln(i) = x( RBorder(i) )
-c      enddo
+      do i = 1, nblack
+        soln(i) = x( RBorder(i) )
+      enddo
 
-      soln(1:nblack) = x( RBorder(1:nblack) )
+C      soln(1:nblack) = x( RBorder(1:nblack) )
 
 c
 c     iteration loop
@@ -2016,9 +2016,6 @@ c
 c
 c     scatter solution
 c
-c      do i = 1, nblack
-c        x( RBorder(i) ) = soln(i)
-c      enddo
        do i = 1, nblack           
          x( RBorder(i) ) = soln(i)
        end do                     
@@ -2475,11 +2472,10 @@ c
 c
 c***************************************************************
 c
-         integer nja, lperm
+         integer nja, lperm, neqns
          integer adjncy(nja), mask(neqns), perm(neqns),
      1           xls(neqns+1)
-         integer xadj(neqns+1), ccsize, i, neqns, nlvl,
-     1           num, root
+         integer xadj(neqns+1), ccsize, i, nlvl, num, root
 c
 c***************************************************************
 c
@@ -3081,8 +3077,9 @@ c    declarations.
 c
 c-----------------------------------------------------------------------
 c
+      integer :: n, nja, nsp
       integer  ia(n+1), ja(nja),  p(n), ip(n),  isp(nsp),  flag,
-     *   v, l, head,  n, nsp, mmax, next, nja
+     *   v, l, head,  mmax, next
 
 cmi
 cmi   original
@@ -3234,9 +3231,9 @@ c             -       .lt. mark(vk)         -
 c
 c-----------------------------------------------------------------------
 c
+      integer :: n, nja, mmax
       integer  ia(n+1), ja(nja),  v(mmax), l(mmax),  head(n), last(n),
-     [         next(n), mark(n),  flag,  tag, dmin, vk,ek, tail,
-     [         n, mmax, k, nja
+     [         next(n), mark(n),  flag,  tag, dmin, vk,ek, tail, k
 
       equivalence  (vk,ek)
 c
@@ -3295,10 +3292,11 @@ c
 c***********************************************************************
 c  mdi -- initialization
 c***********************************************************************
+      integer :: n, nja, mmax
       integer  ia(n+1), ja(nja),  v(mmax), l(mmax),  head(n), last(n),
      [         next(n),
-     *   mark(n), tag,  flag,  sfs, vi,dvi, vj, n, mmax, jmin, jmax, j,
-     *   lvk, kmax, k, nextvi, nja
+     *   mark(n), tag,  flag,  sfs, vi,dvi, vj, jmin, jmax, j,
+     *   lvk, kmax, k, nextvi
 c
 c----initialize degrees, element lists, and degree lists
       do 1 vi=1,n
@@ -3369,9 +3367,9 @@ c
 c***********************************************************************
 c  mdm -- form element from uneliminated neighbors of vk
 c***********************************************************************
+      integer :: mmax, n
       integer  vk, tail,  v(mmax), l(mmax),   last(n), next(n),
-     [         mark(n),
-     *   tag, s,ls,vs,es, b,lb,vb, blp,blpmax, n, mmax
+     [         mark(n), tag, s, ls, vs, es, b, lb, vb, blp, blpmax
       equivalence  (vs, es)
 c
 c----initialize tag and list of uneliminated neighbors
@@ -3516,14 +3514,15 @@ c
 
 
 
-      subroutine mdu(n, mmax, ek,dmin, v,l, head,last,next, mark)
+      subroutine mdu(n, mmax, ek,dmin, v, l, head, last, next, mark)
 c
 c***********************************************************************
 c  mdu -- update degrees of uneliminated vertices in ek
 c***********************************************************************
+      integer :: mmax, n
       integer  ek, dmin,  v(mmax), l(mmax),  head(n), last(n), next(n),
-     *   mark(n),  tag, vi,evi,dvi, s,vs,es, b,vb, ilp,ilpmax,
-     *   blp,blpmax, i, n, mmax
+     *   mark(n), tag, vi, evi, dvi, s, vs, es, b, vb, ilp, ilpmax,
+     *   blp, blpmax, i
 
       equivalence  (vs, es)
 c

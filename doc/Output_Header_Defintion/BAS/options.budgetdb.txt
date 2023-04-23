@@ -1,0 +1,90 @@
+
+BAS Package Options block keyword BUDGETDB
+
+Writes for each time step the volumetric budget 
+for the entire model domain. This is equivalent 
+to the LIST files volumetric budget with the header:
+
+VOLUMETRIC BUDGET FOR ENTIRE MODEL AT END OF TIME STEP    x IN STRESS PERIOD      y
+
+except that: 
+   (1) All values are rates, and 
+   (2) Each row represents a time step and each column is the 
+          budget name (MODFLOW package) with _IN and _OUT appended to the end.
+   (3) IN_OUT represents the rate version of "TOTAL IN" minus "TOTAL OUT"
+   (4) PERCENT_ERROR represents the "PERCENT DISCREPANCY"
+          Defined as:
+                     AVE_ERROR     = abs("TOTAL IN" - "TOTAL OUT") / 2
+                     PERCENT_ERROR = AVE_ERROR / IN_OUT
+
+For example, the following is printed to the LIST file:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  -------------------------------------------------------------------------------------
+  VOLUMETRIC BUDGET FOR ENTIRE MODEL AT END OF TIME STEP    1 IN STRESS PERIOD      1
+  -------------------------------------------------------------------------------------
+
+     CUMULATIVE VOLUMES      L**3       RATES FOR THIS TIME STEP      L**3/T
+     ------------------                 ------------------------
+
+           IN:                                      IN:
+           ---                                      ---
+             STORAGE =      123400.0000               STORAGE =        1234.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+
+            TOTAL IN =      123400.0000              TOTAL IN =        1234.0000
+
+          OUT:                                     OUT:
+          ----                                     ----
+             STORAGE =        5100.0000               STORAGE =          51.0000
+       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+
+           TOTAL OUT =        5100.0782             TOTAL OUT =          51.0000
+
+            IN - OUT =      118300.0000              IN - OUT =        1183.0000
+
+ PERCENT DISCREPANCY =          54.31     PERCENT DISCREPANCY =          54.31
+ 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+would have the equivalent BUDGETDB file as 
+(assume the same results occurred for the second time step):
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+         DATE_START   PER   STP    DELT  SIMTIME     STORAGE_IN    STORAGE_OUT    CHD_IN    CHD_OUT          IN_OUT  PERCENT_ERROR
+1961-04-01T00:00:00     1     1    15.0     15.0      1234.0000        51.0000       0.0       51.0       1183.0000      54.31
+1961-04-16T00:00:00     1     2    15.0     30.0      1234.0000        51.0000       0.0       51.0       1183.0000      54.31
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+/----------------------------\
+|                            |
+|   Additional Information   |
+|                            |
+\----------------------------/
+
+
+Date output is formatted using ISO 8601-1:2019 standard without a time zone designation:
+https://en.wikipedia.org/wiki/ISO_8601#Combined_date_and_time_representations
+
+The general format is:
+yyyy-mm-ddThh:mm:ss
+                   where:
+                         yyyy is the four digit Gregorian year
+                         mm   before the T is the two digit month number       (01 to 12)
+                         dd   is the two digit day of the month                (01 to {28, 29, 30, 31}, depending on the month)
+                         T    calendar date and 24-hour clock time separator
+                         hh   is the hour within the day                       (00 to 23 hour)
+                         mm   after the T is the two digit minutes in the hour (00 to 59 minute)
+                         ss   is the two digit seconds of the minute           (00 to 59 second)
+
+Output is in model units that uses an
+   L as a place holder for Length, L2 is for area, L3 is for volume and
+   T as a place holder for Time
+
+which are defined in the DIS package as being:
+   L: Feet, Meters, Centimeters, and Undefined
+   T: Seconds, Minutes, Hours, Days, Years, and Undefined
+
+
+
+

@@ -5,7 +5,12 @@ MODULE PATH_INTERFACE
   !
   PRIVATE
   !
-  PUBLIC:: IS_WINDOWS       !      IS_WINDOWS()
+  PUBLIC:: IS_WINDOWS         ! win = IS_WINDOWS()
+  !
+  PUBLIC:: GET_CWD            ! cwd = GET_CWD()
+  PUBLIC:: SET_TO_CWD         ! CALL SET_TO_CWD(CWD, LENGTH) 
+  !
+  PUBLIC:: GET_FILE_EXTENSION ! CALL GET_FILE_EXTENSION(FILE_NAME, EXT)
   !
   PUBLIC:: MAKE_DIRECTORY   ! CALL MAKE_DIRECTORY(PATH, HAS_FILE, FIXED) -->This relies on SYSTEM call of mkdir
   PUBLIC:: FIX_PATH         ! CALL FIX_PATH(PATH)
@@ -55,6 +60,83 @@ MODULE PATH_INTERFACE
     HAS_WIN_OS = OS == 'Windows_NT'                    !If any Windows variant then variable exists and is set to Windows_NT
     !
   END FUNCTION
+  !
+  !#############################################################################################################################################################
+  !
+  subroutine get_file_extension(file_name, ext)
+    character(*),              intent(in ):: file_name
+    character(:), allocatable, intent(out):: ext
+    integer:: i, p, dim
+    !
+    dim = len_trim(file_name)
+    p = dim
+    do i=dim, 1, -1
+       if(file_name(i:i) == '.') then
+          p = i
+          exit
+       end if
+    end do
+    !
+    p = p + 1
+    if(p > dim) then
+       ext = ''
+    else
+       ext = file_name(p:dim)
+    end if
+    !
+  end subroutine
+  !
+  !#############################################################################################################################################################
+  !
+  FUNCTION GET_CWD() RESULT(CWD)
+    CHARACTER(:), ALLOCATABLE:: CWD
+    CHARACTER(:), ALLOCATABLE:: PATH
+    INTEGER:: IERR, ITMP, IU
+    !
+    IF(IS_WINDOWS()) THEN
+       CALL EXECUTE_COMMAND_LINE('cd  > ~tmp_path_file.delme', cmdstat=IERR)
+    ELSE
+       CALL EXECUTE_COMMAND_LINE('pwd > ~tmp_path_file.delme', cmdstat=IERR)
+    END IF
+    !
+    IF( IERR == Z ) OPEN(NEWUNIT=IU, FILE='~tmp_path_file.delme',       &
+                         ACTION='READWRITE',  FORM='FORMATTED',         &
+                         ACCESS='SEQUENTIAL', STATUS='OLD', IOSTAT=IERR )
+    IF( IERR == Z )  THEN
+        INQUIRE(IU, SIZE=ITMP)
+        !
+        IF( ITMP <= 4096 ) THEN
+            ITMP = ITMP + 32
+        ELSE
+            ITMP = 4096
+        END IF
+        ALLOCATE(CHARACTER(ITMP):: PATH)
+        !
+        REWIND(IU)
+        READ(IU, '(A)', IOSTAT=IERR) PATH
+        CLOSE(IU, STATUS='DELETE', IOSTAT=ITMP)
+    END IF
+    !
+    IF( IERR == Z ) THEN
+        CWD = TRIM(ADJUSTL(PATH))
+    ELSE
+        CWD = 'Unknown Current Working Directory (CWD)'
+    END IF
+    !
+  END FUNCTION
+  !
+  !#############################################################################################################################################################
+  !
+  SUBROUTINE SET_TO_CWD(CWD, LENGTH) 
+    CHARACTER(*),           INTENT(INOUT):: CWD
+    INTEGER,      OPTIONAL, INTENT(INOUT):: LENGTH
+    CHARACTER(:), ALLOCATABLE:: PATH
+    !
+    PATH = GET_CWD()
+    IF(PRESENT(LENGTH)) LENGTH = LEN(PATH)
+    CWD = PATH
+    !
+  END SUBROUTINE
   !
   !#############################################################################################################################################################
   !

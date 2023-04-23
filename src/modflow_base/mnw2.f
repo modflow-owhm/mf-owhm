@@ -266,12 +266,12 @@ C3------CELL-BY-CELL FLOW TERMS, AND PRINT FLAG
         CASE('PRINT_NODE_INFO') 
             !
             CALL PRNT_MNW2_NODE%OPEN(BL%LINE,LLOC,IOUT,IN,
-     +                                 NOBINARY=TRUE, SAVE_FNAME=TRUE)
+     +                                 NO_BINARY=TRUE, SAVE_FNAME=TRUE)
             !      
         CASE('PRINT_WELL_NODE_FLOW') 
             !
             CALL PRNT_MNW2_Q_NODE%OPEN(BL%LINE,LLOC,IOUT,IN,
-     +                                 NOBINARY=TRUE, SAVE_FNAME=TRUE)
+     +                                 NO_BINARY=TRUE, SAVE_FNAME=TRUE)
             !     
         CASE('PRINT_WELL_INOUT','PRINT_WELL_IN_OUT') 
             !
@@ -2390,18 +2390,22 @@ c  Skip to here unless in first SP
       !
       IF (IERR /= Z) THEN
           READ_ITMP = FALSE
+          itmp = Z
           !
           IF(MNW_FEED%NFEED<1 .AND. .NOT. HAS_FMP_WELLS) THEN
             CALL STOP_ERROR(INFILE=IN,OUTPUT=IOUT,MSG=
      + 'MNW2 ERROR:  FAILED TO READ STRESS PERIOD VARIABLE "ITMP".')
           END IF
           !
-          CALL WARNING_MESSAGE(OUTPUT=IOUT,
-     +    MSG='MNW2 FAILED TO LOAD ITMP.'//NL//'IT WILL BE ASSUMED '//
-     +    'TO BE ZERO (0)'//NL//'IF YOU ARE USING LINEFEED OR FMP '//
-     +    'THEN THESE MAY TURN ON WELLS AUTOMATICALLY.')
-          !
-          itmp = Z
+          WRITE(IOUT,'(/A)')
+     +    "MNW2 PACKAGE WARNING (don't panic): FAILED TO READ "//
+     +      'ITMP (STRESS PERIOD INPUT).'//NEW_LINE(' ')//
+     +    'THIS MAY BE DUE TO THE END OF THE FILE BEING REACHED IN '//
+     +      'THE MNW2 PACKAGE INPUT FILE.'//NEW_LINE(' ')//
+     +    'ITMP IS SET TO ZERO FOR THE REST OF THE SIMULATION.'//
+     +      NEW_LINE(' ')//
+     +    'IF YOU ARE USING LINEFEED OR FMP LINK, THEN THOSE RATES'//
+     +      ' ARE STILL APPLIED AND THE PACKAGE WILL OPERATE NORMALLY.' 
       END IF
       !
       !READ IN NEXT LINE IN LINE_FEED FILE WHICH CONTAINS THE CURRENT STRESS PERIODS DATA

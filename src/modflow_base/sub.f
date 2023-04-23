@@ -128,7 +128,7 @@ C
         INTEGER:: DSTR=Z,DHC =Z,DCME=Z,DCMV=Z,SDZ =Z
       END TYPE
       TYPE(SUBPARAM):: SUBP                                            ! SUBSIDENCE PARAMETER FLAGS 
-      INTEGER::ISUBLNK,ILPFLNK
+      INTEGER::ISUBLNK
       DIMENSION IFL(21)
       CHARACTER(24), DIMENSION(12):: ANAME
       CHARACTER(64):: TLINE
@@ -1068,7 +1068,7 @@ C
 C        SPECIFICATIONS:
 C     ------------------------------------------------------------------
       USE GLOBAL,    ONLY:HNEW,NCOL,NROW,ISSFLG,BOTM,LBOTM,IBOUND
-      USE GWFSUBMODULE ,ONLY: RNB,LN,LDN,HC,DHP,DH,DHC,NZ,DZ,
+      USE GWFSUBMODULE ,ONLY: RNB,LN,LDN,HC,DHP,DH,DHC,
      1                        NNDB,NDB,NN,NOCOMV,
      2                        HAS_DELAY_BED,HAS_INST_BED
 C
@@ -1151,7 +1151,7 @@ C     ------------------------------------------------------------------
       USE GWFUPWMODULE, ONLY: LAYAVG                                    !Required to update UPW conductances
       USE GWFSUBMODULE, ONLY: DVZ                                       !SUB-Linkage rth
 C     ------------------------------------------------------------------
-      INTEGER IGRID,KSTP,KPER,K,I,J,IC,IR,IL,IUNITSUB                   !ADDED IUNITSUB WSCHMID
+      INTEGER IGRID,KSTP,KPER,K,I,J,IUNITSUB                   !ADDED IUNITSUB WSCHMID
       INTEGER ILPF, IUPW, IHUF, Z
 C
       CALL SGWF2BAS7PNT(IGRID)
@@ -1241,14 +1241,12 @@ C        SPECIFICATIONS:
 C     ------------------------------------------------------------------
       USE CONSTANTS, ONLY: SNGL_ninf
       USE GLOBAL,    ONLY: RHS,HCOF,HNEW,HOLD,IBOUND,DELR,DELC,
-     1                     NCOL,NROW,ISSFLG,BOTM,LBOTM,LAYHDT
+     1                     NCOL,NROW,ISSFLG,BOTM,LBOTM
       USE GWFBASMODULE, ONLY: DELT
       USE SIPMODULE,    ONLY: V,HCLOSE
-      USE GWFNWTMODULE, ONLY: ICELL
-      USE GWFUPWMODULE, ONLY: Sn, LAYTYPUPW
       USE GWFSUBMODULE ,ONLY: RNB,LN,LDN,HC,SCE,SCV,DHP,DH,DHC,NZ,DZ,DP,
      1                        BB,AC1,AC2,ITMIN,NN,
-     1                        NDB,NNDB,NMZ,A1,A2,
+     1                        NDB,NNDB,A1,A2,
      1                        HAS_DELAY_BED,HAS_INST_BED
       IMPLICIT NONE
       INTEGER::KPER,KITER,ISIP,IGRID
@@ -1443,17 +1441,13 @@ C
 C     SPECIFICATIONS:
 C     ------------------------------------------------------------------
       USE GLOBAL,       ONLY: IOUT,NCOL,NROW,NLAY,IBOUND,HNEW,HOLD,
-     1                        BUFF,DELR,DELC,ISSFLG,BOTM,LBOTM,SUBLNK,
-     2                        LAYHDT
+     1                        BUFF,DELR,DELC,ISSFLG,BOTM,LBOTM
       USE GWFBASMODULE, ONLY: VBVL,VBNM,MSUM,ICBCFL,DELT
-      USE GWFBASMODULE, ONLY: PERTIM,TOTIM
       USE GWFSUBMODULE ,ONLY: RNB,LN,LDN,HC,SCE,SCV,SUB,SUBE,SUBV,DHP,
      1                        DH,DHC,NZ,DZ,DCOM,DCOME,DCOMV,DP,DVB,
-     2                        NN,ND2,NDB,NNDB,NMZ,IIBSCB,
-     3                        LPFLNK,DVZ,NOCOMV,SEPARTE_FLOWS,          !SUB-Linkage rth 
+     2                        NN,ND2,NDB,NNDB,IIBSCB,
+     3                        DVZ,NOCOMV,SEPARTE_FLOWS,          !SUB-Linkage rth 
      4                        HAS_DELAY_BED,HAS_INST_BED
-      USE GWFNWTMODULE, ONLY: ICELL
-      USE GWFUPWMODULE, ONLY: Sn, LAYTYPUPW
       CHARACTER(16) TEXT(4)
       DOUBLE PRECISION::HHNEW,HHOLD,BOT
       REAL:: STORIN_ELAS, STOROT_ELAS, STORIN_VIRG, STOROT_VIRG
@@ -1882,7 +1876,7 @@ C
 C     SPECIFICATIONS:
 C     ------------------------------------------------------------------
       USE GLOBAL,     ONLY: IOUT,NCOL,NROW,NLAY,NSTP,BUFF,ISSFLG,
-     +                      HNEW,BOTM,LBOTM,IBOUND,SUBLNK,LAYHDT,HOLD
+     +                      HNEW,BOTM,LBOTM,SUBLNK
       USE GWFBASMODULE, ONLY:PERTIM,TOTIM,HDRY,DELT,
      +                       DATE_SP,HAS_STARTDATE
       USE GWFSUBMODULE ,ONLY: LN,LDN,SUB,SUBE,SUBV,HC,RNB,DCOM,DCOME,
@@ -2584,9 +2578,7 @@ C29 WRITE OUT ANY Delay Heads
                 END ASSOCIATE
               END DO
           ELSE                    !SPECIFED INTERBED
-              DO CONCURRENT(IR=1:NROW,IC=1:NCOL) 
-                        BUFF(IC,IR,1)=HDRY
-              END DO
+              BUFF(:,:,1)=HDRY
               LOC4=0
               DO KQ=1,KQ_PRNT
                 K=LDN(KQ)

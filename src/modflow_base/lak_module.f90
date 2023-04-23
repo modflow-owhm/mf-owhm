@@ -6,11 +6,11 @@ MODULE GWFLAKMODULE
         !
         INTEGER,SAVE,POINTER:: IOUT
         !
-        CHARACTER(64),PARAMETER::Version_lak = '$Id: gwf2lak7_NWT.f 2370 2014-07-01 17:35:48Z rniswon $'
-        INTEGER,          SAVE,                   POINTER:: NLAKES,NLAKESAR,ILKCB,NSSITR,LAKUNIT,READTEST
+        INTEGER,          SAVE,                   POINTER:: NLAKES,NLAKESAR,ILKCB,NSSITR,LAKUNIT
         INTEGER,          SAVE,                   POINTER:: MXLKND,LKNODE,ICMX,NCLS,LWRT,NDV,NTRB,IRDTAB
+        INTEGER,          SAVE,                   POINTER:: ISTARTLAK,IGSFLOWLAK
         REAL,             SAVE,                   POINTER:: THETA,SSCNCR,SURFDEPTH
-        DOUBLE PRECISION,   SAVE,POINTER   ::RAMP
+        DOUBLE PRECISION,   SAVE,POINTER   ::RAMP, SMALLTOL
         REAL,   SAVE, DIMENSION(:),  POINTER :: DEADPOOLVOL,MXLKVOLF,RELEASABLE_STOR
 !dep    Added SURFDEPTH  3/3/2009
 !rgn    Added budget variables for GSFLOW CSV file
@@ -54,7 +54,7 @@ MODULE GWFLAKMODULE
         REAL,             SAVE, DIMENSION(:,:),   POINTER, CONTIGUOUS:: CAUG,CPPT,CLAKINIT
         REAL,             SAVE, DIMENSION(:,:,:), POINTER, CONTIGUOUS:: BDLKN1
 !dep  Added arrays for tracking lake budgets for dry lakes
-        REAL,             SAVE, DIMENSION(:),     POINTER, CONTIGUOUS:: EVAPO,FLWIN
+        REAL,             SAVE, DIMENSION(:),     POINTER, CONTIGUOUS:: FLWIN
         REAL,             SAVE, DIMENSION(:),     POINTER, CONTIGUOUS:: GWRATELIM
 !dep    Allocate arrays to add runoff from UZF Package
         REAL,             SAVE, DIMENSION(:),     POINTER, CONTIGUOUS:: OVRLNDRNF,CUMLNDRNF
@@ -78,9 +78,10 @@ MODULE GWFLAKMODULE
       TYPE GWFLAKTYPE
         INTEGER,      POINTER:: NLAKES,NLAKESAR,ILKCB,NSSITR,LAKUNIT, READTEST
         INTEGER,      POINTER:: MXLKND,LKNODE,ICMX,NCLS,LWRT,NDV,NTRB,IRDTAB
+        INTEGER,      POINTER:: ISTARTLAK,IGSFLOWLAK
 !dep    Added SURFDEPTH 3/3/2009
         REAL,         POINTER:: THETA,SSCNCR,SURFDEPTH
-        DOUBLE PRECISION,         POINTER   ::RAMP
+        DOUBLE PRECISION,        POINTER :: RAMP, SMALLTOL
         REAL,  DIMENSION(:),     POINTER :: DEADPOOLVOL,RELEASABLE_STOR,MXLKVOLF
 !rgn    Added budget variables for GSFLOW CSV file
         REAL,                               POINTER:: TOTGWIN_LAK,TOTGWOT_LAK,TOTDELSTOR_LAK
@@ -124,7 +125,7 @@ MODULE GWFLAKMODULE
         REAL,             DIMENSION(:,:),   POINTER, CONTIGUOUS:: CAUG,CPPT,CLAKINIT
         REAL,             DIMENSION(:,:,:), POINTER, CONTIGUOUS:: BDLKN1
 !dep  Added arrays for tracking lake budgets for dry lakes
-        REAL,             DIMENSION(:),     POINTER, CONTIGUOUS:: EVAPO,FLWIN
+        REAL,             DIMENSION(:),     POINTER, CONTIGUOUS:: FLWIN
         REAL,             DIMENSION(:),     POINTER, CONTIGUOUS:: GWRATELIM
 !dep    Allocate arrays to add runoff from UZF Package
         REAL,             DIMENSION(:),     POINTER, CONTIGUOUS:: OVRLNDRNF,CUMLNDRNF

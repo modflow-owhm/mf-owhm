@@ -26,39 +26,39 @@
             <Keywords name="Folders in comment, close"></Keywords>
             <Keywords name="Keywords1">DATE.START&#x000D;&#x000A;DATE.END&#x000D;&#x000A;SOLVER_ITERATION&#x000D;&#x000A;&#x000D;&#x000A;TS.LENGTH&#x000D;&#x000A;TS.NUM&#x000D;&#x000A;TS.START.DATE&#x000D;&#x000A;TS.START.DAY&#x000D;&#x000A;TS.START.MONTH&#x000D;&#x000A;TS.START.YEAR&#x000D;&#x000A;TS.START.DYEAR&#x000D;&#x000A;TS.START.YEAR_FRAC&#x000D;&#x000A;TS.START.DAY_FRAC&#x000D;&#x000A;TS.START.DOY&#x000D;&#x000A;TS.START.SIM_TIME&#x000D;&#x000A;TS.END.DATE&#x000D;&#x000A;TS.END.DAY&#x000D;&#x000A;TS.END.MONTH&#x000D;&#x000A;TS.END.YEAR&#x000D;&#x000A;TS.END.DYEAR&#x000D;&#x000A;TS.END.YEAR_FRAC&#x000D;&#x000A;TS.END.DAY_FRAC&#x000D;&#x000A;TS.END.DOY&#x000D;&#x000A;TS.END.SIM_TIME&#x000D;&#x000A;&#x000D;&#x000A;SP.NUM&#x000D;&#x000A;SP.LENGTH&#x000D;&#x000A;SP.START.DATE&#x000D;&#x000A;SP.START.DAY&#x000D;&#x000A;SP.START.MONTH&#x000D;&#x000A;SP.START.YEAR&#x000D;&#x000A;SP.START.DYEAR&#x000D;&#x000A;SP.START.YEAR_FRAC&#x000D;&#x000A;SP.START.DAY_FRAC&#x000D;&#x000A;SP.START.DOY&#x000D;&#x000A;SP.START.SIM_TIME&#x000D;&#x000A;SP.END.DATE&#x000D;&#x000A;SP.END.DAY&#x000D;&#x000A;SP.END.MONTH&#x000D;&#x000A;SP.END.YEAR&#x000D;&#x000A;SP.END.DYEAR&#x000D;&#x000A;SP.END.YEAR_FRAC&#x000D;&#x000A;SP.END.DAY_FRAC&#x000D;&#x000A;SP.END.DOY&#x000D;&#x000A;SP.END.SIM_TIME&#x000D;&#x000A;&#x000D;&#x000A;PROJ.1.INIT_FLAG&#x000D;&#x000A;PROJ.2.INIT_FLAG&#x000D;&#x000A;PROJ.3.INIT_FLAG&#x000D;&#x000A;PROJ.4.INIT_FLAG&#x000D;&#x000A;PROJ.5.INIT_FLAG&#x000D;&#x000A;PROJ.6.INIT_FLAG&#x000D;&#x000A;PROJ.7.INIT_FLAG&#x000D;&#x000A;PROJ.8.INIT_FLAG&#x000D;&#x000A;PROJ.9.INIT_FLAG&#x000D;&#x000A;PROJ.10.INIT_FLAG</Keywords>
             <Keywords name="Keywords2">&apos;END IF&apos;&#x000D;&#x000A;&apos;END DO&apos;&#x000D;&#x000A;&apos;END WHILE&apos;&#x000D;&#x000A;&apos;ELSE IF&apos;</Keywords>
-            <Keywords name="Keywords3">IF&#x000D;&#x000A;ELSEIF&#x000D;&#x000A;ELSE&#x000D;&#x000A;ENDIF&#x000D;&#x000A;END_IF&#x000D;&#x000A;&#x000D;&#x000A;DO&#x000D;&#x000A;ENDDO&#x000D;&#x000A;END_DO&#x000D;&#x000A;&#x000D;&#x000A;WHILE&#x000D;&#x000A;ENDWHILE&#x000D;&#x000A;END_WHILE&#x000D;&#x000A;&#x000D;&#x000A;PRINT&#x000D;&#x000A;&apos;PRINT VARIABLES&apos;&#x000D;&#x000A;&#x000D;&#x000A;LOOKUP&#x000D;&#x000A;TIME_SERIES&#x000D;&#x000A;</Keywords>
+            <Keywords name="Keywords3">IF&#x000D;&#x000A;ELSEIF&#x000D;&#x000A;ELSE_IF&#x000D;&#x000A;ELSE&#x000D;&#x000A;ENDIF&#x000D;&#x000A;END_IF&#x000D;&#x000A;&#x000D;&#x000A;DO&#x000D;&#x000A;ENDDO&#x000D;&#x000A;END_DO&#x000D;&#x000A;&#x000D;&#x000A;WHILE&#x000D;&#x000A;ENDWHILE&#x000D;&#x000A;END_WHILE&#x000D;&#x000A;&#x000D;&#x000A;PRINT&#x000D;&#x000A;&apos;PRINT VARIABLES&apos;&#x000D;&#x000A;&#x000D;&#x000A;LOOKUP&#x000D;&#x000A;TIME_SERIES&#x000D;&#x000A;&#x000D;&#x000A;&amp;&#x000D;&#x000A;|&#x000D;&#x000A;</Keywords>
             <Keywords name="Keywords4">ABS&#x000D;&#x000A;EXP&#x000D;&#x000A;LOG&#x000D;&#x000A;LOG10&#x000D;&#x000A;NEG&#x000D;&#x000A;SQRT&#x000D;&#x000A;ROUND&#x000D;&#x000A;TRUNCATE&#x000D;&#x000A;CEILING&#x000D;&#x000A;FLOOR&#x000D;&#x000A;NEG_TO_ZERO&#x000D;&#x000A;POS_TO_ZERO&#x000D;&#x000A;MAX&#x000D;&#x000A;MIN&#x000D;&#x000A;MAKE_DATE&#x000D;&#x000A;DATE_DIFF&#x000D;&#x000A;MONTHDAYS&#x000D;&#x000A;ADD_YEAR&#x000D;&#x000A;ADD_MONTH&#x000D;&#x000A;ADD_DAY&#x000D;&#x000A;JULIAN_DAY&#x000D;&#x000A;GET_DAY&#x000D;&#x000A;GET_MONTH&#x000D;&#x000A;GEY_YEAR&#x000D;&#x000A;HAS_MONTHDAY&#x000D;&#x000A;ADD_HOUR&#x000D;&#x000A;ADD_MIN&#x000D;&#x000A;ADD_SEC&#x000D;&#x000A;&#x000D;&#x000A;INTERPOLATE&#x000D;&#x000A;NEAREST&#x000D;&#x000A;STEP_FUNCTION&#x000D;&#x000A;NEXT_VALUE&#x000D;&#x000A;MAX&#x000D;&#x000A;MIN&#x000D;&#x000A;SUM&#x000D;&#x000A;DAY_SUM&#x000D;&#x000A;TIME_MEAN</Keywords>
             <Keywords name="Keywords5">BLOCK_INCLUDE&#x000D;&#x000A;&#x000D;&#x000A;ERROR_STOP&#x000D;&#x000A;ERRORSTOP&#x000D;&#x000A;WARNING</Keywords>
-            <Keywords name="Keywords6">== &#x000D;&#x000A;&lt;= &#x000D;&#x000A;&gt;= &#x000D;&#x000A;&lt; &#x000D;&#x000A;&gt; &#x000D;&#x000A;&amp; &#x000D;&#x000A;|&#x000D;&#x000A;!=&#x000D;&#x000A;=</Keywords>
-            <Keywords name="Keywords7">RES.&#x000D;&#x000A;PROJ.&#x000D;&#x000A;DIST.&#x000D;&#x000A;FARM.&#x000D;&#x000A;AUX.&#x000D;&#x000A;SFR.&#x000D;&#x000A;HNEW.&#x000D;&#x000A;HEAD.&#x000D;&#x000A;WATER_DEPTH.&#x000D;&#x000A;WATER_TABLE.</Keywords>
+            <Keywords name="Keywords6">== &#x000D;&#x000A;&lt;= &#x000D;&#x000A;&gt;= &#x000D;&#x000A;&lt; &#x000D;&#x000A;&gt; &#x000D;&#x000A;&#x000D;&#x000A;!=&#x000D;&#x000A;=</Keywords>
+            <Keywords name="Keywords7">RES.&#x000D;&#x000A;PROJ.&#x000D;&#x000A;DIST.&#x000D;&#x000A;FARM.&#x000D;&#x000A;AUX.&#x000D;&#x000A;SFR.&#x000D;&#x000A;HNEW.&#x000D;&#x000A;HEAD.&#x000D;&#x000A;WATER_DEPTH.&#x000D;&#x000A;WATER_TABLE.&#x000D;&#x000A;REQ.FLOW.&#x000D;&#x000A;REQ.DELIVERY.&#x000D;&#x000A;REQ.DELIVERY_VOL.&#x000D;&#x000A;TRAN.</Keywords>
             <Keywords name="Keywords8">BEGIN&#x000D;&#x000A;END</Keywords>
             <Keywords name="Delimiters">00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21 22 23</Keywords>
         </KeywordLists>
         <Styles>
             <WordsStyle name="DEFAULT" fgColor="000000" bgColor="FFFFFF" fontName="Consolas" fontStyle="0" fontSize="11" nesting="0" />
-            <WordsStyle name="COMMENTS" fgColor="000000" bgColor="FFFFFF" fontName="" fontStyle="0" fontSize="11" nesting="0" />
+            <WordsStyle name="COMMENTS" fgColor="000000" bgColor="FFFFFF" fontStyle="0" fontSize="11" nesting="0" />
             <WordsStyle name="LINE COMMENTS" fgColor="808080" bgColor="FFFFFF" fontName="Courier New" fontStyle="0" fontSize="11" nesting="0" />
             <WordsStyle name="NUMBERS" fgColor="000000" bgColor="FFFFFF" fontName="Consolas" fontStyle="1" fontSize="11" nesting="0" />
-            <WordsStyle name="KEYWORDS1" fgColor="008000" bgColor="FFFFFF" fontName="Verdana" fontStyle="1" fontSize="10" nesting="0" />
-            <WordsStyle name="KEYWORDS2" fgColor="FF0000" bgColor="FFFFFF" fontName="Consolas" fontStyle="1" fontSize="11" nesting="0" />
+            <WordsStyle name="KEYWORDS1" fgColor="008000" bgColor="FFFFFF" fontName="Verdana" fontStyle="1" fontSize="8" nesting="0" />
+            <WordsStyle name="KEYWORDS2" fgColor="F6BE00" bgColor="FF0000" fontName="Lucida Console" fontStyle="1" fontSize="11" nesting="0" />
             <WordsStyle name="KEYWORDS3" fgColor="0000FF" bgColor="FFFFFF" fontName="Consolas" fontStyle="1" fontSize="11" nesting="0" />
             <WordsStyle name="KEYWORDS4" fgColor="000000" bgColor="FFFFFF" fontName="Consolas" fontStyle="1" fontSize="11" nesting="0" />
-            <WordsStyle name="KEYWORDS5" fgColor="000000" bgColor="FFFFFF" fontName="Consolas" fontStyle="0" fontSize="11" nesting="0" />
-            <WordsStyle name="KEYWORDS6" fgColor="000000" bgColor="FFFFFF" fontName="" fontStyle="0" fontSize="11" nesting="0" />
-            <WordsStyle name="KEYWORDS7" fgColor="400080" bgColor="FFFFFF" fontName="Verdana" fontStyle="1" fontSize="10" nesting="0" />
+            <WordsStyle name="KEYWORDS5" fgColor="FF2400" bgColor="FFFFFF" fontName="Consolas" fontStyle="1" fontSize="11" nesting="0" />
+            <WordsStyle name="KEYWORDS6" fgColor="000000" bgColor="FFFFFF" fontName="Consolas" fontStyle="0" fontSize="11" nesting="0" />
+            <WordsStyle name="KEYWORDS7" fgColor="400080" bgColor="FFFFFF" fontName="Verdana" fontStyle="1" fontSize="8" nesting="0" />
             <WordsStyle name="KEYWORDS8" fgColor="008000" bgColor="FFFFFF" fontName="Verdana" fontStyle="1" fontSize="10" nesting="0" />
             <WordsStyle name="OPERATORS" fgColor="000000" bgColor="FFFFFF" fontName="Consolas" fontStyle="0" fontSize="11" nesting="0" />
             <WordsStyle name="FOLDER IN CODE1" fgColor="008000" bgColor="FFFFFF" fontName="Verdana" fontStyle="1" fontSize="10" nesting="0" />
             <WordsStyle name="FOLDER IN CODE2" fgColor="008000" bgColor="FFFFFF" fontName="Verdana" fontStyle="1" fontSize="10" nesting="0" />
-            <WordsStyle name="FOLDER IN COMMENT" fgColor="000000" bgColor="FFFFFF" fontName="" fontStyle="0" fontSize="11" nesting="0" />
+            <WordsStyle name="FOLDER IN COMMENT" fgColor="000000" bgColor="FFFFFF" fontStyle="0" fontSize="11" nesting="0" />
             <WordsStyle name="DELIMITERS1" fgColor="000000" bgColor="FFFFFF" fontName="Consolas" fontStyle="1" fontSize="11" nesting="0" />
-            <WordsStyle name="DELIMITERS2" fgColor="000000" bgColor="FFFFFF" fontName="" fontStyle="0" fontSize="11" nesting="0" />
-            <WordsStyle name="DELIMITERS3" fgColor="000000" bgColor="FFFFFF" fontName="" fontStyle="0" nesting="0" />
-            <WordsStyle name="DELIMITERS4" fgColor="000000" bgColor="FFFFFF" fontName="" fontStyle="0" nesting="0" />
-            <WordsStyle name="DELIMITERS5" fgColor="000000" bgColor="FFFFFF" fontName="" fontStyle="0" nesting="0" />
-            <WordsStyle name="DELIMITERS6" fgColor="000000" bgColor="FFFFFF" fontName="" fontStyle="0" nesting="0" />
-            <WordsStyle name="DELIMITERS7" fgColor="000000" bgColor="FFFFFF" fontName="" fontStyle="0" nesting="0" />
-            <WordsStyle name="DELIMITERS8" fgColor="000000" bgColor="FFFFFF" fontName="" fontStyle="0" nesting="0" />
+            <WordsStyle name="DELIMITERS2" fgColor="000000" bgColor="FFFFFF" fontStyle="0" fontSize="11" nesting="0" />
+            <WordsStyle name="DELIMITERS3" fgColor="000000" bgColor="FFFFFF" fontStyle="0" nesting="0" />
+            <WordsStyle name="DELIMITERS4" fgColor="000000" bgColor="FFFFFF" fontStyle="0" nesting="0" />
+            <WordsStyle name="DELIMITERS5" fgColor="000000" bgColor="FFFFFF" fontStyle="0" nesting="0" />
+            <WordsStyle name="DELIMITERS6" fgColor="000000" bgColor="FFFFFF" fontStyle="0" nesting="0" />
+            <WordsStyle name="DELIMITERS7" fgColor="000000" bgColor="FFFFFF" fontStyle="0" nesting="0" />
+            <WordsStyle name="DELIMITERS8" fgColor="000000" bgColor="FFFFFF" fontStyle="0" nesting="0" />
         </Styles>
     </UserLang>
 </NotepadPlus>

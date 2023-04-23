@@ -1,0 +1,144 @@
+
+PRINT ByWBS Output file from FMP LAND_USE Block
+
+Writes for each time step crop output information 
+summarized by WBS.  
+
+The output may be text or binary format.
+
+If the output file is text format, then it will contain a single header line
+followed by the output written for each time step. If the output file is binary format,
+then each times step writes a binary record containing only the output data.
+
+
+/-------------------------------------\
+|                                     |
+|    Text File Header Definition      |
+|                                     |
+\-------------------------------------/
+
+PER                        is the stress period number
+STP                        is the time step number
+WBS                        is the Water Balance Subregion (Farm) ID number
+WBS_AREA          [L2]     is the WBS area
+CROP_AREA         [L2]     is the area within the WBS_AREA that contains a crop. WBS_AREA - CROP_AREA is the bare soil area.
+IRRIGATED_AREA    [L2]     is the area of land that contains a crop that is irrigated
+EFFICIENCY                 is the calculated irrigation efficiency (OFE), which is the crop irrigation requirement / irrigation water demand.
+CU_INI            [L3/T]   is the initial-potential consumptive use of crop, which is the user-specified input CU plus Kc*ETref
+CU                [L3/T]   is the actual crop consumptive use based on water supply
+CIR_INI           [L3/T]   is the crop irrigation requirement to meet CU_INI, assuming no irrigation losses
+CIR               [L3/T]   is the crop irrigation requirement, assuming no irrigation losses, to meet CU_INI after it has been reduced by anoxia and soil-stresses
+DEMAND_INI        [L3/T]   is the irrigation demand to meet CIR_INI considering irrigation losses
+DEMAND            [L3/T]   is the irrigation demand necessary to satisfy CIR (includes irrigation losses).
+ADDED_DEMAND_INI  [L3/T]   is the initial additional irrigation demand specified for the crop
+ADDED_DEMAND      [L3/T]   is the final additional irrigation demand that was satisfied with supply 
+TOT_DEEP_PERC     [L3/T]   is the total loss of water to deep percolation (groundwater recharge)
+TOT_SURF_RUNOFF   [L3/T]   is the total loss of water to surface runoff
+ADDED_DMD_DPERC   [L3/T]   is the amount of ADDED_DEMAND irrigation that is lost as deep percolation
+ADDED_DMD_RUNOFF  [L3/T]   is the amount of ADDED_DEMAND irrigation that is lost as surface runoff
+TRAN_POT          [L3/T]   is the potential transpiration from the cropped area for the given CU_INI 
+ANOXIA_LOSS       [L3/T]   is the reduction in TRAN_POT due to plant anoxia (high groundwater level)
+SOIL_STRESS_LOSS  [L3/T]   is the reduction in TRAN_POT due to non-idealized soil stress
+TRAN              [L3/T]   is the actual crop transpiration (TRAN_IRR + TRAN_PRECIP + TRAN_GW)
+TRAN_SURF_INI     [L3/T]   is the initial-potential transpiration from precipitation and irrigation water 
+TRAN_SURF         [L3/T]   is actual transpiration from precipitation and irrigation water
+TRAN_IRR          [L3/T]   is the portion of transpiration (TRAN) from irrigation water supply
+TRAN_PRECIP       [L3/T]   is the portion of transpiration (TRAN) from precipitation
+TRAN_GW           [L3/T]   is the portion of transpiration (TRAN) from groundwater
+EVAP_IRR          [L3/T]   is the evaporation of water that originated from irrigation water supply
+EVAP_PRECIP       [L3/T]   is the evaporation of water that originated from precipitation
+EVAP_GW           [L3/T]   is the evaporation of water that originated from groundwater
+PRECIPITATION     [L3/T]   is the total precipitation
+DELT              [T]      is the time step length
+DYEAR                      is the date at the end of the time step as a decimal year
+DATE_START                 is the starting calendar date of the time step in the form: yyyy-mm-ddThh:mm:ss
+
+
+/-------------------------------------\
+|                                     |
+|    Binary File Record Formatting    |
+|                                     |
+\-------------------------------------/
+
+
+DATE_START          CHARACTER(19), starting date formatted as ‘yyyy-mm-ddThh:mm:ss’
+DYEAR               DOUBLE
+DELT                DOUBLE
+PER                 INTEGER
+STP                 INTEGER
+WBS                 INTEGER
+WBS_AREA            DOUBLE
+CROP_AREA           DOUBLE
+IRRIGATED_AREA      DOUBLE
+EFFICIENCY          DOUBLE
+CU_INI              DOUBLE
+CU                  DOUBLE
+CIR_INI             DOUBLE
+CIR                 DOUBLE
+DEMAND_INI          DOUBLE
+DEMAND              DOUBLE
+ADDED_DEMAND_INI    DOUBLE
+ADDED_DEMAND        DOUBLE
+TOT_DEEP_PERC       DOUBLE
+TOT_SURF_RUNOFF     DOUBLE
+ADDED_DMD_DPERC     DOUBLE
+ADDED_DMD_RUNOFF    DOUBLE
+TRAN_POT            DOUBLE
+ANOXIA_LOSS         DOUBLE
+SOIL_STRESS_LOSS    DOUBLE
+TRAN                DOUBLE
+TRAN_SURF_INI       DOUBLE
+TRAN_SURF           DOUBLE
+TRAN_IRR            DOUBLE
+TRAN_PRECIP         DOUBLE
+TRAN_GW             DOUBLE
+EVAP_IRR            DOUBLE
+EVAP_PRECIP         DOUBLE
+EVAP_GW             DOUBLE
+PRECIPITATION       DOUBLE
+
+
+/----------------------------\
+|                            |
+|   Additional Information   |
+|                            |
+\----------------------------/
+
+
+Date output is formatted using ISO 8601-1:2019 standard without a time zone designation:
+https://en.wikipedia.org/wiki/ISO_8601#Combined_date_and_time_representations
+
+The general format is:
+yyyy-mm-ddThh:mm:ss
+                   where:
+                         yyyy is the four digit Gregorian year
+                         mm   before the T is the two digit month number       (01 to 12)
+                         dd   is the two digit day of the month                (01 to {28, 29, 30, 31}, depending on the month)
+                         T    calendar date and 24-hour clock time separator
+                         hh   is the hour within the day                       (00 to 23 hour)
+                         mm   after the T is the two digit minutes in the hour (00 to 59 minute)
+                         ss   is the two digit seconds of the minute           (00 to 59 second)
+
+Output is in model units that uses an
+   L as a place holder for Length, L2 is for area, L3 is for volume and
+   T as a place holder for Time
+
+which are defined in the DIS package as being:
+   L: Feet, Meters, Centimeters, and Undefined
+   T: Seconds, Minutes, Hours, Days, Years, and Undefined
+
+------------------------------------------------------------------------------------------
+
+The MODFLOW-OWHM standard binary formatting is set to
+Fortran Unformatted Stream (C style binary).
+
+The description of each header indicates the Fortran variable
+that is used to write the binary recorded.
+
+The following explain their storage use:
+
+Keyword       Storage      Default Fortran Type  Python Numpy Type       Fortran 2003 Standard
+DOUBLE        8 bytes      Double Precision      numpy.dtype('float64')  REAL(kind=real64)
+INTEGER       4 bytes      Integer               numpy.dtype('int32')    INTEGER(kind=int32)
+CHARACTER(X)  X × 1 bytes  Character(X)          numpy.dtype('SX')       CHARACTER(len=X)
+SNGL          4 bytes      Real                  numpy.dtype('float32')  REAL(kind=real32)

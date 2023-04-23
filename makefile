@@ -1,5 +1,6 @@
-#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # MAKEFILE for compiling One-Water Hydrologic Flow Model (MF-OWHM)
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 # Developed by Scott E Boyce <seboyce@usgs.gov>
 #
@@ -8,22 +9,36 @@
 #
 #    Boyce, S.E., Hanson, R.T., Ferguson, I., Schmid, W., Henson, W., Reimann, T., Mehl, S.M., and Earll, M.M., 2020, One-Water Hydrologic Flow Model: A MODFLOW based conjunctive-use simulation software: U.S. Geological Survey Techniques and Methods 6–A60, 435 p., https://doi.org/10.3133/tm6A60
 #
-#    Boyce, S.E., 2022, MODFLOW One-Water Hydrologic Flow Model (MF-OWHM) Conjunctive Use and Integrated Hydrologic Flow Modeling Software, version 2.2.x: U.S. Geological Survey Software Release, https://doi.org/10.5066/P9P8I8GS
+#    Boyce, S.E., 2023, MODFLOW One-Water Hydrologic Flow Model (MF-OWHM) Conjunctive Use and Integrated Hydrologic Flow Modeling Software, version 2.3.x: U.S. Geological Survey Software Release, https://doi.org/10.5066/P9P8I8GS
 #
 # PROVIDED AS IS WITHOUT WARRANTY OR HELP.
 #
-# See next section to set the compiler type variables
-#   The initial setup has the compiler type variables set to the 
-#   Intel Fortran Compiler Classic (ifort) AND the 
-#   Intel C++ Compiler Classic (icc) to make a release x64 version
-#      However, this makefile default setup does not compile GMG so icc is not used.
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
-# This makefile contains the options for compiling mf-owhm using Intel, GFortran, and LLVM. 
-#   It is recommended to use the Intel Fortran Compiler Classic for compiling mf-owhm.
-#   gfortran is unlikely to successfully compile do to the variability of versions 
-#   included with linux or windows and several known compiler bugs present in multiple versions.
-#   At some point, mf-owhm may be refactored to work around the known compiler bugs.
+# This makefile contains the options for compiling using Intel, GFortran, and LLVM.  
+#   There are a set of known compiler bugs that have been summitted to Intel and GCC that prevent compilation.
+#   If you receive "internal compiler error" when running this makefile, it is because the compiler version does not work.
+#   
+#   The Intel Fortran compiler is now part of Intel oneAPI and has two different versions:
+#     Intel Fortran Compiler Classic (ifort) and Intel Fortran (ifx).
+#        ifx is not recommended and will raise lots of "internal compiler error"s
+#        ifort can have issues depending on the compiler version.
+#     oneAPI versioning is based on YYYY.m.p, where YYYY is year, m is major version, p and patch version.
+#     oneAPI versions may not match its subcomponents,
+#        for example, oneAPI version 2023.0.0, has ifx version 2023.0.0, and ifort version 2021.8.0
+#      
+#   Gfortran many versions that are identified by their major versioning. The current versions in use are 10.x.y, 11.x.y, and 12.x.y
+#     The gfortran version can be determined by "gfortran --version" and 
+#     specific major versions of gfortran can be invoked as gfortran-XX where XX is the major version, such as gfortran-12
+#    
 #   The LLVM compilers, FLANG and CLANG, are still experimental and not yet fully supported.
+#
+#   ifx                        WILL NOT compile this project (feature not implemented errors)
+#   ifort 2021.8.0             WILL NOT compile this project (oneAPI 2023.0.0)
+#   ifort 2021.7.0 and earlier WILL compile this project     (oneAPI 2022.2.1)
+#   gfortran 11.3.0 and 12.1.0 WILL compile this project (but raises runtime errors do to compiler bugs)
+# 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 # To Invoke/Compile type from command prompt:
 # make                  Compile the src files and testing files. Binary located in testing/bin
@@ -57,17 +72,48 @@
 #   --note all these variables should have detailed explanations where they are defined in this makefile.
 #   --bin_out overrides the default binary name with the user specified one, that is: $(F90) -o $(bin_out)
 #
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
 # If you want to use Intel Fortran on Windows 10 
 #    then run the makefile in the Intel Command Prompt (for example, run from the start menu: Compiler 19.1 Update 1 for Intel 64 Visual Studio 2019 environment)
 #    or you will get path or license errors from Intel.
 #    -- Linux Intel Fortran works fine with this makefile if ifort is in the PATH variable.
 #
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+# If you want to use Gfortran on Windows 10 
+#   then you will need to:
+#      1) Install MSYS: https://www.msys2.org/
+#      2) Add to windows PATH variable: 
+#            A) C:\msys64\mingw64\bin
+#            B) C:\msys64\usr\bin
+#      3) Open a bash prompt.
+#            A) If in windows path just type "bash" in the cmd.exe windows
+#            B) Otherwise, it is located at: C:\msys64\usr\bin\bash.exe
+#      4) Run the following commands in bash, 
+#            after each command restart bash (close and reopen the window)
+#            A) pacman --needed -S bash pacman pacman-mirrors msys2-runtime
+#            B) pacman -Syu
+#            C) pacman -Suu
+#            D) pacman -S make
+#            E) pacman -S mingw64/mingw-w64-x86_64-gcc
+#            F) pacman -S mingw64/mingw-w64-x86_64-gcc-fortran
+#            G) pacman -S mingw64/mingw-w64-x86_64-gdb
+# After that, you can now do updates to all components with the command:
+#      5) pacman -Suy
+#
+# To search for additional packages go to:
+#   https://packages.msys2.org/search
+#      and change the search in to "Packages"
+#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
 #         
-#############################################################################
-#############################################################################
-###   Set the following Variables                                         ###
-#############################################################################
-#############################################################################
+#################################################################################################################################
+#################################################################################################################################
+###   Set the following Variables                                         #######################################################
+#################################################################################################################################
+#################################################################################################################################
 #
 # Compilation Configuration-Optimization Scheme
 #   ===> Accepted Answers: RELEASE, DEBUG
@@ -81,6 +127,7 @@ USEGMG := NO
 # Compilation Software                        --> Indicates the compiler collection used for setting compiler flags
 #   ===> Accepted Answers: INTEL, GCC, LLVM       --> LLVM not fully-supported yet
 COMPILER := INTEL
+#
 #
 # Define the Fortran Compiler
 #                    ===> For example: gfortran, gfortran-9, gfortran-10, ifort
@@ -109,14 +156,20 @@ DBLE := YES
 ARG = 
 #
 #
-########################################################################
-########################################################################
-#             DO NOT MODIFY BELOW THIS LINE
-#            UNLESS YOU KNOW WHAT YOUR DOING
-########################################################################
-########################################################################
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+#################################################################################################################################@
+#################################################################################################################################@
+#             DO NOT MODIFY BELOW THIS LINE                           ###########################################################@
+#            UNLESS YOU KNOW WHAT YOUR DOING                          ###########################################################@
+#################################################################################################################################@
+#################################################################################################################################@
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 #
-########################################################################
+# Program Name for echo output
+ST:=
+# Whitespace starts after $(ST)
+#
+ECHO_NAME := $(ST)                     MF-OWHM
 #
 #
 #Define final BIN, SOURCE, and Testing directories => Can be blank, but do not include the trailing forward slash /
@@ -149,9 +202,6 @@ bif_sub_dir := $(bif_src_dir)/datetime             \
                $(bif_src_dir)/unit_test            \
                $(bif_src_dir)/util_misc
 #
-#src_slg := $(src)/slang
-#src_swo := $(src)/swo
-#
 # Location where test files are run
 test_dir ?=./examples
 #
@@ -160,17 +210,6 @@ test_dir ?=./examples
 obj_dir :=$(strip $(shell echo $(CONFIG) | tr A-Z a-z))_$(strip $(shell echo $(F90) | tr A-Z a-z))
 int_dir ?=./obj/$(obj_dir)
 #int_dir:= ./obj
-#
-#
-#############################################################################
-#
-#Define the source code directory search path (really only need source directories)
-#
-#
-VPATH := $(src_dir)     $(int_dir)     $(bin_dir)     \
-         $(cfp_src_dir) $(fmp_src_dir) $(gmg_src_dir) \
-         $(mfb_src_dir) $(nwt_src_dir) $(bif_src_dir) \
-         $(bif_sub_dir)  $(slg_src_dir) $(swo_src_dir)
 #
 #
 #############################################################################
@@ -323,6 +362,8 @@ main_src:= \
            $(mfb_src_dir)/mnw1.f                            \
            $(mfb_src_dir)/mnw2.f                            \
            $(mfb_src_dir)/mnw2i.f                           \
+           $(mfb_src_dir)/wel8.f                            \
+           $(mfb_src_dir)/wel7.f                            \
            $(fmp_src_dir)/fmp_dimension_data.f90            \
            $(fmp_src_dir)/allotment_data.f90                \
            $(fmp_src_dir)/options_data.f90                  \
@@ -360,8 +401,6 @@ main_src:= \
            $(mfb_src_dir)/obs2ghb.f                         \
            $(mfb_src_dir)/obs2riv.f                         \
            $(mfb_src_dir)/solver_rp.f                       \
-           $(mfb_src_dir)/wel8.f                            \
-           $(mfb_src_dir)/wel7.f                            \
            $(mfb_src_dir)/lgr.f                             \
            $(mfb_src_dir)/lmt.f                             \
            $(fmp_src_dir)/fmp_main_driver.f90               \
@@ -373,21 +412,38 @@ main_src:= \
            $(cfp_src_dir)/cfp2utl.f                         \
            $(cfp_src_dir)/cfp2_TM_utl.f                     \
            $(slg_src_dir)/s_language_global_pull.f90        \
-           $(src)main.f90
+           $(src_dir)/main.f90
+#
+#############################################################################
+#
+# Listing of all source files (if multiple variables for specifying source locations)
 #
 all_src := $(GMG_src) $(bif_src) $(main_src)
 #
-# Get all source names with extension changed to ".o"
-obj:=  $(patsubst               %.f90, %.o,   \
-         $(patsubst             %.f,   %.o,   \
-           $(patsubst           %.fpp, %.o,   \
-             $(patsubst         %.c,   %.o,   \
-               $(patsubst       %.for, %.o,   \
-                 $(patsubst     %.F,   %.o,   \
-                   $(patsubst   %.F90, %.o,   \
-                     $(patsubst %.FOR, %.o,   \
-                            $(notdir $(all_src))  \
-        ) ) ) ) ) ) ) )
+#############################################################################
+#
+#Define the source code directory search path (really only need source directories)
+#      $(sort $(dir $(all_src))) gets all the directories that source files reside in 
+#                                -? "$(sort" XYZ) removes duplicates
+#
+VPATH := $(sort $(dir $(all_src)))  $(int_dir)  $(bin_dir)
+#
+#############################################################################
+#
+# Change all source names with extension changed to ".o"
+obj:=$(addsuffix .o, $(basename $(notdir $(all_src))))
+
+# Old method, manually replace each extension by patter matching
+#obj:=  $(patsubst               %.f90, %.o,   \
+#         $(patsubst             %.f,   %.o,   \
+#           $(patsubst           %.fpp, %.o,   \
+#             $(patsubst         %.c,   %.o,   \
+#               $(patsubst       %.for, %.o,   \
+#                 $(patsubst     %.F,   %.o,   \
+#                   $(patsubst   %.F90, %.o,   \
+#                     $(patsubst %.FOR, %.o,   \
+#                            $(notdir $(all_src))  \
+#        ) ) ) ) ) ) ) )
 #
 #obj:= $(patsubst %.f90,%.o,$(patsubst %.f,%.o,$(src)))
 #
@@ -485,10 +541,10 @@ PROGRAM :=$(strip $(PROGRAM))
 #
 ifeq ($(CFG), DEBUG)
    #
-   PROGRAM:=$(PROGRAM)_debug
+   PROGRAM:=$(PROGRAM)-debug
    #
    F90FlagsIntel :=-O0 -g -debug -traceback -assume nocc_omp -fpe0 -fp-model source -nologo -warn nousage -check bounds,pointers,stack,format,output_conversion,uninit
-   F90FlagsGCC   :=-O0 -g -w -fbacktrace -fdefault-double-8  -ffree-line-length-2048 -fmax-errors=10 -ffpe-trap=zero,overflow,underflow -finit-real=nan #-fstack-usage  #<= THIS PROVIDES LOTS OF INFO   -std=f2008
+   F90FlagsGCC   :=-O0 -g -w -fbacktrace -fdefault-double-8  -ffree-line-length-2048 -fmax-errors=10 -ffpe-trap=zero,overflow,underflow -finit-real=nan -fcheck=all # -fstack-usage #<= THIS PROVIDES LOTS OF INFO   -std=f2008
    F90FlagsLLVM  :=
    #
    CFlagsIntel   :=-O0 -debug -g  -fbuiltin 
@@ -620,11 +676,21 @@ runTest: runMake
 #
 startMSG:
 	${echo2}
-	@echo "                 $(CFG) COMPILATION"
-	@echo
-	@echo "                        OF"
-	@echo
-	@echo "                     MF-OWHM"
+	@echo "################################################################################"
+	@echo "################################################################################"
+	@echo "################################################################################"
+	@echo "#                                                                              #"
+	@echo "#                                                                              #"
+	@echo "#                 $(CFG) COMPILATION"
+	@echo "#                                                                              #"
+	@echo "#                        OF                                                    #"
+	@echo "#                                                                              #"
+	@echo "#$(ECHO_NAME)"
+	@echo "#                                                                              #"
+	@echo "#                                                                              #"
+	@echo "################################################################################"
+	@echo "################################################################################"
+	@echo "################################################################################"
 	${echo2}
 #
 CompFlags:
@@ -658,10 +724,10 @@ $(bin_out): $(addprefix $(int_dir)/,$(obj))
 	   echo; echo                                                                              ;  \
 	   echo "OBJECTS HAVE BEEN CREATED NOW LINKING FINAL BINARY:"                              ;  \
 	   echo                                                                                    ;  \
-	   echo "                              $(bin_out)"                                         ;  \
+	   echo "$(F90)  $(int_dir)/*.o  -o  $@"                                                   ;  \
 	   echo                                                                                    ;  \
 	else                                                                                          \
-	   echo "NOW LINKING FINAL BINARY"                                                        ;  \
+	   echo "NOW LINKING FINAL BINARY"                                                         ;  \
 	   echo                                                                                    ;  \
 	fi
 	@$(F90) $(F90FLAGS) $(mod)   $^   $(STATICLNK)  -o  $@
@@ -672,8 +738,13 @@ dashes:
 	${echo2}
         
 completed:
-	@echo "   MAKEFILE COMPILATION COMPLETE"
-	${echo2}
+	@echo "#########################################"
+	@echo "###                                   ###"
+	@echo "###   MAKEFILE COMPILATION COMPLETE   ###"
+	@echo "###                                   ###"
+	@echo "#########################################"
+	${echo4}
+
 #
 #      --> Note this uses the Unix find command and NOT Windows
 #          If you get an error on windows, its using the wrong one --> See MinGW or MySYS64)
@@ -710,6 +781,10 @@ errorClean:
 	${echo2}
 	rm -rf $(bin_out) 
 	${echo2}
+	@echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
+	@echo "@@########################################################@@"
+	@echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
+	${echo4}
 #
 reset: 
 	@echo
@@ -723,7 +798,7 @@ reset:
 	${echo2}
 #
 # The following target allows for printing a specific variable.  old method: @echo $*=$($*)
-#  make print-CC  --> will print out hte value of $(CC)
+#  make print-CC  --> will print out the value of $(CC)
 #
 print-%:
 	@echo '$*=$($*)'

@@ -10,7 +10,7 @@
 #
 BEGIN OPTIONS
     #
-    # Run model but don't solve gw equation to cycle through all input files 
+    # Run model but don't solve gw equation to cycle through all input files
  ###INPUT_CHECK
     #
     # Has the same effect as including the "COMPACT BUDGET" in the Output Control (OC) package
@@ -85,6 +85,7 @@ BEGIN OPTIONS
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Print entire model grid head value at the specified stress period and time step or date.
     #   SPTS must either be a single date, 4/23/1979, which is located within a time step
+    #                                                 or a stress period only, which will automatically use the last time step, such as:  55
     #                                                 or a stress period and time step, such as:  55  2
     #        can be set to NPER to get the last stress period, and optionally specify the time step afterwards
     #        if set to the keyword "LAST_TIMESTEP",  then will write the head for the last time step of every stress period -> For example, "PRINT_HEAD  LAST_TIMESTEP  ./output/head.txt" will write to head.txt the head arrays at the end of the last time step for each stress period.

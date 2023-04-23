@@ -114,7 +114,7 @@ C-----          used.
      +'   but ZoneBudget thinks its single precision, '//LF//
      +'   is single precision when is double, '//LF//
      +'   or the binary contains a mixture of the two.'//LF//LF//
-     +'4) The binary is not compatible with ZoneBudget 3.2. '//LF//
+     +'4) The binary is not compatible with ZoneBudget 3.3. '//LF//
      +'    - Contact a developer for help'//LF//LF
       CHARACTER(:), ALLOCATABLE:: ERRMSG
       !
@@ -128,7 +128,7 @@ C     ------------------------------------------------------------------
               END FUNCTION
       END INTERFACE
       
-      VERSON='ZONEBUDGET version 3.2'
+      VERSON='ZONEBUDGET version 3.3'
 C
 C-----DEFINE INPUT AND OUTPUT UNITS AND INITIALIZE OTHER VARIABLES
       INZN1    = 10
@@ -163,13 +163,39 @@ C-----TELL THE USER WHAT THIS PROGRAM IS
      +'           ONE-WATER HYDROLOGIC-FLOW MODEL',
      +'   The U.S. Geological Survey Modular Finite-Difference',
      +'          Conjunctive Use Simulation Program'
-      WRITE(*,'(/,*(A,/))') 
-     +'This ZoneBudget code and compiled executable are located at:',
-     +'',
-     +'         https://code.usgs.gov/modflow/mf-owhm','',
-     +'For download info see the README.md or README.pdf',
-     +'For bug fixes and new features see the '//
-     +                     'CHANGELOG.md or CHANGELOG.pdf'
+      !
+      WRITE (*,'(A)')
+      WRITE (*,'(*(A, /))') REPEAT('-',84),                          
+     + 'USGS Software Disclaimer:                         '//
+     +                          '                                 |', 
+     + '                                                  '//
+     +                          '                                 |', 
+     + '   No warranty, expressed or implied, is made by t'//
+     +                          'he USGS or the U.S. Government   |', 
+     + '   as to the functionality of the software and rel'//
+     +                          'ated material nor shall the      |', 
+     + '   fact of release constitute any such warranty.  '//
+     +                          '                                 |', 
+     + '                                                  '//
+     +                          '                                 |', 
+     + '   The software is provided on the condition that '//
+     +                          'neither the USGS nor             |', 
+     + '   the U.S. Government shall be held liable for an'//
+     +                          'y damages resulting from the     |', 
+     + '   authorized or unauthorized use of the software.'//
+     +                          '                                 |', 
+     + '                                                  '//
+     +                          '                                 |', 
+     + '   Newer versions may be present at the official c'//
+     +                          'ode and download repository:     |', 
+     + '      https://code.usgs.gov/modflow/mf-owhm       '//
+     +                          '                                 |', 
+     + '   in the postprocessors/zonebudget/bin directory.    '//
+     +                              '                             |',  
+     + '                                                  '//
+     +                          '                                 |', 
+     + REPEAT('-',84)
+      WRITE (*,'(A)')
 C
 C-----OPEN LISTING FILE(S)
       WRITE(*,*)
@@ -228,10 +254,39 @@ C-----WRITE OUTPUT FILE
      +'           ONE-WATER HYDROLOGIC-FLOW MODEL',
      +'   The U.S. Geological Survey Modular Finite-Difference',
      +'          Conjunctive Use Simulation Program'
-      WRITE(IOUT,'(/,*(A,/))') 
-     +'This ZoneBudget code and compiled executable are located at:','',
-     +'         https://code.usgs.gov/modflow/mf-owhm','',
-     +'Please read the README.md or README.pdf for download info.'
+      !
+      WRITE (*,'(A)')
+      WRITE (*,'(*(A, /))') REPEAT('-',84),                          
+     + 'USGS Software Disclaimer:                         '//
+     +                          '                                 |', 
+     + '                                                  '//
+     +                          '                                 |', 
+     + '   No warranty, expressed or implied, is made by t'//
+     +                          'he USGS or the U.S. Government   |', 
+     + '   as to the functionality of the software and rel'//
+     +                          'ated material nor shall the      |', 
+     + '   fact of release constitute any such warranty.  '//
+     +                          '                                 |', 
+     + '                                                  '//
+     +                          '                                 |', 
+     + '   The software is provided on the condition that '//
+     +                          'neither the USGS nor             |', 
+     + '   the U.S. Government shall be held liable for an'//
+     +                          'y damages resulting from the     |', 
+     + '   authorized or unauthorized use of the software.'//
+     +                          '                                 |', 
+     + '                                                  '//
+     +                          '                                 |', 
+     + '   Newer versions may be present at the official c'//
+     +                          'ode and download repository:     |', 
+     + '      https://code.usgs.gov/modflow/mf-owhm       '//
+     +                          '                                 |', 
+     + '   in the postprocessors/zonebudget/bin directory.    '//
+     +                              '                             |',  
+     + '                                                  '//
+     +                          '                                 |', 
+     + REPEAT('-',84)
+      WRITE (*,'(A)')
 C
 C-----OPEN LISTING FILE(S)
       WRITE(*,*)
@@ -1020,9 +1075,16 @@ C
       IF(NZDIM.EQ.0) THEN
          CALL STOP_ERROR('', 0, IOUT, 'Error - No zones defined')
       END IF
-      WRITE(*,195) (LSTZON(M),M=1,NZDIM)
-195   FORMAT(*(I5))
-      WRITE(IOUT,195) (LSTZON(M),M=1,NZDIM)
+      DO M=1, NZDIM
+         WRITE(*,   '(1x,2A)', ADVANCE='NO') INT2STR(LSTZON(M))
+         WRITE(IOUT,'(1x,2A)', ADVANCE='NO') INT2STR(LSTZON(M))
+         IF(MOD(M, 25) == 0) THEN
+            WRITE(*,*)
+            WRITE(IOUT,*) 
+         END IF
+      END DO
+      WRITE(*,*)
+      WRITE(IOUT,*) 
 C
 C  Change IZONE to the zone index number
       DO 300 K=1,NLAY

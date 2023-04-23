@@ -1,0 +1,80 @@
+
+BAS Package Options block keyword CUMULATIVE_RESIDUAL_ERROR_ARRAY
+
+Writes at the end of the simulation the total absolute 
+residual errors (RE) for the model grid. See note below for RE definition.
+This prints out NLAY arrays that represent the cell by cell errors.
+
+The general file structure is:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
+LAY lay      PER  TS  per  stp      NLAY NROW NCOL nlay nrow ncol            |
+array                                                                        |
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
+where the upper case words are part of the file and 
+the lower case are defined as:
+
+lay   is the lay number that array pertains to
+per   is the stress period that the array pertains to (last stress period of simulation)
+stp   is the time step     that the array pertains to (last time step     of simulation)
+nlay  is the number of layers  in the model
+nrow  is the number or rows    in the model
+ncol  is the number or columns in the model
+array is the NROW by NCOL array of cumulative volume errors [L3]
+
+
+This is then repeated for each model layer within the same file.
+
+For example, if you have (NLAY, NROW, NCOL) = (2, 3, 4) and (NPER, NSTP[NPER]) = (60, 2)
+then an example output would be:
+
+LAY 1      PER  TS 600   2      NLAY NROW NCOL  2      3    4
+0.0000000E+00  5.1022327E+04  4.1597557E+04  0.0000000E+00
+2.5147287E+04  4.6456265E+04  3.3370700E+04  0.0000000E+00
+0.0000000E+00  0.0000000E+00  2.3340061E+04  4.2351772E+04
+LAY 2      PER  TS 600   2      NLAY NROW NCOL  2      3    4
+0.0000000E+00  1.0680754E+04  1.2539925E+04  0.0000000E+00
+0.0000000E+00  1.6113413E+05  1.1593084E+04  0.0000000E+00
+0.0000000E+00  0.0000000E+00  1.1119801E+04  0.0000000E+00
+
+Note that if the cell location has IBOUND=0 at the start of the simulation, 
+then its cumulative error is zero.
+ 
+
+/----------------------------\
+|                            |
+|   Additional Information   |
+|                            |
+\----------------------------/
+
+Output is in model units that uses an
+   L as a place holder for Length, L2 is for area, L3 is for volume and
+   T as a place holder for Time
+
+which are defined in the DIS package as being:
+   L: Feet, Meters, Centimeters, and Undefined
+   T: Seconds, Minutes, Hours, Days, Years, and Undefined
+   
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Residual Error (RE) has the following derivation:
+ 
+   Ah = RHS       -> What MODFLOW solves
+
+where:
+   A is the finite difference system matrix
+   h is the head solution vector (what is being solved for)
+   RHS is the right hand side of the equations (sometimes denoted as b)
+   
+Since h not an exact solution, the residual error is 
+determined by calculating the solution mismatch
+   
+   Ah = RHS       -> subtract RHS over
+   Ah - RHS = 0   -> should be zero, but nonzero due to numerical errors
+   Ah - RHS = RE  -> The residual error
+
+The total RE would be the absolute sum of RE for all time steps.  
+ 
+
+
+
+

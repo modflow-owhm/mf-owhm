@@ -58,9 +58,9 @@ MODULE FMP_MAIN_DRIVER
     CHARACTER(250):: LINE  !Only to hold "BEGIN NAME"
     CHARACTER(10):: WORD   !Used to get "BEGIN"
     !
-    INTEGER:: LLOC,N,NF,NS,NC
+    INTEGER:: LLOC, N, NF, NS, NC, NFARM
     !
-    LOGICAL:: EOF, FOUND_BEGIN
+    LOGICAL:: EOF, FOUND_BEGIN, NO_GLOBAL_FOUND
     !
     ! LGR Pointer Update
     !
@@ -82,8 +82,6 @@ MODULE FMP_MAIN_DRIVER
     !
     ALLOCATE(FCROP,SWFL,CLIMATE,ALLOT,SOIL,FMPOPT,FMPOUT,SALT)
     ALLOCATE(SWODAT)
-    !
-    FDIM%NFARM = Z
     !
     WBS%HAS_SFR  = IUNITSFR  .NE. Z
     WBS%HAS_UZF  = IUNITUZF  .NE. Z
@@ -123,6 +121,7 @@ MODULE FMP_MAIN_DRIVER
     !
     !  Search for Global Dimension Block
     !
+    NO_GLOBAL_FOUND = TRUE 
     CALL READ_TO_DATA(LINE,IN_FMP,IOUT,EOF=EOF)
     DO WHILE (.NOT. EOF)
        LLOC=ONE
@@ -133,26 +132,30 @@ MODULE FMP_MAIN_DRIVER
                          !
                          CALL BLK%LOAD(IN_FMP,IOUT,LINE)
                          CALL FDIM%INIT(BLK, NROW, NCOL, IUNITUZF, WBS%GSE)
-                         CALL UTF8_BOM_OFFSET_REWIND(IN_FMP)
+                         NO_GLOBAL_FOUND = FALSE
                          EXIT
                    END IF
        END IF
        CALL READ_TO_DATA(LINE,IN_FMP,IOUT,EOF=EOF)
     END DO
     !
+    CALL UTF8_BOM_OFFSET_REWIND(IN_FMP)
+    !
     CALL SGWF2BAS7PSV(IGRID)  !Ensure that BAS/DIS is backed up due to changes in FDIM
     CALL SGWF2BAS7PNT(IGRID)  !Ensure that BAS Pointers are correct before using FDIM
     !
-    !
+    IF(NO_GLOBAL_FOUND) CALL STOP_ERROR(BLNK,IN_FMP,IOUT,MSG=                                     &
+            'FAILED TO LOCATE "BEGIN GLOBAL DIMENSION" WITHIN FMP INPUT FILE'//NL//               &
+            'FMP AT REQUIRES AT THE MINUMUM SPECIFYING THE "GLOBAL DIMENSION" BLOCK INPUT.'//NL// &
+            '-- PLEASE CHECK INPUT --')
+    
     IF(FDIM%NFARM < Z) CALL STOP_ERROR(BLNK,IN_FMP,IOUT,MSG=                                        &
-            'FAILED TO LOCATE "GLOBAL DIMENSION" BLOCK WITHIN FMP INPUT FILE'//NL//                       &
-            'OR IT FAILED TO LOAD ITS CONTENTS'//BLN//                                                    &
-            'FMP AT REQUIRES AT THE MINUMUM SPECIFYING THE "GLOBAL DIMENSION" BLOCK.'//BLN//              &
-            'PLEASE CHECK INPUT'//NL//                                                                    &
-            '(NOTE THE INPUT IS SCANNED FOR THESE BLOCKS FIRST SO THEIR POSITION DOES NOT MATTER.'//NL//  &
-            'HOWEVER BLOCKS THAT DO NOT HAVE A CORRESPONDING END OR '//NL//                               &
-            'HAVE UNCOMMENTED/NONBLANK LINES OUTSIDE OF A BLOCK'//NL//                                    &
-            'MAY CAUSE OneWater TO CRASH')
+            'FOUND GLOBAL DIMENSION BLOCK,'//NL//                                                   &
+            'BUT IT DID NOT SPECIFY THE NUMBER OF WATER BALANCE SUBREGIONS (NWBS).'//NL//                       &
+            'IT IS REQUIRED AT A MINIMUM TO SPECIFY NWBS FOLLOWED BY AN INTEGER (eg "NWBS 1" or "NWBS 4").')
+    !
+    NFARM = FDIM%NFARM
+    IF(NFARM < ONE) NFARM = ONE  ! Note FDIM%NFARM will be updated at end of subroutine
     !
     ! IF LOADED BUILD ISTRM INDEX
     IF( NSEG > 0 ) THEN
@@ -172,11 +175,7 @@ MODULE FMP_MAIN_DRIVER
         CALL SFR_DELIV%ALLOC(ONE)
     END IF
     !
-    IF(FDIM%NFARM > Z) THEN
-        ALLOCATE(FWELL(FDIM%NFARM))
-    ELSE
-        ALLOCATE(FWELL(ONE))   
-    END IF
+    ALLOCATE(FWELL(NFARM))
     !
     WBS%NFARM = NEG
     !
@@ -200,12 +199,13 @@ MODULE FMP_MAIN_DRIVER
                     CONTINUE
                 END IF
               END IF
-              CALL UTF8_BOM_OFFSET_REWIND(IN_FMP)
               EXIT
            END IF
        END IF
        CALL READ_TO_DATA(LINE,IN_FMP,IOUT,EOF=EOF)
     END DO
+    !
+    CALL UTF8_BOM_OFFSET_REWIND(IN_FMP)
     !
     BLK%EXTRA = 'GO'   !This ensures that loop starts
     !
@@ -243,7 +243,7 @@ MODULE FMP_MAIN_DRIVER
       ELSEIF(BLK%NAME == 'CLIMATE' .AND. BLK%NLINE>0) THEN
              !
              WBS%HAS_CLIM =  TRUE
-             CALL INITIALIZE_CLIMATE_DATA(BLK,CLIMATE,LINE,FDIM)
+             CALL INITIALIZE_CLIMATE_DATA(BLK,CLIMATE,LINE,FDIM,WBS%HAS_CROP)
              !
       ELSEIF( (BLK%NAME == 'ALLOTMENT' .OR. BLK%NAME == 'ALLOTMENTS') .AND. BLK%NLINE>0) THEN
              WBS%HAS_ALLOT = TRUE
@@ -289,21 +289,30 @@ MODULE FMP_MAIN_DRIVER
     END DO  
     CALL BLK%DESTROY()
     !                                                                                                                       
-    IF(WBS%NFARM < Z) CALL STOP_ERROR(BLNK,IN_FMP,IOUT,MSG=                                                           &
-                      'FAILED TO LOCATE "WATER_BALANCE_SUBREGION" BLOCK ("BEGIN WATER_BALANCE_SUBREGION") WITHIN FMP INPUT FILE'//NL//       &
-                      'OR IT FAILED TO LOAD ITS CONTENTS'//BLN//                                                                             &
-                      'FMP AT REQUIRES AT THE MINUMUM SPECIFYING THE "GLOBAL DIMENSION" AND "WATER_BALANCE_SUBREGION" BLOCKS.'//BLN//        &
-                      'PLEASE CHECK INPUT'//NL//'(NOTE THE INPUT IS SCANNED FOR THESE BLOCKS FIRST SO THEIR POSITION DOES NOT MATTER.'//NL// &
-                      'HOWEVER BLOCKS THAT DO NOT HAVE A CORRESPONDING END OR '//NL//                                                        &
-                      'HAVE UNCOMMENTED/NONBLANK LINES OUTSIDE OF A BLOCK'//NL//                                                             &
-                      'MAY CAUSE OneWater TO CRASH')
-                      !
+    IF(WBS%NFARM < Z .AND. FDIM%NFARM > Z) CALL STOP_ERROR(BLNK,IN_FMP,IOUT,MSG=                                                           &
+                      'THE "GLOBAL DIMENSION" BLOCK SPECIFIED NWBS > 0, BUT FAILED TO LOCATE THE "WATER_BALANCE_SUBREGION" BLOCK.'//NL//   &
+                      'IF NWBS > 0, THEN YOU MUST SPECIFY THE WATER_BALANCE_SUBREGION BLOCK AND SPECIFY IN IT THE "LOCATION" KEYWORD.'//NL//                                                        &
+                      'OTHERWISE FMP DOES NOT KNOW HOW THE GEOGRAPHIC LOCATION OF EACH WBS.' )
+    
+    IF(WBS%NFARM < Z) THEN
+        CALL WARNING_MESSAGE(OUTPUT=IOUT,MSG='FMP FAILED TO LOCATE THE "WATER_BALANCE_SUBREGION" BLOCK AND NWBS < 1.'//NL//              &
+                                             'FMP WILL SET NWBS = 1 AND SET THE ENTIRE MODEL GRID AS BEING ASSOCIATED WITH WBS1.'//NL//  &
+                                             'That is, the following is assumed:'//BLN//  &
+                                             'BEGIN GLOBAL DIMENSION'//NL//               &
+                                             '           NWBS 1"'//NL//                   &
+                                             'END  GLOBAL DIMENSION'//BLN//               &
+                                             'BEGIN WATER_BALANCE_SUBREGION'//NL//        &
+                                             '           LOCATION STATIC LIST CONSTANT 1"'//NL//  &
+                                             'END WATER_BALANCE_SUBREGION')
+        CALL WBS%SETUP_NO_WBS_DATA(FDIM, IN_FMP, IOUT)
+    END IF
+    !                  !
     IF(.NOT. WBS%HAS_SOIL) THEN
          CALL WARNING_MESSAGE(OUTPUT=IOUT,MSG=BLN//                                                                                                  &
                        'FMP INPUT FAILED TO LOCATE THE SOIL BLOCK (BEGIN SOIL).'//BLN//                                                                &
                        'IT WILL AUTOMATICALLY SET THE SOIL ID TO ONE AND SET THE CAPILARY FRINGE DEPTH TO ZERO (0.0).'//BLN//                          &
                        'THIS WILL PREVENT ANY EVAPORATION OF GROUNDWATER.'//BLN//                                                                      &
-                       'IF YOU ARE DEFINING CROPS (NCROP>0), THEN THERE IS A SMALL CHANGE (VERY SMALL) OF GETTING A DIV/0 FLOATING POINT ERROR.'//BLN, &
+                       'IF YOU ARE DEFINING CROPS (NCROP>0), THEN THERE IS A SMALL CHANCE (VERY SMALL) OF GETTING A DIV/0 FLOATING POINT ERROR.'//BLN, &
                        CMD_PRINT=TRUE)
      CALL SOIL%NO_SOIL(FDIM, TRUE)
     END IF
@@ -312,9 +321,8 @@ MODULE FMP_MAIN_DRIVER
         CALL WARNING_MESSAGE(OUTPUT=IOUT,MSG=                                                         &
                        'FMP INPUT FAILED TO LOCATE THE "SUPPLY_WELL" BLOCK (BEGIN SUPPLY_WELL).'//BLN// &
                         'NO FARM WELLS WILL BE EMPLOYED DURING SIMULATION'//BLN//                       &
-                       '(i.e. NO AVAILIBLE PUMPAGE TO MEET DEMAND -- NO WELLS TO PUMP).',               &
-                       CMD_PRINT=TRUE)
-        CALL FWEL_BASIC_ALLOCATE(FWELL,IOUT,FDIM%NFARM)  !SETS UP REQUIRED INITS WHEN BLOCK WAS NEVER CALLED
+                       '(i.e. NO AVAILIBLE PUMPAGE TO MEET DEMAND -- NO WELLS TO PUMP).')
+        CALL FWEL_BASIC_ALLOCATE(FWELL, IOUT, NFARM)  ! SETS UP REQUIRED INITS WHEN BLOCK WAS NEVER CALLED
     ELSE
         WBS%HAS_WELL = ANY(ABS(FWELL%DIM) > Z) !THERE IS A CHANCE THERE ARE NO FARM WELLS LOADED  --NOTE TYPE 2 (FID FEED) SETS DIM TO ZERO INITIALLY TO REPRESENT THE TOTAL WELL COUNT
         !
@@ -329,7 +337,7 @@ MODULE FMP_MAIN_DRIVER
                        '(NO AVAILIBLE PUMPAGE TO MEET DEMAND -- NO WELLS TO PUMP).',                        &
                        CMD_PRINT=TRUE)
                        !
-           CALL FWEL_BASIC_ALLOCATE(FWELL,IOUT,FDIM%NFARM)  !SETS UP REQUIRED INITS WHEN BLOCK WAS NEVER CALLED
+           CALL FWEL_BASIC_ALLOCATE(FWELL, IOUT, NFARM)  ! SETS UP REQUIRED INITS WHEN BLOCK WAS NEVER CALLED
         END IF
     END IF
     !
@@ -355,6 +363,10 @@ MODULE FMP_MAIN_DRIVER
                                'PLEASE CHECK INPUT AND EITHER ENABLE SFR OR COMMENT OUT THE "SURFACE_WATER" ALLOTMENT TO CONTINUE.')
     !
     IF(.NOT. SWFL%HAS_SW) CALL SWFL%NO_SURFACE_WATER_DATA(FDIM, IOUT)
+    !
+    IF(.NOT. WBS%HAS_CLIM) CALL CLIMATE%SETUP_NO_CLIMATE_DATA(FDIM, IOUT)
+    !
+    CALL FCROP%SETUP_DEPENDENT_PARTS(FDIM, WBS, CLIMATE, SOIL, IOUT)
     !
     ! CHECK IF GLOBAL SHUTDOWN OF CBC IS IN EFFECT
     CALL CHECK_CBC_GLOBAL_UNIT( FMPOUT%WEL_CBC )
@@ -385,26 +397,26 @@ MODULE FMP_MAIN_DRIVER
     !
     !4H-----Allocate space for the double precision array for the Total Delivery Requirement array (TDR, cell-by-cell) 
     !       and the Total Farm Delivery Requirement lists (TFDR,TFDROLD, farm-by-farm) and initialize 
-    ALLOCATE(TFDROLD(FDIM%NFARM), SOURCE=DZ)
+    ALLOCATE(TFDROLD(NFARM), SOURCE=DZ)
     !
     !
     !4P-----Allocate space for the double precision lists of Unranked (UNRD), Ranked (RNRD), & actually used (NRD)
     !       Non-Routed Delivery Lists and initialize
     !
-    ALLOCATE( SWFL%NRD(FDIM%NFARM) )
+    ALLOCATE( SWFL%NRD(NFARM) )
     !
     IF(.NOT.SWFL%HAS_NRD) THEN
-                        ALLOCATE(UNRD(4,FDIM%NFARM)  , SOURCE=DZ)                                      !DUMMY 4       !DP
-                        ALLOCATE(RNRD(2,1,FDIM%NFARM), SOURCE=DZ)                                      !DUMMY 2,1     !DP
-                        ALLOCATE(NRD(2,FDIM%NFARM)   , SOURCE=DZ)                                      !DP
+                        ALLOCATE(UNRD(4,NFARM)  , SOURCE=DZ)                                      !DUMMY 4       !DP
+                        ALLOCATE(RNRD(2,1,NFARM), SOURCE=DZ)                                      !DUMMY 2,1     !DP
+                        ALLOCATE(NRD(2,NFARM)   , SOURCE=DZ)                                      !DP
     ELSE
-                        ALLOCATE(UNRD((SWFL%MXNRD*3+1),FDIM%NFARM), SOURCE=DZ)                         !DP (1=FID; 3 per type = NRD-vol., NRD-rank, NRD-use-flag)
+                        ALLOCATE(UNRD((SWFL%MXNRD*3+1),NFARM), SOURCE=DZ)                         !DP (1=FID; 3 per type = NRD-vol., NRD-rank, NRD-use-flag)
                         IF(ILGR.NE.0) THEN
-                        ALLOCATE(RNRD(2,SWFL%MXNRD*2,FDIM%NFARM)  , SOURCE=DZ)                         !DP (2 per ranked type = NRD-vol., NRD-use-flag) 2 times the MXNRDT to save old RNDR before
+                        ALLOCATE(RNRD(2,SWFL%MXNRD*2,NFARM)  , SOURCE=DZ)                         !DP (2 per ranked type = NRD-vol., NRD-use-flag) 2 times the MXNRDT to save old RNDR before
                         ELSE                                                                           !scaling it down as a result of prorating for parent and child farm NRDs.        
-                        ALLOCATE(RNRD(2,SWFL%MXNRD,FDIM%NFARM)    , SOURCE=DZ)                         !DP (2 per ranked type = NRD-vol., NRD-use-flag)
+                        ALLOCATE(RNRD(2,SWFL%MXNRD,NFARM)    , SOURCE=DZ)                         !DP (2 per ranked type = NRD-vol., NRD-use-flag)
                         ENDIF
-                        ALLOCATE(NRD(2,FDIM%NFARM)                , SOURCE=DZ)                         !DP (2: NRD-new, NRD-old)
+                        ALLOCATE(NRD(2,NFARM)                , SOURCE=DZ)                         !DP (2: NRD-new, NRD-old)
                         !
                         CALL SWFL%NRD%INIT(SWFL%MXNRD)
     ENDIF
@@ -418,7 +430,7 @@ MODULE FMP_MAIN_DRIVER
     !
     !      
     !5F------Allocate space for ... lgr link  --Wolfgang hold over...not sure what to do with pointer codes
-    ALLOCATE(IFA(FDIM%NFARM))      
+    ALLOCATE(IFA(NFARM))      
     IF(FDIM%NSOIL>Z) THEN
         ALLOCATE(ISA(FDIM%NSOIL))
         DO NS=1,FDIM%NSOIL
@@ -437,13 +449,15 @@ MODULE FMP_MAIN_DRIVER
         ALLOCATE(ICA(ONE), SOURCE=Z)
     END IF
     !
-    DO NF=1,FDIM%NFARM
-                     IFA(NF)=NF   !FOR CHILD MODELS THIS GETS SET TO CHILD FARMS
+    DO NF=1,NFARM
+            IFA(NF)=NF   !FOR CHILD MODELS THIS GETS SET TO CHILD FARMS
     END DO     
     !
     !
     ! ALLOCATE DRT LOCATION AND RETURN FLOW TO FMP ARRAY
-    IF(WBS%HAS_DRT)  ALLOCATE(DRTFLOW(FDIM%NFARM))
+    ALLOCATE(DRTFLOW(NFARM))
+    !
+    IF(FDIM%NFARM < ONE) FDIM%NFARM = ONE  ! Override for outside packages to know there is 1 WBS
     !      
     !7===== SAVE POINTERS FOR GRID AND RETURN. ========================================================
     CALL FMP_LGR_PNT_SAV(IGRID)
@@ -490,11 +504,13 @@ MODULE FMP_MAIN_DRIVER
     !2A-----READ FARM-ID (WATER BALANCE PROPERTIES)
     CALL  WBS%NEXT()
     !
-    IF(FIRST_SP .OR. WBS%FID_TFR%TRANSIENT) CALL WBS%CHECK_SOIL_ID(SOIL%SID)
+    IF(SOIL%HAS_SOIL) THEN
+       IF(FIRST_SP .OR. WBS%FID_TFR%TRANSIENT) CALL WBS%CHECK_SOIL_ID(SOIL%SID)
+    END IF
     !
     !2A-----READ CLIMATE DATA (PRECIP, REF_ET)
     !
-    CALL CLIMATE%NEXT(SOIL,WBS%FID_ARRAY, WBS%FID_TFR%TRANSIENT, WBS%AREA)
+    CALL CLIMATE%NEXT(SOIL,WBS%FID_ARRAY, WBS%NEW_FID, WBS%AREA)
     !
     CALL WBS%SUM_WBS_PRECIP(CLIMATE%HAS_PRECIP, CLIMATE%PRECIP)
     !
@@ -587,7 +603,7 @@ MODULE FMP_MAIN_DRIVER
                      !
                      WRITE(IOUT,'(4X,I4,20X,I6,9X,2A20)')     NF,FWELL(NF)%N, FWELL(NF)%QMAXini,' NaN', ' NaN'
                      !
-          ELSEIF(WBS%INUSE(NF) .AND. FWELL(NF)%QMAXini > 0D0 .AND. FWELL(NF)%QMAXini > ALLOT%GW_RATE_LIM(NF) ) THEN
+          ELSEIF(WBS%INUSE(NF) .AND. FWELL(NF)%QMAXini > DZ .AND. FWELL(NF)%QMAXini > ALLOT%GW_RATE_LIM(NF) ) THEN
                      !
                      WRITE(IOUT,'(4X,I4,20X,I6,9X,3F20.4)')   NF,FWELL(NF)%N,FWELL(NF)%QMAXini, ALLOT%GW_RATE_LIM(NF), ALLOT%GW_RATE_LIM(NF)/FWELL(NF)%QMAXini
           ELSE
@@ -630,12 +646,12 @@ MODULE FMP_MAIN_DRIVER
     !
     IF(.NOT. SWFL%HAS_NRD) THEN
        DO NF=1,FDIM%NFARM
-          NRD(1,NF)=0.D0
-          NRD(2,NF)=0.D0
-          RNRD(1,1,NF)=0.D0
-          RNRD(2,1,NF)=0.D0
+          NRD(1,NF) = DZ
+          NRD(2,NF) = DZ
+          RNRD(1,1,NF) = DZ
+          RNRD(2,1,NF) = DZ
           DO N=1,4
-                  UNRD(N,NF)=0.D0
+                  UNRD(N,NF) = DZ
           ENDDO
        ENDDO
     ENDIF
@@ -736,11 +752,11 @@ MODULE FMP_MAIN_DRIVER
        !
        DO CONCURRENT (NF=1:FDIM%NFARM)           !LOGICAL TO KEEP TRACK OF MODIFIED SFR RUNOFF REACHES
        DO CONCURRENT (I=ONE:SWFL%SRRLOC(NF)%N)
-                 FMP_MOD_SFR_RUNOFF(SWFL%SRRLOC(NF)%ISTRM(I)) = TRUE
+           IF(SWFL%SRRLOC(NF)%ISTRM(I) > Z) FMP_MOD_SFR_RUNOFF(SWFL%SRRLOC(NF)%ISTRM(I)) = TRUE
        END DO
        END DO
        !
-       DO CONCURRENT(I=ONE:SFR_DELIV%N)
+       DO CONCURRENT(I=ONE:SFR_DELIV%N)           ! KEEP TRACK OF MODIFIED SFR DIVERSION REACHES
           FMP_MOD_SFR_RUNOFF(SFR_DELIV%ISTRM(I)) = TRUE
        END DO
        !
@@ -1104,9 +1120,9 @@ MODULE FMP_MAIN_DRIVER
     IF(WBS%HAS_WATERSTACK) CALL FCROP%NOT_FALLOW_RESET()  !FEATURE NOT YET IMPLIMENTED
     !
     !4B-----INITIALIZE SOME VARIABLES 
-    ND=0.D0
-    SURPLUS1=0.D0
-    SURPLUS2=0.D0
+    ND = DZ
+    SURPLUS1 = DZ
+    SURPLUS2 = DZ
     IF(( WBS%HAS_SFR .AND. SWFL%HAS_SRD        .AND. ISTARTFL.EQ.0 )  &
         .OR.                                                          &
        ((WBS%HAS_SFR  .OR. .NOT. SWFL%HAS_SRD) .AND. ISTARTFL.EQ.1  )   ) THEN
@@ -1147,7 +1163,7 @@ MODULE FMP_MAIN_DRIVER
     CALL FWELL%FWELL_ZERO_Q()
     !
     !4D-----INITIALIZE SOME LOCAL VARIABLES
-    FARMALLOT=0.D0
+    FARMALLOT = DZ
     !
     !5===== UPDATE QMAXF WHEN QMAXRESET FLAG OCCURS ======================================= THIS USED TO BE FOR FOR MNW IF QMAX OF MNW-WELLS ITERATIVELY CHANGES NOW CAN APPLY TO ALL WHENEVER QMAXRESET IS IN USE FOR NWT SMOOTHED PUMPING
     !       (ONLY IN FM WHEN QMAXRESET FLAG IS SET TO TRUE. -- QMAX NORMALLY DONE IN RP)
@@ -1221,15 +1237,15 @@ MODULE FMP_MAIN_DRIVER
           !
           !6G2-----FOR EACH WELL FIELD SIMULATED AS NON-ROUTED DELIVERY TYPE
           DO NT=1,SWFL%MXNRD      
-             CTFDR=0.D0
+             CTFDR = DZ
              !
              !6G2A----CALCULATE CUMULATIVE DELIVERY REQUIREMENT OF FARMS SUPPLIED BY A PARTICULAR WELL FIELD
              !        AND EVALUATE AVAILABLE SIMULATED "NON-ROUTED DELIVERY" FROM THAT WELL FIELD
              DO NF=1, WBS%NFARM
              IF(WBS%INUSE(NF)) THEN
                 !
-                IF(TFDROLD(NF).EQ.0D0) TF=WBS%DEMAND(NF)
-                IF(TFDROLD(NF).GT.0D0) TF=TFDROLD(NF)           
+                IF(TFDROLD(NF) .EQ. DZ) TF=WBS%DEMAND(NF)
+                IF(TFDROLD(NF) .GT. DZ) TF=TFDROLD(NF)           
                 IF(IDINT(UNRD(NT*3+1,NF)).LT.0) THEN
                      IF(NT.EQ.1) THEN
                        CTFDR=CTFDR+TF
@@ -1249,8 +1265,8 @@ MODULE FMP_MAIN_DRIVER
              DO NF=1, WBS%NFARM
              IF(WBS%INUSE(NF)) THEN
                 !
-                IF(TFDROLD(NF).EQ.0D0) TF=WBS%DEMAND(NF)
-                IF(TFDROLD(NF).GT.0D0) TF=TFDROLD(NF)         
+                IF(TFDROLD(NF) .EQ. DZ) TF=WBS%DEMAND(NF)
+                IF(TFDROLD(NF) .GT. DZ) TF=TFDROLD(NF)         
                 IF(CTFDR.GT.0) THEN
                      IF(IDINT(UNRD(NT*3+1,NF)).LT.0)THEN
                          IF(NT.EQ.1)THEN
@@ -1258,7 +1274,7 @@ MODULE FMP_MAIN_DRIVER
                          ELSE
                          RNRD(1,NT,NF)=-RNRD(1,NT,IDDELF)*(TF-RNRD(1,NT-1,NF))/CTFDR
                          ENDIF
-                         RNRD(2,NT,NF)=0.D0
+                         RNRD(2,NT,NF) = DZ
                      ENDIF
                 ENDIF
              END IF
@@ -1588,8 +1604,8 @@ MODULE FMP_MAIN_DRIVER
              !
              !             store original pumping requirement before updates after acreage-optimization are done
              IF(.NOT. ( FMPOPT%WELLFIELD .AND. (KITER.LE.1.OR.ISTARTFL.LE.1))) THEN 
-                IF(NRD(2,NF).EQ.0.0D0) NRD(2,NF)=NRD(1,NF)
-                IF(TFDROLD(NF).EQ.0.0D0) TFDROLD(NF)=WBS%DEMAND(NF)
+                IF(NRD(2,NF) .EQ. DZ) NRD(2,NF)=NRD(1,NF)
+                IF(TFDROLD(NF) .EQ. DZ) TFDROLD(NF)=WBS%DEMAND(NF)
              END IF
              !
              WBS%Q_DEMAND(NF)=QR     
@@ -1609,8 +1625,8 @@ MODULE FMP_MAIN_DRIVER
    !       DETERMINE SURFACE-WATER RUNOFF FOR EACH FARM CELL:
    !       ======================================================================
    !
-   WBS%DPERC  = 0D0  !THESE WILL BE POPULATED
-   WBS%RUNOFF = 0D0 
+   WBS%DPERC  = DZ  !THESE WILL BE POPULATED
+   WBS%RUNOFF = DZ 
    CALL FCROP%CALC_INEFFICIENT_LOSSES(WBS, SOIL%SURF_VK)           !POPULATES  WBS%DPERC  and   WBS%RUNOFF(NCOL,NROW)
    !
    ! CHECK IF RUNOFF IS DISABLED
@@ -1620,7 +1636,7 @@ MODULE FMP_MAIN_DRIVER
        DO CONCURRENT ( IC=1:NCOL, IR=1:NROW, WBS%RUNOFF(IC,IR) > DZ)
            !
            WBS%DPERC (IC,IR) = WBS%DPERC(IC,IR) + WBS%RUNOFF(IC,IR)
-           WBS%RUNOFF(IC,IR) = 0D0
+           WBS%RUNOFF(IC,IR) = DZ
            !
        END DO 
        !
@@ -1653,8 +1669,8 @@ MODULE FMP_MAIN_DRIVER
    END IF
    !
    IF(CLIMATE%HAS_RECHARGE) THEN
-            CALL CLIMATE%ADD_DIRECT_RECHARGE(WBS%DPERC)              !ADDS ANY DIRECT RECHARGE TO DPERC
-            CALL WBS%SUM_WBS_DIRECT_RECHARGE(CLIMATE%DIRECT_RECHARGE)!ACCUMULATE FARM BASED DIRECT RECHARGE
+            CALL CLIMATE%ADD_DIRECT_RECHARGE(WBS%DPERC)                              ! ADDS ANY DIRECT RECHARGE TO DPERC
+            CALL WBS%SUM_WBS_DIRECT_RECHARGE(CLIMATE%NDRCH, CLIMATE%DIRECT_RECHARGE) ! ACCUMULATE FARM BASED DIRECT RECHARGE
    END IF
    !
    !WBS%FNRCH = DZ !WBS%FNRCH - CDAT%TGWA - CDAT%EGWA
@@ -1678,13 +1694,13 @@ MODULE FMP_MAIN_DRIVER
    ! ADD DEEP PERCOLATION TO RECHARGE
    !
    IF(WBS%UZF_LINK) THEN
-       !DO CONCURRENT (IR=1:FDIM%NROW, IC=1:FDIM%NCOL,      WBS%DPERC(IC,IR)>0D0  &
-       !                                              .AND. IUZFBND(IC,IR)<1      &
+       !DO CONCURRENT (IR=1:FDIM%NROW, IC=1:FDIM%NCOL,      WBS%DPERC(IC,IR)>0.D0  &
+       !                                              .AND. IUZFBND(IC,IR)<1       &
        !                                              .AND. UPLAY(IC,IR)>0         )
        DO IR=1, FDIM%NROW
        DO IC=1, FDIM%NCOL
-       IF(      WBS%DPERC(IC,IR)>0D0  &
-          .AND. IUZFBND(IC,IR)<1      &
+       IF(      WBS%DPERC(IC,IR)>DZ  &
+          .AND. IUZFBND(IC,IR)<1       &
           .AND. UPLAY(IC,IR)>0         ) THEN
                 IL = UPLAY(IC,IR)
                 RHS(IC,IR,IL) = RHS(IC,IR,IL) - WBS%DPERC(IC,IR)   !NEGATIVE ADDS DPERC TO GW
@@ -1692,11 +1708,11 @@ MODULE FMP_MAIN_DRIVER
        END DO
        END DO
    ELSE
-       !DO CONCURRENT (IR=1:FDIM%NROW, IC=1:FDIM%NCOL,       WBS%DPERC(IC,IR)>0D0  &
+       !DO CONCURRENT (IR=1:FDIM%NROW, IC=1:FDIM%NCOL,       WBS%DPERC(IC,IR)>0.D0  &
        !                                               .AND. UPLAY(IC,IR)>0         )
        DO IR=1, FDIM%NROW
        DO IC=1, FDIM%NCOL
-       IF(      WBS%DPERC(IC,IR)>0D0  &
+       IF(      WBS%DPERC(IC,IR)>DZ  &
           .AND. UPLAY(IC,IR)>0         ) THEN
                 IL = UPLAY(IC,IR)
                 RHS(IC,IR,IL) = RHS(IC,IR,IL) - WBS%DPERC(IC,IR)   !NEGATIVE ADDS DPERC TO GW
@@ -1708,7 +1724,7 @@ MODULE FMP_MAIN_DRIVER
    !DIR$ NOINLINE
    IF(WBS%UZF_LINK) CALL UZF_LOOPS(NROW, NCOL, WBS%DPERC, WBS%AREA, IUZFBND, VKS, FINF, EXCESPP)
    !IF(WBS%UZF_LINK) THEN
-   !    DO CONCURRENT (IR=1:NROW, IC=1:NCOL, IUZFBND(IC,IR)>0 .AND. WBS%DPERC(IC,IR)>0D0 )
+   !    DO CONCURRENT (IR=1:NROW, IC=1:NCOL, IUZFBND(IC,IR)>0 .AND. WBS%DPERC(IC,IR)>0.D0 )
    !        !             !
    !        FINF(IC,IR)=SNGL(WBS%DPERC(IC,IR)/WBS%AREA(IC,IR)) !(DELR(IC)*DELC(IR))
    !        !
@@ -1907,6 +1923,7 @@ MODULE FMP_MAIN_DRIVER
   END SUBROUTINE
   !
   PURE SUBROUTINE UZF_LOOPS(NROW, NCOL, DPERC, AREA, IUZFBND, VKS, FINF, EXCESPP)
+    USE CONSTANTS, ONLY: DZ
     INTEGER,                                INTENT(IN   ):: NROW, NCOL
     INTEGER,          DIMENSION(NCOL,NROW), INTENT(IN   ):: IUZFBND
     DOUBLE PRECISION, DIMENSION(NCOL,NROW), INTENT(IN   ):: DPERC, AREA
@@ -1916,7 +1933,7 @@ MODULE FMP_MAIN_DRIVER
     !
     DO IR=1, NROW
     DO IC=1, NCOL
-        IF( IUZFBND(IC,IR)>0 .AND. DPERC(IC,IR)>0D0 ) THEN
+        IF( IUZFBND(IC,IR)>0 .AND. DPERC(IC,IR)>DZ ) THEN
           !             !
           FINF(IC,IR)=SNGL(DPERC(IC,IR)/AREA(IC,IR)) !(DELR(IC)*DELC(IR))
           !
@@ -2429,6 +2446,7 @@ MODULE FMP_MAIN_DRIVER
     !     ******************************************************************
     !        SPECIFICATIONS:
     !     ------------------------------------------------------------------
+    USE CONSTANTS, ONLY: UNO
     USE FMP_GLOBAL,    ONLY:FWELL, WBS, FMPOPT 
     USE FMPBLK,       ONLY:FPS,ZERO
     USE GWFMNW2MODULE, ONLY:MNW2,MNWNOD
@@ -2490,18 +2508,18 @@ MODULE FMP_MAIN_DRIVER
               J=FWELL(FID)%MNWLOC(I)
               !
               FIRSTNODE=IDINT( MNW2(4,J) )
-              LASTNODE =IDINT( MNW2(4,J) + ABS(MNW2(2,J)) - 1D0 )
+              LASTNODE =IDINT( MNW2(4,J) + ABS(MNW2(2,J)) - UNO )
               !
               Qdes=MNW2(5,J)
               Qact=SUM(MNWNOD(4,FIRSTNODE:LASTNODE))
               !
-              IF(ABS(Qdes).GT.FPS.AND.ABS(Qact).GT.FPS.AND.ABS(Qdes/Qact-1D0).GT.FMPOPT%MNWCLOSE(1)) THEN
+              IF(ABS(Qdes).GT.FPS.AND.ABS(Qact).GT.FPS.AND.ABS(Qdes/Qact-UNO).GT.FMPOPT%MNWCLOSE(1)) THEN
                   !
-                  HCL=HCL*(1.D0-FMPOPT%MNWCLOSE(2))
-                  RCL=RCL*(1.D0-FMPOPT%MNWCLOSE(3))
-                  WRITE(WBS%IOUT,10) FMPOPT%MNWCLOSE(2)*100D0,FMPOPT%MNWCLOSE(3)*100D0,HCL,RCL,Qact,Qdes,FWELL(FID)%WELLID(I),FWELL(FID)%LRC(2,I),FWELL(FID)%LRC(3,I)
+                  HCL=HCL*(UNO - FMPOPT%MNWCLOSE(2))
+                  RCL=RCL*(UNO - FMPOPT%MNWCLOSE(3))
+                  WRITE(WBS%IOUT,10) FMPOPT%MNWCLOSE(2)*100.D0,FMPOPT%MNWCLOSE(3)*100.D0,HCL,RCL,Qact,Qdes,FWELL(FID)%WELLID(I),FWELL(FID)%LRC(2,I),FWELL(FID)%LRC(3,I)
     
-                  WRITE(*,10) FMPOPT%MNWCLOSE(2)*100D0,FMPOPT%MNWCLOSE(3)*100D0,HCL,RCL,Qact,Qdes,FWELL(FID)%WELLID(I),FWELL(FID)%LRC(2,I),FWELL(FID)%LRC(3,I)
+                  WRITE(*,10) FMPOPT%MNWCLOSE(2)*100.D0,FMPOPT%MNWCLOSE(3)*100.D0,HCL,RCL,Qact,Qdes,FWELL(FID)%WELLID(I),FWELL(FID)%LRC(2,I),FWELL(FID)%LRC(3,I)
                   !
                   UPDATE_CLOSURE =.TRUE.
                   EXIT FARM_LOOP
@@ -2749,7 +2767,7 @@ MODULE FMP_MAIN_DRIVER
                                                               TOTIN = TOTIN+EXT
          ENDIF
          !
-         IF(ABS(TOTIN+TOTOUT).GT.FPS) DISC=((TOTIN-TOTOUT)/((TOTIN+TOTOUT)/2.D0))*100D0
+         IF(ABS(TOTIN+TOTOUT).GT.FPS) DISC=((TOTIN-TOTOUT)/((TOTIN+TOTOUT)/2.D0))*100.D0
          !
          IF(FMPOUT%FB_COMPACT%IS_OPEN) THEN
              !
@@ -2843,9 +2861,11 @@ MODULE FMP_MAIN_DRIVER
            END WHERE
            !
            CALL FWELL%PRINT_SMOOTHED_PUMPING( KPER, KSTP, TOTIM, DATE )
-           CALL FWELL%PRINT_BYWELL( KPER,KSTP,DELT,REALTIM,DATE)
-           CALL FWELL%PRINT_BYFARM( KPER,KSTP,DELT,REALTIM,DATE,TFDROLD,WBS%DEMAND)
-           CALL FWELL%PRINT_BYMNW ( KPER,KSTP,DELT,REALTIM,DATE)
+           CALL FWELL%PRINT_BYWELL( KPER,KSTP,DELT,REALTIM,DATE )
+           CALL FWELL%PRINT_BYFARM( KPER,KSTP,DELT,REALTIM,DATE,TFDROLD,WBS%DEMAND )
+           CALL FWELL%PRINT_BYMNW ( KPER,KSTP,DELT,REALTIM,DATE )
+           !
+           IF(FWELL(1)%OUT_BYLAYER%IS_OPEN) CALL FWELL%PRINT_BYLAYER( KPER,KSTP,DELT,REALTIM,DATE,WBS )
            !
            !8F4----PRINT FLOW RATE PER FARM-WELL TO LIST-FILE IF REQUESTED
            !
@@ -2877,7 +2897,7 @@ MODULE FMP_MAIN_DRIVER
            DO NF=1, WBS%NFARM
            IF(WBS%INUSE(NF)) THEN
               DO I =1, FWELL(NF)%DIM
-              IF(FWELL(NF)%ACT(I) .AND. FWELL(NF)%MNWLOC(I) == Z ) THEN !Only include wells that are NOT linked to MNW2
+              IF( FWELL(NF)%ACT(I) .AND. FWELL(NF)%MNWLOC(I) == Z ) THEN !Only include wells that are NOT linked to MNW2
                   IF ( FWELL(NF)%Q(I) < DZ ) THEN
                                                   RATOUT = RATOUT - FWELL(NF)%Q(I)
                   ELSE
@@ -3263,8 +3283,6 @@ MODULE FMP_MAIN_DRIVER
       !
       !4B1----WRITE HEADER TO ASCII FILE
       IF(FMPOUT%FNRCH_LIST%IS_OPEN) THEN
-          IF(KPER.EQ.1.AND.KSTP.EQ.1) WRITE(FMPOUT%FNRCH_LIST%IU,"(2X,'PER',2X,'STP',A14,4X,'FARM ID         RATE')") TIMEUNIT
-          !
           DO NF=1,WBS%NFARM
                   WRITE(FMPOUT%FNRCH_LIST%IU,'(2I5,A14,I11,G17.8)') KPER,KSTP,TIME,IFA(NF), WBS%TOT_FNRCH(NF)
           ENDDO
@@ -3312,6 +3330,7 @@ MODULE FMP_MAIN_DRIVER
     !     ******************************************************************
     !        SPECIFICATIONS:
     !     ------------------------------------------------------------------
+    USE CONSTANTS, ONLY: DZ
     USE FMP_GLOBAL,    ONLY:IFA,FMPOUT,FMP_LGR_PNT, WBS, CRP=>FCROP
     USE FMPBLK,       ONLY:TPL,TPU,ZERO,ZER
     USE GLOBAL,       ONLY:NCOL,NROW,NLAY,IBOUND,ITMUNI,HNEW, BOTM
@@ -3437,8 +3456,8 @@ MODULE FMP_MAIN_DRIVER
         !
         !4B2----WRITE LIST OF CUMULATIVE EVAPORATION AND TRANSPIRATION FOR EACH FARM
         DO NF=1,WBS%NFARM
-                      EVAP=0D0
-                      TRAN=0D0        
+                      EVAP = DZ
+                      TRAN = DZ        
                       DO IR=1,NROW
                       DO IC=1,NCOL
                               IF(WBS%FID_ARRAY(IC,IR).EQ.IFA(NF)) THEN
@@ -3464,6 +3483,7 @@ MODULE FMP_LGR_LINK
   CONTAINS
   !
   SUBROUTINE FMP3PRTOCH_BILINEAR(P,F)
+    USE CONSTANTS, ONLY: DZ
     !
     USE GLOBAL,      ONLY:NCOL,NROW,GLOBALDAT
     USE LGRMODULE,   ONLY:NPCBEG,NPRBEG,NPCEND,NPREND,NCPP,NPL,NCPPL
@@ -3487,8 +3507,8 @@ MODULE FMP_LGR_LINK
     NROWEXT=NROW+2*ICEND
     NCOLEXT=NCOL+2*JCEND
     ALLOCATE(R(NCOLEXT,NROWEXT))
-    R=0D0
-    F=0D0
+    R = DZ
+    F = DZ
     KCLAY=0
     DO KPLAY = 1,NPL
       KCEND=NCPPL(KPLAY)       
@@ -4044,7 +4064,7 @@ MODULE FMP_LGR_LINK
 !!!      ENDIF
 !!!      NRCH=0
 !!!      IF(H2ORETURN(1,NF).NE.0 .AND. H2ORETURN(2,NF)==0
-!!!     +                        .AND. FDSEGL(NF)==0D0) THEN
+!!!     +                        .AND. FDSEGL(NF)==0.D0) THEN
 !!!!      IF( H2ORETURN(1,NF).NE.0.AND.IRRFL.NE.0.AND.FDSEGL(NF).EQ.0 .AND.
 !!!!     +   ( ISRRFL.EQ.0 .OR. (ISRRFL.GT.0.AND.ALL(ISRR(2:5,NF).EQ.0))
 !!!!     +   ) )THEN 

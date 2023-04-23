@@ -76,16 +76,18 @@ C     INITIALIZE AND READ VARIABLES FOR HEAD OBSERVATIONS
 C     ******************************************************************
 C     SPECIFICATIONS:
 C     ------------------------------------------------------------------
-      USE GLOBAL, ONLY: NCOL,NROW,NLAY,DELR,DELC,
+      USE GLOBAL, ONLY: NCOL,NROW,NLAY,
      1                  NPER,NSTP,PERLEN,TSMULT,ISSFLG,IOUT,ITRSS
       USE OBSBASMODULE
       USE GWFBASMODULE,ONLY: HAS_STARTDATE
       USE FILE_IO_INTERFACE, ONLY: READ_TO_DATA
+      USE STRINGS,           ONLY: GET_NUMBER, GET_INTEGER
 C
       CHARACTER(768):: LINE
       CHARACTER(10)::DATE
       CHARACTER(13)::DYEAR
       INTEGER:: OBSNAM_LENGTH
+      REAL:: NO_OBS
 C     ------------------------------------------------------------------
 C
 C1------ALLOCATE AND INITIALIZE TIME STEP COUNTER FOR USE BY ANY
@@ -107,6 +109,7 @@ C3------DEFINE CONSTANTS
       ML=0
       IERR=0
       OBSNAM_LENGTH = 12
+      NO_OBS = -HUGE(NO_OBS)
 C
 C4------WRITE VERSION.
 !        WRITE (IOUT,14) IUHDOB
@@ -121,20 +124,23 @@ C5------READ & PRINT ITEM 1 OF THE HOB INPUT FILE
          LLOC = 1
          CALL URWORD(LINE,LLOC,ISTART,ISTOP,1,IDUM,DUM,IOUT,IUHDOB)
          IF    (LINE(ISTART:ISTOP)=='TIME_STEP_PRINT') THEN
-             CALL FN_PRN%OPEN(LINE,LLOC,IOUT,IUHDOB,NOBINARY=.TRUE.,
-     +                        NO_INTERNAL=.TRUE.)
-            CALL READ_TO_DATA(LINE,IUHDOB,IOUT)
+             CALL FN_PRN%OPEN(LINE,LLOC,IOUT,IUHDOB,
+     +                        NO_BINARY=.TRUE., NO_INTERNAL=.TRUE., 
+     +                        ALLOW_ONLY_UNIT=.TRUE.)
          ELSEIF(LINE(ISTART:ISTOP)=='TIME_STEP_PRINT_ALL') THEN
-             CALL FN_PRN_ALL%OPEN(LINE,LLOC,IOUT,IUHDOB,NOBINARY=.TRUE.,
-     +                            NO_INTERNAL=.TRUE.)
-            CALL READ_TO_DATA(LINE,IUHDOB,IOUT)
+             CALL FN_PRN_ALL%OPEN(LINE,LLOC,IOUT,IUHDOB,
+     +                            NO_BINARY=.TRUE., NO_INTERNAL=.TRUE., 
+     +                            ALLOW_ONLY_UNIT=.TRUE.)
          ELSEIF(LINE(ISTART:ISTOP)=='OBSNAM_LENGTH') THEN
             CALL URWORD(LINE,LLOC,ISTART,ISTOP,2,OBSNAM_LENGTH,
      +                                           DUM,IOUT,IUHDOB)
-            CALL READ_TO_DATA(LINE,IUHDOB,IOUT)
+         ELSEIF(LINE(ISTART:ISTOP)=='NOT_OBSERVED_VALUE') THEN
+             CALL GET_NUMBER(LINE,LLOC,ISTART,ISTOP,IOUT,IUHDOB,
+     +       NO_OBS, MSG='HOB "NOT_OBSERVED_VALUE" READ ERROR.')
          ELSE
              EXIT
          END IF
+         CALL READ_TO_DATA(LINE,IUHDOB,IOUT)
       END DO
       !
       LLOC = 1
@@ -144,6 +150,9 @@ C5------READ & PRINT ITEM 1 OF THE HOB INPUT FILE
       CALL URWORD(LINE,LLOC,ISTART,ISTOP,2,IUHOBSV,DUM,IOUT,IUHDOB)
       CALL URWORD(LINE,LLOC,ISTART,ISTOP,3,IDUM,HOBDRY,IOUT,IUHDOB)
       CALL URWORD(LINE,LLOC,ISTART,ISTOP,1,IDUM,DUM,IOUT,IUHDOB)
+C
+      IF(NO_OBS == -HUGE(NO_OBS)) NO_OBS = HOBDRY
+C
       IPRT=1
       IF(LINE(ISTART:ISTOP).EQ.'NOPRINT' .OR.
      +   LINE(ISTART:ISTOP).EQ.'NO_PRINT') THEN
@@ -209,9 +218,9 @@ C6------ALLOCATE ARRAY DATA.
 C
 C7------INITIALIZE OTIME, SIMULATED EQUIVALENT HEAD, NDER(5,n), and IHOBWET.
       OTIME = ONEN
-      H = HOBDRY
-      NDER(5,:)=0
-      IHOBWET=1
+      H = NO_OBS
+      NDER = 0
+      IHOBWET = 1
 !      DO 50 N = 1, NH
 !        OTIME(N) = ONEN
 !        H(N) = HOBDRY
@@ -395,6 +404,29 @@ C15B3---WRITE ONE MULTI-TIME OBSERVATION.
         CALL UOBSTI(OBSNAM(N),IOUT,ISSFLG,ITRSS,NPER,NSTP,IREFSP,
      &              NDER(4,N),PERLEN,TOFF(N),TOFFSET,TOMULTH,
      &              TSMULT,0,OTIME(N),SKIP_OBS(N),DATE,DYEAR)
+        !
+        IF(ITT.EQ.2 .AND. J.NE.1 .AND. .not. SKIP_OBS(N)) THEN
+          IF(NDER(4,N) < NDER(4,NBASE) .OR. 
+     +      (NDER(4,N) ==NDER(4,NBASE) .AND. TOFF(N)<TOFF(NBASE))) THEN
+            BLOCK
+                CHARACTER:: NL
+                CHARACTER(:), ALLOCATABLE:: TXT
+                NL = NEW_LINE(' ')
+                TXT = 'HOB ABORTING BECAUSE A DRAWDOWN OBSERVATION '//
+     +                '(ITT = 2) HAS ITS OBSERVATION TIME OCCUR '//
+     +                'BEFORE THE FIRST HEAD OBSERVATION.'//NL//
+     +                'THAT IS, THE OBSERVATION TIME FOR'//NL//'   '//
+     +                OBSNAM(N)//NL//
+     +                'OCCURS BEFORE'//NL//'   '//
+     +                OBSNAM(NBASE)//NL//
+     +                'EITHER CHANGE THE DRAWDOWN OBSERVATIONS TO '//
+     +                'BE IN CHRONOLOGICAL ORDER'//NL//
+     +                'OR CHANGE TO HEAD OBSERVATION (SET ITT = 1)'
+                      CALL USTOP(TXT)
+            END BLOCK
+          END IF
+        END IF
+        !
         IF(DATE.NE.'NO_DATE') THEN
             HOB_DATE(N)=DATE
             HOB_DYR (N)=DYEAR
@@ -427,23 +459,26 @@ C
 C18-----IF ERROR OCCURRED ABOVE, PRINT MESSAGE AND STOP.
       IF (IERR.GT.0) THEN
           WRITE(IOUT,610)
-  610 FORMAT(/,1X,'ERROR SEARCH ABOVE FOR "ERROR" MESSAGE(S)',/,1X,
-     &'STOP EXECUTION -- (OBS2BAS7AR)')
-        CALL USTOP('SEE LIST FILE FOR ERROR')
+  610     FORMAT(/,1X,'ERROR SEARCH ABOVE FOR "ERROR" MESSAGE(S)',/,1X,
+     +'STOP EXECUTION -- (OBS2BAS7AR)')
+          BLOCK
+              CHARACTER(:), ALLOCATABLE:: TXT
+              TXT = 'SEE LIST FILE FOR ERROR'
+              CALL USTOP(TXT)
+          END BLOCK
       ENDIF
 C
 C19-----RETURN.
   700 CALL SOBS2BAS7PSV(IUHDOB,IGRID)
-      RETURN
-      END
+      
+      END SUBROUTINE
       SUBROUTINE OBS2BAS7SE(IUHDOB,IGRID)
 C     ******************************************************************
 C     INTERPOLATE HEADS.  ACCOUNT FOR DRY CELLS, IF NEEDED.
 C     ******************************************************************
 C        SPECIFICATIONS:
 C     ------------------------------------------------------------------
-      USE GLOBAL, ONLY: NCOL,NROW,NLAY,DELR,DELC,IBOUND,HNEW,
-     1                  NPER,NSTP,PERLEN,TSMULT,ISSFLG,IOUT
+      USE GLOBAL, ONLY: NCOL,NROW,NLAY,DELR,DELC,IBOUND,HNEW,IOUT
       USE OBSBASMODULE
       DOUBLE PRECISION V
       LOGICAL:: WRITEVAL
@@ -700,8 +735,7 @@ C     ASSUMING ALL CELLS ARE ACTIVE.
 C     ******************************************************************
 C        SPECIFICATIONS:
 C     ------------------------------------------------------------------
-      USE GLOBAL, ONLY: NCOL,NROW,NLAY,DELR,DELC,IBOUND,HNEW,STRT,
-     1                  NPER,NSTP,PERLEN,TSMULT,ISSFLG,IOUT
+      USE GLOBAL, ONLY: NCOL,NROW,DELR,DELC
       USE OBSBASMODULE
 C     ------------------------------------------------------------------
 C

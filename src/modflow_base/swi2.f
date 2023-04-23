@@ -221,8 +221,8 @@ C     ALLOCATE ARRAY STORAGE FOR SEA WATER INTRUSION (SWI2) PACKAGE
 C     ******************************************************************
 C
 C     SPECIFICATIONS:
-        USE GLOBAL,     ONLY:LIST_UNIT=>IOUT,NCOL,NROW,NLAY,NPER,IFREFM,
-     2                      NSTP,LBOTM,BOTM
+        USE GLOBAL,     ONLY:LIST_UNIT=>IOUT,NCOL,NROW,NLAY,NPER,
+     1                      NSTP,LBOTM,BOTM
         USE GWFBCFMODULE, ONLY:LCB=>LAYCON,SC1B=>SC1,SC2B=>SC2
         USE GWFLPFMODULE, ONLY:LCL=>LAYTYP,SC1L=>SC1,SC2L=>SC2
         USE GWFHUFMODULE, ONLY:LCH=>LTHUF,SC1H=>SC1
@@ -1058,11 +1058,9 @@ C     ******************************************************************
 C
 C     SPECIFICATIONS:
 C     ------------------------------------------------------------------
-        USE GLOBAL,      ONLY:ISSFLG,NCOL,NROW,NLAY,IFREFM,
-     2                        LBOTM,BOTM,
-     3                        CR,CC,CV,HCOF,RHS,BUFF,
-     4                        DELR,DELC,IBOUND,HNEW
-        USE GWFBASMODULE, ONLY: DELT,HDRY,TOTIM
+        USE GLOBAL,      ONLY:NCOL,NROW,NLAY,
+     1                        CR,CC,CV,RHS,DELR,DELC,IBOUND
+        USE GWFBASMODULE, ONLY: DELT
         USE GWFSWIMODULE
         IMPLICIT NONE
 C       + + + DUMMY ARGUMENTS + + +
@@ -1446,14 +1444,13 @@ C     ******************************************************************
 C
 C     SPECIFICATIONS:
 C     ------------------------------------------------------------------
-        USE GLOBAL,      ONLY:NCOL,NROW,NLAY,NPER,IFREFM,
-     2                        LBOTM,BOTM,
-     3                        CR,CC,CV,HCOF,RHS,
-     4                        DELR,DELC,IBOUND,HNEW,HOLD,
-     5                        BUFF,ISSFLG,NSTP
-        USE GWFBASMODULE, ONLY: DELT,PERTIM,TOTIM,HDRY,
-     2                          IHDDFL,IBUDFL,ICBCFL,IOFLG,
-     3                          MSUM,VBVL,VBNM
+        USE GLOBAL,      ONLY:NCOL,NROW,NLAY,NPER,
+     1                        LBOTM,BOTM,
+     2                        HCOF,IBOUND,HNEW,HOLD,
+     3                        BUFF,ISSFLG,NSTP
+        USE GWFBASMODULE, ONLY: DELT,PERTIM,TOTIM,
+     1                          IHDDFL,IBUDFL,ICBCFL,IOFLG,
+     2                          MSUM,VBVL,VBNM
         USE GWFSWIMODULE
         IMPLICIT NONE
 C       + + + DUMMY ARGUMENTS + + +
@@ -2203,31 +2200,16 @@ C     ******************************************************************
 C
 C     SPECIFICATIONS:
 C     ------------------------------------------------------------------
-        USE GLOBAL,      ONLY:NCOL,NROW,NLAY,IFREFM,
-     2                        LBOTM,BOTM,
-     3                        CR,CC,CV,HCOF,RHS,
-     4                        DELR,DELC,IBOUND,HNEW,HOLD,
-     5                        BUFF,ISSFLG,NSTP
-        USE GWFBASMODULE, ONLY: DELT,HDRY,TOTIM,IHDDFL,IBUDFL
+        USE GLOBAL,      ONLY:NCOL,NROW,NLAY
         USE GWFSWIMODULE
         IMPLICIT NONE
 C       + + + DUMMY ARGUMENTS + + +
         INTEGER, INTENT(IN) :: Kkstp
         INTEGER, INTENT(IN) :: Kkper
 C       + + + LOCAL DEFINITIONS + + +
-        CHARACTER(24) :: ZETANAME
+        !CHARACTER(24) :: ZETANAME
         INTEGER :: i, j, k
-        INTEGER :: iz, iz2, iz3
-        INTEGER :: izrev
-        INTEGER :: icount
-        INTEGER :: iplz
-        REAL :: zt, zb, zetac, zdiff, zetaavg
-        DOUBLEPRECISION :: qztop, sszxa, dz
-        REAL :: t2
-        REAL :: s0, s1, s2, d0, d1, d2, dzeta1, dzeta2, b2, dzetamax
-        INTEGER :: kk1, kk2
-        DOUBLEPRECISION :: ht1, ht2
-        DOUBLEPRECISION :: bt1, bt2
+        INTEGER :: iz
 C     + + + FUNCTIONS + + +
 C     + + + CODE + + +
 C
@@ -2284,12 +2266,9 @@ C     ******************************************************************
 C
 C     SPECIFICATIONS:
 C     ------------------------------------------------------------------
-        USE GLOBAL,      ONLY:NCOL,NROW,NLAY,IFREFM,
-     2                        LBOTM,BOTM,
-     3                        CR,CC,CV,HCOF,RHS,
-     4                        DELR,DELC,IBOUND,HNEW,HOLD,
-     5                        BUFF,ISSFLG,NSTP
-        USE GWFBASMODULE, ONLY: DELT,HDRY,TOTIM,IHDDFL,IBUDFL
+        USE GLOBAL,      ONLY:NCOL,NROW,NLAY,
+     1                        LBOTM,BOTM,CV,DELR,DELC,IBOUND,HNEW
+        USE GWFBASMODULE, ONLY: IHDDFL
         USE GWFSWIMODULE
         IMPLICIT NONE
 C       + + + DUMMY ARGUMENTS + + +
@@ -2298,14 +2277,9 @@ C       + + + DUMMY ARGUMENTS + + +
 C       + + + LOCAL DEFINITIONS + + +
         CHARACTER(24) :: ZETANAME
         INTEGER :: i, j, k
-        INTEGER :: iz, iz2, iz3
-        INTEGER :: izrev
-        INTEGER :: icount
-        INTEGER :: iplz
-        REAL :: zt, zb, zetac, zdiff, zetaavg
+        INTEGER :: iz
+        REAL :: zt, zb, zetac
         DOUBLEPRECISION :: qztop, sszxa, dz
-        REAL :: t2
-        REAL :: s0, s1, s2, d0, d1, d2, dzeta1, dzeta2, b2, dzetamax
         INTEGER :: kk1, kk2
         DOUBLEPRECISION :: ht1, ht2
         DOUBLEPRECISION :: bt1, bt2
@@ -2402,12 +2376,9 @@ C     ******************************************************************
 C
 C     SPECIFICATIONS:
 C     ------------------------------------------------------------------
-        USE GLOBAL,      ONLY:NCOL,NROW,NLAY,IFREFM,
-     2                        LBOTM,BOTM,
-     3                        CR,CC,CV,HCOF,RHS,
-     4                        DELR,DELC,IBOUND,HNEW,HOLD,
-     5                        BUFF,ISSFLG,NSTP
-        USE GWFBASMODULE, ONLY: DELT,HDRY,TOTIM,IHDDFL,IBUDFL
+        USE GLOBAL,      ONLY:NCOL,NROW,NLAY,
+     1                        LBOTM,BOTM,DELR,DELC,IBOUND,HNEW
+        USE GWFBASMODULE, ONLY: IHDDFL
         USE GWFSWIMODULE
         IMPLICIT NONE
 C       + + + DUMMY ARGUMENTS + + +
@@ -2416,17 +2387,12 @@ C       + + + DUMMY ARGUMENTS + + +
 C       + + + LOCAL DEFINITIONS + + +
         CHARACTER(24) :: ZETANAME
         INTEGER :: i, j, k
-        INTEGER :: iz, iz2, iz3
-        INTEGER :: izrev
-        INTEGER :: icount
-        INTEGER :: iplz
-        REAL :: zt, zb, zetac, zdiff, zetaavg
-        DOUBLEPRECISION :: qztop, sszxa, dz
+        INTEGER :: iz
+        REAL :: zt, zb, zetac
         REAL :: t2
         REAL :: s0, s1, s2, d0, d1, d2, dzeta1, dzeta2, b2, dzetamax
-        INTEGER :: kk1, kk2
-        DOUBLEPRECISION :: ht1, ht2
-        DOUBLEPRECISION :: bt1, bt2
+        DOUBLEPRECISION :: ht1
+        DOUBLEPRECISION :: bt1
 C     + + + FUNCTIONS + + +
 C     + + + CODE + + +
 C
@@ -2675,29 +2641,13 @@ C     ******************************************************************
 C
 C     SPECIFICATIONS:
 C     ------------------------------------------------------------------
-        USE GLOBAL,      ONLY:NCOL,NROW,NLAY,IFREFM,
-     2                        LBOTM,BOTM,
-     3                        CR,CC,CV,HCOF,RHS,
-     4                        DELR,DELC,IBOUND,HNEW,HOLD,
-     5                        BUFF,ISSFLG,NSTP
-        USE GWFBASMODULE, ONLY: DELT,HDRY,TOTIM,IHDDFL,IBUDFL
+        USE GLOBAL,      ONLY:NCOL,NROW,NLAY
         USE GWFSWIMODULE
         IMPLICIT NONE
 C       + + + DUMMY ARGUMENTS + + +
 C       + + + LOCAL DEFINITIONS + + +
-        CHARACTER(24) :: ZETANAME
         INTEGER :: i, j, k
-        INTEGER :: iz, iz2, iz3
-        INTEGER :: izrev
-        INTEGER :: icount
-        INTEGER :: iplz
-        REAL :: zt, zb, zetac, zdiff, zetaavg
-        DOUBLEPRECISION :: qztop, sszxa, dz
-        REAL :: t2
-        REAL :: s0, s1, s2, d0, d1, d2, dzeta1, dzeta2, b2, dzetamax
-        INTEGER :: kk1, kk2
-        DOUBLEPRECISION :: ht1, ht2
-        DOUBLEPRECISION :: bt1, bt2
+        INTEGER :: iz
 C     + + + FUNCTIONS + + +
 C     + + + CODE + + +
 C
@@ -2732,29 +2682,16 @@ C     ******************************************************************
 C
 C     SPECIFICATIONS:
 C     ------------------------------------------------------------------
-        USE GLOBAL,      ONLY:NCOL,NROW,NLAY,IFREFM,
-     2                        LBOTM,BOTM,
-     3                        CR,CC,CV,HCOF,RHS,
-     4                        DELR,DELC,IBOUND,HNEW,HOLD,
-     5                        BUFF,ISSFLG,NSTP
-        USE GWFBASMODULE, ONLY: DELT,HDRY,TOTIM,IHDDFL,IBUDFL
+        USE GLOBAL,      ONLY:NCOL,NROW,NLAY
         USE GWFSWIMODULE
         IMPLICIT NONE
 C       + + + DUMMY ARGUMENTS + + +
 C       + + + LOCAL DEFINITIONS + + +
-        CHARACTER(24) :: ZETANAME
         INTEGER :: i, j, k
         INTEGER :: iz, iz2, iz3
         INTEGER :: izrev
         INTEGER :: icount
-        INTEGER :: iplz
-        REAL :: zt, zb, zetac, zdiff, zetaavg
-        DOUBLEPRECISION :: qztop, sszxa, dz
-        REAL :: t2
-        REAL :: s0, s1, s2, d0, d1, d2, dzeta1, dzeta2, b2, dzetamax
-        INTEGER :: kk1, kk2
-        DOUBLEPRECISION :: ht1, ht2
-        DOUBLEPRECISION :: bt1, bt2
+        REAL :: zdiff, zetaavg
 C     + + + FUNCTIONS + + +
 C     + + + CODE + + +
 C
@@ -2806,12 +2743,9 @@ C     ******************************************************************
 C
 C     SPECIFICATIONS:
 C     ------------------------------------------------------------------
-        USE GLOBAL,      ONLY:NCOL,NROW,NLAY,IFREFM,
-     2                        LBOTM,BOTM,
-     3                        CR,CC,CV,HCOF,RHS,
-     4                        DELR,DELC,IBOUND,HNEW,HOLD,
-     5                        BUFF,ISSFLG,NSTP
-        USE GWFBASMODULE, ONLY: DELT,HDRY,TOTIM,IHDDFL,IBUDFL
+        USE GLOBAL,      ONLY:NCOL,NROW,NLAY,
+     1                        LBOTM,BOTM,DELR,DELC,IBOUND
+        USE GWFBASMODULE, ONLY: IHDDFL
         USE GWFSWIMODULE
         IMPLICIT NONE
 C       + + + DUMMY ARGUMENTS + + +
@@ -2820,17 +2754,12 @@ C       + + + DUMMY ARGUMENTS + + +
 C       + + + LOCAL DEFINITIONS + + +
         CHARACTER(24) :: ZETANAME
         INTEGER :: i, j, k
-        INTEGER :: iz, iz2, iz3
-        INTEGER :: izrev
-        INTEGER :: icount
+        INTEGER :: iz
         INTEGER :: iplz
-        REAL :: zt, zb, zetac, zdiff, zetaavg
-        DOUBLEPRECISION :: qztop, sszxa, dz
+        REAL :: zt, zb, zetac
         REAL :: t1, t2
-        REAL :: s0, s1, s2, d0, d1, d2, dzeta1, dzeta2, b2, dzetamax
+        REAL :: s1, s2, d1, d2, dzeta1, dzeta2, dzetamax
         INTEGER :: kk1, kk2
-        DOUBLEPRECISION :: ht1, ht2
-        DOUBLEPRECISION :: bt1, bt2
 C     + + + FUNCTIONS + + +
 C     + + + CODE + + +
 C
@@ -3441,8 +3370,7 @@ C     SPECIFICATIONS:
 C     ------------------------------------------------------------------
       USE GLOBAL,      ONLY:NCOL,NROW,NLAY,IBOUND,HNEW,BUFF,CR,CC,CV,
      1                      BOTM,LBOTM
-      USE GWFBASMODULE,ONLY:MSUM,VBVL,VBNM,DELT,PERTIM,TOTIM,ICBCFL,
-     1                      ICHFLG
+      USE GWFBASMODULE,ONLY:ICHFLG
 C      USE GWFBCFMODULE,ONLY:LAYCON
       USE GWFSWIMODULE
       IMPLICIT NONE
@@ -3629,12 +3557,10 @@ C     ******************************************************************
 C
 C     SPECIFICATIONS:
 C     ------------------------------------------------------------------
-        USE GLOBAL,      ONLY:NCOL,NROW,NLAY,IFREFM,
-     2                        LBOTM,BOTM,
-     3                        CR,CC,CV,HCOF,RHS,
-     4                        DELR,DELC,IBOUND,HNEW,HOLD,
-     5                        BUFF,ISSFLG,NSTP,KND
-        USE GWFBASMODULE, ONLY: DELT,HDRY,TOTIM
+        USE GLOBAL,      ONLY:NCOL,NROW,NLAY,HCOF,CV,
+     1                        LBOTM,BOTM,BUFF,NSTP,ISSFLG,
+     2                        DELR,DELC,IBOUND,HNEW,KND
+        USE GWFBASMODULE, ONLY: HDRY
         USE GWFSWIMODULE
         IMPLICIT NONE
 C       + + + DUMMY ARGUMENTS + + +
@@ -3999,12 +3925,8 @@ C     ******************************************************************
 C
 C     SPECIFICATIONS:
 C     ------------------------------------------------------------------
-        USE GLOBAL,      ONLY:NCOL,NROW,NLAY,IFREFM,
-     2                        LBOTM,BOTM,
-     3                        CR,CC,CV,HCOF,RHS,
-     4                        DELR,DELC,IBOUND,HNEW,HOLD,
-     5                        BUFF,ISSFLG,NSTP
-        USE GWFBASMODULE, ONLY: DELT,HDRY,TOTIM,IHDDFL,IBUDFL
+        USE GLOBAL,      ONLY:NCOL,NROW,NLAY,
+     1                        LBOTM,BOTM,DELR,DELC,IBOUND,HNEW
         USE GWFSWIMODULE
         IMPLICIT NONE
 C       + + + DUMMY ARGUMENTS + + +
@@ -4158,9 +4080,9 @@ C     ******************************************************************
 C
 C     SPECIFICATIONS:
 C     ------------------------------------------------------------------
-        USE GLOBAL,       ONLY: NCOL,NROW,NLAY,DELR,DELC,IBOUND,
-     2                          LBOTM,BOTM,HNEW,HOLD
-        USE GWFBASMODULE, ONLY: DELT,HNOFLO,HDRY
+        USE GLOBAL,       ONLY: NCOL,NROW,NLAY,DELR,DELC,
+     1                          LBOTM,BOTM,HNEW,HOLD
+        USE GWFBASMODULE, ONLY: HNOFLO,HDRY
         USE GWFSWIMODULE, ONLY: NZONES,IADPT,SWIDELT,ZETA,ZETASWITS0,SSZ
         IMPLICIT NONE
 C     + + + DUMMY ARGUMENTS + + +
@@ -4261,11 +4183,10 @@ C     ******************************************************************
 C
 C     SPECIFICATIONS:
 C     ------------------------------------------------------------------
-        USE GLOBAL,       ONLY: NCOL,NROW,NLAY,DELR,DELC,IBOUND,CV,
-     2                          LBOTM,BOTM,HNEW
-        USE GWFBASMODULE, ONLY: DELT
-        USE GWFSWIMODULE, ONLY: NZONES,IADPT,SWIDELT,
-     2                          NUS,NUBOT,NUTOP,QLEXTRA
+        USE GLOBAL,       ONLY: NCOL,NROW,NLAY,IBOUND,CV,
+     1                          LBOTM,BOTM,HNEW
+        USE GWFSWIMODULE, ONLY: NZONES,IADPT,
+     1                          NUS,NUBOT,NUTOP,QLEXTRA
         IMPLICIT NONE
 C     + + + DUMMY ARGUMENTS + + +
         REAL, INTENT(INOUT), DIMENSION(NCOL,NROW,NLAY,NZONES+1) :: A
@@ -4426,7 +4347,7 @@ C     ******************************************************************
 C
 C     SPECIFICATIONS:
 C     ------------------------------------------------------------------
-        USE GLOBAL,       ONLY: NCOL,NROW,NLAY,IBOUND,LBOTM,BOTM,HNEW
+        USE GLOBAL,       ONLY: NCOL,NROW,IBOUND,LBOTM,BOTM,HNEW
         USE GWFSWIMODULE
         IMPLICIT NONE
 C     + + + DUMMY ARGUMENTS + + +

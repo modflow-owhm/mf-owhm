@@ -539,7 +539,7 @@ MODULE BAS_UTIL
                          CASE (2)                                !MINUTES
                              DAY = DELT * 6.94444444444444D-04
                          CASE (3)                                !HOURS
-                             DAY = DELT / 24D0
+                             DAY = DELT / 24.D0
                          CASE (5)                                !YEARS  --NO WAY TO CORRECT FOR LEAP YEARS FOR THIS CASE
                              DAY = DELT * 365.25D0
                        END SELECT
@@ -552,7 +552,7 @@ MODULE BAS_UTIL
                          CASE (2)                                !MINUTES
                              DAY = DELT * 6.94444444444444E-04
                          CASE (3)                                !HOURS
-                             DAY = DELT / 24E0
+                             DAY = DELT / 24.E0
                          CASE (5)                                !YEARS  --NO WAY TO CORRECT FOR LEAP YEARS FOR THIS CASE
                              DAY = DELT * 365.25
                        END SELECT
@@ -626,7 +626,7 @@ MODULE BAS_UTIL
                                                    YEAR_TRANSITION=2  !NO TRANSION, BUT     IN A LEAP YEAR
     !
     !NOW IF YEAR CHANGE AND TRANSION FROM LEAP YEAR TO NON LEAN YEAR OR VICE-VERSA
-    ELSEIF(DELT > 0D0)                                            THEN!   TRANSITION BETWEEN YEARS IN FORWARD DIRECTION (eg 1932 to 1933 or 1931 to 1932)
+    ELSEIF(DELT > 0.0D0)                                            THEN!   TRANSITION BETWEEN YEARS IN FORWARD DIRECTION (eg 1932 to 1933 or 1931 to 1932)
       IF(      YR_NEW_LEAP .AND. .NOT.YR_OLD_LEAP) YEAR_TRANSITION=3  !TRANSITION FROM NOLEAP TO LEAP YEAR
       IF(.NOT. YR_NEW_LEAP .AND.      YR_OLD_LEAP) YEAR_TRANSITION=4  !TRANSITION FROM LEAP TO NOLEAP YEAR
       !
@@ -694,7 +694,7 @@ MODULE BAS_UTIL
          CASE (3)                                                     !HOURS
              CVRT2DYEAR = 1.140794586245D-04
          CASE (5)
-             CVRT2DYEAR = 1D0
+             CVRT2DYEAR = 1.0D0
        END SELECT
        !
     ELSEIF(YEARTYPE .EQ. 1) THEN  ! 365 days to year
@@ -709,7 +709,7 @@ MODULE BAS_UTIL
          CASE (3)                                                     !HOURS
              CVRT2DYEAR = 1.141552511416D-04
          CASE (5)
-             CVRT2DYEAR = 1D0
+             CVRT2DYEAR = 1.0D0
        END SELECT
        !
     ELSEIF(YEARTYPE .EQ. 2) THEN  ! 366 days to year
@@ -724,7 +724,7 @@ MODULE BAS_UTIL
          CASE (3)                                                     !HOURS
              CVRT2DYEAR = 1.138433515483D-04
          CASE (5)
-             CVRT2DYEAR = 1D0
+             CVRT2DYEAR = 1.0D0
        END SELECT
        !
     END IF
@@ -815,8 +815,8 @@ MODULE BAS_UTIL
      'THIS CAN BE ADJUSTED WITH THE BASIC (BAS) PACKAGE OPTION '//NL//CH5//                                          &
      '"MAX_RELATIVE_VOLUME_ERROR" FOLLOWED BY THE DESIRED LIMIT.'                                                    )
   END IF
-!
-!------IF ITERATIVE PROCEDURE FAILED TO CONVERGE PRINT MESSAGE
+  !
+  !------IF ITERATIVE PROCEDURE FAILED TO CONVERGE PRINT MESSAGE
   IF(ICNVG.EQ.0) THEN
    !
    CALL TXT%ADD_BEGIN(CH5//                                                                                                   &
@@ -1436,7 +1436,6 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
   USE BAS_UTIL,                         ONLY: DELT_TO_DAY
   USE LINKED_LIST_INSTRUCTION,          ONLY: CHARACTER_LINKED_LIST
   USE CAST_TO_STRING,                   ONLY: CAST2STR
-  USE SORT_INTERFACE,                   ONLY: SORT
   !
   USE GWFBASMODULE, ONLY: PRNT_CNVG_NTERM, PRNT_CNVG_OUTER, PRNT_CNVG, PRNT_CNVG_LRC, PRNT_CNVG_DIF,             &
                           PRNT_FRES_NTERM, PRNT_FRES_OUTER, PRNT_FRES, PRNT_FRES_LRC, PRNT_FRES_DIF,             &
@@ -2024,7 +2023,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
               II = LLOC
               CALL PRNT_CNVG%OPEN(BL%LINE,LLOC,BL%IOUT,BL%IU,NO_INTERNAL=TRUE)
               !
-              IF(.NOT. PRNT_CNVG%BINARY)CALL PRNT_CNVG%SET_HEADER('   SP   TS  ITER  LAY  ROW  COL           HEAD     CHNG_HEAD   DATE      CELL_ID')
+              IF(.NOT. PRNT_CNVG%BINARY)CALL PRNT_CNVG%SET_HEADER('   SP   TS  ITER  LAY  ROW  COL           HEAD      CHNG_HEAD   CELL_ID  DATE_START')
               !
               IF(PRNT_CNVG_OUTER > Z) THEN
                  WRITE(IOUT,'(17x, *(A))') 'After solver iteration ',             num2str(PRNT_CNVG_OUTER),", the change in head between iterations (head convergence, Δh<HCLOSE) for the ",                              num2str(PRNT_CNVG_NTERM), ' largest cells and are written to ', TRIM(ADJUSTL(BL%LINE(II:)))
@@ -2046,7 +2045,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
               II = LLOC
               CALL PRNT_FRES%OPEN(BL%LINE,LLOC,BL%IOUT,BL%IU,NO_INTERNAL=TRUE)
               !
-              IF(.NOT. PRNT_FRES%BINARY) CALL PRNT_FRES%SET_HEADER('   SP   TS  ITER  LAY  ROW  COL           HEAD    FLOW_RESIDUAL    VOL_RESIDUAL     CELL_VOLUME      DATE  CELL_ID')
+              IF(.NOT. PRNT_FRES%BINARY) CALL PRNT_FRES%SET_HEADER('   SP   TS  ITER  LAY  ROW  COL           HEAD    FLOW_RESIDUAL    VOL_RESIDUAL     CELL_VOLUME   CELL_ID  DATE_START')
               !
               IF(PRNT_FRES_OUTER > Z) THEN
                  WRITE(IOUT,'(17x, *(A))') 'After solver iteration ',             num2str(PRNT_FRES_OUTER),", the model's residual error (r = Ah - RHS < RCLOSE) for the ", num2str(PRNT_FRES_NTERM), ' largest cells and are written to ', TRIM(ADJUSTL(BL%LINE(II:)))
@@ -2068,7 +2067,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
               II = LLOC
               CALL PRNT_VERR%OPEN(BL%LINE,LLOC,BL%IOUT,BL%IU,NO_INTERNAL=TRUE)
               !
-              IF(.NOT. PRNT_VERR%BINARY) CALL PRNT_VERR%SET_HEADER('   SP   TS  ITER  LAY  ROW  COL           HEAD  REL_VOL_ERR    VOL_RESIDUAL'//'   FLOW_RESIDUAL  DATE      CELL_ID')
+              IF(.NOT. PRNT_VERR%BINARY) CALL PRNT_VERR%SET_HEADER('   SP   TS  ITER  LAY  ROW  COL           HEAD  REL_VOL_ERR    VOL_RESIDUAL    FLOW_RESIDUAL   CELL_ID  DATE_START')
               !
               IF(PRNT_VERR_OUTER > Z) THEN
                  WRITE(IOUT,'(17x, *(A))') 'After solver iteration ',             num2str(PRNT_VERR_OUTER),", the model's relative volume error (re = (Ah - RHS)/vol < MxRE) for the ", num2str(PRNT_VERR_NTERM), ' largest cells and are written to ', TRIM(ADJUSTL(BL%LINE(II:)))
@@ -2273,7 +2272,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
               CUM_HEAD_CHNG     = DZ
               CUM_HEAD_CHNG_E10 = Z
               !
-              CALL PRNT_CUM_HEAD_CHNG%OPEN(BL%LINE,LLOC,IOUT,INBAS,NOBINARY=TRUE, SPLITMAXCOUNT=Z, NO_INTERNAL=TRUE)
+              CALL PRNT_CUM_HEAD_CHNG%OPEN(BL%LINE,LLOC,IOUT,INBAS,NO_BINARY=TRUE, SPLITMAXCOUNT=Z, NO_INTERNAL=TRUE)
               !
               WRITE(PRNT_CUM_HEAD_CHNG%IU, "(3A)", ADVANCE="NO")                                                 &
                   '# CUMULATIVE_HEAD_CHANGE file for comparing code versions with the same model input. ',       &
@@ -2288,7 +2287,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
               CALL INTER_INFO%OPEN(BL%LINE,LLOC,IOUT,INBAS,SPLITMAXCOUNT=Z)
               LINE = '    SP    TS  ITER  TS_LENGTH       VOLUME_ERROR   RATE_ERROR     RAT_PERROR'
               !
-              IF(HAS_STARTDATE) LINE = TRIM(LINE)//'     DATE'
+              IF(HAS_STARTDATE) LINE = TRIM(LINE)//'   MONTH  DATE_START'
               !
               CALL INTER_INFO%SET_HEADER(TRIM(LINE))
               !CALL INTER_INFO%SET_HEADER('    SP    TS  ITER  TS_LENGTH      VOLUME_ERROR   RATE_ERROR     RAT_PERROR     DATE')
@@ -2296,7 +2295,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
               CALL BUDGETDB%OPEN(BL%LINE,LLOC,IOUT,INBAS, SPLITMAXCOUNT=Z)
               !
           CASE('TIME_INFO', 'PRINT_TIME_INFO')
-              CALL TIME_INFO%OPEN(BL%LINE,LLOC,IOUT,INBAS,NOBINARY=TRUE)
+              CALL TIME_INFO%OPEN(BL%LINE,LLOC,IOUT,INBAS,NO_BINARY=TRUE)
               !
           CASE('SUPER_NAMES', 'SUPERNAMES')
               CALL SUPER_NAMES_IN%OPEN(BL%LINE,LLOC,IOUT,INBAS)
@@ -2391,7 +2390,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
                          WRITE(IOUT,'(A, 2x, A)') "EVERY_TIMESTEP", PRINT_HEAD_LIST%LN(ISTART:)
                      END IF
                      !
-                     CALL PRINT_HEAD(1)%OPEN(PRINT_HEAD_LIST%LN, LLOC, IOUT, INBAS, NOBINARY=TRUE, SPLITMAXCOUNT=Z)
+                     CALL PRINT_HEAD(1)%OPEN(PRINT_HEAD_LIST%LN, LLOC, IOUT, INBAS, NO_BINARY=TRUE, SPLITMAXCOUNT=Z)
                      !
                      IF(ALLOCATED(PRINT_HEAD(1)%FMT)) THEN
                                   READ(PRINT_HEAD(1)%FMT,*) J
@@ -2452,17 +2451,19 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
                      !
                      J = LLOC
                      CALL PARSE_WORD(PRINT_HEAD_LIST%LN,LLOC,ISTART,ISTOP)                     !Capture File Name for output
-                     WRITE(IOUT,'(2I6, 3x, A)') ITMP(:,I), PRINT_HEAD_LIST%LN(ISTART:ISTOP)
-                     LLOC = ISTART
                      !
                      IF (N>1) THEN
                         DO J=1, N-1
                             IF( ITMP(1,J)==ITMP(1,N) .AND. ITMP(2,J)==ITMP(2,N) ) THEN
+                                WRITE(IOUT,'(2I6, 3x, 2A)') ITMP(:,I), PRINT_HEAD_LIST%LN(ISTART:ISTOP), '  <- SP/TS already defined, ignoring this entry'
                                 CALL PRINT_HEAD_LIST%DEL_LINE()
                                 CYCLE PHEAD
                             END IF
                         END DO
                      END IF
+                     !
+                     WRITE(IOUT,'(2I6, 3x, A)') ITMP(:,I), PRINT_HEAD_LIST%LN(ISTART:ISTOP)
+                     LLOC = ISTART
                      !
                      ! Drop SPTS/DATE part of line
                      DIM = LEN(PRINT_HEAD_LIST%LN)
@@ -2478,9 +2479,6 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
                      N = N+1
              END DO PHEAD
              !
-             N = N-1
-             CALL SORT(ITMP(:,:N), [1,2], SORT_BY_ROW=TRUE)   ! (A, SORT_INDICES, [DESCEND], [SORT_BY_ROW], [P], [NO_STABLE]) -- Sort by SP (row1), then by TS (row2)
-             !
              K = PRINT_HEAD_LIST%LEN()
              IF(K > 1) THEN
                       DEALLOCATE(PRINT_HEAD)
@@ -2491,7 +2489,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
              DO I=1, K
                      LLOC = ONE
                      !
-                     CALL PRINT_HEAD(I)%OPEN(PRINT_HEAD_LIST%LN, LLOC, IOUT, INBAS, NOBINARY=TRUE, SPLITMAXCOUNT=Z)
+                     CALL PRINT_HEAD(I)%OPEN(PRINT_HEAD_LIST%LN, LLOC, IOUT, INBAS, NO_BINARY=TRUE, SPLITMAXCOUNT=Z)
                      !
                      IF(ALLOCATED(PRINT_HEAD(I)%FMT)) THEN
                                   READ(PRINT_HEAD(I)%FMT,*) J
@@ -2543,7 +2541,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
                          WRITE(IOUT,'(A, 2x, A)') "EVERY_TIMESTEP", PRINT_WTAB_LIST%LN(ISTART:)
                      END IF
                      !
-                     CALL PRINT_WTAB(1)%OPEN(PRINT_WTAB_LIST%LN, LLOC, IOUT, INBAS, NOBINARY=TRUE, SPLITMAXCOUNT=Z)
+                     CALL PRINT_WTAB(1)%OPEN(PRINT_WTAB_LIST%LN, LLOC, IOUT, INBAS, NO_BINARY=TRUE, SPLITMAXCOUNT=Z)
                      !
                      IF(ALLOCATED(PRINT_WTAB(1)%FMT)) THEN
                                   READ(PRINT_WTAB(1)%FMT,*) J
@@ -2604,17 +2602,19 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
                      !
                      J = LLOC
                      CALL PARSE_WORD(PRINT_WTAB_LIST%LN,LLOC,ISTART,ISTOP)                     !Capture File Name for output
-                     WRITE(IOUT,'(2I6, 3x, A)') ITMP(:,I), PRINT_WTAB_LIST%LN(ISTART:ISTOP)
-                     LLOC = ISTART
                      !
                      IF (N>1) THEN
                         DO J=1, N-1
                             IF( ITMP(1,J)==ITMP(1,N) .AND. ITMP(2,J)==ITMP(2,N) ) THEN
+                                WRITE(IOUT,'(2I6, 3x, 2A)') ITMP(:,I), PRINT_WTAB_LIST%LN(ISTART:ISTOP), '  <- SP/TS already defined, ignoring this entry'
                                 CALL PRINT_WTAB_LIST%DEL_LINE()
                                 CYCLE PWTAB
                             END IF
                         END DO
                      END IF
+                     !
+                     WRITE(IOUT,'(2I6, 3x, A)') ITMP(:,I), PRINT_WTAB_LIST%LN(ISTART:ISTOP)
+                     LLOC = ISTART
                      !
                      ! Drop SPTS/DATE part of line
                      DIM = LEN(PRINT_WTAB_LIST%LN)
@@ -2630,9 +2630,6 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
                      N = N+1
              END DO PWTAB
              !
-             N = N-1
-             CALL SORT(ITMP(:,:N), [1,2], SORT_BY_ROW=TRUE)   ! (A, SORT_INDICES, [DESCEND], [SORT_BY_ROW], [P], [NO_STABLE]) -- Sort by SP (row1), then by TS (row2)
-             !
              K = PRINT_WTAB_LIST%LEN()
              IF(K > 1) THEN
                       DEALLOCATE(PRINT_WTAB)
@@ -2643,7 +2640,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
              DO I=1, K
                      LLOC = ONE
                      !
-                     CALL PRINT_WTAB(I)%OPEN(PRINT_WTAB_LIST%LN, LLOC, IOUT, INBAS, NOBINARY=TRUE, SPLITMAXCOUNT=Z)
+                     CALL PRINT_WTAB(I)%OPEN(PRINT_WTAB_LIST%LN, LLOC, IOUT, INBAS, NO_BINARY=TRUE, SPLITMAXCOUNT=Z)
                      !
                      IF(ALLOCATED(PRINT_WTAB(I)%FMT)) THEN
                                   READ(PRINT_WTAB(I)%FMT,*) J
@@ -2695,7 +2692,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
                          WRITE(IOUT,'(A, 2x, A)') "EVERY_TIMESTEP", PRINT_WDEP_LIST%LN(ISTART:)
                      END IF
                      !
-                     CALL PRINT_WDEP(1)%OPEN(PRINT_WDEP_LIST%LN, LLOC, IOUT, INBAS, NOBINARY=TRUE, SPLITMAXCOUNT=Z)
+                     CALL PRINT_WDEP(1)%OPEN(PRINT_WDEP_LIST%LN, LLOC, IOUT, INBAS, NO_BINARY=TRUE, SPLITMAXCOUNT=Z)
                      !
                      IF(ALLOCATED(PRINT_WDEP(1)%FMT)) THEN
                                   READ(PRINT_WDEP(1)%FMT,*) J
@@ -2756,17 +2753,19 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
                      !
                      J = LLOC
                      CALL PARSE_WORD(PRINT_WDEP_LIST%LN,LLOC,ISTART,ISTOP)                     !Capture File Name for output
-                     WRITE(IOUT,'(2I6, 3x, A)') ITMP(:,I), PRINT_WDEP_LIST%LN(ISTART:ISTOP)
-                     LLOC = ISTART
                      !
                      IF (N>1) THEN
                         DO J=1, N-1
                             IF( ITMP(1,J)==ITMP(1,N) .AND. ITMP(2,J)==ITMP(2,N) ) THEN
+                                WRITE(IOUT,'(2I6, 3x, 2A)') ITMP(:,I), PRINT_WDEP_LIST%LN(ISTART:ISTOP), '  <- SP/TS already defined, ignoring this entry'
                                 CALL PRINT_WDEP_LIST%DEL_LINE()
                                 CYCLE PWDEP
                             END IF
                         END DO
                      END IF
+                     !
+                     WRITE(IOUT,'(2I6, 3x, A)') ITMP(:,I), PRINT_WDEP_LIST%LN(ISTART:ISTOP)
+                     LLOC = ISTART
                      !
                      ! Drop SPTS/DATE part of line
                      DIM = LEN(PRINT_WDEP_LIST%LN)
@@ -2782,9 +2781,6 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
                      N = N+1
              END DO PWDEP
              !
-             N = N-1
-             CALL SORT(ITMP(:,:N), [1,2], SORT_BY_ROW=TRUE)   ! (A, SORT_INDICES, [DESCEND], [SORT_BY_ROW], [P], [NO_STABLE]) -- Sort by SP (row1), then by TS (row2)
-             !
              K = PRINT_WDEP_LIST%LEN()
              IF(K > 1) THEN
                       DEALLOCATE(PRINT_WDEP)
@@ -2795,7 +2791,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
              DO I=1, K
                      LLOC = ONE
                      !
-                     CALL PRINT_WDEP(I)%OPEN(PRINT_WDEP_LIST%LN, LLOC, IOUT, INBAS, NOBINARY=TRUE, SPLITMAXCOUNT=Z)
+                     CALL PRINT_WDEP(I)%OPEN(PRINT_WDEP_LIST%LN, LLOC, IOUT, INBAS, NO_BINARY=TRUE, SPLITMAXCOUNT=Z)
                      !
                      IF(ALLOCATED(PRINT_WDEP(I)%FMT)) THEN
                                   READ(PRINT_WDEP(I)%FMT,*) J

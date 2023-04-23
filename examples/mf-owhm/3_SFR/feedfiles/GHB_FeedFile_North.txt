@@ -1,8 +1,8 @@
-# LAY  ROW  COL  COND     AUX ->Which is the associated budgetgroup
-  1    1    1    5.0E+02  GHB_North  # GHB1
-  1    1    2    5.0E+02  GHB_North  # GHB2
-  1    1    3    5.0E+02  GHB_North  # GHB3
-  1    1    4    5.0E+02  GHB_North  # GHB4
+# LAY  ROW  COL  COND     [BGroup]  [xyz]   -> Budget_Group block specified, so input must include BGroup. xyz is the auxiliary integer flags if there are AUXILIARY options specified (there are none in this example).
+  1    1    1    5.0E+02  GHB_North       # GHB1
+  1    1    2    5.0E+02  GHB_North       # GHB2
+  1    1    3    5.0E+02  GHB_North       # GHB3
+  1    1    4    5.0E+02  GHB_North       # GHB4
 #
 # Flag to indicate that all the GHB cells have been specified for this feed file.
 #   After TEMPORAL keyword, each uncommented line represents 1 stress period of input.

@@ -175,7 +175,7 @@ C     ------------------------------------------------------------------
      1                       IBOUND
       USE GWFDRNMODULE, ONLY:NDRAIN,MXDRN,NDRNVL,IPRDRN,NPDRN,
      1                       IDRNPB,NNPDRN,DRNAUX,DRAI,
-     2                       DRNBUD,DRNGROUP,IOUT,LOUT
+     2                       DRNBUD,DRNGROUP,IOUT
       USE CONSTANTS,                ONLY: NL, BLN
       USE ERROR_INTERFACE,          ONLY: STOP_ERROR
       USE NUM2STR_INTERFACE,        ONLY: NUM2STR
@@ -299,7 +299,7 @@ C     VERSION  7.2.00: July 17, 2012 rth
 C     *****************************************************************
       USE GWFDRNMODULE, ONLY:NDRAIN,DRAI
       USE GLOBAL,       ONLY: IBOUND,SUBLNK
-      USE GWFSUBMODULE, ONLY: DVZ,DVZC
+      USE GWFSUBMODULE, ONLY: DVZ
       IMPLICIT NONE
 C     -----------------------------------------------------------------
 C     SPECIFICATIONS:
@@ -315,6 +315,7 @@ C     LOCAL VARIABLES
 C     -----------------------------------------------------------------
 CC
       IF(SUBLNK)THEN
+      CALL SGWF2DRN7PNT(IGRID)
       DO 100 L=1,NDRAIN
 C       
 C1--------GET COLUMN, ROW AND LAYER OF CELL CONTAINING DRAIN.
@@ -383,12 +384,11 @@ C     ******************************************************************
 C
 C        SPECIFICATIONS:
 C     ------------------------------------------------------------------
-      USE GLOBAL,      ONLY:NCOL,NROW,NLAY,IBOUND,HNEW,BUFF,
-     1                      botm, lbotm
+      USE GLOBAL,      ONLY:NCOL,NROW,NLAY,IBOUND,HNEW,BUFF
       USE GWFBASMODULE,ONLY:MSUM,ICBCFL,IAUXSV,DELT,PERTIM,TOTIM,
      1                      VBVL,VBNM
       USE GWFDRNMODULE,ONLY:NDRAIN,IDRNCB,DRAI,NDRNVL,DRNAUX,
-     1                      DRNBUD,IOUT,LOUT
+     1                      DRNBUD,IOUT
 C
       CHARACTER(16) TEXT
       DOUBLE PRECISION HHNEW,EEL,CCDRN,CEL,RATOUT,QQ

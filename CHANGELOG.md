@@ -4,7 +4,7 @@
 
 **[New Feature Changelog](CHANGELOG_Features.md)**
 
-Boyce, S.E., 2022, MODFLOW One-Water Hydrologic Flow Model (MF-OWHM) Conjunctive Use and Integrated Hydrologic Flow Modeling Software, version X.Y.Z: U.S. Geological Survey Software Release, https://doi.org/10.5066/P9P8I8GS
+Boyce, S.E., 2023, MODFLOW One-Water Hydrologic Flow Model (MF-OWHM) Conjunctive Use and Integrated Hydrologic Flow Modeling Software, version X.Y.Z: U.S. Geological Survey Software Release, https://doi.org/10.5066/P9P8I8GS
 
 Boyce, S.E., Hanson, R.T., Ferguson, I., Schmid, W., Henson, W., Reimann, T., Mehl, S.M., and Earll, M.M., 2020, One-Water Hydrologic Flow Model: A MODFLOW based conjunctive-use simulation software: U.S. Geological Survey Techniques and Methods 6–A60, 435 p., https://doi.org/10.3133/tm6A60
 
@@ -18,9 +18,254 @@ Boyce, S.E., Hanson, R.T., Ferguson, I., Schmid, W., Henson, W., Reimann, T., Me
 
 &nbsp;
 
+## 2.3.0
+
+2023-4-23
+
+git commit log: `git log 9d9f5b50c77a03b538e4ec818f5a67e7bcf3e5ea..HEAD`
+
+### HYDFMT v1.2
+
+The update includes the MF-OWHM read utilities, new options, and fixed minor bugs.  
+See [CHANGELOG_Features.md](CHANGELOG_Features.md#2.1.1) for a listing of new Hydmod and HYDFMT features.
+
+### ZoneBudget v3.3
+
+Update to ZoneBudget from `3.2` to `3.3`  
+The update includes the MF-OWHM read utilities, new options, and fixed minor bugs.  
+See [CHANGELOG_Features.md](CHANGELOG_Features.md#2.1.1) for a listing of new ZoneBudget features.
+
+### Merge ⯬ MF-NWT v1.3
+
+- `NWT` Solver version 1.3 source code merged
+    - Obtained from: https://water.usgs.gov/water-resources/software/MODFLOW-NWT/MODFLOW-NWT_1.3.0.zip
+
+### Merge ⯬ BiF v1.2.0
+
+- Batteries Included Fortran (BiF) version 1.2.0 source code merged.
+    - https://code.usgs.gov/fortran/bif/-/tags/1.2.0
+
+### Fixed
+
+* `RCH` reverted back to using upper most `IBOUND /= 0` cell to match results from MF-NWT.
+  
+    * This removes the RCH fix in [2.0.1](#2.0.1) that changed the check to include for convertible layers a check for if the head is about the cell bottom.    
+    * Added `NRCHOP = 4` and `NRCHOP = 5` as options to mimic the old behavior.    
+    * For details about this change, please see  [CHANGELOG_Features.md](CHANGELOG_Features.md#2.3.0)
+    
+* `FMP` Bug Fixes
+  
+    * Can use `FMP` without `SFR`.
+      * Previously, if `FMP` is used without `SFR`, then an index error occurred when `FMP` attempted to check for runoff and delivery locations. To prevent this index error from occurring the user had to specify the `WATERSOURCE` keyword to indicate that `SFR` is not available. 
+      * Now if `SFR` is not in use, then `FMP` automatically disables `SFR` diversions and runoff is flagged for flowing out of the model (rather than to a specific `SFR` location).  
+    * `MNW2`-`FMP` Supply well link no longer crashes if row and column do not match (`SUPPLY_WELL` Block). Instead, `FMP` now copies the row and column specified in `MNW2`. The row and column input is still required in `FMP` as a placeholder, but not used.
+    * `SURFACE_WATER` block `PRINT SFR_RETURN` keyword with binary output (`BINARY` keyword) wrote a random integer if the WBS did not have assigned any SFR return flow locations.
+      * The fix changed this to write the segment and reach as zero to indicate no SFR return flow point was specified.
+      * Note this is already how the text version of the option already works.
+    * FMP failed to identify other blocks when `LAND_USE` was not specified in the input.
+      * While this block should always be specified, the input indicates it is optional.  
+        The code now reflects this flexibility.
+    * Fixed errors when NOT including the `LAND_USE` block in the input and:
+      * `CLIMATE` block specified `REFERENCE_ET` to result in bare soil evaporative fallback calculations (fixed allocation error).
+      * Raise an error when `NCROP > 0`
+    * Fixed errors with FMP `LAND_USE` block and Bare Soil:
+      * Improved logic for bare soil evaporation when `NCROP = 0`
+    
+* Surface Water Operations (`SWO`) 
+  
+  * Fixed an index error that occurs when the Slang input does not declare any required flow variables.
+  
+  * Budget routine missing initialization for 3 diversion accounting variables. 
+  
+* `BAS` Options Fixes
+
+    *  `PRINT_HEAD`, `PRINT_WATER_TABLE`, and `PRINT_WATER_DEPTH` no longer sorts the stress period and time step (`SPTS`).
+        * In `MODULE BAS_OPTIONS_AND_STARTDATE`, if multiple `PRINT_HEAD`, `PRINT_WATER_TABLE`, or `PRINT_WATER_DEPTH` keywords are included to indicate output for different `SPTS`, then they would be sorted by stress period and time step. However, this only slowed the runtime rather than improved it.
+
+    *  `PRINT_WATER_TABLE` and `PRINT_WATER_DEPTH` file header write error.
+        * In `bas.f` the subroutine `GWF2BAS7OT` checks if `PRINT_WATER_TABLE` and/or `PRINT_WATER_DEPTH` options are in use and if the corresponding arrays should be written to a file for the stress period and time step that just finished. While writing the header to the output, the code would use the file unit number associated with `PRINT_HEAD` option, which would either put an extra header in those files or raise a random access violation error.
+    *  Convergence output files changed date format to ISO Standard. This effects the following options:
+        *  `PRINT_ITERATION_INFO`
+        *  `PRINT_CONVERGENCE`
+        *  `PRINT_FLOW_RESIDUAL`
+        *  `PRINT_RELATIVE_VOLUME_ERROR`
+
+* `SWR` Bug Fixes
+
+    * Reach ending layer assignment is set to 1 if the elevation is above the top of layer 1 and set to `NLAY` if it is below the bottom of `NLAY`. Previously, this situation resulted in the layer assignment being undefined.
+    * The code block that updates the number of QAQ connections (`NQAQCONN`) was specified too early in the code. The `CQAQCONN` loop was moved to the correct location.
+
+* `NWT` Bug Fixes
+
+    * Isolated model cells (that is surrounded by `IBOUND=0` cells) were previously set `HDRY` and the  `IBOUND` changed to zero. To be consistent with other flow packages, the head value is instead changed to `HNOFLO`.
+      
+    * `SUBROUTINE XMD7DA` added declaration for `IGRID` argument rather than using implicit typing.
+
+    * `xmd_lib.f` reorder declaring variables.
+      
+      * Several routines in `xmd_lib.f` declare the subroutine arguments after local variables. Most compilers work around this, but it can cause strange effects for arguments that represent local array dimensions.
+      
+      * For example:   
+        ```
+        subroutine array_routine(dim)
+             integer, dimension(dim):: work
+             integer:: dim
+        end subroutine
+        ```
+        Has the issue of `dim` being used as an array dimension before being declared. Most compilers, will catch this and automatically use dim appropriately, but it is best to restructure the routine as:  
+        ```
+        subroutine array_routine(dim)
+             integer:: dim
+             integer, dimension(dim):: work
+        end subroutine
+        ```
+
+
+* `HOB` requires drawdown observations to be in chronological order or an error is raised. 
+  
+
+    * Either the user will need to fix the order or change the observation order or change to head observations.
+
+* `MULT` Bug Fixes
+
+    * `ExpressionParser` inline `IF` conditional index error.
+
+        * If the `ExpressionParser` solved an expression within an inline `IF` that did not result in all the values being True or all False (that is changing the entire array), then an index error was raised.
+
+        * Inline IF is defined as follows:  
+            `IF[ COND, trueANS, falseANS ]`   
+            &nbsp;  
+            where:   
+            `COND` is a conditional expression (must contain <, <=, >, >=)  
+            `trueANS`  is the result returned where `COND` is True  
+            `falseANS` is the result returned where `COND` is False.  
+            &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; It is optional to include `falseANS`,  
+            &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if not present, then where `COND` is False,  
+            &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; then the result returned is `NaN`.
+            &nbsp;  
+        * For example, given  
+            `x = 10.`  
+            `y = 5.`  
+            would have:  
+            `IF[ x + 3 > y, 2*x, 10*y ]`  
+            return the `trueANS`, which is`2*x` or `20`  
+            
+            Another example is  
+            `IF[ A < -1e-6 & A > 1e-6, 0, B / A ]`  
+            would return an array with values of zero where `A` is near zero,  
+            otherwise sets the location to `B` divided by `A`
+
+
+### Refactoring
+
+* `LPF` and `UPW` expanded comment support by using MF-OWHM read utilities.
+  
+    * Provides better error and warning messages for bad input.
+    * Input allows comments and empty lines.
+      * This mainly effected when properties were defined by parameters and   
+        then the input would use a Fortran list-directed read to load the print factor (`IPRN`).  
+        In particular, the following code:  
+        `READ(IN,*) LAYFLG(1,K)`  
+        was changed to:  
+        `CALL READ_TO_DATA(LINE, IN, IOUT)`  
+        `LLOC = 1`  
+        `CALL GET_INTEGER(LINE, LLOC, ISTART, ISTOP, IOUT, IN, LAYFLG(1,K), ...` 
+    * `DIS` improved end of file error message when not enough stress period information is specified.
+    
+* `FMP` `CLIMATE` Block refactored code to allow specifying `DIRECT_RECHARGE` multiple times and the sum of the recharge arrays are applied to deep percolation.
+
+* `main.f90` white space cleanup and reordering of `HYD` subroutine calls.
+
+  * Fixed indentation to make code line up.
+  * Modified an if statement to improve speed when using `HYD` and calling `GWF2HYD7STR7RP` and `GWF2HYD7SFR7RP` routines.
+
+* `xmd.f` indentation cleanup.
+
+* `tabfile_module.f` reading the the actual tabfile's filenames now accept the keywords `OPEN/CLOSE`, `DATAFILE`, and `DATAUNIT`. 
+  * Previously, the tabfile filename was specified without a keyword as just *FNAME* or `EXTERNAL` *UNIT*.  
+    If the user used a keyword, such as `OPEN/CLOSE ./myTabFile.txt`,  
+    then the program would stop saying `Failed to open "OPEN/CLOSE"` causing confusing to the user.
+
+* `util.f` subroutines no longer raises a warning if the optional inputs `CNSTNT` or `IPRN` are not provided.
+
+  * This effects the following subroutines:
+
+    * `U1DREL`
+    * `U2DINT`
+    * `U2DREL`
+    * `U2DDBL`
+
+  *  Instead now, if either is not present, the following is written to the LIST file:  
+    `Reading for XYZ, autoset the scale factor CNSTNT to 1.0, and the print flag IPRN to -1`
+    
+
+* `WEL` and `MNW2` improved missing `ITMP` warning.
+
+  * For the `MNW2` and `WEL` packages, if the end of file is reached or the input fails to read `ITMP`, then `ITMP` is assumed to be zero for the rest of the simulation.
+  * When this occurres a formal warning was made.  
+    This was changed to being a minor message in the `LIST`ing file with the worlds:  
+    `Don't Panic`  
+    in the warning message.
+  * It also indicates to the user that if they are using `LINEFEED` or `FMP-Link` that the rates may be initialized outside of the package.
+
+* `FMP` variable `DRTFLOW` is always allocated when using FMP.
+
+  * The `DRT-FMP` link requires the intermediate variable `DRTFLOW`. This variable was only allocated when `DRT` and `FMP` are both in use. To simplify the connection, `FMP` now always allocates `DRTFLOW` when `FMP` is in use.
+
+* `FMP` improved "runoff leave model" warning message.
+
+  * If a WBS/Farm contains runoff, but has no where to go, a soft warning is raised to let the user know which WBS has runoff and that the runoff is flowing out of the model because it has no where within the model to go.  
+
+    The warning has been expanded to include suggestions on how to fix the problem and what potential causes of the warning are.  
+
+    The warning also indicates that, it is not a problem, but instead is letting the user know that water is leaving the model domain automatically since the user did not specify a runoff location.  
+
+* `FMP` source file standardization of indentation for the following files:
+
+  * `src/fmp/allotment_data.f90`
+  * `src/fmp/climate_data.f90`
+  * `src/fmp/crop_data.f90`
+  * `src/fmp/options_data.f90`
+  * `src/fmp/output_data.f90`
+  * `src/fmp/salinity_data.f90`
+  * `src/fmp/soil_data.f90`
+  * `src/fmp/surface_water_data.f90`
+  * `src/fmp/surface_water_operations_data.f90`
+
+* `src/fmp/wbs_data.f90`  added `SETUP_BASIC_VAR_WBS_DATA` subroutine in `WBS_DATA_FMP_MODULE`
+
+    * In module `WBS_DATA_FMP_MODULE` the basic variable initialization and allocations done by `SUBROUTINE INITIALIZE_WBS_DATA` and `SUBROUTINE SETUP_NO_WBS_DATA` are moved to `SUBROUTINE SETUP_BASIC_VAR_WBS_DATA`.
+
+    * This minimizes the redundant code between the two routines.
+
+* `src/fmp/crop_data.f90`  moved crop initial array allocations to separate subroutine.
+
+    * The FMP `LAND_USE` block, `MODULE CROP_DATA_FMP_MODULE`, contained conditional array allocations that occurred in the `SETUP_NEXT_STRESS_PERIOD` subroutine (RP routine). These have been moved to `SUBROUTINE SETUP_DEPENDENT_PARTS`.
+    * By doing this, allows the allocations to occur at the FMP allocate and read routine (`SUBOURITNE FMP_AR`) after all the FMP block inputs have been read.
+
+* `hydfmt.f` minor character variable cleanup to reduce final executable binary size.
+
+    * To reduce the size of the binary, variables that were set to the same static string only set the first variable and then the remaining were set to the first.  
+    * For example:  
+        &nbsp; &nbsp; &nbsp; `a = '---------'`  
+        &nbsp; &nbsp; &nbsp; `b = '---------'`  
+        &nbsp; &nbsp; &nbsp; `c = '---------'`  
+        is changed to:  
+        &nbsp; &nbsp; &nbsp; `a = '---------'`  
+        &nbsp; &nbsp; &nbsp; `b = a`  
+        &nbsp; &nbsp; &nbsp; `c = a`
+
+
+
+&nbsp; 
+
+------
+
 ## 2.2.0
 
 2022-01-20
+
+git commit log: `git log 4bfb023b3a0f18d8a53a35146f85a93528d6ddd0..9d9f5b50c77a03b538e4ec818f5a67e7bcf3e5ea` 
 
 ### ZoneBudget v3.2
 
@@ -43,12 +288,10 @@ See [CHANGELOG_Features.md](CHANGELOG_Features.md#2.1.1) for a listing of new Zo
 
         Please see the [CHANGELOG_Features.md section 2.1.1 Section NWT Improvements for detailed information about this](CHANGELOG_Features.md#2.1.1).
 
-    * `NWT` thin cell check is disabled. 
-
-        * By default, the `NWT` solver would check all model cells vertical thickness (`thick`) against the largest/thickest cell (`mxthick`). Any cell that had its `thick < 0.01*mxthick` was changed to `IBOUND=0` (removed from the simulation/assumed impermeable rock). This caused models with a large difference between cell thicknesses to drop out smaller ones, which might be thin clay layers in the middle of the model. Users were NOT aware that part of their model was not being simulated. To prevent this situation from occurring, this check is disabled by default.
+    * `NWT` thin cell check is now disabled by default. 
 
         * To enable the thin cell check, add the option `THIN_CELL_CHECK`.  
-            All cells removed from the simulation are written to the LIST file.
+            All "thin" cells removed from the simulation are written to the LIST file.
 
 - `SFR` Modifications
     * The flow-depth-width lookup table, `ICALC = 4`, use `log10` interpolation,  
@@ -129,6 +372,9 @@ See [CHANGELOG_Features.md](CHANGELOG_Features.md#2.1.1) for a listing of new Zo
 
 * Removed from the visual studio solution (`ide/visual_studio/OneWater_Project.sln`) the key entry:`GenAlternateCodePaths="codeForAVX"`
     * `AVX` acceleration caused floating point truncation that resulted in model results that were not repeatable. That is, the same model input would produce different numbers after the tenth digit. Results are now identical when running the multiple times with the same input.  
+* Multiple files changed floating literal numbers that did not include a decimal point to have one.
+    * For example, `X = 0D0` sets `X` to the integer `0`, rather than double precision `0.0`. The compiler than changes the zero from the integer to a double on the fly, but at the minor expense to runtime. To be syntactically correct, this is changed to `X = 0.D0` to indicate a double precision number.
+
 
 
 ### Refactoring
@@ -173,6 +419,8 @@ Initial release of MODFLOW Surface Water Operations (`SWO`) in MF-OWHM
   simulating large-scale surface water management in MODFLOW-based hydrologic models:  
   Denver, Colo., Bureau of Reclamation Technical Memorandum no. 86-68210–2016-02, 96 p.
 
+git commit log: `git log d8ec82ae504a2aaec594ccd576f8674961f59404..4bfb023b3a0f18d8a53a35146f85a93528d6ddd0`
+
 ### Fixed
 
 * `UZF` incorrectly set `ZEROD9 = 1.0d0-9`, now it is `1.0d-9` (that is, it was set to -8 and now it is 10<sup>-9</sup>).
@@ -208,6 +456,8 @@ Initial release of MODFLOW Surface Water Operations (`SWO`) in MF-OWHM
 
 2021-05-25
 
+git commit log: `git log 3adf1e3b8e634d83b8296fd673b3e3360a5cae06..d8ec82ae504a2aaec594ccd576f8674961f59404` 
+
 ### Fixed
 
 * Improvement on warning and error messages in `MNW2`, `UPW`, and `NWT` packages.
@@ -219,6 +469,9 @@ Initial release of MODFLOW Surface Water Operations (`SWO`) in MF-OWHM
 ## 2.0.2
 
 2021-05-15
+
+git commit log: `git log 12b331ce38c47a7e88f7da234c189ffa585d637a..3adf1e3b8e634d83b8296fd673b3e3360a5cae06`  
+or web view at: https://code.usgs.gov/modflow/mf-owhm/-/compare/2.0.1..2.0.2
 
 ### Merge ⯬ BiF v1.0.1
 
@@ -247,6 +500,8 @@ Initial release of MODFLOW Surface Water Operations (`SWO`) in MF-OWHM
 
 2021-03-15
 
+git commit log: `git log 12b331ce38c47a7e88f7da234c189ffa585d637a`
+
 ### Merge ⯬ MF-NWT v1.2
 
 - `NWT` Solver version 1.2 source code merged
@@ -263,8 +518,9 @@ Initial release of MODFLOW Surface Water Operations (`SWO`) in MF-OWHM
 
 * `MNW2` using `QLIMIT` with `NWT` resulted in the models that failed to converge do to a bad index reference for well head.
 
-- `RCH` and `NWT` packages with `NRCHOP=3` did not pass recharge to the time step's upper most active layer. Previously, it only passed water to the upper most non-zero `IBOUND` cell rather than the upper most non-dry cell.
-    - To mimic the original behavior of `RCH` with `NWT` set `NRCHOP = -1`, which applies recharge to the initial upper most non-zero `IBOUND` cell.
+- *`RCH` and `NWT` packages with `NRCHOP=3` did not pass recharge to the time step's upper most active layer. Previously, it only passed water to the upper most non-zero `IBOUND` cell rather than the upper most non-dry cell.*
+    - *To mimic the original behavior of `RCH` with `NWT` set `NRCHOP = -1`, which applies recharge to the initial upper most non-zero `IBOUND` cell.*
+    - **Removed in 2.3.0, see [CHANGELOG_Features](CHANGELOG_Features.md) for more information.**
 
 * `UPW`/`NWT` packages with convertible layers kept releasing water from storage after a model cell was dry.
 

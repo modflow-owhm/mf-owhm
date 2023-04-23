@@ -57,42 +57,41 @@ MODULE OUTPUT_DATA_FMP_MODULE!, ONLY: OUTPUT_DATA, INITIALIZE_OUTPUT_DATA
   CONTAINS
   !
   SUBROUTINE DEALLOCATE_OUTPUT_FINAL(OFL)
-  TYPE(OUTPUT_DATA)::OFL
-  CALL DEALLOCATE_OUTPUT(OFL)
+    TYPE(OUTPUT_DATA)::OFL
+    CALL DEALLOCATE_OUTPUT(OFL)
   END SUBROUTINE
   !
   SUBROUTINE DEALLOCATE_OUTPUT(OFL)
-  CLASS(OUTPUT_DATA), INTENT(INOUT)::OFL
-  !
-  OFL%WEL_CBC = Z
-  OFL%FNR_CBC = Z
-  !OFL%ISDPFL  = Z
-  !OFL%IFBPFL  = Z
-  OFL%HAS_ROUT= Z
-  !
-  CALL OFL%WBS_WATER_USE      %CLOSE()
-  CALL OFL%FDS                %CLOSE()
-  CALL OFL%FB_COMPACT         %CLOSE()
-  CALL OFL%FB_DETAILS         %CLOSE()
-  CALL OFL%ET_ARRAY_SUM       %CLOSE()
-  CALL OFL%ET_ARRAY_SEP       %CLOSE()
-  CALL OFL%ET_LIST            %CLOSE()
-  CALL OFL%FNRCH_ARRAY        %CLOSE()
-  CALL OFL%FNRCH_LIST         %CLOSE()
-  CALL OFL%FWELLS             %CLOSE()
-  CALL OFL%ROUTING_INFORMATION%CLOSE()
-  CALL OFL%EGWA               %CLOSE()
-  CALL OFL%TGWA               %CLOSE()
-  CALL OFL%TI                 %CLOSE()
-  CALL OFL%EI                 %CLOSE()
-  CALL OFL%TP                 %CLOSE()
-  CALL OFL%EP                 %CLOSE()
-  CALL OFL%ETGW               %CLOSE()
-  CALL OFL%ETI                %CLOSE()
-  CALL OFL%ETP                %CLOSE()
-  CALL OFL%RUNOFF             %CLOSE()
-  CALL OFL%DPERC              %CLOSE()
-  !
+    CLASS(OUTPUT_DATA), INTENT(INOUT)::OFL
+    !
+    OFL%WEL_CBC = Z
+    OFL%FNR_CBC = Z
+    !OFL%ISDPFL  = Z
+    !OFL%IFBPFL  = Z
+    OFL%HAS_ROUT= Z
+    !
+    CALL OFL%WBS_WATER_USE      %CLOSE()
+    CALL OFL%FDS                %CLOSE()
+    CALL OFL%FB_COMPACT         %CLOSE()
+    CALL OFL%FB_DETAILS         %CLOSE()
+    CALL OFL%ET_ARRAY_SUM       %CLOSE()
+    CALL OFL%ET_ARRAY_SEP       %CLOSE()
+    CALL OFL%ET_LIST            %CLOSE()
+    CALL OFL%FNRCH_ARRAY        %CLOSE()
+    CALL OFL%FNRCH_LIST         %CLOSE()
+    CALL OFL%FWELLS             %CLOSE()
+    CALL OFL%ROUTING_INFORMATION%CLOSE()
+    CALL OFL%EGWA               %CLOSE()
+    CALL OFL%TGWA               %CLOSE()
+    CALL OFL%TI                 %CLOSE()
+    CALL OFL%EI                 %CLOSE()
+    CALL OFL%TP                 %CLOSE()
+    CALL OFL%EP                 %CLOSE()
+    CALL OFL%ETGW               %CLOSE()
+    CALL OFL%ETI                %CLOSE()
+    CALL OFL%ETP                %CLOSE()
+    CALL OFL%RUNOFF             %CLOSE()
+    CALL OFL%DPERC              %CLOSE()
   END SUBROUTINE
   !  
   SUBROUTINE INITIALIZE_OUTPUT_DATA( BL, OFL, ITMUNI)
@@ -149,51 +148,51 @@ MODULE OUTPUT_DATA_FMP_MODULE!, ONLY: OUTPUT_DATA, INITIALIZE_OUTPUT_DATA
                         WRITE(BL%IOUT,'(A)') '   FARM_WELL_SUMMARY (FWELLS)             OUTPUT KEYWORD FOUND. NOW OPENING GENERIC_OUTPUT FILE. IF NOTHING SPECIFIED THEN OPENING FILE: "FWELLS.out"'
                         IF(BL%LINE(LLOC:) == BLNK) THEN
                                 LLOC=ONE
-                                CALL OFL%FWELLS%OPEN("FWELLS.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NOBINARY=TRUE, NO_INTERNAL=TRUE)
+                                CALL OFL%FWELLS%OPEN("FWELLS.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NO_BINARY=TRUE, NO_INTERNAL=TRUE)
                         ELSE
-                                CALL OFL%FWELLS%OPEN(BL%LINE,LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NOBINARY=TRUE)
+                                CALL OFL%FWELLS%OPEN(BL%LINE,LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NO_BINARY=TRUE)
                                 !
-                                IF(OFL%FWELLS%IU==Z) CALL OFL%FWELLS%OPEN("FWELLS.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NOBINARY=TRUE, NO_INTERNAL=TRUE)
+                                IF(OFL%FWELLS%IU==Z) CALL OFL%FWELLS%OPEN("FWELLS.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NO_BINARY=TRUE, NO_INTERNAL=TRUE)
                         END IF
       CASE ("FNRCH_ARRAY","FARM_NET_RECHARGE_ARRAY")
                         WRITE(BL%IOUT,'(A)') '   FARM_NET_RECHARGE_ARRAY (FNRCH_ARRAY)  OUTPUT KEYWORD FOUND. NOW OPENING GENERIC_OUTPUT FILE. IF NOTHING SPECIFIED THEN OPENING FILE: "FNRCH_ARRAY.out"'
                         IF(BL%LINE(LLOC:) == BLNK) THEN
                                 LLOC=ONE
-                                CALL OFL%FNRCH_ARRAY%OPEN("FNRCH_ARRAY.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NOBINARY=TRUE, NO_INTERNAL=TRUE)
+                                CALL OFL%FNRCH_ARRAY%OPEN("FNRCH_ARRAY.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NO_BINARY=TRUE, NO_INTERNAL=TRUE)
                         ELSE
-                                CALL OFL%FNRCH_ARRAY%OPEN(BL%LINE,LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NOBINARY=TRUE)
+                                CALL OFL%FNRCH_ARRAY%OPEN(BL%LINE,LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NO_BINARY=TRUE)
                                 !
-                                IF(OFL%FNRCH_ARRAY%IU==Z) CALL OFL%FNRCH_ARRAY%OPEN("FNRCH_ARRAY.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NOBINARY=TRUE, NO_INTERNAL=TRUE)
+                                IF(OFL%FNRCH_ARRAY%IU==Z) CALL OFL%FNRCH_ARRAY%OPEN("FNRCH_ARRAY.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NO_BINARY=TRUE, NO_INTERNAL=TRUE)
                         END IF
       CASE ("FNRCH_LIST","FARM_NET_RECHARGE_LIST")
                         WRITE(BL%IOUT,'(A)') '   FARM_NET_RECHARGE_LIST (FNRCH_LIST)    OUTPUT KEYWORD FOUND. NOW OPENING GENERIC_OUTPUT FILE. IF NOTHING SPECIFIED THEN OPENING FILE: "FNRCH_LIST.out"'
                         IF(BL%LINE(LLOC:) == BLNK) THEN
                                 LLOC=ONE
-                                CALL OFL%FNRCH_LIST%OPEN("FNRCH_LIST.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NOBINARY=TRUE, NO_INTERNAL=TRUE)
+                                CALL OFL%FNRCH_LIST%OPEN("FNRCH_LIST.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NO_BINARY=TRUE, NO_INTERNAL=TRUE)
                         ELSE
-                                CALL OFL%FNRCH_LIST%OPEN(BL%LINE,LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NOBINARY=TRUE)
+                                CALL OFL%FNRCH_LIST%OPEN(BL%LINE,LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NO_BINARY=TRUE)
                                 !
-                                IF(OFL%FNRCH_LIST%IU==Z) CALL OFL%FNRCH_LIST%OPEN("FNRCH_LIST.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NOBINARY=TRUE, NO_INTERNAL=TRUE)
+                                IF(OFL%FNRCH_LIST%IU==Z) CALL OFL%FNRCH_LIST%OPEN("FNRCH_LIST.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NO_BINARY=TRUE, NO_INTERNAL=TRUE)
                         END IF
       CASE ("WBS_WATER_USE")
                         WRITE(BL%IOUT,'(A)') '   WBS_WATER_USE                          OUTPUT KEYWORD FOUND. NOW OPENING GENERIC_OUTPUT FILE. IF NOTHING SPECIFIED THEN OPENING FILE: "FMP_WBS_WATER_USE.txt"'
                         IF(BL%LINE(LLOC:) == BLNK) THEN
                                 LLOC=ONE
-                                CALL OFL%WBS_WATER_USE%OPEN("FMP_WBS_WATER_USE.txt",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NOBINARY=TRUE, NO_INTERNAL=TRUE)
+                                CALL OFL%WBS_WATER_USE%OPEN("FMP_WBS_WATER_USE.txt",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NO_BINARY=TRUE, NO_INTERNAL=TRUE)
                         ELSE
-                                CALL OFL%WBS_WATER_USE%OPEN(BL%LINE,LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NOBINARY=TRUE)
+                                CALL OFL%WBS_WATER_USE%OPEN(BL%LINE,LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NO_BINARY=TRUE)
                                 !
-                                IF(OFL%WBS_WATER_USE%IU==Z) CALL OFL%WBS_WATER_USE%OPEN("FMP_WBS_WATER_USE.txt",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NOBINARY=TRUE, NO_INTERNAL=TRUE)
+                                IF(OFL%WBS_WATER_USE%IU==Z) CALL OFL%WBS_WATER_USE%OPEN("FMP_WBS_WATER_USE.txt",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NO_BINARY=TRUE, NO_INTERNAL=TRUE)
                         END IF
       CASE ("FDS","FARM_DEMAND_SUPPLY_SUMMARY")
                         WRITE(BL%IOUT,'(A)') '   FARM_DEMAND_SUPPLY_SUMMARY (FDS)       OUTPUT KEYWORD FOUND. NOW OPENING GENERIC_OUTPUT FILE. IF NOTHING SPECIFIED THEN OPENING FILE: "FDS.out"'
                         IF(BL%LINE(LLOC:) == BLNK) THEN
                                 LLOC=ONE
-                                CALL OFL%FDS%OPEN("FDS.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NOBINARY=TRUE, NO_INTERNAL=TRUE)
+                                CALL OFL%FDS%OPEN("FDS.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NO_BINARY=TRUE, NO_INTERNAL=TRUE)
                         ELSE
                                 CALL OFL%FDS%OPEN(BL%LINE,LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11)
                                 !
-                                IF(OFL%FDS%IU==Z) CALL OFL%FDS%OPEN("FDS.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NOBINARY=TRUE, NO_INTERNAL=TRUE)
+                                IF(OFL%FDS%IU==Z) CALL OFL%FDS%OPEN("FDS.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NO_BINARY=TRUE, NO_INTERNAL=TRUE)
                         END IF
                         !
       CASE ("FB_COMPACT","FARM_BUDGET_COMPACT")
@@ -229,7 +228,7 @@ MODULE OUTPUT_DATA_FMP_MODULE!, ONLY: OUTPUT_DATA, INITIALIZE_OUTPUT_DATA
                                                    LLOC=ONE
                                                    CALL OFL%ET_ARRAY_SUM%OPEN("ET_ARRAY.out",LLOC,BL%IOUT,BL%IU)
                                            ELSE
-                                                   CALL OFL%ET_ARRAY_SUM%OPEN(BL%LINE,LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NOBINARY=TRUE)
+                                                   CALL OFL%ET_ARRAY_SUM%OPEN(BL%LINE,LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NO_BINARY=TRUE)
                                                    !
                                                    IF(OFL%ET_ARRAY_SUM%IU==Z)  CALL OFL%ET_ARRAY_SUM%OPEN("ET_ARRAY.out",LLOC,BL%IOUT,BL%IU)
                                            END IF
@@ -239,7 +238,7 @@ MODULE OUTPUT_DATA_FMP_MODULE!, ONLY: OUTPUT_DATA, INITIALIZE_OUTPUT_DATA
                                                    LLOC=ONE
                                                    CALL OFL%ET_ARRAY_SEP%OPEN("E_n_T_ARRAY.out",LLOC,BL%IOUT,BL%IU)
                                            ELSE
-                                                   CALL OFL%ET_ARRAY_SEP%OPEN(BL%LINE,LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NOBINARY=TRUE)
+                                                   CALL OFL%ET_ARRAY_SEP%OPEN(BL%LINE,LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NO_BINARY=TRUE)
                                                    !
                                                    IF(OFL%ET_ARRAY_SEP%IU==Z)  CALL OFL%ET_ARRAY_SEP%OPEN("E_n_T_ARRAY.out",LLOC,BL%IOUT,BL%IU)
                                            END IF
@@ -249,11 +248,11 @@ MODULE OUTPUT_DATA_FMP_MODULE!, ONLY: OUTPUT_DATA, INITIALIZE_OUTPUT_DATA
                         WRITE(BL%IOUT,'(A)') '   EVAPOTRANSPIRATION_LIST (ET_LIST)      OUTPUT KEYWORD FOUND. NOW OPENING GENERIC_OUTPUT FILE. IF NOTHING SPECIFIED THEN OPENING FILE: "ET_LIST.out"'
                         IF(BL%LINE(LLOC:) == BLNK) THEN
                                 LLOC=ONE
-                                CALL OFL%ET_LIST%OPEN("ET_LIST.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NOBINARY=TRUE, NO_INTERNAL=TRUE)
+                                CALL OFL%ET_LIST%OPEN("ET_LIST.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NO_BINARY=TRUE, NO_INTERNAL=TRUE)
                         ELSE
-                                CALL OFL%ET_LIST%OPEN(BL%LINE,LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NOBINARY=TRUE)
+                                CALL OFL%ET_LIST%OPEN(BL%LINE,LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NO_BINARY=TRUE)
                                 !
-                                IF(OFL%ET_LIST%IU==Z) CALL OFL%ET_LIST%OPEN("ET_LIST.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NOBINARY=TRUE, NO_INTERNAL=TRUE)
+                                IF(OFL%ET_LIST%IU==Z) CALL OFL%ET_LIST%OPEN("ET_LIST.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NO_BINARY=TRUE, NO_INTERNAL=TRUE)
                         END IF
                         !
       CASE ("ROUTING_INFORMATION")
@@ -266,110 +265,110 @@ MODULE OUTPUT_DATA_FMP_MODULE!, ONLY: OUTPUT_DATA, INITIALIZE_OUTPUT_DATA
                         END SELECT
                         IF(BL%LINE(LLOC:) == BLNK) THEN
                                 LLOC=ONE
-                                CALL OFL%ROUTING_INFORMATION%OPEN("ROUT.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NOBINARY=TRUE, NO_INTERNAL=TRUE)
+                                CALL OFL%ROUTING_INFORMATION%OPEN("ROUT.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NO_BINARY=TRUE, NO_INTERNAL=TRUE)
                         ELSE
-                                CALL OFL%ROUTING_INFORMATION%OPEN(BL%LINE,LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NOBINARY=TRUE)
+                                CALL OFL%ROUTING_INFORMATION%OPEN(BL%LINE,LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NO_BINARY=TRUE)
                                 !
-                                IF(OFL%ROUTING_INFORMATION%IU==Z) CALL OFL%ROUTING_INFORMATION%OPEN("ROUT.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NOBINARY=TRUE, NO_INTERNAL=TRUE)
+                                IF(OFL%ROUTING_INFORMATION%IU==Z) CALL OFL%ROUTING_INFORMATION%OPEN("ROUT.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NO_BINARY=TRUE, NO_INTERNAL=TRUE)
                         END IF
                         !
       CASE ("GROUNDWATER_EVAPORATION", "EGWA")
                         WRITE(BL%IOUT,'(A)') '   GROUNDWATER_EVAPORATION (EGWA)         OUTPUT KEYWORD FOUND. NOW OPENING GENERIC_OUTPUT FILE. IF NOTHING SPECIFIED THEN OPENING FILE: "EGWA.out"'
                         IF(BL%LINE(LLOC:) == BLNK) THEN
                                 LLOC=ONE
-                                CALL OFL%EGWA%OPEN("EGWA.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NOBINARY=TRUE, NO_INTERNAL=TRUE)
+                                CALL OFL%EGWA%OPEN("EGWA.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NO_BINARY=TRUE, NO_INTERNAL=TRUE)
                         ELSE
-                                CALL OFL%EGWA%OPEN(BL%LINE,LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NOBINARY=TRUE)
+                                CALL OFL%EGWA%OPEN(BL%LINE,LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NO_BINARY=TRUE)
                                 !
-                                IF(OFL%EGWA%IU==Z) CALL OFL%EGWA%OPEN("EGWA.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NOBINARY=TRUE, NO_INTERNAL=TRUE)
+                                IF(OFL%EGWA%IU==Z) CALL OFL%EGWA%OPEN("EGWA.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NO_BINARY=TRUE, NO_INTERNAL=TRUE)
                         END IF
                         !
       CASE ("GROUNDWATER_TRANSPIRATION", "TGWA")
                         WRITE(BL%IOUT,'(A)') '   GROUNDWATER_TRANSPIRATION (TGWA)       OUTPUT KEYWORD FOUND. NOW OPENING GENERIC_OUTPUT FILE. IF NOTHING SPECIFIED THEN OPENING FILE: "TGWA.out"'
                         IF(BL%LINE(LLOC:) == BLNK) THEN 
                                 LLOC=ONE
-                                CALL OFL%TGWA%OPEN("TGWA.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NOBINARY=TRUE, NO_INTERNAL=TRUE)
+                                CALL OFL%TGWA%OPEN("TGWA.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NO_BINARY=TRUE, NO_INTERNAL=TRUE)
                         ELSE
-                                CALL OFL%TGWA%OPEN(BL%LINE,LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NOBINARY=TRUE)
+                                CALL OFL%TGWA%OPEN(BL%LINE,LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NO_BINARY=TRUE)
                                 !
-                                IF(OFL%TGWA%IU==Z) CALL OFL%TGWA%OPEN("TGWA.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NOBINARY=TRUE, NO_INTERNAL=TRUE)
+                                IF(OFL%TGWA%IU==Z) CALL OFL%TGWA%OPEN("TGWA.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NO_BINARY=TRUE, NO_INTERNAL=TRUE)
                         END IF
                         !
       CASE ("GROUNDWATER_EVAPOTRANSPIRATION", "ETGW")
                         WRITE(BL%IOUT,'(A)') '   GROUNDWATER_EVAPOTRANSPIRATION (ETGW)  OUTPUT KEYWORD FOUND. NOW OPENING GENERIC_OUTPUT FILE. IF NOTHING SPECIFIED THEN OPENING FILE: "ETGW.out"'
                         IF(BL%LINE(LLOC:) == BLNK) THEN
                                 LLOC=ONE
-                                CALL OFL%ETGW%OPEN("ETGW.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NOBINARY=TRUE, NO_INTERNAL=TRUE)
+                                CALL OFL%ETGW%OPEN("ETGW.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NO_BINARY=TRUE, NO_INTERNAL=TRUE)
                         ELSE
-                                CALL OFL%ETGW%OPEN(BL%LINE,LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NOBINARY=TRUE)
+                                CALL OFL%ETGW%OPEN(BL%LINE,LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NO_BINARY=TRUE)
                                 !
-                                IF(OFL%ETGW%IU==Z) CALL OFL%ETGW%OPEN("ETGW.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NOBINARY=TRUE, NO_INTERNAL=TRUE)
+                                IF(OFL%ETGW%IU==Z) CALL OFL%ETGW%OPEN("ETGW.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NO_BINARY=TRUE, NO_INTERNAL=TRUE)
                         END IF
                         !
       CASE ("IRRIGATION_EVAPORATION", "EI")
                         WRITE(BL%IOUT,'(A)') '   IRRIGATION_EVAPORATION (EI)            OUTPUT KEYWORD FOUND. NOW OPENING GENERIC_OUTPUT FILE. IF NOTHING SPECIFIED THEN OPENING FILE: "EI.out"'
                         IF(BL%LINE(LLOC:) == BLNK) THEN
                                 LLOC=ONE
-                                CALL OFL%EI%OPEN("EI.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NOBINARY=TRUE, NO_INTERNAL=TRUE)
+                                CALL OFL%EI%OPEN("EI.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NO_BINARY=TRUE, NO_INTERNAL=TRUE)
                         ELSE
-                                CALL OFL%EI%OPEN(BL%LINE,LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NOBINARY=TRUE)
+                                CALL OFL%EI%OPEN(BL%LINE,LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NO_BINARY=TRUE)
                                 !
-                                IF(OFL%EI%IU==Z) CALL OFL%EI%OPEN("EI.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NOBINARY=TRUE, NO_INTERNAL=TRUE)
+                                IF(OFL%EI%IU==Z) CALL OFL%EI%OPEN("EI.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NO_BINARY=TRUE, NO_INTERNAL=TRUE)
                         END IF
                         !
       CASE ("IRRIGATION_TRANSPIRATION", "TI")
                         WRITE(BL%IOUT,'(A)') '   IRRIGATION_TRANSPIRATION (TI)          OUTPUT KEYWORD FOUND. NOW OPENING GENERIC_OUTPUT FILE. IF NOTHING SPECIFIED THEN OPENING FILE: "TI.out"'
                         IF(BL%LINE(LLOC:) == BLNK) THEN
                                 LLOC=ONE
-                                CALL OFL%TI%OPEN("TI.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NOBINARY=TRUE, NO_INTERNAL=TRUE)
+                                CALL OFL%TI%OPEN("TI.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NO_BINARY=TRUE, NO_INTERNAL=TRUE)
                         ELSE
-                                CALL OFL%TI%OPEN(BL%LINE,LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NOBINARY=TRUE)
+                                CALL OFL%TI%OPEN(BL%LINE,LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NO_BINARY=TRUE)
                                 !
-                                IF(OFL%TI%IU==Z) CALL OFL%TI%OPEN("TI.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NOBINARY=TRUE, NO_INTERNAL=TRUE)
+                                IF(OFL%TI%IU==Z) CALL OFL%TI%OPEN("TI.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NO_BINARY=TRUE, NO_INTERNAL=TRUE)
                         END IF
                         !
       CASE ("IRRIGATION_EVAPOTRANSPIRATION", "ETI")
                         WRITE(BL%IOUT,'(A)') '   IRRIGATION_EVAPOTRANSPIRATION (ETI)    OUTPUT KEYWORD FOUND. NOW OPENING GENERIC_OUTPUT FILE. IF NOTHING SPECIFIED THEN OPENING FILE: "ETI.out"'
                         IF(BL%LINE(LLOC:) == BLNK) THEN
                                 LLOC=ONE
-                                CALL OFL%ETI%OPEN("ETI.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NOBINARY=TRUE, NO_INTERNAL=TRUE)
+                                CALL OFL%ETI%OPEN("ETI.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NO_BINARY=TRUE, NO_INTERNAL=TRUE)
                         ELSE
-                                CALL OFL%ETI%OPEN(BL%LINE,LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NOBINARY=TRUE)
+                                CALL OFL%ETI%OPEN(BL%LINE,LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NO_BINARY=TRUE)
                                 !
-                                IF(OFL%ETI%IU==Z) CALL OFL%ETI%OPEN("ETI.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NOBINARY=TRUE, NO_INTERNAL=TRUE)
+                                IF(OFL%ETI%IU==Z) CALL OFL%ETI%OPEN("ETI.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NO_BINARY=TRUE, NO_INTERNAL=TRUE)
                         END IF
                         !
       CASE ("PRECIPITATION_EVAPORATION", "EP")
                         WRITE(BL%IOUT,'(A)') '   PRECIPITATION_EVAPORATION (EP)         OUTPUT KEYWORD FOUND. NOW OPENING GENERIC_OUTPUT FILE. IF NOTHING SPECIFIED THEN OPENING FILE: "EP.out"'
                         IF(BL%LINE(LLOC:) == BLNK) THEN
                                 LLOC=ONE
-                                CALL OFL%EP%OPEN("EP.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NOBINARY=TRUE, NO_INTERNAL=TRUE)
+                                CALL OFL%EP%OPEN("EP.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NO_BINARY=TRUE, NO_INTERNAL=TRUE)
                         ELSE
-                                CALL OFL%EP%OPEN(BL%LINE,LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NOBINARY=TRUE)
+                                CALL OFL%EP%OPEN(BL%LINE,LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NO_BINARY=TRUE)
                                 !
-                                IF(OFL%EP%IU==Z) CALL OFL%EP%OPEN("EP.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NOBINARY=TRUE, NO_INTERNAL=TRUE)
+                                IF(OFL%EP%IU==Z) CALL OFL%EP%OPEN("EP.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NO_BINARY=TRUE, NO_INTERNAL=TRUE)
                         END IF
                         !
       CASE ("PRECIPITATION_TRANSPIRATION", "TP")
                         WRITE(BL%IOUT,'(A)') '   PRECIPITATION_TRANSPIRATION (TP)       OUTPUT KEYWORD FOUND. NOW OPENING GENERIC_OUTPUT FILE. IF NOTHING SPECIFIED THEN OPENING FILE: "TP.out"'
                         IF(BL%LINE(LLOC:) == BLNK) THEN
                                 LLOC=ONE
-                                CALL OFL%TP%OPEN("TP.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NOBINARY=TRUE, NO_INTERNAL=TRUE)
+                                CALL OFL%TP%OPEN("TP.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NO_BINARY=TRUE, NO_INTERNAL=TRUE)
                         ELSE
-                                CALL OFL%TP%OPEN(BL%LINE,LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NOBINARY=TRUE)
+                                CALL OFL%TP%OPEN(BL%LINE,LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NO_BINARY=TRUE)
                                 !
-                                IF(OFL%TP%IU==Z) CALL OFL%TP%OPEN("TP.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NOBINARY=TRUE, NO_INTERNAL=TRUE)
+                                IF(OFL%TP%IU==Z) CALL OFL%TP%OPEN("TP.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NO_BINARY=TRUE, NO_INTERNAL=TRUE)
                         END IF
                         !
       CASE ("PRECIPITATION_EVAPOTRANSPIRATION", "ETP")
                         WRITE(BL%IOUT,'(A)') '   PRECIPITATION_EVAPOTRANSPIRATION (ETP) OUTPUT KEYWORD FOUND. NOW OPENING GENERIC_OUTPUT FILE. IF NOTHING SPECIFIED THEN OPENING FILE: "ETP.out"'
                         IF(BL%LINE(LLOC:) == BLNK) THEN
                                 LLOC=ONE
-                                CALL OFL%ETP%OPEN("ETP.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NOBINARY=TRUE, NO_INTERNAL=TRUE)
+                                CALL OFL%ETP%OPEN("ETP.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NO_BINARY=TRUE, NO_INTERNAL=TRUE)
                         ELSE
-                                CALL OFL%ETP%OPEN(BL%LINE,LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NOBINARY=TRUE)
+                                CALL OFL%ETP%OPEN(BL%LINE,LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NO_BINARY=TRUE)
                                 !
-                                IF(OFL%ETP%IU==Z) CALL OFL%ETP%OPEN("ETP.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NOBINARY=TRUE, NO_INTERNAL=TRUE)
+                                IF(OFL%ETP%IU==Z) CALL OFL%ETP%OPEN("ETP.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NO_BINARY=TRUE, NO_INTERNAL=TRUE)
                         END IF
                         !
       CASE ("LANDSCAPE_RUNOFF", "RUNOFF")
@@ -380,11 +379,11 @@ MODULE OUTPUT_DATA_FMP_MODULE!, ONLY: OUTPUT_DATA, INITIALIZE_OUTPUT_DATA
                         !
                         IF(BL%LINE(LLOC:) == BLNK) THEN
                                 LLOC=ONE
-                                CALL OFL%RUNOFF%OPEN("RUNOFF.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NOBINARY=TRUE, NO_INTERNAL=TRUE)
+                                CALL OFL%RUNOFF%OPEN("RUNOFF.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NO_BINARY=TRUE, NO_INTERNAL=TRUE)
                         ELSE
-                                CALL OFL%RUNOFF%OPEN(BL%LINE,LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NOBINARY=TRUE)
+                                CALL OFL%RUNOFF%OPEN(BL%LINE,LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NO_BINARY=TRUE)
                                 !
-                                IF(OFL%RUNOFF%IU==Z) CALL OFL%RUNOFF%OPEN("RUNOFF.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NOBINARY=TRUE, NO_INTERNAL=TRUE)
+                                IF(OFL%RUNOFF%IU==Z) CALL OFL%RUNOFF%OPEN("RUNOFF.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NO_BINARY=TRUE, NO_INTERNAL=TRUE)
                         END IF
                         !
                         IF(OFL%RUNOFF%NULL_FILE) CALL OFL%RUNOFF%CLOSE()
@@ -399,11 +398,11 @@ MODULE OUTPUT_DATA_FMP_MODULE!, ONLY: OUTPUT_DATA, INITIALIZE_OUTPUT_DATA
                         !
                         IF(BL%LINE(LLOC:) == BLNK) THEN
                                 LLOC=ONE
-                                CALL OFL%DPERC%OPEN("DPERC.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NOBINARY=TRUE, NO_INTERNAL=TRUE)
+                                CALL OFL%DPERC%OPEN("DPERC.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NO_BINARY=TRUE, NO_INTERNAL=TRUE)
                         ELSE
-                                CALL OFL%DPERC%OPEN(BL%LINE,LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NOBINARY=TRUE)
+                                CALL OFL%DPERC%OPEN(BL%LINE,LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NO_BINARY=TRUE)
                                 !
-                                IF(OFL%DPERC%IU==Z) CALL OFL%DPERC%OPEN("DPERC.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NOBINARY=TRUE, NO_INTERNAL=TRUE)
+                                IF(OFL%DPERC%IU==Z) CALL OFL%DPERC%OPEN("DPERC.out",LLOC,BL%IOUT,BL%IU,SPLITMAXCOUNT=11,NO_BINARY=TRUE, NO_INTERNAL=TRUE)
                         END IF
                         !
                         IF(OFL%DPERC%NULL_FILE) CALL OFL%DPERC%CLOSE()
@@ -433,8 +432,8 @@ MODULE OUTPUT_DATA_FMP_MODULE!, ONLY: OUTPUT_DATA, INITIALIZE_OUTPUT_DATA
     IF(OFL%FDS       %IS_OPEN .AND. .NOT. OFL%FDS       %BINARY) CALL OFL%FDS       %SET_HEADER('  PER  STP'//TIMEUNIT//'    FID         OFE              TFDR-INI            NR-SWD-INI             R-SWD-INI              QREQ-INI              TFDR-FIN            NR-SWD-FIN             R-SWD-FIN              QREQ-FIN                 Q-FIN  DEF-FLAG           DATE_START   ACTIVE')
     IF(OFL%FB_COMPACT%IS_OPEN .AND. .NOT. OFL%FB_COMPACT%BINARY) CALL OFL%FB_COMPACT%SET_HEADER('         PER         STP'//TIMEUNIT//'         FID            Q-p-in           Q-sw-in           Q-gw-in          Q-ext-in          Q-tot-in          Q-et-out       Q-ineff-out          Q-sw-out          Q-gw-out         Q-tot-out          Q-in-out  Q-Discrepancy[%]        DATE_START            ACTIVE')
     IF(OFL%FB_DETAILS%IS_OPEN .AND. .NOT. OFL%FB_DETAILS%BINARY) CALL OFL%FB_DETAILS%SET_HEADER('         PER         STP'//TIMEUNIT//'         FID            Q-p-in          Q-nrd-in          Q-srd-in          Q-drt-in        Q-wells-in          Q-egw-in          Q-tgw-in         Q-drch-in          Q-ext-in          Q-tot-in          Q-ei-out          Q-ep-out         Q-egw-out          Q-ti-out          Q-tp-out         Q-tgw-out         Q-run-out          Q-dp-out         Q-nrd-out         Q-srd-out          Q-rd-out       Q-wells-out         Q-tot-out          Q-in-out  Q-Discrepancy[%]   DATE_START            ACTIVE')
-    IF(OFL%ET_LIST   %IS_OPEN .AND. .NOT. OFL%ET_LIST   %BINARY) CALL OFL%ET_LIST   %SET_HEADER('  PER  STP'//TIMEUNIT//'    FARM ID           EVAPOARATION          TRANSPIRATION     EVAPOTRANSPIRATION')
-    IF(OFL%FNRCH_LIST%IS_OPEN .AND. .NOT. OFL%FNRCH_LIST%BINARY) CALL OFL%FNRCH_LIST%SET_HEADER('  PER  STP'//TIMEUNIT//'    FARM ID         RATE')
+    IF(OFL%ET_LIST   %IS_OPEN .AND. .NOT. OFL%ET_LIST   %BINARY) CALL OFL%ET_LIST   %SET_HEADER('  PER  STP'//TIMEUNIT//'    FARM_ID           EVAPOARATION          TRANSPIRATION     EVAPOTRANSPIRATION')
+    IF(OFL%FNRCH_LIST%IS_OPEN .AND. .NOT. OFL%FNRCH_LIST%BINARY) CALL OFL%FNRCH_LIST%SET_HEADER('  PER  STP'//TIMEUNIT//'    FARM_ID         RATE')
     !
     IF(OFL%WBS_WATER_USE%IS_OPEN .AND. .NOT. OFL%WBS_WATER_USE%BINARY) &
        CALL OFL%WBS_WATER_USE%SET_HEADER('    PER    STP    WBS             AREA   IRRIGATED_AREA          PET_NAT         ETgw_NAT          ETp_NAT            P_NAT          PET_IRR         ETgw_IRR          ETp_IRR          ETi_IRR            P_IRR       DEMAND_POT       EFFICIENCY          NRD_USE          SRD_USE            Q_USE             DELT   DYEAR            DATE_START')

@@ -90,7 +90,9 @@ Cx------Read items 0 and 1.
       DO
          CALL URWORD(LINE,LLOC,ISTART,ISTOP,1,IDUM,DUM,IOUT,IUDRTOB)
          IF    (LINE(ISTART:ISTOP)=='TIME_STEP_PRINT') THEN
-             CALL FN_PRN%OPEN(LINE,LLOC,IOUT,IUDRTOB,NOBINARY=.TRUE.)
+             CALL FN_PRN%OPEN(LINE,LLOC,IOUT,IUDRTOB,
+     +                        NO_BINARY=.TRUE., NO_INTERNAL=.TRUE., 
+     +                        ALLOW_ONLY_UNIT=.TRUE.)
              !CALL URWORD(LINE,LLOC,ISTART,ISTOP,0,IDUM,DUM,IOUT,IUDRTOB)
              !READ(LINE(ISTART:ISTOP),*,IOSTAT=IERR) FN_PRN
              !IF(IERR.NE.0) THEN
@@ -99,8 +101,9 @@ Cx------Read items 0 and 1.
              !END IF
             CALL READ_TO_DATA(LINE,IUDRTOB,IOUT)
          ELSEIF(LINE(ISTART:ISTOP)=='TIME_STEP_PRINT_ALL') THEN
-            CALL FN_PRN_ALL%OPEN(LINE,LLOC,IOUT,IUDRTOB,NOBINARY=.TRUE.,
-     +                            NO_INTERNAL=.TRUE.)
+            CALL FN_PRN_ALL%OPEN(LINE,LLOC,IOUT,IUDRTOB,
+     +                           NO_BINARY=.TRUE., NO_INTERNAL=.TRUE., 
+     +                           ALLOW_ONLY_UNIT=.TRUE.)
              !CALL URWORD(LINE,LLOC,ISTART,ISTOP,0,IDUM,DUM,IOUT,IUDRTOB)
              !READ(LINE(ISTART:ISTOP),*,IOSTAT=IERR) FN_PRN_ALL
              !IF(IERR.NE.0) THEN

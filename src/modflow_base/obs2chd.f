@@ -72,7 +72,9 @@ C3------ITEM 1
       DO
          CALL URWORD(LINE,LLOC,ISTART,ISTOP,1,IDUM,DUM,IOUT,IUCHOB)
          IF    (LINE(ISTART:ISTOP)=='TIME_STEP_PRINT') THEN
-             CALL FN_PRN%OPEN(LINE,LLOC,IOUT,IUCHOB,NOBINARY=.TRUE.)
+             CALL FN_PRN%OPEN(LINE,LLOC,IOUT,IUCHOB,
+     +                        NO_BINARY=.TRUE., NO_INTERNAL=.TRUE., 
+     +                        ALLOW_ONLY_UNIT=.TRUE.)
              !CALL URWORD(LINE,LLOC,ISTART,ISTOP,0,IDUM,DUM,IOUT,IUCHOB)
              !READ(LINE(ISTART:ISTOP),*,IOSTAT=IERR) FN_PRN
              !IF(IERR.NE.0) THEN
@@ -81,8 +83,9 @@ C3------ITEM 1
              !END IF
             CALL URDCOM(IUCHOB,IOUT,LINE)
          ELSEIF(LINE(ISTART:ISTOP)=='TIME_STEP_PRINT_ALL') THEN
-             CALL FN_PRN_ALL%OPEN(LINE,LLOC,IOUT,IUCHOB,NOBINARY=.TRUE.,
-     +                            NO_INTERNAL=.TRUE.)
+             CALL FN_PRN_ALL%OPEN(LINE,LLOC,IOUT,IUCHOB,
+     +                        NO_BINARY=.TRUE., NO_INTERNAL=.TRUE., 
+     +                        ALLOW_ONLY_UNIT=.TRUE.)
              !CALL URWORD(LINE,LLOC,ISTART,ISTOP,0,IDUM,DUM,IOUT,IUCHOB)
              !READ(LINE(ISTART:ISTOP),*,IOSTAT=IERR) FN_PRN_ALL
              !IF(IERR.NE.0) THEN
@@ -339,10 +342,10 @@ C     CALCULATE CONSTANT-HEAD BOUNDARY FLOW FOR A GIVEN CELL
 C     ******************************************************************
 C        SPECIFICATIONS:
 C     ------------------------------------------------------------------
-      USE GLOBAL,       ONLY:IBOUND,HNEW,CR,CC,CV,BOTM,NBOTM,
+      USE GLOBAL,       ONLY:IBOUND,HNEW,CR,CC,CV,BOTM,
      1                       NCOL,NROW,NLAY,LAYHDT,LBOTM
       USE GWFBASMODULE, ONLY:ICHFLG
-      USE GWFUPWMODULE,ONLY:IUPWCB, Sn, LAYTYPUPW
+      USE GWFUPWMODULE,ONLY:Sn, LAYTYPUPW
       USE GWFNWTMODULE,ONLY:Icell, Closezero
 C
       DOUBLE PRECISION HD,X1,X2,X3,X4,X5,X6,RATE

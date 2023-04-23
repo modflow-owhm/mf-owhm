@@ -269,22 +269,22 @@ c  --------------------------------
       ENDIF
 C
       RETURN
-      END
+      END SUBROUTINE
 C-----------------------------------------------------------------------------------
       SUBROUTINE XMD7DA(IGRID)
 C  DEALLOCATE GLOBAL DATA
       use xmdcmn
       use xmdmatrix
-      INTEGER ALLOC_ERR
+      INTEGER:: ALLOC_ERR, IGRID
 C
-      DEALLOCATE(icolour, STAT = ALLOC_ERR)
-      DEALLOCATE(RBorder, STAT = ALLOC_ERR)
+      DEALLOCATE(icolour,   STAT = ALLOC_ERR)
+      DEALLOCATE(RBorder,   STAT = ALLOC_ERR)
       DEALLOCATE(iblackend, STAT = ALLOC_ERR)
-      DEALLOCATE(lorder, STAT = ALLOC_ERR)
-      DEALLOCATE(iaf, STAT = ALLOC_ERR)
-      DEALLOCATE(idiagf, STAT = ALLOC_ERR)
+      DEALLOCATE(lorder,    STAT = ALLOC_ERR)
+      DEALLOCATE(iaf,       STAT = ALLOC_ERR)
+      DEALLOCATE(idiagf,    STAT = ALLOC_ERR)
       RETURN
-      END
+      END SUBROUTINE
 
 
 

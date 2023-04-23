@@ -35,7 +35,7 @@ pandoc  ${file}.md  \
         -f gfm \
         -t pdf \
         --standalone \
-        --self-contained \
+        --embed-resources \
         --variable=linkcolor:blue \
         --variable=geometry:letterpaper \
         --variable=geometry:margin=1in \

@@ -41,8 +41,7 @@ C     ******************************************************************
 C
 C        SPECIFICATIONS:
 C     ------------------------------------------------------------------
-      USE GLOBAL,      ONLY:NCOL,NROW,NLAY,LAYHDT,CR,CC,BOTM,LBOTM,
-     1                      DELR,DELC,IOUT,IUNIT
+      USE GLOBAL,      ONLY:NCOL,NROW,NLAY,IOUT,IUNIT
       USE GWFHFBMODULE,ONLY:MXHFB,NHFB,IPRHFB,NHFBNP,NPHFB,IHFBPB,
      1                      HFB,HFBRT,ICEL_HFB, MXHFBNP,NACTHFB,
      2                      HFB_IN_USE, HAS_NWT, NO_RP
@@ -54,7 +53,6 @@ C
       IMPLICIT NONE
 C
       INTEGER INHFB, IGRID, MXACTFB
-      CHARACTER(16):: AUX(1)
       CHARACTER(768):: LINE
 C ADDED FOR IMPLICIT NONE
       LOGICAL:: HAS_ERROR
@@ -251,7 +249,7 @@ C13-----SAVE POINTERS TO GRID AND RETURN.
       END SUBROUTINE
       
       SUBROUTINE GWF2HFB7CON(IGRID)
-      USE GLOBAL,      ONLY:LAYHDT,IOUT
+      USE GLOBAL,      ONLY:LAYHDT
       USE CONSTANTS, ONLY: Z
       IMPLICIT NONE
       INTEGER::IGRID
@@ -279,7 +277,7 @@ C     ******************************************************************
 C
 C        SPECIFICATIONS:
 C     ------------------------------------------------------------------
-      USE GLOBAL,      ONLY:NCOL,NROW,HNEW,LAYHDT,CR,CC,CV,BOTM,LBOTM,
+      USE GLOBAL,      ONLY:HNEW,LAYHDT,CR,CC,CV,BOTM,LBOTM,
      1                      DELR,DELC,LAYCBD
       USE GWFHFBMODULE,ONLY:NHFB,HFB
       USE CONSTANTS,   ONLY: Z, DZ, ONE
@@ -871,7 +869,7 @@ C     ------------------------------------------------------------------
       CHARACTER(*):: PACK, PTYP
       CHARACTER(*):: LABEL
       CHARACTER(768):: LINE
-      CHARACTER(MXNAMLEN):: CTMP1,CTMP2,CTMP3,CTMP4                     !seb CHANGED FROM CHAR LEN OF 10
+      CHARACTER(MXNAMLEN):: CTMP1,CTMP2
 C     ------------------------------------------------------------------
 C
 C1------The Listing File file unit is the absolute value of IOUTU.  
@@ -982,7 +980,7 @@ C     ******************************************************************
 C
 C        SPECIFICATIONS:
 C     ------------------------------------------------------------------
-      USE GLOBAL,      ONLY:NCOL,NROW,HNEW,LAYHDT,CR,CC,CV,BOTM,LBOTM,
+      USE GLOBAL,      ONLY:LAYHDT,CR,CC,CV,
      1                      DELR,DELC,LAYCBD
       USE GWFHFBMODULE,ONLY:NHFB,HFB
       USE CONSTANTS,   ONLY: Z, ONE, DZ
@@ -1293,7 +1291,7 @@ C       4
       
       SUBROUTINE  FILLINDEXHFB(IC,IR,IL,IJ,IDX)  !NOTE THAT JJ FROM NWT/FILLINDEX BECOMES IDX
 C Suplements SUBROUTINE FILLINDEX by including indecies of cells with barriers that route flow
-      USE GLOBAL, ONLY:NCOL, NROW, NLAY, IBOUND
+      USE GLOBAL, ONLY:NCOL, NROW, IBOUND
       USE GWFNWTMODULE, ONLY: Icell, JA
       USE GWFHFBMODULE, ONLY: HFB,HFBRT,ICEL_HFB
       USE CONSTANTS,    ONLY: Z, ONE, UNO
@@ -1387,8 +1385,7 @@ C BR(4) > Z IF BARRIER IS TO BOTTOM OF CELL IN PLAN VIEW (I+1)
       
       SUBROUTINE COUNTACTIVEHFB(IC,IR,IL,IJ,IDX)  !NOTE THAT JJ IS CHANGED TO IDX
 C Suplemental to SUBROUTINE COUNTACTIVE to ensure that cells with barriers that route flow are included in active count
-      USE GLOBAL, ONLY:NCOL, NROW, NLAY, IBOUND
-      USE GWFNWTMODULE, ONLY: Icell, JA
+      USE GLOBAL, ONLY:NCOL, NROW, IBOUND
       USE GWFHFBMODULE, ONLY: HFB,HFBRT,ICEL_HFB
       USE CONSTANTS,    ONLY: Z
       IMPLICIT NONE
@@ -1475,8 +1472,8 @@ C BR(4) > Z IF BARRIER IS TO BOTTOM OF CELL IN PLAN VIEW (I+1)
 C ASSEMBLE CONDUCTANCE VIA HARMONIC MEAN BETWEEN BARRIER ROUTE CELLS
 C VARIABLES ENDING IN 1 REFER TO LAYER K1
 C VARIABLES ENDING IN 2 REFER TO LAYER K2
-      USE GLOBAL,      ONLY:NCOL,NROW,IBOUND,CR,CC,DELR,DELC,
-     1                      IUNIT,HNEW,BOTM,LBOTM,LAYHDT,IOUT
+      USE GLOBAL,      ONLY:DELR,DELC,
+     1                      IUNIT,HNEW,BOTM,LBOTM,LAYHDT
       USE GWFHFBMODULE,ONLY: HFB
       USE CONSTANTS,   ONLY: Z, DZ, UNO
       IMPLICIT NONE
@@ -1485,7 +1482,7 @@ C CELL LOCATIONS
 C LOCAL VARIABLES
       DOUBLE PRECISION:: HD1,HD2,TOP1,TOP2,BOT1,BOT2
       DOUBLE PRECISION:: HK1,HK2,HANI1,HANI2
-      DOUBLE PRECISION:: T1,T2,THICK1,THICK2,THKAVG,WIDTH
+      DOUBLE PRECISION:: T1,T2,THICK1,THICK2,THKAVG
       DOUBLE PRECISION:: ZERO, ONE, TWO
       !
       ZERO=0.0
@@ -1639,7 +1636,6 @@ C FILLS IN Conductance partial dirivative, Dc(IJ,:), FOR CELL IJ WHEN IT CONTAIN
       IMPLICIT NONE
       DOUBLE PRECISION:: hh, Dv, Dh
       INTEGER:: IC,IR,IL,IJ
-      LOGICAL:: DcHFBInit
       INTEGER:: II, JJ, KK
       INTEGER, DIMENSION(4)::BR
       DOUBLE PRECISION, DIMENSION(4):: CON
@@ -1720,7 +1716,7 @@ C CON IS THE CONDUCTANCE BETWEEN BARRIER CELLS
       SUBROUTINE TEMPFILLUNHFB(Ic, Ir, Il)
 C COPY OF SUBROUTINE TEMPFILLUN BUT TAKES INTO ACCOUNT A BARRIER THAT ROUTES FLOW
       USE GLOBAL, ONLY:Ncol, Nrow, Nlay, Cv, Hnew, Cc, Cr, Ibound, Hcof,
-     +    Rhs, Botm, Lbotm,Iout
+     +    Rhs, Botm, Lbotm
       USE GWFNWTMODULE, ONLY:Cvm1,Hvp1,Hvm1,Crm1,Hrm1,Hrp1,Ccm1,Hcm1,
      +                       Hcp1,Ccc,Crr,Cvv,H,Closezero,Icell,Hcoff,
      +                       Rhss
@@ -1734,7 +1730,6 @@ C COPY OF SUBROUTINE TEMPFILLUN BUT TAKES INTO ACCOUNT A BARRIER THAT ROUTES FLO
 !     -----------------------------------------------------------------
 !     LOCAL VARIABLES
 !     -----------------------------------------------------------------
-      INTEGER:: itemp
       DOUBLE PRECISION:: THICK
 !     -----------------------------------------------------------------
       INTEGER:: IC,IR,IL,IJ
@@ -1960,7 +1955,7 @@ C
       SUBROUTINE TEMPFILLCONHFB(Ic, Ir, Il)
 C COPY OF SUBROUTINE TEMPFILLCON BUT TAKES INTO ACCOUNT A BARRIER THAT ROUTES FLOW
       USE GLOBAL, ONLY:Ncol, Nrow, Nlay, Cv, Hnew, Cc, Cr, Ibound, Hcof,
-     +    Rhs, Botm, Lbotm,Iout
+     +    Rhs
       USE GWFNWTMODULE, ONLY:Cvm1,Hvp1,Hvm1,Crm1,Hrm1,Hrp1,Ccm1,Hcm1,
      +                       Hcp1,Ccc,Crr,Cvv,H,Closezero,Icell,Hcoff,
      +                       Rhss
@@ -1973,9 +1968,6 @@ C COPY OF SUBROUTINE TEMPFILLCON BUT TAKES INTO ACCOUNT A BARRIER THAT ROUTES FL
       INTEGER Ic, Ir, Il, ij
 !     -----------------------------------------------------------------
 !     LOCAL VARIABLES
-!     -----------------------------------------------------------------
-      INTEGER:: itemp
-      DOUBLE PRECISION:: THICK
 !     -----------------------------------------------------------------
       INTEGER:: II, JJ, KK
       INTEGER, DIMENSION(4)::BR
@@ -2117,9 +2109,9 @@ C IF FIRST STRESS PERIOD MODIFY CODUCTANCES OF IF UPW IS TURNED ON AND OF ALL CO
 C STRESS PERIODS >1 WILL READ IN NEW BARRIER INFORMATION AND RESET 
 C CONDUCTANCES BACK TO ORIGINAL VALUES AND THEN APPLY NEW BARRIERS
 C IF THERE IS NO MORE INPUT IN THE HFB FILE THAN NOTHING IS DONE
-      USE GLOBAL,      ONLY:NCOL,NROW,NLAY,LAYHDT,CR,CC,CV,BOTM,LBOTM,
-     1                      DELR,DELC,IOUT,IUNIT
-      USE GWFHFBMODULE,ONLY:MXHFB,NHFB,IPRHFB,NHFBNP,NPHFB,IHFBPB,
+      USE GLOBAL,      ONLY:NCOL,NROW,NLAY,CR,CC,CV,
+     1                      IOUT,IUNIT
+      USE GWFHFBMODULE,ONLY:MXHFB,NHFB,IPRHFB,NHFBNP,IHFBPB,
      1                      HFB,HFBRT,ICEL_HFB,MXHFBNP,NACTHFB,IPRHFB,
      2                      NO_RP
       USE GWFNWTMODULE, ONLY: Numnonzero

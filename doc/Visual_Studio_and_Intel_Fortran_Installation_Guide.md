@@ -1,18 +1,45 @@
 # Integrated Development Environment (IDE)
 
+This document provides an overview on how to setup the tools for compiling
+[MODFLOW-OWHM](https://code.usgs.gov/modflow/mf-owhm).
+In particular, the installation and setup of [MS Visual Studio](https://visualstudio.microsoft.com/) (the IDE) and [Intel oneAPI](https://www.intel.com/content/www/us/en/developer/tools/oneapi/overview.html) (Fortran and C compilers).
+The tools mentioned are not endorsed in any way, but are used to build the
+executable binaries of MODFLOW-OWHM.
+Fortunately, as of writing this document, both offer both Visual Studio and oneAPI offer free, no-cost editions. [GFortran](https://gcc.gnu.org/wiki/GFortran) and [LLVM Flang](https://flang.llvm.org/docs/) are open-source compilers that are available, but come with several limitations. First, there are GFortran multiple versions of gfortran, and most older versions are unable to compile this code due to compiler bugs or lack of newer fortran features (gfortran 11.3.0 and 12.1.0 can compile this repository). Second, gfortran tends to provide slower running executables compared to Intel Fortran. Despite this, the included makefile is set to compile with gfortran as the default option. Flang is a relatively new Fortran compiler that is part of the [LLVM](https://llvm.org/) project. While LLVM does support MS Windows, Flang does NOT nor, as of writing this, considered "production ready".
 
+This document will first explain what Visual Studio is, and how to do a minimal installation for setting up oneAPI. Then it will go over the minimal installation of oneAPI in order to compile
+MODFLOW-OWHM.
 
 
 [[_TOC_]]     
 
+## Import Note: oneAPI Compiler Versions
 
-## Visual Studio 2019 Community Installation Guide (Windows 10)
+Intel oneAPI currently has two Fortran compilers denoted as Intel Fortran Compiler Classic (**ifort**) and Intel Fortran Compiler (**ifx**). The ifort compiler, formerly called *Intel Parallel Studio* and *Intel Fortran Composer*, is the original Fortran compiler provided by Intel that is used to compile MODFLOW. The ifx compiler is a new, redesigned compiler by Intel that translates the Fortran to [LLVM language-independent intermediate representation]([LLVM - Wikipedia](https://en.wikipedia.org/wiki/LLVM)) (IR) that is then compiled. The ifx compiler is intended to replace ifort; however as of writing this, ifx cannot compile all software that is ifort can. As of writing this document, 
+**MODFLOW-OWHM only compiles with ifort**; 
+using ifx raises multiple errors saying feature not currently implemented.  
 
-Visual Studio (VS) does a major release every two years and distinguishes the version with the year it's released. The two recent versions are Visual Studio 2017 and Visual Studio 2019 (denoted as, vs2017 and vs2019). The key difference between the "major" versions (vs2017, vs2019, vsXYZ) are the Microsoft  `.NET` framework and `C` compilers included. This does not affect the Intel OneAPI, so long as the version of visual studio is supported by it. Each major release receives regular updates, but it is recommended to use the most recent major release for new installations of VS. 
+To make compilers more confusing is the versioning of oneAPI is different for ifort and ifx. The oneAPI version is formatted as `YYYY.x`, where `YYYY` is the year released and `x` is a release number (bigger is newer). For example, the past five versions are:
 
-The only caveat is that VS specific settings cannot be exported and imported between VS major versions. That is, you can not take vs2017, export its settings, then import them into vs2019. 
+| oneAPI  Version | ifx Version | ifort Version |
+| --------------- | ----------- | ------------- |
+| 2023.0          | 2023.0      | 2021.8        |
+| 2022.3          | 2022.3      | 2021.7        |
+| 2022.2          | 2022.2      | 2021.6        |
+| 2022.1          | 2022.1      | 2021.5        |
+| 2021.4          | 2021.4      | 2021.4        |
 
-However, the VS *Project Solution* and *Project Files* should work for both vs2017 and vs2019.
+
+
+## Visual Studio Community Installation Guide (Windows 10)
+
+Visual Studio (VS) does a major release every two to three years and distinguishes the version with the year it's released. The three recent versions are Visual Studio 2017, Visual Studio 2019, Visual Studio 2022  (denoted as, vs2017, vs2019, vs2022, respectively, and with sematic versioning as v15, v16, v17, respectively). The key difference between the "major" versions (vs2019, vs2022, vsXYZ) is the Microsoft  `.NET` framework and Microsoft `C` compilers included. This does not affect the Intel OneAPI, so long as the version of visual studio is supported by it. 
+
+**It is important to ensure that both Fortran (ifort/ifx) and C (icc/icx) are supported by the Visual Studio version installed.** The C version is only necessary if you intend to compile the GMG solver. The C version is automatically installed along with the Intel oneAPI DPC++/C++ (which is a requirement of ifort). The Intel Compiler support in Visual Studio is specified at:  
+https://www.intel.com/content/www/us/en/developer/articles/reference-implementation/intel-compilers-compatibility-with-microsoft-visual-studio-and-xcode.html  
+Make sure to pay attention to the VS sematic versions that are supported. It should be noted that ifort only supports older versions of VS2022, as shown below, so **it is recommended to use VS2019**.
+
+![intel_fortran_vs_support_example](./img/intel_fortran_vs_support_example.png)
 
 ### Visual Studio Input Files
 
@@ -35,17 +62,24 @@ The [Community](https://visualstudio.microsoft.com/vs/community) edition is **fr
 
 The other two versions charge a fee and provide support options and easier file sharing and collaboration.
 
-If you qualify for the community edition you can download the installation program at:
+If you qualify for the community edition you can download the latest edition installation program at:
 
 https://visualstudio.microsoft.com/thank-you-downloading-visual-studio/?sku=Community
 
-### Install Visual Studio 2019
+&nbsp; &nbsp; &nbsp; ➥ [Make sure Intel oneAPI supports it](https://www.intel.com/content/www/us/en/developer/articles/reference-implementation/intel-compilers-compatibility-with-microsoft-visual-studio-and-xcode.html)
 
-When you run the installation program there will be a set of updates run for the installer. 
+&nbsp; &nbsp; &nbsp; ➥  You can download a specific older versions at:  
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; https://visualstudio.microsoft.com/vs/older-downloads/  
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  &nbsp; &nbsp; &nbsp; ➥  Use this link to download VS2019.
 
-The next window will ask you to install the features of VS that you want to use. At a minimum, for using Intel Visual Fortran, you must include the `Desktop development with C++` option. 
+### Install Visual Studio
 
-See below for the location of that specific option. Next hit `Install`.
+When you run the installation program there will be a set of updates run for the installer.  
+(Note, the following images are screenshots while installing Visual Studio 2019.)
+
+The next window will ask you to install the features of VS that you want to use.  
+At a minimum, for using Intel Visual Fortran (ifort), you must include the `Desktop development with C++` option.   
+ &nbsp; &nbsp; ➥ See below for the location of that specific option. Press `Install` to continue with installation.
 
 ![vs2019_install_prompt](./img/vs2019_install_prompt.png)
 
@@ -53,7 +87,7 @@ See below for the location of that specific option. Next hit `Install`.
 
 After installation, VS will ask if you want to log into your Microsoft account. You can skip this step and log in later if you do not want to log in. The advantage to logging into your Microsoft account is that your settings are transferred across multiple computers (such as dark theme and window placement).
 
-The next window will ask you to select a theme. Personally, I just leave this as *General* and select the *Dark* theme.
+The next window will ask you to select a theme. You may want to leave this as *General* and select the *Dark* theme. Note that, this window may not appear if you signed into your Microsoft account.
 
 ![vs2019_install_prompt2](./img/vs2019_install_prompt2.png)
 
@@ -61,20 +95,31 @@ The next window will ask you to select a theme. Personally, I just leave this as
 
 
 
-The next window will ask you to start a project or download a git repository. 
+ &nbsp; &nbsp; ➥ The next window will ask you to start a project or download a git repository. 
 
-At this time, just select `Continue without code`.
+ &nbsp; &nbsp; ➥ At this time, just select `Continue without code`.
 
 ![vs2019_install_prompt3](./img/vs2019_install_prompt3.png)
 
+&nbsp; 
+
+&nbsp; &nbsp; &nbsp; ➥ You have successfully installed Visual Studio.
+
+&nbsp; &nbsp; &nbsp; ➥ Now close the Visual Studio window. 
+
+&nbsp; 
+
+Visual Studio does not yet understand Fortran syntax nor can it read a solution/project files created for Intel Fortran 
+(such as, `mf-owhm.vfproj`). 
+If you attempt to open an Intel oneAPI solution or project file, then you will get the following error message:
+
+![visual studio unsupported project error](./img/vs_unsupported_project.png)
+
+In the event of this error, just hit cancel, close Visual Studio and install the Intel oneAPI as described in the [Intel oneAPI and Visual Fortran](#intel-oneapi-and-visual-fortran) section. If you already have the most current version of Intel oneAPI installed and do not want to go through the entire install process, then you selectively add support through the `Modify` menu and selection `Add/Remove components` option. However, it is recommended to uninstall oneAPI and reinstall it as described in the [Fixing Visual Studio Installed After Intel OneAPI](#fixing-visual-studio-installed-after-intel-oneapi) section.
 
 
-- You have successfully installed Visual Studio.
-- Now close the Visual Studio window. 
 
-
-
-## Visual Studio Recommended Plugin
+## Visual Studio Optional Plugin
 
 For ease with using git, it is best to keep all C and Fortran source files with Unix style endings (`LF`) instead of dos style (`CR LF`). 
 This minor semantic can make working with git or Linux/Unix machines easier.
@@ -111,13 +156,13 @@ To automatically use Unix style ending you can add the Visual Studio Extension [
 
 
 
-## Intel Visual Fortran - Intel OneAPI (Windows 10)
+## Intel oneAPI and Visual Fortran
 
 Intel Visual Fortran is now part of the [Intel OneAPI](https://software.intel.com/content/www/us/en/develop/tools/oneapi.html) software suite and is free to use. It requires that Visual Studio to be installed beforehand and two Intel specific installation files. The first is the [Intel oneAPI Base Toolkit](https://software.intel.com/content/www/us/en/develop/tools/oneapi/base-toolkit.html) and the second is [Intel oneAPI HPC Toolkit](https://software.intel.com/content/www/us/en/develop/tools/oneapi/hpc-toolkit.html). The latter contains the Fortran compiler, which is dependent on the base toolkit.
 
-1. Download the Intel oneAPI Base Toolkit by selecting the appropriate boxes at 
-   https://software.intel.com/content/www/us/en/develop/tools/oneapi/base-toolkit/download.html 
-2. Download the Intel oneAPI HPC Toolkit by selecting the appropriate boxes at 
+1. Download the Intel oneAPI Base Toolkit by selecting the appropriate boxes at:  
+   https://www.intel.com/content/www/us/en/developer/tools/oneapi/base-toolkit-download.html 
+2. Download the Intel oneAPI HPC Toolkit by selecting the appropriate boxes at:  
    https://software.intel.com/content/www/us/en/develop/tools/oneapi/hpc-toolkit/download.html
 
 
@@ -127,7 +172,7 @@ Intel Visual Fortran is now part of the [Intel OneAPI](https://software.intel.co
 The **Installer Type** option determines the download size. 
 
 - The **Online** installer downloads a small installation file that lets the user configure the total download (requires internet during installation). 
-- The **Local** installer downloads all features into a single installation file (no internet required by the installer).
+- The **Local** installer downloads all features into a single installation file (no internet required by the installer). This version should be used if the Online installer keeps failing to install the files.
 
 ------
 
@@ -135,24 +180,25 @@ The **Installer Type** option determines the download size.
 
 ### BASE Toolkit Installation - Intel oneAPI
 
-1. Run either the online or local installation exe file downloaded and press continue. 
-2. Check the tick box with *I accept the terms of the license agreement* (see the black circle below).
-3. Click the *Customize* button (see the black box below).
+- Run either the online or local installation exe file downloaded and press continue. 
+- Check the tick box with *I accept the terms of the license agreement* (see the black circle below).
+- If you do not care about the size of the installation, click *Continue* for the Recommended Installation.  
+  Otherwise, click the *Customize* button (see the black box below) and the following will show the minimal required installation.
 
 ![oneAPI_base_install1](./img/oneAPI_base_install1.png)
 
-The Intel oneAPI HPC Toolkit (Fortran Compiler) only requires the installation of the following components:
-
-1. Intel Distribution for GDB
-2. Intel oneAPI DPC++/C++ Compiler
-3. Intel oneAPI DPC++ Library
-4. Intel oneAPI Threading Building Blocks
+- The Intel oneAPI HPC Toolkit (Fortran Compiler) only requires the installation of the following components:
+  1. Intel Distribution for GDB
+  2. Intel oneAPI DPC++/C++ Compiler
+  3. Intel oneAPI DPC++ Library
+  4. Intel oneAPI Threading Building Blocks
 
 The easiest way to do this is to uncheck all the boxes, note that the installer will complain about dependencies, and then click the four boxes that you need to install. 
 
 Feel free to read about the other components and decide if you want to install them, but they are unnecessary to use the Fortran Compiler.
 
-Once you have configured the correct components, the installation window should look something like this:
+- Once you have configured the correct components, the installation window should look something like this:
+
 
 ![oneAPI_base_install2](./img/oneAPI_base_install2.png)
 
@@ -175,25 +221,21 @@ Once you have configured the correct components, the installation window should 
 
 The HPC Toolkit can only be installed after the BASE toolkit. The first part of the installation is identical to the BASE installation.
 
-1. Run either the online or local installation exe file downloaded and press continue. 
-2. Check the tick box with *I accept the terms of the license agreement*.
-3. Click the *Customize* button to continue.
+- Run either the online or local installation exe file downloaded and press continue. 
+- Check the tick box with *I accept the terms of the license agreement*.
+- Click the *Customize* button to continue or select *Continue* for the Recommended Installation if you don't care about storage space.
 
-The Intel oneAPI HPC Toolkit (Fortran Compiler) only requires the installation of the following components:
-
-1. Intel oneAPI DPC++/C++ Compiler (note this was previously installed in the BASE Toolkit)
-2. Intel Fortran Compiler & Intel Fortran Compiler Classic
+- The Intel oneAPI HPC Toolkit (Fortran Compiler) only requires the installation of the following components:
+  1. Intel oneAPI DPC++/C++ Compiler  
+     (note this was previously installed in the BASE Toolkit, but you need it checked or it will uninstall it)
+  2. Intel Fortran Compiler & Intel Fortran Compiler Classic
 
 The easiest way to do this is to uncheck all the boxes, note that the installer will complain about dependencies, and then click the four boxes that you need to install. 
 
-Feel free to read about the other components and decide if you want to install them, but they are unnecessary to use the Fortran Compiler.
+Feel free to read about the other components and decide if you want to install them, but they are unnecessary to use the Fortran Compiler. If you skipped the section [Import Note: oneAPI Compiler Versions](#import-note:-oneapi-compiler-versions), please review that about the difference between Intel Fortran Compiler (ifx) and the Intel Fortran Compiler Classic (ifort).
 
-The are two Fortran compilers available 
+- Once you have configured the correct components, the installation window should look something like this:
 
-1. Intel Fortran Compiler (Translates Fortran to the Multi-Level Intermediate Representation for the [LLVM Toolchain](https://llvm.org/)) 
-2. Intel Fortran Compiler Classic (The compiler you will most likely use; formerly called Intel Parallel Studio)
-
-Once you have configured the correct components, the installation window should look something like this:
 
 ![oneAPI_hpc_install1](./img/oneAPI_hpc_install1.png)
 
@@ -212,5 +254,61 @@ Once you have configured the correct components, the installation window should 
 
 - Now get some more coffee or brew some stronger tea, cause its going to take a while to install.
 
-**You now have installed visual studio with Intel Fortran.**
+**You now have installed Visual Studio with Intel Fortran.**
+
+
+
+## Opening MODFLOW-OWHM with Visual Studio for Compilation
+
+This section briefly discusses how to open in Visual Studio the MODFLOW-OWHM *Project Solution* (`.sln`) files and start the Intel Fortran compiler to build an executable (`exe`). It is recommended to also review `ide/README.md`, which explains the important files that pertain to compilation and settings that may need to be adjusted to account for different `C` compiler versions.
+
+The input files for compilating MODFLOW-OWHM, called a *Project Solution* (`.sln`) and *Project Files* (eg `.vcxproj` and `.vfproj`), are located in`ide/visual_studio`.  It is recommended to only open one of the two provided *Project Solution* files (`OneWater_Project.sln` and `OneWater_Project.sln`). The difference between the two is if `GMG` is included in the compilation, which requires the Intel `C` compiler (`icc`), which is installed along with the *Intel oneAPI DPC++/C++* Fortran dependency. 
+
+The following is what you might see in `ide/visual_studio`:
+
+![mf-owhm ide/visual_studio folder](./img/mf-owhm_visual_studio_files.png)
+
+At a minimum you should see:
+
+- `GMG.vcxproj`
+- `GMG.vcxproj.filters`
+- `OneWater_GMG_Project.sln`
+- `OneWater_Project.sln`
+- `mf-owhm-gmg.vfproj`
+- `mf-owhm.vfproj`
+
+and any additional files are created by Visual Studio for any local customizations, such as breakpoints and IDE window arrangement. 
+
+
+The first time you run `OneWater_GMG_Project.sln` or `OneWater_Project.sln` you will have to associate it with what program to run it with. I recommend picking a single version of Visual Studio rather than the "Selector". You can always change the version with the Windows "Open With" right click option:
+
+![visual_studio_first_open](./img/visual_studio_first_open.png)
+
+
+
+Before you can compile you need to select the Configuration and Platform. The Platform should always be set to x64 for a 64bit Windows and the the project includes the following configurations:
+
+- Release  
+   &nbsp; ➣ `-O2` Maximize Speed optimization with source line numbers embedded  
+   &nbsp; ➣ Builds `mf-owhm.exe`
+- Debug  
+   &nbsp; ➣ Debug model with all compilation and runtime checks (very slow)  
+   &nbsp; ➣ Builds `mf-owhm-debug.exe`
+- Fast_Debug  
+   &nbsp; ➣ Debug model with only important compilation and runtime checks (slow)  
+   &nbsp; ➣ Builds `mf-owhm-fast-debug.exe`
+
+The following is where you can change the Configuration and Platform:
+
+![visual_studio_compile release x64 location](./img/visual_studio_compile1.png)
+
+To compile a new executable, go to the `Build` menu and select `Build Solution` or `Rebuild Solution`. The only difference between the two, is that Rebuild will delete all existing intermediate files before compilation (this forces all new files to be generated).
+
+![visual_studio_compile build and rebuild location](./img/visual_studio_compile2.png)
+
+
+
+## Fixing Visual Studio Installed After Intel oneAPI
+
+If Visual Studio is installed after oneAPI, then it will not recognize Fortran syntax nor load oneAPI *Project Files* (eg `.vcxproj` and `.vfproj`). There is limited success of dealing with installing Visual Studio after installing Intel OneAPI, so **its recommend to just uninstall everything and start reinstalling Visual Studio, followed by oneAPI**. It also is recommended to restart before installing the first program, and after each program's installation completes. This ensures that there are no locked files that can corrupt the installation process.
 

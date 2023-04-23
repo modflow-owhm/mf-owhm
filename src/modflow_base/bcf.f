@@ -327,7 +327,7 @@ C     ******************************************************************
 C
 C        SPECIFICATIONS:
 C     ------------------------------------------------------------------
-      USE GLOBAL,      ONLY:IOUT,NCOL,NROW,NLAY,IBOUND,BOTM,NBOTM,
+      USE GLOBAL,      ONLY:NCOL,NROW,NLAY,IBOUND,BOTM,
      1                      LBOTM,CV,HNEW,RHS,HCOF,HOLD,ISSFLG
       USE GWFBASMODULE,ONLY:DELT
       USE GWFBCFMODULE,ONLY:LAYCON,SC1,SC2
@@ -991,7 +991,7 @@ C     ******************************************************************
 C
 C      SPECIFICATIONS:
 C     ------------------------------------------------------------------
-      USE GLOBAL,      ONLY:NCOL,NROW,NLAY,IBOUND,HNEW,BUFF,BOTM,NBOTM,
+      USE GLOBAL,      ONLY:NCOL,NROW,NLAY,IBOUND,HNEW,BUFF,BOTM,
      1                      LBOTM,CC,CV,IOUT
       USE GWFBASMODULE,ONLY:HDRY
       USE GWFBCFMODULE,ONLY:IWDFLG,WETFCT,IHDWET,IWETIT,LAYCON,
@@ -1181,7 +1181,7 @@ C     ******************************************************************
 C
 C        SPECIFICATIONS:
 C     ------------------------------------------------------------------
-      USE GLOBAL,      ONLY:NCOL,NROW,NLAY,IBOUND,HNEW,LAYCBD,CC,CV,
+      USE GLOBAL,      ONLY:NCOL,NROW,NLAY,IBOUND,HNEW,CC,CV,
      1                      DELR,DELC,IOUT
       USE GWFBASMODULE,ONLY:HNOFLO
       USE GWFBCFMODULE,ONLY:IWDFLG,WETDRY,HY,CVWD,LAYCON,LAYAVG,SC1,SC2

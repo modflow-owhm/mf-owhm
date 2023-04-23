@@ -210,8 +210,8 @@
 !7----Allocate DOUBLE PRECISION variables: C1,C2
 !
       Allocate(C1(MAXRIP,MAXPOLY,MAXTS),C2(MAXRIP,MAXPOLY,MAXTS))
-      C1 = 0D0
-      C2 = 0D0
+      C1 = 0.0D0
+      C2 = 0.0D0
 !
 !8----Allocate CHARACTER variables:
 !
@@ -603,8 +603,8 @@
 !
         If(IBOUND(IC,IR,IL) == 0) Then
             Write(*,'(A)') "**** Riparian cell is inactive ****"
-            C1(LC,:,:)=0D0                                                 !seb
-            C2(LC,:,:)=0D0                                                 !seb
+            C1(LC,:,:)=0.0D0                                                 !seb
+            C2(LC,:,:)=0.0D0                                                 !seb
             Cycle Cell_Loop
         End if
 !
@@ -622,8 +622,8 @@
 !
 !9----Initialize C1 and C2
 !
-            C1(LC,LP,NTS)=0D0
-            C2(LC,LP,NTS)=0D0
+            C1(LC,LP,NTS)=0.0D0
+            C2(LC,LP,NTS)=0.0D0
 !
 !10---Determine cell non-zero fractional coverage for a plant functional 
 !     subgroup, calculate Hsxd and Hxd; and initialize the extinction
@@ -641,13 +641,13 @@
 !     in either case, cycle to the next plant functional subgroup. 
 !
             If(HH > Hsxd ) Then
-              C1(LC,LP,NTS)=0D0
+              C1(LC,LP,NTS)=0.0D0
               C2(LC,LP,NTS)=-Rsxd(NTS)*fCov*DELR(IC)*DELC(IR)
               RHS(IC,IR,IL)=RHS(IC,IR,IL)-C2(LC,LP,NTS)
               cycle TS_Loop
             Else if(HH <= Hxd) then
-              C1(LC,LP,NTS)=0D0
-              C2(LC,LP,NTS)=0D0
+              C1(LC,LP,NTS)=0.0D0
+              C2(LC,LP,NTS)=0.0D0
               cycle TS_Loop                             
             End if
 !

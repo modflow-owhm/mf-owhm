@@ -4,7 +4,8 @@
 !
 MODULE IS_ROUTINES
   !  
-  USE CONSTANTS,                 ONLY: DNEG, DZ, TENTH, NEG, Z, ONE, TWO, TRUE, FALSE, NEARZERO_6, NEARZERO_10, NEARZERO_12, BLNK, NL, BLN, TAB, COM !TEN,UNO,DOS,DIEZ,TRUE,FALSE,ninf,inf,inf_I,inf_R,ninf_R,NEARZERO_29,NEARZERO_30,NEGNEARZERO_30,NEARZERO_5,HALF,TRES, QUIN, FOUR, SEV, EIGHT, HECTO, THOU, LF, CR, SNGL_inf, SNGL_ninf, SNGL_inf_R, SNGL_ninf_R, SNGL_inf_R, SNGL_ninf_R, SUB_ONE, NEAR_ONE, LOG_2, LOG_2_R, NO
+  USE CONSTANTS,                 ONLY: DNEG, DZ, TENTH, NEG, Z, ONE, TWO, TRUE, FALSE, &
+                                       NEARZERO_6, NEARZERO_10, NEARZERO_12, BLNK, NL, BLN, TAB, COM !TEN,UNO,DOS,DIEZ,TRUE,FALSE,ninf,inf,inf_I,inf_R,ninf_R,NEARZERO_29,NEARZERO_30,NEGNEARZERO_30,NEARZERO_5,HALF,TRES, QUIN, FOUR, SEV, EIGHT, HECTO, THOU, LF, CR, SNGL_inf, SNGL_ninf, SNGL_inf_R, SNGL_ninf_R, SNGL_inf_R, SNGL_ninf_R, SUB_ONE, NEAR_ONE, LOG_2, LOG_2_R, NO
   !
   USE, INTRINSIC:: IEEE_ARITHMETIC, ONLY: IEEE_IS_NAN
   USE, INTRINSIC:: ISO_FORTRAN_ENV, ONLY: i8 => INT8,   i16 => INT16,  &
@@ -81,7 +82,7 @@ MODULE IS_ROUTINES
   PURE FUNCTION IS_ODD(NUM)
     INTEGER, INTENT(IN):: NUM
     LOGICAL:: IS_ODD
-    IS_ODD = IAND(NUM,1) == 1
+    IS_ODD = BTEST(NUM, 0)   ! Odd number if least significant bit is set  -- Old Method: IAND(NUM,1) == 1
   END FUNCTION
   !
   !################################################################################
@@ -89,7 +90,7 @@ MODULE IS_ROUTINES
   PURE FUNCTION IS_EVEN(NUM)
     INTEGER, INTENT(IN):: NUM
     LOGICAL:: IS_EVEN
-    IS_EVEN = IAND(NUM,1) == 0
+    IS_EVEN = .NOT. BTEST(NUM, 0)   ! -- Old Method: IAND(NUM,1) == 0
   END FUNCTION
   !
   !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -571,7 +572,7 @@ MODULE IS_ROUTINES
     CHARACTER(*),DIMENSION(:),CONTIGUOUS, INTENT(IN):: VEC
     LOGICAL,                              INTENT(IN):: UPCASE
     LOGICAL:: UNI
-    INTEGER:: I, K, N, M, DIM
+    INTEGER:: I, N, M, DIM
     !
     IF(.NOT. UPCASE) THEN
                          UNI = ALL(VAL /= VEC)

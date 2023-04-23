@@ -1,3 +1,3 @@
 # CUMULATIVE_HEAD_CHANGE file for comparing code versions with the same model input. The sum of the first number with second number multiplied by 1e10 represents the sum of all the absolute value of active cell head changes. For example, " 3.92    7 " represents 3.92 + 7e10).
-    48777170.429   0
+    48776427.603   0
 

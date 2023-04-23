@@ -51,7 +51,8 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
       INTEGER,         DIMENSION(  :),ALLOCATABLE:: ISTRM
       DOUBLE PRECISION,DIMENSION(  :),ALLOCATABLE:: WT
       DOUBLE PRECISION,DIMENSION(  :),ALLOCATABLE:: RUNOFF
-      DOUBLE PRECISION:: TOTLENGTH
+      DOUBLE PRECISION:: LOST_RUNOFF = DZ
+      DOUBLE PRECISION:: TOTLENGTH   = DZ
   END TYPE
   !
   TYPE NRD_VALUES
@@ -164,43 +165,43 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
   CONTAINS
   !
   PURE SUBROUTINE DEALLOCATE_SURFACE_WATER_FINAL(SWF)
-     TYPE(SURFACE_WATER_DATA), INTENT(INOUT)::SWF
-     CALL DEALLOCATE_SURFACE_WATER(SWF)
+    TYPE(SURFACE_WATER_DATA), INTENT(INOUT)::SWF
+    CALL DEALLOCATE_SURFACE_WATER(SWF)
   END SUBROUTINE
   !
   PURE SUBROUTINE DEALLOCATE_SURFACE_WATER(SWF)
-  CLASS(SURFACE_WATER_DATA), INTENT(INOUT)::SWF
-     !
-     SWF%IOUT  = Z
-     SWF%LOUT  = Z
-     SWF%NFARM = Z
-     SWF%IRRFL = Z
-     !SWF%IRDFL = Z
-     SWF%MXNRD = Z
-     SWF%NSFR_DELIV = Z
-     SWF%NSFR_RETURN= Z
-     SWF%HAS_SW      = FALSE
-     SWF%REQ_SFR     = FALSE
-     SWF%HAS_RET     = FALSE
-     SWF%HAS_SRD     = FALSE
-     SWF%HAS_NRD     = FALSE
-     SWF%NRD_IS_RAT  = FALSE
-     SWF%HAS_NRD_LOC = FALSE
-     SWF%NORETURNFLOW= FALSE
-     SWF%TFR_READ    = FALSE
-     SWF%BUILD_FULLY_ROUTED_RETURN = FALSE
-     SWF%ALWAYS_BUILD_FULLY_ROUTED_RETURN = FALSE
-     !
-     IF(ALLOCATED(SWF%H2ORETURN )) DEALLOCATE(SWF%H2ORETURN )
-     IF(ALLOCATED(SWF%SRDLOC    )) DEALLOCATE(SWF%SRDLOC    )
-     IF(ALLOCATED(SWF%SRRLOC    )) DEALLOCATE(SWF%SRRLOC    )
-     IF(ALLOCATED(SWF%BUILD_FRR )) DEALLOCATE(SWF%BUILD_FRR )
-     IF(ALLOCATED(SWF%NRD_DP_LOC)) DEALLOCATE(SWF%NRD_DP_LOC)
-     IF(ALLOCATED(SWF%NRD_DP    )) DEALLOCATE(SWF%NRD_DP    )
-     IF(ALLOCATED(SWF%RUNOFF_PRNT)) DEALLOCATE(SWF%RUNOFF_PRNT)
-     IF(ALLOCATED(SWF%HAS_SRD_WBS)) DEALLOCATE(SWF%HAS_SRD_WBS)
-     IF(ALLOCATED(SWF%NRD        )) DEALLOCATE(SWF%NRD        )
-     !
+    CLASS(SURFACE_WATER_DATA), INTENT(INOUT)::SWF
+    !
+    SWF%IOUT  = Z
+    SWF%LOUT  = Z
+    SWF%NFARM = Z
+    SWF%IRRFL = Z
+    !SWF%IRDFL = Z
+    SWF%MXNRD = Z
+    SWF%NSFR_DELIV = Z
+    SWF%NSFR_RETURN= Z
+    SWF%HAS_SW      = FALSE
+    SWF%REQ_SFR     = FALSE
+    SWF%HAS_RET     = FALSE
+    SWF%HAS_SRD     = FALSE
+    SWF%HAS_NRD     = FALSE
+    SWF%NRD_IS_RAT  = FALSE
+    SWF%HAS_NRD_LOC = FALSE
+    SWF%NORETURNFLOW= FALSE
+    SWF%TFR_READ    = FALSE
+    SWF%BUILD_FULLY_ROUTED_RETURN = FALSE
+    SWF%ALWAYS_BUILD_FULLY_ROUTED_RETURN = FALSE
+    !
+    IF(ALLOCATED(SWF%H2ORETURN )) DEALLOCATE(SWF%H2ORETURN )
+    IF(ALLOCATED(SWF%SRDLOC    )) DEALLOCATE(SWF%SRDLOC    )
+    IF(ALLOCATED(SWF%SRRLOC    )) DEALLOCATE(SWF%SRRLOC    )
+    IF(ALLOCATED(SWF%BUILD_FRR )) DEALLOCATE(SWF%BUILD_FRR )
+    IF(ALLOCATED(SWF%NRD_DP_LOC)) DEALLOCATE(SWF%NRD_DP_LOC)
+    IF(ALLOCATED(SWF%NRD_DP    )) DEALLOCATE(SWF%NRD_DP    )
+    IF(ALLOCATED(SWF%RUNOFF_PRNT)) DEALLOCATE(SWF%RUNOFF_PRNT)
+    IF(ALLOCATED(SWF%HAS_SRD_WBS)) DEALLOCATE(SWF%HAS_SRD_WBS)
+    IF(ALLOCATED(SWF%NRD        )) DEALLOCATE(SWF%NRD        )
+    !
   END SUBROUTINE
   !  
   SUBROUTINE NO_SURFACE_WATER_DATA(SWF, FDIM, IOUT )
@@ -214,6 +215,7 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
     SWF%IOUT = IOUT
     SWF%LOUT = IOUT
     SWF%NFARM= FDIM%NFARM
+    IF(SWF%NFARM < ONE) SWF%NFARM = ONE
     SWF%MXNRD= FDIM%MXNRD
     !
     SWF%NORETURNFLOW = TRUE
@@ -237,10 +239,7 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
     DO CONCURRENT(F=ONE:SWF%NFARM); SWF%SRRLOC(F)%TOTLENGTH = DZ
     END DO
     !
-    DO CONCURRENT (F=ONE:SWF%NFARM)
-             !
-             SWF%SRRLOC(F)%N = Z
-             CALL ALLOC(SWF%SRRLOC(F)%RUNOFF,ONE)   !IF THERE IS RUNOFF, THEN IT LEAVES MODEL 
+    DO CONCURRENT(F=ONE:SWF%NFARM); SWF%SRRLOC(F)%LOST_RUNOFF = DZ
     END DO
     !
   END SUBROUTINE
@@ -272,6 +271,7 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
     SWF%IOUT = BL%IOUT
     SWF%LOUT = BL%IOUT
     SWF%NFARM= FDIM%NFARM
+    IF(SWF%NFARM < ONE) SWF%NFARM = ONE
     SWF%MXNRD= FDIM%MXNRD
     SWF%NSFR_DELIV = FDIM%NSFR_DELIV
     SWF%NSFR_RETURN= FDIM%NSFR_RETURN
@@ -613,6 +613,47 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
     !
     IF(WRN%RAISED) CALL WRN%CHECK('SURFACE_WATER BLOCK ERROR.'//NL//'THE FOLLOWING ARE A LIST OF BAD FMP-SFR LINKS AND THE REASON THEY ARE BAD.'//BLN//'WBS  SEGMENT  REASON', OUTPUT=SWF%IOUT, KILL=TRUE)
     !
+    IF(SRR_CHK) THEN  ! Check for runoff leaving model requests
+        !I,J,K,F,
+        DO F=ONE, SWF%NFARM
+            N = Z  ! Number of ISRR  points for F
+            I = Z  ! Number of SEG=0
+            J = Z  ! Number of SEG=0 and WT > 0.0
+            
+            DO K=ONE, SWF%NSFR_RETURN
+                !
+                IF( F == SWF%ISRR_TFR%WBS(K) ) THEN
+                    N = N + ONE
+                    IF(SWF%ISRR_TFR%SR(ONE,K) == Z) THEN
+                        I = I + ONE
+                        IF(NEGNEARZERO_5 < SWF%ISRR_TFR%WT(K)) J = J + ONE
+                    END IF
+                END IF
+            END DO
+            IF( N > ONE .AND. I > Z .AND. I /= J) THEN  ! More than 1 ISRR defined, and some have SEG=0 but does not specify a weight
+                DO K=ONE, SWF%NSFR_RETURN
+                    !
+                    IF( F == SWF%ISRR_TFR%WBS(K)) THEN
+                        IF(SWF%ISRR_TFR%SR(ONE,K) == Z .AND. SWF%ISRR_TFR%WT(K) < NEGNEARZERO_5) THEN
+                                CALL WRN%ADD( NUM2STR(F,-4)//BLNK//NUM2STR(K))
+                        END IF
+                    END IF
+                END DO
+            END IF
+            
+        END DO
+        IF(WRN%RAISED) CALL WRN%CHECK('SURFACE_WATER BLOCK ERROR.'//NL// &
+                                      'The following are a list bad FMP Semi-Routed Return points (ISRR).'//NL// &
+                                      'If a WBS contains more than one ISRR (multiple return locations defined),'//NL// &
+                                      'then any ISRR with segment set to zero (SEG=0) must define a fraction of surface runoff (FRAC).'//BLN// &
+                                      'That is, if you have a mixture of return flow points: flow to SFR and flow that leaves the model domain,'//NL// &
+                                      'then you have to specify FRAC for each SEG=0 return flow point,'//NL// &
+                                      'otherwise FMP does not know how much return flow leaves the model.'//BLN// &
+                                      'Note the SEMI_ROUTED_RETURN input is: ISRR, WBS_ID, SEGMENT, REACH, [FRAC]'//BLN// &
+                                      'The following need to specify FRAC.'//BLN// &
+                                      'WBS  ISRR', OUTPUT=SWF%IOUT, KILL=TRUE)
+    END IF
+    !
     IF(SRD_CHK) THEN
         !
         DO CONCURRENT(K=ONE:SWF%NSFR_DELIV, SWF%ISRD_TFR%WBS(K) > Z )
@@ -946,11 +987,12 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
                 CALL BUILD_SRR_LOC_FLOW(SWF, SEG_NSTRM, STRM)
     ELSE
         DO CONCURRENT (F=ONE:SWF%NFARM, .NOT. SWF%SRRLOC(F)%HAS_RETURN)
-                 !
                  SWF%SRRLOC(F)%N = Z
-                 CALL ALLOC(SWF%SRRLOC(F)%RUNOFF,ONE)   !IF THERE IS RUNOFF, THEN IT LEAVES MODEL 
         END DO
     END IF
+    DO CONCURRENT (F=ONE:SWF%NFARM)
+                SWF%SRRLOC(F)%LOST_RUNOFF = DZ
+    END DO
     !
     !------------------------------------------------------------------------
     ! 
@@ -1301,28 +1343,20 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
     CLASS(SURFACE_WATER_DATA),           INTENT(INOUT):: SWF
     INTEGER, DIMENSION(:),   CONTIGUOUS, INTENT(IN   ):: SEG_NSTRM
     REAL,    DIMENSION(:,:), CONTIGUOUS, INTENT(IN   ):: STRM
-    INTEGER:: F, K, IRCH, ISTRM, NRCH, S, DIM, DIF
+    INTEGER:: F, K, IRCH, ISTRM, NRCH, S, DIM
     DOUBLE PRECISION:: WT_SUM, LN_SUM
     !
     DO F=ONE, SWF%NFARM
        IF    ( .NOT. SWF%SRRLOC(F)%HAS_RETURN) THEN
              !
              SWF%SRRLOC(F)%N = Z
-             CALL ALLOC(SWF%SRRLOC(F)%RUNOFF,ONE)   !(ARR, N)  !IF THERE IS RUNOFF, THEN IT LEAVES MODEL 
              !
        ELSEIF(       SWF%SRRLOC(F)%HAS_RETURN  .AND. .NOT. SWF%SRRLOC(F)%FULLY) THEN
          !
-         SWF%SRRLOC(F)%TOTLENGTH = DZ
-         SWF%SRRLOC(F)%LEAVE_MODEL = FALSE
-         DIF = Z
          DIM = Z
          DO K=ONE, SWF%NSFR_RETURN
              IF(F == SWF%ISRR_TFR%WBS(K)) THEN
-                 IF    ( SWF%ISRR_TFR%SR(ONE,K) == Z) THEN ! =Z INDICATES RETURN FLOW LEAVES MODEL
-                                                 DIF = DIF - ONE
-                                                 !DIM = Z
-                                                 !EXIT
-                 ELSEIF( SWF%ISRR_TFR%SR(TWO,K)  > Z) THEN ! >Z INDICATES SINGLE REACH 
+                 IF( SWF%ISRR_TFR%SR(ONE,K) == Z .OR. SWF%ISRR_TFR%SR(TWO,K)  > Z) THEN ! =Z INDICATES RETURN FLOW LEAVES MODEL; >Z INDICATES SINGLE REACH 
                                                  DIM = DIM + ONE
                  ELSE !OR USE ALL REACHES
                                                  S    = SWF%ISRR_TFR%SR(ONE,K)
@@ -1332,14 +1366,11 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
              END IF
          END DO
          !
-         IF(DIM+DIF < ONE) THEN      
-             SWF%SRRLOC(F)%LEAVE_MODEL = DIF < Z  !ONLY TRUE IF SEG=0 for all WBS SRDS
-             SWF%SRRLOC(F)%N = Z
-             CALL ALLOC(SWF%SRRLOC(F)%RUNOFF,ONE)   !(ARR, N)
-         ELSE
-             DIM = DIM + DIF
-             SWF%SRRLOC(F)%N = DIM
-             !
+         SWF%SRRLOC(F)%N = DIM
+         SWF%SRRLOC(F)%TOTLENGTH = DZ
+         SWF%SRRLOC(F)%LEAVE_MODEL = DIM == Z
+         !
+         IF(DIM > Z) THEN      
              CALL ALLOC(SWF%SRRLOC(F)%WT,    DIM)   !(ARR, N)
              CALL ALLOC(SWF%SRRLOC(F)%ISTRM, DIM)   !(ARR, N)
              CALL ALLOC(SWF%SRRLOC(F)%RUNOFF,DIM)   !(ARR, N)
@@ -1351,15 +1382,23 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
                  IF(F == SWF%ISRR_TFR%WBS(K)) THEN
                      S     = SWF%ISRR_TFR%SR(ONE,K)
                      IRCH  = SWF%ISRR_TFR%SR(TWO,K)
-                     ISTRM = SEG_NSTRM(S)
+                     !ISTRM = SEG_NSTRM(S)
                      !
-                     IF    (   S == Z ) THEN          !Segment not defined, so do not include it
-                                        CONTINUE      !Do nothing, to start new cycle
+                     IF( S == Z ) THEN          !Segment not defined, so user wants the runoff to leave the model
+                         !
+                         DIM = DIM + ONE
+                         !
+                         SWF%SRRLOC(F)%ISTRM(DIM) = Z
+                         SWF%SRRLOC(F)%WT(DIM)    = SWF%ISRR_TFR%WT(K)
+                         !
+                         SWF%SRRLOC(F)%SR(:,DIM) = Z
+                         !
+                         SWF%SRRLOC(F)%ISRR(DIM) = K
                      ELSEIF( IRCH > Z ) THEN
                          !
                          DIM = DIM + ONE
                          !
-                         SWF%SRRLOC(F)%ISTRM(DIM) = ISTRM + IRCH  !ISTRM LOCATION IN SFR
+                         SWF%SRRLOC(F)%ISTRM(DIM) = SEG_NSTRM(S) + IRCH  !ISTRM LOCATION IN SFR
                          SWF%SRRLOC(F)%WT(DIM)    = SWF%ISRR_TFR%WT(K)
                          !
                          SWF%SRRLOC(F)%SR(ONE,DIM) = S
@@ -1367,7 +1406,8 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
                          !
                          SWF%SRRLOC(F)%ISRR(DIM) = K
                      ELSE
-                         NRCH  = SEG_NSTRM(S+ONE) - ISTRM     ! ==> ISTRM = SEG_NSTRM(S)
+                         ISTRM = SEG_NSTRM(S)
+                         NRCH  = SEG_NSTRM(S+ONE) - ISTRM
                          !
                          IF    (NRCH == ONE) THEN  !ONLY ONE REACH IN SEGMENET
                                 !
@@ -1429,7 +1469,7 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
              !
              ! GET TOTAL LEGNTH
              DO K=ONE, DIM
-                          SWF%SRRLOC(F)%TOTLENGTH = SWF%SRRLOC(F)%TOTLENGTH + STRM( 1, SWF%SRRLOC(F)%ISTRM(K) )
+                 IF(SWF%SRRLOC(F)%ISTRM(K) > Z) SWF%SRRLOC(F)%TOTLENGTH = SWF%SRRLOC(F)%TOTLENGTH + STRM( 1, SWF%SRRLOC(F)%ISTRM(K) )
              END DO
              IF( SWF%SRRLOC(F)%TOTLENGTH < NEARZERO_29 ) SWF%SRRLOC(F)%TOTLENGTH = DZ
              !
@@ -1493,20 +1533,16 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
                     !
                 ELSE !ASSUME AN EVEN SPLIT OF RUNOFF
                     WT_SUM = DZ
-                    ASSOCIATE(ISTRM=>SWF%SRRLOC(F)%ISTRM, &
-                                 WT=>SWF%SRRLOC(F)%WT      )
-                                 !
-                        IF(    DIM == TWO  ) THEN; WT_SUM = HALF
-                        ELSEIF(DIM == THREE) THEN; WT_SUM = THIRD
-                        ELSEIF(DIM == FOUR ) THEN; WT_SUM = FOURTH
-                        ELSEIF(DIM == FIVE ) THEN; WT_SUM = FIFTH
-                        ELSE;                      WT_SUM = UNO / DBLE(DIM)
-                        END IF
-                        !
-                        DO CONCURRENT (K=ONE:DIM);  WT(K) = WT_SUM
-                        END DO
-                        !
-                    END ASSOCIATE
+                    IF(    DIM == TWO  ) THEN; WT_SUM = HALF
+                    ELSEIF(DIM == THREE) THEN; WT_SUM = THIRD
+                    ELSEIF(DIM == FOUR ) THEN; WT_SUM = FOURTH
+                    ELSEIF(DIM == FIVE ) THEN; WT_SUM = FIFTH
+                    ELSE;                      WT_SUM = UNO / DBLE(DIM)
+                    END IF
+                    !
+                    DO CONCURRENT (K=ONE:DIM)
+                                   SWF%SRRLOC(F)%WT(K) = WT_SUM
+                    END DO
                 END IF
                 !
                 ! Ensure weights sum to 1
@@ -1581,9 +1617,7 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
          !
          SWF%SRRLOC(F)%TOTLENGTH = DZ
          !
-         IF(SWF%SRRLOC(F)%N < ONE) THEN
-             CALL ALLOC(SWF%SRRLOC(F)%RUNOFF, ONE, SRC=DZ)   !(ARR, N)
-         ELSE
+         IF(SWF%SRRLOC(F)%N > Z) THEN
              CALL ALLOC(SWF%SRRLOC(F)%RUNOFF,SWF%SRRLOC(F)%N, SRC=DZ)   !(ARR, N)
              CALL ALLOC(SWF%SRRLOC(F)%WT,    SWF%SRRLOC(F)%N)
              !CALL ALLOC(SWF%SRRLOC(F)%ISTRM, SWF%SRRLOC(F)%N)
@@ -1717,13 +1751,19 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
     DOUBLE PRECISION:: REACH_RUNFOFF
     !
     DO F=ONE, SWF%NFARM
+       SWF%SRRLOC(F)%LOST_RUNOFF = DZ
+    END DO
+    !
+    DO F=ONE, SWF%NFARM
         IF(RUNOFF(F) < NEARZERO_6)THEN
             !
-            SWF%SRRLOC(F)%RUNOFF(:) = DZ
+            DO K=ONE, SWF%SRRLOC(F)%N
+                SWF%SRRLOC(F)%RUNOFF(K) = DZ
+            END DO
             !
         ELSEIF( .NOT. SWF%SRRLOC(F)%HAS_RETURN  .OR. SWF%SRRLOC(F)%N == Z) THEN
             !
-            SWF%SRRLOC(F)%RUNOFF(ONE) = RUNOFF(F)  !Hold runoff even though it has no where to go
+            SWF%SRRLOC(F)%LOST_RUNOFF = RUNOFF(F)  !Hold runoff even though it has no where to go
             !
         ELSE!IF( SWF%SRRLOC(F)%HAS_RETURN  .AND. SWF%SRRLOC(F)%N > Z) THEN
             !
@@ -1738,7 +1778,7 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
                    !
                    I = ISTRM(ONE)
                    !
-                   STRM(12,I) = STRM(12,I) + RUNOFF(F)
+                   IF( I > Z ) STRM(12,I) = STRM(12,I) + RUNOFF(F)
                ELSE
                    DO K=ONE, DIM
                        !
@@ -1748,7 +1788,7 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
                        !
                        I = ISTRM(K)
                        !
-                       STRM(12,I) = STRM(12,I) + REACH_RUNFOFF
+                       IF( I > Z ) STRM(12,I) = STRM(12,I) + REACH_RUNFOFF
                        !
                    END DO
                END IF
@@ -1770,30 +1810,39 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
     WRN_PRT = FALSE
     !
     DO F=ONE, SWF%NFARM
-        IF(SWF%SRRLOC(F)%N == Z .AND. SWF%SRRLOC(F)%RUNOFF(ONE) > NEARZERO_6 .AND. .NOT. SWF%SRRLOC(F)%LEAVE_MODEL)THEN
+        IF(SWF%SRRLOC(F)%LOST_RUNOFF > NEARZERO_6)THEN
             !
             IF(SWF%RUNOFF_PRNT(F)) THEN
                                        SWF%RUNOFF_PRNT(F) = FALSE
                                        WRN_PRT = TRUE
             END IF
             !
-            CALL WRN%ADD(NUM2STR(F,6)//'   '//NUM2STR(SWF%SRRLOC(F)%RUNOFF(ONE))//NL)
+            CALL WRN%ADD(NUM2STR(F,6)//'   '//NUM2STR(SWF%SRRLOC(F)%LOST_RUNOFF)//NL)
         END IF
     END DO
     !
     IF(WRN_PRT) THEN
        CALL WRN%CHECK(HED=NL//REPEAT('-',71)//NL//'   THIS IS A SOFT WARNING, IGNORE IT IF YOU INTENTIONALLY WANT THIS.  |'//NL//REPEAT('-',71)//BLN//   &
-       'WBS RUNOFF IS NOT CONNECTED TO A SFR STREAM, SO RUNOFF WILL FLOW OUT OF THE MODEL DOMAIN'//BLN//         &
-       'THIS OCCURS BECAUSE EITHER SFR IS NOT USED IN SIMULATION'//NL//                                          &
-       'OR A SET OF REACHES COULD NOT BE FOUND WITHIN THE WBS/FARM AREA.'//BLN//                                 &
-       'SINCE THE SURFACE WATER RUNOFF HAS NO WHERE TO GO IT IS REMOVED FROM THE MODEL.'//BLN//                  &
-       'IF YOU WANT TO KEEP RUNOFF WITHIN THE MODEL USE THE SURFACE_WATER BLOCK KEYWORD "NORETURNFLOW"'//NL//    &
-       'TO INDICATE THAT SURFACE RUNOFF SHOULD REINFILTRATE AS DEEP PERCOLATION'//NL//                           &
-       'OR SPECIFY A "SEMI_ROUTED_RETURN" LOCATION FOR THE FOLLOWING WBS.'//BLN//                                &
-       '(NOTE IF YOU DEFINE A WBS WITH A "SEMI_ROUTED_RETURN" SEGMENT=0 THEN THIS WARNING IS DISABLED.)'//BLN// &
-       'THE FOLLOWING ARE THE WBS/FARMS THAT HAD RUNOFF THAT FLOWS OUT OF THE MODEL DOMAIN'//BLN//               &
-       '   WBS   RUNOFF',                                        &
-        OUTPUT=SWF%IOUT, CMD_PRINT=SWF%CMD_RUNOFF_PRNT, NO_NL=TRUE, TAIL=BLN//'THIS WARNING APPEARS THE FIRST TIME FMP HAS A WBS WITH RUNOFF > 0 AND THE RUNOFF HAS NO WHERE TO FLOW'//NL)
+       'WBS runoff > 0, but WBS no SFR return flow point was defined, so runoff will leave the model domain.'//BLN//         &
+       'This occurs because either SFR is not used in simulation,'//NL//                                                     &
+       'or you have ROUTED_RETURN_ANY_REACH or ROUTED_RETURN_ANY_NON_DIVERSION_REACH option,'//NL//                          &
+       '   but no SFR reaches are found in the WBS/FARM area to send the runoff,'//NL//                                      &
+       'or you set NO_RETURN_FLOW, but runoff was generated outside of FMP, such as the DRT-FMP link.'//BLN//                &
+       'Since the surface water runoff has no where to go it is removed from the model.'//BLN//                              &
+       'If you want to keep runoff within the model please define either'//NL//                                              &
+       '   define for the WBS a SEMI_ROUTED_RETURN location or'//NL//                                                        &
+       '   define for the WBS the NO_RETURN_FLOW keyword to force surface runoff to reinfiltrate as deep percolation'//BLN// &
+       'NOTE 1: If you define a wbs with a SEMI_ROUTED_RETURN and set the runoff segment to 0 (zero),'//NL//                 &
+       '           then runoff leaves model without a this warning.'//BLN//                                                  &
+       'NOTE 2: The NO_RETURN_FLOW flag supercedes SEMI_ROUTED_RETURN'//NL//                                                 &
+       '           and will disable all return flow points to'//NL//                                                         &
+       '           (a) force all FMP generated runoff to infiltrate and'//NL//                                               &
+       '           (b) force external to FMP runoff to leave the model (and raise this warning).'//BLN//                     &
+       'NOTE 3: If all the model cells beneath the surface are IBOUND=0, '//NL//                 &
+       '           then all deep percolation is always shifted to runoff.'//BLN//                                                  &
+       'The following are the WBS/FARMS that had runoff leave the model domain'//BLN//                                       &
+       '   WBS   RUNOFF',                                                                                                    &
+        OUTPUT=SWF%IOUT, CMD_PRINT=SWF%CMD_RUNOFF_PRNT, NO_NL=TRUE, TAIL=BLN//'This warning appears the first time FMP has a WBS with runoff > 0 and the runoff leaves the model domain.'//NL)
         !
         IF(SWF%CMD_RUNOFF_PRNT) SWF%CMD_RUNOFF_PRNT = FALSE
     END IF
@@ -2056,11 +2105,13 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
   PURE ELEMENTAL SUBROUTINE INIT_NRD_VALUES(NRD, MXNRD)
     CLASS(NRD_VALUES), INTENT(INOUT):: NRD
     INTEGER,           INTENT(IN   ):: MXNRD
+    INTEGER:: I
     !
     CALL DESTROY_NRD_VALUES(NRD)
     !
     IF(MXNRD > Z) THEN
-        ALLOCATE(NRD%RANKPOS(MXNRD), SOURCE=[1:MXNRD])
+        !ALLOCATE(NRD%RANKPOS(MXNRD), SOURCE=[1:MXNRD])  ! not supported by gfortran
+        ALLOCATE(NRD%RANKPOS(MXNRD), SOURCE=[(I, I=1, MXNRD, 1)])
         ALLOCATE(NRD%AVALIBLE_WATER(MXNRD), SOURCE=DZ)
         ALLOCATE(NRD%CONSUMED_WATER(MXNRD), SOURCE=DZ)
     END IF
@@ -2264,13 +2315,13 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
                         !
                         REASON = '  LIMIT'
                     ELSE
-                            REASON = '  UNKNOWN'  !Probably failed to converge on delivery or time step
+                        REASON = '  UNKNOWN'  !Probably failed to converge on delivery or time step
                     END IF
                  END IF
              END IF
              !
              IF(SWF%OUT_SFR_SRD%BINARY) THEN
-                                      !WRITE(IU) DATE,DYEAR,DELT,KPER,KSTP,I,CDAT%CROP_NAME(I),AREA,AREA_IRR,EFF,CU_I,CU,CIRI,CIR,DMDI,DMD,ADMD_I,ADMD,DP,RO,DP_E,RO_E,TPOT,ANOX_LOSS,SOIL_LOSS,TACT,TSURF_I,TSURF,TI,TP,TGWA,EI,EP,EGWA,P
+                     WRITE(IU) DATE, DYEAR, DELT, KPER, KSTP, F, SWF%SRDLOC(F)%SR(ONE,I), SWF%SRDLOC(F)%SR(TWO,I), SWF%SRDLOC(F)%FLOW(I), INFLOW, SWF%SRDLOC(F)%LLIM(I), SWF%SRDLOC(F)%ULIM(I), DMD, SWF%SRDLOC(F)%ISRD(I)
              ELSE
                      WRITE(IU, '(5I7, 5A17, A, A17, 2x,F13.7, 2x,A, 2x,A)') KPER, KSTP, F, SWF%SRDLOC(F)%SR(ONE,I), SWF%SRDLOC(F)%SR(TWO,I), NUM2STR(DMD), NUM2STR(SWF%SRDLOC(F)%FLOW(I)), NUM2STR(INFLOW), NUM2STR(SWF%SRDLOC(F)%LLIM(I)), NUM2STR(SWF%SRDLOC(F)%ULIM(I)), REASON, DT, DYEAR, DATE, NUM2STR(SWF%SRDLOC(F)%ISRD(I))
              END IF
@@ -2317,13 +2368,13 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
       !
       IF(SWF%SRDLOC(F)%N == Z) THEN
           IF(SWF%OUT_SFR_SRD_BYWBS%BINARY) THEN
-                                 WRITE(IU) DATE,DYEAR,DELT,KPER,KSTP,F,DZ, DZ, DZ, DZ, DZ, SWF%SRDLOC(F)%TOT_DMD_INI, DZ
+                  WRITE(IU) DATE,DYEAR,DELT,KPER,KSTP,F,DZ, DZ, DZ, DZ, DZ, SWF%SRDLOC(F)%TOT_DMD_INI, DZ
           ELSE
                   WRITE(IU, '(3I7, 8A17, 2x,F13.7, 2x,A)') KPER, KSTP, F, NUM2STR(SWF%SRDLOC(F)%TOT_DMD_INI),ZER,ZER,ZER,ZER,ZER,ZER, DT, DYEAR, DATE
           END IF
       ELSEIF(ALL(SWF%SRDLOC(F)%ISTRM < ONE)) THEN
           IF(SWF%OUT_SFR_SRD_BYWBS%BINARY) THEN
-                                 WRITE(IU) DATE,DYEAR,DELT,KPER,KSTP,F,DZ, DZ, DZ, DZ, DZ, SWF%SRDLOC(F)%TOT_DMD_INI, DZ
+                  WRITE(IU) DATE,DYEAR,DELT,KPER,KSTP,F,DZ, DZ, DZ, DZ, DZ, SWF%SRDLOC(F)%TOT_DMD_INI, DZ
           ELSE
                   WRITE(IU, '(3I7, 8A17, 2x,F13.7, 2x,A)') KPER, KSTP, F, NUM2STR(SWF%SRDLOC(F)%TOT_DMD_INI),ZER,ZER,ZER,ZER,ZER,ZER, DT, DYEAR, DATE
           END IF
@@ -2367,7 +2418,7 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
           IF( DEFICIT <= NEARZERO_12 ) DEFICIT = DZ
           !
           IF(SWF%OUT_SFR_SRD_BYWBS%BINARY) THEN
-                                 WRITE(IU) DATE,DYEAR,DELT,KPER,KSTP,F,DELIV, INFLOW, MAX_DELIV, SWF%SRDLOC(F)%TOT_DMD_INI, DEFICIT
+                  WRITE(IU) DATE,DYEAR,DELT,KPER,KSTP,F,DELIV, INFLOW, MAX_DELIV, SWF%SRDLOC(F)%TOT_DMD_INI, DEFICIT
           ELSE
                   WRITE(IU, '(3I7, 8A17, 2x,F13.7, 2x,A)') KPER, KSTP, F, NUM2STR(SWF%SRDLOC(F)%TOT_DMD_INI), NUM2STR(DELIV), NUM2STR(INFLOW), NUM2STR(MAX_DELIV), NUM2STR(DEFICIT), NUM2STR(TOT_LLIM), NUM2STR(TOT_ULIM), DT, DYEAR, DATE
           END IF
@@ -2411,28 +2462,28 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
     DO F=ONE, SWF%NFARM
       !
       IF(.NOT. SWF%SRRLOC(F)%FULLY) THEN
-         IF(SWF%SRRLOC(F)%N == Z) THEN
-                IF(SWF%OUT_SFR_SRR%BINARY) THEN
-                                             WRITE(IU) DATE,DYEAR,DELT,KPER,KSTP,F, Z, Z, SWF%SRRLOC(F)%RUNOFF(I), DZ, DZ, NEG
-                ELSE
-                        WRITE(IU, '(5I7, 4A17, 2x,F13.7, 2x,A, 2x,A)') KPER, KSTP, F, Z, Z, NUM2STR(SWF%SRRLOC(F)%RUNOFF(ONE)), ZER, ZER, DT, DYEAR, DATE, '-1'
-                END IF
+         IF(SWF%OUT_SFR_SRR%BINARY) THEN
+                 WRITE(IU) DATE,DYEAR,DELT,KPER,KSTP,F, Z, Z, SWF%SRRLOC(F)%LOST_RUNOFF, DZ, DZ, NEG
          ELSE
-             DO I = ONE, SWF%SRRLOC(F)%N
-              !
-              IF(SWF%SRRLOC(F)%ISTRM(I) > Z) THEN
-                !
-                OTFLOW = STRM(9, SWF%SRRLOC(F)%ISTRM(I))
-                INFLOW = STRM(10,SWF%SRRLOC(F)%ISTRM(I))
-                !
-                IF(SWF%OUT_SFR_SRR%BINARY) THEN
-                                             WRITE(IU) DATE,DYEAR,DELT,KPER,KSTP,F, SWF%SRRLOC(F)%SR(ONE,I), SWF%SRRLOC(F)%SR(TWO,I), SWF%SRRLOC(F)%RUNOFF(I), INFLOW, OTFLOW, SWF%SRRLOC(F)%ISRR(I)
-                ELSE
-                        WRITE(IU, '(5I7, 4A17, 2x,F13.7, 2x,A, 2x,A)') KPER, KSTP, F, SWF%SRRLOC(F)%SR(ONE,I), SWF%SRRLOC(F)%SR(TWO,I), NUM2STR(SWF%SRRLOC(F)%RUNOFF(I)), NUM2STR(INFLOW), NUM2STR(OTFLOW), DT, DYEAR, DATE, NUM2STR(SWF%SRRLOC(F)%ISRR(I))
-                END IF
-              END IF
-             END DO
+                 WRITE(IU, '(5I7, 4A17, 2x,F13.7, 2x,A, 2x,A)') KPER, KSTP, F, Z, Z, NUM2STR(SWF%SRRLOC(F)%LOST_RUNOFF), ZER, ZER, DT, DYEAR, DATE, '-1'
          END IF
+         !
+         DO I = ONE, SWF%SRRLOC(F)%N
+          !
+          IF(SWF%SRRLOC(F)%ISTRM(I) == Z) THEN
+            OTFLOW = DZ
+            INFLOW = DZ
+          ELSE
+            OTFLOW = STRM(9, SWF%SRRLOC(F)%ISTRM(I))
+            INFLOW = STRM(10,SWF%SRRLOC(F)%ISTRM(I))
+          END IF
+          !
+          IF(SWF%OUT_SFR_SRR%BINARY) THEN
+                  WRITE(IU) DATE,DYEAR,DELT,KPER,KSTP,F, SWF%SRRLOC(F)%SR(ONE,I), SWF%SRRLOC(F)%SR(TWO,I), SWF%SRRLOC(F)%RUNOFF(I), INFLOW, OTFLOW, SWF%SRRLOC(F)%ISRR(I)
+          ELSE
+                  WRITE(IU, '(5I7, 4A17, 2x,F13.7, 2x,A, 2x,A)') KPER, KSTP, F, SWF%SRRLOC(F)%SR(ONE,I), SWF%SRRLOC(F)%SR(TWO,I), NUM2STR(SWF%SRRLOC(F)%RUNOFF(I)), NUM2STR(INFLOW), NUM2STR(OTFLOW), DT, DYEAR, DATE, NUM2STR(SWF%SRRLOC(F)%ISRR(I))
+          END IF
+         END DO
       END IF
     END DO
     !
@@ -2472,20 +2523,20 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
     !
     DO F=ONE, SWF%NFARM
       !
-      IF(SWF%SRRLOC(F)%N == Z) THEN
-             IF(SWF%OUT_SFR_RET%BINARY) THEN
-                                           WRITE(IU) DATE,DYEAR,DELT,KPER,KSTP, F, SWF%SRRLOC(F)%SR(ONE,I), SWF%SRRLOC(F)%SR(TWO,I), SWF%SRRLOC(F)%RUNOFF(I), INFLOW, OTFLOW, SWF%SRRLOC(F)%ISRR(I), NEG
-             ELSE
-                     WRITE(IU, '(5I7, 4A17, 2x,F13.7, 2x,A, 2x,A)') KPER, KSTP, F, Z, Z, NUM2STR(SWF%SRRLOC(F)%RUNOFF(ONE)), ZER, ZER, DT, DYEAR, DATE, '-1'
-             END IF
-      ELSEIF(SWF%SRRLOC(F)%FULLY) THEN
+      IF(SWF%OUT_SFR_RET%BINARY) THEN
+              WRITE(IU) DATE,DYEAR,DELT,KPER,KSTP, F, Z, Z, SWF%SRRLOC(F)%LOST_RUNOFF, INFLOW, OTFLOW, NEG
+      ELSE
+              WRITE(IU, '(5I7, 4A17, 2x,F13.7, 2x,A, 2x,A)') KPER, KSTP, F, Z, Z, NUM2STR(SWF%SRRLOC(F)%LOST_RUNOFF), ZER, ZER, DT, DYEAR, DATE, '-1'
+      END IF
+      !
+      IF(SWF%SRRLOC(F)%FULLY) THEN
           DO I = ONE, SWF%SRRLOC(F)%N
              !
              OTFLOW = STRM(9, SWF%SRRLOC(F)%ISTRM(I))
              INFLOW = STRM(10,SWF%SRRLOC(F)%ISTRM(I))
              !
              IF(SWF%OUT_SFR_RET%BINARY) THEN
-                                           WRITE(IU) DATE,DYEAR,DELT,KPER,KSTP, F, SWF%SRRLOC(F)%SR(ONE,I), SWF%SRRLOC(F)%SR(TWO,I), SWF%SRRLOC(F)%RUNOFF(I), INFLOW, OTFLOW, SWF%SRRLOC(F)%ISRR(I), Z
+                     WRITE(IU) DATE,DYEAR,DELT,KPER,KSTP, F, SWF%SRRLOC(F)%SR(ONE,I), SWF%SRRLOC(F)%SR(TWO,I), SWF%SRRLOC(F)%RUNOFF(I), INFLOW, OTFLOW, SWF%SRRLOC(F)%ISRR(I), Z
              ELSE
                      WRITE(IU, '(5I7, 4A17, 2x,F13.7, 2x,A, 2x,A)') KPER, KSTP, F, SWF%SRRLOC(F)%SR(ONE,I), SWF%SRRLOC(F)%SR(TWO,I), NUM2STR(SWF%SRRLOC(F)%RUNOFF(I)), NUM2STR(INFLOW), NUM2STR(OTFLOW), DT, DYEAR, DATE, '0'
              END IF
@@ -2493,16 +2544,18 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
       ELSE
           DO I = ONE, SWF%SRRLOC(F)%N
            !
-           IF(SWF%SRRLOC(F)%ISTRM(I) > Z) THEN
-             !
+           IF(SWF%SRRLOC(F)%ISTRM(I) == Z) THEN
+             OTFLOW = DZ
+             INFLOW = DZ
+           ELSE
              OTFLOW = STRM(9, SWF%SRRLOC(F)%ISTRM(I))
              INFLOW = STRM(10,SWF%SRRLOC(F)%ISTRM(I))
-             !
-             IF(SWF%OUT_SFR_RET%BINARY) THEN
-                                           WRITE(IU) DATE,DYEAR,DELT,KPER,KSTP, F, SWF%SRRLOC(F)%SR(ONE,I), SWF%SRRLOC(F)%SR(TWO,I), SWF%SRRLOC(F)%RUNOFF(I), INFLOW, OTFLOW, SWF%SRRLOC(F)%ISRR(I)
-             ELSE
-                     WRITE(IU, '(5I7, 4A17, 2x,F13.7, 2x,A, 2x,A)') KPER, KSTP, F, SWF%SRRLOC(F)%SR(ONE,I), SWF%SRRLOC(F)%SR(TWO,I), NUM2STR(SWF%SRRLOC(F)%RUNOFF(I)), NUM2STR(INFLOW), NUM2STR(OTFLOW), DT, DYEAR, DATE, NUM2STR(SWF%SRRLOC(F)%ISRR(I))
-             END IF
+           END IF
+           !
+           IF(SWF%OUT_SFR_RET%BINARY) THEN
+                   WRITE(IU) DATE,DYEAR,DELT,KPER,KSTP, F, SWF%SRRLOC(F)%SR(ONE,I), SWF%SRRLOC(F)%SR(TWO,I), SWF%SRRLOC(F)%RUNOFF(I), INFLOW, OTFLOW, SWF%SRRLOC(F)%ISRR(I)
+           ELSE
+                   WRITE(IU, '(5I7, 4A17, 2x,F13.7, 2x,A, 2x,A)') KPER, KSTP, F, SWF%SRRLOC(F)%SR(ONE,I), SWF%SRRLOC(F)%SR(TWO,I), NUM2STR(SWF%SRRLOC(F)%RUNOFF(I)), NUM2STR(INFLOW), NUM2STR(OTFLOW), DT, DYEAR, DATE, NUM2STR(SWF%SRRLOC(F)%ISRR(I))
            END IF
           END DO
       END IF
@@ -2551,7 +2604,7 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
       IF(CON < DZ) CON = DZ
       !
       IF(SWF%OUT_NRD_BUD_WBS%BINARY) THEN
-                             WRITE(IU) DATE,DYEAR,DELT,KPER,KSTP,F,DMD, SUP, CON
+              WRITE(IU) DATE,DYEAR,DELT,KPER,KSTP,F,DMD, SUP, CON
       ELSE
               WRITE(IU, '(3I7, 4A17, 2x,F13.7, 2x,A)') KPER, KSTP, F, NUM2STR(DMD), NUM2STR(SUP), NUM2STR(CON), DT, DYEAR, DATE
       END IF
@@ -2603,7 +2656,7 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
          !
          IF(SUP > DZ) THEN
             IF(SWF%OUT_NRD_BUD%BINARY) THEN
-                                   WRITE(IU) DATE,DYEAR,DELT,KPER,KSTP,F,I, DMD, SUP, CON
+                    WRITE(IU) DATE,DYEAR,DELT,KPER,KSTP,F,I, DMD, SUP, CON
             ELSE
                     WRITE(IU, '(4I7, 4A17, 2x,F13.7, 2x,A)') KPER, KSTP, F, I, NUM2STR(DMD), NUM2STR(SUP), NUM2STR(CON), DT, DYEAR, DATE
             END IF

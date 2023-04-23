@@ -1,0 +1,53 @@
+
+BAS Package Options block keyword TIME_INFO
+
+Writes for each time step's temporal information.
+That is, the stress period, time step, time step length,
+simulated time, decimal year, and calendar date.
+
+Note that the first record reports the stress period and time step
+as zero and gives the simulation starting information.
+
+
+/-------------------------------------\
+|                                     |
+|    Text File Header Definition      |
+|                                     |
+\-------------------------------------/
+
+STEP                       is the total number of time steps
+SP                         is the stress period number
+TS                         is the time step number
+DELT              [T]      is the time step length
+SIMTIM            [T]      is the total simulated time at the end of the time step
+DYEAR                      is the          date at the end of the time step as a decimal year
+DATE                       is the calendar date at the end of the time step as: yyyy-mm-ddThh:mm:ss
+
+/----------------------------\
+|                            |
+|   Additional Information   |
+|                            |
+\----------------------------/
+
+
+Date output is formatted using ISO 8601-1:2019 standard without a time zone designation:
+https://en.wikipedia.org/wiki/ISO_8601#Combined_date_and_time_representations
+
+The general format is:
+yyyy-mm-ddThh:mm:ss
+                   where:
+                         yyyy is the four digit Gregorian year
+                         mm   before the T is the two digit month number       (01 to 12)
+                         dd   is the two digit day of the month                (01 to {28, 29, 30, 31}, depending on the month)
+                         T    calendar date and 24-hour clock time separator
+                         hh   is the hour within the day                       (00 to 23 hour)
+                         mm   after the T is the two digit minutes in the hour (00 to 59 minute)
+                         ss   is the two digit seconds of the minute           (00 to 59 second)
+
+Output is in model units that uses an
+   L as a place holder for Length, L2 is for area, L3 is for volume and
+   T as a place holder for Time
+
+which are defined in the DIS package as being:
+   L: Feet, Meters, Centimeters, and Undefined
+   T: Seconds, Minutes, Hours, Days, Years, and Undefined

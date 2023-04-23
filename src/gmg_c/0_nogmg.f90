@@ -27,12 +27,6 @@
       'Use the "mf-owhm-gmg." executable instead, '//                            &
       'which has been compiled with the GMG C library.'//NL                      &
       )
-!      WRITE(IOUT,1)
-!      WRITE(*,1)
-!    1 FORMAT(1X,
-!     1 'The GMG solver is not included in this version of MODFLOW')
-!         CALL USTOP(' ')
-!      RETURN
       END SUBROUTINE
       !
       SUBROUTINE GMG7AP(HNEW,RHS,CR,CC,CV,HCOF,HNOFLO,IBOUND,  &

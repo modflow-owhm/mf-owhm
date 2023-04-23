@@ -28,14 +28,14 @@ SUBROUTINE PRINT_MAIN_HEADER(IU)  ! Set to 6 for cmd prompt or use output_unit f
   CHARACTER(:),ALLOCATABLE:: VERSION_SWO
   CHARACTER(:),ALLOCATABLE:: Revision
   !
-  VERSION_OWHM='2.2'
+  VERSION_OWHM='2.3'
   Revision    ='0'
   VERSION_MF  ='1.12'
   VERSION_FMP ='4.1'
   VERSION_SWR ='1.04'
   VERSION_SWI ='2.0'
   VERSION_LGR ='2.0'
-  VERSION_NWT ='1.2'
+  VERSION_NWT ='1.3'
   VERSION_CFP ='1.09.57'
   VERSION_SWO ='1.0'
   !
@@ -435,12 +435,13 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
                            !
                            IF(IUNIT(19) /= Z) CALL GWF2HYD7IBS7AR(IUNIT(43),IGRID)
                            IF(IUNIT(54) /= Z) CALL GWF2HYD7SUB7AR(IUNIT(43),IGRID)
+                           IF(IUNIT(57) /= Z) CALL GWF2HYD7SWT7AR(IUNIT(43),IGRID)
                            IF(IUNIT(18) /= Z) CALL GWF2HYD7STR7AR(IUNIT(43),IGRID)
                            IF(IUNIT(44) /= Z) CALL GWF2HYD7SFR7AR(IUNIT(43),IGRID)
       END IF
       !
       !barc**add CFP AR                                                       !TR: 2017 07 20 CFPv2
-      !seba--PROCESS AND CHECK CONDUIT DATA                                   !TR: 2017 07 20 CFPv2
+      !--PROCESS AND CHECK CONDUIT DATA                                       !TR: 2017 07 20 CFPv2
       !
       IF(IUNIT(58) /= Z) CALL GWF2CFP1AR(IUNIT(58), IUNIT(59),IUNIT(60),CFPMODE)             !TR: 2017 07 20 CFPv2
       IF(IUNIT(49) /= Z) CALL LMT8BAS7AR(NAM_UNIT,CUNIT,IGRID)
@@ -563,58 +564,60 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
           IF(IUNIT(8)  /= Z) CALL GWF2RCH7RP(IUNIT(8),IGRID)
           IF(IUNIT(17) /= Z) CALL GWF2RES7RP(IUNIT(17),IGRID)
           IF(IUNIT(18) /= Z) CALL GWF2STR7RP(IUNIT(18),IGRID)
-          IF(IUNIT(43) /= Z .AND. &
-             IUNIT(18) /= Z)      CALL GWF2HYD7STR7RP(IUNIT(43),KKPER,IGRID)
           IF(IUNIT(20) /= Z) CALL GWF2CHD7RP(IUNIT(20),IGRID)
           IF(IUNIT(21) /= Z) CALL GWF2HFB7RP(IUNIT(21),KKPER,IGRID)
           !
-          IF(IUNIT(44) /= Z) CALL GWF2SFR7RP(IUNIT(44),IUNIT(15),     &
+          IF(IUNIT(44) /= Z) CALL GWF2SFR7RP(IUNIT(44),IUNIT(15),       &
                                       IUNIT(22),IUNIT(54),KKPER,KKSTP,  &
                                       NSOL,IOUTS,IUNIT(1),              &
                                       IUNIT(23),IUNIT(37),              &
                                       IUNIT(62), IUNIT(55), IGRID)
-        IF(IUNIT(43) /= Z .AND. &
-           IUNIT(44) /= Z)      CALL GWF2HYD7SFR7RP(IUNIT(43),KKPER,IGRID)
-        !
-        IF(IUNIT(55) /= Z) CALL GWF2UZF1RP(IUNIT(55),KKPER,IUNIT(44),IGRID)
-        !
-        IF(IUNIT(22) /= Z) CALL GWF2LAK7RP(IUNIT(22),IUNIT(1),IUNIT(15),IUNIT(23),IUNIT(37),IUNIT(44),IUNIT(55),IUNIT(62),KKPER,NSOL,IOUTS,IGRID) !formerly IOUTS???
-        !
-        IF(IUNIT(46) /= Z) THEN
-            IF(KKPER == ONE) CALL GWF2GAG7RP(IUNIT(15),IUNIT(22),IUNIT(55),NSOL,IGRID)
-        END IF
-        !
-        IF(IUNIT(39) /= Z) CALL GWF2ETS7RP(IUNIT(39),IGRID)
-        IF(IUNIT(50) /= Z) CALL GWF2MNW27RP(IUNIT(50),KKPER,IUNIT(9),IUNIT(10),0,IUNIT(13),0,IUNIT(42),IUNIT(70),IUNIT(15),IUNIT(63),IUNIT(61),     +                                                           IGRID)
-        IF(IUNIT(51) /= Z) THEN
-            IF(KKPER == ONE) CALL GWF2MNW2I7RP(IUNIT(51), 0, IGRID)
-        END IF
-        !
-        IF(IUNIT(52) /= Z) CALL GWF2MNW17RP(IUNIT(52),IUNIT(1),IUNIT(23),IUNIT(37),IUNIT(62),KKPER,IGRID)
-        !
-        IF(IUNIT(66) /= Z) CALL GWF2AG7RP(IUNIT(66),IUNIT(44),KKPER)
-        !
-        !
-        !--barc**READ DATA FOR CONDUIT RECHARGE PACKAGE
-        IF(IUNIT(58) /= Z) CALL GWF2CFP1RP(IUNIT(60))                   !TR: 2017 07 20 CFPv2
-        !
-        IF(IUNIT(48) /= Z) CALL GWF2BFH2RP(IUNIT(48),KKPER,IGRID)
-        !
-        IF(IUNIT(61) /= Z) CALL FMP_RP(KKPER,IGRID)
-        !
-        IF(IUNIT(40) /= Z) CALL GWF2DRT7RP(IUNIT(40),IGRID)             !DRT must be after FMP_RP
-        IF(IUNIT(64) /= Z) CALL GWF2SWR7RP(IUNIT(64),KKPER,IGRID)       !SWR - JDH
-        !
-        IF(IUNIT(66) /= Z) CALL GWF2AG7AD(IUNIT(66),KKPER)
-        !
-        IF(IUNIT(63) /= Z) CALL GWF2NWT1RP(IUNIT(63),KPER,Mxiter,IGRID)
-        IF(IUNIT(13) /= Z) CALL PCG7RP(IUNIT(13),KPER,Mxiter,IGRID)
-        IF(IUNIT(70) /= Z) CALL PCGN2RP(IUNIT(70),KPER,IGRID,IOUT,Mxiter)
-        !
-        !slang IF(HAS_SLANG) CALL SLANG_RP(KPER)  !Determine what scripts are run
-        !
-        !swo IF(IUNIT(45) /= Z) CALL SWO % SETUP_NEXT_STRESS_PERIOD(KPER)
-        !
+          IF(IUNIT(43) /= Z ) THEN
+             IF(KKPER == 1) THEN
+                IF( IUNIT(18) /= Z ) CALL GWF2HYD7STR7RP(IUNIT(43),KKPER,IGRID)
+                IF( IUNIT(44) /= Z ) CALL GWF2HYD7SFR7RP(IUNIT(43),KKPER,IGRID)
+             END IF
+          END IF
+          !
+          IF(IUNIT(55) /= Z) CALL GWF2UZF1RP(IUNIT(55),KKPER,IUNIT(44),IGRID)
+          !
+          IF(IUNIT(22) /= Z) CALL GWF2LAK7RP(IUNIT(22),IUNIT(1),IUNIT(15),IUNIT(23),IUNIT(37),IUNIT(44),IUNIT(55),IUNIT(62),KKPER,NSOL,IOUTS,IGRID) !formerly IOUTS???
+          !
+          IF(IUNIT(46) /= Z) THEN
+              IF(KKPER == ONE) CALL GWF2GAG7RP(IUNIT(15),IUNIT(22),IUNIT(55),NSOL,IGRID)
+          END IF
+          !
+          IF(IUNIT(39) /= Z) CALL GWF2ETS7RP(IUNIT(39),IGRID)
+          IF(IUNIT(50) /= Z) CALL GWF2MNW27RP(IUNIT(50),KKPER,IUNIT(9),IUNIT(10),0,IUNIT(13),0,IUNIT(42),IUNIT(70),IUNIT(15),IUNIT(63),IUNIT(61),     +                                                           IGRID)
+          IF(IUNIT(51) /= Z) THEN
+              IF(KKPER == ONE) CALL GWF2MNW2I7RP(IUNIT(51), 0, IGRID)
+          END IF
+          !
+          IF(IUNIT(52) /= Z) CALL GWF2MNW17RP(IUNIT(52),IUNIT(1),IUNIT(23),IUNIT(37),IUNIT(62),KKPER,IGRID)
+          !
+          IF(IUNIT(66) /= Z) CALL GWF2AG7RP(IUNIT(66),IUNIT(44),KKPER)
+          !
+          !
+          !--barc**READ DATA FOR CONDUIT RECHARGE PACKAGE
+          IF(IUNIT(58) /= Z) CALL GWF2CFP1RP(IUNIT(60))                   !TR: 2017 07 20 CFPv2
+          !
+          IF(IUNIT(48) /= Z) CALL GWF2BFH2RP(IUNIT(48),KKPER,IGRID)
+          !
+          IF(IUNIT(61) /= Z) CALL FMP_RP(KKPER,IGRID)
+          !
+          IF(IUNIT(40) /= Z) CALL GWF2DRT7RP(IUNIT(40),IGRID)             !DRT must be after FMP_RP
+          IF(IUNIT(64) /= Z) CALL GWF2SWR7RP(IUNIT(64),KKPER,IGRID)       !SWR - JDH
+          !
+          IF(IUNIT(66) /= Z) CALL GWF2AG7AD(IUNIT(66),KKPER)
+          !
+          IF(IUNIT(63) /= Z) CALL GWF2NWT1RP(IUNIT(63),KPER,Mxiter,IGRID)
+          IF(IUNIT(13) /= Z) CALL PCG7RP(IUNIT(13),KPER,Mxiter,IGRID)
+          IF(IUNIT(70) /= Z) CALL PCGN2RP(IUNIT(70),KPER,IGRID,IOUT,Mxiter)
+          !
+          !slang IF(HAS_SLANG) CALL SLANG_RP(KPER)  !Determine what scripts are run
+          !
+          !swo IF(IUNIT(45) /= Z) CALL SWO % SETUP_NEXT_STRESS_PERIOD(KPER)
+          !
       END DO GRID_RP  ! ------------------------------------------------------------------------------------------------------------------------------
       !
       !7C-----SIMULATE EACH TIME STEP.
@@ -1232,6 +1235,7 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
                                    CALL GWF2HYD7BAS7SE(1,IGRID)
                                    IF(IUNIT(19) /= Z) CALL GWF2HYD7IBS7SE(1,IGRID)
                                    IF(IUNIT(54) /= Z) CALL GWF2HYD7SUB7SE(1,IGRID)
+                                   IF(IUNIT(57) /= Z) CALL GWF2HYD7SWT7SE(1,IGRID)
                                    IF(IUNIT(18) /= Z) CALL GWF2HYD7STR7SE(1,IGRID)
                                    IF(IUNIT(44) /= Z) CALL GWF2HYD7SFR7SE(1,IGRID)
               END IF
