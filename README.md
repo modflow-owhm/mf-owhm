@@ -2,9 +2,9 @@
 
 ![MF-OWHM_banner_v2b](img/MF-OWHM_banner_v2b.png)
 
-&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; **IPDS No.**&nbsp; `IP-TBA`
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; **IPDS No.**&nbsp; `IP-152297`
 
-# Version 2.3.0b
+# Version 2.3.0
 
 MODFLOW One-Water Hydrologic Flow Model (MF-OWHM) Conjunctive Use and Integrated Hydrologic Flow Modeling Software
 
@@ -125,11 +125,11 @@ To obtain this repository via git run:
 
 ## Code Citation
 
-> Boyce, S.E., 2022, MODFLOW One-Water Hydrologic Flow Model (MF-OWHM) Conjunctive Use and Integrated Hydrologic Flow Modeling Software, version 2.3.0a: U.S. Geological Survey Software Release, https://doi.org/10.5066/P9P8I8GS
+> Boyce, S.E., 2023, MODFLOW One-Water Hydrologic Flow Model (MF-OWHM) Conjunctive Use and Integrated Hydrologic Flow Modeling Software, version 2.3.0: U.S. Geological Survey Software Release, https://doi.org/10.5066/P9P8I8GS
 
 And if you use Surface Water Operations (`SWO`) in your project:
 
-> Boyce, S.E. and Ferguson, I.M., 2022, MODFLOW One-Water Hydrologic Flow Model (MF-OWHM) Conjunctive Use and Integrated Hydrologic Flow Modeling Software with Surface Water Operations, version 2.3.0a: U.S. Geological Survey Software Release, https://doi.org/10.5066/P9P8I8GS
+> Boyce, S.E. and Ferguson, I.M., 2023, MODFLOW One-Water Hydrologic Flow Model (MF-OWHM) Conjunctive Use and Integrated Hydrologic Flow Modeling Software with Surface Water Operations, version 2.3.0: U.S. Geological Survey Software Release, https://doi.org/10.5066/P9P8I8GS
 
 ## Documentation Citation
 
