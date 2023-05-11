@@ -5034,17 +5034,17 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
         END IF !((RchID.EQ.ISEG).AND.(RchSeg.EQ.ISTRM(4,IRCH))
 
         SWO%RCHDATA(IRCH)%LENGTH        = STRM( 1,IRCH)
-        SWO%RCHDATA(IRCH)%RUNOFF        = STRM(12,IRCH)
+        SWO%RCHDATA(IRCH)%RUNOFF        = STRM(12,IRCH) + STRM(24,IRCH)
         SWO%RCHDATA(IRCH)%STRM_ET       = STRM(13,IRCH)
         SWO%RCHDATA(IRCH)%STRM_PRCP     = STRM(14,IRCH)
 
         SWO%RCHDATA_PREV(IRCH)%LENGTH   = STRM( 1,IRCH)
-        SWO%RCHDATA_PREV(IRCH)%RUNOFF   = STRM(12,IRCH)
+        SWO%RCHDATA_PREV(IRCH)%RUNOFF   = STRM(12,IRCH) + STRM(24,IRCH)
         SWO%RCHDATA_PREV(IRCH)%STRM_ET  = STRM(13,IRCH)
         SWO%RCHDATA_PREV(IRCH)%STRM_PRCP= STRM(14,IRCH)
 
         SWO%RCHDATA_SAVE(IRCH)%LENGTH   = STRM( 1,IRCH)
-        SWO%RCHDATA_SAVE(IRCH)%RUNOFF   = STRM(12,IRCH)
+        SWO%RCHDATA_SAVE(IRCH)%RUNOFF   = STRM(12,IRCH) + STRM(24,IRCH)
 !        RCHDATRA_SAVE(IRCH)%RUNOFF
 !     +    SEG(3,ISTRM(4,IRCH))*(STRM(1,IRCH)/SEG(1,ISTRM(4,IRCH)))
         SWO%RCHDATA_SAVE(IRCH)%STRM_ET  = STRM(13,IRCH)
@@ -12743,7 +12743,7 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
                  JRCH    =SWO%SEGRCH_OUT(JSEG)                               ! reach index @ last reach of seg
                  DO ISTR =IRCH, JRCH
                           DFLOW_RN = DFLOW_RN + STRM(12,ISTR)
-                          DFLOW_RN = DFLOW_RN + STRM(23,ISTR)
+                          DFLOW_RN = DFLOW_RN + STRM(24,ISTR)
                  END DO
                  ! ... uptree @ iupseg ...
                  NTREE   =SWO%UPTREE_NAT(JSEG)%NTREE
@@ -12753,7 +12753,7 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
                    JRCH  =SWO%SEGRCH_OUT(KSEG)
                    DO ISTR=IRCH, JRCH
                            DFLOW_RN = DFLOW_RN + STRM(12,ISTR)
-                           DFLOW_RN = DFLOW_RN + STRM(23,ISTR)
+                           DFLOW_RN = DFLOW_RN + STRM(24,ISTR)
                    END DO
                  END DO
                  SWO%DIVSEG(IDVS)%UP_DFLOW_RN = DFLOW_RN * SWO%DELT
