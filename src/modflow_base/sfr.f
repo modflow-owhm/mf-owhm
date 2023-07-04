@@ -619,6 +619,9 @@ C
          !
       ELSEIF(BL%NAME == 'TIME_SERIES'       .OR. 
      +       BL%NAME == 'TIME_SERIES_INPUT' .OR. 
+     +       BL%NAME == 'TIME_SERIES_FILE_INPUT'  .OR.
+     +       BL%NAME == 'TIME_SERIES_FILE'  .OR. 
+     +       BL%NAME == 'TIME_SERIES_FILES' .OR. 
      +       BL%NAME == 'TIME'                  ) THEN
              !
              CALL TIME_SERIES%INIT(BL, READ_ID=TRUE)
@@ -3255,7 +3258,9 @@ C1------CALL LINEAR INTERPOLATION ROUTINE
       !
       ! APPLY THE NEW FEED DATA TO THE SFR PACKAGE ARRAY
       !
-      CALL SFRFEED%FEED_SFR(SEG(:,:NSS),2,' SEGMENT            VALUE')
+      IF (SFRFEED%NFEED > 0) THEN
+        CALL SFRFEED%FEED_SFR(SEG(:,:NSS),2,' SEGMENT            VALUE')
+      END IF
       !
       IF(TIME_SERIES%NFIL > 0) THEN
           DTIM0 = DATE_SP(KPER)%TS(KSTP-1)%DYEAR! + YEARTOL
