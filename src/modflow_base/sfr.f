@@ -7437,7 +7437,7 @@ C  Store data in parameter area
           ISEG(3, iqseg) = n
           SEG(1, nseg) = SEG(1, n)
         END IF
-        BACKSPACE In
+        BACKSPACE(IN)
 C
 C4------READ DATA SET 4B FOR SEGMENTS THAT ARE NOT DIVERSIONS.
         jfst = 28+1

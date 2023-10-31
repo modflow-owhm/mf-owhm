@@ -16,7 +16,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 # This makefile contains the options for compiling using Intel, GFortran, and LLVM.  
-#   There are a set of known compiler bugs that have been summitted to Intel and GCC that prevent compilation.
+#   There are a set of known compiler bugs that have been submitted to Intel and GCC that prevent compilation.
 #   If you receive "internal compiler error" when running this makefile, it is because the compiler version does not work.
 #   
 #   The Intel Fortran compiler is now part of Intel oneAPI and has two different versions:
