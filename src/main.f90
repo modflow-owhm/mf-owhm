@@ -465,6 +465,7 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
                CALL STOP_ERROR(MSG='Cannot simulate both CFP with the NWT Solver when there are Constant Head Cells (IBOUND<0 or CHD Package) at this time. Contact the developer and he may be able to add that feature. Regretibly this was set aside due to time contraints.')
           END IF
       END IF
+      IF(IUNIT(58) /= Z .AND. ILGR /= Z) CALL STOP_ERROR(MSG='CFP with LGR is NOT supported at this time. Please only simulate one model at at time.')
       !
       IF(MXITER < 10) MXITER=10
       !
@@ -818,7 +819,9 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
                    IF(IUNIT(37) /= Z) CALL GWF2HUF7FM(KKITER,KKSTP,KKPER,IUNIT(47),ILGR,IGRID)
                    !
                    !BARC**MODIFY CONDUCTANCES HERE WHEN MODE 2 IS ACTIVE
-                   IF(IUNIT(58) /= Z) CALL GWF2CFPM2FM(KKITER,KKSTP,KKPER,ICNVG)                                                !TR: 2017 07 20 CFPv2 TODO CHECK FOR MODE2
+                   IF(IUNIT(58) /= Z) THEN
+                       IF (CFPMODE /= ONE) CALL GWF2CFPM2FM(KKITER,KKSTP,KKPER,ICNVG)
+                   END IF
                    !
                    IF ( IUNIT(62) == Z ) THEN
                      IF(IUNIT(21) /= Z) CALL GWF2HFB7FM(IGRID)
@@ -886,7 +889,9 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
                    IF(IUNIT(48) /= Z) CALL GWF2BFH2FM(KKPER,KKSTP,KKITER,IGRID)
                    !
                    !--BARC**SOLVE MODE 1 PIPE FLOW EQUATIONS
-                   IF(IUNIT(58) /= Z) CALL GWF2CFP1M1FM(KKITER,KKPER,KKSTP,1)  !TR: 2017 07 20 CFPv2
+                   IF(IUNIT(58) /= Z) THEN
+                       IF (CFPMODE /= TWO) CALL GWF2CFP1M1FM(KKITER,KKPER,KKSTP,1)
+                   END IF
                    !
                    !-----------------ADJUST HCOF AND RHS IF LGR IS ACTIVE
                    !
@@ -976,8 +981,11 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
                    !
                    !7C2C---IF CONVERGENCE CRITERION HAS BEEN MET STOP ITERATING.
                    !
-                   IF(IUNIT(58) /= Z .AND. ICNVG == ONE) THEN                  !TR: 2017 07 20 CFOPv2
-                       IF (CFPMODE == 2 .AND. CFP_ICFPCNVG /= ONE) ICNVG = Z     !TR: 2017 07 20 CFOPv2 !TR: 2011 10 14 JUST DO THIS FOR CFPM2
+                   IF(IUNIT(58) /= Z .AND. ICNVG == ONE) THEN
+                       IF (CFPMODE == TWO .AND. CFP_ICFPCNVG == Z) THEN
+                          ICNVG = Z
+                          CFP_ICFPCNVG = ONE  ! Flag to indicate solving for turbulent flow
+                       END IF
                    ENDIF
                    !
                    IF (ICNVG == ONE) EXIT FM_LOOP
@@ -1005,7 +1013,9 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
                 !  TO ADJUST THE CONDUIT HEADS TO THE HEADS IN THE FISSURED SYSTEM
                 !  AFTER THE LAST MODFLOW-ITERATION
                 !
-                IF(IUNIT(58) /= Z) CALL GWF2CFP1M1FM(KKITER,KKPER,KKSTP,2)    !TR: 2017 09 13 FINAL CFP call
+                IF(IUNIT(58) /= Z) THEN
+                    IF (CFPMODE /= TWO) CALL GWF2CFP1M1FM(KKITER,KKPER,KKSTP,2)    !TR: 2017 09 13 FINAL CFP call
+                END IF
                 !
                 IF(IUNIT(62) /= Z ) CALL GWF2UPWUPDATE(2,Igrid)
                 !
@@ -1211,7 +1221,12 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
               !BARC**ADD THESE
               !BIRK----EXCHANGE BUDGET OF CONDUIT AND FISSURED SYSTEM
               !
-              IF(IUNIT(58) /= Z) CALL GWF2CFP1BD(KKPER,KKSTP,IUNIT(59),MSUM) !TR: 2017 07 20 CFPv2
+              IF(IUNIT(58) /= Z) THEN
+                  IF (CFPMODE /= TWO) CALL GWF2CFP1BD(KKPER,KKSTP,IUNIT(59),MSUM) !TR: 2017 07 20 CFPv2
+                  IF (CFPMODE /= ONE) THEN
+                      IF(KKSTP == NSTP(KPER)) CALL GWF2CFPM2_OC(KKPER)  ! Only write at end of Stress Period
+                  END IF
+              END IF
               !LMT
               !LMT----CALL LINK-MT3DMS SUBROUTINES TO SAVE FLOW-TRANSPORT LINK FILE
               !LMT----FOR USE BY MT3DMS FOR TRANSPORT SIMULATION
@@ -1409,6 +1424,7 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
       IF(IUNIT(54) /= Z) CALL GWF2SUB7DA(IGRID)
       IF(IUNIT(55) /= Z) CALL GWF2UZF1DA(IGRID)
       IF(IUNIT(57) /= Z) CALL GWF2SWT7DA(IGRID)
+      IF(IUNIT(58) /= Z) CALL CFP_DEALLOCATE(IGRID)
       IF(IUNIT(64) /= Z) CALL GWF2SWR7DA(IGRID)  !SWR - JDH
       IF(IUNIT(65) /= Z) CALL GWF2SWI2DA(IGRID)  !SW1 - JDH
       IF(IUNIT(66) /= Z) CALL GWF2AG7DA()
