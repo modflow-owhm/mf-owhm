@@ -14,7 +14,8 @@ C
 C
       USE CONSTANTS, ONLY: Z
       USE CFPMODULE, ONLY:MODE, TURB_FR, TURB_FF, TURB_FV, TL_OUT, 
-     +                    NCL, CL
+     +                    NCL, CL, 
+     +                    CFP_OUT_DIRECTORY, TURBLAM
       USE GLOBAL, ONLY:NCOL, NROW, NLAY
       IMPLICIT NONE
 C
@@ -22,13 +23,17 @@ C--ARGUMENTS
       INTEGER, INTENT(IN) :: KKPER
 C
 C--LOCAL VARIABLES
-      INTEGER I, IC, J
+      INTEGER I, IC, J, IU
 C
       IF ( MODE.EQ.1 ) RETURN
 C 
 C--BARC**ENDIF FOR WORK DONE ONLY AT END OF FIRST STRESS PERIOD.
-      IF ( KKPER.EQ.1 ) OPEN (UNIT=999, FILE='TURBLAM.TXT',             
-     +                        STATUS='UNKNOWN')
+      IF ( KKPER.EQ.1 ) THEN
+          CALL TURBLAM%OPEN(CFP_OUT_DIRECTORY//'TURBLAM.TXT')
+      END IF
+!      IF ( KKPER.EQ.1 ) OPEN (UNIT=999, FILE='TURBLAM.TXT',             
+!     +                        STATUS='UNKNOWN')
+      IU = TURBLAM%IU
 C 
 C--BARC**INITIALIZE**
       TL_OUT = Z
@@ -79,10 +84,10 @@ C--BARC**FLOWV,R,F = TURB
 C 
 C--BARC**WRITE OUT ITURB CODES
       DO IC = 1, NCL
-        WRITE (999, '(A13,I3,1X,A5,I3,1X,A14)') 'STRESS PERIOD', KKPER, 
+        WRITE (IU, '(A13,I3,1X,A5,I3,1X,A14)') 'STRESS PERIOD', KKPER, 
      +         'LAYER', CL(IC), 'TURBULENT CODE'
         DO I = 1, NROW
-          WRITE (999, '(5000I3)') (TL_OUT(J,I,CL(IC)), J=1, NCOL)
+          WRITE (IU, '(5000I3)') (TL_OUT(J,I,CL(IC)), J=1, NCOL)
         ENDDO
       ENDDO
 C
@@ -104,14 +109,17 @@ C  UPDATES BY THOMAS.REIMANN@TU-DRESDEN.DE
 C  2012 11 29 ADDED MATRIX HEAD IN NODE OUTPUT // 2014 02 20 CADS
 C  RECHARGE
 C
-      USE CONSTANTS, ONLY: Z
+      USE CONSTANTS,         ONLY: Z, TRUE
+      USE NUM2STR_INTERFACE, ONLY: NUM2STR
       USE CFPMODULE, ONLY:NNOD, QBDIR, QTUB, TSNODE, TSTUBE, B_MAT,     
      +    QMAT, QFIX, CON_DATA, TUB_REYNOLD, MXNODE, MXTUBE, NOTSNO,    
      +    NOTSTU, PFPSFLOW, NODEBOT, DTUBE, KTSNO, KTSTU, TAUI,         !TR: 2012 06 08 REPLACED NSTOR BY PFPSFLOW
      +    QFHLQ, CADSFLOW, QWELL, NBR, QCYLQ, CYFLOW, QLH, NCOUNT,      !TR: 2012 05 15 ADDED FHLQ, CADSFLOW, WELL; 2012 11 29 NBR FOR MATRIX HEAD OUTPUT / 2013 03 14 CAUCHY / 2013 03 25 LH // NCOUNT / TCOUNT GLOBAL
      +    TCOUNT, KTSTSAN, NOTSTSAN, TSAN_FLG, KTSTSAT, NOTSTSAT,       !TR: 2013 08 13 TSAN
-     +    TSAT_FLG, QSDIR,IWELL, CWC_WELL                               !TR: 2013 08 13 TSAT // 2014 02 20 CADS RECHARGE // 2016 10 11 CWC
-C
+     +    TSAT_FLG, QSDIR,IWELL, CWC_WELL,                              !TR: 2013 08 13 TSAT // 2014 02 20 CADS RECHARGE // 2016 10 11 CWC
+     +    CFP_OUT_DIRECTORY, NODE_OUTPUT_FILES, TUBE_OUTPUT_FILES
+      
+
       USE GLOBAL, ONLY:IOUT, HNEW                                       !TR: 2012 11 29 ADDED HNEW FOR MATRIX HEAD OUTPUT
       USE GWFBASMODULE, ONLY:TOTIM
 C
@@ -129,26 +137,34 @@ C
 C--TIME SERIES OUTPUT NODES
       IF ( NOTSNO.EQ.KTSNO ) THEN
         KTSNO = Z
-        NCOUNT = Z
+        !NCOUNT = Z
         DO N = 1, MXNODE
           HWELL = 0.0                                                   !TR: 2016 10 11 INI
           IC = NBR(N, 2)                                                !TR: 2012 11 29 ADDED HNEW MATRIX HEAD OUTPUT
           IR = NBR(N, 3)                                                !TR: 2012 11 29 ADDED HNEW MATRIX HEAD OUTPUT
           IL = NBR(N, 4)                                                !TR: 2012 11 29 ADDED HNEW MATRIX HEAD OUTPUT
           IF ( TSNODE(N).NE.Z ) THEN
-            NCOUNT = NCOUNT + 1
-            WRITE (FNO, FMT='(I8.8)') N
-            FNAME = 'NODE'//FNO//'.out'
-            FUNIT = 200 + NCOUNT                                        
+            !NCOUNT = NCOUNT + 1
+            !WRITE (FNO, FMT='(I8.8)') N
+            !FNAME = 'NODE'//FNO//'.out'
+            !FUNIT = 200 + NCOUNT                                        
             IF ( TSNODE(N).GT.Z ) THEN
               TSNODE(N) = -1
-              OPEN (FUNIT, FILE=FNAME, STATUS='UNKNOWN', ERR=100)
-              WRITE (IOUT, *) 'TIME SERIES OUTPUT IN FILE ', FNAME
+!              OPEN (FUNIT, FILE=FNAME, STATUS='UNKNOWN', ERR=100)
+              ALLOCATE(NODE_OUTPUT_FILES(N)%FL)
+              CALL NODE_OUTPUT_FILES(N)%FL%OPEN(
+     +             CFP_OUT_DIRECTORY//'NODE'//NUM2STR(N,4,TRUE)//'.out',
+     +             SAVE_FNAME=TRUE)
+              FUNIT = NODE_OUTPUT_FILES(N)%FL%IU
+              WRITE (IOUT, *) 'TIME SERIES OUTPUT IN FILE ', 
+     +                        NODE_OUTPUT_FILES(N)%FL%FNAME
               IF(IWELL(N).EQ.Z)THEN                                       !TR: 2016 10 11 
                 WRITE (FUNIT, 9001)                                     !TR: 2016 10 11 
               ELSE                                                      !TR: 2016 10 11 
                 WRITE (FUNIT, 9011)
               ENDIF                                                     !TR: 2016 10 11 
+            ELSE
+              FUNIT = NODE_OUTPUT_FILES(N)%FL%IU
             ENDIF
 C
 C--FOR WELLS                                                            !TR: 2016 10 11 
@@ -215,14 +231,23 @@ C--TIME SERIES OUTPUT TUBES
         DO T = 1, MXTUBE
           IF ( TSTUBE(T).NE.Z ) THEN
             TCOUNT = TCOUNT + 1
-            WRITE (FNO, FMT='(I8.8)') T
-            FNAME = 'TUBE'//FNO//'.out'
-            FUNIT = 200 + NCOUNT + TCOUNT
+            !WRITE (FNO, FMT='(I8.8)') T
+            !FNAME = 'TUBE'//FNO//'.out'
+            !FUNIT = 200 + NCOUNT + TCOUNT
             IF ( TSTUBE(T).GT.Z ) THEN
               TSTUBE(T) = -1
-              OPEN (FUNIT, FILE=FNAME, STATUS='UNKNOWN', ERR=100)
-              WRITE (IOUT, *) 'TIME SERIES OUTPUT IN FILE ', FNAME
+              !OPEN (FUNIT, FILE=FNAME, STATUS='UNKNOWN', ERR=100)
+              ALLOCATE(TUBE_OUTPUT_FILES(T)%FL)
+              CALL TUBE_OUTPUT_FILES(T)%FL%OPEN(
+     +             CFP_OUT_DIRECTORY//'TUBE'//NUM2STR(T,4,TRUE)//'.out',
+     +             SAVE_FNAME=TRUE)
+              FUNIT = TUBE_OUTPUT_FILES(T)%FL%IU
+              WRITE (IOUT, *) 'TIME SERIES OUTPUT IN FILE ', 
+     +                        TUBE_OUTPUT_FILES(T)%FL%FNAME
+              
               WRITE (FUNIT, 9003)
+            ELSE
+              FUNIT = TUBE_OUTPUT_FILES(T)%FL%IU
             ENDIF
 C
 C--BARC**ADD TAUI

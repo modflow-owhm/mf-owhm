@@ -11,13 +11,24 @@ C               BCF, LPF OR HUF FOR MODE 2;
 C     **MODE=3, PIPES AND LAYERS
 C
 C     ******************************************************************
+      USE GENERIC_OUTPUT_FILE_INSTRUCTION,  ONLY: GENERIC_OUTPUT_FILE
       IMPLICIT NONE
+      PRIVATE :: GENERIC_OUTPUT_FILE
       INTEGER, PARAMETER :: NNOD = 6
       !DOUBLE PRECISION, PARAMETER :: PII = 3.141592654D0
       !DOUBLE PRECISION, PARAMETER :: TWOPII = 2.0D0*3.141592654D0
       DOUBLE PRECISION, PARAMETER :: ONE8TH = 1.0D0/8.0D0!, DOS = 2.0D0
       !DOUBLE PRECISION, PARAMETER :: NEARZERO = 1.0D-30, DZ = 0.0D0
       DOUBLE PRECISION, PARAMETER :: CM2INCH = 3.2804D0
+C
+C     GENERIC_OUTPUT_FILE for NODE and TUBE output
+      TYPE CFP_OUTPUT_FILE
+          TYPE(GENERIC_OUTPUT_FILE), ALLOCATABLE:: FL
+      END TYPE
+      TYPE(CFP_OUTPUT_FILE),DIMENSION(:),SAVE,POINTER::NODE_OUTPUT_FILES
+      TYPE(CFP_OUTPUT_FILE),DIMENSION(:),SAVE,POINTER::TUBE_OUTPUT_FILES
+      TYPE(GENERIC_OUTPUT_FILE),SAVE,POINTER::TURBLAM
+      CHARACTER(:), POINTER :: CFP_OUT_DIRECTORY
 C
 C--VARIABLES NEEDED FOR MODE 1:
       INTEGER, SAVE, POINTER :: MODE, MXNODE, MXTUBE, NBR_LAY, ITERS
@@ -214,7 +225,13 @@ C     ALLOCATE AND READ DATA FOR CONDUIT FLOW PROCESS
 C     MARCH 2007 VERSION 1.0
 C     ******************************************************************
 C
-      USE CONSTANTS, ONLY: TRUE,FALSE,Z,ONE,NEG,NINER,DZ,DOS,NEARZERO_30
+      USE CONSTANTS, ONLY: TRUE,FALSE,Z,ONE,NEG,NINER,DZ,DOS,
+     +                     NEARZERO_30, NL
+      USE PARSE_WORD_INTERFACE, ONLY: PARSE_WORD, PARSE_WORD_UP
+      USE FILE_IO_INTERFACE,    ONLY: READ_TO_DATA
+      USE STRINGS,              ONLY: GET_INTEGER, GET_NUMBER, GET_WORD
+      USE NUM2STR_INTERFACE,    ONLY: NUM2STR
+      USE GENERIC_BLOCK_READER_INSTRUCTION, ONLY: GENERIC_BLOCK_READER
       USE GLOBAL, ONLY:IOUT, NCOL, NROW, NLAY, LENUNI, ITMUNI,BOTM,DELR
       USE CFPMODULE
       IMPLICIT NONE
@@ -236,6 +253,11 @@ C--LOCAL VARIABLES
       DOUBLE PRECISION BC_DUMMY1, BC_DUMMY2                             !TR: 2012 05 09 FHLQ / DUMMYS FOR BC_DATA
       INTEGER FHLQ_COUNT, WELL_COUNT, CY_COUNT, LH_COUNT                !TR: 2012 05 09 FHLQ / WELL / FHLQ_COUNT / WELL_COUNT = COUNTER TO CHECK FHLQ /WELL BC INPUT / 2013 03 13 CAUCHY / 2013 03 22 LH / 2013 04 03  WELL TD
       REAL,DIMENSION(:,:),ALLOCATABLE:: ARR
+      INTEGER :: LLOC, ISTART, ISTOP
+      TYPE(GENERIC_BLOCK_READER):: BL
+      LOGICAL :: FBC_FOUND
+      LOGICAL :: CADS_FOUND
+      LOGICAL :: CADSML_FOUND
 C
 C--BARC**FOR CFPMODE 2 U2DREL
       CHARACTER(24) ANAME(5)
@@ -286,6 +308,9 @@ C--INITIALIZE
       L_ABS = DZ                                                       !TR: 2014 11 18 L_ABS
       NO_L_NTS = Z                                                     !TR: 2018 05 22 COUNTER FOR LISTING OUTPUT
       L_NTS = ONE                                                      !TR: 2018 05 22 NUMBER OF TIME STEPS FOR LISTING OUTPUT (CALL FREQUENCY OF NWBOUT AND FLOW_OUTPUT)
+      FBC_FOUND    = FALSE
+      CADS_FOUND   = FALSE
+      CADSML_FOUND = FALSE
 C
 C--CBARC**FOR BUDGETS AND OUTPUT CONTROL
       ALLOCATE (BUD_SOURCE, BUD_SINK, BUD_MATIN, BUD_MATOUT,            !TR: 2012 04 24 BUD_QBDIR REMOVED
@@ -337,13 +362,66 @@ C
 C--BARC**WRITE MESSAGE TO OUTPUT IOUT
       WRITE (IOUT, *)
       WRITE (IOUT, *) 'CFP1AR READING FROM UNIT', INUNIT
+
+      ALLOCATE(CFP_OUT_DIRECTORY, SOURCE="./")
+C
 C 
 C--BARC**READ MODE TO DETERMINE WHAT IS READ FROM CFP FILE.
 C--ELK**READ CFP INPUT FILE CDUMMY REQUIRED COMMENT LINE FOR SIMULATION
-      READ (INUNIT, *) CDUMMY
+      CALL READ_TO_DATA(CDUMMY, INUNIT, IOUT, IOUT)
+C
+      CALL BL%LOAD(INUNIT,IOUT,CDUMMY)
+      
+      IF(BL%NAME == 'OPTION' .OR. BL%NAME == 'OPTIONS' ) THEN
+        !
+        WRITE(IOUT,'(/,1X,A)') 'PROCESSING CFP OPTION BLOCK'
+        !
+        CALL BL%START()
+        DO I=ONE, BL%NLINE
+          LLOC = ONE
+          CALL PARSE_WORD_UP(BL%LINE,LLOC,ISTART,ISTOP)
+          !
+          SELECT CASE (BL%LINE(ISTART:ISTOP))
+          CASE('FBC')
+              WRITE(IOUT,'(6x, A)') "FBC option found"
+              FBC_FOUND = TRUE
+          CASE('CADS')
+              WRITE(IOUT,'(6x, A)') "CADS option found"
+              CADS_FOUND = TRUE
+          CASE('CADSML')
+              WRITE(IOUT,'(6x, A)') "CADSML option found"
+              CADSML_FOUND = TRUE
+          CASE('OUT_DIRECTORY', 'OUT_DIR','DIRECTORY')
+            !
+            WRITE(IOUT,'(6x,2A)') BL%LINE(ISTART:ISTOP), " option found"
+            !
+            CALL PARSE_WORD(BL%LINE,LLOC,ISTART,ISTOP)
+            IF( BL%LINE(ISTART:ISTOP) /= '' ) THEN
+              DEALLOCATE(CFP_OUT_DIRECTORY, STAT=J)
+              IF( BL%LINE(ISTOP:ISTOP)=='/' .OR. 
+     +            BL%LINE(ISTOP:ISTOP)=='\' )THEN
+                  ALLOCATE(CFP_OUT_DIRECTORY, 
+     +                     SOURCE=BL%LINE(ISTART:ISTOP))
+              ELSE
+                  ALLOCATE(CFP_OUT_DIRECTORY, 
+     +                     SOURCE=BL%LINE(ISTART:ISTOP)//'/')
+              END IF
+            END IF
+            
+            WRITE(IOUT,'(10x, 3A)') 
+     +            'CFP node*.out and tube*.out will be placed in: "',
+     +            CFP_OUT_DIRECTORY,'"'
+          END SELECT
+          CALL BL%NEXT()
+        END DO
+      END IF
 C
 C--ELK**READ CFP INPUT DATA TYPE 0 IN REPORT DOCUMENTATION
-      READ (INUNIT, *) MODE
+      LLOC = ONE
+      CALL GET_INTEGER(CDUMMY,LLOC,ISTART,ISTOP,IOUT,INUNIT,MODE,
+     +     MSG='Failed to read CFP "MODE". Note input now '//
+     +         'expects comments to be preceded by a "#", '//
+     +         'so you may have an input mismatch.')
       CFPMODE = MODE                                                    !TR: 2009 11 10 CFPMODE
 C
 C--BARC**SKIP PIPE ALLOCATES AND READS IF MODE=2
@@ -355,34 +433,68 @@ C--BARC**READ WHAT IS NEEDED FOR PIPES
         WRITE (IOUT, *) '---------------------------------'
 C
 C--ELK**READ CFP INPUT FILE DATA TYPE 1 AND 2 REQUIRED COMMENT LINES
-        READ (INUNIT,'(A)') CDUMMY
+        CALL READ_TO_DATA(CDUMMY, INUNIT, IOUT, IOUT)
 C
 C--CHECK IF FURTHER BOUNDARY DATA ARE ACTIVE - HERE THE FIRST COMMENT 
 C  LINE IS USED; CHECK FOR FBC PARAMETERS AND SET FLAGS        
-        CALL CHECKPARA(CDUMMY,"FBC",IOUT,FBC_FLG)        
-        CALL CHECKPARA(CDUMMY,"CADS",IOUT,CADS_FLG)    
+        CALL CHECKPARA(CDUMMY,"FBC",   IOUT,FBC_FLG   )        
+        CALL CHECKPARA(CDUMMY,"CADS",  IOUT,CADS_FLG  )    
         CALL CHECKPARA(CDUMMY,"CADSML",IOUT,CADSML_FLG)                 !TR: 2013 06 28 CADSML
-        IF (CADS_FLG.EQ.1.AND.CADSML_FLG.EQ.1) CALL USTOP('BOTH CADS AND!TR: 2013 06 28 CADSML
-     + CADSML ARE ACTIVE - DEACTIVATE ONE - STOP')
+        
+        IF (FBC_FLG + CADS_FLG + CADSML_FLG > Z) THEN                   ! Found FBC_FLG, CADS_FLG, or CADSML_FLG
+            CALL READ_TO_DATA(CDUMMY, INUNIT, IOUT, IOUT)
+        END IF
+        
+        IF( FBC_FOUND    ) FBC_FLG    = ONE  ! If defined in option block
+        IF( CADS_FOUND   ) CADS_FLG   = ONE
+        IF( CADSML_FOUND ) CADSML_FLG = ONE
+        
+        IF (CADS_FLG + CADSML_FLG > ONE) THEN
+            CALL USTOP('BOTH CADS AND ' //
+     +                 'CADSML ARE ACTIVE - DEACTIVATE ONE')
+        END IF
+        !
+        IF (FBC_FLG    > Z) WRITE(IOUT, '(A)') " FBC    OPTION ENABLED"
+        IF (CADS_FLG   > Z) WRITE(IOUT, '(A)') " CADS   OPTION ENABLED"
+        IF (CADSML_FLG > Z) WRITE(IOUT, '(A)') " CADSML OPTION ENABLED"
 C 
 C--BARC&ELK**READ CFP INPUT FILE DATA TYPE 3 MXNODE,MXTUBE,NBR_LAY
 C--BARC**SET NNOD, THIS IS THE MAXIMUM # OF CONNECTING NODES (3-D)
-        READ (INUNIT, *) CDUMMY    
-        READ (INUNIT, *) MXNODE, MXTUBE, NBR_LAY     
+
+      LLOC = ONE
+      CALL GET_INTEGER(CDUMMY,LLOC,ISTART,ISTOP,IOUT,INUNIT,MXNODE,
+     +     MSG='CPF input line expects "NNODES, NPIPES, NLAYERS"'//NL//
+     +         'Failed to read "NNODES" (mxnode)'//NL//
+     +         'Note CFP input now expects comments '//
+     +         'to be preceded by a "#", '//
+     +         'so you may have an input mismatch.')
+      CALL GET_INTEGER(CDUMMY,LLOC,ISTART,ISTOP,IOUT,INUNIT,MXTUBE,
+     +     MSG='CPF input line expects "NNODES, NPIPES, NLAYERS"'//NL//
+     +         'Failed to read "NPIPES"'//NL//
+     +         'Note CFP input now expects comments '//
+     +         'to be preceded by a "#", '//
+     +         'so you may have an input mismatch.')
+      CALL GET_INTEGER(CDUMMY,LLOC,ISTART,ISTOP,IOUT,INUNIT,NBR_LAY,
+     +     MSG='CPF input line expects "NNODES, NPIPES, NLAYERS"'//NL//
+     +         'Failed to read "NLAYERS"'//NL//
+     +         'Note CFP input now expects comments '//
+     +         'to be preceded by a "#", '//
+     +         'so you may have an input mismatch.')
         WRITE (IOUT, 9001) MXNODE
         WRITE (IOUT, 9009) MXTUBE
         WRITE (IOUT, 9002) NBR_LAY
 C 
 C--SEBA--TEST IF # OF LAYERS IN MODFLOW AND CONDUIT IS THE SAME
         IF ( NLAY.NE.NBR_LAY ) THEN
-          PRINT *,                                                      
-     +    'THE NUMBER OF LAYERS IN MODFLOW AND CFP FILE IS NOT THE SAME'
-          PRINT *, '  PROGRAM STOPS'
-          STOP
+            CALL USTOP('THE NUMBER OF LAYERS IN MODFLOW '//
+     +                 'AND CFP FILE IS NOT THE SAME')
         ENDIF
 C        
-C--BARC**ALLOCATE MODE 1 ARRAYS AND VARIABLES THAT NEED MXNODE,MXTUBE,
-C  NBR_LAY
+C--BARC**ALLOCATE MODE 1 ARRAYS AND VARIABLES THAT NEED MXNODE,MXTUBE,NBR_LAY 
+C
+        ALLOCATE(NODE_OUTPUT_FILES(MXNODE))
+        ALLOCATE(TUBE_OUTPUT_FILES(MXTUBE))
+      
         ALLOCATE (NBR(MXNODE,4+2*NNOD))
         ALLOCATE (NODETOP(MXNODE), NODEBOT(MXNODE))
 !       ALLOCATE (LAY_THICK(NBR_LAY))
@@ -1361,7 +1473,245 @@ C--READ NOTSTSAT
 
       END SUBROUTINE CFPM1OCAR
 C
+
+      SUBROUTINE CFP_DEALLOCATE(IGRID)
+C  Deallocate CFP DATA
+        USE CFPMODULE
+        integer, intent(in):: IGRID
+        integer:: I
 C
+        if(IGRID /= 1) RETURN
+C
+        DEALLOCATE( MODE             , stat=I )
+        DEALLOCATE( MXNODE           , stat=I )
+        DEALLOCATE( MXTUBE           , stat=I )
+        DEALLOCATE( NBR_LAY          , stat=I )
+        DEALLOCATE( ITERS            , stat=I )
+        DEALLOCATE( ACTIVENODE       , stat=I )
+        DEALLOCATE( ITERA_MAX        , stat=I )
+        DEALLOCATE( LSURFACEDEP      , stat=I )
+        DEALLOCATE( P_NR             , stat=I )
+        DEALLOCATE( NBR              , stat=I )
+        DEALLOCATE( NCOND            , stat=I )
+        DEALLOCATE( NOTSNO           , stat=I )
+        DEALLOCATE( NOTSTU           , stat=I )
+        DEALLOCATE( NNODES           , stat=I )
+        DEALLOCATE( NTUBES           , stat=I )
+        DEALLOCATE( TSNO             , stat=I )
+        DEALLOCATE( TSTU             , stat=I )
+        DEALLOCATE( NTSAN            , stat=I )
+        DEALLOCATE( NOTSTSAN         , stat=I )
+        DEALLOCATE( TSA_FUNIT        , stat=I )
+        DEALLOCATE( NCOUNT           , stat=I )
+        DEALLOCATE( TCOUNT           , stat=I )
+        DEALLOCATE( NTSAT            , stat=I )
+        DEALLOCATE( NOTSTSAT         , stat=I )
+        DEALLOCATE( L_NTS            , stat=I )
+        DEALLOCATE( NO_L_NTS         , stat=I )
+        DEALLOCATE( TSNODE           , stat=I )
+        DEALLOCATE( TSTUBE           , stat=I )
+        DEALLOCATE( TSAN             , stat=I )
+        DEALLOCATE( TSAN_FUNIT       , stat=I )
+        DEALLOCATE( TSAT             , stat=I )
+        DEALLOCATE( TSAT_FUNIT       , stat=I )
+        DEALLOCATE( TSA_FLG          , stat=I )
+        DEALLOCATE( TSAN_FLG         , stat=I )
+        DEALLOCATE( TSAT_FLG         , stat=I )
+        DEALLOCATE( NU               , stat=I )
+        DEALLOCATE( TC               , stat=I )
+        DEALLOCATE( VISCTC           , stat=I )
+        DEALLOCATE( VNUTC            , stat=I )
+        DEALLOCATE( EPSILON          , stat=I )
+        DEALLOCATE( G                , stat=I )
+        DEALLOCATE( CFPRELAX         , stat=I )
+        DEALLOCATE( L_ABS            , stat=I )
+        DEALLOCATE( GEOHIGHT         , stat=I )
+        DEALLOCATE( NODETOP          , stat=I )
+        DEALLOCATE( NODEBOT          , stat=I )
+        DEALLOCATE( BEGHEAD          , stat=I )
+        DEALLOCATE( TORTUOS          , stat=I )
+        DEALLOCATE( ROUGHNESS        , stat=I )
+        DEALLOCATE( B                , stat=I )
+        DEALLOCATE( B_MAT            , stat=I )
+        DEALLOCATE( B_MAT_O          , stat=I )
+        DEALLOCATE( B_MAT_P          , stat=I )
+        DEALLOCATE( B_MAT_OTR        , stat=I )
+        DEALLOCATE( MOD2             , stat=I )
+        DEALLOCATE( MODD             , stat=I )
+        DEALLOCATE( CON_DATA         , stat=I )
+        DEALLOCATE( ITUBE            , stat=I )
+        DEALLOCATE( DTUBE            , stat=I )
+        DEALLOCATE( NODE_LOCA        , stat=I )
+        DEALLOCATE( TOP              , stat=I )
+        DEALLOCATE( HC               , stat=I )
+        DEALLOCATE( IFLAG_RECH       , stat=I )
+        DEALLOCATE( QCONDIR          , stat=I )
+        DEALLOCATE( QCONDIROLD       , stat=I )
+        DEALLOCATE( QBDIR            , stat=I )
+        DEALLOCATE( QBDIROLD         , stat=I )
+        DEALLOCATE( QBDIRSAVE        , stat=I )
+        DEALLOCATE( QCDSDIR          , stat=I )
+        DEALLOCATE( QCDSDIROLD       , stat=I )
+        DEALLOCATE( QSDIR            , stat=I )
+        DEALLOCATE( QSDIROLD         , stat=I )
+        DEALLOCATE( QSDIRSAVE        , stat=I )
+        DEALLOCATE( KONV             , stat=I )
+        DEALLOCATE( FTURB            , stat=I )
+        DEALLOCATE( TURB             , stat=I )
+        DEALLOCATE( FX0              , stat=I )
+        DEALLOCATE( TUB_REYNOLD      , stat=I )
+        DEALLOCATE( TAUI             , stat=I )
+        DEALLOCATE( HEAD_SAVE        , stat=I )
+        DEALLOCATE( INDEX1           , stat=I )
+        DEALLOCATE( EQ_MAT           , stat=I )
+        DEALLOCATE( KTSNO            , stat=I )
+        DEALLOCATE( KTSTU            , stat=I )
+        DEALLOCATE( KTSTSAN          , stat=I )
+        DEALLOCATE( KTSTSAT          , stat=I )
+        DEALLOCATE( BUD_SOURCE       , stat=I )
+        DEALLOCATE( BUD_SINK         , stat=I )
+        DEALLOCATE( BUD_MATIN        , stat=I )
+        DEALLOCATE( BUD_MATOUT       , stat=I )
+        DEALLOCATE( DIFF_TOT         , stat=I )
+        DEALLOCATE( BUD_QBDIRIN      , stat=I )
+        DEALLOCATE( BUD_QBDIROUT     , stat=I )
+        DEALLOCATE( BUD_QSDIRIN      , stat=I )
+        DEALLOCATE( BUD_QSDIROUT     , stat=I )
+        DEALLOCATE( BUD_CADSIN       , stat=I )
+        DEALLOCATE( BUD_CADSOUT      , stat=I )
+        DEALLOCATE( BUD_CDSCONIN     , stat=I )
+        DEALLOCATE( BUD_CDSCONOUT    , stat=I )
+        DEALLOCATE( BUD_FHLQIN       , stat=I )
+        DEALLOCATE( BUD_FHLQOUT      , stat=I )
+        DEALLOCATE( BUD_WELLIN       , stat=I )
+        DEALLOCATE( BUD_WELLOUT      , stat=I )
+        DEALLOCATE( BUD_CYIN         , stat=I )
+        DEALLOCATE( BUD_CYOUT        , stat=I )
+        DEALLOCATE( BUD_CYLQIN       , stat=I )
+        DEALLOCATE( BUD_CYLQOUT      , stat=I )
+        DEALLOCATE( BUD_LHIN         , stat=I )
+        DEALLOCATE( BUD_LHOUT        , stat=I )
+        DEALLOCATE( BUD_STORAGE_IN   , stat=I )
+        DEALLOCATE( BUD_STORAGE_OUT  , stat=I )
+        DEALLOCATE( TOTAL_BUDGET     , stat=I )
+        DEALLOCATE( BUD_TOTAL_STEP   , stat=I )
+        DEALLOCATE( TS_IN_MAT        , stat=I )
+        DEALLOCATE( TS_OUT_MAT       , stat=I )
+        DEALLOCATE( TS_BUD_SINK      , stat=I )
+        DEALLOCATE( TS_BUD_SOURCE    , stat=I )
+        DEALLOCATE( TS_IN            , stat=I )
+        DEALLOCATE( TS_OUT           , stat=I )
+        DEALLOCATE( KU_IN            , stat=I )
+        DEALLOCATE( KU_OUT           , stat=I )
+        DEALLOCATE( TS_IN_QBDIR      , stat=I )
+        DEALLOCATE( TS_OUT_QBDIR     , stat=I )
+        DEALLOCATE( TS_IN_QSDIR      , stat=I )
+        DEALLOCATE( TS_OUT_QSDIR     , stat=I )
+        DEALLOCATE( TS_IN_CADS       , stat=I )
+        DEALLOCATE( TS_OUT_CADS      , stat=I )
+        DEALLOCATE( TS_IN_CDSCON     , stat=I )
+        DEALLOCATE( TS_OUT_CDSCON    , stat=I )
+        DEALLOCATE( TS_IN_FHLQ       , stat=I )
+        DEALLOCATE( TS_OUT_FHLQ      , stat=I )
+        DEALLOCATE( TS_IN_WELL       , stat=I )
+        DEALLOCATE( TS_OUT_WELL      , stat=I )
+        DEALLOCATE( TS_IN_CY         , stat=I )
+        DEALLOCATE( TS_OUT_CY        , stat=I )
+        DEALLOCATE( TS_IN_CYLQ       , stat=I )
+        DEALLOCATE( TS_OUT_CYLQ      , stat=I )
+        DEALLOCATE( TS_IN_LH         , stat=I )
+        DEALLOCATE( TS_OUT_LH        , stat=I )
+        DEALLOCATE( TS_IN_PFPS       , stat=I )
+        DEALLOCATE( TS_OUT_PFPS      , stat=I )
+        DEALLOCATE( DIFF_TS          , stat=I )
+        DEALLOCATE( TOT_FLOW         , stat=I )
+        DEALLOCATE( TS_TOT_FLOW      , stat=I )
+        DEALLOCATE( PFPSFLOW         , stat=I )
+        DEALLOCATE( PFPS2            , stat=I )
+        DEALLOCATE( NSTOR            , stat=I )
+        DEALLOCATE( QMAT             , stat=I )
+        DEALLOCATE( MATFLOW          , stat=I )
+        DEALLOCATE( QDIR             , stat=I )
+        DEALLOCATE( QFIX             , stat=I )
+        DEALLOCATE( NODIN            , stat=I )
+        DEALLOCATE( NODOUT           , stat=I )
+        DEALLOCATE( QTUBIN           , stat=I )
+        DEALLOCATE( QTUBOUT          , stat=I )
+        DEALLOCATE( QTUB             , stat=I )
+        DEALLOCATE( ROF              , stat=I )
+        DEALLOCATE( NCL              , stat=I )
+        DEALLOCATE( ICFPCNVG         , stat=I )
+        DEALLOCATE( CL               , stat=I )
+        DEALLOCATE( TWATER           , stat=I )
+        DEALLOCATE( DENSWA           , stat=I )
+        DEALLOCATE( VISCWA           , stat=I )
+        DEALLOCATE( FEEXP            , stat=I )
+        DEALLOCATE( KLAM_CR          , stat=I )
+        DEALLOCATE( KLAM_CC          , stat=I )
+        DEALLOCATE( KLAM_CV          , stat=I )
+        DEALLOCATE( TURB_FR          , stat=I )
+        DEALLOCATE( TURB_FF          , stat=I )
+        DEALLOCATE( TURB_FV          , stat=I )
+        DEALLOCATE( TL_OUT           , stat=I )
+        DEALLOCATE( CADS_FLG         , stat=I )
+        DEALLOCATE( CADSML_FLG       , stat=I )
+        DEALLOCATE( W_CADS           , stat=I )
+        DEALLOCATE( L_NODE           , stat=I )
+        DEALLOCATE( CADSFLOW         , stat=I )
+        DEALLOCATE( CADS2            , stat=I )
+        DEALLOCATE( CADSML2          , stat=I )
+        DEALLOCATE( CADSML2_P        , stat=I )
+        DEALLOCATE( CADSMLDAT        , stat=I )
+        DEALLOCATE( FBC_FLG          , stat=I )
+        DEALLOCATE( FHLQ_FLG         , stat=I )
+        DEALLOCATE( FHLQTD_FLG       , stat=I )
+        DEALLOCATE( FHLQTD_LINESMAX  , stat=I )
+        DEALLOCATE( FHLQTD_COUNT     , stat=I )
+        DEALLOCATE( Q_FH_LQ          , stat=I )
+        DEALLOCATE( QFHLQ            , stat=I )
+        DEALLOCATE( DFHLQ            , stat=I )
+        DEALLOCATE( IFHLQ            , stat=I )
+        DEALLOCATE( FHLQ_FLIP        , stat=I )
+        DEALLOCATE( FHLQTD_IN        , stat=I )
+        DEALLOCATE( FHLQTD_DAT       , stat=I )
+        DEALLOCATE( WELL_FLG         , stat=I )
+        DEALLOCATE( WELLTD_FLG       , stat=I )
+        DEALLOCATE( WELLTD_LINESMAX  , stat=I )
+        DEALLOCATE( WELLTD_COUNT     , stat=I )
+        DEALLOCATE( QWELL            , stat=I )
+        DEALLOCATE( CWC_WELL         , stat=I )
+        DEALLOCATE( IWELL            , stat=I )
+        DEALLOCATE( WELLTD_IN        , stat=I )
+        DEALLOCATE( WELLTD_DAT       , stat=I )
+        DEALLOCATE( CY_FLG           , stat=I )
+        DEALLOCATE( CYTD_FLG         , stat=I )
+        DEALLOCATE( CYTD_LINESMAX    , stat=I )
+        DEALLOCATE( CYTD_COUNT       , stat=I )
+        DEALLOCATE( HCY              , stat=I )
+        DEALLOCATE( CONDCY           , stat=I )
+        DEALLOCATE( CONDCYS          , stat=I )
+        DEALLOCATE( CYLQ             , stat=I )
+        DEALLOCATE( CYFLOW           , stat=I )
+        DEALLOCATE( QCYLQ            , stat=I )
+        DEALLOCATE( CY_FLIP          , stat=I )
+        DEALLOCATE( CYTD_IN          , stat=I )
+        DEALLOCATE( ICY              , stat=I )
+        DEALLOCATE( CYTD_DAT         , stat=I )
+        DEALLOCATE( LH_FLG           , stat=I )
+        DEALLOCATE( HLH              , stat=I )
+        DEALLOCATE( QLH              , stat=I )
+        DEALLOCATE( LH_FLIP          , stat=I )
+        DEALLOCATE( ILH              , stat=I )
+        DEALLOCATE( FHTD_FLG         , stat=I )
+        DEALLOCATE( FHTD_LINESMAX    , stat=I )
+        DEALLOCATE( FHTD_COUNT       , stat=I )
+        DEALLOCATE( FHTD_IN          , stat=I )
+        DEALLOCATE( FHTD_DAT         , stat=I )
+        DEALLOCATE( CFP_OUT_DIRECTORY, stat=I )
+        DEALLOCATE( NODE_OUTPUT_FILES, stat=I )
+        DEALLOCATE( TUBE_OUTPUT_FILES, stat=I )
+        DEALLOCATE( TURBLAM          , stat=I )
+      END SUBROUTINE
 C
 C
 C
