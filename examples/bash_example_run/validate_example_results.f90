@@ -38,8 +38,8 @@ implicit none
 DOUBLE PRECISION, PARAMETER:: HTOL = 0.02d0   ! Cumulative change tolerance (CumHCHG) High Tolerance
 DOUBLE PRECISION, PARAMETER:: PTOL = 0.30d0   ! Cumulative change tolerance (CumHCHG) Passing Tolerance
 DOUBLE PRECISION, PARAMETER:: ETOL = 10.0d0   ! Cumulative change tolerance (CumHCHG) for extended problems
-character(64), dimension(56):: utest
-character(64), dimension( 2):: etest  ! extra tests not meant for validation due long runtimes.
+character(128), dimension(60):: utest
+character( 64), dimension( 2):: etest  ! extra tests not meant for validation due long runtimes.
 character(16):: arg1
 integer:: i, n, iu1, iu2
 double precision:: ans1, ans2
@@ -102,6 +102,13 @@ utest(53) = "../mf-swr/output/SWRSample02_CumHCHG.txt"
 utest(54) = "../mf-swr/output/SWRSample03_CumHCHG.txt"
 utest(55) = "../mf-swr/output/SWRSample04_CumHCHG.txt"
 utest(56) = "../mf-swr/output/SWRSample05_CumHCHG.txt"
+
+utest(57) = "../mf-cfp/cfp_mode1_benchmark_examples/exch/output/cfp_bench_exch_CumHCHG.txt"
+utest(58) = "../mf-cfp/cfp_mode1_benchmark_examples/q_lam/output/cfp_bench_q_lam_CumHCHG.txt"
+utest(59) = "../mf-cfp/cfp_mode1_benchmark_examples/q_turb/output/cfp_bench_q_turb_CumHCHG.txt"
+utest(60) = "../mf-cfp/cfp_mode1_example/output/cfp_mode1_CumHCHG.txt"
+!utest(61) = "../mf-cfp/cfp_mode2_example/output/CumHCHG.txt"
+!utest(62) = "../mf-cfp/cfp_mode3_example/output/CumHCHG.txt"
 
 write(*,'(/,1x, A, 28x, 2x, A)') "File", "Test"
 write(*,'(A)') REPEAT('-', 45)

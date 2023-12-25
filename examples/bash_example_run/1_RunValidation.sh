@@ -78,43 +78,47 @@ then
    cd "$SHELLDIR"
    if [ "${multiThread}" = "F" ]
    then
-      echo "    MF_2005      test 1 of 7"
+      echo "    MF_2005      test 1 of 8"
       bash 2_RunAllTests_MF_2005.sh     "nopause"  $debug  > out1_MF_2005.txt
       
-      echo "    MF_2005_NWT  test 2 of 7"
+      echo "    MF_2005_NWT  test 2 of 8"
       bash 2_RunAllTests_MF_2005_NWT.sh "nopause"  $debug  > out2_MF_2005_NWT.txt
       
-      echo "    MF_NWT       test 3 of 7"
-      bash 2_RunAllTests_MF_NWT.sh      "nopause"  $debug  > out3_MF_NWT.txt
+      echo "    MF_CFP       test 3 of 8"
+      bash 2_RunAllTests_MF_CFP.sh      "nopause"  $debug  > out3_MF_CFP.txt
       
-      echo "    MF_OWHM      test 4 of 7"
-      bash 2_RunAllTests_MF_OWHM.sh     "nopause"  $debug  > out4_MF_OWHM.txt
+      echo "    MF_NWT       test 4 of 8"
+      bash 2_RunAllTests_MF_NWT.sh      "nopause"  $debug  > out4_MF_NWT.txt
       
-      echo "    MF_RIP       test 5 of 7"
-      bash 2_RunAllTests_MF_RIP.sh      "nopause"  $debug  > out5_MF_RIP.txt
+      echo "    MF_OWHM      test 5 of 8"
+      bash 2_RunAllTests_MF_OWHM.sh     "nopause"  $debug  > out5_MF_OWHM.txt
       
-      echo "    MF_SWI       test 6 of 7"
-      bash 2_RunAllTests_MF_SWI.sh      "nopause"  $debug  > out6_MF_SWI.txt
+      echo "    MF_RIP       test 6 of 8"
+      bash 2_RunAllTests_MF_RIP.sh      "nopause"  $debug  > out6_MF_RIP.txt
       
-      echo "    MF_SWR       test 7 of 7"
-      bash 2_RunAllTests_MF_SWR.sh      "nopause"  $debug  > out7_MF_SWR.txt
+      echo "    MF_SWI       test 7 of 8"
+      bash 2_RunAllTests_MF_SWI.sh      "nopause"  $debug  > out7_MF_SWI.txt
+      
+      echo "    MF_SWR       test 8 of 8"
+      bash 2_RunAllTests_MF_SWR.sh      "nopause"  $debug  > out8_MF_SWR.txt
    else
       trap "exit" INT TERM ERR
       trap "kill 0" EXIT
       
-      bash 2_RunAllTests_MF_2005.sh     "nopause"  $debug  > out1_MF_2005.txt     & echo "    MF_2005      test 1 of 7 -> Started"
-      bash 2_RunAllTests_MF_2005_NWT.sh "nopause"  $debug  > out2_MF_2005_NWT.txt & echo "    MF_2005_NWT  test 2 of 7 -> Started"
-      bash 2_RunAllTests_MF_NWT.sh      "nopause"  $debug  > out3_MF_NWT.txt      & echo "    MF_NWT       test 3 of 7 -> Started"
+      bash 2_RunAllTests_MF_2005.sh     "nopause"  $debug  > out1_MF_2005.txt     & echo "    MF_2005      test 1 of 8 -> Started"
+      bash 2_RunAllTests_MF_2005_NWT.sh "nopause"  $debug  > out2_MF_2005_NWT.txt & echo "    MF_2005_NWT  test 2 of 8 -> Started"
+      bash 2_RunAllTests_MF_CFP.sh      "nopause"  $debug  > out3_MF_CFP.txt      & echo "    MF_CFP       test 3 of 8 -> Started"
       wait
       echo "                                Tests 1, 2, 3 Finished"
-      bash 2_RunAllTests_MF_OWHM.sh     "nopause"  $debug  > out4_MF_OWHM.txt     & echo "    MF_OWHM      test 4 of 7 -> Started"
-      bash 2_RunAllTests_MF_RIP.sh      "nopause"  $debug  > out5_MF_RIP.txt      & echo "    MF_RIP       test 5 of 7 -> Started"
+      bash 2_RunAllTests_MF_NWT.sh      "nopause"  $debug  > out4_MF_NWT.txt      & echo "    MF_NWT       test 4 of 8 -> Started"
+      bash 2_RunAllTests_MF_OWHM.sh     "nopause"  $debug  > out5_MF_OWHM.txt     & echo "    MF_OWHM      test 5 of 8 -> Started"
+      bash 2_RunAllTests_MF_RIP.sh      "nopause"  $debug  > out6_MF_RIP.txt      & echo "    MF_RIP       test 6 of 8 -> Started"
       wait
-      echo "                                Tests 4, 5 Finished"
-      bash 2_RunAllTests_MF_SWI.sh      "nopause"  $debug  > out6_MF_SWI.txt      & echo "    MF_SWI       test 6 of 7 -> Started"
-      bash 2_RunAllTests_MF_SWR.sh      "nopause"  $debug  > out7_MF_SWR.txt      & echo "    MF_SWR       test 7 of 7 -> Started"
+      echo "                                Tests 4, 5, 6 Finished"
+      bash 2_RunAllTests_MF_SWI.sh      "nopause"  $debug  > out7_MF_SWI.txt      & echo "    MF_SWI       test 7 of 8 -> Started"
+      bash 2_RunAllTests_MF_SWR.sh      "nopause"  $debug  > out8_MF_SWR.txt      & echo "    MF_SWR       test 8 of 8 -> Started"
       wait
-      echo "                                Tests 6, 7 Finished"
+      echo "                                Tests 7, 8 Finished"
       echo
    fi
 
@@ -122,7 +126,7 @@ then
    then
       curTim=`date +"%T"`
       echo "    MF_OWHM_v1   extended test 1 of 1 -> Started at ${curTim} and takes ~3hr"
-      bash 2_RunAllTests_MF_OWHM_v1.sh      "nopause"  $debug  > out8_MF_OWHM_v1.txt
+      bash 2_RunAllTests_MF_OWHM_v1.sh      "nopause"  $debug  > out9_MF_OWHM_v1.txt
       curTim=
    fi
 else
