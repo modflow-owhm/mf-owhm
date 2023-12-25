@@ -378,148 +378,151 @@ C
 C
 C
 C
-      SUBROUTINE CALC_DENS_VISC2
+!     SUBROUTINE CALC_DENS_VISC2
 C     ******************************************************************
 C     BARC**CALCULATES WATER DENSITY AND VISCOSITY FOR CFPM2 TURB 
 C     PARAMETER ARRAYS; ROH--DENSITY [KG/M**3] OF WATER ACCORDING TO
 C     HANDBOOK OF CHEMISTRY AND PHYSICS (1979); DYNAMIC VISCOSITY [PA SEC]
 C     OF WATER ACCORDING TO HANDBOOK OF CHEMISTRY AND PHYSICS (1979)
+C     !TR: 2023 07 02 THIS SUBROUTINE IS FOR CFP MODE2 WITH TEMPERATURE
+C     SPATIALLY VARIABLE, CURRENTLY, THIS FEATURE IS DEACTIVATED AND THE
+C     ROUTINE IS NOT CALLED
 C     ******************************************************************
 C
-      USE CONSTANTS, ONLY: TRUE,FALSE,Z,ONE,NEG,NINER,DZ,DOS,NEARZERO_30
-      USE CFPMODULE, ONLY:TWATER2, DENSWA2, VISCWA2, CM2INCH, NCL
-      USE GLOBAL, ONLY:IOUT, ITMUNI, LENUNI, NCOL, NROW
-      IMPLICIT NONE
-      INTEGER K,I,J
+!     USE CONSTANTS, ONLY: TRUE,FALSE,Z,ONE,NEG,NINER,DZ,DOS,NEARZERO_30
+!     USE CFPMODULE, ONLY:TWATER2, DENSWA2, VISCWA2, CM2INCH, NCL
+!     USE GLOBAL, ONLY:IOUT, ITMUNI, LENUNI, NCOL, NROW
+!     IMPLICIT NONE
+!     INTEGER K,I,J
 C     ------------------------------------------------------------------
 C
-      DO K=1,NCL
-        DO I=1,NROW
-          DO J=1,NCOL
+!     DO K=1,NCL
+!       DO I=1,NROW
+!         DO J=1,NCOL
       
-            DENSWA2(J,I,K) = (999.83952D0+16.945176D0*TWATER2(J,I,K)    
-     +         -7.9870401D-3*TWATER2(J,I,K)**DOS-46.170461D
-     +         -6*TWATER2(J,I,K)**3.0D0+105.56302D
-     +         -9*TWATER2(J,I,K)**4.0D0-280.54253D
-     +         -12*TWATER2(J,I,K)**5.0D0)
-     +         /(1.0D0+16.879850D-3*TWATER2(J,I,K))
+!           DENSWA2(J,I,K) = (999.83952D0+16.945176D0*TWATER2(J,I,K)    
+!    +         -7.9870401D-3*TWATER2(J,I,K)**DOS-46.170461D
+!    +         -6*TWATER2(J,I,K)**3.0D0+105.56302D
+!    +         -9*TWATER2(J,I,K)**4.0D0-280.54253D
+!    +         -12*TWATER2(J,I,K)**5.0D0)
+!    +         /(1.0D0+16.879850D-3*TWATER2(J,I,K))
 C 
 C--CALCULATE DYNAMIC VISCOSITY
-            IF (TWATER2(J,I,K).GE.0.0.AND.TWATER2(J,I,K).LT.20.0) THEN
-              VISCWA2(J,I,K) = 10.0D0**(1301.0D0/(998.33D0+
-     +            8.1855D0*(TWATER2(J,I,K)-20.0D0)+
-     +            0.00585D0*(TWATER2(J,I,K)-20.0D0)**DOS)-
-     +            1.30233D0)/1000.0D0
-            ELSEIF (TWATER2(J,I,K).GE.20.0.AND.TWATER2(J,I,K).LE.100.0) 
-     +      THEN
-              VISCWA2(J,I,K) = 10.0D0**((1.3272D0*(20.0D0               
-     +            -TWATER2(J,I,K))-0.001053D0*(TWATER2(J,I,K)-20.0D0)
-     +            **DOS)/(TWATER2(J,I,K)+105.0D0))*1.002D0/1000.0D0
-            ELSE
-              WRITE (*, *) 'BAD TEMPERATURE INPUT!'
-              STOP
-            ENDIF
+!           IF (TWATER2(J,I,K).GE.0.0.AND.TWATER2(J,I,K).LT.20.0) THEN
+!             VISCWA2(J,I,K) = 10.0D0**(1301.0D0/(998.33D0+
+!    +            8.1855D0*(TWATER2(J,I,K)-20.0D0)+
+!    +            0.00585D0*(TWATER2(J,I,K)-20.0D0)**DOS)-
+!    +            1.30233D0)/1000.0D0
+!           ELSEIF (TWATER2(J,I,K).GE.20.0.AND.TWATER2(J,I,K).LE.100.0) 
+!    +      THEN
+!             VISCWA2(J,I,K) = 10.0D0**((1.3272D0*(20.0D0               
+!    +            -TWATER2(J,I,K))-0.001053D0*(TWATER2(J,I,K)-20.0D0)
+!    +            **DOS)/(TWATER2(J,I,K)+105.0D0))*1.002D0/1000.0D0
+!           ELSE
+!             WRITE (*, *) 'BAD TEMPERATURE INPUT!'
+!             STOP
+!           ENDIF
 CB       WRITE (IOUT,'(3I5,F6.4)') ' DYN VISC OF WATER IS [PA SEC]=', 
 CB     +   J,I,K,VISCWA2(J,I,K)    
 C
 C--KINEMATIC VISCOSITY NU[M**2/S]
-            VISCWA2(J,I,K) = VISCWA2(J,I,K)/DENSWA2(J,I,K)
+!           VISCWA2(J,I,K) = VISCWA2(J,I,K)/DENSWA2(J,I,K)
 C      
 CBARC**ENDDOS
-          ENDDO
-        ENDDO
-      ENDDO
+!         ENDDO
+!       ENDDO
+!     ENDDO
 C
 C--BARC**CORRECT DENSITY UNITS
-      DO K=1,NCL
-        DO I=1,NROW
-          DO J=1,NCOL
-C          
+!     DO K=1,NCL
+!       DO I=1,NROW
+!         DO J=1,NCOL
+          
 C--BARC**UNITS ARE FT
-            IF(LENUNI.EQ.1)DENSWA2(J,I,K) = DENSWA2(J,I,K)*(1.0D0/
-     +                                          (CM2INCH**3.0D0))
+!           IF(LENUNI.EQ.1)DENSWA2(J,I,K) = DENSWA2(J,I,K)*(1.0D0/
+!    +                                          (CM2INCH**3.0D0))
 C
 C--BARC**UNITS ARE CM
-            IF(LENUNI.EQ.3)DENSWA2(J,I,K) = DENSWA2(J,I,K)*(1.0D0/
-     +                   (100.0D0**3.0D0))
+!           IF(LENUNI.EQ.3)DENSWA2(J,I,K) = DENSWA2(J,I,K)*(1.0D0/
+!    +                   (100.0D0**3.0D0))
 C 
 C--BARC**CORRECT VISCOSITY UNITS
 C--BARC**UNITS ARE M2/S
-            IF(ITMUNI.EQ.1.AND.LENUNI.EQ.2) VISCWA2(J,I,K) = 
-     +         VISCWA2(J,I,K)*1.0D0
+!           IF(ITMUNI.EQ.1.AND.LENUNI.EQ.2) VISCWA2(J,I,K) = 
+!    +         VISCWA2(J,I,K)*1.0D0
 C
 C--BARC**UNITS ARE M2 / MIN
-            IF(ITMUNI.EQ.2 .AND. LENUNI.EQ.2) VISCWA2(J,I,K) = 
-     +         VISCWA2(J,I,K)*60.0D0
+!           IF(ITMUNI.EQ.2 .AND. LENUNI.EQ.2) VISCWA2(J,I,K) = 
+!    +         VISCWA2(J,I,K)*60.0D0
 C
 C--BARC**UNITS ARE M2/HOUR
-            IF(ITMUNI.EQ.3 .AND. LENUNI.EQ.2) VISCWA2(J,I,K) = 
-     +         VISCWA2(J,I,K)*60.0D0**DOS
+!           IF(ITMUNI.EQ.3 .AND. LENUNI.EQ.2) VISCWA2(J,I,K) = 
+!    +         VISCWA2(J,I,K)*60.0D0**DOS
 C
 C--BARC**UNITS ARE M2/DAY
-            IF (ITMUNI.EQ.4 .AND. LENUNI.EQ.2)                 
-     +          VISCWA2(J,I,K) = VISCWA2(J,I,K)*60.0D0**DOS*24.0D0
+!           IF (ITMUNI.EQ.4 .AND. LENUNI.EQ.2)                 
+!    +          VISCWA2(J,I,K) = VISCWA2(J,I,K)*60.0D0**DOS*24.0D0
 C
 C--BARC**UNITS ARE M2/YEAR
-            IF (ITMUNI.EQ.5 .AND. LENUNI.EQ.2)        
-     +          VISCWA2(J,I,K)=VISCWA2(J,I,K)*60.0D0**DOS*24.0D0*365.0D0
+!           IF (ITMUNI.EQ.5 .AND. LENUNI.EQ.2)        
+!    +          VISCWA2(J,I,K)=VISCWA2(J,I,K)*60.0D0**DOS*24.0D0*365.0D0
 C 
 C--BARC**UNITS ARE FT2 /SEC
-            IF (ITMUNI.EQ.1 .AND. LENUNI.EQ.1) VISCWA2(J,I,K) = 
-     +          VISCWA2(J,I,K)*CM2INCH**DOS
+!           IF (ITMUNI.EQ.1 .AND. LENUNI.EQ.1) VISCWA2(J,I,K) = 
+!    +          VISCWA2(J,I,K)*CM2INCH**DOS
 C
 C--BARC**UNITS ARE FT2/MIN
-            IF (ITMUNI.EQ.2 .AND. LENUNI.EQ.1)              
-     +          VISCWA2(J,I,K) = VISCWA2(J,I,K)*CM2INCH**DOS*60.0D0
+!           IF (ITMUNI.EQ.2 .AND. LENUNI.EQ.1)              
+!    +          VISCWA2(J,I,K) = VISCWA2(J,I,K)*CM2INCH**DOS*60.0D0
 C
 C--BARC**UNITS ARE FT2/HR
-            IF (ITMUNI.EQ.3 .AND. LENUNI.EQ.1)
-     +          VISCWA2(J,I,K) = VISCWA2(J,I,K)*CM2INCH**DOS*60.0D0**DOS
+!           IF (ITMUNI.EQ.3 .AND. LENUNI.EQ.1)
+!    +          VISCWA2(J,I,K) = VISCWA2(J,I,K)*CM2INCH**DOS*60.0D0**DOS
 C
 C--BARC**UNITS ARE FT2/DAY
-            IF (ITMUNI.EQ.4 .AND. LENUNI.EQ.1)
-     +          VISCWA2(J,I,K) = VISCWA2(J,I,K)*CM2INCH**DOS*60.0D0
-     +         **DOS*24.0D0
+!           IF (ITMUNI.EQ.4 .AND. LENUNI.EQ.1)
+!    +          VISCWA2(J,I,K) = VISCWA2(J,I,K)*CM2INCH**DOS*60.0D0
+!    +         **DOS*24.0D0
 C
 C--BARC**UNITS ARE FT2/YR
-            IF (ITMUNI.EQ.5 .AND. LENUNI.EQ.1)
-     +          VISCWA2(J,I,K) = VISCWA2(J,I,K)*CM2INCH**DOS*60.0D0
-     +         **DOS*24.0D0*365.0D0
+!           IF (ITMUNI.EQ.5 .AND. LENUNI.EQ.1)
+!    +          VISCWA2(J,I,K) = VISCWA2(J,I,K)*CM2INCH**DOS*60.0D0
+!    +         **DOS*24.0D0*365.0D0
 C 
 C--BARC**UNITS ARE CM2/SEC
-            IF (ITMUNI.EQ.1 .AND. LENUNI.EQ.3) VISCWA2(J,I,K) = 
-     +          VISCWA2(J,I,K)*100.D0**DOS
-C
+!           IF (ITMUNI.EQ.1 .AND. LENUNI.EQ.3) VISCWA2(J,I,K) = 
+!    +          VISCWA2(J,I,K)*100.D0**DOS
+!
 C--BARC**UNITS ARE CM2/MIN
-            IF (ITMUNI.EQ.2 .AND. LENUNI.EQ.3)
-     +          VISCWA2(J,I,K) = VISCWA2(J,I,K)*100.0D0**DOS*60.0D0
+!           IF (ITMUNI.EQ.2 .AND. LENUNI.EQ.3)
+!    +          VISCWA2(J,I,K) = VISCWA2(J,I,K)*100.0D0**DOS*60.0D0
 C
 C--BARC**UNITS ARE CM2/HR
-            IF (ITMUNI.EQ.3 .AND. LENUNI.EQ.3)
-     +          VISCWA2(J,I,K) = VISCWA2(J,I,K)*100.0D0**DOS*60.0D0**DOS
+!           IF (ITMUNI.EQ.3 .AND. LENUNI.EQ.3)
+!    +          VISCWA2(J,I,K) = VISCWA2(J,I,K)*100.0D0**DOS*60.0D0**DOS
 C
 C--BARC**UNITS ARE CM2/DAY
-            IF (ITMUNI.EQ.4 .AND. LENUNI.EQ.3)
-     +          VISCWA2(J,I,K) = VISCWA2(J,I,K)*100.0D0**DOS*60.0D0
-     +          **DOS*24.0D0
+!           IF (ITMUNI.EQ.4 .AND. LENUNI.EQ.3)
+!    +          VISCWA2(J,I,K) = VISCWA2(J,I,K)*100.0D0**DOS*60.0D0
+!    +          **DOS*24.0D0
 C
 C--BARC**UNITS ARE CM2/YR
-            IF (ITMUNI.EQ.5 .AND. LENUNI.EQ.3)
-     +          VISCWA2(J,I,K) = VISCWA2(J,I,K)*100.0D0**DOS*60.0D0
-     +          **DOS*24.0D0*365.0D0
+!           IF (ITMUNI.EQ.5 .AND. LENUNI.EQ.3)
+!    +          VISCWA2(J,I,K) = VISCWA2(J,I,K)*100.0D0**DOS*60.0D0
+!    +          **DOS*24.0D0*365.0D0
 CB    WRITE (IOUT, *) ' KINEMATIC VISCOSITY [L^2/T]=', VISCWA2(J,I,K)
-            WRITE (IOUT,'(A30,1X,A5,3I5,1X,F8.4)') ' DENSITY OF WATER IS
-     + [KG/L^3]=','J,I,K',J,I,K,DENSWA2(J,I,K)
+!           WRITE (IOUT,'(A30,1X,A5,3I5,1X,F8.4)') ' DENSITY OF WATER IS
+!    + [KG/L^3]=','J,I,K',J,I,K,DENSWA2(J,I,K)
 CB      WRITE (IOUT, *) ' DYN VISC OF WATER IS [KG/LT]=', VISCWA2(J,I,K)
-            WRITE (IOUT,'(A30,1X,A5,3I5,1X,F8.4)') ' KIN VISC OF WATER I
-     +S [L^2/T]=','J,I,K',J,I,K,VISCWA2(J,I,K)
+!           WRITE (IOUT,'(A30,1X,A5,3I5,1X,F8.4)') ' KIN VISC OF WATER I
+!    +S [L^2/T]=','J,I,K',J,I,K,VISCWA2(J,I,K)
 C
 C--BARC**ENDDOS
-          ENDDO
-        ENDDO
-      ENDDO
+!         ENDDO
+!       ENDDO
+!     ENDDO
 C 
-      END SUBROUTINE CALC_DENS_VISC2
+!     END SUBROUTINE CALC_DENS_VISC2
 C
 C
 C
@@ -553,7 +556,49 @@ C
 C
 C
 C
-      SUBROUTINE READTD (INUNIT,TDDATA,MAXLINES,NONODES)
+!      SUBROUTINE READTD (INUNIT,TDDATA,MAXLINES,NONODES)
+!C****************************************************************
+!C     READ TIME DEPENDENT DATA FROM GIVEN INPUT FILES
+!C     BY THOMAS.REIMANN@TU-DRESDEN.DE
+!C****************************************************************      
+!C     INUNIT = ARRAY WITH INPUT UNIT NUMBERS FOR ALL NODES
+!C     TDDATA = TIME DEPENDENT DATA ARRAY (NODE,TIME,VALUE) FOR EACH TD NODE
+!C     MAXLINES = MAX NUMBER OF LINES IN INPUT DATA (FOR ALLOCATION PURPOSES)
+!C     NONODES = NUMBER OF TD NODES
+!C     NOLINES = NUMBER OF LINES IN INPUT DATA
+!C
+!      USE CFPMODULE, ONLY: ACTIVENODE      
+!      USE GENERIC_OPEN_INTERFACE, ONLY: UTF8_BOM_OFFSET_REWIND
+!C      
+!      IMPLICIT NONE
+!C
+!      INTEGER I,J,N, NOLINES
+!      INTEGER, INTENT(IN) :: NONODES, INUNIT(ACTIVENODE), MAXLINES
+!      DOUBLE PRECISION, INTENT(OUT)::TDDATA(MAXLINES,3,NONODES)
+!      DOUBLE PRECISION DUMMY1, DUMMY2
+!C
+!C--INITIALIZE COUNTER
+!      N=0
+!C      
+!      DO I=1, ACTIVENODE
+!C
+!C--IF EXTERNAL TD INPUT IS AVAILABLE      
+!        IF (INUNIT(I).GT.0) THEN
+!          N=N+1
+!          CALL UTF8_BOM_OFFSET_REWIND(INUNIT(I))
+!          READ (INUNIT(I),*) NOLINES
+!          DO J=1, NOLINES
+!            READ (INUNIT(I),*) DUMMY1, DUMMY2
+!            TDDATA (J,1,N) = I
+!            TDDATA (J,2,N) = DUMMY1
+!            TDDATA (J,3,N) = DUMMY2
+!          ENDDO
+!        ENDIF
+!      ENDDO
+!C      
+!      END SUBROUTINE READTD
+
+      SUBROUTINE READTD (INUNIT,TDDATA,MAXLINES,NONODES,LINE,IOUT)
 C****************************************************************
 C     READ TIME DEPENDENT DATA FROM GIVEN INPUT FILES
 C     BY THOMAS.REIMANN@TU-DRESDEN.DE
@@ -566,26 +611,46 @@ C     NOLINES = NUMBER OF LINES IN INPUT DATA
 C
       USE CFPMODULE, ONLY: ACTIVENODE      
       USE GENERIC_OPEN_INTERFACE, ONLY: UTF8_BOM_OFFSET_REWIND
-C      
+      USE CONSTANTS, ONLY: ONE, NL
+      USE FILE_IO_INTERFACE, ONLY: READ_TO_DATA
+      USE STRINGS,           ONLY: GET_INTEGER, GET_NUMBER
+      !USE NUM2STR_INTERFACE, ONLY: NUM2STRC      
       IMPLICIT NONE
 C
       INTEGER I,J,N, NOLINES
-      INTEGER, INTENT(IN) :: NONODES, INUNIT(ACTIVENODE), MAXLINES
-      DOUBLE PRECISION, INTENT(OUT)::TDDATA(MAXLINES,3,NONODES)
+      integer,      intent(in) :: NONODES, INUNIT(ACTIVENODE), MAXLINES
+      double precision, intent(out)::TDDATA(MAXLINES,3,NONODES)
+      character(*), intent(inout) :: LINE
+      integer,      intent(in   ) :: IOUT
       DOUBLE PRECISION DUMMY1, DUMMY2
+      INTEGER  LLOC,ISTART,ISTOP,IU
+      CHARACTER(128):: ERR
 C
 C--INITIALIZE COUNTER
       N=0
+      ERR = 'If line is an empty, "", reader may have prematurely '//
+     +      'reached the end of the file (read count on first line '//
+     +      'is too big).'
 C      
       DO I=1, ACTIVENODE
 C
 C--IF EXTERNAL TD INPUT IS AVAILABLE      
         IF (INUNIT(I).GT.0) THEN
           N=N+1
-          CALL UTF8_BOM_OFFSET_REWIND(INUNIT(I))
-          READ (INUNIT(I),*) NOLINES
+          IU = INUNIT(I)
+          CALL UTF8_BOM_OFFSET_REWIND(IU)
+          CALL READ_TO_DATA(LINE, IU, IOUT)
+          LLOC = ONE
+          CALL GET_INTEGER(LINE,LLOC,ISTART,ISTOP,IOUT,IU,NOLINES)  
+          
           DO J=1, NOLINES
-            READ (INUNIT(I),*) DUMMY1, DUMMY2
+            CALL READ_TO_DATA(LINE, IU, IOUT)
+            LLOC = ONE
+            CALL GET_NUMBER(LINE,LLOC,ISTART,ISTOP,IOUT,IU,DUMMY1,
+     +                      MSG=ERR)  
+            CALL GET_NUMBER(LINE,LLOC,ISTART,ISTOP,IOUT,IU,DUMMY2,
+     +                      MSG=ERR)  
+            !
             TDDATA (J,1,N) = I
             TDDATA (J,2,N) = DUMMY1
             TDDATA (J,3,N) = DUMMY2
@@ -711,23 +776,67 @@ C
 C
 C
 C            
-      SUBROUTINE ASSIGNTDDATA(I,READDATA,TD_IN,TD_LINESMAX)
+!      SUBROUTINE ASSIGNTDDATA(I,READDATA,TD_IN,TD_LINESMAX)
+!C****************************************************************
+!C     ASSIGN READ IN DATA AS UNIT NUMBER FOR TIME DEPENDENT READ 
+!C     IN; BY THOMAS.REIMANN@TU-DRESDEN.DE
+!C**************************************************************** 
+!      USE CFPMODULE, ONLY: ACTIVENODE      
+!      USE 
+!C      
+!      IMPLICIT NONE
+!C
+!      INTEGER I, TD_LINES, TD_LINESMAX, TD_IN(ACTIVENODE)
+!      DOUBLE PRECISION READDATA       
+!C
+!C--SET READ IN DATA AS INPUT UNIT NUMBER      
+!      TD_IN(I) = INT(READDATA)
+!C
+!C--ASSESS NUMBER OF LINES IN INPUT FILE      
+!      READ (TD_IN(I),*) TD_LINES
+!C
+!C--UPDATE MAXIMUM NUMBER OF LINES - IF NECESSARY      
+!      IF (TD_LINES.GT.TD_LINESMAX)TD_LINESMAX = TD_LINES
+!C
+!      END SUBROUTINE ASSIGNTDDATA
+C            
+      SUBROUTINE ASSIGNTDDATA(I,READDATA,TD_IN,TD_LINESMAX,LINE,IOUT)
 C****************************************************************
 C     ASSIGN READ IN DATA AS UNIT NUMBER FOR TIME DEPENDENT READ 
 C     IN; BY THOMAS.REIMANN@TU-DRESDEN.DE
 C**************************************************************** 
       USE CFPMODULE, ONLY: ACTIVENODE      
+      USE CONSTANTS, ONLY: ONE, NL
+      USE FILE_IO_INTERFACE, ONLY: READ_TO_DATA
+      USE STRINGS,           ONLY: GET_INTEGER
+      USE NUM2STR_INTERFACE, ONLY: NUM2STR
 C      
       IMPLICIT NONE
 C
-      INTEGER I, TD_LINES, TD_LINESMAX, TD_IN(ACTIVENODE)
-      DOUBLE PRECISION READDATA       
-C
+      integer,          intent(in   ) :: I, IOUT  
+      double precision, intent(in   ) :: READDATA       
+      integer,          intent(inout) :: TD_IN(ACTIVENODE)  
+      integer,          intent(inout) :: TD_LINESMAX  
+      character(*),     intent(inout) :: LINE
+C  
+      integer :: TD_LINES, IERR, LLOC, ISTART, ISTOP
+      logical :: ISOPEN
+      
 C--SET READ IN DATA AS INPUT UNIT NUMBER      
       TD_IN(I) = INT(READDATA)
-C
-C--ASSESS NUMBER OF LINES IN INPUT FILE      
-      READ (TD_IN(I),*) TD_LINES
+      
+      INQUIRE(TD_IN(I), OPENED=ISOPEN)
+      IF (.not. ISOPEN) then
+         CALL USTOP('CPF input attempted to read from file unit '//
+     +        NUM2STR(TD_IN(I))//NL//
+     +        'But the unit is not associated with an open file.'//NL//
+     +        'The unit number was read from the following line:'//NL//
+     +        '"'//TRIM(LINE)//'"')
+      END IF
+      !
+      CALL READ_TO_DATA(LINE, TD_IN(I))
+      LLOC = ONE
+      CALL GET_INTEGER(LINE,LLOC,ISTART,ISTOP,IOUT,TD_IN(I),TD_LINES)  
 C
 C--UPDATE MAXIMUM NUMBER OF LINES - IF NECESSARY      
       IF (TD_LINES.GT.TD_LINESMAX)TD_LINESMAX = TD_LINES
@@ -818,7 +927,7 @@ C
       INTEGER, INTENT(IN) :: IN, IOUT
       INTEGER, INTENT(OUT) :: NUM
 ! LOCAL VARIABLES
-      CHARACTER(LEN=1024) LINE
+      CHARACTER(LEN=80) LINE
       INTEGER I, II, ISTART, IEND
 C
 C--INI
