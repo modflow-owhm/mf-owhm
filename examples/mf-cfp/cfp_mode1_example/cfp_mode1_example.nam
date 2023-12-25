@@ -1,0 +1,13 @@
+BAS6         1  cfp_mode1_example.bas
+DIS          2  cfp_mode1_example.dis
+LPF         11  cfp_mode1_example.lpf
+RCH         13  cfp_mode1_example.rch
+CRCH        14  cfp_mode1_example.crc
+PCG         15  cfp_mode1_example.pcg
+CFP         16  cfp_mode1_example.cfp
+OC          22  cfp_mode1_example.oc
+COC         23  cfp_mode1_example.coc
+
+LIST         7  ./output/cfp_mode1_example.lst
+DATA(BINARY) 50 ./output/cfp_mode1_example.cbc
+DATA(BINARY) 51 ./output/cfp_mode1_example.hds

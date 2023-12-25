@@ -1,0 +1,20 @@
+#Mode 1 time series output
+#Number of nodes for output
+5 
+#Node numbers, one per line 
+1
+2
+3
+4
+5
+#Output each n time steps
+1
+#Number of tubes for output
+4 
+#Tube numbers, one per line 
+1
+2
+3
+4
+#Output each n time steps
+1

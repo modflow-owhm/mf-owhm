@@ -1,0 +1,10 @@
+BAS6          1  exch.bas
+DIS           2  exch.dis
+BCF6         11  exch.bcf
+PCG          15  exch.pcg
+CFP          16  exch.cfp
+OC           22  exch.oc
+
+LIST          7 ./output/exch.lst
+DATA(BINARY) 50 ./output/exch.cbc
+DATA         51 ./output/exch.hds
