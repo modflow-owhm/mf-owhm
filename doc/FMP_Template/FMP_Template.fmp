@@ -685,7 +685,8 @@ BEGIN WATER_BALANCE_SUBREGION   #WBS
    #  Only REQUIRED keyword in block,
    #       the rest will be set to default values if not specified. Note that EFFICIENCY is required when NIRRIGATE > 0
    #
-   # READ 2D Array of INT that are from 0 to NWBS to indicate the spatial area and location of each WBS
+   # READ 2D Array of INT that are from 0 to NWBS to indicate the spatial area and location of each WBS.
+   #   In older publications, the WBS LOCATION was abbreviated as FID.
    #
    LOCATION  LAI[S,T,A]
    #
@@ -711,7 +712,7 @@ BEGIN WATER_BALANCE_SUBREGION   #WBS
    #
    EFFICIENCY    LAI[S,T,A,L-NIRRIGATE]
    #
-   # When water supply does not meet demand the EFFICIENTY (OFE)
+   # When water supply does not meet demand the EFFICIENCY (OFE)
    # can improve to 1.0 or remain the same.
    # EFFICIENCY_IMPROVEMENT is a 0 or 1 flag to indicate if efficiency improvement is allowed.
    #   0 - Efficiency remains the same, crop transpiration reduced due to supply shortfall
@@ -761,14 +762,17 @@ BEGIN WATER_BALANCE_SUBREGION   #WBS
    #
    # ------------------------------------------------------------------------------------------------------------------
    #
-   # If there are cells declared as FALLOW/BARE then this determines the
-   # fraction of runoff to infiltration for precipitation that falls on bare soil/fallow land.
-   #    BARE cells result for model cells not defined by a land use/crop ID (CID < 1) or if the sum of crop fractions for a cell do not sum to 1.
+   # BARE soil/fallowed land occurs for model cells not defined by a land use/crop location (CID; e.g. BARE cells have: CID < 1 or NCROP < CID)
+   #    or if a model cell LAND_USE_AREA_FRACTION for all crops sums to less than 1 
+   #       (e.g. if a model cell has 0.3 of Crop 1 and 0.5 of Crop 2, then 0.2 of the cell is BARE). 
    #
+   # Precipitation on bare soil is first reduced by evaporation, then remaining water becomes surface runoff or infiltrates to groundwater.
+   # BARE_RUNOFF_FRACTION is the fraction of the unconsumed precipitation that becomes surface runoff.
+   # This is equivalent to the LAND_USE keyword SURFACEWATER_LOSS_FRACTION_PRECIPITATION, but for BARE soil.
    # The fraction is set by WBS or by (ROW,COL).
    #   For example, if WBS 1 is set to 0.75; this indicates that 75% of precip that falls on bare soil in WBS 1 becomes surface runoff
    #
-   # If not specified then automatically set to 1.0 to disable any infiltration from precip over bare soil. That is "BARE_RUNOFF_FRACTION CONSTANT 1.0"
+   # If not specified then automatically set to 1.0 to disable any infiltration from precip over bare soil. That is, "BARE_RUNOFF_FRACTION CONSTANT 1.0"
    #
    BARE_RUNOFF_FRACTION LAI[S,T,A,L]
    #
@@ -809,7 +813,7 @@ BEGIN WATER_BALANCE_SUBREGION   #WBS
    #   This only applies to irrigated crops and the additional
    #   demanded water only becomes surface runoff or deep percolation
    #
-   #   In can be specified as a length per time (LENGTH or FLUX) or volume per time (RATE). --Both maybe used at once.
+   #   In can be specified as a length per time (LENGTH or FLUX) or volume per time (RATE). --Both may be used at once.
    #   The added demand is summed with other crop related added demands (e.g. CROP Block ADDED_DEMAND)
    #
    #   You may specify both FLUX and RATE versions
@@ -844,6 +848,7 @@ BEGIN SOIL
    #
    # SOIL_ID is a NROW by NCOL INT array of Soil ID locations
    #   The location of each ID are used for the remaining properties if they use LIST input (that is if CAPILLARY_FRINGE is specified by .
+   #   In older publications, the SOIL_ID is abbreviated as SID.
    #
    SOIL_ID  ULOAD
    #
@@ -1012,7 +1017,7 @@ BEGIN SURFACE_WATER
    #         = 2 indicates that unused delivered water is evenly injected to a WBS associated supply wells
    #
    #
-   # It maybe specified as VOLUME of water per stress period.
+   # It may be specified as VOLUME of water per stress period.
    # The keywords RATE and VOLUME are optional and if not specified, then VOLUME is the default.
    #
    # Or as a RATE of water available in model units L^3/T
@@ -1038,8 +1043,8 @@ BEGIN SURFACE_WATER
    PRINT SFR_SRR_ONLY          GENERIC_OUTPUT_OptKey  # Runoff budget for the NSFR_RETURN SFR segment/reaches that receive FMP runoff
    #
    #
-   PRINT NRD                   GENERIC_OUTPUT_OptKey  # NON_ROUTED_DELIVERY output by WBS that specifies WBS water DEMAND, the NRD available water SUPPLY, and amount of NRD water CONSUMED
-   PRINT NRD_BY_WBS            GENERIC_OUTPUT_OptKey  # NON_ROUTED_DELIVERY output by NRD that specifies WBS water DEMAND, the NRD available water SUPPLY, and amount of NRD water CONSUMED
+   PRINT NRD                   GENERIC_OUTPUT_OptKey  # NON_ROUTED_DELIVERY water demanded and delivered for each NRD, for each WBS.
+   PRINT NRD_BY_WBS            GENERIC_OUTPUT_OptKey   # NON_ROUTED_DELIVERY water demanded and delivered for each WBS.
    #
    # ------------------------------------------------------------------------------------------------------------------
    #
@@ -1056,7 +1061,7 @@ BEGIN SURFACE_WATER
    #         This is how you can specify less delivery points then NSFR_DELIV
    #
    #   FRAC is optional and if specified indicates an initial fraction
-   #     of the irrigation demand that is suppled by the SRD.
+   #     of the irrigation demand that is supplied by the SRD.
    #     If the SRD can not supply that amount of water, then the
    #     deficit demand is shifted to other defined SRD's.
    #
@@ -1293,7 +1298,7 @@ BEGIN SUPPLY_WELL
    MNW_AUTOMATIC_OFF [ByWBS ULOAD]
    #
    # MNW_PUMP_SPREAD applies to only FMP-MNW2 Linked wells.
-   #   It determines what MNW nodes to assign desired (demanded) pumpage too.
+   #   It determines what MNW nodes to assign desired (demanded) pumpage to.
    #   It should have no effect on the final/converged solution,
    #      but it may improve convergence speed and thus reduce simulation time.
    #   The following are the three methods that the pumpage can initially be spread:
@@ -1445,15 +1450,16 @@ BEGIN LAND_USE
    #
    #
    # If SINGLE_LAND_USE_PER_CELL then it is required to specify LOCATION
-   #  which indicates where each crop ID is located.
-   #  NROW by NCOL INT array, 0 is bare land, >0 and <= NCROP is the crop grown there
-   #  CANNOT specify LOCATION with MULTIPLE_LAND_USE_PER_CELL
+   #   which indicates where each crop ID is located.
+   #   NROW by NCOL INT array, 0 is bare land, >0 and <= NCROP is the crop grown there
+   #   CANNOT specify LOCATION with MULTIPLE_LAND_USE_PER_CELL
+   #   In older publications, the land use LOCATION was abbreviated as CID.
    #
    LOCATION LAI[S,T,A]
    #
    # If MULTIPLE_LAND_USE_PER_CELL is specified, then it is required to specify LAND_USE_AREA_FRACTION
    #   which identifies the model cell location for each land use and the area it occupies.
-   #   If the sum of all the crop fractions for a cell exceeds 1, then the crop fraction for hat cell are scaled to equal 1.
+   #   If the sum of all the crop fractions for a cell exceeds 1, then the crop fraction for that cell are scaled to equal 1.
    #   If the sum of all the crop fractions are less than 1, then the undefined area is set to bare soil.
    #     -> Only Array-Style input is supported.
    # 
@@ -1533,7 +1539,7 @@ BEGIN LAND_USE
    # ------------------------------------------------------------------------------------------------------------------
    #
    # Crop root depth below land surface.
-   #   Must be >0.0; NOT required or maybe zero if GROUNDWATER_ROOT_INTERACTION = 0 or 1
+   #   Must be >0.0; NOT required or may be zero if GROUNDWATER_ROOT_INTERACTION = 0 or 1
    #
    ROOT_DEPTH       LAI[S,T,A,L]
    #
@@ -1577,7 +1583,7 @@ BEGIN LAND_USE
    #     It should be less than or equal to 1 - FTR  (That is FEI + FTR <= 1), but this is not required.
    #
    #     Can be viewed as the area that irrigated water is exposed to the sun and evaporates.
-   #     For example(for example on top of bare soil space between row crops.
+   #     For example, on top of bare soil space between row crops.
    #
    #     If FEI + FTR > 1, then the final consumptive use can be larger
    #                       than the input specified due to evaporation.
@@ -1672,23 +1678,29 @@ BEGIN LAND_USE
    #               CF    = CONSUMPTIVE_USE
    #               Kc    = CROP_COEFFICIENT
    #               ETref = REFERENCE_ET
+   #               CU    = Potential Consumptive Use/Potential Evapotranspiration
    #
    # If the Potential Consumptive Use is CU = CF + Kc*ETref = 0,
    #   then the crop is assumed to be scraped clean earth with no evapotranspiration (CU = 0).
    #
-   # This occurs when CF and Kc are set to zero indicating there is no potential consumption.
+   # This occurs when CF and Kc are set to zero indicating there is 
+   #   no potential consumption (no potential evapotranspiration).
    #
-   # If it is desired to convert CU = 0 to Fallow/Bare soil, then
-   #   it is necessary to specify the keyword ZERO_CONSUMPTIVE_USE_BECOMES_BARE_SOIL
+   # ZERO_CONSUMPTIVE_USE_BECOMES_BARE_SOIL indicates that if a cell has CU = 0, 
+   #   then the cell is converted to BARE soil/fallowed land and redefines CU as:  
+   #     CU = REFERENCE_ET_TO_BARE * ETref or
+   #     CU = POTENTIAL_EVAPORATION_BARE
+   #   and only groundwater evaporation is allowed (that is, BARE soil evaporation).
    #
-   #   With this keyword, if CF and Kc are set to zero, then CU = REFERENCE_ET_TO_BARE * ETref or
-   #   CU = POTENTIAL_EVAPORATION_BARE and only groundwater evaporation is allowed.
+   #   If input does not include ETref or POTENTIAL_EVAPORATION_BARE, 
+   #     then ZERO_CONSUMPTIVE_USE_BECOMES_BARE_SOIL is disabled (that is, CU = 0 is unmodified).
    #
-   #   LAI[S,T,L] is optional. If LAI[S,T,L] is not specified,
-   #     then all Crops become bare soil when CU = 0
-   #     if LAI[S,T,L] is included then specify NCROP records that have either
-   #        a  1 to convert CU = 0 crops to bare soil calculation
-   #        or 0 to not use feature
+   #   If ZERO_CONSUMPTIVE_USE_BECOMES_BARE_SOIL is specified with none of the
+   #     LAI[S,T,L] keywords, then it is applied to all crops (equivalent to "ZERO_CONSUMPTIVE_USE_BECOMES_BARE_SOIL CONSTANT 1"). 
+   #
+   #     if LAI[S,T,L] is specified, then input expects to read NCROP records with:
+   #        1 to enabled for the crop
+   #        0 to disable for the crop
    #
    ZERO_CONSUMPTIVE_USE_BECOMES_BARE_SOIL [ LAI[S,T,L] ]
    #
@@ -1738,7 +1750,7 @@ BEGIN LAND_USE
    #       Recommended values are from 0.1 to 1.0, if not specified than it is set to 1.0
    #
    #    ***Note that some relax values may not help convergence or not converge at all,
-   #       while others may improve both speed and for highly nonlinear models with high water tables.
+   #       while others may improve both speed and convergence for highly nonlinear models with high water tables.
    #       Smaller relaxation values do not necessarily equate to better convergence.
    #       In some instances, larger values (0.8) may provide better convergence than smaller (0.1)
    #
@@ -1837,7 +1849,7 @@ BEGIN SALINITY_FLUSH_IRRIGATION
    #
    # The following LAI inputs read LIST input with NCROP records (i.e. CROP ID)
    #
-   # HAS_CROP_SALINITY_DEMAND is similar to IBOUND, which is an INT and
+   # CROP_HAS_SALINITY_DEMAND is similar to IBOUND, which is an INT and
    # indicates if crop has a salinity irrigation demand calculated
    # If specified as a zero (0), then it does not have it, if it is non-zero then it does.
    # If keyword is not included, then all crops are assumed to have salinity flushing.

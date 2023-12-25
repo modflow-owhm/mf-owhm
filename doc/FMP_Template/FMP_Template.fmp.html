@@ -628,12 +628,12 @@ span {
 </span><span class="sc24">   </span><span class="sc2">#  It may be more accurate to use a combination of the head at the start of the time step (HOLD) with HNEW.
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2">#  HEAD_PREDICTOR_FACTOR specifies a weight for determining the water table (WT) from HNEW and HOLD
-</span><span class="sc24">   </span><span class="sc2">#     WT = FACT*HNEW + (1-FACT)*HOLD
+</span><span class="sc24">   </span><span class="sc2">#     WT = FACT*HNEW + (1-FACT)*HOLD
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2">#  FACT should be set to 0.0 or 0.5 or 1.0 to indicate using only HOLD, the average, or only HNEW
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2">#  If keyword is not specified, then, by default, FACT = 1 which makes:
-</span><span class="sc24">   </span><span class="sc2">#     WT = HNEW
+</span><span class="sc24">   </span><span class="sc2">#     WT = HNEW
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc6">HEAD_PREDICTOR_FACTOR</span><span class="sc24"> </span><span class="sc7">FLOAT</span><span class="sc24">
    </span><span class="sc2">#
@@ -740,7 +740,8 @@ span {
 </span><span class="sc24">   </span><span class="sc2">#  Only REQUIRED keyword in block,
 </span><span class="sc24">   </span><span class="sc2">#       the rest will be set to default values if not specified. Note that EFFICIENCY is required when NIRRIGATE &gt; 0
 </span><span class="sc24">   </span><span class="sc2">#
-</span><span class="sc24">   </span><span class="sc2"># READ 2D Array of INT that are from 0 to NWBS to indicate the spatial area and location of each WBS
+</span><span class="sc24">   </span><span class="sc2"># READ 2D Array of INT that are from 0 to NWBS to indicate the spatial area and location of each WBS.
+</span><span class="sc24">   </span><span class="sc2">#   In older publications, the WBS LOCATION was abbreviated as FID.
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc6">LOCATION</span><span class="sc24">  </span><span class="sc7">LAI</span><span class="sc12">[</span><span class="sc0">S</span><span class="sc12">,</span><span class="sc0">T</span><span class="sc12">,</span><span class="sc0">A</span><span class="sc12">]</span><span class="sc24">
    </span><span class="sc2">#
@@ -816,14 +817,17 @@ span {
    </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># ------------------------------------------------------------------------------------------------------------------
 </span><span class="sc24">   </span><span class="sc2">#
-</span><span class="sc24">   </span><span class="sc2"># If there are cells declared as FALLOW/BARE then this determines the
-</span><span class="sc24">   </span><span class="sc2"># fraction of runoff to infiltration for precipitation that falls on bare soil/fallow land.
-</span><span class="sc24">   </span><span class="sc2">#    BARE cells result for model cells not defined by a land use/crop ID (CID &lt; 1) or if the sum of crop fractions for a cell do not sum to 1.
+</span><span class="sc24">   </span><span class="sc2"># BARE soil/fallowed land occurs for model cells not defined by a land use/crop location (CID; e.g. BARE cells have: CID &lt; 1 or NCROP &lt; CID)
+</span><span class="sc24">   </span><span class="sc2">#    or if a model cell LAND_USE_AREA_FRACTION for all crops sums to less than 1 
+</span><span class="sc24">   </span><span class="sc2">#       (e.g. if a model cell has 0.3 of Crop 1 and 0.5 of Crop 2, then 0.2 of the cell is BARE). 
 </span><span class="sc24">   </span><span class="sc2">#
+</span><span class="sc24">   </span><span class="sc2"># Precipitation on bare soil is first reduced by evaporation, then remaining water becomes surface runoff or infiltrates to groundwater.
+</span><span class="sc24">   </span><span class="sc2"># BARE_RUNOFF_FRACTION is the fraction of the unconsumed precipitation that becomes surface runoff.
+</span><span class="sc24">   </span><span class="sc2"># This is equivalent to the LAND_USE keyword SURFACEWATER_LOSS_FRACTION_PRECIPITATION, but for BARE soil.
 </span><span class="sc24">   </span><span class="sc2"># The fraction is set by WBS or by (ROW,COL).
 </span><span class="sc24">   </span><span class="sc2">#   For example, if WBS 1 is set to 0.75; this indicates that 75% of precip that falls on bare soil in WBS 1 becomes surface runoff
 </span><span class="sc24">   </span><span class="sc2">#
-</span><span class="sc24">   </span><span class="sc2"># If not specified then automatically set to 1.0 to disable any infiltration from precip over bare soil. That is "BARE_RUNOFF_FRACTION CONSTANT 1.0"
+</span><span class="sc24">   </span><span class="sc2"># If not specified then automatically set to 1.0 to disable any infiltration from precip over bare soil. That is, "BARE_RUNOFF_FRACTION CONSTANT 1.0"
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc6">BARE_RUNOFF_FRACTION</span><span class="sc24"> </span><span class="sc7">LAI</span><span class="sc12">[</span><span class="sc0">S</span><span class="sc12">,</span><span class="sc0">T</span><span class="sc12">,</span><span class="sc0">A</span><span class="sc12">,</span><span class="sc0">L</span><span class="sc12">]</span><span class="sc24">
    </span><span class="sc2">#
@@ -899,6 +903,7 @@ span {
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># SOIL_ID is a NROW by NCOL INT array of Soil ID locations
 </span><span class="sc24">   </span><span class="sc2">#   The location of each ID are used for the remaining properties if they use LIST input (that is if CAPILLARY_FRINGE is specified by .
+</span><span class="sc24">   </span><span class="sc2">#   In older publications, the SOIL_ID is abbreviated as SID.
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc6">SOIL_ID</span><span class="sc24">  </span><span class="sc7">ULOAD</span><span class="sc24">
    </span><span class="sc2">#
@@ -1093,8 +1098,8 @@ span {
 </span><span class="sc24">   </span><span class="sc6">PRINT SFR_SRR_ONLY</span><span class="sc24">          </span><span class="sc8">GENERIC_OUTPUT_OptKey</span><span class="sc24">  </span><span class="sc2"># Runoff budget for the NSFR_RETURN SFR segment/reaches that receive FMP runoff
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2">#
-</span><span class="sc24">   </span><span class="sc6">PRINT NRD</span><span class="sc24">                   </span><span class="sc8">GENERIC_OUTPUT_OptKey</span><span class="sc24">  </span><span class="sc2"># NON_ROUTED_DELIVERY output by WBS that specifies WBS water DEMAND, the NRD available water SUPPLY, and amount of NRD water CONSUMED
-</span><span class="sc24">   </span><span class="sc6">PRINT NRD_BY_WBS</span><span class="sc24">            </span><span class="sc8">GENERIC_OUTPUT_OptKey</span><span class="sc24">  </span><span class="sc2"># NON_ROUTED_DELIVERY output by NRD that specifies WBS water DEMAND, the NRD available water SUPPLY, and amount of NRD water CONSUMED
+</span><span class="sc24">   </span><span class="sc6">PRINT NRD</span><span class="sc24">                   </span><span class="sc8">GENERIC_OUTPUT_OptKey</span><span class="sc24">  </span><span class="sc2"># NON_ROUTED_DELIVERY water demanded and delivered for each NRD, for each WBS.
+</span><span class="sc24">   </span><span class="sc6">PRINT NRD_BY_WBS</span><span class="sc24">            </span><span class="sc8">GENERIC_OUTPUT_OptKey</span><span class="sc24">   </span><span class="sc2"># NON_ROUTED_DELIVERY water demanded and delivered for each WBS.
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># ------------------------------------------------------------------------------------------------------------------
 </span><span class="sc24">   </span><span class="sc2">#
@@ -1348,7 +1353,7 @@ span {
    </span><span class="sc6">MNW_AUTOMATIC_OFF</span><span class="sc24"> </span><span class="sc12">[</span><span class="sc7">ByWBS</span><span class="sc24"> </span><span class="sc7">ULOAD</span><span class="sc12">]</span><span class="sc24">
    </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># MNW_PUMP_SPREAD applies to only FMP-MNW2 Linked wells.
-</span><span class="sc24">   </span><span class="sc2">#   It determines what MNW nodes to assign desired (demanded) pumpage too.
+</span><span class="sc24">   </span><span class="sc2">#   It determines what MNW nodes to assign desired (demanded) pumpage to.
 </span><span class="sc24">   </span><span class="sc2">#   It should have no effect on the final/converged solution,
 </span><span class="sc24">   </span><span class="sc2">#      but it may improve convergence speed and thus reduce simulation time.
 </span><span class="sc24">   </span><span class="sc2">#   The following are the three methods that the pumpage can initially be spread:
@@ -1500,15 +1505,16 @@ span {
    </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># If SINGLE_LAND_USE_PER_CELL then it is required to specify LOCATION
-</span><span class="sc24">   </span><span class="sc2">#  which indicates where each crop ID is located.
-</span><span class="sc24">   </span><span class="sc2">#  NROW by NCOL INT array, 0 is bare land, &gt;0 and &lt;= NCROP is the crop grown there
-</span><span class="sc24">   </span><span class="sc2">#  CANNOT specify LOCATION with MULTIPLE_LAND_USE_PER_CELL
+</span><span class="sc24">   </span><span class="sc2">#   which indicates where each crop ID is located.
+</span><span class="sc24">   </span><span class="sc2">#   NROW by NCOL INT array, 0 is bare land, &gt;0 and &lt;= NCROP is the crop grown there
+</span><span class="sc24">   </span><span class="sc2">#   CANNOT specify LOCATION with MULTIPLE_LAND_USE_PER_CELL
+</span><span class="sc24">   </span><span class="sc2">#   In older publications, the land use LOCATION was abbreviated as CID.
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc6">LOCATION</span><span class="sc24"> </span><span class="sc7">LAI</span><span class="sc12">[</span><span class="sc0">S</span><span class="sc12">,</span><span class="sc0">T</span><span class="sc12">,</span><span class="sc0">A</span><span class="sc12">]</span><span class="sc24">
    </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># If MULTIPLE_LAND_USE_PER_CELL is specified, then it is required to specify LAND_USE_AREA_FRACTION
 </span><span class="sc24">   </span><span class="sc2">#   which identifies the model cell location for each land use and the area it occupies.
-</span><span class="sc24">   </span><span class="sc2">#   If the sum of all the crop fractions for a cell exceeds 1, then the crop fraction for hat cell are scaled to equal 1.
+</span><span class="sc24">   </span><span class="sc2">#   If the sum of all the crop fractions for a cell exceeds 1, then the crop fraction for that cell are scaled to equal 1.
 </span><span class="sc24">   </span><span class="sc2">#   If the sum of all the crop fractions are less than 1, then the undefined area is set to bare soil.
 </span><span class="sc24">   </span><span class="sc2">#     -&gt; Only Array-Style input is supported.
 </span><span class="sc24">   </span><span class="sc2"># 
@@ -1632,7 +1638,7 @@ span {
 </span><span class="sc24">   </span><span class="sc2">#     It should be less than or equal to 1 - FTR  (That is FEI + FTR &lt;= 1), but this is not required.
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2">#     Can be viewed as the area that irrigated water is exposed to the sun and evaporates.
-</span><span class="sc24">   </span><span class="sc2">#     For example(for example on top of bare soil space between row crops.
+</span><span class="sc24">   </span><span class="sc2">#     For example, on top of bare soil space between row crops.
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2">#     If FEI + FTR &gt; 1, then the final consumptive use can be larger
 </span><span class="sc24">   </span><span class="sc2">#                       than the input specified due to evaporation.
@@ -1727,23 +1733,29 @@ span {
 </span><span class="sc24">   </span><span class="sc2">#               CF    = CONSUMPTIVE_USE
 </span><span class="sc24">   </span><span class="sc2">#               Kc    = CROP_COEFFICIENT
 </span><span class="sc24">   </span><span class="sc2">#               ETref = REFERENCE_ET
+</span><span class="sc24">   </span><span class="sc2">#               CU    = Potential Consumptive Use/Potential Evapotranspiration
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># If the Potential Consumptive Use is CU = CF + Kc*ETref = 0,
 </span><span class="sc24">   </span><span class="sc2">#   then the crop is assumed to be scraped clean earth with no evapotranspiration (CU = 0).
 </span><span class="sc24">   </span><span class="sc2">#
-</span><span class="sc24">   </span><span class="sc2"># This occurs when CF and Kc are set to zero indicating there is no potential consumption.
+</span><span class="sc24">   </span><span class="sc2"># This occurs when CF and Kc are set to zero indicating there is 
+</span><span class="sc24">   </span><span class="sc2">#   no potential consumption (no potential evapotranspiration).
 </span><span class="sc24">   </span><span class="sc2">#
-</span><span class="sc24">   </span><span class="sc2"># If it is desired to convert CU = 0 to Fallow/Bare soil, then
-</span><span class="sc24">   </span><span class="sc2">#   it is necessary to specify the keyword ZERO_CONSUMPTIVE_USE_BECOMES_BARE_SOIL
+</span><span class="sc24">   </span><span class="sc2"># ZERO_CONSUMPTIVE_USE_BECOMES_BARE_SOIL indicates that if a cell has CU = 0, 
+</span><span class="sc24">   </span><span class="sc2">#   then the cell is converted to BARE soil/fallowed land and redefines CU as:  
+</span><span class="sc24">   </span><span class="sc2">#     CU = REFERENCE_ET_TO_BARE * ETref or
+</span><span class="sc24">   </span><span class="sc2">#     CU = POTENTIAL_EVAPORATION_BARE
+</span><span class="sc24">   </span><span class="sc2">#   and only groundwater evaporation is allowed (that is, BARE soil evaporation).
 </span><span class="sc24">   </span><span class="sc2">#
-</span><span class="sc24">   </span><span class="sc2">#   With this keyword, if CF and Kc are set to zero, then CU = REFERENCE_ET_TO_BARE * ETref or
-</span><span class="sc24">   </span><span class="sc2">#   CU = POTENTIAL_EVAPORATION_BARE and only groundwater evaporation is allowed.
+</span><span class="sc24">   </span><span class="sc2">#   If input does not include ETref or POTENTIAL_EVAPORATION_BARE, 
+</span><span class="sc24">   </span><span class="sc2">#     then ZERO_CONSUMPTIVE_USE_BECOMES_BARE_SOIL is disabled (that is, CU = 0 is unmodified).
 </span><span class="sc24">   </span><span class="sc2">#
-</span><span class="sc24">   </span><span class="sc2">#   LAI[S,T,L] is optional. If LAI[S,T,L] is not specified,
-</span><span class="sc24">   </span><span class="sc2">#     then all Crops become bare soil when CU = 0
-</span><span class="sc24">   </span><span class="sc2">#     if LAI[S,T,L] is included then specify NCROP records that have either
-</span><span class="sc24">   </span><span class="sc2">#        a  1 to convert CU = 0 crops to bare soil calculation
-</span><span class="sc24">   </span><span class="sc2">#        or 0 to not use feature
+</span><span class="sc24">   </span><span class="sc2">#   If ZERO_CONSUMPTIVE_USE_BECOMES_BARE_SOIL is specified with none of the
+</span><span class="sc24">   </span><span class="sc2">#     LAI[S,T,L] keywords, then it is applied to all crops (equivalent to "ZERO_CONSUMPTIVE_USE_BECOMES_BARE_SOIL CONSTANT 1"). 
+</span><span class="sc24">   </span><span class="sc2">#
+</span><span class="sc24">   </span><span class="sc2">#     if LAI[S,T,L] is specified, then input expects to read NCROP records with:
+</span><span class="sc24">   </span><span class="sc2">#        1 to enabled for the crop
+</span><span class="sc24">   </span><span class="sc2">#        0 to disable for the crop
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc6">ZERO_CONSUMPTIVE_USE_BECOMES_BARE_SOIL</span><span class="sc24"> </span><span class="sc12">[</span><span class="sc24"> </span><span class="sc7">LAI</span><span class="sc12">[</span><span class="sc0">S</span><span class="sc12">,</span><span class="sc0">T</span><span class="sc12">,</span><span class="sc0">L</span><span class="sc12">]</span><span class="sc24"> </span><span class="sc12">]</span><span class="sc24">
    </span><span class="sc2">#
@@ -1793,7 +1805,7 @@ span {
 </span><span class="sc24">   </span><span class="sc2">#       Recommended values are from 0.1 to 1.0, if not specified than it is set to 1.0
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2">#    ***Note that some relax values may not help convergence or not converge at all,
-</span><span class="sc24">   </span><span class="sc2">#       while others may improve both speed and for highly nonlinear models with high water tables.
+</span><span class="sc24">   </span><span class="sc2">#       while others may improve both speed and convergence for highly nonlinear models with high water tables.
 </span><span class="sc24">   </span><span class="sc2">#       Smaller relaxation values do not necessarily equate to better convergence.
 </span><span class="sc24">   </span><span class="sc2">#       In some instances, larger values (0.8) may provide better convergence than smaller (0.1)
 </span><span class="sc24">   </span><span class="sc2">#
