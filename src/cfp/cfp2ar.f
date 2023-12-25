@@ -451,6 +451,9 @@ C--ELK**READ CFP INPUT DATA TYPE 0 IN REPORT DOCUMENTATION
      +         'expects comments to be preceded by a "#", '//
      +         'so you may have an input mismatch.')
       CFPMODE = MODE                                                    !TR: 2009 11 10 CFPMODE
+      
+      IF ( MODE > 1 ) CALL USTOP('CFP INPUT ERROR.' // NL //
+     +                     'This version of CFP only supports MODE = 1')
 C
 C--BARC**SKIP PIPE ALLOCATES AND READS IF MODE=2
       IF ( MODE.NE.2 ) THEN
@@ -478,7 +481,7 @@ C  LINE IS USED; CHECK FOR FBC PARAMETERS AND SET FLAGS
         IF( CADSML_FOUND ) CADSML_FLG = ONE
         
         IF (CADS_FLG + CADSML_FLG > ONE) THEN
-            CALL USTOP('BOTH CADS AND!TR: 2013 06 28 CADSML ' //
+            CALL USTOP('BOTH CADS AND ' //
      +                 'CADSML ARE ACTIVE - DEACTIVATE ONE')
         END IF
         !
