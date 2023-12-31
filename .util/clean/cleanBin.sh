@@ -25,8 +25,8 @@ fi
 #---- Run Script  ------------------------------------------------------------------------
 #
 echo 
-echo "BIN Clean: ${FND} ./bin -not -name 'bin' -not -name '.keep' -delete"
-${FND} ../../bin -not -name 'bin' -not -name '.keep' -delete
+echo "BIN Clean: ${FND} ./bin -not -name 'bin' -not -name '.keep' -not -name 'readme.txt' -delete"
+${FND} ../../bin -not -name 'bin' -not -name '.keep' -not -name 'readme.txt' -delete
 #
 #
 #---- Return to calling folder  ----------------------------------------------------------
