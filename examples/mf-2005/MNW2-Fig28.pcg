@@ -8,5 +8,5 @@
 #
 #-----------------------------------------------------------------------------------------------------------------------------------------------------
 
- 25 100 1                                # MXITER ITER1 NPCOND [IHCOFADD]
- 1.0E-6  1.0E-0  1.0E+00 2 1 1  1.0E+00  # HCLOSE RCLOSE RELAX NBPOL  IPRPCG MUTPCG DAMPPCG [DAMPPCGT]
+500 100 1                                 # MXITER ITER1 NPCOND [IHCOFADD]
+ 1.0E-8  5.0E-10  1.0E+00 2 1 1  1.0E+00  # HCLOSE RCLOSE RELAX NBPOL  IPRPCG MUTPCG DAMPPCG [DAMPPCGT]
