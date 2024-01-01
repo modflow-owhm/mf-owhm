@@ -1314,7 +1314,7 @@ MODULE ULOAD_AND_SFAC_INTERFACE
               IF(IU==Z) THEN
                     N = LLOC
                     !
-                    CALL VAR%OPEN(LN, LLOC, IOUT, IN, REQKEY=TRUE, NOSTOP=TRUE, KEY_FAIL_STOP=TRUE, INTERNAL_IU=INFILE, KEY_FOUND=NEG_LLOC, BINARY=BIN, KEY = EXT)
+                    CALL VAR%OPEN(LN, LLOC, IOUT, IN, REQKEY=TRUE, NOSTOP=TRUE, KEY_FAIL_STOP=TRUE, INTERNAL_IU=INFILE, KEY_FOUND=NEG_LLOC, BINARY=BIN, KEY = EXT, MSG=MSG)
                     !
                     IF(VAR%IS_INTERNAL .AND. NO_INTERN) CALL STOP_ERROR( LINE=LN, INFILE=ERROR_IU, OUTPUT=IOUT, MSG= 'ULOAD ERROR: THIS SPECIFIC INPUT LINE DOES NOT ALLOW FOR THE "INTERNAL" KEYWORD OR IMPLIED INTERNAL. PLEASE MOVE INTERNAL INPUT TO SEPARATE FILE AND CHANGE KEYWORD TO "OPEN/CLOSE" OR "EXTERNAL".', MSG2=MSG)
                     !
@@ -1358,7 +1358,7 @@ MODULE ULOAD_AND_SFAC_INTERFACE
                       N = LLOC
                       ALLOCATE(FL)
                       !
-                      CALL FL%OPEN(LN, LLOC, IOUT, IN, REQKEY=TRUE, NOSTOP=TRUE, KEY_FAIL_STOP=TRUE, INTERNAL_IU=INFILE, BINARY=BIN)
+                      CALL FL%OPEN(LN, LLOC, IOUT, IN, REQKEY=TRUE, NOSTOP=TRUE, KEY_FAIL_STOP=TRUE, INTERNAL_IU=INFILE, BINARY=BIN, MSG=MSG)
                       !
                       IF(FL%IS_INTERNAL .AND. NO_INTERN) CALL STOP_ERROR( LINE=LN, INFILE=ERROR_IU, OUTPUT=IOUT, MSG= 'ULOAD ERROR: THIS SPECIFIC INPUT LINE DOES NOT ALLOW FOR THE "INTERNAL" KEYWORD. PLEASE MOVE INTERNAL INPUT TO SEPARATE FILE AND CHANGE KEYWORD TO "OPEN/CLOSE" OR "EXTERNAL" OR INSTEAD USE AN IMPLIED INTERNAL BY HAVING THE INPUT DATA ITEM ON THE SAME LINE.', MSG2=MSG)
                       !
@@ -1861,7 +1861,7 @@ MODULE ULOAD_AND_SFAC_INTERFACE
           N = LLOC
           ALLOCATE(FL)
           !
-          CALL FL%OPEN(LN,LLOC,IOUT,IN,NOSTOP=TRUE,REQKEY=TRUE,BINARY=BIN)
+          CALL FL%OPEN(LN,LLOC,IOUT,IN,NOSTOP=TRUE,KEY_FAIL_STOP=TRUE,REQKEY=TRUE,BINARY=BIN, MSG=MSG)
           SFAC_FILE = FL%SCALE
           FL%SCALE = UNO
           BIN = FL%BINARY
@@ -2442,7 +2442,7 @@ MODULE ULOAD_AND_SFAC_INTERFACE
     IF(IU==Z) THEN
           ALLOCATE(FL)
           !
-          CALL FL%OPEN(LN,LLOC,IOUT,IN,NOSTOP=TRUE,REQKEY=TRUE,BINARY=BIN)
+          CALL FL%OPEN(LN,LLOC,IOUT,IN,NOSTOP=TRUE,KEY_FAIL_STOP=TRUE,REQKEY=TRUE,BINARY=BIN, MSG=MSG)
           !
           SFAC_FILE = FL%SCALE
           FL%SCALE = UNO
@@ -2654,7 +2654,7 @@ MODULE ULOAD_AND_SFAC_INTERFACE
                     CALL FILE_IO_ERROR( IERR, UNIT=ERROR_IU, LINE=LN, INFILE=IN, OUTPUT=IOUT, MSG= 'Attempt made to read list from uload on line, but it failed to load the following value "'//LN(ISTART:ISTOP)//'"'//BLN//'Note that no keyword was found on the previous line, so code automoved downward to next line.'//NL//'You maybe missing a keyword (viz. INTERNAL, EXTERNAL, OPEN/CLOSE, DATEFILE, DATAUNIT).', MSG2=MSG)
                ELSE
                     SELECT TYPE (VAR)
-                    TYPE IS (DATE_OPERATOR);           CALL FILE_IO_ERROR( IERR, UNIT=ERROR_IU, LINE=LN, INFILE=IN, OUTPUT=IOUT, MSG= 'Attempt made to read row of dates from ULOAD ON LINE, BUT IT FAILED TO CONVERT THE FOLLOWING TO A CALENDAR DATE "'//LN(ISTART:ISTOP)//'"'//BLN//'The accepted date formats are "mm/dd/YYYY" OR "YYYY-mm-dd" if you want to add a 24-Hour time to it you must add to the date "Thh:mm:ss" (e.g. "YYYY-mm-ddThh:mm:ss")', MSG2=MSG)
+                    TYPE IS (DATE_OPERATOR);           CALL FILE_IO_ERROR( IERR, UNIT=ERROR_IU, LINE=LN, INFILE=IN, OUTPUT=IOUT, MSG= 'Attempt made to read row of dates from ULOAD, but it failed to convert the following to a calendar date "'//LN(ISTART:ISTOP)//'"'//BLN//'The accepted date formats are "mm/dd/YYYY" OR "YYYY-mm-dd" if you want to add a 24-Hour time to it you must add to the date "Thh:mm:ss" (e.g. "YYYY-mm-ddThh:mm:ss")', MSG2=MSG)
                     TYPE IS (GENERIC_INPUT_FILE);      CALL FILE_IO_ERROR( IERR, UNIT=ERROR_IU, LINE=LN, INFILE=IN, OUTPUT=IOUT, MSG= 'Attempt made to open row of files with ULOAD, but it failed to either open, find the file, or is not set up correctly. The following is the file that was attempted to be opened "'//LN(ISTART:ISTOP)//'".', MSG2=MSG)
                     CLASS DEFAULT
                                                        CALL FILE_IO_ERROR( IERR, UNIT=ERROR_IU, LINE=LN, INFILE=IN, OUTPUT=IOUT, MSG= 'Attempt made to read a row of numbers from ULOAD on line, but it failed to load.'//NL//' (Note that error code -1 may indicate that you do not have enough numbers on the line'//NL//'  e.g. expects 5 numbers but only 4 numbers on line'//NL//'  or if line is empty/blank then you may have reached the end of file prematurely.)', MSG2=MSG)
