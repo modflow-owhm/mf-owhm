@@ -226,16 +226,13 @@ CONTAINS
       !
    end function
    !
-   subroutine writeFAIL(iu1,iu2)
-      integer, intent(in):: iu1,iu2
+   subroutine writeFAIL(iu1,iu2,note)
+      integer,      intent(in):: iu1,iu2
+      character(*), intent(in):: note
       integer:: ierr
-      if( iu1 == 0 .or. iu2 == 0 ) then
-                    write(*,'(A)') '    FAIL     ->File Not Found'
-      else
-                    write(*,'(A)') '    FAIL'
-      end if
-      close(iu1, iostat=ierr)
-      close(iu2, iostat=ierr)
+      write(*,'(A, 11x, A)') '    FAIL', note
+      if( iu1 /= 0) close(iu1, iostat=ierr)
+      if( iu2 /= 0) close(iu2, iostat=ierr)
       passed = .FALSE.
    end subroutine
    !
@@ -260,10 +257,14 @@ CONTAINS
       integer,          intent(in):: iu1, iu2
       double precision:: cmp
       !
-      if( iu1 == 0 .or. iu2 == 0 ) then
-          call writeFAIL(iu1,iu2)
-      elseif( ans1 /= ans1 .or. ans2 /= ans2 ) then
-          call writeFAIL(iu1,iu2)
+      if    ( iu1 == 0 ) then
+          call writeFAIL(iu1,iu2,"->Test result file not found")
+      elseif( iu2 == 0 ) then
+          call writeFAIL(iu1,iu2,"->True result file not found")
+      elseif( ans1 /= ans1 ) then
+          call writeFAIL(iu1,iu2,"->Test result value read error")
+      elseif( ans2 /= ans2 ) then
+          call writeFAIL(iu1,iu2,"->True result value read error")
       else
           cmp = abs( ans1 - ans2 )
           if (cmp < HTOL) then
@@ -271,7 +272,8 @@ CONTAINS
           elseif (cmp < PTOL) then
               call writePASS(iu1,iu2)
           else
-              call writeFAIL(iu1,iu2)
+              call writeFAIL(iu1,iu2,"->CumHCHG difference: "//dble2str(cmp)// &
+                                     " with True CumHCHG: "//dble2str(ans2))
           end if
       end if
       !
@@ -282,10 +284,14 @@ CONTAINS
       integer,          intent(in):: iu1, iu2
       double precision:: cmp
       !
-      if( iu1 == 0 .or. iu2 == 0 ) then
-          call writeFAIL(iu1,iu2)
-      elseif( ans1 /= ans1 .or. ans2 /= ans2 ) then
-          call writeFAIL(iu1,iu2)
+      if    ( iu1 == 0 ) then
+          call writeFAIL(iu1,iu2,"->Test result file not found")
+      elseif( iu2 == 0 ) then
+          call writeFAIL(iu1,iu2,"->True result file not found")
+      elseif( ans1 /= ans1 ) then
+          call writeFAIL(iu1,iu2,"->Test result file read error")
+      elseif( ans2 /= ans2 ) then
+          call writeFAIL(iu1,iu2,"->True result file read error")
       else
           cmp = abs( ans1 - ans2 )
           if (cmp < PTOL) then
@@ -293,7 +299,7 @@ CONTAINS
           elseif (cmp < ETOL) then
               call writePASS(iu1,iu2)
           else
-              call writeFAIL(iu1,iu2)
+              call writeFAIL(iu1,iu2,"->Test and True difference: "//dble2str(cmp))
           end if
       end if
       !
@@ -317,4 +323,62 @@ CONTAINS
       !
    end function
    !
+   function dble2str(val) result(str)
+     use, intrinsic:: iso_fortran_env, only: real64
+     real(real64),      intent(in) :: val
+     character(:),     allocatable :: str
+     real(real64):: tmp
+     logical :: val10_chk, val1c_chk, val1k_chk, val100k_chk
+     real(real64):: tol, one, neg
+     character(16):: num                                         ! Largest possible number is 14 characters
+     !
+     num=''
+     !
+     if(val /= val) then  ! NaN never equals itself if IEEE float
+         num='nan'
+     elseif(val >= HUGE(one)) then
+         num = 'inf'
+     elseif(val <= -HUGE(one)) then
+         num = '-inf'
+     elseif(val == 0.0_real64) then
+         num = '0.0'
+     elseif(val>=1.e100_real64 .or. val<=-1.e100_real64) then
+        write(num,'(es16.7e3)') val
+     elseif(val>=1.e10_real64  .or. val<=-1.e10_real64) then
+        write(num,'(es16.7e2)') val
+     elseif(val>=1.e6_real64   .or. val<=-1.e6_real64) then
+        write(num,'(es16.7e1)') val
+     else !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~v
+        !
+        tol= 1.e-13_real64
+        one= 1.0_real64
+        neg= -1.0_real64
+        tmp =     10._real64*val;   val10_chk = abs(tmp - anint(tmp)) < tmp * tol  .and. (tmp>=one .or. tmp<=neg)
+        tmp =    100._real64*val;   val1c_chk = abs(tmp - anint(tmp)) < tmp * tol  .and. (tmp>=one .or. tmp<=neg)
+        tmp =   1000._real64*val;   val1k_chk = abs(tmp - anint(tmp)) < tmp * tol  .and. (tmp>=one .or. tmp<=neg)
+        tmp = 100000._real64*val; val100k_chk = abs(tmp - anint(tmp)) < tmp * tol  .and. (tmp>=one .or. tmp<=neg)
+        !
+        if( val10_chk ) then
+           write(num,'(f16.1)') val
+        elseif( val1c_chk ) then
+           write(num,'(f16.2)') val
+        elseif( val1k_chk ) then
+           write(num,'(f16.3)') val
+        elseif(val100k_chk .or. val>=100._real64 .or. val<=-100._real64 ) then
+           write(num,'(f16.5)') val
+        elseif(val>=0.00099_real64 .or. val<=-0.00099_real64 ) then
+           write(num,'(f16.7)') val
+        elseif(val>=1.e-9_real64 .or. val<=-1.e-9_real64) then
+           write(num,'(es16.7e1)') val
+        elseif(val>=1.e-99_real64 .or. val<=-1.e-99_real64) then
+           write(num,'(es16.7e2)') val
+        else
+           write(num,'(es16.7e3)') val
+        end if
+        !
+     end if !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+     !
+     str = trim(adjustl(num))
+     !
+   end function
 end program
