@@ -1,32 +1,26 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27703.2018
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.34301.259
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "mf-owhm", "mf-owhm.vfproj", "{EA3EE8BC-18AA-47DA-8DCC-FC3553E70D29}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
-		Debug|x86 = Debug|x86
 		Fast_Debug|x64 = Fast_Debug|x64
-		Fast_Debug|x86 = Fast_Debug|x86
 		Release|x64 = Release|x64
-		Release|x86 = Release|x86
+		ReleaseIFX|x64 = ReleaseIFX|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{EA3EE8BC-18AA-47DA-8DCC-FC3553E70D29}.Debug|x64.ActiveCfg = Debug|x64
 		{EA3EE8BC-18AA-47DA-8DCC-FC3553E70D29}.Debug|x64.Build.0 = Debug|x64
-		{EA3EE8BC-18AA-47DA-8DCC-FC3553E70D29}.Debug|x86.ActiveCfg = Debug|Win32
-		{EA3EE8BC-18AA-47DA-8DCC-FC3553E70D29}.Debug|x86.Build.0 = Debug|Win32
 		{EA3EE8BC-18AA-47DA-8DCC-FC3553E70D29}.Fast_Debug|x64.ActiveCfg = Fast_Debug|x64
 		{EA3EE8BC-18AA-47DA-8DCC-FC3553E70D29}.Fast_Debug|x64.Build.0 = Fast_Debug|x64
-		{EA3EE8BC-18AA-47DA-8DCC-FC3553E70D29}.Fast_Debug|x86.ActiveCfg = Fast_Debug|Win32
-		{EA3EE8BC-18AA-47DA-8DCC-FC3553E70D29}.Fast_Debug|x86.Build.0 = Fast_Debug|Win32
 		{EA3EE8BC-18AA-47DA-8DCC-FC3553E70D29}.Release|x64.ActiveCfg = Release|x64
 		{EA3EE8BC-18AA-47DA-8DCC-FC3553E70D29}.Release|x64.Build.0 = Release|x64
-		{EA3EE8BC-18AA-47DA-8DCC-FC3553E70D29}.Release|x86.ActiveCfg = Release|Win32
-		{EA3EE8BC-18AA-47DA-8DCC-FC3553E70D29}.Release|x86.Build.0 = Release|Win32
+		{EA3EE8BC-18AA-47DA-8DCC-FC3553E70D29}.ReleaseIFX|x64.ActiveCfg = ReleaseIFX|x64
+		{EA3EE8BC-18AA-47DA-8DCC-FC3553E70D29}.ReleaseIFX|x64.Build.0 = ReleaseIFX|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
