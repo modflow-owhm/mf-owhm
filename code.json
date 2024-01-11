@@ -1,10 +1,10 @@
 [
   {
     "version": "2.3.0",
-    "status": "Preliminary",
+    "status": "Production",
 
     "date": {
-      "metadataLastUpdated": "2023-04-23"
+      "metadataLastUpdated": "2024-01-10"
     },
 
     "downloadURL":   "https://code.usgs.gov/modflow/mf-owhm/-/archive/main/mf-owhm-main.zip",

@@ -14,7 +14,57 @@
 
 ## 2.3.0
 
-2023-4-23
+2024-01-10
+
+### `CFP` Improved Input Reader 
+
+CFP was modified to use the main OWHM read utilities (`READ_TO_DATA`, `GET_INTEGER`, `GET_NUMBER`) instead of the Fortran list-directed read.  
+This has the following changes:
+
+- **Text and comment lines must start with #**
+  - The # is not required to be at the start of the line, but it must appear before any non-blank characters.
+
+- Text and comment lines are now optional (previously, Text lines were required)
+- Empty lines are skipped
+- Input errors raise a descriptive message rather than a Fortran stack dump.
+
+### `CFP` OPTION Block
+
+CFP was modified to check for an option block before the start of the input. Comments are allowed before and after the option block, but it must be placed before defining the CFP MODE. Both `BEGIN OPTION` and `BEGIN OPTIONS` are acceptable names for the block.  
+The following is the option block with all options present:
+
+```
+BEGIN OPTIONS
+   #
+   OUT_DIRECTORY  out_dir
+   #
+   FBC
+   CADS
+   CADSML
+   #
+END OPTIONS
+```
+
+where:
+
+- `OUT_DIRECTORY`  *out_dir*
+  - Indicates that CFP output files that are not defined in the NAME file are placed in the directory *out_dir*.
+    - If not specified, then *out_dir* = `./`, which is the directory MF-OWHM is run in.
+    - This effects the `NODExxx.OUT`, `TUBExxx.OUT`, and `TURBLAM.OUT` files  
+      (`xxx` is replaced with the node and tube number).
+
+- `FBC`
+  - Enable further boundary condition (FBC).
+
+- `CADS `
+  - Enable conduit-associated drainable storage (CADS).
+
+- `CADSML `
+  - Enable multi-layer, conduit-associated drainable storage (CADSML).
+
+
+For more information about `FBC`, `CADS`, and `CADSML`, please refer to Appendix 7 and 8 of [Boyce and others, 2020](https://pubs.usgs.gov/publication/tm6A60).
+
 
 ### `HYD` supports the `SWT` package
 
@@ -68,17 +118,17 @@ BAS  HD  I  1  3.  2.  Label2
 BAS  HD  I  1  5.  2.  Label3
 ```
 
-### `RCH` modified to produce similar to results to `MF-NWT` `RCH` package
+### `RCH` modified to produce results similar to MODFLOW-NWT `RCH` package
 
 This reverts a feature added in version [2.0.1](#2.0.1) under the header "`RCH` can set `NRCHOP` to `-1` "  to reflect how it originally operated in MODFLOW-NWT. 
 
-In summary, when using the `NWT` solver the IBOUND array is never changed from the `BAS` package. When `NWT` is not in use, any layer marked as `CONVERTIBLE` and has the head drops below the cell bottom changes the IBOUND to zero; the so called *DRY* cell (IBOUND=0). Because `NWT` does not vary vertical conductance (that is, it is held constant at the saturated value), any water added to a *DRY* cell percolates downward roughly at the rate of  
-C<sub>v</sub>(h<sub>cell_below</sub> - h<sub>dry_cell</sub>)
+In summary, when using the `NWT` solver the IBOUND array is never changed from the `BAS` package. For all other solvers, in any layer marked as `CONVERTIBLE` where the head drops below the cell bottom, IBOUND changes to zero; the so called *DRY* cell (IBOUND=0). Because `NWT` does not vary vertical conductance (that is, it is held constant at the saturated value), any water added to a *DRY* cell percolates downward roughly at the rate of  
+C<sub>v</sub>(h<sub>dry_cell</sub> - h<sub>cell_below</sub>)
 
-For the `RCH` package, it checks for IBOUND=0 to determine if a cell should not receive recharge or not; it does not apply recharge to *DRY* cells. However, since `NWT` never changes the IBOUND array, recharge is applied to cells that are considered *DRY* by other packages (and `NWT` will output `HDRY` for those cells). This particularly important for the `NRCHOP=3` option in `RCH`, which applies recharge to the upper most active cell. 
+The `RCH` package checks for IBOUND=0 to determine if a cell should receive recharge or not; it does not apply recharge to *DRY* cells. However, since `NWT` never changes the IBOUND array, recharge is applied to cells that are considered *DRY* by other packages (and `NWT` will output `HDRY` for those cells). This is particularly important for the `NRCHOP=3` option in `RCH`, which applies recharge to the upper most active cell. 
 
 For example, assume there is a two layer model with both layers set to `CONVERTIBLE` and have `IBOUND>0`.  
-Assume RCH applies 1 unit of recharge and the following is the state of the model: 
+Assume `RCH` applies 1 unit of recharge and the following is the state of the model: 
 
 - Lay 1 has the head less than its bottom (`HNEW(1) < BOTM(1)`)
   - If `NWT` not used, then MODFLOW sets IBOUND to zero (`IBOUND(1) = 0`)
@@ -87,13 +137,13 @@ Assume RCH applies 1 unit of recharge and the following is the state of the mode
 When using `NWT` the IBOUND array is not changed so the 1 unit of recharge is applied to Lay 1, which would percolate downward to Lay 2.  
 When using any other solver the recharge is placed in Lay 2 because Lay 1 has `IBOUND(1)=0`.
 
-This subtle difference lead to the a fix released in version 2.0.1 that only applied recharge if the cell was `CONFINE` or `CONVERTIBLE` and `HNEW > BOTM`. However, models that calibrated to this feature resulted in a significant different result when using MODFLOW-NWT and MODFLOW-OWHM, so it was decided to revert back to the method used by MODFLOW-NWT. 
+This subtle difference led to the fix released in version 2.0.1 which only applied recharge if the cell was `CONFINE` or `CONVERTIBLE` and `HNEW > BOTM`. However, models using this feature resulted in a significantly different result when using MODFLOW-NWT and MODFLOW-OWHM, so it was decided to revert back to the method used by MODFLOW-NWT. 
 
-If you want to apply the recharge only to the water table, please see the next feature.
+If you want to apply recharge only to the water table, please see the next feature.
 
 ### `RCH` supports `NRCHOP = 4`  and `5` ➣ Apply recharge to water table cell
 
-As discussed in the previous feature, when using the `NWT` solver with a DRY cell can result in a difference in how the recharge is applied to the model. Since the fix applied in version [2.0.1](#2.0.1) was removed, recharge is applied to the upper most `IBOUND /= 0` cell rather than the water table. To allow users to still apply recharge to the water table a new option was added. 
+As discussed in the previous feature, when using the `NWT` solver with a DRY cell recharge is applied differently than with other solvers. Since the fix applied in version [2.0.1](#2.0.1) was removed, recharge is applied to the upper most `IBOUND /= 0` cell rather than the water table. To allow users to still apply recharge to the water table a new option was added. 
 
 If `RCH` sets the `NRCHOP = 4`:
 
@@ -141,7 +191,7 @@ Using the example presented in the previous feature, the following happens (inde
 
 * `SUPPLY_WELL` Block ignores row and column read in for supply wells that are linked to `MNW2`. Their input is still required, but is not used. Instead the row and column are copied over from the `MNW2` input.
 * `SUPPLY_WELL` Block now checks if non-MNW2 linked wells are within model grid and raises an error if a well is not.
-* Improved reading in the spatial location of the Water Balance Subregion (WBS). This input is read in the`WATER_BALANCE_SUBREGION` Block with the the keyword `LOCATION`, as an integer array, with a value of `0` to indicate no WBS and non-zero to indicate the WBS that is associated with that (row, col) loocation. If the number specified in the input is greater than the total number (`>NWBS`) or less than `0`, then the WBS number is changed to `0` and the model cell location is ignored. 
+* Improved reading in the spatial location of the Water Balance Subregion (WBS). This input is read in the`WATER_BALANCE_SUBREGION` Block with the keyword `LOCATION`, as an integer array, with a value of `0` to indicate no WBS and non-zero to indicate the WBS that is associated with that (row, col) location. If the number specified in the input is greater than the total number (`>NWBS`) or less than `0`, then the WBS number is changed to `0` and the model cell location is ignored. 
 * `CLIMATE` Block `DIRECT_RECHARGE` keyword can be specified multiple times. The sum of the recharge arrays are applied to deep percolations.  
   For example:  
   `DIRECT_RECHARGE  FLUX  STATIC ARRAY OPEN/CLOSE rch1.txt`  
@@ -149,8 +199,8 @@ Using the example presented in the previous feature, the following happens (inde
   `DIRECT_RECHARGE  RATE  STATIC ARRAY OPEN/CLOSE rch3.txt`  
   would apply to deep percolation the sum from the arrays read in from rch1.txt, rch2.txt, and rch3.txt
 * Part of runoff can be defined to leave the model.
-  * Runoff that is generated from FMP either flows to SFR or leaves the model as lost runoff. The SFR locations are either defined explicitly as a semi-routed return (`SRR`) points or automatically as fully-routed return (`FRR`). `FRR` just searched for any SFR segments/reaches that reside in a Water Balance Subregion (WBS) and set then as `SRR` locations.
-  * The code was updated to allow defining `SRR`  locations with the segment = 0 to indicate that runoff is supposed to leave the model. There is no limit for how many `SRR` locations that remove water from the model, but it is recommended to only have one per WBS.
+  * Runoff that is generated from FMP either flows to SFR or leaves the model as lost runoff. The SFR locations are either defined explicitly as semi-routed return (`SRR`) points or automatically as fully-routed return (`FRR`). `FRR` searches for any SFR segments/reaches that reside in a Water Balance Subregion (WBS) and sets them as `SRR` locations.
+  * The code was updated to allow defining `SRR`  locations with the segment = 0 to indicate that runoff is supposed to leave the model as lost runoff. There is no limit for how many `SRR` locations that remove water from the model, but it is recommended to only have one per WBS.
   * For example,  given that `NSFR_RETURN` = 2 and the user wants WBS 4 to have 60% of the runoff to go to segment 5, reach 1 and 40% of the runoff to leave the model domain. The input would have the following format:  
     `SEMI_ROUTED_RETURN  STATIC  LIST  INTERNAL`  
     `# ISRR, WBS_ID, SEGMENT, REACH, [FRAC]`  
@@ -172,23 +222,22 @@ Using the example presented in the previous feature, the following happens (inde
 
 ### `HOB` Improvements
 
-* Drawdown observations must be in chronological order or an error is raised. Either the user will need to fix the order or change the observation order or change to head observations.
+* Drawdown observations must be in chronological order or an error is raised. The user must change the observation order or switch to head observations.
 
 * Head observations that are not within the simulation are set to a null value.
   * Set to the `NOT_OBSERVED_VALUE`, if it is specified, otherwise set to `HOBDRY`.
   * Allows simulation to continue with an HOB file that includes observations that are not within the simulation timeframe.
-    * Typically occurs if you want to run the model with feature stress periods than it was designed for, or when using the `FASTFORWARD` option.
+    * Typically occurs if you want to run the model with fewer stress periods than it was designed for, or when using the `FASTFORWARD` option.
 
 * Drawdown observations that have the first head observation not within the simulation have all the observations set to the `HOBDRY` value.
-* The HOB supports keywords that are specified at the start o the input file, one per line and in any order.  
+* `HOB` supports keywords that are specified at the start of the input file, one per line and in any order.  
   Keywords supported:
   * `TIME_STEP_PRINT`  *Generic_Output*
     * Writes head observations to file when they are simulated.
     * The order of the observations is the order they appear in the simulation.
 
   * `TIME_STEP_PRINT_ALL`  *Generic_Output*
-    * Writes all head observations to file at the end of each time step.
-      * The file is replaced after each time step.
+    * Writes all head observations to file at the end of each time step. The file is replaced after each time step.
 
     * This is useful to obtain the head observations when the simulation crashes.
 
@@ -242,7 +291,7 @@ Lets assume the HOB defines the observation location `XYZ`, that measures the fo
 The observation names will be printed with a length of 16, such as:
 `"XYZ_1           "`
 
-After time step 1 (simulation time from 0.0 to 10.0), the the file `./output/head_obs.txt` will contain:
+After time step 1 (simulation time from 0.0 to 10.0), the file `./output/head_obs.txt` will contain:
 
 ```
 "SIMULATED EQUIVALENT"   "OBSERVED VALUE"    "OBSERVATION NAME"      DATE    DECIMAL_YEAR
@@ -255,7 +304,7 @@ After time step 1 (simulation time from 0.0 to 10.0), the the file `./output/hea
   -8.88800000000E+03   1.50000000000E+00       XYZ_7            2001-01-09     2001.021918
 ```
 
-After time step 2 (simulation time from 10.0 to 20.0), the the file `./output/head_obs.txt` will contain:
+After time step 2 (simulation time from 10.0 to 20.0), the file `./output/head_obs.txt` will contain:
 
 ```
 "SIMULATED EQUIVALENT"   "OBSERVED VALUE"    "OBSERVATION NAME"      DATE    DECIMAL_YEAR
@@ -268,7 +317,7 @@ After time step 2 (simulation time from 10.0 to 20.0), the the file `./output/he
   -8.88800000000E+03   1.50000000000E+00       XYZ_7            2001-01-09     2001.021918
 ```
 
-After time step 3 (simulation time from 20.0 to 30.0), the the file `./output/head_obs.txt` will contain (same as Time Step 2):
+After time step 3 (simulation time from 20.0 to 30.0), the file `./output/head_obs.txt` will contain (same as Time Step 2):
 
 ```
 "SIMULATED EQUIVALENT"   "OBSERVED VALUE"    "OBSERVATION NAME"      DATE    DECIMAL_YEAR
@@ -281,7 +330,7 @@ After time step 3 (simulation time from 20.0 to 30.0), the the file `./output/he
   -8.88800000000E+03   1.50000000000E+00       XYZ_7            2001-01-09     2001.021918
 ```
 
-After time step 4 (simulation time from 30.0 to 40.0), the the **final version of the file** `./output/head_obs.txt` will contain:
+After time step 4 (simulation time from 30.0 to 40.0), the **final version of the file** `./output/head_obs.txt` will contain:
 
 ```
 "SIMULATED EQUIVALENT"   "OBSERVED VALUE"    "OBSERVATION NAME"      DATE    DECIMAL_YEAR
@@ -304,7 +353,7 @@ Observation point `XYZ_7` is always set to the `NO_OBS_VALUE` because it is beyo
 
 ### `Tabfile` Improved Open File Keyword Support
 
-* The `Tabfile` module previously would previously read a set of filenames to open or use the keyword `EXTERNAL` read a *unit* number. However if the user used another keyword, such as `OPEN/CLOSE`, the program would stop and not raise an ambiguous error message.
+* The `Tabfile` module previously would read a set of filenames to open or use the keyword `EXTERNAL` to read a *unit* number. However if the user used another keyword, such as `OPEN/CLOSE`, the program would stop and raise an ambiguous error message.
 * The `Tabfile` code can now just read the tabfile files as:  
   `EXTERAL` *unit*  
   *filename*  
@@ -561,8 +610,8 @@ MONTHLY  -4   SS        # MONTHLY input with 4 time steps, and first stress peri
 
 ### S Interpretive Language for Customizable User Input (`slang`)
 
-- Custom scripting langauge that can be used for dynmaic changes to MODFLOW-OWHM.
-- Developed to enable custom reservoir opeations decision trees in MODFLOW.
+- Custom scripting langauge that can be used for dynamic changes to MODFLOW-OWHM.
+- Developed to enable custom reservoir operation decision trees in MODFLOW.
 
 ### `U1DREL`, `U2DREL`, and `U2DINT` no longer require specifying `CNSTNT`, `FMTIN`, and `IPRN`
 

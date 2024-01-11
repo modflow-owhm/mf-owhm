@@ -1147,14 +1147,14 @@ MODULE FMP_MAIN_DRIVER
     !4C-----SKIP 1ST FMP_FM-ITERATION
     IF(ISTARTFL.LE.0) RETURN
     !
-    IF(WBS%HAS_SFR) THEN !RESEST BACK TO ORIGINAL RUNOFF FROM SFR INPUT
-       !
-       DO CONCURRENT (I=1:NSTRM, FMP_MOD_SFR_RUNOFF(I))
-           !
-           STRM(12,I) = SFR_RUNOFF(I)
-           !
-       END DO
-    END IF
+    !IF(WBS%HAS_SFR) THEN !RESEST BACK TO ORIGINAL RUNOFF FROM SFR INPUT -> seb, moved to after SWO computation block
+    !   !
+    !   DO CONCURRENT (I=1:NSTRM, FMP_MOD_SFR_RUNOFF(I))
+    !       !
+    !       STRM(12,I) = SFR_RUNOFF(I)
+    !       !
+    !   END DO
+    !END IF
     !
     !GET POTENTIAL FLOW FROM SFR DELIVERY POINTS
     IF(WBS%HAS_SFR) CALL SFR_DELIV%SET_INFLOW(STRM)
@@ -1368,18 +1368,18 @@ MODULE FMP_MAIN_DRIVER
     !!!END IF
     !
     !
-    CALL SWODAT%COMPUTE_ALLOCATION_AND_RELEASE(KPER,KSTP,KITER,IDIVAR,STRM,SEG, SITER)       ! FINAL SET OF RELEASES AFTER INNER, INNER ITERATIONS
+    CALL SWODAT%COMPUTE_ALLOCATION_AND_RELEASE(KPER,KSTP,KITER,IDIVAR,STRM,SEG, SITER)       ! FINAL SET OF RELEASES AFTER INNER, INNER ITERATIONS; SFR RUNOFF, STRM(12,:), is from previous iteration
     !
     END IF !WBS%HAS_SWO
     !
-    !IF(WBS%HAS_SFR) THEN !RESEST BACK TO ORIGINAL RUNOFF FROM SFR INPUT
-    !   !
-    !   DO CONCURRENT (I=1:NSTRM, FMP_MOD_SFR_RUNOFF(I))
-    !       !
-    !       STRM(12,I) = SFR_RUNOFF(I)
-    !       !
-    !   END DO
-    !END IF
+    IF(WBS%HAS_SFR) THEN !RESEST BACK TO ORIGINAL RUNOFF FROM SFR INPUT -> seb, moved to after SWO computation block
+       !
+       DO CONCURRENT (I=1:NSTRM, FMP_MOD_SFR_RUNOFF(I))
+           !
+           STRM(12,I) = SFR_RUNOFF(I)
+           !
+       END DO
+    END IF
     !
     !
     !7===== START OF FARMS LOOP =================================================================================

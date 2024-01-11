@@ -11,13 +11,24 @@ C               BCF, LPF OR HUF FOR MODE 2;
 C     **MODE=3, PIPES AND LAYERS
 C
 C     ******************************************************************
+      USE GENERIC_OUTPUT_FILE_INSTRUCTION,  ONLY: GENERIC_OUTPUT_FILE
       IMPLICIT NONE
+      PRIVATE :: GENERIC_OUTPUT_FILE
       INTEGER, PARAMETER :: NNOD = 6
       !DOUBLE PRECISION, PARAMETER :: PII = 3.141592654D0
       !DOUBLE PRECISION, PARAMETER :: TWOPII = 2.0D0*3.141592654D0
       DOUBLE PRECISION, PARAMETER :: ONE8TH = 1.0D0/8.0D0!, DOS = 2.0D0
       !DOUBLE PRECISION, PARAMETER :: NEARZERO = 1.0D-30, DZ = 0.0D0
       DOUBLE PRECISION, PARAMETER :: CM2INCH = 3.2804D0
+C
+C     GENERIC_OUTPUT_FILE for NODE and TUBE output
+      TYPE CFP_OUTPUT_FILE
+          TYPE(GENERIC_OUTPUT_FILE), ALLOCATABLE:: FL
+      END TYPE
+      TYPE(CFP_OUTPUT_FILE),DIMENSION(:),SAVE,POINTER::NODE_OUTPUT_FILES
+      TYPE(CFP_OUTPUT_FILE),DIMENSION(:),SAVE,POINTER::TUBE_OUTPUT_FILES
+      TYPE(GENERIC_OUTPUT_FILE),SAVE,POINTER::TURBLAM
+      CHARACTER(:), POINTER :: CFP_OUT_DIRECTORY
 C
 C--VARIABLES NEEDED FOR MODE 1:
       INTEGER, SAVE, POINTER :: MODE, MXNODE, MXTUBE, NBR_LAY, ITERS
@@ -132,16 +143,21 @@ C--GSFLOW
       DOUBLE PRECISION, SAVE, POINTER, DIMENSION(:) :: ROF
 C
 C--VARIABLES NEEDED FOR MODE 2:
-      INTEGER, SAVE, POINTER :: NCL,ICFPCNVG,IRADFLAG,IRADWELCOL
+!     INTEGER, SAVE, POINTER :: NCL,ICFPCNVG,IRADFLAG,IRADWELCOL        !TR: 2023 07 02 REMOVE RADIAL FLOW
+      INTEGER, SAVE, POINTER :: NCL,ICFPCNVG
       INTEGER, SAVE, POINTER, DIMENSION(:) :: CL
 C
 C--FOR RADIAL FLOW MODELS
-      DOUBLE PRECISION, SAVE, POINTER,DIMENSION(:) :: R_LENGTH
+!     DOUBLE PRECISION, SAVE, POINTER,DIMENSION(:) :: R_LENGTH          !TR: 2023 07 02 REMOVE SPATIAL VARIABILITY AND FEEXP
       DOUBLE PRECISION, SAVE, POINTER :: TWATER, DENSWA, VISCWA
+      
+      DOUBLE PRECISION, SAVE, POINTER, DIMENSION(:) :: Lcritrey
+      DOUBLE PRECISION, SAVE, POINTER, DIMENSION(:) :: Tcritrey, Void
+      DOUBLE PRECISION, SAVE, POINTER, DIMENSION(:) :: FEEXP
 C      
-C--ADD SPATIAL VARIABILITY
-      DOUBLE PRECISION, SAVE, POINTER,DIMENSION(:,:,:) :: TWATER2, 
-     +DENSWA2, VISCWA2,VOID2,LCRITREY2,TCRITREY2,FEEXP                  !TR: 2010 03 22 FEEXP AS FLOW EQUATION EXPONENT 
+C--ADD SPATIAL VARIABILITY                                              !TR: 2023 07 02 REMOVE SPATIAL VARIABILITY AND FEEXP
+!     DOUBLE PRECISION, SAVE, POINTER,DIMENSION(:,:,:) :: TWATER2, 
+!    +DENSWA2, VISCWA2,VOID2,LCRITREY2,TCRITREY2,FEEXP                  !TR: 2010 03 22 FEEXP AS FLOW EQUATION EXPONENT 
 C
 C--BARC**ADD THESE
       DOUBLE PRECISION, SAVE, POINTER, DIMENSION(:,:,:) :: KLAM_CR,
@@ -150,7 +166,7 @@ C--BARC**ADD THESE
       INTEGER, SAVE, POINTER, DIMENSION(:,:,:) :: TURB_FR, TURB_FF,
      +TURB_FV
       INTEGER, SAVE, POINTER, DIMENSION(:,:,:) :: TL_OUT
-      DOUBLE PRECISION, SAVE, POINTER, DIMENSION(:,:,:) :: CRT, CCT,CVT
+!     DOUBLE PRECISION, SAVE, POINTER, DIMENSION(:,:,:) :: CRT, CCT,CVT
 C
 C--FOR CAD STORAGE
       INTEGER, SAVE, POINTER :: CADS_FLG, CADSML_FLG                    !TR: 2012 04 25 CADS / CADS_FLG = DEFINES WHETHER CADS IS ACTIVE (1) OR NOT (0) // 2013 06 28 CADSML_FLG
@@ -214,7 +230,13 @@ C     ALLOCATE AND READ DATA FOR CONDUIT FLOW PROCESS
 C     MARCH 2007 VERSION 1.0
 C     ******************************************************************
 C
-      USE CONSTANTS, ONLY: TRUE,FALSE,Z,ONE,NEG,NINER,DZ,DOS,NEARZERO_30
+      USE CONSTANTS, ONLY: TRUE,FALSE,Z,ONE,NEG,NINER,DZ,DOS,
+     +                     NEARZERO_30, NL
+      USE PARSE_WORD_INTERFACE, ONLY: PARSE_WORD, PARSE_WORD_UP
+      USE FILE_IO_INTERFACE,    ONLY: READ_TO_DATA
+      USE STRINGS,              ONLY: GET_INTEGER, GET_NUMBER, GET_WORD
+      USE NUM2STR_INTERFACE,    ONLY: NUM2STR
+      USE GENERIC_BLOCK_READER_INSTRUCTION, ONLY: GENERIC_BLOCK_READER
       USE GLOBAL, ONLY:IOUT, NCOL, NROW, NLAY, LENUNI, ITMUNI,BOTM,DELR
       USE CFPMODULE
       IMPLICIT NONE
@@ -230,12 +252,23 @@ C--ARGUMENTS
 C
 C--LOCAL VARIABLES
       INTEGER I, IC, II, IL, IR, J, IDUMMY,K,KK, NUM            !TR: 2016 10 11 NUM FOR COUNT_LINE_NUMBERS ROUTINE
-      CHARACTER(LEN=80) CDUMMY
+      CHARACTER(LEN=1024) CDUMMY
       DOUBLE PRECISION DUMMY2
       CHARACTER (LEN=8) BC_TYPE,  NAME_MULTI(8)                         !TR: 2012 05 09 FHLQ / TO CONSIDER FURTHER BC DATA; READ IN N_HEAD DATA (LINE 27 OF CFPM1 INPUT) // 2018 05 22 LISTING OUTPUT
+      CHARACTER (LEN=8) BC_TYPES(8)
       DOUBLE PRECISION BC_DUMMY1, BC_DUMMY2                             !TR: 2012 05 09 FHLQ / DUMMYS FOR BC_DATA
       INTEGER FHLQ_COUNT, WELL_COUNT, CY_COUNT, LH_COUNT                !TR: 2012 05 09 FHLQ / WELL / FHLQ_COUNT / WELL_COUNT = COUNTER TO CHECK FHLQ /WELL BC INPUT / 2013 03 13 CAUCHY / 2013 03 22 LH / 2013 04 03  WELL TD
       REAL,DIMENSION(:,:),ALLOCATABLE:: ARR
+      INTEGER :: LLOC, ISTART, ISTOP
+      CHARACTER(:), ALLOCATABLE:: CTMP, CTMP2
+      LOGICAL :: ERROR
+      CHARACTER(79):: NBR_STR
+      CHARACTER(94):: BC_TYPES_STR
+      TYPE(GENERIC_BLOCK_READER):: BL
+      LOGICAL :: FBC_FOUND
+      LOGICAL :: CADS_FOUND
+      LOGICAL :: CADSML_FOUND
+      
 C
 C--BARC**FOR CFPMODE 2 U2DREL
       CHARACTER(24) ANAME(5)
@@ -247,7 +280,21 @@ C
       DATA ANAME(2) /'      MEAN VOID DIAMETER'/
       DATA ANAME(3) /'   LOWER CRIT REY NUMBER'/
       DATA ANAME(4) /'   UPPER CRIT REY NUMBER'/
-      DATA ANAME(5) /'            TURB EXP (M)'/     
+      DATA ANAME(5) /'            TURB EXP (M)'/  
+      NBR_STR = "NO_N,  MC,  MR,  ML, NB1, NB2, NB3, NB4, NB5, "//
+     +          "NB6, PB1, PB2, PB3, PB4, PB5, PB6"
+      BC_TYPES = ["FHLQ    ",
+     +            "FHLQTD  ",
+     +            "WELL    ",
+     +            "WELLTD  ",
+     +            "CAUCHY  ",
+     +            "CAUCHYTD",
+     +            "LH      ",
+     +            "TD      "
+     +            ]
+      BC_TYPES_STR = '"FHLQ    ", "FHLQTD  ", "WELL    ", '//
+     +               '"WELLTD  ", "CAUCHY  ", "CAUCHYTD", '//
+     +               '"LH      ", "TD      "'
 C      
 C--ALLOCATE SCALAR DATA.
       ALLOCATE (MODE, MXNODE, MXTUBE, NBR_LAY, KONV, FTURB, ITERS)
@@ -264,6 +311,7 @@ C--ALLOCATE SCALAR DATA.
       ALLOCATE(ARR(NCOL,NROW))                                          !seb TMP space for U2DREL
 C
 C--INITIALIZE
+      ICFPCNVG = Z
       CADS_FLG = Z                                                      !TR: 2012 05 09 CADS / INI CADS_FLG
       CADSML_FLG = Z                                                    !TR: 2013 06 28 CADSML / INI CADSML_FLG
       FHLQ_FLG = FALSE                                                !TR: 2012 05 09 FHLQ / INI FHLQ_FLG
@@ -286,6 +334,9 @@ C--INITIALIZE
       L_ABS = DZ                                                       !TR: 2014 11 18 L_ABS
       NO_L_NTS = Z                                                     !TR: 2018 05 22 COUNTER FOR LISTING OUTPUT
       L_NTS = ONE                                                      !TR: 2018 05 22 NUMBER OF TIME STEPS FOR LISTING OUTPUT (CALL FREQUENCY OF NWBOUT AND FLOW_OUTPUT)
+      FBC_FOUND    = FALSE
+      CADS_FOUND   = FALSE
+      CADSML_FOUND = FALSE
 C
 C--CBARC**FOR BUDGETS AND OUTPUT CONTROL
       ALLOCATE (BUD_SOURCE, BUD_SINK, BUD_MATIN, BUD_MATOUT,            !TR: 2012 04 24 BUD_QBDIR REMOVED
@@ -337,14 +388,72 @@ C
 C--BARC**WRITE MESSAGE TO OUTPUT IOUT
       WRITE (IOUT, *)
       WRITE (IOUT, *) 'CFP1AR READING FROM UNIT', INUNIT
+      WRITE (IOUT, *) 'CFP NOW REQUIRES COMMENT LINES '//
+     +                'TO BE PRECEDED BY A #'
+
+      ALLOCATE(CFP_OUT_DIRECTORY, SOURCE="./")
+C
 C 
 C--BARC**READ MODE TO DETERMINE WHAT IS READ FROM CFP FILE.
 C--ELK**READ CFP INPUT FILE CDUMMY REQUIRED COMMENT LINE FOR SIMULATION
-      READ (INUNIT, *) CDUMMY
+      CALL READ_TO_DATA(CDUMMY, INUNIT, IOUT, IOUT)
+C
+      CALL BL%LOAD(INUNIT,IOUT,CDUMMY)
+      
+      IF(BL%NAME == 'OPTION' .OR. BL%NAME == 'OPTIONS' ) THEN
+        !
+        WRITE(IOUT,'(/,1X,A)') 'PROCESSING CFP OPTION BLOCK'
+        !
+        CALL BL%START()
+        DO I=ONE, BL%NLINE
+          LLOC = ONE
+          CALL PARSE_WORD_UP(BL%LINE,LLOC,ISTART,ISTOP)
+          !
+          SELECT CASE (BL%LINE(ISTART:ISTOP))
+          CASE('FBC')
+              WRITE(IOUT,'(6x, A)') "FBC option found"
+              FBC_FOUND = TRUE
+          CASE('CADS')
+              WRITE(IOUT,'(6x, A)') "CADS option found"
+              CADS_FOUND = TRUE
+          CASE('CADSML')
+              WRITE(IOUT,'(6x, A)') "CADSML option found"
+              CADSML_FOUND = TRUE
+          CASE('OUT_DIRECTORY', 'OUT_DIR','DIRECTORY')
+            !
+            WRITE(IOUT,'(6x,2A)') BL%LINE(ISTART:ISTOP), " option found"
+            !
+            CALL PARSE_WORD(BL%LINE,LLOC,ISTART,ISTOP)
+            IF( BL%LINE(ISTART:ISTOP) /= '' ) THEN
+              DEALLOCATE(CFP_OUT_DIRECTORY, STAT=J)
+              IF( BL%LINE(ISTOP:ISTOP)=='/' .OR. 
+     +            BL%LINE(ISTOP:ISTOP)=='\' )THEN
+                  ALLOCATE(CFP_OUT_DIRECTORY, 
+     +                     SOURCE=BL%LINE(ISTART:ISTOP))
+              ELSE
+                  ALLOCATE(CFP_OUT_DIRECTORY, 
+     +                     SOURCE=BL%LINE(ISTART:ISTOP)//'/')
+              END IF
+            END IF
+            
+            WRITE(IOUT,'(10x, 3A)') 
+     +            'CFP node*.out and tube*.out will be placed in: "',
+     +            CFP_OUT_DIRECTORY,'"'
+          END SELECT
+          CALL BL%NEXT()
+        END DO
+      END IF
 C
 C--ELK**READ CFP INPUT DATA TYPE 0 IN REPORT DOCUMENTATION
-      READ (INUNIT, *) MODE
+      LLOC = ONE
+      CALL GET_INTEGER(CDUMMY,LLOC,ISTART,ISTOP,IOUT,INUNIT,MODE,
+     +     MSG='Failed to read CFP "MODE". Note input now '//
+     +         'expects comments to be preceded by a "#", '//
+     +         'so you may have an input mismatch.')
       CFPMODE = MODE                                                    !TR: 2009 11 10 CFPMODE
+      
+      IF ( MODE > 1 ) CALL USTOP('CFP INPUT ERROR.' // NL //
+     +                     'This version of CFP only supports MODE = 1')
 C
 C--BARC**SKIP PIPE ALLOCATES AND READS IF MODE=2
       IF ( MODE.NE.2 ) THEN
@@ -355,34 +464,68 @@ C--BARC**READ WHAT IS NEEDED FOR PIPES
         WRITE (IOUT, *) '---------------------------------'
 C
 C--ELK**READ CFP INPUT FILE DATA TYPE 1 AND 2 REQUIRED COMMENT LINES
-        READ (INUNIT,'(A)') CDUMMY
+        CALL READ_TO_DATA(CDUMMY, INUNIT, IOUT, IOUT)
 C
 C--CHECK IF FURTHER BOUNDARY DATA ARE ACTIVE - HERE THE FIRST COMMENT 
 C  LINE IS USED; CHECK FOR FBC PARAMETERS AND SET FLAGS        
-        CALL CHECKPARA(CDUMMY,"FBC",IOUT,FBC_FLG)        
-        CALL CHECKPARA(CDUMMY,"CADS",IOUT,CADS_FLG)    
+        CALL CHECKPARA(CDUMMY,"FBC",   IOUT,FBC_FLG   )        
+        CALL CHECKPARA(CDUMMY,"CADS",  IOUT,CADS_FLG  )    
         CALL CHECKPARA(CDUMMY,"CADSML",IOUT,CADSML_FLG)                 !TR: 2013 06 28 CADSML
-        IF (CADS_FLG.EQ.1.AND.CADSML_FLG.EQ.1) CALL USTOP('BOTH CADS AND!TR: 2013 06 28 CADSML
-     + CADSML ARE ACTIVE - DEACTIVATE ONE - STOP')
+        
+        IF (FBC_FLG + CADS_FLG + CADSML_FLG > Z) THEN                   ! Found FBC_FLG, CADS_FLG, or CADSML_FLG
+            CALL READ_TO_DATA(CDUMMY, INUNIT, IOUT, IOUT)
+        END IF
+        
+        IF( FBC_FOUND    ) FBC_FLG    = ONE  ! If defined in option block
+        IF( CADS_FOUND   ) CADS_FLG   = ONE
+        IF( CADSML_FOUND ) CADSML_FLG = ONE
+        
+        IF (CADS_FLG + CADSML_FLG > ONE) THEN
+            CALL USTOP('BOTH CADS AND ' //
+     +                 'CADSML ARE ACTIVE - DEACTIVATE ONE')
+        END IF
+        !
+        IF (FBC_FLG    > Z) WRITE(IOUT, '(A)') " FBC    OPTION ENABLED"
+        IF (CADS_FLG   > Z) WRITE(IOUT, '(A)') " CADS   OPTION ENABLED"
+        IF (CADSML_FLG > Z) WRITE(IOUT, '(A)') " CADSML OPTION ENABLED"
 C 
 C--BARC&ELK**READ CFP INPUT FILE DATA TYPE 3 MXNODE,MXTUBE,NBR_LAY
 C--BARC**SET NNOD, THIS IS THE MAXIMUM # OF CONNECTING NODES (3-D)
-        READ (INUNIT, *) CDUMMY    
-        READ (INUNIT, *) MXNODE, MXTUBE, NBR_LAY     
+
+      LLOC = ONE
+      CALL GET_INTEGER(CDUMMY,LLOC,ISTART,ISTOP,IOUT,INUNIT,MXNODE,
+     +     MSG='CPF input line expects "NNODES, NPIPES, NLAYERS"'//NL//
+     +         'Failed to read "NNODES" (mxnode)'//NL//
+     +         'Note CFP input now expects comments '//
+     +         'to be preceded by a "#", '//
+     +         'so you may have an input mismatch.')
+      CALL GET_INTEGER(CDUMMY,LLOC,ISTART,ISTOP,IOUT,INUNIT,MXTUBE,
+     +     MSG='CPF input line expects "NNODES, NPIPES, NLAYERS"'//NL//
+     +         'Failed to read "NPIPES"'//NL//
+     +         'Note CFP input now expects comments '//
+     +         'to be preceded by a "#", '//
+     +         'so you may have an input mismatch.')
+      CALL GET_INTEGER(CDUMMY,LLOC,ISTART,ISTOP,IOUT,INUNIT,NBR_LAY,
+     +     MSG='CPF input line expects "NNODES, NPIPES, NLAYERS"'//NL//
+     +         'Failed to read "NLAYERS"'//NL//
+     +         'Note CFP input now expects comments '//
+     +         'to be preceded by a "#", '//
+     +         'so you may have an input mismatch.')
         WRITE (IOUT, 9001) MXNODE
         WRITE (IOUT, 9009) MXTUBE
         WRITE (IOUT, 9002) NBR_LAY
 C 
 C--SEBA--TEST IF # OF LAYERS IN MODFLOW AND CONDUIT IS THE SAME
         IF ( NLAY.NE.NBR_LAY ) THEN
-          PRINT *,                                                      
-     +    'THE NUMBER OF LAYERS IN MODFLOW AND CFP FILE IS NOT THE SAME'
-          PRINT *, '  PROGRAM STOPS'
-          STOP
+            CALL USTOP('THE NUMBER OF LAYERS IN MODFLOW '//
+     +                 'AND CFP FILE IS NOT THE SAME')
         ENDIF
 C        
-C--BARC**ALLOCATE MODE 1 ARRAYS AND VARIABLES THAT NEED MXNODE,MXTUBE,
-C  NBR_LAY
+C--BARC**ALLOCATE MODE 1 ARRAYS AND VARIABLES THAT NEED MXNODE,MXTUBE,NBR_LAY 
+C
+        ALLOCATE(NODE_OUTPUT_FILES(MXNODE))
+        ALLOCATE(TUBE_OUTPUT_FILES(MXTUBE))
+      
         ALLOCATE (NBR(MXNODE,4+2*NNOD))
         ALLOCATE (NODETOP(MXNODE), NODEBOT(MXNODE))
 !       ALLOCATE (LAY_THICK(NBR_LAY))
@@ -480,9 +623,9 @@ C
 C--BARC**MAKE SURE LENGTH AND TIME UNITS ARE NOT UNDEFINED, SO THAT G
 C  CAN BE DEFINED
         IF ( ITMUNI.EQ.Z .OR. LENUNI.EQ.Z ) THEN
-          PRINT *, 'ERROR IN DIS FILE, ITMUNI AND LENUNIT CANNOT BE',   
-     +          ' UNDEFINED WHEN CFP IS ACTIVE'
-          STOP
+          CALL USTOP('CFP ERROR IN DIS FILE UNITS ERROR. '//NL//
+     +               'ITMUNI AND LENUNIT MUST SPECIFY A UNIT.'//NL//
+     +               'CURRENTLY, ITMUNI OR LENUNIT IS SET TO UNDEFINED')
         ENDIF
 C 
 C--BARC**SET G
@@ -529,8 +672,13 @@ C--BARC**ALLOCATE AND INITIALIZE NCOND
 C 
 C--BARC&ELK**READ COMMENT CFC INPUT FILE DATA TYPE 4 AND TEMPERATURE IN
 C  C DATA TYPE 5
-        READ (INUNIT, '(A)') CDUMMY
-        READ (INUNIT, *) TC
+      CALL READ_TO_DATA(CDUMMY, INUNIT, IOUT, IOUT)
+      LLOC = ONE
+      CALL GET_NUMBER(CDUMMY,LLOC,ISTART,ISTOP,IOUT,INUNIT,TC,MSG=
+     +     'Failed to read CFP water "TEMPERATURE". '//
+     +     'Note input now expects comments to be preceded by a "#", '//
+     +     'so you may have an input mismatch.')
+
         WRITE (IOUT, *) 'WATER TEMPERATURE, IN DEGREES CELCIUS, IS ', TC
 C 
 C--BARC**CALCULATE DYNAMIC VISCOSITY
@@ -576,18 +724,43 @@ C--BARC**SET NU
 C
 C--READ IN NODES, TUBES AND THEIR RELATION => NBR-ARRAY
 C--ELK READ CFP INPUT DATA TYPE 6 REQUIRED COMMENT LINE
-        READ (INUNIT, '(A)') CDUMMY
-        WRITE (IOUT, *)
-        WRITE (IOUT, *) ' NBR-ARRAY: '
+        CALL READ_TO_DATA(CDUMMY, INUNIT, IOUT, IOUT)
+        
 C
 C--ELK READ CFP INPUT DATA TYPE 7
 C--ELK READ NO_N  MC  MR  ML  NB1  NB2  NB3  NB4  NB5  NB6  PB1  PB2  
 C  PB3  PB4  PB5  PB6
+        K = 4+2*NNOD
+        
+        WRITE (IOUT, *)
+        WRITE (IOUT, *) ' NBR-ARRAY'
+        WRITE (IOUT, '(4x, A)') NBR_STR
         DO I = 1, MXNODE
-          READ (INUNIT, *) (NBR(I,J), J=1, (4+2*NNOD))
+          !READ (INUNIT, *) (NBR(I,J), J=1, (4+2*NNOD))
+          LLOC = ONE
+          DO J=1, K
+             CALL GET_INTEGER(CDUMMY,LLOC,ISTART,ISTOP,IOUT,INUNIT,
+     +                        NBR(I,J), HAS_ERROR=ERROR)
+             IF (ERROR) EXIT
+          END DO
+          !
+          IF (ERROR) THEN
+             LLOC = ISTART
+             CALL GET_INTEGER(CDUMMY,LLOC,ISTART,ISTOP,
+     +       IOUT,INUNIT, NBR(I,J), MSG=NL//
+     +       'CFP NBR array failed to read node (row) ' //
+     +       NUM2STR(I)//' of '//NUM2STR(MXNODE)//' (nnodes). '//NL//
+     +       'Input expects the following:'//NL//NBR_STR//NL//
+     +       'but failed to load "'//NBR_POS_VAR(J, NBR_STR)//'"'//NL//
+     +       'Note CFP input now expects comments to be '//
+     +       'preceded by a "#", so you may have an input mismatch.')
+          END IF
+          !
           WRITE (IOUT, 9003) (NBR(I,J), J=1, (4+2*NNOD))
+          !
+          IF( I < MXNODE) CALL READ_TO_DATA(CDUMMY, INUNIT, IOUT)
         ENDDO
-        WRITE (IOUT, *) 'NBR ARRAY READ'
+
 C 
 C--BIRK---WRITE NODE NUMBERS TO NCOND
         DO I = 1, MXNODE
@@ -598,9 +771,12 @@ C
           IF(NCOND(IC,IR,IL).EQ.Z) THEN
             NCOND(IC, IR, IL) = I
           ELSE
-            WRITE(IOUT,'(A34,3I5)') 
-     +                 'ERROR, DOS NODES WITHIN CELL JIK =',IC,IR,IL
-            STOP
+            CALL USTOP('CFP ERROR: "NBR-ARRAY" input '//
+     +                 'can only have one node per model cell.'//NL//
+     +                 'Found two nodes at column, row, and layer '//
+     +                 '( MC, MR, ML ): '//NL//
+     +                 '( '//NUM2STR(IC)//', '//NUM2STR(IR)//', '//
+     +                 NUM2STR(IL)//' )')
           ENDIF
         ENDDO
 C
@@ -610,16 +786,34 @@ C--BARC**ALLOCATE AND READ DATA TO DETERMINE ELEVATION OF NODES
         ALLOCATE (GEOHIGHT(MXNODE))
 C
 C--ELK READ CFP INPUT FILE DATA TYPE 8-10 3 REQUIRED COMMENT LINES 
-        READ (INUNIT, '(A)') CDUMMY
-        READ (INUNIT, '(A)') CDUMMY
-        READ (INUNIT, '(A)') CDUMMY
+        CALL READ_TO_DATA(CDUMMY, INUNIT, IOUT, IOUT)
 C
 C--ELK READ CFP INPUT FILE DATA TYPE 11 NOTE READ DUMMY FIRST BECAUSE 
 C  ELK OF 2 OPTIONS FOR THE ELEVATION OF THE NODE HEIGHT
 C  ELK      OPTION 1 USER MUST ENTER ABSOLUTE NODE HEIGHT 
 C  !TR:     ADDED OPTION TO DEFINE A UNIFORM VALUE FOR ABSOLUTE NODE HEIGHT
 C  !TR:     THIS OPTION IS ACTIVE IF NUMBER IS -1 
-        READ (INUNIT, *) IDUMMY, DUMMY2
+        LLOC = ONE
+        CALL GET_INTEGER(CDUMMY,LLOC,ISTART,ISTOP,IOUT,INUNIT,
+     +                   IDUMMY, MSG=
+     +       'CPF input failed to read "GEOHEIGHT" input.'//NL//
+     +       'Input line expects to read "IFLAG, ELEVATION"'//NL//
+     +       'Where IFLAG is equal to "-1", "NO_N", "-NNODES", '//
+     +       'or "NNODES"'//NL//'That is, IFLAG is equal to: '//
+     +       '-1, 1, -'//NUM2STR(MXNODE)//', or '//NUM2STR(MXNODE)//NL//
+     +       'Note CFP input now expects comments '//
+     +       'to be preceded by a "#", '//
+     +       'so you may have an input mismatch.')
+        CALL GET_NUMBER(CDUMMY,LLOC,ISTART,ISTOP,IOUT,INUNIT,
+     +                  DUMMY2, MSG=
+     +       'CPF input failed to read "GEOHEIGHT" input.'//NL//
+     +       'Input line expects to read "IFLAG, ELEVATION"'//NL//
+     +       'Where IFLAG is equal to "-1", "NO_N", "-NNODES", '//
+     +       'or "NNODES"'//
+     +       'Failed to read "ELEVATION"'//NL//
+     +       'Note CFP input now expects comments '//
+     +       'to be preceded by a "#", '//
+     +       'so you may have an input mismatch.')
         IF ( IDUMMY.EQ.-1) THEN                                         !TR: 2017 07 25 GEOHIGHT UNIFORM
           DO I = 1,MXNODE                                               !TR: 2017 07 25 GEOHIGHT UNIFORM
             GEOHIGHT(I) = DUMMY2                                        !TR: 2017 07 25 GEOHIGHT UNIFORM
@@ -627,10 +821,29 @@ C  !TR:     THIS OPTION IS ACTIVE IF NUMBER IS -1
         ELSEIF( IDUMMY.EQ.1 ) THEN
           GEOHIGHT(IDUMMY) = DUMMY2
           DO I = 2, MXNODE
-            READ (INUNIT, *) II, GEOHIGHT(I)
-            IF ( II.NE.I ) WRITE (IOUT, *)                              
-     +                     'ERROR READING NODE ELEVATIONS, LIST NODES', 
-     +            ' AND ELEVATIONS IN SEQUENTIAL ORDER FROM 1 TO MXNODE'
+            CALL READ_TO_DATA(CDUMMY, INUNIT, IOUT)
+            LLOC = ONE
+            CALL GET_INTEGER(CDUMMY,LLOC,ISTART,ISTOP,IOUT,INUNIT,
+     +                       II, MSG=
+     +           'CPF input failed to read "GEOHEIGHT" input.'//NL//
+     +           'Input line expects to read "NO_N, ELEVATION"'//NL//
+     +           'Note CFP input now expects comments '//
+     +           'to be preceded by a "#", '//
+     +           'so you may have an input mismatch.')
+            CALL GET_NUMBER(CDUMMY,LLOC,ISTART,ISTOP,IOUT,INUNIT,
+     +                      GEOHIGHT(I), MSG=
+     +           'CPF input failed to read "GEOHEIGHT" input.'//NL//
+     +           'Input line expects to read "NO_N, ELEVATION"'//NL//
+     +           'Note CFP input now expects comments '//
+     +           'to be preceded by a "#", '//
+     +           'so you may have an input mismatch.')
+            IF ( II.NE.I ) CALL USTOP('CFP ERROR: "GEOHEIGHT" input '//
+     +                     'expects NO_N to be sequential from '//
+     +                     '1 to NNODES.'//NL//
+     +                     'Expected to read '//NUM2STR(I)//NL//
+     +                     'but instead read '//NUM2STR(II)//NL//
+     +                     'Error occured on line:'//NL//
+     +                     '"'//TRIM(CDUMMY)//'"')
           ENDDO
         ELSEIF ( IDUMMY.EQ.MXNODE ) THEN
           DO I = 1, MXNODE
@@ -648,6 +861,19 @@ C--BARC&ELK OPTION 2 MAKE THE NODE ELEVATION THE BOTTOM + DUMMY2 OF THE MODFLOW
 C  CELL.
             GEOHIGHT(I) = DUMMY2 + BOTM(NBR(I,2), NBR(I,3), NBR(I,4))   !TR: 2017 07 26 GEOHIGHT RELATIVE TO CELL BOTTOM
           ENDDO                                                         !TR: 2017 07 26 GEOHIGHT RELATIVE TO CELL BOTTOM
+        ELSE
+          CALL USTOP(
+     +       'CPF input failed to read "GEOHEIGHT" input line:'//NL//
+     +       '"'//TRIM(CDUMMY)//'"'//NL//
+     +       'Input line expects to read "IFLAG, ELEVATION"'//NL//
+     +       'Where IFLAG is equal to "-1", "NO_N", "-NNODES", '//
+     +       'or "NNODES"'//NL//'That is, IFLAG is equal to: '//
+     +       '-1, 1, -'//NUM2STR(MXNODE)//', or '//NUM2STR(MXNODE)//NL//
+     +       'Failed to read an appropiate "IFLAG" value'//NL//
+     +       'What was read is: '//NUM2STR(IDUMMY)//NL//
+     +       'Note CFP input now expects comments '//
+     +       'to be preceded by a "#", '//
+     +       'so you may have an input mismatch.')
         ENDIF
         WRITE (IOUT, *) ' NODE ELEVATIONS:'
         DO I = 1, MXNODE
@@ -659,44 +885,75 @@ C
 C--READ FLAG OF SURFACE-AREA DEPENDENT OR CONSTANT EXCHANGE PIPE 
 C  CONCUCTANCE
 C  ELK CPF INPUT FILE DATA TYPE 12 REQUIRED COMMENT STATEMENT
-        READ (INUNIT, '(A)') CDUMMY
+        CALL READ_TO_DATA(CDUMMY, INUNIT, IOUT, IOUT)
 C
 C--ELK CPF INPUT FILE DATA TYPE 13 SA_EXCHANGE IN REPORT THIS IS
 C  A 0 OR 1
-        READ (INUNIT, *) LSURFACEDEP
+        LLOC = ONE
+        CALL GET_INTEGER(CDUMMY,LLOC,ISTART,ISTOP,IOUT,INUNIT,
+     +                   LSURFACEDEP, MSG=
+     +           'Failed to read CFP "SA_EXCHANGE". Note input now '//
+     +           'expects comments to be preceded by a "#", '//
+     +           'so you may have an input mismatch.')
 C 
 C--READ CRITERION OF CONVERGENCE
 C--ELK CPF INPUT FILE DATA TYPE 14 REQUIRED COMMENT STATEMENT
-        READ (INUNIT, '(A)') CDUMMY
+        CALL READ_TO_DATA(CDUMMY, INUNIT, IOUT, IOUT)
+        
 C--ELK CPF INPUT FILE DATA TYPE 15 EPSILON IN REPORT THE CONVERGENCE
 C  CRITERIA
-        READ (INUNIT, *) EPSILON
+        LLOC = ONE
+        CALL GET_NUMBER(CDUMMY,LLOC,ISTART,ISTOP,IOUT,INUNIT,
+     +                  EPSILON, MSG=
+     +           'Failed to read CFP "EPSILON". Note input now '//
+     +           'expects comments to be preceded by a "#", '//
+     +           'so you may have an input mismatch.')
 C 
 C--READ MAXIMUM FOR ITERATION
 C--ELK CPF INPUT FILE DATA TYPE 16 REQUIRED COMMENT STATEMENT
-        READ (INUNIT, '(A)') CDUMMY
+        CALL READ_TO_DATA(CDUMMY, INUNIT, IOUT, IOUT)
 C
 C--ELK CPF INPUT FILE DATA TYPE 17 NITER IN REPORT-THE MAXIMUM NUMBER
 C  OF ITERATIONS
-        READ (INUNIT, *) ITERA_MAX
+        LLOC = ONE
+        CALL GET_INTEGER(CDUMMY,LLOC,ISTART,ISTOP,IOUT,INUNIT,
+     +                   ITERA_MAX, MSG=
+     +           'Failed to read CFP "NITER". Note input now '//
+     +           'expects comments to be preceded by a "#", '//
+     +           'so you may have an input mismatch.')
 C 
 C--READ IN RELAXATION PARAMETER
 C  ELK CPF INPUT FILE DATA TYPE 18 REQUIRED COMMENT STATEMENT
-        READ (INUNIT, '(A)') CDUMMY
+        CALL READ_TO_DATA(CDUMMY, INUNIT, IOUT, IOUT)
 C
 C--ELK CPF INPUT FILE DATA TYPE 19 RELAX IN REPORT-THE RELAXATION
 C  PERAMETER
-        READ (INUNIT, *) CFPRELAX
+        LLOC = ONE
+        CALL GET_NUMBER(CDUMMY,LLOC,ISTART,ISTOP,IOUT,INUNIT,
+     +                  CFPRELAX, MSG=
+     +           'Failed to read CFP "RELAX". Note input now '//
+     +           'expects comments to be preceded by a "#", '//
+     +           'so you may have an input mismatch.')
 C 
 C--READ NEWTON RAPHSON PRINT FLAG
 C  ELK CPF INPUT FILE DATA TYPE 20 REQUIRED COMMENT STATEMENT
-        READ (INUNIT, '(A)') CDUMMY
+        CALL READ_TO_DATA(CDUMMY, INUNIT, IOUT, IOUT)
 C        
 C--ELK CPF INPUT FILE DATA TYPE 21 P_NR IN REPORT-A PRINT FLAG 0 OR 1
 C       READ (INUNIT, *) P_NR
         NAME_MULTI(1) = 'P_NR    '                                      !TR: 2018 05 22 LISTING OUTPUT
         NAME_MULTI(2) = 'L_NTS   '                                      !TR: 2018 05 22 LISTING OUTPUT
-        CALL EINTRD_MULTI(READIN,INUNIT,IOUT,NAME_MULTI)                     !TR: 2018 05 22 LISTING OUTPUT
+        LLOC = ONE
+        CALL GET_INTEGER(CDUMMY,LLOC,ISTART,ISTOP,IOUT,INUNIT,
+     +                   READIN(1), MSG=
+     +           'Failed to read CFP "P_NR". Note input now '//
+     +           'expects comments to be preceded by a "#", '//
+     +           'so you may have an input mismatch.')
+        CALL GET_INTEGER(CDUMMY,LLOC,ISTART,ISTOP,IOUT,INUNIT,
+     +                   READIN(2), ERROR_VAL=0)
+        WRITE (IOUT, *) NAME_MULTI(1), READIN(1)
+        WRITE (IOUT, *) NAME_MULTI(2), READIN(2)
+        !CALL EINTRD_MULTI(READIN,INUNIT,IOUT,NAME_MULTI)                     !TR: 2018 05 22 LISTING OUTPUT
         P_NR = READIN(1)                                                !TR: 2018 05 22 LISTING OUTPUT
         L_NTS = READIN(2)                                               !TR: 2018 05 22 LISTING OUTPUT
         IF (L_NTS.EQ.0) L_NTS = 1                                      !TR: 2018 05 22 LISTING OUTPUT
@@ -709,8 +966,7 @@ C--BARC**READ NODE AND TUBE DATA NEXT
         WRITE (IOUT, *) 'READING NODE AND TUBE DATA'
 C
 C--ELK CPF INPUT FILE DATA TYPE 22 ABD 23 REQUIRED COMMENT STATEMENTS
-        READ (INUNIT, '(A)') CDUMMY
-        READ (INUNIT, '(A)') CDUMMY
+        CALL READ_TO_DATA(CDUMMY, INUNIT, IOUT, IOUT)
 C
 C--READ TUBEDATA
 C  ELK CPF INPUT FILE DATA TYPE 24  ONE LINE FOR EACH PIPE NUMBER OR SET 
@@ -719,13 +975,38 @@ C  ELK LCRITREY_P  TCRITREY_P LCRITREY_P THE LOWER CRITICAL REYNOLDS
 C  ELK NUMBER (TURBULENT TO LAMINAR) TCRITREY_P THE UPPER CRITICAL 
 C  ELK REYNOLDS NUMBER (LAMINAR TO TURBULENT) 
 C  !TR: ADDED MESSAGES FOR OUTPUT
-        WRITE (IOUT,*) 'NO_P  DIAMETER  TORTUOSITY  RHEIGHT  LCRITREY_P'
-     +                ,' TCRITREY_P'                                    !TR: 2012 12 11 WRITE OUTPUT HEADER TO LISTING FILE
+        WRITE (IOUT,'(2A)') 'NO_P   DIAMETER  TORTUOSITY  RHEIGHT  ',
+     +                      'LCRITREY_P TCRITREY_P'                     !TR: 2012 12 11 WRITE OUTPUT HEADER TO LISTING FILE
         DO I = 1, MXTUBE
-          READ (INUNIT, *) (CON_DATA(I,J), J=1, 6)
-          IF ( I.NE.DINT(CON_DATA(I,1)) ) PRINT *,                      
-     +         '      ERROR IN CONDUIT INPUT FILE: TUBE DATA'
+          LLOC = ONE
+          DO J=1, 6
+             CALL GET_NUMBER(CDUMMY,LLOC,ISTART,ISTOP,IOUT,INUNIT,
+     +                        CON_DATA(I,J), HAS_ERROR=ERROR)
+             IF (ERROR) EXIT
+          END DO
+          !
+          IF (ERROR) THEN
+            LLOC = ISTART
+            CALL GET_NUMBER(CDUMMY,LLOC,ISTART,ISTOP,
+     +      IOUT,INUNIT, CON_DATA(I,J), MSG=NL//
+     +      'CFP failed to load one of the six inputs for Pipe Tube ' //
+     +       NUM2STR(I)//NL//
+     +      'Note CFP input now expects comments to be '//
+     +      'preceded by a "#", so you may have an input mismatch.')
+          END IF
+          !
           WRITE (IOUT, 9020)(CON_DATA(I,J), J=1, 6)                     !TR: 2012 12 11 WRITE OUTPUT TO LISTING FILE
+          !
+          IF ( I /= DINT(CON_DATA(I,1)) ) CALL USTOP(
+     +           'CFP ERROR: Pipe Tube input '//
+     +           'expects NO_P to be sequential from '//
+     +           '1 to NPIPES.'//NL//
+     +           'Expected to read '//NUM2STR(I)//NL//
+     +           'but instead read '//NUM2STR(DINT(CON_DATA(I,1)))//NL//
+     +           'Error occured on line:'//NL//
+     +           '"'//TRIM(CDUMMY)//'"')
+          !
+          IF( I < MXTUBE) CALL READ_TO_DATA(CDUMMY, INUNIT, IOUT)
         ENDDO
 C
 C--BARC**ASSIGN THESE FOR LATER
@@ -736,7 +1017,9 @@ C--BARC**ASSIGN THESE FOR LATER
 C
 C--BARC**READ HEADS
 C  ELK CFP INPUT FILE DATA TYPE 25 REQUIRED COMMENT STATEMENT
-        READ (INUNIT, '(A)') CDUMMY
+        CALL READ_TO_DATA(CDUMMY, INUNIT, IOUT, IOUT)
+        BACKSPACE(INUNIT)
+        
         WRITE (IOUT, *) 'READING NODE BOUNDARY CONDITIONS (FIXED HEADS, 
      +IBOUNDS, AND FBCs)'
         WRITE (IOUT, *) ' NODE  HEAD AND/OR IBOUND'
@@ -744,15 +1027,44 @@ C
 C--ELK CFP INPUT FILE DATA TYPE 26 NO_N N_HEAD IN REPORT
 C  IF NO FURTHER BC DATA NEED TO BE CONSIDERED                          !TR: 2012 05 09 THIS IS THE ORIGINAL FORMULATION
         IF (FBC_FLG.EQ.Z) THEN                                          !TR: 2012 05 09 FHLQ
+          WRITE(IOUT, '(2A, /, A)') " FBC OPTION NOT ENABLED,", 
+     +                          " READING ORIGINAL FORMULATION INPUT:",
+     +                          "        NO_N  N_HEAD"
           DO I = 1, MXNODE
-            READ (INUNIT, *) IDUMMY, BEGHEAD(I)
+            CALL READ_TO_DATA(CDUMMY, INUNIT, IOUT)
+            LLOC = ONE
+            CALL GET_INTEGER(CDUMMY,LLOC,ISTART,ISTOP,IOUT,INUNIT,
+     +                       IDUMMY, MSG=
+     +          'CPF input failed to read "STARTING HEADS" input.'//NL//
+     +          'Input line expects to read "NO_N, N_HEAD"'//NL//
+     +          'But failed to read "NO_N"'//NL//
+     +           'Note CFP input now expects comments '//
+     +           'to be preceded by a "#", '//
+     +           'so you may have an input mismatch.')
+            CALL GET_NUMBER(CDUMMY,LLOC,ISTART,ISTOP,IOUT,INUNIT,
+     +                      BEGHEAD(I), MSG=
+     +          'CPF input failed to read "STARTING HEADS" input.'//NL//
+     +          'Input line expects to read "NO_N, N_HEAD"'//NL//
+     +          'But failed to read "N_HEAD"'//NL//
+     +           'Note CFP input now expects comments '//
+     +           'to be preceded by a "#", '//
+     +           'so you may have an input mismatch.')
             WRITE (IOUT, *) I, BEGHEAD(I)
-            IF ( I.NE.IDUMMY ) PRINT *,                                 
-     +             '      ERROR IN CONDUIT INPUT FILE: STARTING HEADS'
+            IF ( I.NE.IDUMMY ) CALL USTOP(
+     +                     'CFP ERROR: "STARTING HEADS" input '//
+     +                     'expects NO_N to be sequential from '//
+     +                     '1 to NNODES.'//NL//
+     +                     'Expected to read '//NUM2STR(I)//NL//
+     +                     'but instead read '//NUM2STR(IDUMMY)//NL//
+     +                     'Error occured on line:'//NL//
+     +                     '"'//TRIM(CDUMMY)//'"')
           ENDDO
 C
 C--IF FBC DATA ARE CONSIDERED
         ELSE                                                            !TR: 2012 05 09
+          WRITE(IOUT, '(2A, /, A)') " FBC OPTION ENABLED,", 
+     +                          " READING MODIFIED FORMULATION INPUT:",
+     +                          " NO_N, N_HEAD, BC_TYPE, [BC1], [BC2]"
           FHLQ_COUNT = Z                                                !TR: 2012 05 09 INI COUNTER FOR FHLQ BC'S
           WELL_COUNT = Z                                                !TR: 2012 06 08 WELL / INI COUNTER FOR WELL BC'S
           WELLTD_COUNT = Z                                              !TR: 2013 04 03 WELL TD
@@ -760,14 +1072,65 @@ C--IF FBC DATA ARE CONSIDERED
           LH_COUNT = Z                                                  !TR: 2013 03 22 LH
           BC_DUMMY2 = 999999                                            !TR: 2013 03 15 INI BCDUMMY2 FOR CAUCHY; LARGE NUMBER MEANS LQ IS QUITE HIGH
           DO I = 1, MXNODE
-            READ (INUNIT, *) IDUMMY, BEGHEAD(I), BC_TYPE                !TR: 2012 05 09 ADDED BC_TYPE, BC_DUMMY1 / 2013 03 15 BCDUMMY2
-            IF ( I.NE.IDUMMY ) PRINT *,                                 
-     +             '      ERROR IN CONDUIT INPUT FILE: STARTING HEADS'
+            CALL READ_TO_DATA(CDUMMY, INUNIT, IOUT)
+            LLOC = ONE
+            CALL GET_INTEGER(CDUMMY,LLOC,ISTART,ISTOP,IOUT,INUNIT,
+     +                       IDUMMY, MSG=
+     +                       'CPF input failed to read "NO_N" input.')
+            CALL GET_NUMBER(CDUMMY,LLOC,ISTART,ISTOP,IOUT,INUNIT,
+     +                      BEGHEAD(I), MSG=
+     +                      'CPF input failed to read "N_HEAD" input.')
+            CALL GET_WORD(BC_TYPE, CDUMMY, LLOC)
+            !
+            IF ( I.NE.IDUMMY ) CALL USTOP(
+     +                     'CFP ERROR: "STARTING HEADS" input '//
+     +                     'expects NO_N to be sequential from '//
+     +                     '1 to NNODES.'//NL//
+     +                     'Expected to read '//NUM2STR(I)//NL//
+     +                     'but instead read '//NUM2STR(IDUMMY)//NL//
+     +                     'Error occured on line:'//NL//
+     +                     '"'//TRIM(CDUMMY)//'"')
+            IF (.NOT. ANY(BC_TYPE == BC_TYPES) .AND. 
+     +                                       BC_TYPE(1:1) /= "X") THEN
+                CALL USTOP('CFP ERROR: "STARTING HEADS" input '//
+     +                     'expects BC_TYPE to be one of '//
+     +                     'the following: '//NL//
+     +                     BC_TYPES_STR//NL//
+     +                     'Or set to "X" to skip BC_TYPE'//NL//
+     +                     'but instead read "'//BC_TYPE//'"'//NL//
+     +                     'Error occured on line:'//NL//
+     +                     '"'//TRIM(CDUMMY)//'"')
+            END IF
+            !
+            CALL GET_NUMBER(CDUMMY,LLOC,ISTART,ISTOP,IOUT,INUNIT,
+     +                      BC_DUMMY1, HAS_ERROR=ERROR)  ! Requird by all except WELL, LH, and TD
+            IF(ERROR) THEN
+               BC_DUMMY1 = DZ
+               IF (BC_TYPE /= "WELL    " .AND. 
+     +             BC_TYPE /= "LH      " .AND. 
+     +             BC_TYPE /= "TD      ") THEN
+                   CALL USTOP(
+     +                    'CPF input failed to read "BC1" input.'//NL//
+     +                    'Error occured on line:'//NL//
+     +                    '"'//TRIM(CDUMMY)//'"') 
+               END IF
+            ELSE
+                CALL GET_NUMBER(CDUMMY,LLOC,ISTART,ISTOP,IOUT,INUNIT,
+     +                          BC_DUMMY2, HAS_ERROR=ERROR)  ! Required by CAUCHY and CAUCHYTD, optional for WELLTD
+            END IF
+            !
+            IF (ERROR) THEN
+               BC_DUMMY2 = DZ
+               IF (BC_TYPE=="CAUCHY  " .OR. BC_TYPE=="CAUCHYTD") THEN
+                  CALL USTOP(
+     +                   'CPF input failed to read "BC2" input.'//NL//
+     +                   'Error occured on line:'//NL//
+     +                   '"'//TRIM(CDUMMY)//'"')
+               END IF
+            END IF
 C
 C--PROCESS BOUNDARY CONDITION DATA - FHLQ
             IF (BC_TYPE.EQ."FHLQ    ") THEN                             !TR: 2012 05 09 
-              BACKSPACE (INUNIT)                                        !TR: 2013 03 15 READ AGAIN WITH ADEQUATE PARAMETERS
-              READ (INUNIT, *) IDUMMY, BEGHEAD(I), BC_TYPE, BC_DUMMY1   !TR: 2012 05 09 ADDED BC_TYPE, BC_DUMMY1 / 2013 03 15 BCDUMMY2            
               WRITE (IOUT,9030) I, BEGHEAD(I), BC_DUMMY1                !TR: 2012 05 09 
               FHLQ_COUNT = FHLQ_COUNT + 1                               !TR: 2012 05 09 
 C                                                                       
@@ -779,13 +1142,12 @@ C--ASSIGN FHLQ DATA
 C
 C--PROCESS BOUNDARY CONDITION DATA - FHLQ
             ELSEIF (BC_TYPE.EQ."FHLQTD  ") THEN                         !TR: 2013 04 04 FHLQTD
-              BACKSPACE (INUNIT)                                        !TR: 2013 03 15 READ AGAIN WITH ADEQUATE PARAMETERS
-              READ (INUNIT, *) IDUMMY, BEGHEAD(I), BC_TYPE, BC_DUMMY1   !TR: 2012 05 09 ADDED BC_TYPE, BC_DUMMY1 / 2013 03 15 BCDUMMY2
               WRITE (IOUT,9035) I, INT(BEGHEAD(I)), BC_DUMMY1           !TR: 2013 04 04 FHLQTD
               FHLQ_COUNT = FHLQ_COUNT + 1                               !TR: 2013 04 04 FHLQTD
               FHLQTD_COUNT = FHLQTD_COUNT + 1                           !TR: 2013 04 04 FHLQTD
               FHLQTD_FLG = TRUE                                       !TR: 2013 04 04 FHLQTD
-              CALL ASSIGNTDDATA(I,BEGHEAD(I),FHLQTD_IN,FHLQTD_LINESMAX) !TR: 2013 04 04 FHLQTD
+              CALL ASSIGNTDDATA(I,BEGHEAD(I),FHLQTD_IN,FHLQTD_LINESMAX,
+     +                          CDUMMY,IOUT)
 C                                                                       
 C--ASSIGN FHLQ DATA                                                     
               IFHLQ(FHLQ_COUNT,1) = I                                   !TR: 2012 05 09 
@@ -797,14 +1159,8 @@ C
 C--ASSIGN WELL DATA            
               WELL_COUNT = WELL_COUNT + 1                               !TR: 2012 06 08 WELL /
               IWELL(I) = 1                                              !TR: 2013 03 18 WELL / SET FLAG TO MARK ACTIVE WELL
-              BACKSPACE (INUNIT)                                        !TR: 2016 10 11 CWC REWIND TO READ AGAIN FOR EVENTUALLY CWC DATA
-              CALL COUNT_LINE_NUMBERS(INUNIT, IOUT, NUM)                !TR: 2016 10 11 CWC
-              IF (NUM .EQ. 4) THEN                                      !TR: 2016 10 11 CWC
-                BACKSPACE (INUNIT)                                      !TR: 2016 10 11 CWC REWIND TO READ AGAIN FOR EVENTUALLY CWC DATA 
-                READ (INUNIT, *) IDUMMY, BEGHEAD(I), BC_TYPE, BC_DUMMY1 !TR: 2012 05 09 ADDED BC_TYPE, BC_DUMMY1 / 2013 03 15 BCDUMMY2
-                CWC_WELL(I) = BC_DUMMY1                                 !TR: 2016 10 11 
-              ENDIF                                                     !TR: 2016 10 11 
-              IF(CWC_WELL(I).EQ.Z)THEN                                  !TR: 2016 10 11 THIS IS THE INITIAL VALUE, I.E. NO DATA ASSIGNED OR DZ IS ASSIGNED IN INPUT
+              CWC_WELL(I) = BC_DUMMY1
+              IF(BC_DUMMY1.EQ.DZ)THEN                                   !TR: 2016 10 11 THIS IS THE INITIAL VALUE, I.E. NO DATA ASSIGNED OR DZ IS ASSIGNED IN INPUT
                 WRITE (IOUT,9040) I, BEGHEAD(I)                         !TR: 2012 05 09 
               ELSE
                 WRITE (IOUT,9042) I, BEGHEAD(I), CWC_WELL(I)            !TR: 2016 10 11  
@@ -812,32 +1168,20 @@ C--ASSIGN WELL DATA
             ELSEIF (BC_TYPE.EQ."WELLTD  ") THEN                         !TR: 2013 04 03 WELL TD
 C
 C--ASSIGN WELL DATA FOR TIME DEPENDENT WELLS         
-              BACKSPACE (INUNIT)                                        !TR: 2013 04 03 WELL TD
-              CALL COUNT_LINE_NUMBERS(INUNIT, IOUT, NUM)                !TR: 2016 10 21 CWC
-              BACKSPACE (INUNIT)                                        !TR: 2018 05 02 REWIND HERE
-              IF (NUM .EQ. 5) THEN                                      !TR: 2016 10 21 CWC
-C               BACKSPACE (INUNIT)                                      !TR: 2016 10 11 CWC REWIND TO READ AGAIN FOR EVENTUALLY CWC DATA 
-                READ (INUNIT,*) IDUMMY, BEGHEAD(I), BC_TYPE, BC_DUMMY1, !TR: 2013 04 03 WELL TD
-     +                          BC_DUMMY2                               !TR: 2016 10 21 CWC
-                CWC_WELL(I) = BC_DUMMY2                                 !TR: 2016 10 21 
-              ELSE                                                      !TR: 2016 10 21 CWC
-                READ (INUNIT,*) IDUMMY, BEGHEAD(I), BC_TYPE, BC_DUMMY1  !TR: 2013 04 03 WELL TD
-              ENDIF                                                     !TR: 2016 10 21 CWC
-                WELLTD_FLG = TRUE                                       !TR: 2013 04 03 WELL TD
+              CWC_WELL(I) = BC_DUMMY2                                                     !TR: 2016 10 21 CWC
+              WELLTD_FLG = TRUE                                         !TR: 2013 04 03 WELL TD
               WELLTD_COUNT = WELLTD_COUNT + 1                           !TR: 2013 04 03 WELL TD
               IWELL(I) = 2                                              !TR: 2013 04 03 WELL TD/ SET FLAG TO MARK ACTIVE WELL (FLAG AS 2 MEANS TD WELL)
-              CALL ASSIGNTDDATA(I,BC_DUMMY1,WELLTD_IN,WELLTD_LINESMAX)  !TR: 2013 04 04 FHLQTD 
-              IF(CWC_WELL(I).EQ.Z)THEN                                  !TR: 2016 10 11 THIS IS THE INITIAL VALUE, I.E. NO DATA ASSIGNED OR DZ IS ASSIGNED IN INPUT
+              CALL ASSIGNTDDATA(I,BC_DUMMY1,WELLTD_IN,WELLTD_LINESMAX,
+     +                          CDUMMY,IOUT)                                 !TR: 2013 04 04 FHLQTD 
+              IF(CWC_WELL(I) == DZ) THEN                                !TR: 2016 10 11 THIS IS THE INITIAL VALUE, I.E. NO DATA ASSIGNED OR DZ IS ASSIGNED IN INPUT
                 WRITE (IOUT,9045) I, BEGHEAD(I)                         !TR: 2013 04 03 WELL TD
               ELSE
                 WRITE (IOUT,9047) I, BEGHEAD(I), CWC_WELL(I)            !TR: 2016 10 21  
               ENDIF
             ELSEIF (BC_TYPE.EQ."CAUCHY  ") THEN                         !TR: 2013 03 13 CAUCHY
 C
-C--ASSIGN CAUCHY DATA                                       
-              BACKSPACE (INUNIT)                                        !TR: 2013 03 13 CAUCHY
-              READ (INUNIT, *) IDUMMY, BEGHEAD(I), BC_TYPE, BC_DUMMY1,  !TR: 2013 03 13 CAUCHY
-     +                         BC_DUMMY2                                !TR: 2012 05 09 ADDED BC_TYPE, BC_DUMMY1 / 2013 03 15 BCDUMMY2
+C--ASSIGN CAUCHY DATA
               WRITE (IOUT,9050)I, BEGHEAD(I),BC_DUMMY1,BC_DUMMY2        !TR: 2012 05 09      
               CY_COUNT = CY_COUNT + 1                                   !TR: 2013 03 13 CAUCHY
               ICY(CY_COUNT,1) = I                                       !TR: 2013 03 13 CAUCHY
@@ -849,11 +1193,9 @@ C--ASSIGN CAUCHY DATA
             ELSEIF (BC_TYPE.EQ."CAUCHYTD")THEN                          !TR: 2013 04 03 CAUCHY TD
 C
 C--ASSIGN CAUCHY DATA                                       
-              BACKSPACE (INUNIT)                                        !TR: 2013 04 03 CAUCHY TD
-              READ (INUNIT, *) IDUMMY, BEGHEAD(I), BC_TYPE, BC_DUMMY1,  !TR: 2013 04 03 CAUCHY TD
-     +                         BC_DUMMY2                                !TR: 2012 05 09 ADDED BC_TYPE, BC_DUMMY1 / 2013 03 15 BCDUMMY2
               CYTD_FLG = TRUE                                         !TR: 2013 04 03 CAUCHY TD
-              CALL ASSIGNTDDATA(I,BEGHEAD(I),CYTD_IN,CYTD_LINESMAX)     !TR: 2013 04 04 CAUCHY TD
+              CALL ASSIGNTDDATA(I,BEGHEAD(I),CYTD_IN,CYTD_LINESMAX,
+     +                          CDUMMY,IOUT)                                 !TR: 2013 04 04 CAUCHY TD
               WRITE (IOUT,9055)I, CYTD_IN(I),BC_DUMMY1,BC_DUMMY2        !TR: 2012 05 09      
               CYTD_COUNT = CYTD_COUNT + 1                               !TR: 2013 04 03 CAUCHY TD
               CY_COUNT = CY_COUNT + 1                                   !TR: 2013 03 13 CAUCHY
@@ -866,8 +1208,6 @@ C--ASSIGN CAUCHY DATA
             ELSEIF (BC_TYPE.EQ."LH      ")THEN
 C
 C--ASSIGN LH DATA
-              BACKSPACE (INUNIT)                                        !TR: 2013 03 15 READ AGAIN WITH ADEQUATE PARAMETERS
-              READ (INUNIT, *) IDUMMY, BEGHEAD(I), BC_TYPE              !TR: 2013 03 22 LH
               WRITE (IOUT,9070) I, BEGHEAD(I)                           !TR: 2013 03 22 LH
               LH_COUNT = LH_COUNT + 1                                   !TR: 2013 03 22 LH
               ILH(LH_COUNT,1) = I                                       !TR: 2013 03 22 LH
@@ -878,15 +1218,13 @@ C--ASSIGN LH DATA
 C
 C--ASSIGN FIXED HEAD TD DATA     
               FHTD_FLG = TRUE                                         !TR: 2013 04 04 FH TD
-              CALL ASSIGNTDDATA(I,BEGHEAD(I),FHTD_IN,FHTD_LINESMAX)     !TR: 2013 04 04 FH TD
+              CALL ASSIGNTDDATA(I,BEGHEAD(I),FHTD_IN,FHTD_LINESMAX,
+     +                          CDUMMY,IOUT)                                 !TR: 2013 04 04 FH TD
               WRITE (IOUT,9065)I, INT(BEGHEAD(I))                       !TR: 2013 04 04 FH TD
               FHTD_COUNT = FHTD_COUNT + 1                               !TR: 2013 04 04 FH TD
               BEGHEAD(I) = NINER                                         !TR: 2013 04 04 FH TD
             ELSE
               WRITE (IOUT,9060) I, BEGHEAD(I)
-              IF ((BC_TYPE(1:1).NE.'X').AND.(BC_TYPE(1:1).NE.'x')) 
-     +            WRITE(IOUT,*)'BOUNDARY DENOTATION FOR NODE',I,
-     +           'MISSED - BCTYPE OR X IS EXPECTED - PLEASE CHECK!'  
             ENDIF                                                       !TR: 2013 03 13 CAUCHY
           ENDDO                                                         !TR: 2012 05 09 
 C
@@ -905,32 +1243,38 @@ C
 C--PROCESS TIME DEPENDENT DATA
 C  FHLQ TD // ALLOCATE, INITIALIZE, AND READ IN DATA
           IF (FHLQTD_FLG) THEN                                          !TR: 2013 04 04 FHLQ TD
+            WRITE(IOUT, *) "Reading FHLQTD time dependent data"
             ALLOCATE (FHLQTD_DAT(FHLQTD_LINESMAX,3,FHLQTD_COUNT))       !TR: 2013 04 04 FHLQ TD
             CALL INITDDATA(FHLQTD_DAT,FHLQTD_LINESMAX,FHLQTD_COUNT)     !TR: 2013 04 04 FHLQ TD
             CALL READTD (FHLQTD_IN,FHLQTD_DAT,FHLQTD_LINESMAX,
-     +                   FHLQTD_COUNT)                                  !TR: 2013 04 04 FHLQ TD
+     +                   FHLQTD_COUNT,CDUMMY,IOUT)                                  !TR: 2013 04 04 FHLQ TD
           ENDIF                                                         !TR: 2013 04 04 FHLQ TD
 C
 C--TD WELLS // ALLOCATE, INITIALIZE, AND READ IN DATA
           IF (WELLTD_FLG) THEN                                          !TR: 2013 04 03 WELL TD
+            WRITE(IOUT, *) "Reading WELLTD time dependent data"
             ALLOCATE (WELLTD_DAT(WELLTD_LINESMAX,3,WELLTD_COUNT))       !TR: 2013 04 03 WELL TD
             CALL INITDDATA(WELLTD_DAT,WELLTD_LINESMAX,WELLTD_COUNT)     !TR: 2013 04 04 WELL TD
             CALL READTD (WELLTD_IN,WELLTD_DAT,WELLTD_LINESMAX,
-     +                   WELLTD_COUNT)                                  !TR: 2013 04 03 WELL TD
+     +                   WELLTD_COUNT,CDUMMY,IOUT)                                  !TR: 2013 04 03 WELL TD
           ENDIF                                                         !TR: 2013 04 03 WELL TD
 C
 C--CAUCHY TD DATA // ALLOCATE, INITIALIZE, AND READ IN DATA
           IF (CYTD_FLG) THEN                                            !TR: 2013 04 03 CAUCHY TD
+            WRITE(IOUT, *) "Reading WELLTD time dependent data"
             ALLOCATE (CYTD_DAT(CYTD_LINESMAX,3,CYTD_COUNT))             !TR: 2013 04 03 CAUCHY TD
             CALL INITDDATA(CYTD_DAT,CYTD_LINESMAX,CYTD_COUNT)           !TR: 2013 04 04 CAUCHY TD
-            CALL READTD (CYTD_IN,CYTD_DAT,CYTD_LINESMAX,CYTD_COUNT)     !TR: 2013 04 03 CAUCHY TD
+            CALL READTD (CYTD_IN,CYTD_DAT,CYTD_LINESMAX,CYTD_COUNT,
+     +                   CDUMMY,IOUT)     !TR: 2013 04 03 CAUCHY TD
           ENDIF                                                         !TR: 2013 04 03 CAUCHY TD
 C          
 C--TD FIXED HEAD // ALLOCATE, INITIALIZE, AND READ IN DATA
           IF (FHTD_FLG) THEN                                            !TR: 2013 04 04 FH TD
+            WRITE(IOUT, *) "Reading TD time dependent data"
             ALLOCATE (FHTD_DAT(FHTD_LINESMAX,3,FHTD_COUNT))             !TR: 2013 04 04 FH TD
             CALL INITDDATA(FHTD_DAT,FHTD_LINESMAX,FHTD_COUNT)           !TR: 2013 04 04 FH TD
-            CALL READTD (FHTD_IN,FHTD_DAT,FHTD_LINESMAX,FHTD_COUNT)     !TR: 2013 04 04 FH TD
+            CALL READTD (FHTD_IN,FHTD_DAT,FHTD_LINESMAX,FHTD_COUNT,
+     +                   CDUMMY,IOUT)     !TR: 2013 04 04 FH TD
           ENDIF                                                         !TR: 2013 04 04 FH TD
 C          
         ENDIF        
@@ -951,7 +1295,8 @@ C--BARC**READ 'MODD' EXCHANGE COEFFICIENTS
 !       WRITE (IOUT, *) 'NODE          EXCHANGE COEFFICIENT'            !TR: 2012 05 25 NOTE COMES LATER
 C
 C--ELK CFP INPUT FILE DATA TYPE 27 REQUIRED COMMENT STATEMENT
-        READ (INUNIT, '(A)') CDUMMY
+        CALL READ_TO_DATA(CDUMMY, INUNIT, IOUT)
+        BACKSPACE(INUNIT)
 C
 C--DATA FOR CADS
         ALLOCATE (L_NODE(MXNODE),CADSFLOW(MXNODE))                      !TR: 2012 04 25 CADS /
@@ -973,40 +1318,59 @@ C
 C--DATA FOR PFPS
         ALLOCATE (PFPS2(MXNODE),PFPSFLOW(MXNODE))                       !TR: 2012 07 12 PFPS /
         DO I = 1, MXNODE                                                !TR: 2012 07 12 PFPS /
-          PFPSFLOW(I) = DZ                                            !TR: 2012 07 12 PFPS /
-          PFPS2(I) = DZ                                               !TR: 2012 07 12 PFPS /
+          PFPSFLOW(I) = DZ                                              !TR: 2012 07 12 PFPS /
+          PFPS2(I) = DZ                                                 !TR: 2012 07 12 PFPS /
         ENDDO                                                           !TR: 2012 07 12 PFPS /
 C
 C--ELK CFP INPUT FILE DATA TYPE 28 NO_N K_EXCHANGE IN REPORT
 C  TR MODIFIED TO CONSIDER OPTIONALLY CADS
         IF (CADS_FLG.EQ.Z.AND.CADSML_FLG.EQ.Z) THEN                     !TR: 2012 05 25 NO CADS THEN ORIGINAL CODE // 2013 06 28 CADSML
-          WRITE (IOUT, *) 'NODE I  K_EXCHANGE(I)'                       !TR: 2012 05 25 NOTE FOR OUTPUT
-          DO I = 1, MXNODE
-            READ (INUNIT, *) IDUMMY, MODD(I)
-            WRITE (IOUT, 9005) I, MODD(I)                               !TR: 2012 05 25 ADDED FORMAT
-            IF ( I.NE.IDUMMY ) PRINT *,                                 
-     +             '      ERROR IN CONDUIT INPUT FILE: EXCHANGE TERMS'
-          ENDDO
+          WRITE (IOUT, *) 'NODE_I  K_EXCHANGE(I)'                       !TR: 2012 05 25 NOTE FOR OUTPUT
         ELSEIF (CADS_FLG.EQ.1.OR.CADS_FLG.EQ.-1) THEN                   !TR: 2012 05 25 CADS / !TR: 2013 06 28 CADSML
-          WRITE (IOUT, *) 'NODE I  K_EXCHANGE(I)  W_CADS(I)'            !TR: 2012 05 25 NOTE FOR OUTPUT        
-          DO I = 1, MXNODE
-            READ (INUNIT, *) IDUMMY, MODD(I), W_CADS(I)                 !TR: 2012 05 25 CADS / READ W_CADS
-            WRITE (IOUT, 9006) I, MODD(I), W_CADS(I)                    !TR: 2012 05 25 CADS /
-            IF ( I.NE.IDUMMY ) PRINT *,                                 
-     +             '      ERROR IN CONDUIT INPUT FILE: EXCHANGE TERMS'
-          ENDDO        
+          WRITE (IOUT, *) 'NODE_I  K_EXCHANGE(I)  W_CADS(I)'            !TR: 2012 05 25 NOTE FOR OUTPUT        
         ELSE                                                            !TR: 2013 06 28 CADSML
-          WRITE (IOUT, *) 'NODE I  K_EXCHANGE(I) Z_CADSML(I) W_CADSML(I)
-     + ...'                                                             !TR: 2013 06 28 CADSML
-          DO I = 1, MXNODE                                              
-            READ (INUNIT, *) IDUMMY, MODD(I), (CADSMLDAT(I,1,II), 
-     +                       CADSMLDAT(I,2,II),II = 1, 4)               !TR: 2013 06 28 CADSML
-            WRITE (IOUT, 9016) I, MODD(I), (CADSMLDAT(I,1,II), 
-     +             CADSMLDAT(I,2,II),II = 1, 4)                         !TR: 2013 06 28 CADSML
-            IF ( I.NE.IDUMMY ) PRINT *,                                 
-     +             '      ERROR IN CONDUIT INPUT FILE: EXCHANGE TERMS'
-          ENDDO         
-        ENDIF                                                           !TR: 2012 05 25 CADS /
+          WRITE (IOUT, *) 'NODE_I  K_EXCHANGE(I) '//
+     +                    'Z_CADSML(1) W_CADSML(1) '//                                                            !TR: 2013 06 28 CADSML
+     +                    'Z_CADSML(2) W_CADSML(2) '//                                                            !TR: 2013 06 28 CADSML
+     +                    'Z_CADSML(3) W_CADSML(3) '//                                                            !TR: 2013 06 28 CADSML
+     +                    'Z_CADSML(4) W_CADSML(4) '                                                             !TR: 2013 06 28 CADSML
+        ENDIF   
+        !
+        DO I = 1, MXNODE
+         CALL READ_TO_DATA(CDUMMY, INUNIT, IOUT)
+         LLOC = ONE
+         CALL GET_INTEGER(CDUMMY,LLOC,ISTART,ISTOP,IOUT,INUNIT,IDUMMY,
+     +                    MSG='CPF error reading "NO_N" input.')
+         CALL GET_NUMBER(CDUMMY,LLOC,ISTART,ISTOP,IOUT,INUNIT,MODD(I),
+     +                   MSG='CPF error reading "K_EXCHANGE" input.')
+         !
+         IF (CADS_FLG.EQ.Z.AND.CADSML_FLG.EQ.Z) THEN                     !TR: 2012 05 25 NO CADS THEN ORIGINAL CODE // 2013 06 28 CADSML
+            WRITE (IOUT, 9005) I, MODD(I)                               !TR: 2012 05 25 ADDED FORMAT
+         ELSEIF (CADS_FLG.EQ.1.OR.CADS_FLG.EQ.-1) THEN                   !TR: 2012 05 25 CADS / !TR: 2013 06 28 CADSML
+            CALL GET_NUMBER(CDUMMY,LLOC,ISTART,ISTOP,IOUT,INUNIT,
+     +                      W_CADS(I),
+     +                      MSG='CPF error reading "W_CADS" input.')
+            WRITE (IOUT, 9006) I, MODD(I), W_CADS(I)                    !TR: 2012 05 25 CADS /
+         ELSE                                                            !TR: 2013 06 28 CADSML
+            DO II=1, 4
+              CALL GET_NUMBER(CDUMMY,LLOC,ISTART,ISTOP,IOUT,INUNIT,
+     +                        CADSMLDAT(I,1,II),
+     +                        MSG='CPF error reading "Z_CADSML" input.')
+              CALL GET_NUMBER(CDUMMY,LLOC,ISTART,ISTOP,IOUT,INUNIT,
+     +                        CADSMLDAT(I,2,II),
+     +                        MSG='CPF error reading "W_CADSML" input.')
+            END DO
+         ENDIF   
+         IF ( I.NE.IDUMMY ) CALL USTOP(
+     +                   'CFP ERROR: "EXCHANGE TERMS" input '//
+     +                   'expects NO_N to be sequential from '//
+     +                   '1 to NNODES.'//NL//
+     +                   'Expected to read '//NUM2STR(I)//NL//
+     +                   'but instead read '//NUM2STR(IDUMMY)//NL//
+     +                   'Error occured on line:'//NL//
+     +                   '"'//TRIM(CDUMMY)//'"')
+      
+        ENDDO  
 C
 C--ELK--END OF INPUT FOR MODE EQUAL 1 OR 3  -------------------           
       ENDIF
@@ -1018,9 +1382,9 @@ C--BARC**JUMP TO HERE IF MODE=2
 !&                  'CFP MODE 2 / 3 IS CURRENTLY NOT SUPPORTED BY ',!TR: 2013 05 17 NOTE
 !&                  'THIS RESEARCH VERSION OF CFP. PLEASE REFER TO',!TR: 2013 05 17 NOTE
 !&                  'THE OFFICIALLY RELEASED USGS VERSION OF CFP.'  !TR: 2013 05 17 NOTE
-!   STOP                                                             !TR: 2013 05 17 CFP MODE 2 DEACTIVATED HERE
+!   STOP                                                            !TR: 2013 05 17 CFP MODE 2 DEACTIVATED HERE
         WRITE (IOUT, *) '---------------------------------'
-        WRITE (IOUT, *) 'CFP MODE 2 IS ACTIVE (LAYERS) '
+        WRITE (IOUT, *) 'CFP MODE 2 OR 3 IS ACTIVE (LAYERS) '
         WRITE (IOUT, *) '---------------------------------'
 C 
 C--BARC**READ WHAT IS NEEDED FOR PREFERENTIAL FLOW LAYERS MODE 2
@@ -1032,137 +1396,172 @@ C--BARC**
      +             KLAM_CV(NCOL,NROW,NLAY))
 CB        ALLOCATE  (CRT(NCOL,NROW,NLAY),CCT(NCOL,NROW,NLAY),
 CB     +             CVT(NCOL,NROW,NLAY))
+        
+        ALLOCATE(TURBLAM)
 C
 C--ELK CFP INPUT FILE DATA TYPES 29 AND 30 COMMENT LINES 
-        READ (INUNIT, *) CDUMMY
-        READ (INUNIT, *) CDUMMY
+        CALL READ_TO_DATA(CDUMMY, INUNIT, IOUT, IOUT)
 C
 C--ELK CFP INPUT FILE DATA TYPES 31 NCL NUMBER OF PREFERENTIAL FLOW LAYERS
 C--BARC**IRADFLAG=1 INDICATES RADIAL FLOW MODEL. 
-        READ (INUNIT, *) NCL
+        LLOC = ONE
+        CALL GET_INTEGER(CDUMMY,LLOC,ISTART,ISTOP,IOUT,INUNIT,NCL,
+     +       MSG='Failed to read CFP "NCL". Note input now '//
+     +           'expects comments to be preceded by a "#", '//
+     +           'so you may have an input mismatch.')
         IF(NCL.GT.NLAY) THEN
-          PRINT*, 'NUMBER OF CONDUIT LAYERS (NCL) CANNOT'
-          PRINT*, 'BE GREATER THAN THE NUMBER OF MODEL'
-          PRINT*, 'LAYERS (NLAY). RESET THE NUMBER OF CONDUIT LAYERS'
-          PRINT*, 'IN THE CFP INPUT FILE.'
-          STOP
+            CALL USTOP('CFP number of conduit layers (NCL) cannot be '//
+     +                'greater than the number of model layers (NLAY).')
         ENDIF
 C
         ALLOCATE (CL(NCL))
 C
-C--BARC**ALLOCATE TWATER2 AND OTHERS
-        ALLOCATE  (TWATER2(NCOL,NROW,NCL),DENSWA2(NCOL,NROW,NCL), 
-     +         VISCWA2(NCOL,NROW,NCL),VOID2(NCOL,NROW,NCL),
-     +         LCRITREY2(NCOL,NROW,NCL),TCRITREY2(NCOL,NROW,NCL),
-     +         FEEXP(NCOL,NROW,NCL))
+C--BARC**ALLOCATE TWATER2 AND OTHERS                                          !TR: 2023 07 02 DEACTIVATE SPATIAL VARIABILITY
+!       ALLOCATE  (TWATER2(NCOL,NROW,NCL),DENSWA2(NCOL,NROW,NCL), 
+!    +         VISCWA2(NCOL,NROW,NCL),VOID2(NCOL,NROW,NCL),
+!    +         LCRITREY2(NCOL,NROW,NCL),TCRITREY2(NCOL,NROW,NCL),
+!    +         FEEXP(NCOL,NROW,NCL))
 C     
 C--ELK CFP INPUT FILE DATA TYPE 32 COMMENT LINE
-        READ (INUNIT, *) CDUMMY
+        CALL READ_TO_DATA(CDUMMY, INUNIT, IOUT, IOUT)
 C
-C--ELK CFP INPUT FILE DATA TYPE 33 THIS IS THE ACTUAL MODEL LAYER NUMBERS CL(NCL)
-        READ (INUNIT, *) (CL(I), I=1, NCL)
         WRITE (IOUT, '(A10,I3,A27)') 'THERE ARE ', NCL,                 
      +                               ' PREFERENTIAL FLOW LAYER(S)'
         WRITE (IOUT, '(A34)') 'PREFERENTIAL FLOW LAYER NUMBER(S):'
+C
+C--ELK CFP INPUT FILE DATA TYPE 33 THIS IS THE ACTUAL MODEL LAYER NUMBERS CL(NCL)
+        LLOC = ONE
+        DO I=1, NCL
+           CALL GET_INTEGER(CDUMMY,LLOC,ISTART,ISTOP,IOUT,INUNIT,CL(I),
+     +          MSG='Failed to read CFP "CL". Expected to read NCL '//
+     +          'layer numbers along a single line.'//NL//
+     +          'Note input now expects comments to be preceded by '//
+     +          'a "#", so you may have an input mismatch.')
+        END DO
         WRITE (IOUT, *) (CL(I), I=1, NCL)
 C
 C--BARC**ALLOCATE AND READ WATER TEMPERATURE TO CALCULATE DENSITY AND VISCOSITY
 C--ELK CFP INPUT FILE DATA TYPE 34 COMMENT LINE
-C--BARC**READ IRADFLAG FOR RADIAL FLOW MODELS
-        ALLOCATE(IRADFLAG,IRADWELCOL)
-        READ (INUNIT, *) CDUMMY
-        READ (INUNIT, *) IRADFLAG
-        ALLOCATE(R_LENGTH(NCOL))
+C--BARC**READ IRADFLAG FOR RADIAL FLOW MODELS                 !TR: 2023 07 02 DEACTIVATE RADIAL FLOW
+!       ALLOCATE(IRADFLAG,IRADWELCOL)
+!       READ (INUNIT, *) CDUMMY
+!       READ (INUNIT, *) IRADFLAG
+!       ALLOCATE(R_LENGTH(NCOL))
 C--BARC**FOR RADIAL FLOW MODELS
-        IF(IRADFLAG.EQ.Z) THEN
-          DO J=1,NCOL
-            R_LENGTH(J)=1.0
-          ENDDO
-        ENDIF
-        IF(IRADFLAG.EQ.1) THEN
+!       IF(IRADFLAG.EQ.Z) THEN
+!         DO J=1,NCOL
+!           R_LENGTH(J)=1.0
+!         ENDDO3
+!       ENDIF
+!       IF(IRADFLAG.EQ.1) THEN
 C
 C--BARC**CDUMMY FOR #IRADWELCOL COMMENT
-          READ (INUNIT, *) CDUMMY
-          READ (INUNIT, *) IRADWELCOL
+!         READ (INUNIT, *) CDUMMY
+!         READ (INUNIT, *) IRADWELCOL
 C
 C--BARC**CALCULATE R_LENGTH, BASED ON WEL COLUMN
-          IF(IRADWELCOL.EQ.1) THEN
-            DO J=1,NCOL
-              IF(J.EQ.1) THEN 
-                 R_LENGTH(J) = (DELR(1)*0.5)
-              ELSEIF(J.EQ.2) THEN
-                 R_LENGTH(J) = (DELR(1)*0.5)+DELR(J)*0.5
-              ELSE
-                 R_LENGTH(J) = R_LENGTH(J-1)+((DELR(J-1)*0.5)+
-     +                        (DELR(J)*0.5))
-              ENDIF
+!         IF(IRADWELCOL.EQ.1) THEN
+!           DO J=1,NCOL
+!             IF(J.EQ.1) THEN 
+!                R_LENGTH(J) = (DELR(1)*0.5)
+!             ELSEIF(J.EQ.2) THEN
+!                R_LENGTH(J) = (DELR(1)*0.5)+DELR(J)*0.5
+!             ELSE
+!                R_LENGTH(J) = R_LENGTH(J-1)+((DELR(J-1)*0.5)+
+!    +                        (DELR(J)*0.5))
+!             ENDIF
 CB            PRINT*,R_LENGTH(J)
 CB            PAUSE
-            ENDDO
+!           ENDDO
 C
 C--BARC**ELSE FOR  IF(IRADWELCOL.EQ.1) THEN
-          ELSEIF(IRADWELCOL.EQ.NCOL) THEN
-            DO J=NCOL,1,-1
-              IF(J.EQ.NCOL) THEN 
-                R_LENGTH(J) = (DELR(NCOL)*0.5) 
-              ELSEIF(J.EQ.NCOL-1) THEN 
-                R_LENGTH(J) = (DELR(NCOL)*0.5)+DELR(J)*0.5
-              ELSE
-                R_LENGTH(J) = R_LENGTH(J+1)+((DELR(J+1)*0.5)
-     +                        +(DELR(J)*0.5))
-              ENDIF
-            ENDDO
+!         ELSEIF(IRADWELCOL.EQ.NCOL) THEN
+!           DO J=NCOL,1,-1
+!             IF(J.EQ.NCOL) THEN 
+!               R_LENGTH(J) = (DELR(NCOL)*0.5) 
+!             ELSEIF(J.EQ.NCOL-1) THEN 
+!               R_LENGTH(J) = (DELR(NCOL)*0.5)+DELR(J)*0.5
+!             ELSE
+!               R_LENGTH(J) = R_LENGTH(J+1)+((DELR(J+1)*0.5)
+!    +                        +(DELR(J)*0.5))
+!             ENDIF
+!           ENDDO
 C
 C--BARC**ELSE FOR  IF(IRADWELCOL.EQ.1) THEN
-          ENDIF
+!         ENDIF
 C
 C--BARC**ENDIF FOR IF IRADFLAG****
-        ENDIF
+!       ENDIF
 C
 C--BARC**CDUMMY FOR #TURBULENT FLOW PARAMETER ARRAYS COMMENT
-        READ (INUNIT, *) CDUMMY
+        CALL READ_TO_DATA(CDUMMY, INUNIT, IOUT, IOUT)
+        
 C
 C--ELK CFP INPUT FILE DATA TYPE 35 LTEMP IN REPORT ONE TEMPERATURE FOR ALL LAYERS
-CB        READ (INUNIT, *) TWATER
-        DO I=1,NCL
-          K=I
-          KK=K
-          READ (INUNIT, *) CDUMMY
-          CALL U2DREL(ARR,ANAME(1),NROW,NCOL,KK,INUNIT,IOUT)
-          TWATER2(:,:,K) = DBLE(ARR)
-          READ (INUNIT, *) CDUMMY
-          CALL U2DREL(ARR,ANAME(2),NROW,NCOL,KK,INUNIT,IOUT)
-          VOID2(:,:,K) = DBLE(ARR)
-          READ (INUNIT, *) CDUMMY
-          CALL U2DREL(ARR,ANAME(3),NROW,NCOL,KK,INUNIT,IOUT)
-          LCRITREY2(:,:,K) = DBLE(ARR)
-          READ (INUNIT, *) CDUMMY
-          CALL U2DREL(ARR,ANAME(4),NROW,NCOL,KK,INUNIT,IOUT)
-          TCRITREY2(:,:,K) = DBLE(ARR)
-          READ (INUNIT, *) CDUMMY
-          CALL U2DREL(ARR,ANAME(5),NROW,NCOL,KK,INUNIT,IOUT)
-          FEEXP(:,:,K) = DBLE(ARR)
-        ENDDO 
-CB    WRITE (IOUT,' (A21,F6.3,A16)') 'WATER TEMPERATURE IS ', TWATER,   
-CB   + ' DEGREES CELCIUS'
-CB        CALL CALC_DENS_VISC
-        CALL CALC_DENS_VISC2
+        LLOC = ONE
+        CALL GET_NUMBER(CDUMMY,LLOC,ISTART,ISTOP,IOUT,INUNIT,TWATER,MSG=
+     +       'Failed to read CFP water "LTEMP" (twater). '//NL//
+     +       'Note input now expects comments to be preceded '//
+     +       'by a "#", so you may have an input mismatch.')
+!       DO I=1,NCL                                                    !TR: 2023 07 02 REMOVE SPATIAL VARIABILITY
+!         K=I
+!         KK=K
+!         READ (INUNIT, *) CDUMMY
+!         CALL U2DREL(ARR,ANAME(1),NROW,NCOL,KK,INUNIT,IOUT)
+!         TWATER2(:,:,K) = DBLE(ARR)
+!         READ (INUNIT, *) CDUMMY
+!         CALL U2DREL(ARR,ANAME(2),NROW,NCOL,KK,INUNIT,IOUT)
+!         VOID2(:,:,K) = DBLE(ARR)
+!         READ (INUNIT, *) CDUMMY
+!         CALL U2DREL(ARR,ANAME(3),NROW,NCOL,KK,INUNIT,IOUT)
+!         LCRITREY2(:,:,K) = DBLE(ARR)
+!         READ (INUNIT, *) CDUMMY
+!         CALL U2DREL(ARR,ANAME(4),NROW,NCOL,KK,INUNIT,IOUT)
+!         TCRITREY2(:,:,K) = DBLE(ARR)
+!         READ (INUNIT, *) CDUMMY
+!         CALL U2DREL(ARR,ANAME(5),NROW,NCOL,KK,INUNIT,IOUT)
+!         FEEXP(:,:,K) = DBLE(ARR)
+!       ENDDO 
+        WRITE (IOUT,' (A21,F6.3,A16)') 'WATER TEMPERATURE IS ', TWATER,
+     + ' DEGREES CELCIUS'
+        CALL CALC_DENS_VISC                                             !TR: 2023 07 02 REMOVE SPATIAL VARIABILITY
+!     CALL CALC_DENS_VISC2
 C
 C--BARC**ALLOCATE AND READ MEAN VOID DIAMETERS AND CRITICAL REYNOLDS #'S FOR CONDUIT LAYERS
-CB        ALLOCATE (VOID(NCL), LCRITREY(NCL), TCRITREY(NCL),FEEXP(NCL))
-C     ALLOCATE (NEFF(NCL))
+        ALLOCATE (VOID(NCL), LCRITREY(NCL), TCRITREY(NCL), FEEXP(NCL))
+C       ALLOCATE (NEFF(NCL))
 C
 C--ELK CFP INPUT FILE DATA TYPE 36 COMMENT LINES
 C--ELK CFP INPUT FILE DATA TYPE FOR READING IN A COMMENT AND CONSTANTS FOR EACH LAYER
-CB        READ (INUNIT, *) CDUMMY
-CB       DO I = 1, NCL
-CB          READ (INUNIT, *) CDUMMY
-CB          READ (INUNIT, *) VOID(I), LCRITREY(I), TCRITREY(I),FEEXP(I)
-CB       WRITE (IOUT, *) 'READ MEAN VOID DIA, LOWER & UPPER CRIT REYN
-CB     + NO. FOR CONDUIT LAYER AND TURB EXP', CL(I)
-CB    WRITE (IOUT, *) VOID(I), LCRITREY(I), TCRITREY(I),FEEXP(I)
-CB        ENDDO
-        ENDIF
+        DO I = 1, NCL
+          !TR: INITIALIZE FEEXP = 1.5, WHICH RESULT IN THE ORIGINAL MODE2 BEHAVIOR
+          CALL READ_TO_DATA(CDUMMY, INUNIT, IOUT)
+          LLOC = ONE
+          CALL GET_NUMBER(CDUMMY,LLOC,ISTART,ISTOP,IOUT,INUNIT,
+     +             VOID(I), MSG=
+     +             'Failed to read CFP water "VOID". '//NL//
+     +             'Note input now expects comments to be preceded '//
+     +             'by a "#", so you may have an input mismatch.')
+          CALL GET_NUMBER(CDUMMY,LLOC,ISTART,ISTOP,IOUT,INUNIT,
+     +             LCRITREY(I), MSG=
+     +             'Failed to read CFP water "LCRITREY_L". '//NL//
+     +             'Note input now expects comments to be preceded '//
+     +             'by a "#", so you may have an input mismatch.')
+          CALL GET_NUMBER(CDUMMY,LLOC,ISTART,ISTOP,IOUT,INUNIT,
+     +             TCRITREY(I), MSG=
+     +             'Failed to read CFP water "TCRITREY_L". '//NL//
+     +             'Note input now expects comments to be preceded '//
+     +             'by a "#", so you may have an input mismatch.')
+!         READ (INUNIT, *) VOID(I), LCRITREY(I), TCRITREY(I), FEEXP(I)
+!         WRITE (IOUT, *) 'READ MEAN VOID DIA, LOWER & UPPER CRIT REYN
+!    +NO. FOR CONDUIT LAYER AND TURB EXP', CL(I)
+!         WRITE (IOUT, *) VOID(I), LCRITREY(I), TCRITREY(I), FEEXP(I)
+          FEEXP(I) = 1.5
+          WRITE (IOUT, *) 'READ MEAN VOID DIA, LOWER & UPPER CRIT REYN
+     +NO. FOR CONDUIT LAYER ', CL(I)
+          WRITE (IOUT, *) VOID(I), LCRITREY(I), TCRITREY(I)
+        ENDDO
+      ENDIF
 CELK**ENDIF FOR READING DATA FOR MODE EQUAL 2 OR 3 
 
 CBARC**JUMP TO HERE IF MODE=1,3
@@ -1212,6 +1611,23 @@ C
  9065 FORMAT (I5,4X,'FIXED HEAD TD DATA READ FROM UNIT:',I3)            !TR: 2013 04 04 FH TD
  9070 FORMAT (I5,4X,'LH BC, LH:',F8.4)                                  !TR: 2013 03 19 FORMAT LH OUTPUT 
 C 
+      CONTAINS
+      
+      FUNCTION NBR_POS_VAR(pos, nbr_str) RESULT(str)
+      integer,      intent(in) :: pos
+      character(*), intent(in) :: nbr_str
+      character(:), allocatable:: str
+      integer:: i, j
+      if (pos == 1) then
+          i = 1
+          j = 4
+      else
+          i = 6 + (pos - 2) * 5
+          j = i + 3
+      end if
+      str = trim(adjustl(nbr_str(i:j)))
+      END FUNCTION 
+
       END SUBROUTINE GWF2CFP1AR
 C
 C
@@ -1240,7 +1656,11 @@ C     TSTU    TUBE NUMBER FOR WHICH TSO IS REQUESTED
 C     TSTUBE  ARRAY DETERMING IF TSO IS WRITTEN FOR A TUBE (NOT 0)
 C             OR NOT (0), DIMENSION(MXTUBE)
 C
-      USE CONSTANTS, ONLY: TRUE,FALSE,Z,ONE,NEG,NINER,DZ,DOS,NEARZERO_30
+      USE CONSTANTS, ONLY: TRUE,FALSE,Z,ONE,NEG,NINER,DZ,DOS,
+     +                     NEARZERO_30, NL
+      USE FILE_IO_INTERFACE,    ONLY: READ_TO_DATA
+      USE STRINGS,              ONLY: GET_INTEGER
+      USE NUM2STR_INTERFACE,    ONLY: NUM2STR
       USE GLOBAL, ONLY:IOUT
 C
       USE CFPMODULE, ONLY:NOTSNO, NOTSTU, NNODES, NTUBES, TSNO, TSNODE, 
@@ -1257,6 +1677,8 @@ C
 C--LOCAL VARIABLES
       INTEGER I, N, T, IDUMMY
       CHARACTER(8) NAME, NAME_MULTI(8)                                   !TR: 2013 08 12 TSAN
+      INTEGER :: LLOC, ISTART, ISTOP
+      CHARACTER(1024) :: LINE
 C
 C--BARC**ALLOCATE
       ALLOCATE (NOTSNO, NOTSTU, NNODES, NTUBES, TSNO, TSTU, TSA_FLG,
@@ -1264,6 +1686,7 @@ C--BARC**ALLOCATE
      + NOTSTSAT)
       ALLOCATE (TSNODE(MXNODE),TSTUBE(MXTUBE),TSAN(MXNODE),
      + TSAN_FUNIT(5),TSAT(MXNODE),TSAT_FUNIT(5))                        !TR: 2013 08 13 TSAN // TSAT
+      
 C
 C--BARC**READ AND WRITE
 C--WRITE MESSAGE
@@ -1292,9 +1715,23 @@ C
 C--READ NNODES
       NAME_MULTI(1) = 'NNODES  '
       NAME_MULTI(2) = 'NTSAN   '                                        !TR: 2013 08 12 TSAN
-      CALL EINTRD_MULTI(READIN, INUNIT, IOUT, NAME_MULTI)  
+      
+      CALL READ_TO_DATA(LINE, INUNIT, IOUT, IOUT)
+      LLOC = ONE
+      CALL GET_INTEGER(LINE,LLOC,ISTART,ISTOP,IOUT,INUNIT,READIN(1),
+     +     MSG='CPF input line expects "NNODES, [NTSAN]"'//NL//
+     +         'Failed to read "NNODES" '//NL//
+     +         'Note CFP input now expects comments '//
+     +         'to be preceded by a "#", '//
+     +         'so you may have an input mismatch.')
+      CALL GET_INTEGER(LINE,LLOC,ISTART,ISTOP,IOUT,INUNIT,READIN(2),
+     +                 ERROR_VAL=0)
+      WRITE(IOUT, '(2A)') NAME_MULTI(1), NUM2STR(READIN(1))
+      WRITE(IOUT, '(2A)') NAME_MULTI(2), NUM2STR(READIN(2))
+      
+      !CALL EINTRD_MULTI(READIN, INUNIT, IOUT, NAME_MULTI)  
       NNODES = READIN(1)                                                !TR: 2013 08 12 TSAN
-      NTSAN = READIN(2)                                                 !TR: 2013 08 13 TSAN
+      NTSAN  = READIN(2)                                                !TR: 2013 08 13 TSAN
       IF (NNODES.LT.Z) THEN                                             !TR: 2013 05 13 TSA OUTPUT
         NNODES = -NNODES !* -1                                            !TR: 2013 05 13 TSA OUTPUT
         TSA_FLG = TRUE                                                !TR: 2013 05 13 TSA OUTPUT
@@ -1303,65 +1740,386 @@ C--READ NNODES
       IF (NTSAN.NE.Z) TSAN_FLG = TRUE                                 !TR: 2013 08 12 TSAN
 C
 C--READ TSNO
+      NAME = 'TSNO    '
       DO N = 1, NNODES
-        NAME = 'TSNO    '
-        CALL EINTRD(TSNO, INUNIT, IOUT, NAME)
+        CALL READ_TO_DATA(LINE, INUNIT, IOUT, IOUT)
+        LLOC = ONE
+        CALL GET_INTEGER(LINE,LLOC,ISTART,ISTOP,IOUT,INUNIT,TSNO,
+     +          MSG='CPF "NODE_NUMBERS" input expects one integer'//NL//
+     +              'Failed to read "TSNO" '//NL//
+     +              'Note CFP input now expects comments '//
+     +              'to be preceded by a "#", '//
+     +              'so you may have an input mismatch.')
+        !CALL EINTRD(TSNO, INUNIT, IOUT, NAME)
+        WRITE(IOUT, '(2A)') NAME, NUM2STR(TSNO)
         TSNODE(TSNO) = 1
       ENDDO
 C
 C--READ NOTSNO
       NAME = 'NOTSNO  '
-      CALL EINTRD(NOTSNO, INUNIT, IOUT, NAME)
+      CALL READ_TO_DATA(LINE, INUNIT, IOUT, IOUT)
+      LLOC = ONE
+      CALL GET_INTEGER(LINE,LLOC,ISTART,ISTOP,IOUT,INUNIT,NOTSNO,
+     +        MSG='CPF "N_NTS" input expects one integer'//NL//
+     +            'Failed to read "NOTSNO" '//NL//
+     +            'Note CFP input now expects comments '//
+     +            'to be preceded by a "#", '//
+     +            'so you may have an input mismatch.')
+      WRITE(IOUT, '(2A)') NAME, NUM2STR(NOTSNO)
+      !CALL EINTRD(NOTSNO, INUNIT, IOUT, NAME)
 C
 C--READ NTUBES
       NAME_MULTI(1) = 'NTUBES  '
       NAME_MULTI(2) = 'NTSAT   '                                        !TR: 2013 08 12 TSAT
-      CALL EINTRD_MULTI(READIN, INUNIT, IOUT, NAME_MULTI)       
+      CALL READ_TO_DATA(LINE, INUNIT, IOUT, IOUT)
+      LLOC = ONE
+      CALL GET_INTEGER(LINE,LLOC,ISTART,ISTOP,IOUT,INUNIT,READIN(1),
+     +     MSG='CPF input line expects "NTUBES, [NTSAT]"'//NL//
+     +         'Failed to read "NTUBES" (npipes)'//NL//
+     +         'Note CFP input now expects comments '//
+     +         'to be preceded by a "#", '//
+     +         'so you may have an input mismatch.')
+      CALL GET_INTEGER(LINE,LLOC,ISTART,ISTOP,IOUT,INUNIT,READIN(2),
+     +                 ERROR_VAL=0)
+      WRITE(IOUT, '(2A)') NAME_MULTI(1), NUM2STR(READIN(1))
+      WRITE(IOUT, '(2A)') NAME_MULTI(2), NUM2STR(READIN(2))
+      !CALL EINTRD_MULTI(READIN, INUNIT, IOUT, NAME_MULTI)       
       NTUBES = READIN(1)                                                !TR: 2013 08 12 TSAT
       NTSAT = READIN(2)                                                 !TR: 2013 08 13 TSAT
       TCOUNT = NTUBES                                                   !TR: 2013 05 17 SET TCOUNT FOR THE FIRST TIME
       IF (NTSAT.NE.Z) TSAT_FLG = TRUE                                 !TR: 2013 08 13 TSAT
 C
 C--READ TSTU
+      NAME = 'TSTU    '
       DO T = 1, NTUBES
-        NAME = 'TSTU    '
-        CALL EINTRD(TSTU, INUNIT, IOUT, NAME)
+        CALL READ_TO_DATA(LINE, INUNIT, IOUT, IOUT)
+        LLOC = ONE
+        CALL GET_INTEGER(LINE,LLOC,ISTART,ISTOP,IOUT,INUNIT,TSTU,
+     +          MSG='CPF "PIPE_NUMBERS" input expects one integer'//NL//
+     +              'Failed to read "TSTU" '//NL//
+     +              'Note CFP input now expects comments '//
+     +              'to be preceded by a "#", '//
+     +              'so you may have an input mismatch.')
+        WRITE(IOUT, '(2A)') NAME, NUM2STR(TSTU)
+        !CALL EINTRD(TSTU, INUNIT, IOUT, NAME)
         TSTUBE(TSTU) = 1
       ENDDO
 C
 C--READ NOTSTU
       NAME = 'NOTSTU  '
-      CALL EINTRD(NOTSTU, INUNIT, IOUT, NAME)
+      CALL READ_TO_DATA(LINE, INUNIT, IOUT, IOUT)
+      LLOC = ONE
+      CALL GET_INTEGER(LINE,LLOC,ISTART,ISTOP,IOUT,INUNIT,NOTSTU,
+     +        MSG='CPF "T_NTS" input expects one integer'//NL//
+     +            'Failed to read "NOTSTU" '//NL//
+     +            'Note CFP input now expects comments '//
+     +            'to be preceded by a "#", '//
+     +            'so you may have an input mismatch.')
+      WRITE(IOUT, '(2A)') NAME, NUM2STR(NOTSTU)
+      !CALL EINTRD(NOTSTU, INUNIT, IOUT, NAME)
 C
 C--READ TSAN NODES
       IF(TSAN_FLG) THEN
+        NAME = 'NTSAN   '
         DO N = 1, NTSAN
-          NAME = 'NTSAN   '
-          CALL EINTRD(IDUMMY, INUNIT, IOUT, NAME)       
+          CALL READ_TO_DATA(LINE, INUNIT, IOUT, IOUT)
+          LLOC = ONE
+          CALL GET_INTEGER(LINE,LLOC,ISTART,ISTOP,IOUT,INUNIT,IDUMMY,
+     +            MSG='CPF "NTSAN" input expects one integer'//NL//
+     +                'Note CFP input now expects comments '//
+     +                'to be preceded by a "#", '//
+     +                'so you may have an input mismatch.')
+          WRITE(IOUT, '(2A)') NAME, NUM2STR(IDUMMY)
+          !CALL EINTRD(IDUMMY, INUNIT, IOUT, NAME)       
           TSAN(N) = IDUMMY
         ENDDO
 C
 C--READ NOTSTSAN
         NAME = 'NOTSTSAN'
-        CALL EINTRD(NOTSTSAN, INUNIT, IOUT, NAME)       
+        CALL READ_TO_DATA(LINE, INUNIT, IOUT, IOUT)
+        LLOC = ONE
+        CALL GET_INTEGER(LINE,LLOC,ISTART,ISTOP,IOUT,INUNIT,NOTSTSAN,
+     +          MSG='CPF "NOTSTSAN" input expects one integer'//NL//
+     +              'Note CFP input now expects comments '//
+     +              'to be preceded by a "#", '//
+     +              'so you may have an input mismatch.')
+        WRITE(IOUT, '(2A)') NAME, NUM2STR(NOTSTSAN)
+        !CALL EINTRD(NOTSTSAN, INUNIT, IOUT, NAME)       
       ENDIF
 C
 C--READ TSAT TUBES
       IF(TSAT_FLG) THEN
         DO N = 1, NTSAT
           NAME = 'NTSAT   '
-          CALL EINTRD(IDUMMY, INUNIT, IOUT, NAME)       
+          CALL READ_TO_DATA(LINE, INUNIT, IOUT, IOUT)
+          LLOC = ONE
+          CALL GET_INTEGER(LINE,LLOC,ISTART,ISTOP,IOUT,INUNIT,IDUMMY,
+     +            MSG='CPF "NTSAT" input expects one integer'//NL//
+     +                'Note CFP input now expects comments '//
+     +                'to be preceded by a "#", '//
+     +                'so you may have an input mismatch.')
+          WRITE(IOUT, '(2A)') NAME, NUM2STR(IDUMMY)
+          !CALL EINTRD(IDUMMY, INUNIT, IOUT, NAME)       
           TSAT(N) = IDUMMY
         ENDDO
 C
 C--READ NOTSTSAT
         NAME = 'NOTSTSAT'
-        CALL EINTRD(NOTSTSAT, INUNIT, IOUT, NAME)                  
+        CALL READ_TO_DATA(LINE, INUNIT, IOUT, IOUT)
+        LLOC = ONE
+        CALL GET_INTEGER(LINE,LLOC,ISTART,ISTOP,IOUT,INUNIT,NOTSTSAT,
+     +          MSG='CPF "NOTSTSAT" input expects one integer'//NL//
+     +              'Note CFP input now expects comments '//
+     +              'to be preceded by a "#", '//
+     +              'so you may have an input mismatch.')
+        WRITE(IOUT, '(2A)') NAME, NUM2STR(NOTSTSAT)
+        !CALL EINTRD(NOTSTSAT, INUNIT, IOUT, NAME)                  
       ENDIF
 
       END SUBROUTINE CFPM1OCAR
 C
+
+      SUBROUTINE CFP_DEALLOCATE(IGRID)
+C  Deallocate CFP DATA
+        USE CFPMODULE
+        integer, intent(in):: IGRID
+        integer:: I
 C
+        if(IGRID /= 1) RETURN
+C
+        DEALLOCATE( MODE             , stat=I )
+        DEALLOCATE( MXNODE           , stat=I )
+        DEALLOCATE( MXTUBE           , stat=I )
+        DEALLOCATE( NBR_LAY          , stat=I )
+        DEALLOCATE( ITERS            , stat=I )
+        DEALLOCATE( ACTIVENODE       , stat=I )
+        DEALLOCATE( ITERA_MAX        , stat=I )
+        DEALLOCATE( LSURFACEDEP      , stat=I )
+        DEALLOCATE( P_NR             , stat=I )
+        DEALLOCATE( NBR              , stat=I )
+        DEALLOCATE( NCOND            , stat=I )
+        DEALLOCATE( NOTSNO           , stat=I )
+        DEALLOCATE( NOTSTU           , stat=I )
+        DEALLOCATE( NNODES           , stat=I )
+        DEALLOCATE( NTUBES           , stat=I )
+        DEALLOCATE( TSNO             , stat=I )
+        DEALLOCATE( TSTU             , stat=I )
+        DEALLOCATE( NTSAN            , stat=I )
+        DEALLOCATE( NOTSTSAN         , stat=I )
+        DEALLOCATE( TSA_FUNIT        , stat=I )
+        DEALLOCATE( NCOUNT           , stat=I )
+        DEALLOCATE( TCOUNT           , stat=I )
+        DEALLOCATE( NTSAT            , stat=I )
+        DEALLOCATE( NOTSTSAT         , stat=I )
+        DEALLOCATE( L_NTS            , stat=I )
+        DEALLOCATE( NO_L_NTS         , stat=I )
+        DEALLOCATE( TSNODE           , stat=I )
+        DEALLOCATE( TSTUBE           , stat=I )
+        DEALLOCATE( TSAN             , stat=I )
+        DEALLOCATE( TSAN_FUNIT       , stat=I )
+        DEALLOCATE( TSAT             , stat=I )
+        DEALLOCATE( TSAT_FUNIT       , stat=I )
+        DEALLOCATE( TSA_FLG          , stat=I )
+        DEALLOCATE( TSAN_FLG         , stat=I )
+        DEALLOCATE( TSAT_FLG         , stat=I )
+        DEALLOCATE( NU               , stat=I )
+        DEALLOCATE( TC               , stat=I )
+        DEALLOCATE( VISCTC           , stat=I )
+        DEALLOCATE( VNUTC            , stat=I )
+        DEALLOCATE( EPSILON          , stat=I )
+        DEALLOCATE( G                , stat=I )
+        DEALLOCATE( CFPRELAX         , stat=I )
+        DEALLOCATE( L_ABS            , stat=I )
+        DEALLOCATE( GEOHIGHT         , stat=I )
+        DEALLOCATE( NODETOP          , stat=I )
+        DEALLOCATE( NODEBOT          , stat=I )
+        DEALLOCATE( BEGHEAD          , stat=I )
+        DEALLOCATE( TORTUOS          , stat=I )
+        DEALLOCATE( ROUGHNESS        , stat=I )
+        DEALLOCATE( B                , stat=I )
+        DEALLOCATE( B_MAT            , stat=I )
+        DEALLOCATE( B_MAT_O          , stat=I )
+        DEALLOCATE( B_MAT_P          , stat=I )
+        DEALLOCATE( B_MAT_OTR        , stat=I )
+        DEALLOCATE( MOD2             , stat=I )
+        DEALLOCATE( MODD             , stat=I )
+        DEALLOCATE( CON_DATA         , stat=I )
+        DEALLOCATE( ITUBE            , stat=I )
+        DEALLOCATE( DTUBE            , stat=I )
+        DEALLOCATE( NODE_LOCA        , stat=I )
+        DEALLOCATE( TOP              , stat=I )
+        DEALLOCATE( HC               , stat=I )
+        DEALLOCATE( IFLAG_RECH       , stat=I )
+        DEALLOCATE( QCONDIR          , stat=I )
+        DEALLOCATE( QCONDIROLD       , stat=I )
+        DEALLOCATE( QBDIR            , stat=I )
+        DEALLOCATE( QBDIROLD         , stat=I )
+        DEALLOCATE( QBDIRSAVE        , stat=I )
+        DEALLOCATE( QCDSDIR          , stat=I )
+        DEALLOCATE( QCDSDIROLD       , stat=I )
+        DEALLOCATE( QSDIR            , stat=I )
+        DEALLOCATE( QSDIROLD         , stat=I )
+        DEALLOCATE( QSDIRSAVE        , stat=I )
+        DEALLOCATE( KONV             , stat=I )
+        DEALLOCATE( FTURB            , stat=I )
+        DEALLOCATE( TURB             , stat=I )
+        DEALLOCATE( FX0              , stat=I )
+        DEALLOCATE( TUB_REYNOLD      , stat=I )
+        DEALLOCATE( TAUI             , stat=I )
+        DEALLOCATE( HEAD_SAVE        , stat=I )
+        DEALLOCATE( INDEX1           , stat=I )
+        DEALLOCATE( EQ_MAT           , stat=I )
+        DEALLOCATE( KTSNO            , stat=I )
+        DEALLOCATE( KTSTU            , stat=I )
+        DEALLOCATE( KTSTSAN          , stat=I )
+        DEALLOCATE( KTSTSAT          , stat=I )
+        DEALLOCATE( BUD_SOURCE       , stat=I )
+        DEALLOCATE( BUD_SINK         , stat=I )
+        DEALLOCATE( BUD_MATIN        , stat=I )
+        DEALLOCATE( BUD_MATOUT       , stat=I )
+        DEALLOCATE( DIFF_TOT         , stat=I )
+        DEALLOCATE( BUD_QBDIRIN      , stat=I )
+        DEALLOCATE( BUD_QBDIROUT     , stat=I )
+        DEALLOCATE( BUD_QSDIRIN      , stat=I )
+        DEALLOCATE( BUD_QSDIROUT     , stat=I )
+        DEALLOCATE( BUD_CADSIN       , stat=I )
+        DEALLOCATE( BUD_CADSOUT      , stat=I )
+        DEALLOCATE( BUD_CDSCONIN     , stat=I )
+        DEALLOCATE( BUD_CDSCONOUT    , stat=I )
+        DEALLOCATE( BUD_FHLQIN       , stat=I )
+        DEALLOCATE( BUD_FHLQOUT      , stat=I )
+        DEALLOCATE( BUD_WELLIN       , stat=I )
+        DEALLOCATE( BUD_WELLOUT      , stat=I )
+        DEALLOCATE( BUD_CYIN         , stat=I )
+        DEALLOCATE( BUD_CYOUT        , stat=I )
+        DEALLOCATE( BUD_CYLQIN       , stat=I )
+        DEALLOCATE( BUD_CYLQOUT      , stat=I )
+        DEALLOCATE( BUD_LHIN         , stat=I )
+        DEALLOCATE( BUD_LHOUT        , stat=I )
+        DEALLOCATE( BUD_STORAGE_IN   , stat=I )
+        DEALLOCATE( BUD_STORAGE_OUT  , stat=I )
+        DEALLOCATE( TOTAL_BUDGET     , stat=I )
+        DEALLOCATE( BUD_TOTAL_STEP   , stat=I )
+        DEALLOCATE( TS_IN_MAT        , stat=I )
+        DEALLOCATE( TS_OUT_MAT       , stat=I )
+        DEALLOCATE( TS_BUD_SINK      , stat=I )
+        DEALLOCATE( TS_BUD_SOURCE    , stat=I )
+        DEALLOCATE( TS_IN            , stat=I )
+        DEALLOCATE( TS_OUT           , stat=I )
+        DEALLOCATE( KU_IN            , stat=I )
+        DEALLOCATE( KU_OUT           , stat=I )
+        DEALLOCATE( TS_IN_QBDIR      , stat=I )
+        DEALLOCATE( TS_OUT_QBDIR     , stat=I )
+        DEALLOCATE( TS_IN_QSDIR      , stat=I )
+        DEALLOCATE( TS_OUT_QSDIR     , stat=I )
+        DEALLOCATE( TS_IN_CADS       , stat=I )
+        DEALLOCATE( TS_OUT_CADS      , stat=I )
+        DEALLOCATE( TS_IN_CDSCON     , stat=I )
+        DEALLOCATE( TS_OUT_CDSCON    , stat=I )
+        DEALLOCATE( TS_IN_FHLQ       , stat=I )
+        DEALLOCATE( TS_OUT_FHLQ      , stat=I )
+        DEALLOCATE( TS_IN_WELL       , stat=I )
+        DEALLOCATE( TS_OUT_WELL      , stat=I )
+        DEALLOCATE( TS_IN_CY         , stat=I )
+        DEALLOCATE( TS_OUT_CY        , stat=I )
+        DEALLOCATE( TS_IN_CYLQ       , stat=I )
+        DEALLOCATE( TS_OUT_CYLQ      , stat=I )
+        DEALLOCATE( TS_IN_LH         , stat=I )
+        DEALLOCATE( TS_OUT_LH        , stat=I )
+        DEALLOCATE( TS_IN_PFPS       , stat=I )
+        DEALLOCATE( TS_OUT_PFPS      , stat=I )
+        DEALLOCATE( DIFF_TS          , stat=I )
+        DEALLOCATE( TOT_FLOW         , stat=I )
+        DEALLOCATE( TS_TOT_FLOW      , stat=I )
+        DEALLOCATE( PFPSFLOW         , stat=I )
+        DEALLOCATE( PFPS2            , stat=I )
+        DEALLOCATE( NSTOR            , stat=I )
+        DEALLOCATE( QMAT             , stat=I )
+        DEALLOCATE( MATFLOW          , stat=I )
+        DEALLOCATE( QDIR             , stat=I )
+        DEALLOCATE( QFIX             , stat=I )
+        DEALLOCATE( NODIN            , stat=I )
+        DEALLOCATE( NODOUT           , stat=I )
+        DEALLOCATE( QTUBIN           , stat=I )
+        DEALLOCATE( QTUBOUT          , stat=I )
+        DEALLOCATE( QTUB             , stat=I )
+        DEALLOCATE( ROF              , stat=I )
+        DEALLOCATE( NCL              , stat=I )
+        DEALLOCATE( ICFPCNVG         , stat=I )
+        DEALLOCATE( CL               , stat=I )
+        DEALLOCATE( TWATER           , stat=I )
+        DEALLOCATE( DENSWA           , stat=I )
+        DEALLOCATE( VISCWA           , stat=I )
+        DEALLOCATE( Lcritrey         , stat=I )
+        DEALLOCATE( Tcritrey         , stat=I )
+        DEALLOCATE( Void             , stat=I )
+        DEALLOCATE( FEEXP            , stat=I )
+        DEALLOCATE( KLAM_CR          , stat=I )
+        DEALLOCATE( KLAM_CC          , stat=I )
+        DEALLOCATE( KLAM_CV          , stat=I )
+        DEALLOCATE( TURB_FR          , stat=I )
+        DEALLOCATE( TURB_FF          , stat=I )
+        DEALLOCATE( TURB_FV          , stat=I )
+        DEALLOCATE( TL_OUT           , stat=I )
+        DEALLOCATE( CADS_FLG         , stat=I )
+        DEALLOCATE( CADSML_FLG       , stat=I )
+        DEALLOCATE( W_CADS           , stat=I )
+        DEALLOCATE( L_NODE           , stat=I )
+        DEALLOCATE( CADSFLOW         , stat=I )
+        DEALLOCATE( CADS2            , stat=I )
+        DEALLOCATE( CADSML2          , stat=I )
+        DEALLOCATE( CADSML2_P        , stat=I )
+        DEALLOCATE( CADSMLDAT        , stat=I )
+        DEALLOCATE( FBC_FLG          , stat=I )
+        DEALLOCATE( FHLQ_FLG         , stat=I )
+        DEALLOCATE( FHLQTD_FLG       , stat=I )
+        DEALLOCATE( FHLQTD_LINESMAX  , stat=I )
+        DEALLOCATE( FHLQTD_COUNT     , stat=I )
+        DEALLOCATE( Q_FH_LQ          , stat=I )
+        DEALLOCATE( QFHLQ            , stat=I )
+        DEALLOCATE( DFHLQ            , stat=I )
+        DEALLOCATE( IFHLQ            , stat=I )
+        DEALLOCATE( FHLQ_FLIP        , stat=I )
+        DEALLOCATE( FHLQTD_IN        , stat=I )
+        DEALLOCATE( FHLQTD_DAT       , stat=I )
+        DEALLOCATE( WELL_FLG         , stat=I )
+        DEALLOCATE( WELLTD_FLG       , stat=I )
+        DEALLOCATE( WELLTD_LINESMAX  , stat=I )
+        DEALLOCATE( WELLTD_COUNT     , stat=I )
+        DEALLOCATE( QWELL            , stat=I )
+        DEALLOCATE( CWC_WELL         , stat=I )
+        DEALLOCATE( IWELL            , stat=I )
+        DEALLOCATE( WELLTD_IN        , stat=I )
+        DEALLOCATE( WELLTD_DAT       , stat=I )
+        DEALLOCATE( CY_FLG           , stat=I )
+        DEALLOCATE( CYTD_FLG         , stat=I )
+        DEALLOCATE( CYTD_LINESMAX    , stat=I )
+        DEALLOCATE( CYTD_COUNT       , stat=I )
+        DEALLOCATE( HCY              , stat=I )
+        DEALLOCATE( CONDCY           , stat=I )
+        DEALLOCATE( CONDCYS          , stat=I )
+        DEALLOCATE( CYLQ             , stat=I )
+        DEALLOCATE( CYFLOW           , stat=I )
+        DEALLOCATE( QCYLQ            , stat=I )
+        DEALLOCATE( CY_FLIP          , stat=I )
+        DEALLOCATE( CYTD_IN          , stat=I )
+        DEALLOCATE( ICY              , stat=I )
+        DEALLOCATE( CYTD_DAT         , stat=I )
+        DEALLOCATE( LH_FLG           , stat=I )
+        DEALLOCATE( HLH              , stat=I )
+        DEALLOCATE( QLH              , stat=I )
+        DEALLOCATE( LH_FLIP          , stat=I )
+        DEALLOCATE( ILH              , stat=I )
+        DEALLOCATE( FHTD_FLG         , stat=I )
+        DEALLOCATE( FHTD_LINESMAX    , stat=I )
+        DEALLOCATE( FHTD_COUNT       , stat=I )
+        DEALLOCATE( FHTD_IN          , stat=I )
+        DEALLOCATE( FHTD_DAT         , stat=I )
+        DEALLOCATE( CFP_OUT_DIRECTORY, stat=I )
+        DEALLOCATE( NODE_OUTPUT_FILES, stat=I )
+        DEALLOCATE( TUBE_OUTPUT_FILES, stat=I )
+        DEALLOCATE( TURBLAM          , stat=I )
+      END SUBROUTINE
 C
 C
 C

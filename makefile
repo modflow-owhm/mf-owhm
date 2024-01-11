@@ -4,40 +4,51 @@
 #
 # Developed by Scott E Boyce <seboyce@usgs.gov>
 #
-# If you use MF-OWHM, this MAKEFILE, a derivative of this makefile 
+# If you use MF-OWHM, this MAKEFILE, a derivative of this makefile
 #   please include in any publications the following citations:
 #
 #    Boyce, S.E., Hanson, R.T., Ferguson, I., Schmid, W., Henson, W., Reimann, T., Mehl, S.M., and Earll, M.M., 2020, One-Water Hydrologic Flow Model: A MODFLOW based conjunctive-use simulation software: U.S. Geological Survey Techniques and Methods 6–A60, 435 p., https://doi.org/10.3133/tm6A60
 #
-#    Boyce, S.E., 2023, MODFLOW One-Water Hydrologic Flow Model (MF-OWHM) Conjunctive Use and Integrated Hydrologic Flow Modeling Software, version 2.3.x: U.S. Geological Survey Software Release, https://doi.org/10.5066/P9P8I8GS
+#    Boyce, S.E., 2024, MODFLOW One-Water Hydrologic Flow Model (MF-OWHM) Conjunctive Use and Integrated Hydrologic Flow Modeling Software, version 2.3.x: U.S. Geological Survey Software Release, https://doi.org/10.5066/P9P8I8GS
 #
 # PROVIDED AS IS WITHOUT WARRANTY OR HELP.
 #
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
-# This makefile contains the options for compiling using Intel, GFortran, and LLVM.  
-#   There are a set of known compiler bugs that have been summitted to Intel and GCC that prevent compilation.
+# This makefile contains the options for compiling using Intel, GFortran, and LLVM.
+#   There are a set of known compiler bugs in older versions of Intel and GCC that prevent compilation.
 #   If you receive "internal compiler error" when running this makefile, it is because the compiler version does not work.
-#   
+#
 #   The Intel Fortran compiler is now part of Intel oneAPI and has two different versions:
 #     Intel Fortran Compiler Classic (ifort) and Intel Fortran (ifx).
-#        ifx is not recommended and will raise lots of "internal compiler error"s
-#        ifort can have issues depending on the compiler version.
+#     Historically MODFLOW is compiled using ifort, but Intel support for ifort ends in December, 2024.
+#
+#     The two compilers have similar runtimes, but due to different floating point models and optimizations
+#     may yield slightly different results with the same input.
+#
+#     New projects should use ifx and existing projects should test both ifort and ifx compilations.
+#       The default is still ifort, but may change in a future release.
+#
 #     oneAPI versioning is based on YYYY.m.p, where YYYY is year, m is major version, p and patch version.
 #     oneAPI versions may not match its subcomponents,
 #        for example, oneAPI version 2023.0.0, has ifx version 2023.0.0, and ifort version 2021.8.0
-#      
+#
 #   Gfortran many versions that are identified by their major versioning. The current versions in use are 10.x.y, 11.x.y, and 12.x.y
-#     The gfortran version can be determined by "gfortran --version" and 
+#     The gfortran version can be determined by "gfortran --version" and
 #     specific major versions of gfortran can be invoked as gfortran-XX where XX is the major version, such as gfortran-12
-#    
+#
 #   The LLVM compilers, FLANG and CLANG, are still experimental and not yet fully supported.
 #
-#   ifx                        WILL NOT compile this project (feature not implemented errors)
-#   ifort 2021.8.0             WILL NOT compile this project (oneAPI 2023.0.0)
+#   ifx   2024.0.0  and newer  WILL compile this project     (oneAPI 2024.0.0)
+#   ifort 2021.10.0 and newer  WILL compile this project     (oneAPI 2023.2.0)
 #   ifort 2021.7.0 and earlier WILL compile this project     (oneAPI 2022.2.1)
+#   ifort 2021.8.0             WILL NOT compile this project (oneAPI 2023.0.0)
+#   ifort 2021.9.0             WILL NOT compile this project (oneAPI 2023.1.0)
 #   gfortran 11.3.0 and 12.1.0 WILL compile this project (but raises runtime errors do to compiler bugs)
-# 
+#
+#   The Intel C Compiler Classic (icc) has been discontinued and replaced by Intel C++ compiler (icx) in OneAPI w024.0.0 and newer.
+#     Both icc and icx versions can compile GMG.
+#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 # To Invoke/Compile type from command prompt:
@@ -50,7 +61,7 @@
 # make CONFIG=debug       or
 # make CONFIG=release     or
 # make run CONFIG=debug   or
-# 
+#
 # make COMPILER=gcc F90=gfortran       or
 # make COMPILER=gcc F90=gfortran CONFIG=debug
 #
@@ -74,23 +85,23 @@
 #
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
-# If you want to use Intel Fortran on Windows 10 
+# If you want to use Intel Fortran on Windows 10/11
 #    then run the makefile in the Intel Command Prompt (for example, run from the start menu: Compiler 19.1 Update 1 for Intel 64 Visual Studio 2019 environment)
 #    or you will get path or license errors from Intel.
 #    -- Linux Intel Fortran works fine with this makefile if ifort is in the PATH variable.
 #
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
-# If you want to use Gfortran on Windows 10 
+# If you want to use Gfortran on Windows 10/11
 #   then you will need to:
 #      1) Install MSYS: https://www.msys2.org/
-#      2) Add to windows PATH variable: 
+#      2) Add to windows PATH variable:
 #            A) C:\msys64\mingw64\bin
 #            B) C:\msys64\usr\bin
 #      3) Open a bash prompt.
 #            A) If in windows path just type "bash" in the cmd.exe windows
 #            B) Otherwise, it is located at: C:\msys64\usr\bin\bash.exe
-#      4) Run the following commands in bash, 
+#      4) Run the following commands in bash,
 #            after each command restart bash (close and reopen the window)
 #            A) pacman --needed -S bash pacman pacman-mirrors msys2-runtime
 #            B) pacman -Syu
@@ -108,7 +119,7 @@
 #
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
-#         
+#
 #################################################################################################################################
 #################################################################################################################################
 ###   Set the following Variables                                         #######################################################
@@ -136,7 +147,7 @@ F90 := ifort
 #
 # Define the C Compiler
 #   ===> Accepted Answers: gcc, icc
-CC  := icc
+CC  := icx
 #
 # Program Name - Do not include extension (eg .exe). Also _debug will automatically be added if CONFIG = debug. Use bin_out= to specify exact location and name for binary.
 #
@@ -543,7 +554,7 @@ ifeq ($(CFG), DEBUG)
    #
    PROGRAM:=$(PROGRAM)-debug
    #
-   F90FlagsIntel :=-O0 -g -debug -traceback -assume nocc_omp -fpe0 -fp-model source -nologo -warn nousage -check bounds,pointers,stack,format,output_conversion,uninit
+   F90FlagsIntel :=-O0 -g -debug -traceback -assume nocc_omp -fpe0 -fp-model source -nologo -warn nousage -check bounds,pointers,stack,format,output_conversion,uninit -diag-disable=10448
    F90FlagsGCC   :=-O0 -g -w -fbacktrace -fdefault-double-8  -ffree-line-length-2048 -fmax-errors=10 -ffpe-trap=zero,overflow,underflow -finit-real=nan -fcheck=all # -fstack-usage #<= THIS PROVIDES LOTS OF INFO   -std=f2008
    F90FlagsLLVM  :=
    #
@@ -553,7 +564,7 @@ ifeq ($(CFG), DEBUG)
 else
    # NOTE "-ip" can sometimes cause catastrophic error: **Internal compiler error:
    #
-   F90FlagsIntel :=-O2 -assume nocc_omp -fpe0 -fp-model source -threads -warn nousage -nologo
+   F90FlagsIntel :=-O2 -assume nocc_omp -fpe0 -fp-model source -threads -warn nousage -nologo -diag-disable=10448
    F90FlagsGCC   :=-O2 -w -fno-backtrace -fdefault-double-8 -ffree-line-length-2048
    F90FlagsLLVM  :=
    #

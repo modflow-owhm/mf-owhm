@@ -1,4 +1,4 @@
-# Copyright 2023 U.S. Geological Survey
+# Copyright 2024 U.S. Geological Survey
 ```
                                  Apache License
                            Version 2.0, January 2004
@@ -232,5 +232,6 @@ should include the following two citations:
 
 * Boyce, S.E., Hanson, R.T., Ferguson, I., Schmid, W., Henson, W., Reimann, T., Mehl, S.M., and Earll, M.M., 2020, One-Water Hydrologic Flow Model: A MODFLOW based conjunctive-use simulation software: U.S. Geological Survey Techniques and Methods 6–A60, 435 p., https://doi.org/10.3133/tm6A60
 
-+ Boyce, S.E., 2023, MODFLOW One-Water Hydrologic Flow Model (MF-OWHM) Conjunctive Use and Integrated Hydrologic Flow Modeling Software, version 2.x.y: U.S. Geological Survey Software Release, https://doi.org/10.5066/P9P8I8GS
-  + Note that 2.x.y should replace the x and y with the version number you are using
++ Boyce, S.E., 20XX, MODFLOW One-Water Hydrologic Flow Model (MF-OWHM) Conjunctive Use and Integrated Hydrologic Flow Modeling Software, version 2.x.y: U.S. Geological Survey Software Release, https://doi.org/10.5066/P9P8I8GS
+  + 20XX should replace the XX with the year of release for the version used.
+  + 2.x.y should replace the x and y with the version number you are using

@@ -2,11 +2,7 @@
 PRINT ByWBS_ByCrop Output file from FMP SALINITY_FLUSH_IRRIGATION Block
 
 
-The keyword PRINT ByWBS_ByCrop writes to the Generic_Output_OptKey file the summarized salinity irrigation flush
-results for each WBS for every time. The keyword PRINT ByWBS has the same headers, except it does not include the CROP header because it aggregates all crops together by WBS. The keyword PRINT ByCrop has the same headers, except it does not include the WBS header because it aggregates information across all WBSs for each crop. The keyword PRINT ByCrop has the same headers, except it is written for every model cell and contains the header ROW and COL, for the model row and column, after the header FARM.
-
-
-Writes for each time step salinity irrigation flush demand and flows sumarized
+Writes for each time step a summary of salinity irrigation flush demand and flows
 for each Water Balance Subregion (WBS) and for each land use (crop).
 
 The output may be text or binary format.
@@ -14,6 +10,12 @@ The output may be text or binary format.
 If the output file is text format, then it will contain a single header line
 followed by the output written for each time step. If the output file is binary format,
 then each times step writes a binary record containing only the output data.
+
+Note that, the keyword PRINT ByWBS has the same headers, except it does not include 
+the CROP header because it aggregates all crops together by WBS. The keyword 
+PRINT ALL has the same headers, except it is written for every model cell 
+and contains the header ROW and COL, for the model row and column, after the header WBS.
+
 
 
 /-------------------------------------\

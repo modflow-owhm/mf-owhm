@@ -20,7 +20,7 @@ Boyce, S.E., Hanson, R.T., Ferguson, I., Schmid, W., Henson, W., Reimann, T., Me
 
 ## 2.3.0
 
-2023-4-23
+2024-01-10
 
 git commit log: `git log 9d9f5b50c77a03b538e4ec818f5a67e7bcf3e5ea..HEAD`
 
@@ -45,13 +45,25 @@ See [CHANGELOG_Features.md](CHANGELOG_Features.md#2.1.1) for a listing of new Zo
 - Batteries Included Fortran (BiF) version 1.2.0 source code merged.
     - https://code.usgs.gov/fortran/bif/-/tags/1.2.0
 
+### CFP MODE 2 and 3 is Disabled
+
+* `CFP` input specifies `MODE` as being 1, 2, or 3. 
+  * `MODE 1` solves the conduit pipes (available)
+  * `MODE 2` solves conduit layers (disabled)
+  * `MODE 3` combines 1 and 2  (disabled)
+
+
+Mode 2, and consequently 3, is failing to converge for the example problems nor matching the example results. In an abundance of caution this feature has been disabled until the reason for the discrepancy is found. If mode 2 or 3 is selected then an error message is raised.
+
+Only MODE 1 is allowed until this issue is fixed.
+
 ### Fixed
 
 * `RCH` reverted back to using upper most `IBOUND /= 0` cell to match results from MF-NWT.
   
-    * This removes the RCH fix in [2.0.1](#2.0.1) that changed the check to include for convertible layers a check for if the head is about the cell bottom.    
+    * This removes the RCH fix in [2.0.1](#2.0.1) that changed the check to include for convertible layers a check for if the head is above the cell bottom.    
     * Added `NRCHOP = 4` and `NRCHOP = 5` as options to mimic the old behavior.    
-    * For details about this change, please see  [CHANGELOG_Features.md](CHANGELOG_Features.md#2.3.0)
+    * For details about this change, please see [CHANGELOG_Features.md](CHANGELOG_Features.md#2.3.0)
     
 * `FMP` Bug Fixes
   
@@ -61,7 +73,7 @@ See [CHANGELOG_Features.md](CHANGELOG_Features.md#2.1.1) for a listing of new Zo
     * `MNW2`-`FMP` Supply well link no longer crashes if row and column do not match (`SUPPLY_WELL` Block). Instead, `FMP` now copies the row and column specified in `MNW2`. The row and column input is still required in `FMP` as a placeholder, but not used.
     * `SURFACE_WATER` block `PRINT SFR_RETURN` keyword with binary output (`BINARY` keyword) wrote a random integer if the WBS did not have assigned any SFR return flow locations.
       * The fix changed this to write the segment and reach as zero to indicate no SFR return flow point was specified.
-      * Note this is already how the text version of the option already works.
+      * Note this is how the text version of the option already works.
     * FMP failed to identify other blocks when `LAND_USE` was not specified in the input.
       * While this block should always be specified, the input indicates it is optional.  
         The code now reflects this flexibility.
@@ -80,7 +92,7 @@ See [CHANGELOG_Features.md](CHANGELOG_Features.md#2.1.1) for a listing of new Zo
 * `BAS` Options Fixes
 
     *  `PRINT_HEAD`, `PRINT_WATER_TABLE`, and `PRINT_WATER_DEPTH` no longer sorts the stress period and time step (`SPTS`).
-        * In `MODULE BAS_OPTIONS_AND_STARTDATE`, if multiple `PRINT_HEAD`, `PRINT_WATER_TABLE`, or `PRINT_WATER_DEPTH` keywords are included to indicate output for different `SPTS`, then they would be sorted by stress period and time step. However, this only slowed the runtime rather than improved it.
+        * Previously, in `MODULE BAS_OPTIONS_AND_STARTDATE`, if multiple `PRINT_HEAD`, `PRINT_WATER_TABLE`, or `PRINT_WATER_DEPTH` keywords were included to indicate output for different `SPTS`, then they would be sorted by stress period and time step. However, this only slowed the runtime rather than improved it.
 
     *  `PRINT_WATER_TABLE` and `PRINT_WATER_DEPTH` file header write error.
         * In `bas.f` the subroutine `GWF2BAS7OT` checks if `PRINT_WATER_TABLE` and/or `PRINT_WATER_DEPTH` options are in use and if the corresponding arrays should be written to a file for the stress period and time step that just finished. While writing the header to the output, the code would use the file unit number associated with `PRINT_HEAD` option, which would either put an extra header in those files or raise a random access violation error.
@@ -97,7 +109,7 @@ See [CHANGELOG_Features.md](CHANGELOG_Features.md#2.1.1) for a listing of new Zo
 
 * `NWT` Bug Fixes
 
-    * Isolated model cells (that is surrounded by `IBOUND=0` cells) were previously set `HDRY` and the  `IBOUND` changed to zero. To be consistent with other flow packages, the head value is instead changed to `HNOFLO`.
+    * Isolated model cells (ones that are surrounded by `IBOUND=0` cells) were previously set to `HDRY` and the `IBOUND` changed to zero. To be consistent with other flow packages, the head value is instead changed to `HNOFLO`.
       
     * `SUBROUTINE XMD7DA` added declaration for `IGRID` argument rather than using implicit typing.
 
@@ -120,9 +132,7 @@ See [CHANGELOG_Features.md](CHANGELOG_Features.md#2.1.1) for a listing of new Zo
         end subroutine
         ```
 
-
-* `HOB` requires drawdown observations to be in chronological order or an error is raised. 
-  
+* `HOB` now requires drawdown observations to be in chronological order or an error is raised. 
 
     * Either the user will need to fix the order or change the observation order or change to head observations.
 
@@ -162,7 +172,7 @@ See [CHANGELOG_Features.md](CHANGELOG_Features.md#2.1.1) for a listing of new Zo
   
     * Provides better error and warning messages for bad input.
     * Input allows comments and empty lines.
-      * This mainly effected when properties were defined by parameters and   
+      * This mainly affected when properties were defined by parameters and   
         then the input would use a Fortran list-directed read to load the print factor (`IPRN`).  
         In particular, the following code:  
         `READ(IN,*) LAYFLG(1,K)`  
@@ -181,7 +191,8 @@ See [CHANGELOG_Features.md](CHANGELOG_Features.md#2.1.1) for a listing of new Zo
 
 * `xmd.f` indentation cleanup.
 
-* `tabfile_module.f` reading the the actual tabfile's filenames now accept the keywords `OPEN/CLOSE`, `DATAFILE`, and `DATAUNIT`. 
+* `tabfile_module.f` reading the actual tabfile's filenames now accept the keywords `OPEN/CLOSE`, `DATAFILE`, and `DATAUNIT`. 
+
   * Previously, the tabfile filename was specified without a keyword as just *FNAME* or `EXTERNAL` *UNIT*.  
     If the user used a keyword, such as `OPEN/CLOSE ./myTabFile.txt`,  
     then the program would stop saying `Failed to open "OPEN/CLOSE"` causing confusing to the user.
@@ -202,11 +213,11 @@ See [CHANGELOG_Features.md](CHANGELOG_Features.md#2.1.1) for a listing of new Zo
 * `WEL` and `MNW2` improved missing `ITMP` warning.
 
   * For the `MNW2` and `WEL` packages, if the end of file is reached or the input fails to read `ITMP`, then `ITMP` is assumed to be zero for the rest of the simulation.
-  * When this occurres a formal warning was made.  
-    This was changed to being a minor message in the `LIST`ing file with the worlds:  
+  * When this occurs a formal warning was made.  
+    This was changed to being a minor message in the `LIST`ing file with the words:  
     `Don't Panic`  
     in the warning message.
-  * It also indicates to the user that if they are using `LINEFEED` or `FMP-Link` that the rates may be initialized outside of the package.
+  * It also indicates to the user that if they are using `LINEFEED` or `FMP-Link` the rates may be initialized outside of the package.
 
 * `FMP` variable `DRTFLOW` is always allocated when using FMP.
 
@@ -218,7 +229,7 @@ See [CHANGELOG_Features.md](CHANGELOG_Features.md#2.1.1) for a listing of new Zo
 
     The warning has been expanded to include suggestions on how to fix the problem and what potential causes of the warning are.  
 
-    The warning also indicates that, it is not a problem, but instead is letting the user know that water is leaving the model domain automatically since the user did not specify a runoff location.  
+    The warning also indicates that water is leaving the model domain automatically since the user did not specify a runoff location.  
 
 * `FMP` source file standardization of indentation for the following files:
 
@@ -241,7 +252,7 @@ See [CHANGELOG_Features.md](CHANGELOG_Features.md#2.1.1) for a listing of new Zo
 * `src/fmp/crop_data.f90`  moved crop initial array allocations to separate subroutine.
 
     * The FMP `LAND_USE` block, `MODULE CROP_DATA_FMP_MODULE`, contained conditional array allocations that occurred in the `SETUP_NEXT_STRESS_PERIOD` subroutine (RP routine). These have been moved to `SUBROUTINE SETUP_DEPENDENT_PARTS`.
-    * By doing this, allows the allocations to occur at the FMP allocate and read routine (`SUBOURITNE FMP_AR`) after all the FMP block inputs have been read.
+    * By doing this, the allocations can occur at the FMP allocate and read routine (`SUBOURITNE FMP_AR`) after all the FMP block inputs have been read.
 
 * `hydfmt.f` minor character variable cleanup to reduce final executable binary size.
 

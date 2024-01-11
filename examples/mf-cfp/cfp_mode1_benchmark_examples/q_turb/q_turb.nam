@@ -1,0 +1,11 @@
+BAS6          1  q_turb.bas
+DIS           2  q_turb.dis
+BCF6         11  q_turb.bcf
+PCG          15  q_turb.pcg
+CFP          16  q_turb.cfp
+OC           22  q_turb.oc
+
+LIST          7 ./output/q_turb.lst
+DATA(BINARY) 50 ./output/q_turb.cbc
+DATA         51 ./output/q_turb.hds
+

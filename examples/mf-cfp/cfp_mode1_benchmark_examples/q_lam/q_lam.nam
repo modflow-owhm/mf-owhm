@@ -1,0 +1,10 @@
+BAS6          1  q_lam.bas
+DIS           2  q_lam.dis
+BCF6         11  q_lam.bcf
+PCG          15  q_lam.pcg
+CFP          16  q_lam.cfp
+OC           22  q_lam.oc
+
+LIST          7 ./output/q_lam.lst
+DATA(BINARY) 50 ./output/q_lam.cbc
+DATA         51 ./output/q_lam.hds

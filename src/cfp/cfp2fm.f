@@ -20,7 +20,7 @@ C
 C ADAPTED VERSION = CONDUIT TYPE FLOW IN CONTINUUM CTFC
 C
 C 1) FADJ COMPUTATION CHANGED, KTURB ITERATION REMOVED;
-C    MODE 2 FEEXP IS USER DEFINED
+C    MODE 2 FEEXP IS SET TO 1.5 TO BEHAVE LIKE THE ORIGINAL CFPM2
 C 2) DISCHARGE DISCONTINUITY ADDED (IF THIS SHOULD NOT BE CONSIDER, 
 C    USE SIMILAR VALUES FOR CRITICAL REYNOLD NUMBER IN INPUT FILE)
 C 3) LAMINAR PRECALCULATION ADDED
@@ -35,10 +35,14 @@ C--USE MODULES
       USE GLOBAL, ONLY:IOUT, NCOL, NROW, NLAY, HOLD, BOTM, CR, CC, HNEW,
      +                 DELR, DELC, CV
 C
-      USE CFPMODULE, ONLY:MODE, NCL, CL, TWATER2, DENSWA2, VISCWA2,
-     +                    LCRITREY2, TCRITREY2, VOID2, TURB_FR, TURB_FF,
-     +                    TURB_FV,KLAM_CR, KLAM_CC, KLAM_CV, CRT, CCT, 
-     +                    CVT, FEEXP,ICFPCNVG,R_LENGTH,IRADFLAG
+      USE CFPMODULE, ONLY:MODE, NCL, CL, TWATER, DENSWA, VISCWA,        !TR: 2023 07 02 REMOVED SPATIAL VARIABILITY
+     +                    LCRITREY, TCRITREY, VOID, TURB_FR, TURB_FF,
+!     USE CFPMODULE, ONLY:MODE, NCL, CL, TWATER2, DENSWA2, VISCWA2,
+!    +                    LCRITREY2, TCRITREY2, VOID2, TURB_FR, TURB_FF,
+!    +                    TURB_FV,KLAM_CR, KLAM_CC, KLAM_CV, CRT, CCT, 
+     +                    TURB_FV,KLAM_CR, KLAM_CC, KLAM_CV,
+!    +                    CVT, FEEXP,ICFPCNVG,R_LENGTH,IRADFLAG         !TR: 2023 07 01 REMOVED RADIAL FLOW
+     +                    FEEXP, ICFPCNVG                          !TR: 2023 07 01 REMOVED RADIAL FLOW      
 C
 CBARC*************************************************************************
       IMPLICIT NONE
@@ -51,13 +55,16 @@ C
 C--LOCAL VARIABLES
 C--ELK  LEAVE FADJ IN CODE 
       DOUBLE PRECISION HDIFF, LENGTH, DHCRIT_LT, DHCRIT_TL, THK, KLAM, 
-     +                 AREA, FADJ,TCRIT_AVG,LCRIT_AVG,VIS_AVG,VOID_AVG,
-     +                 FE_AVG,AREA_RAD
+     +                 AREA, FADJ
+!    +                 AREA, FADJ,TCRIT_AVG,LCRIT_AVG,VIS_AVG,VOID_AVG,  !TR: 2023 07 02 REMOVED SPATIAL VARIABILITY
+!    +                 FE_AVG,AREA_RAD
 C
       INTEGER I, IC, J, K, ICNVG
 C
 C--SKIP IF MODE 1 IS ACTIVE!
       IF ( MODE.EQ.1 ) RETURN
+      
+      IF(KKITER < 5) ICFPCNVG = 0
 C 
 C--CBARC**SET LAMINAR CONDUCTANCES AND TURBULENCE FLAGS
       IF(KKSTP.EQ.1.AND.KKITER.EQ.1.AND.KKPER.EQ.1) THEN
@@ -67,24 +74,19 @@ C--CBARC**SET LAMINAR CONDUCTANCES AND TURBULENCE FLAGS
 	      KLAM_CR(J,I,K) = CR(J,I,K)
 CB	       CRT(J,I,K) = KLAM_CR(J,I,K)
 	      KLAM_CC(J,I,K) = CC(J,I,K)
-CB	       CCT(J,I,K) = KLAM_CC(J,I,K)
-	      KLAM_CV(J,I,K) = CV(J,I,K)
-CB	       CVT(J,I,K) = KLAM_CV(J,I,K)
-            
+CB	       CCT(J,I,K) = KLAM_CC(J,I,K)       
             TURB_FR(J, I, K) = 0
             TURB_FF(J, I, K) = 0
-            TURB_FV(J, I, K) = 0
-
          ENDDO
 	  ENDDO
 	 ENDDO
       ENDIF
 C
 C---CBARC** RUN CTFC ONLY AFTER LAM. CONVERGENCE            
-      IF(ICNVG.EQ.0) RETURN
-      ICNVG=0
-      ICFPCNVG=1
-      PRINT*, "COMPUTING TURBULENT CONDUCTANCES CR CC AND CV"
+      IF(ICFPCNVG == 0) RETURN
+!!!      ICNVG=0
+!!!      ICFPCNVG=1
+!!!      PRINT*, "COMPUTING TURBULENT CONDUCTANCES CR CC AND CV"
 CB      PRINT*, ICNVG,ICFPCNVG
 C
 C--CBARC&ELK**MODIFY CC AND CR IF FLOW IS TURBULENT 
@@ -111,24 +113,28 @@ CB           PAUSE
             KLAM=(CR(J,I,CL(IC))*LENGTH)/AREA                           !TR: 2009 12 07 USED CR INSTEAD OF KLAM_CR, 100% CORRECT ONLY FOR SATURATED SITUATIONS
 C
 C--BARC**CALC AREA FOR RADIAL FLOW MODELS
-            IF(IRADFLAG.EQ.1)THEN
+!           IF(IRADFLAG.EQ.1)THEN                                       !TR:2023 07 01 REMOVED RADIAL FLOW 
 CB             AREA_RAD=THK*(2*3.14159*R_LENGTH(J))
-             KLAM=CR(J,I,CL(IC))*(LENGTH/(2*3.14159*R_LENGTH(J)*AREA))
+!            KLAM=CR(J,I,CL(IC))*(LENGTH/(2*3.14159*R_LENGTH(J)*AREA))  !TR:2023 07 01 REMOVED RADIAL FLOW
 CB             PRINT*,KLAM
-            ENDIF
+!           ENDIF                                                       !TR:2023 07 01 REMOVED RADIAL FLOW
 C
 C--BARC**COMPUTE AVERAGES
-            TCRIT_AVG=(TCRITREY2(J,I,CL(IC))+TCRITREY2(J+1,I,CL(IC)))/2
-            LCRIT_AVG=(LCRITREY2(J,I,CL(IC))+LCRITREY2(J+1,I,CL(IC)))/2
-            VIS_AVG=(VISCWA2(J,I,CL(IC))+VISCWA2(J+1,I,CL(IC)))/2
-            VOID_AVG=(VOID2(J,I,CL(IC))+VOID2(J+1,I,CL(IC)))/2
-            FE_AVG=(FEEXP(J,I,CL(IC))+FEEXP(J+1,I,CL(IC)))/2
+!           TCRIT_AVG=(TCRITREY2(J,I,CL(IC))+TCRITREY2(J+1,I,CL(IC)))/2
+!           LCRIT_AVG=(LCRITREY2(J,I,CL(IC))+LCRITREY2(J+1,I,CL(IC)))/2
+!           VIS_AVG=(VISCWA2(J,I,CL(IC))+VISCWA2(J+1,I,CL(IC)))/2
+!           VOID_AVG=(VOID2(J,I,CL(IC))+VOID2(J+1,I,CL(IC)))/2
+!           FE_AVG=(FEEXP(J,I,CL(IC))+FEEXP(J+1,I,CL(IC)))/2
 C            
 C--BARC**COMPUTE UPPER AND LOWER CRITICAL HEAD DIFFERENCES AT RIGHT FACE
 C--ELK DHCRIT IS CORRECT ALONG ROW 1 FROM BENCHMARK COMPUTATION             
-            DHCRIT_LT = (TCRIT_AVG*VIS_AVG*LENGTH)/(VOID_AVG*KLAM)
+!           DHCRIT_LT = (TCRIT_AVG*VIS_AVG*LENGTH)/(VOID_AVG*KLAM)      !TR: 2023 07 02 REMOVED SPATIAL VARIABILITY
+!           DHCRIT_TL = (LCRIT_AVG*VIS_AVG*LENGTH)/(VOID_AVG*KLAM)
+            dhcrit_lt = (Tcritrey(ic)*Viscwa*length)/
+     &                  (Void(ic)*Klam)
 
-            DHCRIT_TL = (LCRIT_AVG*VIS_AVG*LENGTH)/(VOID_AVG*KLAM)
+            dhcrit_tl = (Lcritrey(ic)*Viscwa*length)/
+     &                  (Void(ic)*Klam)
 C
 C--BARC**COMPUTE HDIFF FOR FLOW TO RIGHT
 C--BARCANDELK** USE HNEW
@@ -141,19 +147,17 @@ C--BARC**QLAM TO QTURB-----------------------------------------------
             IF ((HDIFF.GE.DHCRIT_LT).OR.((TURB_FR(J, I, CL(IC)).EQ.1)   !TR: 2010 04 30 FADJ IF HDIFF > DHCRIT_LT OR IF HDIFF > DHCRIT_TL IF DISCHARGE IS ALREADY TURBULENT
      +           .AND.(HDIFF.GE.DHCRIT_TL)))  THEN
 C--BARC**SET TURBULENCE FLAG
-                TURB_FR(J, I, CL(IC)) = 1
+               TURB_FR(J, I, CL(IC)) = 1
 C--BARC**COMPUTE TURBULENT CR
 C--BARC**	FADJ=DSQRT((KLAM_CR(J,I,CL(IC))*DHCRIT_LT)/
 CB     +(CRT(J,I,CL(IC))*HDIFF))
 C
 C--!TR: COMPUTE FADJ ACCORDING TO FEEXP
-         FADJ = ((HDIFF / DHCRIT_TL)**(1.0 / FE_AVG)) *                 !TR: 2010 03 19 
-     +                 (DHCRIT_TL / HDIFF)     
-     
-         CR(J, I, CL(IC)) = FADJ*KLAM_CR(J, I, CL(IC))
+               Fadj = (hdiff / dhcrit_tl)**((1.0 - FEexp(ic))/FEexp(ic)) !TR: 2010 12 23; compact formulation; successfully tested by comparison      
+               CR(J, I, CL(IC)) = FADJ*KLAM_CR(J, I, CL(IC))
 C
 C--BARC**ENDIF FOR IF ( HDIFF.GT.DHCRIT_LT ) 
-              ENDIF 
+            ENDIF 
 C
 C--BARC**QTURB TO QLAM------------------------------------------------
              IF ( HDIFF.LT.DHCRIT_TL ) THEN
@@ -189,15 +193,22 @@ C--ELK CALC KLAM [L/T] FOR DHCRIT CALCULATIONS
             KLAM=(CC(J,I,CL(IC))*LENGTH)/AREA                           !TR: 2009 12 07 USED CC INSTEAD OF KLAM_CC, 100% CORRECT ONLY FOR SATURATED SITUATIONS
 C
 C--BARC**COMPUTE AVERAGES
-            TCRIT_AVG=(TCRITREY2(J,I,CL(IC))+TCRITREY2(J,I+1,CL(IC)))/2
-            LCRIT_AVG=(LCRITREY2(J,I,CL(IC))+LCRITREY2(J,I+1,CL(IC)))/2
-            VIS_AVG=(VISCWA2(J,I,CL(IC))+VISCWA2(J,I+1,CL(IC)))/2
-            VOID_AVG=(VOID2(J,I,CL(IC))+VOID2(J,I+1,CL(IC)))/2
-            FE_AVG=(FEEXP(J,I,CL(IC))+FEEXP(J,I+1,CL(IC)))/2
+!           TCRIT_AVG=(TCRITREY2(J,I,CL(IC))+TCRITREY2(J,I+1,CL(IC)))/2 !TR: 2023 07 02 REMOVED SPATIAL VARIABILITY
+!           LCRIT_AVG=(LCRITREY2(J,I,CL(IC))+LCRITREY2(J,I+1,CL(IC)))/2
+!           VIS_AVG=(VISCWA2(J,I,CL(IC))+VISCWA2(J,I+1,CL(IC)))/2
+!           VOID_AVG=(VOID2(J,I,CL(IC))+VOID2(J,I+1,CL(IC)))/2
+!           FE_AVG=(FEEXP(J,I,CL(IC))+FEEXP(J,I+1,CL(IC)))/2
 C
 C--BARC**COMPUTE CRITICAL HEAD DIFFERENCES AT FRONT FACE
-            DHCRIT_LT = (TCRIT_AVG*VIS_AVG*LENGTH)/(VOID_AVG*KLAM)
-            DHCRIT_TL = (LCRIT_AVG*VIS_AVG*LENGTH)/(VOID_AVG*KLAM)
+!           DHCRIT_LT = (TCRIT_AVG*VIS_AVG*LENGTH)/(VOID_AVG*KLAM)
+!           DHCRIT_TL = (LCRIT_AVG*VIS_AVG*LENGTH)/(VOID_AVG*KLAM)
+            
+            dhcrit_lt = (Tcritrey(ic)*Viscwa*length)/ 
+     &                  (Void(ic)*Klam)
+
+            dhcrit_tl = (Lcritrey(ic)*Viscwa*length)/
+     &                  (Void(ic)*Klam)
+            
             HDIFF = HNEW(J, I, CL(IC)) - HNEW(J, I+1, CL(IC))
 C 
 C--BARC**FORCE HDIFF POSITIVE
@@ -213,8 +224,7 @@ C
 C--BARC&ELK**MAKE MODIFICATION TO CC
 CB      FADJ=DSQRT((KLAM_CC(J,I,CL(IC))*DHCRIT_LT)/
 CB     +(CCT(J,I,CL(IC))*HDIFF))
-              FADJ = ((HDIFF / DHCRIT_TL)**(1.0 / FE_AVG)) *            !TR: 2010 03 19 
-     +               (DHCRIT_TL / HDIFF)
+              Fadj = (hdiff / dhcrit_tl)**((1.0 - FEexp(ic))/FEexp(ic)) !TR: 2010 12 23; compact formulation; successfully tested by comparison    
      
               CC(J, I, CL(IC)) = FADJ*KLAM_CC(J, I, CL(IC))
 C
@@ -236,82 +246,83 @@ C
 C--BARC**GOTO HERE IF I.EQ.NROW
 C
 C--BARC**VERT FLOW****************************************************
-        DO I = 1, NROW
-          DO J = 1, NCOL
+!TR: 2023 07 02 NOT IN THE ORIGINAL FORMULATION / DEACTIVATED HERE
+!       DO I = 1, NROW
+!         DO J = 1, NCOL
 C
 C--BARC**EXIT IF LAST ROW
-            IF ( CL(IC).EQ.NLAY ) EXIT
+!           IF ( CL(IC).EQ.NLAY ) EXIT
 C 
 C--BARC**SET LENGTH
-            LENGTH = (BOTM(J, I, CL(IC)-1) - BOTM(J, I, CL(IC)))/2 +
-     +             (BOTM(J, I, CL(IC)) - BOTM(J, I, CL(IC)+1))/2
-            AREA = DELC(I)*DELR(J)
+!           LENGTH = (BOTM(J, I, CL(IC)-1) - BOTM(J, I, CL(IC)))/2 +
+!    +             (BOTM(J, I, CL(IC)) - BOTM(J, I, CL(IC)+1))/2
+!           AREA = DELC(I)*DELR(J)
 CB            PRINT*,LENGTH,AREA
-            KLAM=(CV(J,I,CL(IC))*LENGTH)/AREA                           !TR: 2009 12 07 USED CC INSTEAD OF KLAM_CC, 100% CORRECT ONLY FOR SATURATED SITUATIONS
+!           KLAM=(CV(J,I,CL(IC))*LENGTH)/AREA                           !TR: 2009 12 07 USED CC INSTEAD OF KLAM_CC, 100% CORRECT ONLY FOR SATURATED SITUATIONS
 C
 C--BARC**COMPUTE AVERAGES, IF NEEDED
 C--BARC**THIS INCLUDES CASES WHEN NCL.EQ.1; AND WHEN DARCIAN FLOW LAYER UNDERLIES 
-C--BARC**A NON-DARCIAN FLOW LAYER
-            TCRIT_AVG=TCRITREY2(J,I,CL(IC))
-            LCRIT_AVG=LCRITREY2(J,I,CL(IC))
-            VIS_AVG=VISCWA2(J,I,CL(IC))
-            VOID_AVG=VOID2(J,I,CL(IC))
-            FE_AVG=FEEXP(J,I,CL(IC))
+C--BARC**A NON-DARCIAN FLOW LAYER                                       !TR: 2023 07 02 REMOVED SPATIAL VARIABILITY
+!           TCRIT_AVG=TCRITREY2(J,I,CL(IC))
+!           LCRIT_AVG=LCRITREY2(J,I,CL(IC))
+!           VIS_AVG=VISCWA2(J,I,CL(IC))
+!           VOID_AVG=VOID2(J,I,CL(IC))
+!           FE_AVG=FEEXP(J,I,CL(IC))
 C
 C--BARC**USE THIS WHEN A NON-DARCIAN FLOW LAYER UNDERLIES A NON-DARCIAN FLOW LAYER
-            IF(NCL.GT.1) THEN
-              IF(CL(IC)+1.EQ.CL(IC+1)) THEN
-                TCRIT_AVG=(TCRITREY2(J,I,CL(IC))
-     +                    +TCRITREY2(J,I,CL(IC)+1))/2
-                LCRIT_AVG=(LCRITREY2(J,I,CL(IC))
-     +                    +LCRITREY2(J,I,CL(IC)+1))/2
-                VIS_AVG=(VISCWA2(J,I,CL(IC))+VISCWA2(J,I,CL(IC)+1))/2
-                VOID_AVG=(VOID2(J,I,CL(IC))+VOID2(J,I,CL(IC)+1))/2
-                FE_AVG=(FEEXP(J,I,CL(IC))+FEEXP(J,I,CL(IC)+1))/2
-              ENDIF
-            ENDIF
+!           IF(NCL.GT.1) THEN
+!             IF(CL(IC)+1.EQ.CL(IC+1)) THEN
+!               TCRIT_AVG=(TCRITREY2(J,I,CL(IC))
+!    +                    +TCRITREY2(J,I,CL(IC)+1))/2
+!               LCRIT_AVG=(LCRITREY2(J,I,CL(IC))
+!    +                    +LCRITREY2(J,I,CL(IC)+1))/2
+!               VIS_AVG=(VISCWA2(J,I,CL(IC))+VISCWA2(J,I,CL(IC)+1))/2
+!               VOID_AVG=(VOID2(J,I,CL(IC))+VOID2(J,I,CL(IC)+1))/2
+!               FE_AVG=(FEEXP(J,I,CL(IC))+FEEXP(J,I,CL(IC)+1))/2
+!             ENDIF
+!           ENDIF
 C
 C--BARC**MAY NEED TO CHANGE THIS, USE AN AVERAGE OF DHCRIT(CL(IC)) AND DHCRIT(CL(IC)+1)
-            DHCRIT_LT = (TCRIT_AVG*VIS_AVG*LENGTH)/ 
-     +                  (VOID_AVG*KLAM)
+!           DHCRIT_LT = (TCRIT_AVG*VIS_AVG*LENGTH)/ 
+!    +                  (VOID_AVG*KLAM)
 C
-            DHCRIT_TL = (LCRIT_AVG*VIS_AVG*LENGTH)/
-     +                  (VOID_AVG*KLAM)
+!           DHCRIT_TL = (LCRIT_AVG*VIS_AVG*LENGTH)/
+!    +                  (VOID_AVG*KLAM)
 C
-            HDIFF = HNEW(J, I, CL(IC)) - HNEW(J, I, CL(IC)+1)
+!           HDIFF = HNEW(J, I, CL(IC)) - HNEW(J, I, CL(IC)+1)
 C 
 C--BARC**FORCE HDIFF POSITIVE
-            HDIFF = DABS(HDIFF)
+!           HDIFF = DABS(HDIFF)
 C
 C--BARC**QLAM TO QTURB--------------------------------------------------
-            IF ((HDIFF.GE.DHCRIT_LT).OR.((TURB_FF(J, I, CL(IC)).EQ.1)   !TR: 2010 04 30 FADJ IF HDIFF > DHCRIT_LT OR IF HDIFF > DHCRIT_TL IF DISCHARGE IS ALREADY TURBULENT
-     +           .AND.(HDIFF.GE.DHCRIT_TL)))  THEN              
+!           IF ((HDIFF.GE.DHCRIT_LT).OR.((TURB_FF(J, I, CL(IC)).EQ.1)   !TR: 2010 04 30 FADJ IF HDIFF > DHCRIT_LT OR IF HDIFF > DHCRIT_TL IF DISCHARGE IS ALREADY TURBULENT
+!    +           .AND.(HDIFF.GE.DHCRIT_TL)))  THEN              
 
 C
 C--BARC**SET TURBULENCE FLAG
-              TURB_FV(J, I, CL(IC)) = 1
+!             TURB_FV(J, I, CL(IC)) = 1
 C
 C--BARC&ELK**MAKE MODIFICATION TO CV
 CB      FADJ=DSQRT((KLAM_CV(J,I,CL(IC))*DHCRIT_LT)/
 CB     +(CVT(J,I,CL(IC))*HDIFF))
-              FADJ = ((HDIFF / DHCRIT_TL)**(1.0 / FE_AVG)) *            !TR: 2010 03 19 
-     +               (DHCRIT_TL / HDIFF)
+!             FADJ = ((HDIFF / DHCRIT_TL)**(1.0 / FE_AVG)) *            !TR: 2010 03 19 
+!    +               (DHCRIT_TL / HDIFF)
      
-              CV(J, I, CL(IC)) = FADJ*KLAM_CV(J, I, CL(IC))
+!             CV(J, I, CL(IC)) = FADJ*KLAM_CV(J, I, CL(IC))
 C
 C--BARC**ENDIF STATEMENT FOR IF ( HDIFF.GT.DHCRIT_LT )
-            ENDIF
+!           ENDIF
 C
 C--BARC**QTURB TO QLAM--------------------------------------------------
-            IF ( HDIFF.LT.DHCRIT_TL ) THEN
-              TURB_FV(J, I, CL(IC)) = 0
-            ENDIF
+!           IF ( HDIFF.LT.DHCRIT_TL ) THEN
+!             TURB_FV(J, I, CL(IC)) = 0
+!           ENDIF
 C
 C--BARC**ENDDO FOR J LOOP
-          ENDDO
+!         ENDDO
 C
 C--BARC**ENDDO FOR I LOOP
-        ENDDO
+!       ENDDO
 C
 C--BARC***ENDDO FOR IC LOOP
       ENDDO

@@ -31,6 +31,11 @@ fi
 #
 # ---- Override and use specified PROGRAM. Uncomment and set to use  --------------------------------------
 #
+# 
+#PROGRAM=mf-owhm.ifx.exe
+#
+#PROGRAM=mf-owhm.ifort.exe
+#
 #PROGRAM=mf-owhm-gmg-debug.exe
 #PROGRAM=mf-owhm-gmg.exe
 #

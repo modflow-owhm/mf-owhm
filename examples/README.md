@@ -48,6 +48,7 @@ The bash script `1_RunValidation.sh` is a special script that will clean out all
 | bash_example_run | Directory that contains Bash scripts to run the files in the example directories. <br /><br />Contains the unit testing script, `1_RunValidation.sh`, <br />which runs all the example problems and then compiles with<br />`gfortran` the file `validate_example_results.f90` to check the <br />results of the example problems with the output-true directories. |
 | mf-2005          | MODFLOW-2005 Standard Test example models.<br />They have been modified to use the additional features unique to MODFLOW-OWHM. |
 | mf-2005-nwt      | MODFLOW-2005 Standard Test example models converted to use the NWT solver and UPW flow package. |
+| mf-cfp           | MODFLOW-CFP Standard Test example models for MODE 1.<br />They have been modified to use the additional features unique to MODFLOW-OWHM. |
 | mf-nwt           | MODFLOW-NWT Standard Test example models.<br />They have been modified to use the additional features unique to MODFLOW-OWHM. |
 | mf-owhm          | Example problem that demonstrate the advance features of MODFLOW-OWHMv2 developed by Jon Traum. See [MODFLOW-OWHM Example Readme](./mf-owhm/README.md) |
 | mf-owhm-v1       | MODFLOW-OWHM example problems documented in <br />Hanson, R.T., Boyce, S.E., Schmid, Wolfgang, Hughes, J.D., Mehl, S.M., Leake, S.A., Maddock, Thomas, III, and Niswonger, R.G., 2014, One-Water Hydrologic Flow Model (MODFLOW-OWHM): U.S. Geological Survey Techniques and Methods 6–A51, 120 p., https://dx.doi.org/10.3133/tm6A51 |

@@ -1651,7 +1651,7 @@ c           Check if there is a screened iterval
                 IF(IINT == NINTVL .AND. intnodes.eq.0) THEN
                     MNW2(1,MNWID)=DNEG
                     CALL WRN%ADD(WELLID(MNWID)//
-     +' -- Ztop <=Zbotm for all intervals causing '//
+     +' -- Ztop <= Zbotm or IBOUND=0 for all intervals causing '//
      +'cell-to-well cond = 0. Well deactivated '//
      +'for entire simulation.'//NL )
                 END IF
