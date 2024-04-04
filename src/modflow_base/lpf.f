@@ -62,7 +62,7 @@ C     ------------------------------------------------------------------
       USE CONSTANTS,            ONLY: Z, ONE, DZ, UNO, NL, BLN, NL
       !
       CHARACTER(14):: LAYPRN(5),AVGNAM(3),TYPNAM(2),VKANAM(2),
-     1                WETNAM(2),HANNAM
+     1                WETNAM(3),HANNAM
       !
       CHARACTER(768):: LINE
       CHARACTER(24):: ANAME(9),STOTXT
@@ -79,7 +79,8 @@ C     ------------------------------------------------------------------
       VKANAM(2) = '    ANISOTROPY'
       !
       WETNAM(1) = '     NEVER-DRY'
-      WETNAM(2) = '      WETTABLE'
+      WETNAM(2) = '      STAY-DRY'
+      WETNAM(3) = '      WETTABLE'
       !
       HANNAM = '      VARIABLE'
       !
@@ -350,9 +351,16 @@ C4B-----TO SC2, HANI, and WETDRY.  PRINT INTERPRETED VALUES OF FLAGS.
       END IF
       LAYPRN(4)=VKANAM(1)
       IF(LAYVKA(K) /= Z) LAYPRN(4)=VKANAM(2)
-      LAYPRN(5)=WETNAM(1)
-      IF(LAYWET(K) /= Z) LAYPRN(5)=WETNAM(2)
-        WRITE(IOUT,78) K,(LAYPRN(I),I=1,5)
+      !
+      IF(LAYTYP(K) == Z) THEN
+          LAYPRN(5)=WETNAM(1)
+      ELSEIF(LAYWET(K) == Z) THEN
+          LAYPRN(5)=WETNAM(2)
+      ELSE
+          LAYPRN(5)=WETNAM(3)
+      END IF
+      !
+      WRITE(IOUT,78) K,(LAYPRN(I),I=1,5)
    78 FORMAT(1X,I4,5A)
   100 CONTINUE
 C
