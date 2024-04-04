@@ -45,7 +45,9 @@ integer:: i, n, iu1, iu2
 double precision:: ans1, ans2
 logical:: passed
 passed = .TRUE.
-
+!
+utest = ""
+!
 utest( 1) = "../mf-2005/output/bcf2ss_CumHCHG.txt"
 utest( 2) = "../mf-2005/output/etsdrt_CumHCHG.txt"
 utest( 3) = "../mf-2005/output/fhb_CumHCHG.txt"
@@ -110,11 +112,19 @@ utest(60) = "../mf-cfp/cfp_mode1_example/output/cfp_mode1_CumHCHG.txt"
 !utest(61) = "../mf-cfp/cfp_mode2_example/output/CumHCHG.txt"
 !utest(62) = "../mf-cfp/cfp_mode3_example/output/CumHCHG.txt"
 
+!utest(63) = "../mf-owhm/XXXX/output/CumHCHG.txt"
+!utest(64) = "../mf-owhm/XXXX/output/CumHCHG.txt"
+!utest(65) = "../mf-owhm/XXXX/output/CumHCHG.txt"
+!utest(66) = "../mf-owhm/XXXX/output/CumHCHG.txt"
+
+
 write(*,'(/,1x, A, 28x, 2x, A)') "File", "Test"
 write(*,'(A)') REPEAT('-', 45)
 
 n = size(utest)
 do i=1, n
+   if( utest(i) == "" ) CYCLE
+   !
    write(*,'(1x, A32, 2x)', advance="NO") testFile(utest(i))
    !
    iu1  = opener(utest(i))
