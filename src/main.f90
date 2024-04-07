@@ -29,7 +29,7 @@ SUBROUTINE PRINT_MAIN_HEADER(IU)  ! Set to 6 for cmd prompt or use output_unit f
   CHARACTER(:),ALLOCATABLE:: Revision
   !
   VERSION_OWHM='2.3'
-  Revision    ='0'
+  Revision    ='1-b1'
   VERSION_MF  ='1.12'
   VERSION_FMP ='4.1'
   VERSION_SWR ='1.04'
@@ -44,6 +44,14 @@ SUBROUTINE PRINT_MAIN_HEADER(IU)  ! Set to 6 for cmd prompt or use output_unit f
   ELSE
                    WRITE (IU,'(A,/,20x,A,/,/)') '💧🧙💦🌊  <-These symbols help text editors identify file as Unicode UTF8.', &
                                                 'UTF8 is not necessary to view numerical results, but no UTF8 support can have artifacts where non-ascii symbols are used (such as the degree symbol).'
+  END IF
+  !
+  IF(SCAN(Revision, "-rcb") > 0) THEN
+      WRITE(IU,'(A, /, /, A, /, A)')  &
+          " This software version is a Beta Release (-b) or Release Canidate (-rc).", &
+          " This software is preliminary and is subject to revision.", &
+          " It is being provided to meet the need for timely best science and ", &
+          "    has not received final approval by the U.S. Geological Survey (USGS)."
   END IF
   !
   WRITE (IU,'(4A)') 'MODFLOW-OWHM v', VERSION_OWHM,".",Revision !(:MIN(len_trim(Revision), 4))
