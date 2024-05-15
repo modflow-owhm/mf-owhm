@@ -685,9 +685,13 @@ C
       DOUBLE PRECISION, INTENT(IN):: TDDATA(MAXLINES,3,NONODES)
       DOUBLE PRECISION, INTENT(INOUT):: OUT(ACTIVENODE)
       DOUBLE PRECISION TP,TPP,XP,XPP
+      INTEGER :: TIME_INDEX
+      DOUBLE PRECISION :: DT, KV, ZERO_TOL
 C      
 C--INITIALIZE COUNTER
       N = Z
+      KV = 273.15d0
+      ZERO_TOL = 1.0d-29
 C      
       DO I = 1, ACTIVENODE
 C
@@ -719,30 +723,53 @@ C--IF NODE REQUIRE TIME DEPENDENT DATA
         ENDIF
 C
 C--IF NODE BOUNDARY DATA ARE TIME DEPENDENT
-        IF (FOUND.OR.BLK_FLG) THEN      
-C
-C--GO THROUGH THE INPUT DATA          
-          DO J = 1, MAXLINES
-C
-C--SEARCH FOR TIME > MODFLOW TIME          
-            IF (TDDATA(J,2,N).GE.TIME) THEN
-C
-C--INTERPOLATE              
-              TP  = TDDATA (J-1,2,N)
-              TPP = TDDATA (J,2,N)
-              XP  = TDDATA (J-1,3,N)
-              XPP = TDDATA (J,3,N)
-              IF(FLG.EQ.1) OUT(I) = (TIME-TP)/(TPP-TP)*(XPP-XP)+XP
-              IF(FLG.EQ.3) OUT(I) = ((TIME-TP)/(TPP-TP)*(XPP-XP)+XP)
-     +                              +273.15
-              IF(FLG.EQ.2) OUT(I_NODE) = (TIME-TP)/(TPP-TP)*(XPP-XP)+XP
-C
-C--SKIP THIS NODE WHEN FINISHED              
-              GOTO 100              
-            ENDIF
-          ENDDO
-100       CONTINUE          
-        ENDIF
+        IF (FOUND.OR.BLK_FLG) THEN
+           TIME_INDEX = MAXLINES
+           DO J = 1, MAXLINES             ! SEARCH FOR TIME > MODFLOW TIME    
+             IF (TDDATA(J,2,N).GE.TIME) THEN
+                 TIME_INDEX = J
+                 EXIT
+             ENDIF
+           ENDDO
+           !
+           J = TIME_INDEX
+           !
+           IF ( MAXLINES == 1 ) THEN
+               IF(FLG.EQ.1) OUT(I)      = TDDATA(1,3,N)
+               IF(FLG.EQ.3) OUT(I)      = TDDATA(1,3,N) + KV
+               IF(FLG.EQ.2) OUT(I_NODE) = TDDATA(1,3,N)
+           ELSE IF ( J == 1 ) THEN
+               TP   = TDDATA (J  ,2,N)
+               TPP  = TDDATA (J+1,2,N)
+               XP   = TDDATA (J  ,3,N)
+               XPP  = TDDATA (J+1,3,N)
+               DT = TPP-TP
+               IF ( DT < ZERO_TOL ) THEN
+                  IF(FLG.EQ.1) OUT(I)      = TDDATA(J,3,N)
+                  IF(FLG.EQ.3) OUT(I)      = TDDATA(J,3,N) + KV
+                  IF(FLG.EQ.2) OUT(I_NODE) = TDDATA(J,3,N)
+               ELSE
+                  IF(FLG.EQ.1) OUT(I) = XP + (XPP-XP)*(TIME-TP)/DT
+                  IF(FLG.EQ.3) OUT(I) = XP + (XPP-XP)*(TIME-TP)/DT + KV
+                  IF(FLG.EQ.2) OUT(I_NODE) = XP + (XPP-XP)*(TIME-TP)/DT
+               END IF
+           ELSE
+               TP   = TDDATA (J-1,2,N)
+               TPP  = TDDATA (J  ,2,N)
+               XP   = TDDATA (J-1,3,N)
+               XPP  = TDDATA (J  ,3,N)
+               DT = TPP-TP
+               IF ( DT < ZERO_TOL ) THEN
+                  IF(FLG.EQ.1) OUT(I)      = TDDATA(J,3,N)
+                  IF(FLG.EQ.3) OUT(I)      = TDDATA(J,3,N) + KV
+                  IF(FLG.EQ.2) OUT(I_NODE) = TDDATA(J,3,N)
+               ELSE
+                  IF(FLG.EQ.1) OUT(I) = XP + (XPP-XP)*(TIME-TP)/DT
+                  IF(FLG.EQ.3) OUT(I) = XP + (XPP-XP)*(TIME-TP)/DT + KV
+                  IF(FLG.EQ.2) OUT(I_NODE) = XP + (XPP-XP)*(TIME-TP)/DT
+               END IF
+           END IF
+        END IF
       ENDDO 
 C      
       END SUBROUTINE GETTDDATA
