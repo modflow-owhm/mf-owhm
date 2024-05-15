@@ -231,10 +231,10 @@ C     ------------------------------------------------------------------
       IF ( TC.GE.0.0 .AND. TC.LT.20.0 ) THEN
         DYNVISC = 10.0D0**                                              
      +            (1301.0D0/(998.33D0+8.1855D0*(TC-20.0D0)+0.00585D0*   
-     +            (TC-20.0D0)**2.0D0)-1.30233D0)/1000.0D0
+     +            (TC-20.0D0)**2)-1.30233D0)/1000.0D0
       ELSEIF ( TC.GE.20.0 .AND. TC.LE.100.0 ) THEN
         DYNVISC = 10.0D0**                                              
-     +            ((1.3272D0*(20.0D0-TC)-0.001053D0*(TC-20.0D0)**2.0D0) 
+     +            ((1.3272D0*(20.0D0-TC)-0.001053D0*(TC-20.0D0)**2) 
      +            /(TC+105.0D0))*1.002D0/1000.0D0
       ELSE
         WRITE (*, *) 'BAD TEMPERATURE INPUT!'
@@ -269,9 +269,9 @@ C     TC      TEMPERATURE IN DEGREE CELSIUS
 C     VISC    DYNAMIC VISCOSITY IN PA S
 C     WADENS  DENSITY OF WATER IN KG/M**3   
 C     ------------------------------------------------------------------         
-      WADENS = (999.83952D0+16.945176D0*TC-7.9870401D-3*TC**2.0D0-      
-     +         46.170461D-6*TC**3.0D0+105.56302D-9*TC**4.0D0-           
-     +         280.54253D-12*TC**5.0D0)/(1.0D0+16.879850D-3*TC)
+      WADENS = (999.83952D0+16.945176D0*TC-7.9870401D-3*TC**2-      
+     +         46.170461D-6*TC**3+105.56302D-9*TC**4-           
+     +         280.54253D-12*TC**5)/(1.0D0+16.879850D-3*TC)
 C 
       KINVISC = VISC/WADENS
 C
@@ -295,19 +295,19 @@ C
       IMPLICIT NONE
 C     ------------------------------------------------------------------
       DENSWA = (999.83952D0+16.945176D0*TWATER-                         
-     +         7.9870401D-3*TWATER**DOS-46.170461D-6*TWATER**3.0D0+     
-     +         105.56302D-9*TWATER**4.0D0-280.54253D-12*TWATER**5.0D0)  
+     +         7.9870401D-3*TWATER**2-46.170461D-6*TWATER**3+     
+     +         105.56302D-9*TWATER**4-280.54253D-12*TWATER**5)  
      +         /(1.0D0+16.879850D-3*TWATER)
 C 
 C--CALCULATE DYNAMIC VISCOSITY
       IF ( TWATER.GE.0.0 .AND. TWATER.LT.20.0 ) THEN
         VISCWA = 10.0D0**                                               
      +           (1301.0D0/(998.33D0+8.1855D0*(TWATER-20.0D0)+0.00585D0*
-     +           (TWATER-20.0D0)**DOS)-1.30233D0)/1000.0D0
+     +           (TWATER-20.0D0)**2)-1.30233D0)/1000.0D0
       ELSEIF ( TWATER.GE.20.0 .AND. TWATER.LE.100.0 ) THEN
         VISCWA = 10.0D0**                                               
      +           ((1.3272D0*(20.0D0-TWATER)-0.001053D0*(TWATER-20.0D0)  
-     +           **DOS)/(TWATER+105.0D0))*1.002D0/1000.0D0
+     +           **2)/(TWATER+105.0D0))*1.002D0/1000.0D0
       ELSE
         WRITE (*, *) 'BAD TEMPERATURE INPUT!'
         STOP
@@ -320,9 +320,9 @@ C--KINEMATIC VISCOSITY NU [M**2/S]
 C 
 C--BARC**CORRECT DENSITY UNITS
 C--BARC**UNITS ARE FT
-      IF ( LENUNI.EQ.1 ) DENSWA = DENSWA*(1.0D0/(CM2INCH**3.0D0))
+      IF ( LENUNI.EQ.1 ) DENSWA = DENSWA*(1.0D0/(CM2INCH**3))
 C--BARC**UNITS ARE CM
-      IF ( LENUNI.EQ.3 ) DENSWA = DENSWA*(1.0D0/(100.0D0**3.0D0))
+      IF ( LENUNI.EQ.3 ) DENSWA = DENSWA*(1.0D0/(100.0D0**3))
 C 
 C--BARC**CORRECT VISCOSITY UNITS
 C--BARC**UNITS ARE M2/S
@@ -330,43 +330,43 @@ C--BARC**UNITS ARE M2/S
 C--BARC**UNITS ARE M2 / MIN
       IF ( ITMUNI.EQ.2 .AND. LENUNI.EQ.2 ) VISCWA = VISCWA*60.0D0
 C--BARC**UNITS ARE M2/HOUR
-      IF ( ITMUNI.EQ.3 .AND. LENUNI.EQ.2 ) VISCWA = VISCWA*60.0D0**DOS
+      IF ( ITMUNI.EQ.3 .AND. LENUNI.EQ.2 ) VISCWA = VISCWA*60.0D0**2
 C--BARC**UNITS ARE M2/DAY
       IF ( ITMUNI.EQ.4 .AND. LENUNI.EQ.2 )                              
-     +     VISCWA = VISCWA*60.0D0**DOS*24.0D0
+     +     VISCWA = VISCWA*60.0D0**2*24.0D0
 C--BARC**UNITS ARE M2/YEAR
       IF ( ITMUNI.EQ.5 .AND. LENUNI.EQ.2 )                              
-     +     VISCWA = VISCWA*60.0D0**DOS*24.0D0*365.0D0
+     +     VISCWA = VISCWA*60.0D0**2*24.0D0*365.0D0
 C 
 C--BARC**UNITS ARE FT2 /SEC
-      IF ( ITMUNI.EQ.1 .AND. LENUNI.EQ.1 ) VISCWA = VISCWA*CM2INCH**DOS
+      IF ( ITMUNI.EQ.1 .AND. LENUNI.EQ.1 ) VISCWA = VISCWA*CM2INCH**2
 C--BARC**UNITS ARE FT2/MIN
       IF ( ITMUNI.EQ.2 .AND. LENUNI.EQ.1 )                              
-     +     VISCWA = VISCWA*CM2INCH**DOS*60.0D0
+     +     VISCWA = VISCWA*CM2INCH**2*60.0D0
 C--BARC**UNITS ARE FT2/HR
       IF ( ITMUNI.EQ.3 .AND. LENUNI.EQ.1 )                              
-     +     VISCWA = VISCWA*CM2INCH**DOS*60.0D0**DOS
+     +     VISCWA = VISCWA*CM2INCH**2*60.0D0**2
 C--BARC**UNITS ARE FT2/DAY
       IF ( ITMUNI.EQ.4 .AND. LENUNI.EQ.1 )                              
-     +     VISCWA = VISCWA*CM2INCH**DOS*60.0D0**DOS*24.0D0
+     +     VISCWA = VISCWA*CM2INCH**2*60.0D0**2*24.0D0
 C--BARC**UNITS ARE FT2/YR
       IF ( ITMUNI.EQ.5 .AND. LENUNI.EQ.1 )                              
-     +     VISCWA = VISCWA*CM2INCH**DOS*60.0D0**DOS*24.0D0*365.0D0
+     +     VISCWA = VISCWA*CM2INCH**2*60.0D0**2*24.0D0*365.0D0
 C 
 C--BARC**UNITS ARE CM2/SEC
-      IF ( ITMUNI.EQ.1 .AND. LENUNI.EQ.3 ) VISCWA = VISCWA*100.D0**DOS
+      IF ( ITMUNI.EQ.1 .AND. LENUNI.EQ.3 ) VISCWA = VISCWA*100.D0**2
 C--BARC**UNITS ARE CM2/MIN
       IF ( ITMUNI.EQ.2 .AND. LENUNI.EQ.3 )                              
-     +     VISCWA = VISCWA*100.0D0**DOS*60.0D0
+     +     VISCWA = VISCWA*100.0D0**2*60.0D0
 C--BARC**UNITS ARE CM2/HR
       IF ( ITMUNI.EQ.3 .AND. LENUNI.EQ.3 )                              
-     +     VISCWA = VISCWA*100.0D0**DOS*60.0D0**DOS
+     +     VISCWA = VISCWA*100.0D0**2*60.0D0**2
 C--BARC**UNITS ARE CM2/DAY
       IF ( ITMUNI.EQ.4 .AND. LENUNI.EQ.3 )                              
-     +     VISCWA = VISCWA*100.0D0**DOS*60.0D0**DOS*24.0D0
+     +     VISCWA = VISCWA*100.0D0**2*60.0D0**2*24.0D0
 C--BARC**UNITS ARE CM2/YR
       IF ( ITMUNI.EQ.5 .AND. LENUNI.EQ.3 )                              
-     +     VISCWA = VISCWA*100.0D0**DOS*60.0D0**DOS*24.0D0*365.0D0 
+     +     VISCWA = VISCWA*100.0D0**2*60.0D0**2*24.0D0*365.0D0 
 CB    WRITE (IOUT, *) ' KINEMATIC VISCOSITY [L^2/T]=', VISCWA
       WRITE (IOUT, *) ' DENSITY OF WATER IS [KG/L^3]=', DENSWA
 CB      WRITE (IOUT, *) ' DYN VISC OF WATER IS [KG/LT]=', VISCWA
@@ -401,23 +401,23 @@ C
 !         DO J=1,NCOL
       
 !           DENSWA2(J,I,K) = (999.83952D0+16.945176D0*TWATER2(J,I,K)    
-!    +         -7.9870401D-3*TWATER2(J,I,K)**DOS-46.170461D
-!    +         -6*TWATER2(J,I,K)**3.0D0+105.56302D
-!    +         -9*TWATER2(J,I,K)**4.0D0-280.54253D
-!    +         -12*TWATER2(J,I,K)**5.0D0)
+!    +         -7.9870401D-3*TWATER2(J,I,K)**2-46.170461D
+!    +         -6*TWATER2(J,I,K)**3+105.56302D
+!    +         -9*TWATER2(J,I,K)**4-280.54253D
+!    +         -12*TWATER2(J,I,K)**5)
 !    +         /(1.0D0+16.879850D-3*TWATER2(J,I,K))
 C 
 C--CALCULATE DYNAMIC VISCOSITY
 !           IF (TWATER2(J,I,K).GE.0.0.AND.TWATER2(J,I,K).LT.20.0) THEN
 !             VISCWA2(J,I,K) = 10.0D0**(1301.0D0/(998.33D0+
 !    +            8.1855D0*(TWATER2(J,I,K)-20.0D0)+
-!    +            0.00585D0*(TWATER2(J,I,K)-20.0D0)**DOS)-
+!    +            0.00585D0*(TWATER2(J,I,K)-20.0D0)**2)-
 !    +            1.30233D0)/1000.0D0
 !           ELSEIF (TWATER2(J,I,K).GE.20.0.AND.TWATER2(J,I,K).LE.100.0) 
 !    +      THEN
 !             VISCWA2(J,I,K) = 10.0D0**((1.3272D0*(20.0D0               
 !    +            -TWATER2(J,I,K))-0.001053D0*(TWATER2(J,I,K)-20.0D0)
-!    +            **DOS)/(TWATER2(J,I,K)+105.0D0))*1.002D0/1000.0D0
+!    +            **2)/(TWATER2(J,I,K)+105.0D0))*1.002D0/1000.0D0
 !           ELSE
 !             WRITE (*, *) 'BAD TEMPERATURE INPUT!'
 !             STOP
@@ -440,11 +440,11 @@ C--BARC**CORRECT DENSITY UNITS
           
 C--BARC**UNITS ARE FT
 !           IF(LENUNI.EQ.1)DENSWA2(J,I,K) = DENSWA2(J,I,K)*(1.0D0/
-!    +                                          (CM2INCH**3.0D0))
+!    +                                          (CM2INCH**3))
 C
 C--BARC**UNITS ARE CM
 !           IF(LENUNI.EQ.3)DENSWA2(J,I,K) = DENSWA2(J,I,K)*(1.0D0/
-!    +                   (100.0D0**3.0D0))
+!    +                   (100.0D0**3))
 C 
 C--BARC**CORRECT VISCOSITY UNITS
 C--BARC**UNITS ARE M2/S
@@ -457,59 +457,59 @@ C--BARC**UNITS ARE M2 / MIN
 C
 C--BARC**UNITS ARE M2/HOUR
 !           IF(ITMUNI.EQ.3 .AND. LENUNI.EQ.2) VISCWA2(J,I,K) = 
-!    +         VISCWA2(J,I,K)*60.0D0**DOS
+!    +         VISCWA2(J,I,K)*60.0D0**2
 C
 C--BARC**UNITS ARE M2/DAY
 !           IF (ITMUNI.EQ.4 .AND. LENUNI.EQ.2)                 
-!    +          VISCWA2(J,I,K) = VISCWA2(J,I,K)*60.0D0**DOS*24.0D0
+!    +          VISCWA2(J,I,K) = VISCWA2(J,I,K)*60.0D0**2*24.0D0
 C
 C--BARC**UNITS ARE M2/YEAR
 !           IF (ITMUNI.EQ.5 .AND. LENUNI.EQ.2)        
-!    +          VISCWA2(J,I,K)=VISCWA2(J,I,K)*60.0D0**DOS*24.0D0*365.0D0
+!    +          VISCWA2(J,I,K)=VISCWA2(J,I,K)*60.0D0**2*24.0D0*365.0D0
 C 
 C--BARC**UNITS ARE FT2 /SEC
 !           IF (ITMUNI.EQ.1 .AND. LENUNI.EQ.1) VISCWA2(J,I,K) = 
-!    +          VISCWA2(J,I,K)*CM2INCH**DOS
+!    +          VISCWA2(J,I,K)*CM2INCH**2
 C
 C--BARC**UNITS ARE FT2/MIN
 !           IF (ITMUNI.EQ.2 .AND. LENUNI.EQ.1)              
-!    +          VISCWA2(J,I,K) = VISCWA2(J,I,K)*CM2INCH**DOS*60.0D0
+!    +          VISCWA2(J,I,K) = VISCWA2(J,I,K)*CM2INCH**2*60.0D0
 C
 C--BARC**UNITS ARE FT2/HR
 !           IF (ITMUNI.EQ.3 .AND. LENUNI.EQ.1)
-!    +          VISCWA2(J,I,K) = VISCWA2(J,I,K)*CM2INCH**DOS*60.0D0**DOS
+!    +          VISCWA2(J,I,K) = VISCWA2(J,I,K)*CM2INCH**2*60.0D0**2
 C
 C--BARC**UNITS ARE FT2/DAY
 !           IF (ITMUNI.EQ.4 .AND. LENUNI.EQ.1)
-!    +          VISCWA2(J,I,K) = VISCWA2(J,I,K)*CM2INCH**DOS*60.0D0
-!    +         **DOS*24.0D0
+!    +          VISCWA2(J,I,K) = VISCWA2(J,I,K)*CM2INCH**2*60.0D0
+!    +         **2*24.0D0
 C
 C--BARC**UNITS ARE FT2/YR
 !           IF (ITMUNI.EQ.5 .AND. LENUNI.EQ.1)
-!    +          VISCWA2(J,I,K) = VISCWA2(J,I,K)*CM2INCH**DOS*60.0D0
-!    +         **DOS*24.0D0*365.0D0
+!    +          VISCWA2(J,I,K) = VISCWA2(J,I,K)*CM2INCH**2*60.0D0
+!    +         **2*24.0D0*365.0D0
 C 
 C--BARC**UNITS ARE CM2/SEC
 !           IF (ITMUNI.EQ.1 .AND. LENUNI.EQ.3) VISCWA2(J,I,K) = 
-!    +          VISCWA2(J,I,K)*100.D0**DOS
+!    +          VISCWA2(J,I,K)*100.D0**2
 !
 C--BARC**UNITS ARE CM2/MIN
 !           IF (ITMUNI.EQ.2 .AND. LENUNI.EQ.3)
-!    +          VISCWA2(J,I,K) = VISCWA2(J,I,K)*100.0D0**DOS*60.0D0
+!    +          VISCWA2(J,I,K) = VISCWA2(J,I,K)*100.0D0**2*60.0D0
 C
 C--BARC**UNITS ARE CM2/HR
 !           IF (ITMUNI.EQ.3 .AND. LENUNI.EQ.3)
-!    +          VISCWA2(J,I,K) = VISCWA2(J,I,K)*100.0D0**DOS*60.0D0**DOS
+!    +          VISCWA2(J,I,K) = VISCWA2(J,I,K)*100.0D0**2*60.0D0**2
 C
 C--BARC**UNITS ARE CM2/DAY
 !           IF (ITMUNI.EQ.4 .AND. LENUNI.EQ.3)
-!    +          VISCWA2(J,I,K) = VISCWA2(J,I,K)*100.0D0**DOS*60.0D0
-!    +          **DOS*24.0D0
+!    +          VISCWA2(J,I,K) = VISCWA2(J,I,K)*100.0D0**2*60.0D0
+!    +          **2*24.0D0
 C
 C--BARC**UNITS ARE CM2/YR
 !           IF (ITMUNI.EQ.5 .AND. LENUNI.EQ.3)
-!    +          VISCWA2(J,I,K) = VISCWA2(J,I,K)*100.0D0**DOS*60.0D0
-!    +          **DOS*24.0D0*365.0D0
+!    +          VISCWA2(J,I,K) = VISCWA2(J,I,K)*100.0D0**2*60.0D0
+!    +          **2*24.0D0*365.0D0
 CB    WRITE (IOUT, *) ' KINEMATIC VISCOSITY [L^2/T]=', VISCWA2(J,I,K)
 !           WRITE (IOUT,'(A30,1X,A5,3I5,1X,F8.4)') ' DENSITY OF WATER IS
 !    + [KG/L^3]=','J,I,K',J,I,K,DENSWA2(J,I,K)
