@@ -476,9 +476,12 @@ C  LINE IS USED; CHECK FOR FBC PARAMETERS AND SET FLAGS
             CALL READ_TO_DATA(CDUMMY, INUNIT, IOUT, IOUT)
         END IF
         
-        IF( FBC_FOUND    ) FBC_FLG    = ONE  ! If defined in option block
-        IF( CADS_FOUND   ) CADS_FLG   = ONE
-        IF( CADSML_FOUND ) CADSML_FLG = ONE
+        IF( FBC_FOUND     ) FBC_FLG    = ONE  ! If option is specified in option block
+        IF( CADS_FOUND    ) CADS_FLG   = ONE
+        IF( CADSML_FOUND  ) CADSML_FLG = ONE
+        IF (FBC_FLG    > Z) FBC_FOUND    = TRUE  ! Not used again, but set to True for consistancy
+        IF (CADS_FLG   > Z) CADS_FOUND   = TRUE
+        IF (CADSML_FLG > Z) CADSML_FOUND = TRUE
         
         IF (CADS_FLG + CADSML_FLG > ONE) THEN
             CALL USTOP('BOTH CADS AND ' //
@@ -1108,7 +1111,8 @@ C--IF FBC DATA ARE CONSIDERED
                BC_DUMMY1 = DZ
                IF (BC_TYPE /= "WELL    " .AND. 
      +             BC_TYPE /= "LH      " .AND. 
-     +             BC_TYPE /= "TD      ") THEN
+     +             BC_TYPE /= "TD      " .AND. 
+     +             BC_TYPE /= "X       ") THEN
                    CALL USTOP(
      +                    'CPF input failed to read "BC1" input.'//NL//
      +                    'Error occured on line:'//NL//
