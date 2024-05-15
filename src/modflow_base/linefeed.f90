@@ -10,9 +10,6 @@
 !
 !  VERSION 1.0 [4/23/2015] ORIGINAL VERSION THAT RETURNS A LINE_FEED DATATYPE
 !
-! DATA TREE
-      !
-      !
 MODULE LINE_FEEDER
   USE CONSTANTS
   USE GLOBAL,                           ONLY: IUNIT, CUNIT, XYGRID, BOTM, LBOTM, NLAY
@@ -28,41 +25,41 @@ MODULE LINE_FEEDER
   IMPLICIT NONE
   !
   PRIVATE
-  PUBLIC:: LINE_FEED                                                 !LINE_FEED SERVES BOTH AS ALLOCATION ROUTINE AND DATA TYPE DEFINITION
+  PUBLIC:: LINE_FEED                                               ! LINE_FEED serves both as allocation routine and data type definition
   !
   TYPE:: FEED_DATA
-      !INTEGER:: IN                                                   !HOLDS  UNIT NUMBER OF LINE_FEED
+      !INTEGER:: IN                                                ! Holds  unit number of line_feed
       TYPE(GENERIC_INPUT_FILE):: FL
-      TYPE(GENERIC_INPUT_FILE), ALLOCATABLE:: BIN                    !ONLY ALLOCATED IF FEED FILE IS A BIANRY
-      DOUBLE PRECISION:: PROP_SFAC = UNO                                  !GLOBAL SCALE FACTOR
-      INTEGER:: NDAT                                                 !SIZE OF DAT        
-      !INTEGER:: NACT                                                !SIZE OF CURRENTLY ACTIVE CELLS (IN USE FOR CURRENT STRESS PERIOD)
-      INTEGER,         DIMENSION(:,:),ALLOCATABLE:: NUMIDX           !SIZE(NUMIDX,1)>0 WHEN ACTIVE
+      TYPE(GENERIC_INPUT_FILE), ALLOCATABLE:: BIN                  ! Only allocated if feed file is a binary
+      DOUBLE PRECISION:: PROP_SFAC = UNO                           ! Global scale factor
+      INTEGER:: NDAT                                               ! Size of DAT
+      !INTEGER:: NACT                                              ! Size of currently active cells (in use for current stress period)
+      INTEGER,         DIMENSION(:,:),ALLOCATABLE:: NUMIDX         ! SIZE(NUMIDX,1)>0 when active
       CHARACTER(20),   DIMENSION(:),  ALLOCATABLE:: CHARID          
-      INTEGER,         DIMENSION(:),  ALLOCATABLE:: CHARIDX          !SIZE(CHARIDX)>0 WHEN ACTIVE
-      !CLASS(*),        DIMENSION(:),  ALLOCATABLE:: WILD             !CAN BE ANY USER DEFINED DERIVED DATATYPE (its a WILD card)
-      DOUBLE PRECISION,DIMENSION(:,:),ALLOCATABLE:: PROP             !TIME INVARIANT PROPERTIES (LIKE DRAIN ELEVATION)
-      INTEGER,         DIMENSION(:,:),ALLOCATABLE:: AUX              !AUXILIARY INFORMATION (LIKE NAUX/AUX FROM NORMAL READS)
+      INTEGER,         DIMENSION(:),  ALLOCATABLE:: CHARIDX        ! SIZE(CHARIDX)>0 when active
+      !CLASS(*),        DIMENSION(:),  ALLOCATABLE:: WILD          ! Can be any user defined derived datatype (its a wild card)
+      DOUBLE PRECISION,DIMENSION(:,:),ALLOCATABLE:: PROP           ! Time invariant properties (like drain elevation)
+      INTEGER,         DIMENSION(:,:),ALLOCATABLE:: AUX            ! Auxiliary information (like NAUX/AUX from normal reads)
       CHARACTER(16),   DIMENSION(:),  ALLOCATABLE:: GRP  
-      DOUBLE PRECISION,DIMENSION(:),  ALLOCATABLE:: DAT              !CURRENT STRESS PERIODS DATA AS FLOAT
-      INTEGER,         DIMENSION(:),  ALLOCATABLE:: IDAT             !CURRENT STRESS PERIODS DATA AS INT
+      DOUBLE PRECISION,DIMENSION(:),  ALLOCATABLE:: DAT            ! Current stress periods data as float
+      INTEGER,         DIMENSION(:),  ALLOCATABLE:: IDAT           ! Current stress periods data as int
   END TYPE 
   !
   TYPE:: LINE_FEED
-      LOGICAL:: BINARY = FALSE                                       !DERMINES IF SECOND HALF OF FEEDFILE IS BINARY
-      LOGICAL:: INT_DAT= FALSE                                       !DETERMISN IF DAT OR IDAT IS IN USE
-      INTEGER:: NFEED  = NEG                                         !THE SIZE OF FD  --INIT AT -1, SET TO ZERO IF NOT FOUND
-      INTEGER:: TOTDAT = Z                                           !TOTAL COUNT OF ALL FEED POINTS ( COUNT OF FD(:)%DAT(:) )  -NOTE IF NFEED=0 THEN TOTDAT=0
-      INTEGER:: NACT   = Z                                           !TOTAL COUNT OF ALL FEED POINTS IN USE FOR CURRENT STRESS PERIOD ( COUNT OF FD(:)%NACT )
-      INTEGER:: IPRT   = Z                                           !PRINT FLAG 0 MEANS NO PRINTING
-      INTEGER,                     ALLOCATABLE:: LDIM                !LEADING DIMENSION OF NUMIDX (0, 1, or >3), IF EQUAL TO ZERO THEN CHARID IS ALLOCATED AND NUMIDX IS NOT USED
-      INTEGER,                     ALLOCATABLE:: NPROP               !NUMBER OF PROPERTIES ASSOCIATED WITH LINE FEED. FOR EXAMPLE GHB HAS NPROP=1 BECAUSE A GHB CELL HAS A CONDUCTANCE ASSIGNED TO IT
-      INTEGER,                     ALLOCATABLE:: IOUT                !SHADOW COPY OF LIST UNIT NUMBER
-      CHARACTER(5),                ALLOCATABLE:: PAK                 !ENCOMPANSING PACKAGE
-      CHARACTER(16),DIMENSION(:),  ALLOCATABLE:: CAUX                !LIST OF ADDITIONAL AUX VARIABLES
-      LOGICAL,                     ALLOCATABLE:: XYCOORD             !LOGICAL THE DETERMINES IF X,Y,Layer is read in rather than Layer, Row, COL
-      LOGICAL,                     ALLOCATABLE:: XYZCOORD            !LOGICAL THE DETERMINES IF X,Y,Z     is read in rather than Layer, Row, COL
-      TYPE(FEED_DATA),DIMENSION(:),ALLOCATABLE:: FD                  !HOLDS EACH OF THE LINE FEEDS
+      LOGICAL:: BINARY = FALSE                                     ! Determines if second half of feedfile is binary
+      LOGICAL:: INT_DAT= FALSE                                     ! Determines if dat or idat is in use
+      INTEGER:: NFEED  = NEG                                       ! The size of fd  --init at -1, set to zero if not found
+      INTEGER:: TOTDAT = Z                                         ! Total count of all feed points ( count of FD(:)%DAT(:) )  -note if NFEED=0 then TOTDAT=0
+      INTEGER:: NACT   = Z                                         ! Total count of all feed points in use for current stress period ( count of FD(:)%NACT )
+      INTEGER:: IPRT   = Z                                         ! Print flag 0 means no printing
+      INTEGER,                     ALLOCATABLE:: LDIM              ! Leading dimension of NUMIDX (0, 1, or >3), if equal to zero then charid is allocated and NUMIDX is not used
+      INTEGER,                     ALLOCATABLE:: NPROP             ! Number of properties associated with line feed. for example GHB has NPROP=1 because a GHB cell has a conductance assigned to it
+      INTEGER,                     ALLOCATABLE:: IOUT              ! Shadow copy of list unit number
+      CHARACTER(5),                ALLOCATABLE:: PAK               ! Encompansing package
+      CHARACTER(16),DIMENSION(:),  ALLOCATABLE:: CAUX              ! List of additional AUX variables
+      LOGICAL,                     ALLOCATABLE:: XYCOORD           ! Logical the determines if X,Y,Layer is read in rather than Layer, Row, Col
+      LOGICAL,                     ALLOCATABLE:: XYZCOORD          ! Logical the determines if X,Y,Z     is read in rather than Layer, Row, Col
+      TYPE(FEED_DATA),DIMENSION(:),ALLOCATABLE:: FD                ! Holds each of the line feeds
       !
       CONTAINS
       !
@@ -980,11 +977,11 @@ CONTAINS
           PUMPCAP=INT( MNW2(22,MNWID) )
           !
           if(PUMPCAP.GT.Z) then
-           if(Qdes.GT.DZ) then                                        !seb (Qdes.GE.0.d0) CHANGED TO (Qdes.GT.0.d0)
+           if(Qdes.GT.DZ) then                                        ! (Qdes.GE.0.d0) CHANGED TO (Qdes.GT.0.d0)
                 MNW2(25,MNWID)=DZ                                     !Initialize CapFlag2
                 MNW2(27,MNWID)=DZ
            else
-             IF(Qdes.EQ.0.0D0)THEN                                        !seb ALLOW HOLDING OF CAPMULT FOR Qdes=0 BUT DO NOT ENABLE CAPACITY CONTSTRAINTS TO FACILITATE LINK TO FMP
+             IF(Qdes.EQ.DZ)THEN                                       ! ALLOW HOLDING OF CAPMULT FOR Qdes=0 BUT DO NOT ENABLE CAPACITY CONTSTRAINTS TO FACILITATE LINK TO FMP
                 MNW2(25,MNWID)=DZ
                 MNW2(27,MNWID)=DZ                                     !Initialize CapFlag2
              ELSE
