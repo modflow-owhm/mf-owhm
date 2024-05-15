@@ -1548,7 +1548,8 @@ C
 C--BARC**ADD THIS FOR OVERLAND FLOW
       DOUBLE PRECISION QT
 C
-      DOUBLE PRECISION MAT_A(ACTIVENODE, ACTIVENODE), VEC_B(ACTIVENODE)
+      !DOUBLE PRECISION MAT_A(ACTIVENODE, ACTIVENODE), VEC_B(ACTIVENODE)
+      DOUBLE PRECISION, ALLOCATABLE :: MAT_A(:, :), VEC_B(:)
       DOUBLE PRECISION OSC(5),OSCSUM5, OSCSUM5_P,OSCSUM4, OSCSUM4_P     !TR: 2013 07 05 OSC // OSC = ARRAY WITH HEAD CHANGE, OSCSUM = SUM OF CRITERIAS, OSCSUM_P = PREVIOUS VALUE OF OSCSUM
       INTEGER I,II,III                                                  !TR: 2013 07 05 OSC
       LOGICAL OSCFLG                                                    !TR: 2013 07 05 OSC
@@ -1557,7 +1558,8 @@ C--BARC**ADD THIS FOR OVERLAND FLOW
       INTEGER N,T,BNOD,ENOD
 C-----------------------------------------------------------------------
 C
-C--INI      
+C--INI
+      ALLOCATE(MAT_A(ACTIVENODE, ACTIVENODE), VEC_B(ACTIVENODE))
       KONV = Z
       OSC = DZ                                                           !TR: 2013 07 05 OSC
       OSCFLG = FALSE                                                    !TR: 2013 07 05 OSC
@@ -1704,7 +1706,9 @@ CB      ROF(N) = DZ
 C--BARC**SET ROF
 CB       ROF(N) = QTUBIN(N)
 CB       PRINT*,N, ROF(N)
-	ENDDO
+      ENDDO
+C
+      DEALLOCATE(MAT_A, VEC_B, STAT=I)
 C
       END SUBROUTINE ITERA_NEW
 C
