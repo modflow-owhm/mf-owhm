@@ -633,33 +633,33 @@ C  CAN BE DEFINED
 C 
 C--BARC**SET G
         IF ( ITMUNI.EQ.1 .AND. LENUNI.EQ.2 ) G = 9.80665D0              !C--BARC**UNITS ARE M SEC-2
-        IF ( ITMUNI.EQ.2 .AND. LENUNI.EQ.2 ) G = 9.80665D0*60.D0**DOS   !C--BARC**UNITS ARE M MIN-2
+        IF ( ITMUNI.EQ.2 .AND. LENUNI.EQ.2 ) G = 9.80665D0*60.D0**2   !C--BARC**UNITS ARE M MIN-2
         IF ( ITMUNI.EQ.3 .AND. LENUNI.EQ.2 )                            !C--BARC**UNITS ARE M HOURS-2
-     +       G = 9.80665D0*60.D0**DOS*60.D0**DOS
+     +       G = 9.80665D0*60.D0**2*60.D0**2
         IF ( ITMUNI.EQ.4 .AND. LENUNI.EQ.2 )                            !C--BARC**UNITS ARE M DAYS-2
-     +       G = 9.80665D0*60.D0**DOS*60.D0**DOS*24.D0**DOS
+     +       G = 9.80665D0*60.D0**2*60.D0**2*24.D0**2
         IF ( ITMUNI.EQ.5 .AND. LENUNI.EQ.2 )                            !C--BARC**UNITS ARE M YEAR-2
-     +       G = 9.80665D0*60.D0**DOS*60.D0**DOS*24.D0**DOS*365.D0**DOS
+     +       G = 9.80665D0*60.D0**2*60.D0**2*24.D0**2*365.D0**2
         IF ( ITMUNI.EQ.1 .AND. LENUNI.EQ.1 ) G = 9.80665D0*CM2INCH      !C--BARC**UNITS ARE FT SEC-2
         IF ( ITMUNI.EQ.2 .AND. LENUNI.EQ.1 )                            !C--BARC**UNITS ARE FT MIN-2
-     +       G = 9.80665D0*CM2INCH*60.D0**DOS
+     +       G = 9.80665D0*CM2INCH*60.D0**2
         IF ( ITMUNI.EQ.3 .AND. LENUNI.EQ.1 )                            !C--BARC**UNITS ARE FT HOURS-2
-     +       G = 9.80665D0*CM2INCH*60.D0**DOS*60.D0**DOS
+     +       G = 9.80665D0*CM2INCH*60.D0**2*60.D0**2
         IF ( ITMUNI.EQ.4 .AND. LENUNI.EQ.1 )                            !C--BARC**UNITS ARE FT DAYS-2
-     +       G = 9.80665D0*CM2INCH*60.D0**DOS*60.D0**DOS*24.D0**DOS
+     +       G = 9.80665D0*CM2INCH*60.D0**2*60.D0**2*24.D0**2
         IF ( ITMUNI.EQ.5 .AND. LENUNI.EQ.1 )                            !C--BARC**UNITS ARE FT YEAR-2
-     +       G = 9.80665D0*CM2INCH*60.D0**DOS*60.D0**DOS*24.D0**DOS     
-     +           *365.D0**DOS
+     +       G = 9.80665D0*CM2INCH*60.D0**2*60.D0**2*24.D0**2     
+     +           *365.D0**2
         IF ( ITMUNI.EQ.1 .AND. LENUNI.EQ.3 ) G = 9.80665D0*100.D0       !C--BARC**UNITS ARE CM SEC-2
         IF ( ITMUNI.EQ.2 .AND. LENUNI.EQ.3 )                            !C--BARC**UNITS ARE CM MIN-2
-     +       G = 9.80665D0*100.D0*60.D0**DOS
+     +       G = 9.80665D0*100.D0*60.D0**2
         IF ( ITMUNI.EQ.3 .AND. LENUNI.EQ.3 )                            !C--BARC**UNITS ARE CM HOURS-2
-     +       G = 9.80665D0*100.D0*60.D0**DOS*60.D0**DOS
+     +       G = 9.80665D0*100.D0*60.D0**2*60.D0**2
         IF ( ITMUNI.EQ.4 .AND. LENUNI.EQ.3 )                            !C--BARC**UNITS ARE CM DAYS-2
-     +       G = 9.80665D0*100*60**DOS*60**DOS*24**DOS
+     +       G = 9.80665D0*100*60**2*60**2*24**2
         IF ( ITMUNI.EQ.5 .AND. LENUNI.EQ.3 )                            !C--BARC**UNITS ARE CM YEAR-2
-     +       G = 9.80665D0*100.D0*60.D0**DOS*60.D0**DOS*24.D0**DOS      
-     +           *365.D0**DOS
+     +       G = 9.80665D0*100.D0*60.D0**2*60.D0**2*24.D0**2      
+     +           *365.D0**2
 C 
         WRITE (IOUT, *) 'GRAVITATIONAL CONSTANT (G) COMPUTED '
 C
@@ -695,30 +695,30 @@ C--CALCULATE KINEMATIC VISCOSITY (COMES OUT WITH UNITS OF M2/SEC)
 C
         IF ( ITMUNI.EQ.1 .AND. LENUNI.EQ.2 ) VNUTC = VNUTC*1.D0         !C--BARC**UNITS ARE M2/S
         IF ( ITMUNI.EQ.2 .AND. LENUNI.EQ.2 ) VNUTC = VNUTC*60.D0        !C--BARC**UNITS ARE M2 / MIN
-        IF ( ITMUNI.EQ.3 .AND. LENUNI.EQ.2 ) VNUTC = VNUTC*60.D0**DOS   !C--BARC**UNITS ARE M2/HOUR
+        IF ( ITMUNI.EQ.3 .AND. LENUNI.EQ.2 ) VNUTC = VNUTC*60.D0**2     !C--BARC**UNITS ARE M2/HOUR
         IF ( ITMUNI.EQ.4 .AND. LENUNI.EQ.2 )                            !C--BARC**UNITS ARE M2/DAY
-     +       VNUTC = VNUTC*60.D0**DOS*24.D0
+     +       VNUTC = VNUTC*60.D0**2*24.D0
         IF ( ITMUNI.EQ.5 .AND. LENUNI.EQ.2 )                            !C--BARC**UNITS ARE M2/YEAR
-     +       VNUTC = VNUTC*60.D0**DOS*24.D0*365.D0
+     +       VNUTC = VNUTC*60.D0**2*24.D0*365.D0
         IF ( ITMUNI.EQ.1 .AND. LENUNI.EQ.1 )                            !C--BARC**UNITS ARE FT2 /SEC
-     +       VNUTC = VNUTC*CM2INCH**DOS
+     +       VNUTC = VNUTC*CM2INCH**2
         IF ( ITMUNI.EQ.2 .AND. LENUNI.EQ.1 )                            !C--BARC**UNITS ARE FT2/MIN
-     +       VNUTC = VNUTC*CM2INCH**DOS*60.D0
+     +       VNUTC = VNUTC*CM2INCH**2*60.D0
         IF ( ITMUNI.EQ.3 .AND. LENUNI.EQ.1 )                            !C--BARC**UNITS ARE FT2/HR
-     +       VNUTC = VNUTC*CM2INCH**DOS*60.D0**DOS
+     +       VNUTC = VNUTC*CM2INCH**2*60.D0**2
         IF ( ITMUNI.EQ.4 .AND. LENUNI.EQ.1 )                            !C--BARC**UNITS ARE FT2/DAY
-     +       VNUTC = VNUTC*CM2INCH**DOS*60.D0**DOS*24.D0
+     +       VNUTC = VNUTC*CM2INCH**2*60.D0**2*24.D0
         IF ( ITMUNI.EQ.5 .AND. LENUNI.EQ.1 )                            !C--BARC**UNITS ARE FT2/YR
-     +       VNUTC = VNUTC*CM2INCH**DOS*60.D0**DOS*24.D0*365.D0
-        IF ( ITMUNI.EQ.1 .AND. LENUNI.EQ.3 ) VNUTC = VNUTC*100.D0**DOS  !C--BARC**UNITS ARE CM2/SEC
+     +       VNUTC = VNUTC*CM2INCH**2*60.D0**2*24.D0*365.D0
+        IF ( ITMUNI.EQ.1 .AND. LENUNI.EQ.3 ) VNUTC = VNUTC*100.D0**2    !C--BARC**UNITS ARE CM2/SEC
         IF ( ITMUNI.EQ.2 .AND. LENUNI.EQ.3 )                            !C--BARC**UNITS ARE CM2/MIN
-     +       VNUTC = VNUTC*100.D0**DOS*60.D0
+     +       VNUTC = VNUTC*100.D0**2*60.D0
         IF ( ITMUNI.EQ.3 .AND. LENUNI.EQ.3 )                            !C--BARC**UNITS ARE CM2/HR
-     +       VNUTC = VNUTC*100.D0**DOS*60.D0**DOS
+     +       VNUTC = VNUTC*100.D0**2*60.D0**2
         IF ( ITMUNI.EQ.4 .AND. LENUNI.EQ.3 )                            !C--BARC**UNITS ARE CM2/DAY
-     +       VNUTC = VNUTC*100.D0**DOS*60.D0**DOS*24.D0
+     +       VNUTC = VNUTC*100.D0**2*60.D0**2*24.D0
         IF ( ITMUNI.EQ.5 .AND. LENUNI.EQ.3 )                            !C--BARC**UNITS ARE CM2/YR
-     +       VNUTC = VNUTC*100.D0**DOS*60.D0**DOS*24.D0*365.D0
+     +       VNUTC = VNUTC*100.D0**2*60.D0**2*24.D0*365.D0
 C 
         WRITE (IOUT, *) ' KINEMATIC VISCOSITY [L^2/T]=', VNUTC
 C
