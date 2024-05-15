@@ -533,22 +533,22 @@ C--BARC**FOR CASES OF Z=0
             ELSEIF ( X.GT.DZ .AND. Y.LT.NEARZERO_30 ) THEN
               LENGTH = X
             ELSE
-              LENGTH = DSQRT(X**DOS+Y**DOS)
+              LENGTH = DSQRT(X**2+Y**2)
             ENDIF
 C
 C--BARC**FOR CASES OF Z>0
           ELSEIF ( X.LT.NEARZERO_30 .AND. Y.GT.0.0D0 ) THEN
-            LENGTH = DSQRT(Y**DOS+Z**DOS)
+            LENGTH = DSQRT(Y**2+Z**2)
           ELSEIF ( X.GT.0.0D0 .AND. Y.LT.NEARZERO_30 ) THEN
-            LENGTH = DSQRT(X**DOS+Z**DOS)
+            LENGTH = DSQRT(X**2+Z**2)
           ELSE
             LENGTH = Z
           ENDIF
 C 
           TAUI(I) = DABS((LENGTH*TORTUOS(I))                            
-     +           /(DTUBE(I,1)/(PI*(CON_DATA(I,2)/DOS)**DOS)))
+     +           /(DTUBE(I,1)/(PI*(CON_DATA(I,2)/DOS)**2)))
 CB          TAUI = DABS((LENGTH*TORTUOS(I))                               
-CB     +           /(DTUBE(I,1)/(PI*(CON_DATA(I,2)/DOS)**DOS)))
+CB     +           /(DTUBE(I,1)/(PI*(CON_DATA(I,2)/DOS)**2)))
         ELSE
           TAUI(I) = DZ
         ENDIF
