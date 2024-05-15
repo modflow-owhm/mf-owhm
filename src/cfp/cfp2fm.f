@@ -2859,23 +2859,31 @@ C
               LENGTH = LENGTH * TORTUOS(ITEST)                          !TR: 2012 06 08 COMPUTE LENGTH
 C
 C--PREVIOUS ITERATION              
+              THETA = DZ
               WETTDNEW = B_MAT_P(I) - TUBEBOT1
               DKNOT = CON_DATA(ITEST, 2)
-              THETA = DOS*ASIN(DOS*DSQRT((DKNOT/DOS)**2               
-     +                -(WETTDNEW-DKNOT/DOS)**2)/DKNOT)
+              IF (WETTDNEW < CON_DATA(ITEST,2) .AND.
+     +            WETTDNEW > DZ                     ) THEN
+                        THETA = DOS*ASIN(DOS*DSQRT((DKNOT/DOS)**2
+     +                          -(WETTDNEW-DKNOT/DOS)**2)/DKNOT)
+              END IF
               IF ( B_MAT_P(I).GE.GEOHIGHT(I) ) THETA = TWOPI - THETA   !TR: 2012 06 08 REPLACED B BY B_MAT
               IF (WETTDNEW.GE.CON_DATA(ITEST,2)) THETA = TWOPI         !TR: 2012 06 08 CONSIDER FILLED PIPE / PREVENT 'NAN' = FULL CASE
               IF (WETTDNEW.LE.DZ) THETA = DZ                        !TR: 2012 06 11 CONSIDER DRY PIPE / PREVENT 'NAN' = DRY CASE
               VNEW = ONE8TH*(THETA-SIN(THETA))*DKNOT**2*LENGTH        !TR: 2012 06 08 REPLACED LTOURT BY LENGTH
 C
 C--PREVIOUS TIMESTEP
+              THETA = DZ
               WETTDOLD = B_MAT_O(I) - TUBEBOT1
-              THETA = DOS*ASIN(DOS*DSQRT((DKNOT/DOS)**2               
-     +                -(WETTDOLD-DKNOT/DOS)**2)/DKNOT)
+              IF (WETTDOLD < CON_DATA(ITEST,2) .AND. 
+     +            WETTDOLD > DZ) THEN
+                        THETA = DOS*ASIN(DOS*DSQRT((DKNOT/DOS)**2
+     +                          -(WETTDOLD-DKNOT/DOS)**2)/DKNOT)
+              END IF
               IF ( B_MAT_O(I).GE.GEOHIGHT(I) ) THETA = TWOPI - THETA
               IF (WETTDOLD.GE.CON_DATA(ITEST,2)) THETA = TWOPI          !TR: 2012 06 08 CONSIDER FILLED PIPE / PREVENT 'NAN'
               IF (WETTDOLD.LE.DZ) THETA = DZ                            !TR: 2012 06 11 CONSIDER DRY PIPE / PREVENT 'NAN' = DRY CASE              
-              VOLD = ONE8TH*(THETA-SIN(THETA))*DKNOT**2*LENGTH        !TR: 2012 06 08 REPLACED LTOURT BY LENGTH
+              VOLD = ONE8TH*(THETA-SIN(THETA))*DKNOT**DOS*LENGTH        !TR: 2012 06 08 REPLACED LTOURT BY LENGTH
               IF( ABS(B_MAT_P(I)-B_MAT_O(I)) < NEARZERO_15 ) THEN       !TR: 2012 07 12 THIS OCCURS IN THE FIRST ITERATION
                   PFPS2(I) = DZ
               ELSE
