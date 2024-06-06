@@ -776,21 +776,6 @@ BEGIN WATER_BALANCE_SUBREGION   #WBS
    #
    BARE_RUNOFF_FRACTION LAI[S,T,A,L]
    #
-   # If there is over-consumption through evaporation of precipitation over bare soil, this imposes a limit on that consumption.
-   #
-   # This is defined as a fraction of precipitation that falls on bare surface that is available for consumption (evaporation).
-   #
-   # Must be specified between 0 and 1, with a default value of 1 when not specified.
-   #
-   # Precipitation that is not available for consumption becomes either runoff or deep percolation
-   # Precipitation that is     available for consumption, but does not evaporate becomes either runoff or deep percolation
-   #
-   # This can be tied to SCS estimates of the fraction of consumption or user estimated.
-   #
-   # **If not specified then defaults to 1.0, for full potential consumption. That is "BARE_PRECIPITATION_CONSUMPTION_FRACTION CONSTANT 1.0"
-   #
-   BARE_PRECIPITATION_CONSUMPTION_FRACTION LAI[S,T,A]
-   #
    # ------------------------------------------------------------------------------------------------------------------
    #
    # If a WBS has specified an added irrigation demand, then defines the

@@ -831,21 +831,6 @@ span {
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc6">BARE_RUNOFF_FRACTION</span><span class="sc24"> </span><span class="sc7">LAI</span><span class="sc12">[</span><span class="sc0">S</span><span class="sc12">,</span><span class="sc0">T</span><span class="sc12">,</span><span class="sc0">A</span><span class="sc12">,</span><span class="sc0">L</span><span class="sc12">]</span><span class="sc24">
    </span><span class="sc2">#
-</span><span class="sc24">   </span><span class="sc2"># If there is over-consumption through evaporation of precipitation over bare soil, this imposes a limit on that consumption.
-</span><span class="sc24">   </span><span class="sc2">#
-</span><span class="sc24">   </span><span class="sc2"># This is defined as a fraction of precipitation that falls on bare surface that is available for consumption (evaporation).
-</span><span class="sc24">   </span><span class="sc2">#
-</span><span class="sc24">   </span><span class="sc2"># Must be specified between 0 and 1, with a default value of 1 when not specified.
-</span><span class="sc24">   </span><span class="sc2">#
-</span><span class="sc24">   </span><span class="sc2"># Precipitation that is not available for consumption becomes either runoff or deep percolation
-</span><span class="sc24">   </span><span class="sc2"># Precipitation that is     available for consumption, but does not evaporate becomes either runoff or deep percolation
-</span><span class="sc24">   </span><span class="sc2">#
-</span><span class="sc24">   </span><span class="sc2"># This can be tied to SCS estimates of the fraction of consumption or user estimated.
-</span><span class="sc24">   </span><span class="sc2">#
-</span><span class="sc24">   </span><span class="sc2"># **If not specified then defaults to 1.0, for full potential consumption. That is "BARE_PRECIPITATION_CONSUMPTION_FRACTION CONSTANT 1.0"
-</span><span class="sc24">   </span><span class="sc2">#
-</span><span class="sc24">   </span><span class="sc6">BARE_PRECIPITATION_CONSUMPTION_FRACTION</span><span class="sc24"> </span><span class="sc7">LAI</span><span class="sc12">[</span><span class="sc0">S</span><span class="sc12">,</span><span class="sc0">T</span><span class="sc12">,</span><span class="sc0">A</span><span class="sc12">]</span><span class="sc24">
-   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># ------------------------------------------------------------------------------------------------------------------
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># If a WBS has specified an added irrigation demand, then defines the
