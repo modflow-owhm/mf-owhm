@@ -1669,6 +1669,10 @@ SUBROUTINE VARIABLE_SET_RETURN_VALUES(VAR, NAM, KPER, KSTP, ERROR) ! PULL VALUES
                               END IF
                   CASE("DELIVERY")
                              CALL NAM(I)%GET(THREE,PROP,ID)
+                             IF(ID < ONE .OR. SWODAT%NFARM < ID ) THEN
+                                 ERROR=ERROR//VAR%NAM(POS)//' HAS A BAD WBS/FARM ID NUMBER, IT IS EITHER >NWBS OR <1'//NL
+                                 CYCLE
+                             END IF
                              SELECT CASE(PROP)
                              CASE("FARM")
                                          SWODAT%FARM(ID)%REQ_DELIVERY_S = VAR%VAL(POS)
@@ -1677,6 +1681,10 @@ SUBROUTINE VARIABLE_SET_RETURN_VALUES(VAR, NAM, KPER, KSTP, ERROR) ! PULL VALUES
                              END SELECT
                   CASE("DELIVERY_VOL")
                              CALL NAM(I)%GET(THREE,PROP,ID)
+                             IF(ID < ONE .OR. SWODAT%NFARM < ID ) THEN
+                                 ERROR=ERROR//VAR%NAM(POS)//' HAS A BAD WBS/FARM ID NUMBER, IT IS EITHER >NWBS OR <1'//NL
+                                 CYCLE
+                             END IF
                              SELECT CASE(PROP)
                              CASE("FARM")
                                          SWODAT%FARM(ID)%REQ_DELIVERY_VOL_S = VAR%VAL(POS)
