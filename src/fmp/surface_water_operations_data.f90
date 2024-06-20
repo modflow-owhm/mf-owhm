@@ -14290,10 +14290,10 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
     DOUBLE PRECISION:: DTMP, ACHK, RCHK, FACTOR,ORDER, DIVIN,SPTIN,BRCIN,SUMIN,SUMOUT
     CHARACTER(:), ALLOCATABLE:: ERROR
     !
-    IF(KPER==ONE) THEN
-      !
-      IF( SWO%NSFR_OLD_FLO > Z .AND. KSTP==ONE .AND. KITER==ONE) THEN  !THERE ARE VARIABLES THAT SET TO SFR_INPUT_DATA_TYPES IN OR OUT FLOW
-          !
+    IF( SWO%NSFR_OLD_FLO > Z) THEN                  !THERE ARE VARIABLES THAT SET TO SFR_INPUT_DATA_TYPES IN OR OUT FLOW
+       IF(SWO%DEC_RUL_IT%INUSE .OR.                    &  ! Note this is used by the slang variables SFR.xyz.INFLOW and .OUTFLOW, which captures the natural flows without resivoir releases 
+          SWO%DEC_RUL_IT_END%INUSE .OR.                &  ! But it will be the flow from reservior releases if variable is used by iteration
+          (KPER==ONE .AND. KSTP==ONE .AND. KITER==ONE) ) THEN 
           DO I=ONE, SWO%NSFR_OLD_FLO
               !
               IF(SWO%SFR_OLD_FLO(I)%IS_INFLOW) THEN
@@ -14303,7 +14303,7 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
                   SWO%SFR_OLD_FLO(I)%FLO  = STRM( 9,SWO%SFR_OLD_FLO(I)%ISTRM)
               ENDIF
           END DO
-      END IF
+       END IF
     END IF
 !   DOUBLE PRECISION, DIMENSION(:,:), ALLOCATABLE :: DCNVG
     !
