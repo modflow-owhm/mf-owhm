@@ -1362,12 +1362,21 @@ MODULE S_LANGUAGE_INTERFACE!, ONLY: S_INTERPRETER, S_VARIABLE_LIST
     DO I = ONE, RET%N
                      CALL LST%ADD_UNIQUE(RET%NAM(I), K)
                      !
-                     IF(K==Z) VAR%NRET = VAR%NRET + ONE
+                     IF(K==Z) THEN
+                         VAR%NRET = VAR%NRET + ONE
+                     ELSE
+                        RET%NAM(I) = BLNK  ! Flag to skip name
+                     END IF
+                     
     END DO
     DO I = ONE, SYS%N
                      CALL LST%ADD_UNIQUE(SYS%NAM(I), K)
                      !
-                     IF(K==Z) VAR%NSYS = VAR%NSYS + ONE
+                     IF(K==Z) THEN
+                         VAR%NSYS = VAR%NSYS + ONE
+                     ELSE
+                        SYS%NAM(I) = BLNK  ! Flag to skip name
+                     END IF
     END DO
     !
     VAR%POS_VAR = LST%LEN() + ONE
@@ -1381,10 +1390,13 @@ MODULE S_LANGUAGE_INTERFACE!, ONLY: S_INTERPRETER, S_VARIABLE_LIST
                      ELSE
                          !
                          IF(I<SVAR%N) THEN
-                             IF( SVAR%NAM(I) == SVAR%NAM(I+ONE)) CALL STOP_ERROR(INFILE=IN,OUTPUT=IOUT,MSG='S LANGAUGE VARIABLES VARIABLE ERROR: A VARIABLE NAME (VARNAM) WITH AN ARRAY INDEX (VARNAM[]) IS INDENTICAL TO A VARIABLE NAME IN EITHER THE SYSTEM PROPERTY (SYSNAM) OR RETURN (RETNAM) NAMES.'//NL//'THE VARIABLE FOUND THAT IS CAUSING PROBLEMS IS "'//SVAR%NAM(I)//'"'//BLN//'PLEASE EITHER REMOVE THE ARRAY DIMENSION OR CHANGE THE VARIABLE NAME (VARNAM[]).') 
+                             IF( SVAR%NAM(I) == SVAR%NAM(I+ONE)) CALL STOP_ERROR(INFILE=IN,OUTPUT=IOUT, &
+                                 MSG='S LANGAUGE VARIABLES VARIABLE ERROR: A VARIABLE NAME (VARNAM) WITH AN ARRAY INDEX (VARNAM[]) IS INDENTICAL TO A VARIABLE NAME IN EITHER THE SYSTEM PROPERTY (SYSNAM) OR RETURN (RETNAM) NAMES.'//NL// &
+                                 'THE VARIABLE FOUND THAT IS CAUSING PROBLEMS IS "'//SVAR%NAM(I)//'"'//BLN//&
+                                 'PLEASE EITHER REMOVE THE ARRAY DIMENSION OR CHANGE THE VARIABLE NAME (VARNAM[]).') 
                          END IF
                          !
-                         SVAR%NAM(I) = BLNK
+                         SVAR%NAM(I) = BLNK  ! Flag to skip name
                          !
                      END IF
     END DO
@@ -1478,29 +1490,37 @@ MODULE S_LANGUAGE_INTERFACE!, ONLY: S_INTERPRETER, S_VARIABLE_LIST
 !    ALLOCATE(VAR%REQUIRED(VAR%NRET), SOURCE = FALSE)
 !    ALLOCATE(VAR%AT_LEAST(VAR%NRET), SOURCE = FALSE)
     !
+    K = Z
     ALLOCATE(VAR%PROP_PUL(VAR%NSYS))
-    DO I=ONE, VAR%NSYS
-       DO J=ONE, N 
-                IF( SYS%NAM(I) == VAR%NAM(J) )THEN
-                                                  VAR%VAL(J)  = SYS%VAL(I)
-                                                  !
-                                                  CALL VAR%PROP_PUL(I)%INIT( SYS%NAM(I), J )
-                                                  EXIT
-                END IF
-       END DO
+    DO I=ONE, SIZE(SYS%NAM)
+       IF(SYS%NAM(I) /= BLNK) THEN
+          DO J=ONE, N 
+                   IF( SYS%NAM(I) == VAR%NAM(J) )THEN
+                                                     VAR%VAL(J)  = SYS%VAL(I)
+                                                     !
+                                                     K = K + 1
+                                                     CALL VAR%PROP_PUL(K)%INIT( SYS%NAM(I), J )
+                                                     EXIT
+                   END IF
+          END DO
+       END IF
     END DO
     !
     ALLOCATE(VAR%PROP_RET(VAR%NRET))
     !
-    DO I=ONE, VAR%NRET
-       DO J=ONE, N 
-                IF( RET%NAM(I) == VAR%NAM(J) )THEN
-                                                  VAR%VAL(J)  = RET%VAL(I)
-                                                  !
-                                                  CALL VAR%PROP_RET(I)%INIT( RET%NAM(I), J )
-                                                  EXIT
-                END IF
-       END DO
+    K = Z
+    DO I=ONE, SIZE(RET%NAM)
+       IF(RET%NAM(I) /= BLNK) THEN
+          DO J=ONE, N 
+                   IF( RET%NAM(I) == VAR%NAM(J) )THEN
+                                                     VAR%VAL(J)  = RET%VAL(I)
+                                                     !
+                                                     K = K + 1
+                                                     CALL VAR%PROP_RET(K)%INIT( RET%NAM(I), J )
+                                                     EXIT
+                   END IF
+          END DO
+       END IF
     END DO
     !
   END SUBROUTINE
