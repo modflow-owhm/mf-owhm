@@ -22,7 +22,7 @@ Boyce, S.E., Hanson, R.T., Ferguson, I., Schmid, W., Henson, W., Reimann, T., Me
 
 2024-01-10
 
-git commit log: `git log 9d9f5b50c77a03b538e4ec818f5a67e7bcf3e5ea..HEAD`
+git commit log: `git log --reverse 9d9f5b50c77a03b538e4ec818f5a67e7bcf3e5ea^..HEAD`
 
 ### HYDFMT v1.2
 
@@ -276,7 +276,7 @@ Only MODE 1 is allowed until this issue is fixed.
 
 2022-01-20
 
-git commit log: `git log 4bfb023b3a0f18d8a53a35146f85a93528d6ddd0..9d9f5b50c77a03b538e4ec818f5a67e7bcf3e5ea` 
+git commit log: `git log --reverse 4bfb023b3a0f18d8a53a35146f85a93528d6ddd0^..9d9f5b50c77a03b538e4ec818f5a67e7bcf3e5ea` 
 
 ### ZoneBudget v3.2
 
@@ -430,7 +430,7 @@ Initial release of MODFLOW Surface Water Operations (`SWO`) in MF-OWHM
   simulating large-scale surface water management in MODFLOW-based hydrologic models:  
   Denver, Colo., Bureau of Reclamation Technical Memorandum no. 86-68210–2016-02, 96 p.
 
-git commit log: `git log d8ec82ae504a2aaec594ccd576f8674961f59404..4bfb023b3a0f18d8a53a35146f85a93528d6ddd0`
+git commit log: `git log --reverse d8ec82ae504a2aaec594ccd576f8674961f59404^..4bfb023b3a0f18d8a53a35146f85a93528d6ddd0`
 
 ### Fixed
 
@@ -467,7 +467,7 @@ git commit log: `git log d8ec82ae504a2aaec594ccd576f8674961f59404..4bfb023b3a0f1
 
 2021-05-25
 
-git commit log: `git log 3adf1e3b8e634d83b8296fd673b3e3360a5cae06..d8ec82ae504a2aaec594ccd576f8674961f59404` 
+git commit log: `git log --reverse 3adf1e3b8e634d83b8296fd673b3e3360a5cae06^..d8ec82ae504a2aaec594ccd576f8674961f59404` 
 
 ### Fixed
 
@@ -481,7 +481,7 @@ git commit log: `git log 3adf1e3b8e634d83b8296fd673b3e3360a5cae06..d8ec82ae504a2
 
 2021-05-15
 
-git commit log: `git log 12b331ce38c47a7e88f7da234c189ffa585d637a..3adf1e3b8e634d83b8296fd673b3e3360a5cae06`  
+git commit log: `git log --reverse 12b331ce38c47a7e88f7da234c189ffa585d637a^..3adf1e3b8e634d83b8296fd673b3e3360a5cae06`  
 or web view at: https://code.usgs.gov/modflow/mf-owhm/-/compare/2.0.1..2.0.2
 
 ### Merge ⯬ BiF v1.0.1
