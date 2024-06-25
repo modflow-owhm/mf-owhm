@@ -18,11 +18,85 @@ Boyce, S.E., Hanson, R.T., Ferguson, I., Schmid, W., Henson, W., Reimann, T., Me
 
 &nbsp;
 
+## 2.3.1-b2
+
+TBA
+
+git commit log: `git log --reverse 455800a6bf6138e1b00c5ee17b6eb2108614e2e3^..HEAD`
+
+### HEADER1
+
+abc
+
+### Fixed
+* `FMP` Farm Process
+  * `BARE_PRECIPITATION_CONSUMPTION_FRACTION` removed from FMP_Template.
+    * The Farm Process input template, [doc/FMP_Template/FMP_Template.fmp](doc/FMP_Template/FMP_Template.fmp), incorrectly had a legacy keyword. This option was superseded by the `SOIL` block `EFFECTIVE_PRECIPITATION_TABLE` and the `CLIMATE` block `PRECIPITATION_POTENTIAL_CONSUMPTION`, which are applied to both bare and non-bare land uses.
+
+* `BAS` Basic Package
+  * `PRINT_WATER_DEPTH` output file wrote an empty line to `PRINT_WATER_TABLE` output file.
+    * Fixed `PRINT_WATER_DEPTH` from using the unit number associated with the BAS option `PRINT_WATER_TABLE` when writing an empty line to separate records. If `PRINT_WATER_TABLE`, then a random file called fort.xxx with xxx being a random number, would be written with nothing but blank spaces.
+
+* `NWT` Newton Solver (MF-OWHM specific version)
+  * Allow keyword `CONTINUE` after the `SPECIFY` keyword.
+    * The NWT solver instruction manual defines that a set of numbers are read after the `SPECIFY` keyword option. However, the MODFLOW-NWT source code allows for the `CONTINUE` keyword option to appear after `SPECIFY` and before the numerical parameters. This is also the default behavior for FloPy when making a NWT solver file. This feature was added back to maintain compatibility with MODFLOW-NWT and FloPy.
+    * It is recommended to use the BAS option `NO_FAILED_CONVERGENCE_STOP`, which has the same effect and is not solver dependent.
+
+* `SWO` Surface Water Operations
+  * Improved warning message descriptions.
+  * `RESERVOIR_SPLIT_FRACTIONS` keyword added.
+    * In an early beta release of SWO, the split reservoir setting required the keyword `RESERVOIR_SPLIT_FRACTIONS`, however for the final release of SWO this keyword was changed to `RESERVOIR_PRIMARY_REREGULATION_SPLIT`. For backward compatibility, both keywords are now checked for and serve the same purpose.
+
+* `Slang` MF-OWHM Language Interpreter (only used by SWO)
+  * `SFR.seg.INFLOW` and `SFR.seg.OUTFLOW` are now correctly set for iteration-based slang scripts.
+    * Slang can be invoked at different times of the simulation, model start, stress period start, time step start, iteration start, and at the end of those same times. For scripts invoked at the start of each iteration, the variables that are set to the inflow or outflow of a specific SFR segment reused the solution from the second iteration. It now updates with the solution of the previous iteration.
+  * Add check for valid `REQ.DELIVERY.FARM` variables.
+    * Slang property variables are set to values within MF-OWHM based on the current model state. The variables `REQ.DELIVERY.FARM.#` and `REQ.DELIVERY_VOL.FARM.#`, where # is replaced by a valid FARM/WBS number, are set to the water delivered to the WBS. However, if the user specified a number <1 or >NWBS resulted in random behavior, so a check was added to prevent this.
+  * Fixed incorrect handling of duplicate variable names.
+    * If a variable name, in the variable definition input is specified twice, then only one value should be stored. However, if a user happen to define the same variable name in the `PROPERTY` and `RETURN` variable blocks, then slang would correctly drop the duplicate from the `PROPERTY` block, but incorrectly drop the last variable defined in the block.
+
+ However if the user entered a bad number, then either the variable was set to a random value or resulted in a runtime index error.
+
+* `CFP` Conduit Flow Process (MF-OWHM specific version)
+  * Fixed an input read error for the advanced CFP input, which reads in a set of boundary condition flags to modify the input structure. If the advanced input is skipped, then an `X` must be used as a placeholder. However, this raised an error that the option was not found.
+  * Index error for Time-Dependent Boundary Conditions (TD)
+    * The search algorithm for finding the time interval no longer raises an index error if the time falls within the first interval. 
+    * The algorithm was also refactored to improve the execution speed.
+  * Remove potential of taking `sqrt` of a negative number.
+  
+
+* `validate_example_results.f90` fixed missing character initialization.
+
+* `options.print_convergence.txt` fixed an incorrect header description.
+
+
+### Refactoring
+
+* `LPF` and `UPW` improved wettable description.  
+  The LPF/UPW packages output the layer wettable description to the list file as `NEVER-DRY` or `WETTABLE`.  
+  To be more descriptive the variable now outputs:
+    * `NEVER-DRY`
+      * Indicates layer is confine
+    * `STAY-DRY`
+      * Indicates layer is convertible without wetting
+    * `WETTABLE`
+      * Indicates layer is convertible with wetting
+* `CFP` changed automatic arrays to allocatable to remove potential of a stack overflow for large models.
+* `CFP` changed exponents from real to integers to improve speed.
+  * For example, `x**3.0` was changed to `x**3` to tell the compiler to expand the variable rather than using a floating point pow library. That is, `x**3` results in the compiler doing `x*x*x` in the assembly code.
+* LineFeed comment cleaning and changed Fortran equality letters to symbols (`.EQ.` was changed to `==`; `.GT.` was changed to `>`; ...)
+* `Slang` added to `TYPE(VARIABLE_NAME_MEANING)` the routine `SUBROUTINE EQUALITY_VARIABLE_NAME_MEANING`, which is assigned as the `GENERIC :: OPERATOR(==)` to allow variable equality checks.
+
+
+------
+
+&nbsp;
+
 ## 2.3.0
 
 2024-01-10
 
-git commit log: `git log --reverse 9d9f5b50c77a03b538e4ec818f5a67e7bcf3e5ea^..HEAD`
+git commit log: `git log --reverse 9d9f5b50c77a03b538e4ec818f5a67e7bcf3e5ea^..455800a6bf6138e1b00c5ee17b6eb2108614e2e3`
 
 ### HYDFMT v1.2
 
