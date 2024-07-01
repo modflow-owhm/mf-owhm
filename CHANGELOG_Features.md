@@ -12,6 +12,22 @@
 
 &nbsp;
 
+## 2.3.1-b2
+
+TBA
+
+### `MF-OWHM` Command Argument Support
+
+The main executable added support for basic command arguments. The current arguments supported are:
+  * `-h` &nbsp; &nbsp; &nbsp; `--help`
+    * Print out supported command arguments, then exit program.
+  * `-v` &nbsp; &nbsp; &nbsp; `--version`
+    *  Print out the mf-owhm version number, then exit program.
+
+------
+
+&nbsp;
+
 ## 2.3.0
 
 2024-01-10
