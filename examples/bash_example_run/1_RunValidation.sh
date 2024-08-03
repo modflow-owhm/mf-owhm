@@ -172,11 +172,14 @@ then
    echo "now running existing: ${prog}"
    echo
    echo
-   "${prog}" "${runAll}"
-   status=$?
+   status=0
+   "${prog}" "${runAll}" || status=1
 else
-   gfortran  -o "${prog}"  -fno-backtrace  validate_example_results.f90 && "${prog}" "${runAll}"
-   status=$?
+   status=0
+   gfortran  -o "${prog}"  -fno-backtrace  validate_example_results.f90 || status=1
+   if [ $status -eq 0 ]; then
+      "${prog}" "${runAll}" || status=1
+   fi
 fi
 
 if [ "${savePROG}" = "F" ]  && [ "${reUse}" = "F" ]
