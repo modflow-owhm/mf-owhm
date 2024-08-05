@@ -4,7 +4,25 @@
 
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; **IPDS No.**&nbsp; `NA`
 
-# Version 2.3.1-b2
+# Version 2.3.1-b2  — Develop–Beta Release
+
+&nbsp; 
+
+The `develop` branch contains intermediate code and bug fixes for MODFLOW-OWHM. When the code is in a state that it compiles and passes the example tests, then a beta release is made and posted to the `beta` branch. These releases have NOT undergone USGS peer review and contain the preliminary disclaimer. The develop branch is stable and is eventually merged into the main branch for USGS code peer review. 
+
+The `beta` branch is only for beta compiled executables, beta README.pdf, beta CHANGELOG.pdf, and it's source code from the develop branch. All other pdf documents are kept in their original markdown format. To read them either download a production release or view the markdown format on code.usgs.gov. 
+
+Any commit stored on the beta `branch` may be dropped or rebased to save on online storage. Beta releases are not meant to be used in official publications, but are available to provide rapid release of bug fixes and new features for users to take advantage of. If a beta commit that you need is removed, then you can obtain the code it is based off of by finding in the `develop` branch a commit named `v2.X.Y-bZ`, where `X`, `Y`, and `Z` pertain to the beta version's minor, patch and beta numbers. For example, the commit `v2.3.1-b3`  would contain the code that was compiled to make the beta version 2.3.1-b3 (that is, the third beta release of version 2.3.1).
+
+The web location for the `beta` and `develop` branches are:  
+https://code.usgs.gov/modflow/mf-owhm/-/tree/beta  
+https://code.usgs.gov/modflow/mf-owhm/-/tree/develop
+
+&nbsp; 
+
+------
+
+&nbsp; 
 
 MODFLOW One-Water Hydrologic Flow Model (MF-OWHM) Conjunctive Use and Integrated Hydrologic Flow Modeling Software
 
