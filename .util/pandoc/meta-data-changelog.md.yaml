@@ -15,8 +15,8 @@ abstract: |
   The file readme.txt does contain a list of software suggestions to view markdown in their web form.  
      
   The original markdown files, in gitlab web format, can be viewed at:  
-  https://code.usgs.gov/modflow/mf-owhm/-/blob/release/CHANGELOG.md  
-  https://code.usgs.gov/modflow/mf-owhm/-/blob/release/CHANGELOG_Features.md  
+  https://code.usgs.gov/modflow/mf-owhm/-/blob/beta/CHANGELOG.md  
+  https://code.usgs.gov/modflow/mf-owhm/-/blob/beta/CHANGELOG_Features.md  
      
      
      

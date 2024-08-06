@@ -8,7 +8,7 @@ abstract: |
      
   `Readme.md` is converted from [Markdown](https://en.wikipedia.org/wiki/Markdown) to pdf using [pandoc](https://pandoc.org/) and [LuaLaTex](http://www.luatex.org/) pdf-engine 
   and package management with [MiKTeX](https://miktex.org/). It is created for convenience for those that do not want to 
-  install a markdown viewer or [view the file on the web](https://code.usgs.gov/modflow/mf-owhm/-/blob/release/README.md). 
+  install a markdown viewer or [view the file on the web](https://code.usgs.gov/modflow/mf-owhm/-/blob/beta/README.md). 
   Note that all relative link references (that is, hyperlinks to other markdown files) are removed and converted and appear italicized.  
      
   The file [readme.txt](https://code.usgs.gov/modflow/mf-owhm/-/blob/main/readme.txt) contains a brief explanation about Markdown files (`.md`).  
@@ -20,12 +20,15 @@ abstract: |
   Please view `Readme.md`, with any text editor, for the version included in the download. 
   It is located on the seventh line, and says `# Version X.Y.Z`.  
      
-  It is recommended to check the version at  
-  https://code.usgs.gov/modflow/mf-owhm/-/blob/release/README.md  
-  against your current version and update if a newer one is available.  
+  It is recommended to check the version at:  
+        https://code.usgs.gov/modflow/mf-owhm/-/blob/beta/README.md  
+        https://code.usgs.gov/modflow/mf-owhm/-/blob/release/README.md  
+  against your current version and update if a newer beta or release version is available.  
+  Note a release version with the same version number as a beta is always newer.  
+  That is release version 2.3.1 is newer then beta version 2.3.1-b1  
      
-  The following is a stable link for the most recent release (preliminary or production)  
-  https://code.usgs.gov/modflow/mf-owhm/-/archive/release/mf-owhm-release.zip  
+  The following is a stable link for the most recent beta release (preliminary):  
+        https://code.usgs.gov/modflow/mf-owhm/-/archive/beta/mf-owhm-beta.zip  
      
      
      
