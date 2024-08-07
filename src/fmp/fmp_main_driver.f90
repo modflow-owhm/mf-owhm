@@ -599,15 +599,24 @@ MODULE FMP_MAIN_DRIVER
        WRITE(IOUT,'(/1x,A)') 'FARM-ID,  NUMBER OF WELLS PER FARM, ORIGINAL PUMP CAPACIFTY, GROUNDWATER-ALLOTMENT,  FRACTION OF PUMPING CAPACITY PER FARM'
        !
        DO NF=1,FDIM%NFARM
-          IF(ALLOT%GW_RATE_LIM(NF) < DZ) THEN
+          IF(.NOT. WBS%INUSE(NF)) THEN
+                     !
+                     WRITE(IOUT,'(4X,I4,20X,I6,9X,2F20.4,A)') NF, 0, 0.0, ALLOT%GW_RATE_LIM(NF), '                 0.0'
+                     !
+          ELSEIF(ALLOT%GW_RATE_LIM(NF) < DZ) THEN
                      !
                      WRITE(IOUT,'(4X,I4,20X,I6,9X,2A20)')     NF,FWELL(NF)%N, FWELL(NF)%QMAXini,' NaN', ' NaN'
                      !
-          ELSEIF(WBS%INUSE(NF) .AND. FWELL(NF)%QMAXini > DZ .AND. FWELL(NF)%QMAXini > ALLOT%GW_RATE_LIM(NF) ) THEN
-                     !
+          ELSEIF(FWELL(NF)%QMAXini <= ALLOT%GW_RATE_LIM(NF)) THEN  ! Not constrained via allotment
+              IF( ALLOT%GW_RATE_LIM(NF) > DZ ) THEN
+                     WRITE(IOUT,'(4X,I4,20X,I6,9X,2F20.4,A)') NF,FWELL(NF)%N, FWELL(NF)%QMAXini, ALLOT%GW_RATE_LIM(NF), '                 1.0'
+              ELSE
+                     WRITE(IOUT,'(4X,I4,20X,I6,9X,2F20.4,A)') NF,FWELL(NF)%N, FWELL(NF)%QMAXini, ALLOT%GW_RATE_LIM(NF), '                 0.0'
+              ENDIF
+          ELSEIF(FWELL(NF)%QMAXini > DZ) THEN
                      WRITE(IOUT,'(4X,I4,20X,I6,9X,3F20.4)')   NF,FWELL(NF)%N,FWELL(NF)%QMAXini, ALLOT%GW_RATE_LIM(NF), ALLOT%GW_RATE_LIM(NF)/FWELL(NF)%QMAXini
           ELSE
-                     WRITE(IOUT,'(4X,I4,20X,I6,9X,2F20.4,A)') NF,FWELL(NF)%N, FWELL(NF)%QMAXini, ALLOT%GW_RATE_LIM(NF), '                 NaN'
+                     WRITE(IOUT,'(4X,I4,20X,I6,9X,2F20.4,A)') NF,FWELL(NF)%N, FWELL(NF)%QMAXini, ALLOT%GW_RATE_LIM(NF), '                 0.0'
           END IF
        END DO
     END IF

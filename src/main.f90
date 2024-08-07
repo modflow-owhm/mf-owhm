@@ -29,7 +29,7 @@ SUBROUTINE PRINT_MAIN_HEADER(IU)  ! Set to 6 for cmd prompt or use output_unit f
   CHARACTER(:),ALLOCATABLE:: Revision
   !
   VERSION_OWHM='2.3'
-  Revision    ='1-b1'
+  Revision    ='1-b2'
   VERSION_MF  ='1.12'
   VERSION_FMP ='4.1'
   VERSION_SWR ='1.04'
@@ -101,84 +101,79 @@ END SUBROUTINE
 !
 !
 PROGRAM MODFLOW_OWHM
-  IMPLICIT NONE
-  CHARACTER(1):: NAME_FILE                  !If blank then MF-OWHM checks command arguments
+  implicit none
+  character(1):: name_file                  !If blank then MF-OWHM checks command arguments
+  logical:: program_continue
   !
-  NAME_FILE = ""
-  CALL MODFLOW_OWHM_RUN(NAME_FILE)
+  program_continue = .TRUE.
+  call command_argument_check(program_continue)
   !
-  !CALL MODFLOW_OWHM_RUN('bcf2ss.nam'      )
-  !CALL MODFLOW_OWHM_RUN('etsdrt.nam'      )
-  !CALL MODFLOW_OWHM_RUN('fhb.nam'         )
-  !CALL MODFLOW_OWHM_RUN('ibs2k.nam'       )
-  !CALL MODFLOW_OWHM_RUN('l1a2k.nam'       )
-  !CALL MODFLOW_OWHM_RUN('l1b2k.nam'       )
-  !CALL MODFLOW_OWHM_RUN('l1b2k_bath.nam'  )
-  !CALL MODFLOW_OWHM_RUN('mnw1.nam'        )
-  !CALL MODFLOW_OWHM_RUN('restest.nam'     )
-  !CALL MODFLOW_OWHM_RUN('str.nam'         )
-  !CALL MODFLOW_OWHM_RUN('swtex4.nam'      )
-  !CALL MODFLOW_OWHM_RUN('tc2hufv4.nam'    )
-  !CALL MODFLOW_OWHM_RUN('test1ss.nam'     )
-  !CALL MODFLOW_OWHM_RUN('test1tr.nam'     )
-  !CALL MODFLOW_OWHM_RUN('testsfr2.nam'    )
-  !CALL MODFLOW_OWHM_RUN('testsfr2_tab.nam')
-  !CALL MODFLOW_OWHM_RUN('tr2k_s3.nam'     )
-  !CALL MODFLOW_OWHM_RUN('twri.nam'        )
-  !CALL MODFLOW_OWHM_RUN('twrihfb.nam'     )
-  !CALL MODFLOW_OWHM_RUN('twrip.nam'       )
-  !CALL MODFLOW_OWHM_RUN('MNW2-Fig28.nam'  )
-  !CALL MODFLOW_OWHM_RUN('UZFtest2.nam'    )
-  !
-  !CALL CHDIR('../mf-2005-nwt')
-  !
-  !CALL MODFLOW_OWHM_RUN('etsdrt_nwt.nam'      )
-  !CALL MODFLOW_OWHM_RUN('swtex4_nwt.nam'      )
-  !CALL MODFLOW_OWHM_RUN('test1ss_nwt.nam'     )
-  !CALL MODFLOW_OWHM_RUN('test1tr_nwt.nam'     )
-  !CALL MODFLOW_OWHM_RUN('testsfr2_nwt.nam'    )
-  !CALL MODFLOW_OWHM_RUN('testsfr2_tab_nwt.nam')
-  !CALL MODFLOW_OWHM_RUN('twrip_nwt.nam'       )
-  !CALL MODFLOW_OWHM_RUN('MNW2-Fig28_nwt.nam'  )
-  !CALL MODFLOW_OWHM_RUN('UZFtest2_nwt.nam'    )
-  !
-  !CALL CHDIR('../mf-nwt')
-  !
-  !CALL MODFLOW_OWHM_RUN('Pr1a_MFNWT.nam'      )
-  !CALL MODFLOW_OWHM_RUN('Pr1b_MFNWT.nam'      )
-  !CALL MODFLOW_OWHM_RUN('Pr2MFNWT.nam'        )
-  !CALL MODFLOW_OWHM_RUN('Pr3_MFNWT_higher.nam')
-  !CALL MODFLOW_OWHM_RUN('Pr3_MFNWT_lower.nam' )
-  !CALL MODFLOW_OWHM_RUN('swi2ex4sww.nam'      )
-  !
-  !CALL CHDIR('../mf-swr')
-  !
-  !CALL MODFLOW_OWHM_RUN('SWRSample01.01min.nam')
-  !CALL MODFLOW_OWHM_RUN('SWRSample01.nam'      )
-  !CALL MODFLOW_OWHM_RUN('SWRSample02.nam'      )
-  !CALL MODFLOW_OWHM_RUN('SWRSample03.nam'      )
-  !CALL MODFLOW_OWHM_RUN('SWRSample04.nam'      )
-  !CALL MODFLOW_OWHM_RUN('SWRSample05-nwt.nam'  )
-  !
-  !CALL CHDIR('../mf-swi')
-  !
-  !CALL MODFLOW_OWHM_RUN( 'swi2ex1.nam'         )
-  !CALL MODFLOW_OWHM_RUN( 'swi2ex2_cont.nam'    )
-  !CALL MODFLOW_OWHM_RUN( 'swi2ex2_strat.nam'   )
-  !CALL MODFLOW_OWHM_RUN( 'swi2ex3.nam'         )
-  !CALL MODFLOW_OWHM_RUN( 'swi2ex4_2d.nam'      )
-  !CALL MODFLOW_OWHM_RUN( 'swi2ex4_2d_sww.nam'  )
-  !CALL MODFLOW_OWHM_RUN( 'swi2ex5.nam'         )
-  !CALL MODFLOW_OWHM_RUN( 'swi2ex6_1.nam'       )
-  !CALL MODFLOW_OWHM_RUN( 'swi2ex6_2.nam'       )
-  !CALL MODFLOW_OWHM_RUN( 'swi2ex6_3_0.005.nam' )
-  !CALL MODFLOW_OWHM_RUN( 'swi2ex6_3_0.010.nam' )
-  !CALL MODFLOW_OWHM_RUN( 'swi2ex6_3_0.100.nam' )
-  !CALL MODFLOW_OWHM_RUN( 'swi2ex6_3_1.000.nam' )
-  !!
-  !CONTINUE
+  if(program_continue) then
+      name_file = ""
+      call MODFLOW_OWHM_RUN(name_file)
+  end if
   !
 END PROGRAM MODFLOW_OWHM
+!
+SUBROUTINE COMMAND_ARGUMENT_CHECK(program_continue)
+  use, intrinsic:: iso_fortran_env, only: stdout=>output_unit
+  implicit none
+  logical, intent(inout) :: program_continue
+  integer :: narg, iarg, i, j, p, ONE
+  logical :: FALSE
+  character(128) :: arg
+  FALSE = .FALSE.
+  ONE = 1
+  NARG = command_argument_count()
+  !
+  if (NARG < ONE) return
+  !
+  do iarg=ONE, NARG
+     call get_command_argument(iarg, arg)
+     arg = adjustl(arg)
+     !
+     if (arg(1:1) == "-") then   ! command argument found
+         !
+         j = scan(arg, "=:") - 1
+         if(j < 1) j = len_trim(arg)
+         !
+         do i=2, j
+             p = INDEX( "ABCDEFGHIJKLMNOPQRSTUVWXYZ", arg(I:I))
+             !
+             IF(p > 0) arg(I:I) = "abcdefghijklmnopqrstuvwxyz"(p:p)
+         END DO
+         !
+         i = 2
+         if (arg(2:2) == "-") i = 3
+         !
+         select case (arg(i:j))
+         case("h", "help")
+             write(stdout,'(A,/)')
+             write(stdout,'(A,/)') "MODFLOW-OWHM Help Menu"
+             write(stdout,'(A,/)') REPEAT('-',84)
+             write(stdout,'(A,/)') "Command arguments supported:"
+             write(stdout,'(A,/)') "-h --help      : This menu"
+             write(stdout,'(A)'  ) "-v --version   : Print the verison of the software."
+             write(stdout,'(A)'  ) '                 The version is printed as "MODFLOW-OWHM vX.Y.Z-bA"'
+             write(stdout,'(A)'  ) '                    where X, Y, Z, and A are set to the version numbers'
+             write(stdout,'(A,/)') '                       "-bA" is only present for beta releases'
+             write(stdout,'(A)'  ) "NameFile       : If no - is present, then the input is assumed to be"
+             write(stdout,'(A,/, /)') "                 the MODFLOW-OWHM name file and the simulation starts."
+             write(stdout,'(A,/)') REPEAT('-',84)
+             write(stdout,'(A,/)') "Now printing the standard header before exiting the program."
+             write(stdout,'(A,/)') REPEAT('-',84)
+             call PRINT_MAIN_HEADER(stdout)
+             program_continue = FALSE
+             EXIT
+         case("v", "version")
+             call PRINT_MAIN_HEADER(stdout)
+             program_continue = FALSE
+             EXIT
+         end select
+     end if
+  end do
+  !
+END SUBROUTINE
 !
 SUBROUTINE MODFLOW_OWHM_RUN(NAME)
   !

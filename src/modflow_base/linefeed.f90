@@ -10,9 +10,6 @@
 !
 !  VERSION 1.0 [4/23/2015] ORIGINAL VERSION THAT RETURNS A LINE_FEED DATATYPE
 !
-! DATA TREE
-      !
-      !
 MODULE LINE_FEEDER
   USE CONSTANTS
   USE GLOBAL,                           ONLY: IUNIT, CUNIT, XYGRID, BOTM, LBOTM, NLAY
@@ -28,41 +25,41 @@ MODULE LINE_FEEDER
   IMPLICIT NONE
   !
   PRIVATE
-  PUBLIC:: LINE_FEED                                                 !LINE_FEED SERVES BOTH AS ALLOCATION ROUTINE AND DATA TYPE DEFINITION
+  PUBLIC:: LINE_FEED                                               ! LINE_FEED serves both as allocation routine and data type definition
   !
   TYPE:: FEED_DATA
-      !INTEGER:: IN                                                   !HOLDS  UNIT NUMBER OF LINE_FEED
+      !INTEGER:: IN                                                ! Holds  unit number of line_feed
       TYPE(GENERIC_INPUT_FILE):: FL
-      TYPE(GENERIC_INPUT_FILE), ALLOCATABLE:: BIN                    !ONLY ALLOCATED IF FEED FILE IS A BIANRY
-      DOUBLE PRECISION:: PROP_SFAC = UNO                                  !GLOBAL SCALE FACTOR
-      INTEGER:: NDAT                                                 !SIZE OF DAT        
-      !INTEGER:: NACT                                                !SIZE OF CURRENTLY ACTIVE CELLS (IN USE FOR CURRENT STRESS PERIOD)
-      INTEGER,         DIMENSION(:,:),ALLOCATABLE:: NUMIDX           !SIZE(NUMIDX,1)>0 WHEN ACTIVE
+      TYPE(GENERIC_INPUT_FILE), ALLOCATABLE:: BIN                  ! Only allocated if feed file is a binary
+      DOUBLE PRECISION:: PROP_SFAC = UNO                           ! Global scale factor
+      INTEGER:: NDAT                                               ! Size of DAT
+      !INTEGER:: NACT                                              ! Size of currently active cells (in use for current stress period)
+      INTEGER,         DIMENSION(:,:),ALLOCATABLE:: NUMIDX         ! SIZE(NUMIDX,1)>0 when active
       CHARACTER(20),   DIMENSION(:),  ALLOCATABLE:: CHARID          
-      INTEGER,         DIMENSION(:),  ALLOCATABLE:: CHARIDX          !SIZE(CHARIDX)>0 WHEN ACTIVE
-      !CLASS(*),        DIMENSION(:),  ALLOCATABLE:: WILD             !CAN BE ANY USER DEFINED DERIVED DATATYPE (its a WILD card)
-      DOUBLE PRECISION,DIMENSION(:,:),ALLOCATABLE:: PROP             !TIME INVARIANT PROPERTIES (LIKE DRAIN ELEVATION)
-      INTEGER,         DIMENSION(:,:),ALLOCATABLE:: AUX              !AUXILIARY INFORMATION (LIKE NAUX/AUX FROM NORMAL READS)
+      INTEGER,         DIMENSION(:),  ALLOCATABLE:: CHARIDX        ! SIZE(CHARIDX)>0 when active
+      !CLASS(*),        DIMENSION(:),  ALLOCATABLE:: WILD          ! Can be any user defined derived datatype (its a wild card)
+      DOUBLE PRECISION,DIMENSION(:,:),ALLOCATABLE:: PROP           ! Time invariant properties (like drain elevation)
+      INTEGER,         DIMENSION(:,:),ALLOCATABLE:: AUX            ! Auxiliary information (like NAUX/AUX from normal reads)
       CHARACTER(16),   DIMENSION(:),  ALLOCATABLE:: GRP  
-      DOUBLE PRECISION,DIMENSION(:),  ALLOCATABLE:: DAT              !CURRENT STRESS PERIODS DATA AS FLOAT
-      INTEGER,         DIMENSION(:),  ALLOCATABLE:: IDAT             !CURRENT STRESS PERIODS DATA AS INT
+      DOUBLE PRECISION,DIMENSION(:),  ALLOCATABLE:: DAT            ! Current stress periods data as float
+      INTEGER,         DIMENSION(:),  ALLOCATABLE:: IDAT           ! Current stress periods data as int
   END TYPE 
   !
   TYPE:: LINE_FEED
-      LOGICAL:: BINARY = FALSE                                       !DERMINES IF SECOND HALF OF FEEDFILE IS BINARY
-      LOGICAL:: INT_DAT= FALSE                                       !DETERMISN IF DAT OR IDAT IS IN USE
-      INTEGER:: NFEED  = NEG                                         !THE SIZE OF FD  --INIT AT -1, SET TO ZERO IF NOT FOUND
-      INTEGER:: TOTDAT = Z                                           !TOTAL COUNT OF ALL FEED POINTS ( COUNT OF FD(:)%DAT(:) )  -NOTE IF NFEED=0 THEN TOTDAT=0
-      INTEGER:: NACT   = Z                                           !TOTAL COUNT OF ALL FEED POINTS IN USE FOR CURRENT STRESS PERIOD ( COUNT OF FD(:)%NACT )
-      INTEGER:: IPRT   = Z                                           !PRINT FLAG 0 MEANS NO PRINTING
-      INTEGER,                     ALLOCATABLE:: LDIM                !LEADING DIMENSION OF NUMIDX (0, 1, or >3), IF EQUAL TO ZERO THEN CHARID IS ALLOCATED AND NUMIDX IS NOT USED
-      INTEGER,                     ALLOCATABLE:: NPROP               !NUMBER OF PROPERTIES ASSOCIATED WITH LINE FEED. FOR EXAMPLE GHB HAS NPROP=1 BECAUSE A GHB CELL HAS A CONDUCTANCE ASSIGNED TO IT
-      INTEGER,                     ALLOCATABLE:: IOUT                !SHADOW COPY OF LIST UNIT NUMBER
-      CHARACTER(5),                ALLOCATABLE:: PAK                 !ENCOMPANSING PACKAGE
-      CHARACTER(16),DIMENSION(:),  ALLOCATABLE:: CAUX                !LIST OF ADDITIONAL AUX VARIABLES
-      LOGICAL,                     ALLOCATABLE:: XYCOORD             !LOGICAL THE DETERMINES IF X,Y,Layer is read in rather than Layer, Row, COL
-      LOGICAL,                     ALLOCATABLE:: XYZCOORD            !LOGICAL THE DETERMINES IF X,Y,Z     is read in rather than Layer, Row, COL
-      TYPE(FEED_DATA),DIMENSION(:),ALLOCATABLE:: FD                  !HOLDS EACH OF THE LINE FEEDS
+      LOGICAL:: BINARY = FALSE                                     ! Determines if second half of feedfile is binary
+      LOGICAL:: INT_DAT= FALSE                                     ! Determines if dat or idat is in use
+      INTEGER:: NFEED  = NEG                                       ! The size of fd  --init at -1, set to zero if not found
+      INTEGER:: TOTDAT = Z                                         ! Total count of all feed points ( count of FD(:)%DAT(:) )  -note if NFEED=0 then TOTDAT=0
+      INTEGER:: NACT   = Z                                         ! Total count of all feed points in use for current stress period ( count of FD(:)%NACT )
+      INTEGER:: IPRT   = Z                                         ! Print flag 0 means no printing
+      INTEGER,                     ALLOCATABLE:: LDIM              ! Leading dimension of NUMIDX (0, 1, or >3), if equal to zero then charid is allocated and NUMIDX is not used
+      INTEGER,                     ALLOCATABLE:: NPROP             ! Number of properties associated with line feed. for example GHB has NPROP=1 because a GHB cell has a conductance assigned to it
+      INTEGER,                     ALLOCATABLE:: IOUT              ! Shadow copy of list unit number
+      CHARACTER(5),                ALLOCATABLE:: PAK               ! Encompansing package
+      CHARACTER(16),DIMENSION(:),  ALLOCATABLE:: CAUX              ! List of additional AUX variables
+      LOGICAL,                     ALLOCATABLE:: XYCOORD           ! Logical the determines if X,Y,Layer is read in rather than Layer, Row, Col
+      LOGICAL,                     ALLOCATABLE:: XYZCOORD          ! Logical the determines if X,Y,Z     is read in rather than Layer, Row, Col
+      TYPE(FEED_DATA),DIMENSION(:),ALLOCATABLE:: FD                ! Holds each of the line feeds
       !
       CONTAINS
       !
@@ -125,13 +122,13 @@ CONTAINS
   PACKID=Z
   DO I=1,UBOUND(IUNIT,1)
     PACKID=PACKID+1
-    IF(IUNIT(I).EQ.BL%IU) EXIT
+    IF(IUNIT(I) == BL%IU) EXIT
   END DO
-  IF(PACKID.EQ.Z)THEN
+  IF(PACKID == Z)THEN
       PACKID=UBOUND(IUNIT,1)
   END IF
   !
-  IF(BL%NAME .EQ. 'LINEFEED') THEN
+  IF(BL%NAME == 'LINEFEED') THEN
     FEEDAUX=Z
     CAUX=''
     XYCOORD =FALSE
@@ -142,15 +139,15 @@ CONTAINS
     DO
       CALL PARSE_WORD_UP(BL%EXTRA,LLOC,ISTART,ISTOP)
       !
-      IF    (BL%EXTRA(ISTART:ISTOP).EQ.'XY')   THEN
+      IF    (BL%EXTRA(ISTART:ISTOP) == 'XY')   THEN
           XYCOORD =TRUE
-      ELSEIF(BL%EXTRA(ISTART:ISTOP).EQ.'XYZ')  THEN
+      ELSEIF(BL%EXTRA(ISTART:ISTOP) == 'XYZ')  THEN
           XYZCOORD=TRUE
-      ELSEIF(BL%EXTRA(ISTART:ISTOP).EQ.'PRINT')  THEN
+      ELSEIF(BL%EXTRA(ISTART:ISTOP) == 'PRINT')  THEN
           FEED%IPRT = 1
-      ELSEIF(BL%EXTRA(ISTART:ISTOP).EQ.'BINARY')  THEN
+      ELSEIF(BL%EXTRA(ISTART:ISTOP) == 'BINARY')  THEN
           FEED%BINARY=TRUE
-      ELSEIF(BL%EXTRA(ISTART:ISTOP).NE.' ' .AND. FEEDAUX < MXAUX ) THEN     !REACHED THE END OF THE BL%EXTRA THAT IS READ IN
+      ELSEIF(BL%EXTRA(ISTART:ISTOP) /= ' ' .AND. FEEDAUX < MXAUX ) THEN     !REACHED THE END OF THE BL%EXTRA THAT IS READ IN
           FEEDAUX=FEEDAUX+1
           CAUX(FEEDAUX)=BL%EXTRA(ISTART:ISTOP)
       ELSE
@@ -168,14 +165,14 @@ CONTAINS
       LLOC=1
       CALL GET_WORD(BL%LINE,LLOC,ISTART,ISTOP,WORD)
       !
-      IF(WORD .NE. 'SFAC') NFEED = NFEED + ONE
+      IF(WORD /= 'SFAC') NFEED = NFEED + ONE
       !
       CALL BL%NEXT()
   END DO
   !
   FEED%NFEED=NFEED
   !
-  IF(FEED%NFEED.LE.Z)THEN
+  IF(FEED%NFEED <= Z)THEN
      WRITE(BL%IOUT,'(/ 2A /)') ' NO LINEFEEDS ARE SPECIFIED FOR PACKAGE ',CUNIT(PACKID)
      FEED%NFEED=Z
      FEED%TOTDAT=Z
@@ -261,9 +258,9 @@ CONTAINS
               CALL FEED%FD(I)%BIN%OPEN(BL%LINE,LLOC,BL%IOUT,BL%IU,NO_INTERNAL=TRUE, NO_CONSTANT=TRUE)
           END IF
           !
-          IF( SF1 .NE. UNO ) FEED%FD(I)%FL%SCALE = FEED%FD(I)%FL%SCALE * SF1
+          IF( SF1 /= UNO ) FEED%FD(I)%FL%SCALE = FEED%FD(I)%FL%SCALE * SF1
           !
-          IF( SF2 .NE. UNO ) THEN
+          IF( SF2 /= UNO ) THEN
                              FEED%FD(I)%NDAT = POS   !Use NDAT to Temporarily Hold Scale Position
           ELSE
                              FEED%FD(I)%NDAT = Z
@@ -314,9 +311,9 @@ CONTAINS
   PACKID=Z
   DO I=1,UBOUND(IUNIT,1)
     PACKID=PACKID+1
-    IF(IUNIT(I).EQ.IN) EXIT
+    IF(IUNIT(I) == IN) EXIT
   END DO
-  IF(PACKID.EQ.Z)THEN
+  IF(PACKID == Z)THEN
       PACKID=UBOUND(IUNIT,1)
   END IF
   !
@@ -327,7 +324,7 @@ CONTAINS
   !
   KEY_FOUND = FALSE
   NFEED=Z
-  IF(LINE(ISTART:ISTOP).EQ.'LINEFEED') THEN
+  IF(LINE(ISTART:ISTOP) == 'LINEFEED') THEN
     KEY_FOUND = TRUE
     CALL GET_INTEGER(LINE,LLOC,ISTART,ISTOP,IOUT,IN,NFEED,MSG='FOUND LINEFEED KEYWORD, BUT FAILED TO LOAD THE NUMBER OF FEED FILES, "NFEED".')
     FEEDAUX=Z
@@ -338,13 +335,13 @@ CONTAINS
     DO
       CALL PARSE_WORD_UP(LINE,LLOC,ISTART,ISTOP,TRUE)
       !
-      IF    (LINE(ISTART:ISTOP).EQ.'XY')   THEN
+      IF    (LINE(ISTART:ISTOP) == 'XY')   THEN
           XYCOORD =TRUE
-      ELSEIF(LINE(ISTART:ISTOP).EQ.'XYZ')  THEN
+      ELSEIF(LINE(ISTART:ISTOP) == 'XYZ')  THEN
           XYZCOORD=TRUE
-      ELSEIF(LINE(ISTART:ISTOP).EQ.'PRINT')  THEN
+      ELSEIF(LINE(ISTART:ISTOP) == 'PRINT')  THEN
           FEED%IPRT = 1
-      ELSEIF(LINE(ISTART:ISTOP).NE.' ' .AND. FEEDAUX < MXAUX ) THEN     !REACHED THE END OF THE LINE THAT IS READ IN
+      ELSEIF(LINE(ISTART:ISTOP) /= ' ' .AND. FEEDAUX < MXAUX ) THEN     !REACHED THE END OF THE LINE THAT IS READ IN
           FEEDAUX=FEEDAUX+1
           CAUX(FEEDAUX)=LINE(ISTART:ISTOP)
       ELSE
@@ -356,7 +353,7 @@ CONTAINS
   !
   FEED%NFEED=NFEED
   !
-  IF(FEED%NFEED.LE.Z)THEN
+  IF(FEED%NFEED <= Z)THEN
      WRITE(IOUT,'(/ 2A /)') ' NO LINEFEEDS ARE SPECIFIED FOR PACKAGE ',CUNIT(PACKID)
      FEED%NFEED=Z
      FEED%TOTDAT=Z
@@ -397,20 +394,20 @@ CONTAINS
       IF( FEED%FD(I)%FL%BINARY ) CALL STOP_ERROR(LINE,IN,IOUT,MSG='WHEN OPENING LINEFEED FILE, FOUND "BINARY" KEYWORD, HOWEVER BINARY FORMAT IS NOT SUPPORTED FOR LINEFEED. PLEASE REMOVE "BINARY" KEYWORD AND USE TEXT INPUT.')
       !CALL PARSE_WORD(LINE,LLOC,ISTART,ISTOP)
       !!
-      !IF(ISTOP-ISTART+1.EQ.8) THEN
+      !IF(ISTOP-ISTART+1 == 8) THEN
       !    EXT=LINE(ISTART:ISTOP)                                        !COULD CONTAIN EXTERNAL KEY WORD
       !    CALL UPCASE(EXT)
       !ELSE
       !    EXT=' '
       !END IF
       !!
-      !IF (EXT.EQ.'EXTERNAL')THEN     
+      !IF (EXT == 'EXTERNAL')THEN     
       !     CALL GET_INTEGER(LINE,LLOC,ISTART,ISTOP,IOUT,IN,INFEED,MSG='LINEFEED ERROR: FOUND KEYWORD "EXTERNAL" BUT FAILED TO LOAD THE UNIT NUMBER.') !EXTERNAL FILE, READ UNIT NUMBER
       !ELSE
       !     !
       !     OPEN(NEWUNIT=INFEED, FILE=LINE(ISTART:ISTOP), ACTION='READ', IOSTAT=IERR)
       !     !
-      !     IF(IERR.NE.Z) CALL FILE_IO_ERROR(IERR, FNAME=LINE(ISTART:ISTOP), LINE=LINE, INFILE=IN, OUTPUT=IOUT)
+      !     IF(IERR /= Z) CALL FILE_IO_ERROR(IERR, FNAME=LINE(ISTART:ISTOP), LINE=LINE, INFILE=IN, OUTPUT=IOUT)
       !END IF
       !!
       !REWIND(INFEED)
@@ -458,11 +455,11 @@ CONTAINS
   !
   WRITE(IOUT,'(/2A/)') TRIM(FEED%PAK),' LINEFEED LOADING MODEL CELLS THAT WILL BE FED STRESS PERIOD INFORMATION'
   !
-  IF(FEED%IPRT.NE.Z.AND.FEED%XYCOORD) WRITE(IOUT,'(2A//A)')               &
+  IF(FEED%IPRT /= Z.AND.FEED%XYCOORD) WRITE(IOUT,'(2A//A)')               &
        TRIM(FEED%PAK),' LINEFEED COORDINATES WILL BE TRANSLATED TO LAY, ROW, COL',       &
        '       X               Y             LAY         =>     LAY    ROW    COL'
   !
-  IF(FEED%IPRT.NE.Z.AND.FEED%XYZCOORD) WRITE(IOUT,'(2A//A)')               &
+  IF(FEED%IPRT /= Z.AND.FEED%XYZCOORD) WRITE(IOUT,'(2A//A)')               &
        TRIM(FEED%PAK),' LINEFEED COORDINATES WILL BE TRANSLATED TO LAY, ROW, COL',       &
        '       X               Y               Z         =>     LAY    ROW    COL'
   !
@@ -479,7 +476,7 @@ CONTAINS
       DO     !READ UNTIL FIRT NON_COMMENT
         READ(IN,'(A)',IOSTAT=IERR) SLINE
         !
-        IF(IERR.NE.Z) THEN
+        IF(IERR /= Z) THEN
           INQUIRE(IN,NAME=FNAM)
           LINE=TRIM(FEED%PAK)//' LINEFEED ERROR WHILE READING IN CELLS FROM LINEFEED FILE:'//NL//      &
                TRIM(FNAM)//NL//                                                                        &
@@ -491,7 +488,7 @@ CONTAINS
         END IF
         !
         SLINE = ADJUSTL(SLINE)
-        IF(SLINE(1:1).NE.'#') EXIT
+        IF(SLINE(1:1) /= '#') EXIT
         !
       END DO
       !
@@ -510,12 +507,12 @@ CONTAINS
     FEED%FD(I)%NDAT=NDAT
     FEED%TOTDAT=FEED%TOTDAT+NDAT
     !
-    IF (LDIM.EQ.Z) THEN
+    IF (LDIM == Z) THEN
         ALLOCATE(FEED%FD(I)%CHARID(NDAT))
         IF(PRESENT(NML)) ALLOCATE(FEED%FD(I)%CHARIDX(NDAT), SOURCE=-1)
     ELSEIF(LDIM>Z) THEN
         ALLOCATE(FEED%FD(I)%NUMIDX(LDIM,NDAT))
-    !ELSEIF(LDIM.EQ.-1) THEN
+    !ELSEIF(LDIM == -1) THEN
     !    ALLOCATE(FEED%FD(I)%WILD(NDAT), SOURCE=WILD)
     END IF  
     !
@@ -594,18 +591,18 @@ CONTAINS
               ! SEARCH FOR LAYER LOCATION
               IF (FEED%XYZCOORD) THEN
                  LAY=1
-                 DO WHILE ( ZZ.LE.BOTM(COL,ROW,LBOTM(LAY)) )
+                 DO WHILE ( ZZ <= BOTM(COL,ROW,LBOTM(LAY)) )
                    LAY=LAY+1
-                   IF(LAY.GT.NLAY) THEN
+                   IF(LAY > NLAY) THEN
                       ELINE=ELINE//'FEEDFILE '//TRIM(FNAM)//' SPECIFIED Z ELEVATION THAT IS BELOW THE BOTTOM OF MODEL WHEN PROCESSING LINE: '//TRIM(LINE)
                       ERROR = TRUE
                       CYCLE
                    END IF
                  END DO
                  !
-                 IF(FEED%IPRT.NE.Z) WRITE(IOUT,'(3G16.8,A,3I7)') X,Y,ZZ,' => ',LAY,ROW,COL   ! THIS IF IS INCLUDED IN IF (FEED%XYZCOORD)
+                 IF(FEED%IPRT /= Z) WRITE(IOUT,'(3G16.8,A,3I7)') X,Y,ZZ,' => ',LAY,ROW,COL   ! THIS IF IS INCLUDED IN IF (FEED%XYZCOORD)
                  !
-              ELSEIF(FEED%IPRT.NE.Z) THEN                                                    ! LAY ALREADY SPECIFIED, CHECK IF PRINT OUT IS REQUESTED
+              ELSEIF(FEED%IPRT /= Z) THEN                                                    ! LAY ALREADY SPECIFIED, CHECK IF PRINT OUT IS REQUESTED
                  WRITE(IOUT,'(2G16.8,I16,A,3I7)') X,Y,LAY,' => ',LAY,ROW,COL
               END IF                  
               !
@@ -677,7 +674,7 @@ CONTAINS
   INTEGER:: I, J, IERR, NACT, INFEED
   LOGICAL:: EOF
   !
-  IF(FEED%NFEED.LE.Z) RETURN
+  IF(FEED%NFEED <= Z) RETURN
   !
   WRITE(FEED%IOUT,*)                                       !CARRAGE RETURN WHEN USING LINE FEED
   !
@@ -696,9 +693,9 @@ CONTAINS
         ELSE
             READ(INFEED,*,IOSTAT=IERR) FEED%FD(I)%DAT
         END IF
-        IF(IERR.NE.Z) EXIT
+        IF(IERR /= Z) EXIT
         !
-        IF(FEED%FD(I)%FL%SCALE.NE.UNO) THEN
+        IF(FEED%FD(I)%FL%SCALE /= UNO) THEN
               DO CONCURRENT(J=ONE:FEED%FD(I)%NDAT, FEED%FD(I)%DAT(J) == FEED%FD(I)%DAT(J));  FEED%FD(I)%DAT(J) = FEED%FD(I)%DAT(J) * FEED%FD(I)%FL%SCALE
               END DO
         END IF
@@ -715,18 +712,18 @@ CONTAINS
         ELSE
             READ(INFEED,*,IOSTAT=IERR) FEED%FD(I)%IDAT
         END IF
-        IF(IERR.NE.Z) EXIT
+        IF(IERR /= Z) EXIT
         !
-        NACT = NACT + COUNT(FEED%FD(I)%IDAT .NE. Z)                      !IF ZERO THEN ASSUMED INACTIVE
+        NACT = NACT + COUNT(FEED%FD(I)%IDAT /= Z)                      !IF ZERO THEN ASSUMED INACTIVE
       END DO
   ELSEIF(.NOT. FEED%INT_DAT .AND. FEED%BINARY ) THEN  !DBL AND BIN
       DO I=1, FEED%NFEED
         INFEED=FEED%FD(I)%FL%IU
         !
         READ(INFEED,IOSTAT=IERR) FEED%FD(I)%DAT
-        IF(IERR.NE.Z) EXIT
+        IF(IERR /= Z) EXIT
         !
-        IF(FEED%FD(I)%FL%SCALE.NE.UNO) THEN
+        IF(FEED%FD(I)%FL%SCALE /= UNO) THEN
               DO CONCURRENT(J=ONE:FEED%FD(I)%NDAT, FEED%FD(I)%DAT(J) == FEED%FD(I)%DAT(J));  FEED%FD(I)%DAT = FEED%FD(I)%DAT * FEED%FD(I)%FL%SCALE
               END DO
         END IF
@@ -738,13 +735,13 @@ CONTAINS
         INFEED=FEED%FD(I)%FL%IU
         !
         READ(INFEED,IOSTAT=IERR) FEED%FD(I)%IDAT
-        IF(IERR.NE.Z) EXIT
+        IF(IERR /= Z) EXIT
         !
-        NACT = NACT + COUNT(FEED%FD(I)%IDAT .NE. Z)                      !IF ZERO THEN ASSUMED INACTIVE
+        NACT = NACT + COUNT(FEED%FD(I)%IDAT /= Z)                      !IF ZERO THEN ASSUMED INACTIVE
       END DO
   END IF
   !
-  IF(IERR.NE.Z) THEN
+  IF(IERR /= Z) THEN
      IF(FEED%INT_DAT) THEN
          NACT = SIZE(FEED%FD(I)%IDAT)
      ELSE
@@ -777,7 +774,7 @@ CONTAINS
   INTEGER:: ISTART
   CHARACTER(40)::  FMT1,FMT2
   !
-  IF (FEED%NFEED .LE. Z) RETURN
+  IF (FEED%NFEED <= Z) RETURN
   !
   IOUT = FEED%IOUT
   IF(FEED%IPRT==Z .AND. IPRT>Z) FEED%IPRT = 1
@@ -790,16 +787,16 @@ CONTAINS
   ISTART=NTOT+1
   !
   !Write a label for the list if the list will be printed.
-  IF(FEED%IPRT.EQ.1) THEN
+  IF(FEED%IPRT == 1) THEN
      WRITE(IOUT,'(A/)') TRIM(FEED%PAK)//' LINEFEED STRESS PERIOD INFORMATION'
      CALL ULSTLB(IOUT,LABEL,CAUX,NCAUX,NAUX)
   END IF
   !
   DO I=1, FEED%NFEED
-    IF(FEED%IPRT.EQ.1) WRITE(IOUT,'(A,I2)')'FEED NUMBER ',I
+    IF(FEED%IPRT == 1) WRITE(IOUT,'(A,I2)')'FEED NUMBER ',I
     !
     DO J=1, FEED%FD(I)%NDAT
-      IF( FEED%FD(I)%DAT(J) .NE. FEED%FD(I)%DAT(J) ) CYCLE          !SKIP PROCESSING NaN VALUES
+      IF( FEED%FD(I)%DAT(J) /= FEED%FD(I)%DAT(J) ) CYCLE          !SKIP PROCESSING NaN VALUES
       NTOT=NTOT+1
       IPROP=1
       PAK(NTOT)%LAY=FEED%FD(I)%NUMIDX(1,J)
@@ -818,13 +815,13 @@ CONTAINS
       !
       IF (NAUX > Z ) PAK(NTOT)%AUX = FEED%FD(I)%AUX(:,J)
       !
-      IF(FEED%IPRT.EQ.1)THEN
+      IF(FEED%IPRT == 1)THEN
         WRITE(FMT1,*)LDIM
         WRITE(FMT2,*)NAUX
         FMT1=ADJUSTL(FMT1);  FMT2=ADJUSTL(FMT2)
         FMT2='(1X,I6,I7,I7,I7,'//TRIM(FMT1)//'G16.8,'//TRIM(FMT2)//'I10)'
         FMT1='(1X,I6,I7,I7,I7,'//TRIM(FMT1)//'G16.8)'
-        IF(NAUX.GT.Z)THEN   
+        IF(NAUX > Z)THEN   
          WRITE(IOUT,FMT2) NTOT, PAK(NTOT)%LAY, PAK(NTOT)%ROW, PAK(NTOT)%COL, PAK(NTOT)%VAL, PAK(NTOT)%AUX(1:NAUX)
         ELSE
          WRITE(IOUT,FMT1) NTOT, PAK(NTOT)%LAY, PAK(NTOT)%ROW, PAK(NTOT)%COL, PAK(NTOT)%VAL
@@ -862,7 +859,7 @@ CONTAINS
   INTEGER:: I, J, K, IPROP, LDIM, NAUX, NCAUX, IOUT
   CHARACTER(40)::  FMT1,FMT2
   !
-  IF (FEED%NFEED .LE. Z) RETURN
+  IF (FEED%NFEED <= Z) RETURN
   !
   IOUT = FEED%IOUT
   IF(FEED%IPRT==Z .AND. IPRT>Z) FEED%IPRT = 1
@@ -873,16 +870,16 @@ CONTAINS
   NCAUX = SIZE(CAUX)
   !
   !Write a label for the list if the list will be printed.
-  IF(FEED%IPRT.EQ.1) THEN
+  IF(FEED%IPRT == 1) THEN
      WRITE(IOUT,'(A/)') TRIM(FEED%PAK)//' LINEFEED STRESS PERIOD INFORMATION'
      CALL ULSTLB(IOUT,LABEL,CAUX,NCAUX,NAUX)
   END IF
   !
   DO I=1, FEED%NFEED
-    IF(FEED%IPRT.EQ.1) WRITE(IOUT,'(A,I2)')'FEED NUMBER ',I
+    IF(FEED%IPRT == 1) WRITE(IOUT,'(A,I2)')'FEED NUMBER ',I
     !
     DO J=1, FEED%FD(I)%NDAT
-      IF( FEED%FD(I)%DAT(J) .NE. FEED%FD(I)%DAT(J) ) CYCLE          !SKIP PROCESSING NaN VALUES
+      IF( FEED%FD(I)%DAT(J) /= FEED%FD(I)%DAT(J) ) CYCLE          !SKIP PROCESSING NaN VALUES
       NTOT=NTOT+1
       IPROP=1
       PAK(NTOT)%LAY=FEED%FD(I)%NUMIDX(1,J)
@@ -899,13 +896,13 @@ CONTAINS
       !
       IF (NAUX > Z ) PAK(NTOT)%AUX = FEED%FD(I)%AUX(:,J)
       !
-      IF(FEED%IPRT.EQ.1)THEN
+      IF(FEED%IPRT == 1)THEN
         WRITE(FMT1,*)LDIM
         WRITE(FMT2,*)NAUX
         FMT1=ADJUSTL(FMT1);  FMT2=ADJUSTL(FMT2)
    FMT2='(1X,I6,I7,I7,I7,'//TRIM(FMT1)//'G16.8,'//TRIM(FMT2)//'I10)'
         FMT1='(1X,I6,I7,I7,I7,'//TRIM(FMT1)//'G16.8)'
-        IF(NAUX.GT.Z)THEN   
+        IF(NAUX > Z)THEN   
          WRITE(IOUT,FMT2) NTOT, PAK(NTOT)%LAY, PAK(NTOT)%ROW, PAK(NTOT)%COL, PAK(NTOT)%VAL, PAK(NTOT)%AUX(1:NAUX)
         ELSE
          WRITE(IOUT,FMT1) NTOT, PAK(NTOT)%LAY, PAK(NTOT)%ROW, PAK(NTOT)%COL, PAK(NTOT)%VAL
@@ -933,7 +930,7 @@ CONTAINS
   INTEGER:: I, J, MNWID, QLOC, IACT, IOUT
   INTEGER:: PUMPCAP, firstnode, lastnode, QLOCNOD, NNODES, NODNUM
   !
-  IF (FEED%NFEED .LE. Z) RETURN
+  IF (FEED%NFEED <= Z) RETURN
   !
   QLOC=5     !LOCATION OF Qdes
   IACT=1     !LOCATION OF FLAG FOR WELL IN USE
@@ -947,13 +944,13 @@ CONTAINS
   WRITE(IOUT,*)                                       !CARRAGE RETURN WHEN USING LINE FEED
   !
   !Write a label for the list if the list will be printed.
-  IF(FEED%IPRT.EQ.1) THEN
+  IF(FEED%IPRT == 1) THEN
      WRITE(IOUT,'(A/)') TRIM(FEED%PAK)//' LINEFEED STRESS PERIOD INFORMATION'
      !CALL ULSTLB(IOUT,LABEL,CAUX,NCAUX,NAUX)
   END IF
   !
   DO I=1, FEED%NFEED
-    IF(FEED%IPRT.EQ.1) WRITE(IOUT,'(A,I2)')'FEED NUMBER ',I
+    IF(FEED%IPRT == 1) WRITE(IOUT,'(A,I2)')'FEED NUMBER ',I
     !
     DO J=1, FEED%FD(I)%NDAT
       !
@@ -979,12 +976,12 @@ CONTAINS
           !
           PUMPCAP=INT( MNW2(22,MNWID) )
           !
-          if(PUMPCAP.GT.Z) then
-           if(Qdes.GT.DZ) then                                        !seb (Qdes.GE.0.d0) CHANGED TO (Qdes.GT.0.d0)
+          if(PUMPCAP > Z) then
+           if(Qdes > DZ) then                                        ! (Qdes.GE.0.d0) CHANGED TO (Qdes > 0.d0)
                 MNW2(25,MNWID)=DZ                                     !Initialize CapFlag2
                 MNW2(27,MNWID)=DZ
            else
-             IF(Qdes.EQ.0.0D0)THEN                                        !seb ALLOW HOLDING OF CAPMULT FOR Qdes=0 BUT DO NOT ENABLE CAPACITY CONTSTRAINTS TO FACILITATE LINK TO FMP
+             IF(Qdes == DZ)THEN                                       ! ALLOW HOLDING OF CAPMULT FOR Qdes=0 BUT DO NOT ENABLE CAPACITY CONTSTRAINTS TO FACILITATE LINK TO FMP
                 MNW2(25,MNWID)=DZ
                 MNW2(27,MNWID)=DZ                                     !Initialize CapFlag2
              ELSE
@@ -994,13 +991,13 @@ CONTAINS
              MNW2(24,MNWID)=UNO  !CapMult
            end if
           end if
-          IF(FEED%IPRT.EQ.1)THEN
+          IF(FEED%IPRT == 1)THEN
             !WRITE(FMT1,*)LDIM
             !WRITE(FMT2,*)NAUX
             !FMT1=ADJUSTL(FMT1);  FMT2=ADJUSTL(FMT2)
             !FMT2='(1X,I6,I7,I7,I7,'//TRIM(FMT1)//'G16.8,'//TRIM(FMT2)//'I10)'
             !FMT1='(1X,I6,I7,I7,I7,'//TRIM(FMT1)//'G16.8)'
-            !IF(NAUX.GT.0)THEN   
+            !IF(NAUX > 0)THEN   
             ! WRITE(IOUT,FMT2) NTOT, PAK(NTOT)%LAY, PAK(NTOT)%ROW, PAK(NTOT)%COL, PAK(NTOT)%VAL, PAK(NTOT)%AUX(1:NAUX)
             !ELSE
             ! WRITE(IOUT,FMT1) NTOT, PAK(NTOT)%LAY, PAK(NTOT)%ROW, PAK(NTOT)%COL, PAK(NTOT)%VAL
@@ -1026,7 +1023,7 @@ CONTAINS
   INTEGER:: I, J, IOUT, ISEG, NSEG
   CHARACTER(16),DIMENSION(1):: CAUX
   !
-  IF (FEED%NFEED .LE. Z) RETURN
+  IF (FEED%NFEED <= Z) RETURN
   !
   NSEG = SIZE(PAK, 2) + 1  !Expects passed array to be correct dimension; +1 isfor < rather than <= with checks
   !
@@ -1034,7 +1031,7 @@ CONTAINS
   WRITE(IOUT,*)                                       !CARRAGE RETURN WHEN USING LINE FEED
   !
   !Write a label for the list if the list will be printed.
-  IF(FEED%IPRT.EQ.1) THEN
+  IF(FEED%IPRT == 1) THEN
      WRITE(IOUT,'(A/)') TRIM(FEED%PAK)//' LINEFEED STRESS PERIOD INFORMATION'
      CALL ULSTLB(IOUT,LABEL,CAUX,1,Z)
   ELSE
@@ -1043,7 +1040,7 @@ CONTAINS
   !
   DO I=1, FEED%NFEED
     DO J=1, FEED%FD(I)%NDAT
-      IF( FEED%FD(I)%DAT(J) .NE. FEED%FD(I)%DAT(J) ) FEED%FD(I)%DAT(J)=0.0D0          !NaN VALUES ARE SET TO ZERO
+      IF( FEED%FD(I)%DAT(J) /= FEED%FD(I)%DAT(J) ) FEED%FD(I)%DAT(J)=0.0D0          !NaN VALUES ARE SET TO ZERO
       !
       ISEG = FEED%FD(I)%NUMIDX(1,J)
       IF(0 < ISEG .AND. ISEG < NSEG) PAK(IPVL,ISEG) = 0.0
@@ -1057,7 +1054,7 @@ CONTAINS
     END DO
   END DO
   !
-  IF(FEED%IPRT.EQ.1) THEN
+  IF(FEED%IPRT == 1) THEN
      DO I=1, FEED%NFEED
        WRITE(IOUT,'(A,I2)')'FEED NUMBER ',I
        DO J=1, FEED%FD(I)%NDAT
@@ -1074,7 +1071,7 @@ CONTAINS
   !
  END SUBROUTINE
   !
- PURE SUBROUTINE FINAL_DEALLOCATE_LINEFEED(FEED)
+ SUBROUTINE FINAL_DEALLOCATE_LINEFEED(FEED)
   TYPE(LINE_FEED), INTENT(INOUT):: FEED
   !
   INTEGER:: I, LDIM
@@ -1087,7 +1084,7 @@ CONTAINS
   AUX  = SIZE(FEED%FD(1)%AUX, 1) > Z        !AT A MINIMUM THERE IS ONE FEED. THIS RETURNS TRUE IF THE FIRST DIMENSION OF AUX IS GREATER THAN ZERO (ie ITS ALLOCATED)
   !
   DO I=1, FEED%NFEED
-    IF (LDIM.EQ.Z) THEN
+    IF (LDIM == Z) THEN
         DEALLOCATE(FEED%FD(I)%CHARID)
         IF (ALLOCATED(FEED%FD(I)%CHARIDX))  DEALLOCATE(FEED%FD(I)%CHARIDX)
     ELSE

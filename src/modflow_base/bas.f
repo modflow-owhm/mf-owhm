@@ -2622,7 +2622,7 @@ C4------PRINT TOTAL BUDGET IF REQUESTED
      +    'FORMAT "'//PRINT_WDEP(n)%FMT//'"     '
           !
           IF(HAS_STARTDATE) THEN
-              WRITE(PRINT_WTAB(n)%IU,'(A,4x)',ADVANCE='NO')
+              WRITE(PRINT_WDEP(n)%IU,'(A,4x)',ADVANCE='NO')
      +                  DATE_SP(KPER)%TS(KSTP-1)%STR_MONTHYEAR()
           END IF
           WRITE(PRINT_WDEP(n)%IU,"(A)") "WATER_DEPTH"

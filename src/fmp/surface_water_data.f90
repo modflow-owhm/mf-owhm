@@ -676,7 +676,7 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
                 SWF%ISRD_TFR%WBS(K)  = Z
                 SWF%ISRD_TFR%SR(:,K) = Z
                 SWF%ISRD_TFR%WT(K)   = DZ
-                CALL WRN%ADD( NUM2STR(F,-5)//BLNK//NUM2STR(I,-5)//'   '//NUM2STR(J,-5)//'  Semi-Routed DELIVERY Segment is less than 0, it is reset to 0'//NL )
+                CALL WRN%ADD( NUM2STR(F,-5)//BLNK//NUM2STR(I,-5)//'   '//NUM2STR(J,-5)//'  Semi-Routed DELIVERY Segment is less than 1, WBS is set to 0 to disable this delivery point'//NL )
             END IF
         END DO
         !
@@ -688,7 +688,7 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
                 SWF%ISRD_TFR%WBS(K)  = Z
                 SWF%ISRD_TFR%SR(:,K) = Z
                 SWF%ISRD_TFR%WT(K)   = DZ
-                CALL WRN%ADD( NUM2STR(F,-5)//BLNK//NUM2STR(I,-5)//'   '//NUM2STR(J,-5)//'  Semi-Routed DELIVERY Reach is less than 0, reset to 0'//NL )
+                CALL WRN%ADD( NUM2STR(F,-5)//BLNK//NUM2STR(I,-5)//'   '//NUM2STR(J,-5)//'  Semi-Routed DELIVERY Reach is less than 0, WBS is set to 0 to disable this delivery point'//NL )
             END IF
         END DO
         !
@@ -700,7 +700,7 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
                 SWF%ISRD_TFR%WBS(K)  = Z
                 SWF%ISRD_TFR%SR(:,K) = Z
                 SWF%ISRD_TFR%WT(K)   = DZ
-                CALL WRN%ADD( NUM2STR(F,-5)//BLNK//NUM2STR(I,-5)//'   '//NUM2STR(J,-5)//'  Semi-Routed DELIVERY Segment is 0, but delivery Reach is greater than 0, the delivery Reach is reset to 0'//NL )
+                CALL WRN%ADD( NUM2STR(F,-5)//BLNK//NUM2STR(I,-5)//'   '//NUM2STR(J,-5)//'  Semi-Routed DELIVERY Segment is 0, but delivery Reach is greater than 0, WBS is set to 0 to disable this delivery point'//NL )
             END IF
         END DO
         !

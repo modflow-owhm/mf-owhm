@@ -1414,14 +1414,14 @@ C--CAUCHY LQ IN- AND OUT-FLOW                                           !TR: 201
 !                ELSEIF ( X.GT.DZ .AND. Y.LT.NEARZERO ) THEN
 !                  LENGTH = X/DOS
 !                ELSE
-!                  LENGTH = DSQRT(X**DOS+Y**DOS)/DOS
+!                  LENGTH = DSQRT(X**2+Y**2)/DOS
 !                ENDIF
 !C
 !C--BARC**FOR CASES OF Z>0
 !              ELSEIF ( X.LT.NEARZERO .AND. Y.GT.DZ ) THEN
-!                LENGTH = DSQRT(Y**DOS+Z**DOS)/DOS
+!                LENGTH = DSQRT(Y**2+Z**2)/DOS
 !              ELSEIF ( X.GT.DZ .AND. Y.LT.NEARZERO ) THEN
-!                LENGTH = DSQRT(X**DOS+Z**DOS)/DOS
+!                LENGTH = DSQRT(X**2+Z**2)/DOS
 !              ELSE
 !                LENGTH = Z
 !              ENDIF
@@ -1431,21 +1431,21 @@ C--CAUCHY LQ IN- AND OUT-FLOW                                           !TR: 201
 !              LENGTH = LENGTH * TORTUOS(ITEST)                          !TR: 2012 06 08 COMPUTE LENGTH
 !              WETTDNEW = B_MAT(I) - TUBEBOT1
 !              DKNOT = CON_DATA(ITEST, 2)
-!              THETA = DOS*ASIN(DOS*DSQRT((DKNOT/DOS)**DOS               
-!     +                -(WETTDNEW-DKNOT/DOS)**DOS)/DKNOT)
+!              THETA = DOS*ASIN(DOS*DSQRT((DKNOT/DOS)**2               
+!     +                -(WETTDNEW-DKNOT/DOS)**2)/DKNOT)
 !              IF ( B_MAT(I).GE.GEOHIGHT(I) ) THETA = TWOPI - THETA     !TR: 2012 06 08 REPLACED B BY B_MAT
 !              IF (WETTDNEW.GE.CON_DATA(ITEST,2)) THETA = TWOPI         !TR: 2012 06 08 CONSIDER FILLED PIPE / PREVENT 'NAN' = FULL CASE
 !              IF (WETTDNEW.LE.DZ) THETA = DZ                        !TR: 2012 06 11 CONSIDER DRY PIPE / PREVENT 'NAN' = DRY CASE
-!              VNEW = ONE8TH*(THETA-SIN(THETA))*DKNOT**DOS*LENGTH        !TR: 2012 06 08 REPLACED LTOURT BY LENGTH
+!              VNEW = ONE8TH*(THETA-SIN(THETA))*DKNOT**2*LENGTH        !TR: 2012 06 08 REPLACED LTOURT BY LENGTH
 !C
 !C--BARC**LAST ITERATION.
 !              WETTDOLD = B_MAT_O(I) - TUBEBOT1
-!              THETA = DOS*ASIN(DOS*DSQRT((DKNOT/DOS)**DOS               
-!     +                -(WETTDOLD-DKNOT/DOS)**DOS)/DKNOT)
+!              THETA = DOS*ASIN(DOS*DSQRT((DKNOT/DOS)**2               
+!     +                -(WETTDOLD-DKNOT/DOS)**2)/DKNOT)
 !              IF ( B_MAT_O(I).GE.GEOHIGHT(I) ) THETA = TWOPI - THETA
 !              IF (WETTDOLD.GE.CON_DATA(ITEST,2)) THETA = TWOPI         !TR: 2012 06 08 CONSIDER FILLED PIPE / PREVENT 'NAN'
 !              IF (WETTDOLD.LE.DZ) THETA = DZ                        !TR: 2012 06 11 CONSIDER DRY PIPE / PREVENT 'NAN' = DRY CASE              
-!              VOLD = ONE8TH*(THETA-SIN(THETA))*DKNOT**DOS*LENGTH        !TR: 2012 06 08 REPLACED LTOURT BY LENGTH
+!              VOLD = ONE8TH*(THETA-SIN(THETA))*DKNOT**2*LENGTH        !TR: 2012 06 08 REPLACED LTOURT BY LENGTH
 !              VCHANGE = VNEW - VOLD
 !              TS_BUD_STORAGE = TS_BUD_STORAGE + VCHANGE / DELT          !TR: 2012 06 08 DIVIDE VCHANGE BY DELT TO GET FLOW PER TIME
 !C

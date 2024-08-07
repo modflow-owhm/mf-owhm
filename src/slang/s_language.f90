@@ -195,7 +195,7 @@ MODULE EQUATION_VARIABLE_LIST
     !
   END FUNCTION
   !
-  PURE ELEMENTAL SUBROUTINE DEALLOCATE_VARIABLE_LIST(VAR)
+  IMPURE ELEMENTAL SUBROUTINE DEALLOCATE_VARIABLE_LIST(VAR)
     CLASS(VARIABLE_LIST), INTENT(INOUT):: VAR
     !
     IF (ALLOCATED(VAR%NAM))  DEALLOCATE(VAR%NAM)
@@ -225,6 +225,8 @@ MODULE EQUATION_VARIABLE_LIST
     CALL DEALLOCATE_VARIABLE_LIST(VAR)
     !
     IF(PRESENT(IOUT)) VAR%IOUT = IOUT
+    !
+    IF(CHAR_LEN < 4) CALL STOP_ERROR( OUTPUT=VAR%IOUT, MSG= 'VARIABLE LIST ERROR: (SUBROUTINE INIT_VARIABLES CODE ERROR) CHAR_LEN < 4. VARIABLE NAMES MUST BE AT LEAST 4 CHARACTERS')
     !
     IF(NVAR > Z) THEN
        VAR%N = NVAR
@@ -1224,6 +1226,8 @@ MODULE S_LANGUAGE_INTERFACE!, ONLY: S_INTERPRETER, S_VARIABLE_LIST
       PROCEDURE, PASS(VMN):: INIT     => PARSE_VARIABLE_NAME!(NAM,POS)
       PROCEDURE, PASS(VMN):: GET      => GET_VARIABLE_NAME_MEANING  !(LVL,PROP,ID)
       PROCEDURE, PASS(VMN):: DESTROY  => DEALLOCATE_VARIABLE_NAME_MEANING!()
+      GENERIC             :: OPERATOR(==) => EQUALITY_VARIABLE_NAME_MEANING
+      PROCEDURE,   PRIVATE:: EQUALITY_VARIABLE_NAME_MEANING
       FINAL:: DEALLOCATE_VARIABLE_NAME_MEANING_FINAL
   END TYPE
   !
@@ -1360,12 +1364,21 @@ MODULE S_LANGUAGE_INTERFACE!, ONLY: S_INTERPRETER, S_VARIABLE_LIST
     DO I = ONE, RET%N
                      CALL LST%ADD_UNIQUE(RET%NAM(I), K)
                      !
-                     IF(K==Z) VAR%NRET = VAR%NRET + ONE
+                     IF(K==Z) THEN
+                         VAR%NRET = VAR%NRET + ONE
+                     ELSE
+                        RET%NAM(I) = BLNK  ! Flag to skip name
+                     END IF
+                     
     END DO
     DO I = ONE, SYS%N
                      CALL LST%ADD_UNIQUE(SYS%NAM(I), K)
                      !
-                     IF(K==Z) VAR%NSYS = VAR%NSYS + ONE
+                     IF(K==Z) THEN
+                         VAR%NSYS = VAR%NSYS + ONE
+                     ELSE
+                        SYS%NAM(I) = BLNK  ! Flag to skip name
+                     END IF
     END DO
     !
     VAR%POS_VAR = LST%LEN() + ONE
@@ -1379,10 +1392,13 @@ MODULE S_LANGUAGE_INTERFACE!, ONLY: S_INTERPRETER, S_VARIABLE_LIST
                      ELSE
                          !
                          IF(I<SVAR%N) THEN
-                             IF( SVAR%NAM(I) == SVAR%NAM(I+ONE)) CALL STOP_ERROR(INFILE=IN,OUTPUT=IOUT,MSG='S LANGAUGE VARIABLES VARIABLE ERROR: A VARIABLE NAME (VARNAM) WITH AN ARRAY INDEX (VARNAM[]) IS INDENTICAL TO A VARIABLE NAME IN EITHER THE SYSTEM PROPERTY (SYSNAM) OR RETURN (RETNAM) NAMES.'//NL//'THE VARIABLE FOUND THAT IS CAUSING PROBLEMS IS "'//SVAR%NAM(I)//'"'//BLN//'PLEASE EITHER REMOVE THE ARRAY DIMENSION OR CHANGE THE VARIABLE NAME (VARNAM[]).') 
+                             IF( SVAR%NAM(I) == SVAR%NAM(I+ONE)) CALL STOP_ERROR(INFILE=IN,OUTPUT=IOUT, &
+                                 MSG='S LANGAUGE VARIABLES VARIABLE ERROR: A VARIABLE NAME (VARNAM) WITH AN ARRAY INDEX (VARNAM[]) IS INDENTICAL TO A VARIABLE NAME IN EITHER THE SYSTEM PROPERTY (SYSNAM) OR RETURN (RETNAM) NAMES.'//NL// &
+                                 'THE VARIABLE FOUND THAT IS CAUSING PROBLEMS IS "'//SVAR%NAM(I)//'"'//BLN//&
+                                 'PLEASE EITHER REMOVE THE ARRAY DIMENSION OR CHANGE THE VARIABLE NAME (VARNAM[]).') 
                          END IF
                          !
-                         SVAR%NAM(I) = BLNK
+                         SVAR%NAM(I) = BLNK  ! Flag to skip name
                          !
                      END IF
     END DO
@@ -1476,29 +1492,37 @@ MODULE S_LANGUAGE_INTERFACE!, ONLY: S_INTERPRETER, S_VARIABLE_LIST
 !    ALLOCATE(VAR%REQUIRED(VAR%NRET), SOURCE = FALSE)
 !    ALLOCATE(VAR%AT_LEAST(VAR%NRET), SOURCE = FALSE)
     !
+    K = Z
     ALLOCATE(VAR%PROP_PUL(VAR%NSYS))
-    DO I=ONE, VAR%NSYS
-       DO J=ONE, N 
-                IF( SYS%NAM(I) == VAR%NAM(J) )THEN
-                                                  VAR%VAL(J)  = SYS%VAL(I)
-                                                  !
-                                                  CALL VAR%PROP_PUL(I)%INIT( SYS%NAM(I), J )
-                                                  EXIT
-                END IF
-       END DO
+    DO I=ONE, SIZE(SYS%NAM)
+       IF(SYS%NAM(I) /= BLNK) THEN
+          DO J=ONE, N 
+                   IF( SYS%NAM(I) == VAR%NAM(J) )THEN
+                                                     VAR%VAL(J)  = SYS%VAL(I)
+                                                     !
+                                                     K = K + 1
+                                                     CALL VAR%PROP_PUL(K)%INIT( SYS%NAM(I), J )
+                                                     EXIT
+                   END IF
+          END DO
+       END IF
     END DO
     !
     ALLOCATE(VAR%PROP_RET(VAR%NRET))
     !
-    DO I=ONE, VAR%NRET
-       DO J=ONE, N 
-                IF( RET%NAM(I) == VAR%NAM(J) )THEN
-                                                  VAR%VAL(J)  = RET%VAL(I)
-                                                  !
-                                                  CALL VAR%PROP_RET(I)%INIT( RET%NAM(I), J )
-                                                  EXIT
-                END IF
-       END DO
+    K = Z
+    DO I=ONE, SIZE(RET%NAM)
+       IF(RET%NAM(I) /= BLNK) THEN
+          DO J=ONE, N 
+                   IF( RET%NAM(I) == VAR%NAM(J) )THEN
+                                                     VAR%VAL(J)  = RET%VAL(I)
+                                                     !
+                                                     K = K + 1
+                                                     CALL VAR%PROP_RET(K)%INIT( RET%NAM(I), J )
+                                                     EXIT
+                   END IF
+          END DO
+       END IF
     END DO
     !
   END SUBROUTINE
@@ -3087,6 +3111,20 @@ MODULE S_LANGUAGE_INTERFACE!, ONLY: S_INTERPRETER, S_VARIABLE_LIST
     END IF
     !
   END SUBROUTINE
+  !
+  ELEMENTAL PURE FUNCTION EQUALITY_VARIABLE_NAME_MEANING(VMN1, VMN2) RESULT(EQ)
+    CLASS(VARIABLE_NAME_MEANING), INTENT(IN):: VMN1, VMN2
+    LOGICAL:: EQ
+    INTEGER:: I
+    EQ = FALSE
+    IF(VMN1%N == VMN2%N) THEN
+       IF(ANY(VMN1%ID /= VMN2%ID)) RETURN
+        DO I=ONE, VMN1%N
+            IF(VMN1%PROP(I) /= VMN2%PROP(I)) RETURN
+        END DO
+        EQ = TRUE
+    END IF
+  END FUNCTION
   !
   !SUBROUTINE PARSE_SINGLE_VARIABLE_NAME(NAM, LST)
   !  CHARACTER(*), INTENT(IN):: NAM
