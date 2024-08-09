@@ -593,7 +593,7 @@ span {
    </span><span class="sc6">NSFR_DELIV</span><span class="sc24">  </span><span class="sc7">INT</span><span class="sc24">
    </span><span class="sc6">NSFR_RETURN</span><span class="sc24"> </span><span class="sc7">INT</span><span class="sc24">
    </span><span class="sc2">#
-</span><span class="sc24">   </span><span class="sc2"># SURFACE_ELEVATION is a 2D FLOAT ARRAY of land surface elevations
+</span><span class="sc24">   </span><span class="sc2"># SURFACE_ELEVATION is a 2D FLOAT ARRAY of land surface elevations (L)
 </span><span class="sc24">   </span><span class="sc2">#    --Note you do not have to specify this, if it is specified DIS package keyword as "SURFACE_ELEVATION ULOAD". Where the keyword "SURFACE_ELEVATION" IS ON THE LINE BEFORE SPECIFYING TOP.
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc6">SURFACE_ELEVATION</span><span class="sc24"> </span><span class="sc7">ULOAD</span><span class="sc24">
@@ -767,7 +767,7 @@ span {
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc6">EFFICIENCY</span><span class="sc24">    </span><span class="sc7">LAI</span><span class="sc12">[</span><span class="sc0">S</span><span class="sc12">,</span><span class="sc0">T</span><span class="sc12">,</span><span class="sc0">A</span><span class="sc12">,</span><span class="sc0">L-NIRRIGATE</span><span class="sc12">]</span><span class="sc24">
    </span><span class="sc2">#
-</span><span class="sc24">   </span><span class="sc2"># When water supply does not meet demand the EFFICIENTY (OFE)
+</span><span class="sc24">   </span><span class="sc2"># When water supply does not meet demand the EFFICIENCY (OFE)
 </span><span class="sc24">   </span><span class="sc2"># can improve to 1.0 or remain the same.
 </span><span class="sc24">   </span><span class="sc2"># EFFICIENCY_IMPROVEMENT is a 0 or 1 flag to indicate if efficiency improvement is allowed.
 </span><span class="sc24">   </span><span class="sc2">#   0 - Efficiency remains the same, crop transpiration reduced due to supply shortfall
@@ -851,12 +851,14 @@ span {
 </span><span class="sc24">   </span><span class="sc2">#          --The crop must have an IRRIGATION flag &gt;0 or the added demand cannot be applied.
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2">#   This only applies to irrigated crops and the additional
-</span><span class="sc24">   </span><span class="sc2">#   demanded water only becomes surface runoff or deep percolation
+</span><span class="sc24">   </span><span class="sc2">#   demanded water only becomes surface runoff or deep percolation.
 </span><span class="sc24">   </span><span class="sc2">#
-</span><span class="sc24">   </span><span class="sc2">#   In can be specified as a length per time (LENGTH or FLUX) or volume per time (RATE). --Both maybe used at once.
+</span><span class="sc24">   </span><span class="sc2">#   The second keyword indicates the units of the input, where
+</span><span class="sc24">   </span><span class="sc2">#      LENGTH or FLUX indicates input is length per time (L/T)
+</span><span class="sc24">   </span><span class="sc2">#      RATE           indicates input is volume per time (L^3/T)
 </span><span class="sc24">   </span><span class="sc2">#   The added demand is summed with other crop related added demands (e.g. CROP Block ADDED_DEMAND)
 </span><span class="sc24">   </span><span class="sc2">#
-</span><span class="sc24">   </span><span class="sc2">#   You may specify both FLUX and RATE versions
+</span><span class="sc24">   </span><span class="sc2">#   You may specify both ADDED_CROP_DEMAND FLUX and ADDED_CROP_DEMAND RATE at the same time (but on different lines).
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc6">ADDED_CROP_DEMAND</span><span class="sc24"> </span><span class="sc7">FLUX</span><span class="sc24">  </span><span class="sc7">LAI</span><span class="sc12">[</span><span class="sc0">S</span><span class="sc12">,</span><span class="sc0">T</span><span class="sc12">,</span><span class="sc0">L-NCROP</span><span class="sc12">]</span><span class="sc24">
    </span><span class="sc2">#
@@ -875,7 +877,7 @@ span {
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># ------------------------------------------------------------------------------------------------------------------
 </span><span class="sc24">   </span><span class="sc2">#
-</span><span class="sc24">   </span><span class="sc2"># Specify soil capillary fringe depth. If specified with LIST,
+</span><span class="sc24">   </span><span class="sc2"># Specify soil capillary fringe depth (L). If specified with LIST,
 </span><span class="sc24">   </span><span class="sc2">#         then record ID is the location in SOIL_ID that the capillary fringe is applied too.
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2">#   If specified as ARRAY, then the (ROW,COL) location defines the models capillary fringe and SOIL_ID is not used.
@@ -985,7 +987,7 @@ span {
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># Optional keywords that define how Bare Soil Potential Evaporation is calculated
 </span><span class="sc24">   </span><span class="sc2">#
-</span><span class="sc24">   </span><span class="sc2"># Potential evaporation rate of groundwater under Fallow and Bare Soil
+</span><span class="sc24">   </span><span class="sc2"># Potential evaporation rate of groundwater under Fallow and Bare Soil (L/T)
 </span><span class="sc24">   </span><span class="sc2">#   ***If not specified then REFERENCE_ET is used in its place. If REFERENCE_ET is not specified then set to 0.0
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc6">POTENTIAL_EVAPORATION_BARE</span><span class="sc24">  </span><span class="sc7">LAI</span><span class="sc12">[</span><span class="sc0">S</span><span class="sc12">,</span><span class="sc0">T</span><span class="sc12">,</span><span class="sc0">A</span><span class="sc12">]</span><span class="sc24">
@@ -1057,7 +1059,7 @@ span {
 </span><span class="sc24">   </span><span class="sc2">#         = 2 indicates that unused delivered water is evenly injected to a WBS associated supply wells
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2">#
-</span><span class="sc24">   </span><span class="sc2"># It maybe specified as VOLUME of water per stress period.
+</span><span class="sc24">   </span><span class="sc2"># It may be specified as VOLUME of water per stress period.
 </span><span class="sc24">   </span><span class="sc2"># The keywords RATE and VOLUME are optional and if not specified, then VOLUME is the default.
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># Or as a RATE of water available in model units L^3/T
@@ -1101,7 +1103,7 @@ span {
 </span><span class="sc24">   </span><span class="sc2">#         This is how you can specify less delivery points then NSFR_DELIV
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2">#   FRAC is optional and if specified indicates an initial fraction
-</span><span class="sc24">   </span><span class="sc2">#     of the irrigation demand that is suppled by the SRD.
+</span><span class="sc24">   </span><span class="sc2">#     of the irrigation demand that is supplied by the SRD.
 </span><span class="sc24">   </span><span class="sc2">#     If the SRD can not supply that amount of water, then the
 </span><span class="sc24">   </span><span class="sc2">#     deficit demand is shifted to other defined SRD's.
 </span><span class="sc24">   </span><span class="sc2">#
@@ -1546,8 +1548,8 @@ span {
    </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># ------------------------------------------------------------------------------------------------------------------
 </span><span class="sc24">   </span><span class="sc2">#
-</span><span class="sc24">   </span><span class="sc2"># CROP_COEFFICIENT (Kc) is multiplied by the ETref to get CU -- input requires that REFERENCE_ET (ETref) to be specified
-</span><span class="sc24">   </span><span class="sc2"># CONSUMPTIVE_USE  (CF) specifies directly the CU
+</span><span class="sc24">   </span><span class="sc2"># CROP_COEFFICIENT (Kc; L/T) is multiplied by the ETref to get CU -- input requires that REFERENCE_ET (ETref) to be specified
+</span><span class="sc24">   </span><span class="sc2"># CONSUMPTIVE_USE  (CF; L/T) specifies directly the CU
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># Potential Consumptive Use CU = CF + Kc*ETref
 </span><span class="sc24">   </span><span class="sc2">#    If not specified then set to zero.
@@ -1578,8 +1580,8 @@ span {
    </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># ------------------------------------------------------------------------------------------------------------------
 </span><span class="sc24">   </span><span class="sc2">#
-</span><span class="sc24">   </span><span class="sc2"># Crop root depth below land surface.
-</span><span class="sc24">   </span><span class="sc2">#   Must be &gt;0.0; NOT required or maybe zero if GROUNDWATER_ROOT_INTERACTION = 0 or 1
+</span><span class="sc24">   </span><span class="sc2"># Crop root depth below land surface (L).
+</span><span class="sc24">   </span><span class="sc2">#   Must be &gt;0.0; NOT required or may be zero if GROUNDWATER_ROOT_INTERACTION = 0 or 1
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc6">ROOT_DEPTH</span><span class="sc24">       </span><span class="sc7">LAI</span><span class="sc12">[</span><span class="sc0">S</span><span class="sc12">,</span><span class="sc0">T</span><span class="sc12">,</span><span class="sc0">A</span><span class="sc12">,</span><span class="sc0">L</span><span class="sc12">]</span><span class="sc24">
    </span><span class="sc2">#
@@ -1691,7 +1693,7 @@ span {
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># If CONCEPT TWO, linear uptake, linear anoxia model is used, then
 </span><span class="sc24">   </span><span class="sc2"># the ponding depth is a height of water above the land surface that the crop
-</span><span class="sc24">   </span><span class="sc2"># can tolerate.
+</span><span class="sc24">   </span><span class="sc2"># can tolerate (L).
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2">#  CONCEPT TWO occurs when either ROOT_PRESSURE is not specified
 </span><span class="sc24">   </span><span class="sc2">#            or for crops that have all four ROOT_PRESSUREs set to 0
@@ -1706,9 +1708,12 @@ span {
 </span><span class="sc24">   </span><span class="sc2"># demanded water only becomes surface runoff or deep percolation
 </span><span class="sc24">   </span><span class="sc2"># based on the fraction specified in the WBS Block "ADDED_DEMAND_RUNOFF_SPLIT"
 </span><span class="sc24">   </span><span class="sc2">#
-</span><span class="sc24">   </span><span class="sc2"># It may only be specified as a Length per Time (LENGTH or FLUX) or Volume per Time (RATE).
+</span><span class="sc24">   </span><span class="sc2"># The second keyword indicates the units of the input, where
+</span><span class="sc24">   </span><span class="sc2">#    LENGTH or FLUX indicates input is length per time (L/T)
+</span><span class="sc24">   </span><span class="sc2">#    RATE           indicates input is volume per time (L^3/T)
 </span><span class="sc24">   </span><span class="sc2">#
-</span><span class="sc24">   </span><span class="sc2"># The added demand is summed with other added demands (e.g. WBS Block ADDED_CROP_DEMAND)
+</span><span class="sc24">   </span><span class="sc2"># The LAND_USE ADDED_DEMAND may only be specified once and is 
+</span><span class="sc24">   </span><span class="sc2">#    added demand is summed with other added demands (e.g. WBS Block ADDED_CROP_DEMAND)
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc6">ADDED_DEMAND</span><span class="sc24">  </span><span class="sc12">{</span><span class="sc7">FLUX</span><span class="sc12">,</span><span class="sc24"> </span><span class="sc7">RATE</span><span class="sc12">}</span><span class="sc24">  </span><span class="sc7">LAI</span><span class="sc12">[</span><span class="sc0">S</span><span class="sc12">,</span><span class="sc0">T</span><span class="sc12">,</span><span class="sc0">A</span><span class="sc12">,</span><span class="sc0">L-NWBS</span><span class="sc12">]</span><span class="sc24">
    </span><span class="sc2">#
@@ -1889,7 +1894,7 @@ span {
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># The following LAI inputs read LIST input with NCROP records (i.e. CROP ID)
 </span><span class="sc24">   </span><span class="sc2">#
-</span><span class="sc24">   </span><span class="sc2"># HAS_CROP_SALINITY_DEMAND is similar to IBOUND, which is an INT and
+</span><span class="sc24">   </span><span class="sc2"># CROP_HAS_SALINITY_DEMAND is similar to IBOUND, which is an INT and
 </span><span class="sc24">   </span><span class="sc2"># indicates if crop has a salinity irrigation demand calculated
 </span><span class="sc24">   </span><span class="sc2"># If specified as a zero (0), then it does not have it, if it is non-zero then it does.
 </span><span class="sc24">   </span><span class="sc2"># If keyword is not included, then all crops are assumed to have salinity flushing.

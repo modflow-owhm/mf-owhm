@@ -538,7 +538,7 @@ BEGIN GLOBAL DIMENSION
    NSFR_DELIV  INT
    NSFR_RETURN INT
    #
-   # SURFACE_ELEVATION is a 2D FLOAT ARRAY of land surface elevations
+   # SURFACE_ELEVATION is a 2D FLOAT ARRAY of land surface elevations (L)
    #    --Note you do not have to specify this, if it is specified DIS package keyword as "SURFACE_ELEVATION ULOAD". Where the keyword "SURFACE_ELEVATION" IS ON THE LINE BEFORE SPECIFYING TOP.
    #
    SURFACE_ELEVATION ULOAD
@@ -796,12 +796,14 @@ BEGIN WATER_BALANCE_SUBREGION   #WBS
    #          --The crop must have an IRRIGATION flag >0 or the added demand cannot be applied.
    #
    #   This only applies to irrigated crops and the additional
-   #   demanded water only becomes surface runoff or deep percolation
+   #   demanded water only becomes surface runoff or deep percolation.
    #
-   #   In can be specified as a length per time (LENGTH or FLUX) or volume per time (RATE). --Both may be used at once.
+   #   The second keyword indicates the units of the input, where
+   #      LENGTH or FLUX indicates input is length per time (L/T)
+   #      RATE           indicates input is volume per time (L^3/T)
    #   The added demand is summed with other crop related added demands (e.g. CROP Block ADDED_DEMAND)
    #
-   #   You may specify both FLUX and RATE versions
+   #   You may specify both ADDED_CROP_DEMAND FLUX and ADDED_CROP_DEMAND RATE at the same time (but on different lines).
    #
    ADDED_CROP_DEMAND FLUX  LAI[S,T,L-NCROP]
    #
@@ -820,7 +822,7 @@ BEGIN SOIL
    #
    # ------------------------------------------------------------------------------------------------------------------
    #
-   # Specify soil capillary fringe depth. If specified with LIST,
+   # Specify soil capillary fringe depth (L). If specified with LIST,
    #         then record ID is the location in SOIL_ID that the capillary fringe is applied too.
    #
    #   If specified as ARRAY, then the (ROW,COL) location defines the models capillary fringe and SOIL_ID is not used.
@@ -930,7 +932,7 @@ BEGIN CLIMATE
    #
    # Optional keywords that define how Bare Soil Potential Evaporation is calculated
    #
-   # Potential evaporation rate of groundwater under Fallow and Bare Soil
+   # Potential evaporation rate of groundwater under Fallow and Bare Soil (L/T)
    #   ***If not specified then REFERENCE_ET is used in its place. If REFERENCE_ET is not specified then set to 0.0
    #
    POTENTIAL_EVAPORATION_BARE  LAI[S,T,A]
@@ -1491,8 +1493,8 @@ BEGIN LAND_USE
    #
    # ------------------------------------------------------------------------------------------------------------------
    #
-   # CROP_COEFFICIENT (Kc) is multiplied by the ETref to get CU -- input requires that REFERENCE_ET (ETref) to be specified
-   # CONSUMPTIVE_USE  (CF) specifies directly the CU
+   # CROP_COEFFICIENT (Kc; L/T) is multiplied by the ETref to get CU -- input requires that REFERENCE_ET (ETref) to be specified
+   # CONSUMPTIVE_USE  (CF; L/T) specifies directly the CU
    #
    # Potential Consumptive Use CU = CF + Kc*ETref
    #    If not specified then set to zero.
@@ -1523,7 +1525,7 @@ BEGIN LAND_USE
    #
    # ------------------------------------------------------------------------------------------------------------------
    #
-   # Crop root depth below land surface.
+   # Crop root depth below land surface (L).
    #   Must be >0.0; NOT required or may be zero if GROUNDWATER_ROOT_INTERACTION = 0 or 1
    #
    ROOT_DEPTH       LAI[S,T,A,L]
@@ -1636,7 +1638,7 @@ BEGIN LAND_USE
    #
    # If CONCEPT TWO, linear uptake, linear anoxia model is used, then
    # the ponding depth is a height of water above the land surface that the crop
-   # can tolerate.
+   # can tolerate (L).
    #
    #  CONCEPT TWO occurs when either ROOT_PRESSURE is not specified
    #            or for crops that have all four ROOT_PRESSUREs set to 0
@@ -1651,9 +1653,12 @@ BEGIN LAND_USE
    # demanded water only becomes surface runoff or deep percolation
    # based on the fraction specified in the WBS Block "ADDED_DEMAND_RUNOFF_SPLIT"
    #
-   # It may only be specified as a Length per Time (LENGTH or FLUX) or Volume per Time (RATE).
+   # The second keyword indicates the units of the input, where
+   #    LENGTH or FLUX indicates input is length per time (L/T)
+   #    RATE           indicates input is volume per time (L^3/T)
    #
-   # The added demand is summed with other added demands (e.g. WBS Block ADDED_CROP_DEMAND)
+   # The LAND_USE ADDED_DEMAND may only be specified once and is 
+   #    added demand is summed with other added demands (e.g. WBS Block ADDED_CROP_DEMAND)
    #
    ADDED_DEMAND  {FLUX, RATE}  LAI[S,T,A,L-NWBS]
    #
