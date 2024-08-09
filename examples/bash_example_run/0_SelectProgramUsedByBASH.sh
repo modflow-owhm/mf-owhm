@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/env bash
 
 # This will be the location of the exectuable that will be used by
 # All of the batch scripts in this folder

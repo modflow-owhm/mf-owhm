@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/env bash
 
 # RUN EACH TEST CASE USING MODFLOW-OWHM
 # RESULTS WILL BE STORED IN TEST-OUT
