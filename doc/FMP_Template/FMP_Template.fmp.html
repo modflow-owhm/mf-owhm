@@ -14,6 +14,7 @@ span {
 	font-size: 11pt;
 }
 .sc2 {
+	font-family: 'Courier New';
 	font-size: 11pt;
 	color: #808080;
 }
@@ -1243,6 +1244,22 @@ span {
    </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># ------------------------------------------------------------------------------------------------------------------
 </span><span class="sc24">   </span><span class="sc2">#
+</span><span class="sc24">   </span><span class="sc2"># ADDED_RUNOFF is additional runoff that is included in the model. 
+</span><span class="sc24">   </span><span class="sc2">#   This is added to the runoff calculated from precipitation and irrigation.
+</span><span class="sc24">   </span><span class="sc2">#
+</span><span class="sc24">   </span><span class="sc2">#    --Note, NO_RETURN_FLOW converts ADDED_RUNOFF to deep percolation.
+</span><span class="sc24">   </span><span class="sc2">#
+</span><span class="sc24">   </span><span class="sc2"># The second keyword indicates the units of the input, where
+</span><span class="sc24">   </span><span class="sc2">#   LENGTH or FLUX indicates input is length per time (L/T).
+</span><span class="sc24">   </span><span class="sc2">#   RATE           indicates input is volume per time (L^3/T)
+</span><span class="sc24">   </span><span class="sc2">#
+</span><span class="sc24">   </span><span class="sc2"># Array-Style input reads an NROW by NCOL array of runoff values.
+</span><span class="sc24">   </span><span class="sc2"># List-Style reads NWBS records that specify the total runoff for each WBS.
+</span><span class="sc24">   </span><span class="sc2">#
+</span><span class="sc24">   </span><span class="sc6">ADDED_RUNOFF</span><span class="sc24"> </span><span class="sc12">{</span><span class="sc7">FLUX</span><span class="sc12">,</span><span class="sc24"> </span><span class="sc7">RATE</span><span class="sc12">}</span><span class="sc24"> </span><span class="sc7">LAI</span><span class="sc12">[</span><span class="sc0">S</span><span class="sc12">,</span><span class="sc0">T</span><span class="sc12">,</span><span class="sc0">A</span><span class="sc12">,</span><span class="sc0">L</span><span class="sc12">]</span><span class="sc24">
+   </span><span class="sc2">#
+</span><span class="sc24">   </span><span class="sc2"># ------------------------------------------------------------------------------------------------------------------
+</span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc14">END</span><span class="sc24">
 </span><span class="sc2">#
 #
@@ -2053,6 +2070,14 @@ span {
 #     #                                                                                                                                                  ###
 #     #                                                                                                                                                  ###
 #     PRECIPITATION_POTENTIAL_CONSUMPTION                  Reads ROW, COL, PrecipPot; Default is 1E100 for unspecified (ROW, COL)                        ###
+#     #                                                                                                                                                  ###
+#  END CLIMATE                                                                                                                                           ###
+#  #                                                                                                                                                     ###
+#  BEGIN SURFACE_WATER                                                                                                                                   ###
+#     #                                                                                                                                                  ###
+#     #                                                                                                                                                  ###
+#     ADDED_RUNOFF                                        Reads ROW, COL, RUNOFF;   Default is 0.0 for unspecified (ROW, COL)                            ###
+#     #                                                                                                                                                  ###
 #     #                                                                                                                                                  ###
 #  END CLIMATE                                                                                                                                           ###
 #  #                                                                                                                                                     ###
