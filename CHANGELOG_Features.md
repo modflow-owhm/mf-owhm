@@ -24,6 +24,23 @@ The main executable added support for basic command arguments. The current argum
   * `-v` &nbsp; &nbsp; &nbsp; `--version`
     *  Print out the mf-owhm version number, then exit program.
 
+### `FMP` Improvements
+
+* `SURFACE_WATER` block `ADDED_RUNOFF` keyword.:
+     * `ADDED_RUNOFF` specifies additional runoff that is included in the model.
+          This is added to the calculated runoff from precipitation and irrigation.
+     * `ADDED_RUNOFF` is effected by any modification to a WBS runoff, such as,  
+          the `NO_RETURN_FLOW` option will change added runoff to deep percolation.
+     * `ADDED_RUNOFF` must be followed by the secondary keyword `FLUX` or `RATE` to  
+          indicate the units of the input. 
+          *  `FLUX` indicates input is length per time (L/T).
+          *  `RATE` indicates input is volume per time (L^3/T)
+     * `ADDED_RUNOFF {FLUX, RATE} LAI[S,T,A,L]`
+          * The List-Array Input supports the advanced scale factor `SFAC ByWBS`
+            and reads NWBS scale factors and applies them by WBS.
+          * Array-Style input reads an NROW by NCOL array of runoff values.
+          * List-Style reads NWBS records that specify the total added runoff for each WBS.
+
 ------
 
 &nbsp;
