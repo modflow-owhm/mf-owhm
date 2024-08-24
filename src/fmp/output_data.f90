@@ -223,7 +223,7 @@ MODULE OUTPUT_DATA_FMP_MODULE!, ONLY: OUTPUT_DATA, INITIALIZE_OUTPUT_DATA
                         CALL PARSE_WORD_UP(BL%LINE,LLOC,ISTART,ISTOP)
                         SELECT CASE ( BL%LINE(ISTART:ISTOP) )
                         CASE("SUM")      
-                                           WRITE(BL%IOUT,'(A)') 'FOUND SUM KEYWORD, NOW OPENING GENERIC_OUTPUT FILE. IF NOTHING SPECIFIED THEN OPENING FILE: "ET_ARRAY.out"'
+                                           WRITE(BL%IOUT,'(42x,A)') 'FOUND SUM KEYWORD, NOW OPENING GENERIC_OUTPUT FILE. IF NOTHING SPECIFIED THEN OPENING FILE: "ET_ARRAY.out"'
                                            IF(BL%LINE(LLOC:) == BLNK) THEN
                                                    LLOC=ONE
                                                    CALL OFL%ET_ARRAY_SUM%OPEN("ET_ARRAY.out",LLOC,BL%IOUT,BL%IU)
@@ -233,7 +233,7 @@ MODULE OUTPUT_DATA_FMP_MODULE!, ONLY: OUTPUT_DATA, INITIALIZE_OUTPUT_DATA
                                                    IF(OFL%ET_ARRAY_SUM%IU==Z)  CALL OFL%ET_ARRAY_SUM%OPEN("ET_ARRAY.out",LLOC,BL%IOUT,BL%IU)
                                            END IF
                         CASE("SEPARATE")      
-                                           WRITE(BL%IOUT,'(A)') 'FOUND SEPARATE KEYWORD, NOW OPENING GENERIC_OUTPUT FILE. IF NOTHING SPECIFIED THEN OPENING FILE: "E_n_T_ARRAY.out"'
+                                           WRITE(BL%IOUT,'(42x,A)') 'FOUND SEPARATE KEYWORD, NOW OPENING GENERIC_OUTPUT FILE. IF NOTHING SPECIFIED THEN OPENING FILE: "E_n_T_ARRAY.out"'
                                            IF(BL%LINE(LLOC:) == BLNK) THEN
                                                    LLOC=ONE
                                                    CALL OFL%ET_ARRAY_SEP%OPEN("E_n_T_ARRAY.out",LLOC,BL%IOUT,BL%IU)
