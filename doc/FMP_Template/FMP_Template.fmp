@@ -990,6 +990,13 @@ BEGIN SURFACE_WATER
    #
    # ALL KEYWORDS ARE OPTIONAL
    #
+   # The Surface Water Block defines:
+   #   1) Surface water deliveries to meet demand
+   #   2) How Runoff/Return Flow is Handled
+   # 
+   # *** This block is required if you want to have runoff. 
+   #     Otherwise, all runoff is converted to deep percolation (implies: NO_RETURN_FLOW).
+   #
    # ------------------------------------------------------------------------------------------------------------------
    #
    # NON_ROUTED_DELIVERY (NRD) is quantity of water that is available to a WBS.
@@ -1111,16 +1118,17 @@ BEGIN SURFACE_WATER
    #
    # ------------------------------------------------------------------------------------------------------------------
    #
-   # Defining How Runoff is Handled
+   # Defining How Runoff/Return Flow is Handled
    #
    # WBS Runoff has four options for how is it is applied. (Note they are listed in order of priority)
-   #   1) Require all runoff to re-infiltrate as deep percolation. (NORETURNFLOW)
+   #   1) Require all runoff to re-infiltrate as deep percolation.                              (NORETURNFLOW)
    #   2) Specify the SFR segments/reaches that receive runoff, or define runoff to leave model (SEMI_ROUTED_RETURN)
-   #   3) Prorate runoff across all SFR reaches within a WBS. If no SFR reaches are found then
-   #   4) If a WBS does not have anywhere to apply runoff then it leaves the model domain and a warning is raised.
+   #   3) Prorate runoff across all SFR reaches within a WBS.                                   (ROUTED_RETURN_ANY_REACH)
+   #      If WBS has no SFR reaches, then runoff leaves the model and a warning is raised.
    #
    # If WBS is defined with multiple runoff options, then the previous order determines which one is selected.
-   #   For example NORETURN flow is chosen over SEMI_ROUTED_RETURN if both are specified.
+   #
+   # ------------------------------------------------------------------------------------------------------------------
    #
    # 1) NO_RETURN_FLOW indicates that surface runoff re-infiltrates as deep percolation.
    #
@@ -1130,6 +1138,8 @@ BEGIN SURFACE_WATER
    #        or 0 to indicate that it does have return flow and Options 2, 3, and 4 decide the runoff location
    #
    NO_RETURN_FLOW  [ LAI[S,T,L] ]
+   #
+   # ------------------------------------------------------------------------------------------------------------------
    #
    # 2) SEMI_ROUTED_RETURN points to the specific SFR segments and reaches that receive runoff
    #    NSFR_RETURN in the GLOBAL BLOCK defines the number of List-Style Loads records loaded.
@@ -1152,7 +1162,7 @@ BEGIN SURFACE_WATER
    #        ***If FRAC is NOT specified (or specified as -1), then the fraction of runoff automatically determined
    #           as the ratio of ISRR's length to the total length of all return flow points for the WBS --note if there is a mixture of FRAC defined and not defined for a WBS, then it defaults to length prorating.
    #
-   #     For Example with NSFR_RETURN = 6, the following allows WBS 4 and 5's return flow locations
+   #     For Example with NSFR_RETURN = 7, the following defines the SEMI_ROUTED_RETURN:
    #       ISRR, WBS_ID, SEGMENT, REACH, [FRAC]
    #          1     4     3         2    0.6   # 60% of WBS 4's runoff is applied to Seg 3, RCH 4
    #          2     4     14        0    0.4   # 40% of WBS 4's runoff is applied to all reaches in Seg 14. The runoff is length prorated for each of the SEG 14's reaches.
@@ -1160,9 +1170,11 @@ BEGIN SURFACE_WATER
    #          4     0                          # ISRR is disabled and ignored
    #          5     6     16        2          # No FRAC indicates that WBS 6 will length prorate all its return flow locations
    #          6     6     17        0          # WBS 6 includes all reaches from SEG 15, length prorates along with SEG 16, RCH 2
+   #          7     3     0         0          # WBS 3 runoff is removed from the model (flows out of simulation domain)
    #
    SEMI_ROUTED_RETURN LAI[S,T,L-3]
    #
+   # ------------------------------------------------------------------------------------------------------------------
    #
    # 3) FULLY ROUTED RETURN indicates that a WBS will search for any SFR reaches
    #    that are within the WBS. It will then length prorate the runoff to those reaches
@@ -1170,11 +1182,10 @@ BEGIN SURFACE_WATER
    #    for any WBS that does not have a 1 for NO_RETURN_FLOW or defined with a SEMI_ROUTED_RETURN
    #        ***Note only one of two keywords may be present. They differ in telling FMP
    #           if diversion segments should be included in the search.
+   #        ***Note if SFR is not part of the simulation, then an error is raised.
    #
    ROUTED_RETURN_ANY_NON_DIVERSION_REACH  # WBS return flow (runoff) goes to all non-diversion SEGMENT/REACH located in WBS
    ROUTED_RETURN_ANY_REACH                # WBS return flow (runoff) goes to all               SEGMENT/REACH located in WBS
-   #
-   # ------------------------------------------------------------------------------------------------------------------
    #
    # By default the FULLY ROUTED RETURN network is determined only when the FMP WBS IDs change spatial location.
    #   This saves computation time, since the fully routed network return locations should not change.
