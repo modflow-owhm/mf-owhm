@@ -600,7 +600,7 @@ MODULE CROP_DATA_FMP_MODULE
                         !
                         CALL PARSE_WORD_UP(LINE,LLOC,ISTART,ISTOP)
                         SELECT CASE(LINE(ISTART:ISTOP))
-                        CASE("STATIC","TRANSIENT","LIST")
+                        CASE("STATIC", "TRANSIENT", "LIST", "CONSTANT", "INTERNAL")
                                    LLOC = ISTART
                                    CALL CDAT%ZERO_CU_TO_BARE%INIT('CU_TO_BARE',  LLOC, LINE, BL%IOUT, BL%IU, CDAT%NCROP, ONE, Z, Z, SCRATCH=BL%SCRATCH)
                         CASE DEFAULT
@@ -663,7 +663,7 @@ MODULE CROP_DATA_FMP_MODULE
                         !
                         CALL PARSE_WORD_UP(LINE,LLOC,ISTART,ISTOP)
                         SELECT CASE(LINE(ISTART:ISTOP))
-                        CASE("STATIC","TRANSIENT","LIST")
+                        CASE("STATIC", "TRANSIENT", "LIST", "CONSTANT", "INTERNAL")
                                    LLOC = ISTART
                                    CALL CDAT%FEI_CHECK%INIT('FEI_CHECK',  LLOC, LINE, BL%IOUT, BL%IU, CDAT%NCROP, ONE, Z, Z, SCRATCH=BL%SCRATCH)
                         CASE DEFAULT
