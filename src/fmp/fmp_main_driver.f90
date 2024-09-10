@@ -409,8 +409,6 @@ MODULE FMP_MAIN_DRIVER
     !4P-----Allocate space for the double precision lists of Unranked (UNRD), Ranked (RNRD), & actually used (NRD)
     !       Non-Routed Delivery Lists and initialize
     !
-    ALLOCATE( SWFL%NRD(NFARM) )
-    !
     IF(.NOT.SWFL%HAS_NRD) THEN
                         ALLOCATE(UNRD(4,NFARM)  , SOURCE=DZ)                                      !DUMMY 4       !DP
                         ALLOCATE(RNRD(2,1,NFARM), SOURCE=DZ)                                      !DUMMY 2,1     !DP
