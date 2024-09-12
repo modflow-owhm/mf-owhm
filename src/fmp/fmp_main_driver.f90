@@ -1691,6 +1691,15 @@ MODULE FMP_MAIN_DRIVER
             CALL WBS%SUM_WBS_DIRECT_RECHARGE(CLIMATE%NDRCH, CLIMATE%DIRECT_RECHARGE) ! ACCUMULATE FARM BASED DIRECT RECHARGE
    END IF
    !
+   ! Check if all cells beneath land surface are IBOUND=0, if true shift DPERC to RUNOFF (infiltration cannot occur)
+   ! Note this also effects DIRECT_RECHARGE
+   DO CONCURRENT ( IC=1:NCOL, IR=1:NROW, UPLAY(IC,IR)==0)  ! might be an invalid DO CONCURRENT, even though techically all iterations are independent
+       IF(WBS%DPERC(IC,IR) > DZ) THEN
+           WBS%RUNOFF(IC,IR) = WBS%RUNOFF(IC,IR) + WBS%DPERC(IC,IR)
+           WBS%DPERC (IC,IR) = DZ
+       END IF
+   END DO 
+   !
    !WBS%FNRCH = DZ !WBS%FNRCH - CDAT%TGWA - CDAT%EGWA
    !
    CALL WBS%SUM_WBS_RUNOFF_DPERC()                  !POPULATES  WBS%TOT_DPERC  and   WBS%TOT_RUNOFF(NFARM)   --CALLED IN BD ROUTINE
