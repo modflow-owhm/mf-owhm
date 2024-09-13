@@ -1642,11 +1642,6 @@ MODULE FMP_MAIN_DRIVER
    WBS%RUNOFF = DZ 
    CALL FCROP%CALC_INEFFICIENT_LOSSES(WBS, SOIL%SURF_VK)           !POPULATES  WBS%DPERC  and   WBS%RUNOFF(NCOL,NROW)
    !
-   IF(SWFL%HAS_ADDED_RUNOFF) THEN
-       WBS%RUNOFF = WBS%RUNOFF + SWFL%ADDED_RUNOFF
-   END IF
-   
-   !
    ! CHECK IF RUNOFF IS DISABLED
    !
    IF(SWFL%NORETURNFLOW) THEN                                !NO RUNOFF ALLOWED
@@ -1684,6 +1679,11 @@ MODULE FMP_MAIN_DRIVER
                                             END DO
                                         END IF
                                         END DO
+   END IF
+   !
+   ! Added runoff is always included as runoff and is not allowed to reinfiltrate
+   IF(SWFL%HAS_ADDED_RUNOFF) THEN
+       WBS%RUNOFF = WBS%RUNOFF + SWFL%ADDED_RUNOFF
    END IF
    !
    IF(CLIMATE%HAS_RECHARGE) THEN
