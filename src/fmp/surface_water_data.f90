@@ -40,19 +40,19 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
       DOUBLE PRECISION:: TOT_DMD_INI, TOT_DMD_MET
   END TYPE
   !
-  TYPE RETURN_LOC
-      LOGICAL:: HAS_RETURN = FALSE
-      LOGICAL:: FULLY      = FALSE
-      LOGICAL:: BUILD_FULLY= FALSE
-      LOGICAL:: LEAVE_MODEL= FALSE
+  TYPE RETURN_LOC                   ! TYPE(RETURN_LOC), DIMENSION(NWBS) :: SRRLOC
+      LOGICAL:: HAS_RETURN = FALSE  ! Set to true if farm has one or more fully/semi-routed return points that it can pass runoff to (includes SEG=0, runoff leave model; but if no point is defined then runoff is set to LOST_RUNOFF).
+      LOGICAL:: FULLY      = FALSE  ! If true, then farm has no semi-routed return and used a fully-routouted return.
+      LOGICAL:: BUILD_FULLY= FALSE  ! If true, then indicates that a full-routed search should start after end of SETUP_NEXT_STRESS_PERIOD routine
+      LOGICAL:: LEAVE_MODEL= FALSE  ! If true, then runoff has no defined return location (including defining the location to leave the model)
       INTEGER:: N=Z
-      INTEGER,         DIMENSION(:,:),ALLOCATABLE:: SR
-      INTEGER,         DIMENSION(  :),ALLOCATABLE:: ISRR       !OLD SRD TFR POSITION
-      INTEGER,         DIMENSION(  :),ALLOCATABLE:: ISTRM
-      DOUBLE PRECISION,DIMENSION(  :),ALLOCATABLE:: WT
-      DOUBLE PRECISION,DIMENSION(  :),ALLOCATABLE:: RUNOFF
-      DOUBLE PRECISION:: LOST_RUNOFF = DZ
-      DOUBLE PRECISION:: TOTLENGTH   = DZ
+      INTEGER,         DIMENSION(:,:),ALLOCATABLE:: SR         ! Segment and reach for return flow location
+      INTEGER,         DIMENSION(  :),ALLOCATABLE:: ISRR       ! OLD SRD TFR POSITION
+      INTEGER,         DIMENSION(  :),ALLOCATABLE:: ISTRM      ! Location in SFR that recieves runoff   
+      DOUBLE PRECISION,DIMENSION(  :),ALLOCATABLE:: WT         ! Fraction of runoff applied to SFR location (weight)
+      DOUBLE PRECISION,DIMENSION(  :),ALLOCATABLE:: RUNOFF     ! Runoff applied to caculated and applied to ISTRM
+      DOUBLE PRECISION:: LOST_RUNOFF = DZ                      ! Holds runoff when it is set assigned to a fully/semi-routed return point (any runoff that is not set to a SFR reach)
+      DOUBLE PRECISION:: TOTLENGTH   = DZ                      ! Total length of all the runoff reaches for return flow point
   END TYPE
   !
   TYPE NRD_VALUES
@@ -621,21 +621,21 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
     !
     IF(SRR_CHK) THEN  ! SWF%ISRD%ARRAY CHANGED SWF%ISRD%SEGRCH
         !
-        DO CONCURRENT (K=ONE:SWF%NSFR_RETURN, SWF%ISRR_TFR%WBS(K) < ONE .OR. SWF%ISRR_TFR%WBS(K) > SWF%NFARM)
-                SWF%ISRR_TFR%SR(ONE,K) = Z
-                SWF%ISRR_TFR%SR(TWO,K) = Z
-                SWF%ISRR_TFR%WBS(K)    = Z
-                SWF%ISRR_TFR%WT(K)     = DZ
-        END DO
-        !
-        DO K=ONE, SWF%NSFR_RETURN
-            !
-            IF(SWF%NSEG < SWF%ISRR_TFR%SR(ONE,K)) THEN
-                J = SWF%ISRR_TFR%WBS(K)
-                I = SWF%ISRR_TFR%SR(ONE,K)
-                CALL WRN%ADD( NUM2STR(J,-5)//BLNK//NUM2STR(I,-5)//'    Semi-Routed RETURN Segment is greater then SFR number of segments'//NL )
-            END IF
-        END DO
+        IF (SWF%NSFR_RETURN > Z .and. SWF%HAS_SFR) THEN
+            DO CONCURRENT (K=ONE:SWF%NSFR_RETURN, SWF%ISRR_TFR%WBS(K) < ONE .OR. SWF%ISRR_TFR%WBS(K) > SWF%NFARM)
+                    SWF%ISRR_TFR%SR(ONE,K) = Z
+                    SWF%ISRR_TFR%SR(TWO,K) = Z
+                    SWF%ISRR_TFR%WBS(K)    = Z
+                    SWF%ISRR_TFR%WT(K)     = DZ
+            END DO
+            DO K=ONE, SWF%NSFR_RETURN
+                IF(SWF%NSEG < SWF%ISRR_TFR%SR(ONE,K)) THEN
+                    J = SWF%ISRR_TFR%WBS(K)
+                    I = SWF%ISRR_TFR%SR(ONE,K)
+                    CALL WRN%ADD( NUM2STR(J,-5)//BLNK//NUM2STR(I,-5)//'    Semi-Routed RETURN Segment is greater then SFR number of segments'//NL )
+                END IF
+            END DO
+        END IF
         !
     END IF
     !
@@ -963,11 +963,11 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
           NO_RETURN       = FALSE
           IS_FULLY_RETURN = FALSE
           !
-          IF(SWF%H2ORETURN(1,F) == Z .AND. SWF%H2ORETURN(2,F) == Z) THEN ! NO RETURN FLOW
+          IF(SWF%H2ORETURN(1,F) == Z .AND. SWF%H2ORETURN(2,F) == Z) THEN ! NO RETURN FLOW indicated for F
               !
               NO_RETURN = TRUE
               !
-          ELSEIF( SWF%NSFR_RETURN == Z .OR. .NOT. SWF%ISRR_TFR%INUSE .OR. SWF%H2ORETURN(TWO,F) == Z) THEN  !SEMI => SWF%H2ORETURN(TWO,F)
+          ELSEIF( SWF%NSFR_RETURN == Z .OR. .NOT. SWF%ISRR_TFR%INUSE .OR. SWF%H2ORETURN(TWO,F) == Z) THEN  !SEMI => SWF%H2ORETURN(TWO,F); no semi-routed points, check for fully routed flag
               !
               IF(SWF%IRRFL .NE. Z .AND. SWF%H2ORETURN(ONE,F)==ONE) THEN !FULY => SWF%H2ORETURN(ONE,F)
                   !
@@ -975,13 +975,13 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
               ELSE
                   NO_RETURN = TRUE
               END IF
-          ELSE
+          ELSE  ! Search to see if F has a semi-routed delivery, if not, check if it has a fully routed delivery
               DO K=ONE, SWF%NSFR_RETURN
                   IF(F == SWF%ISRR_TFR%WBS(K)) THEN    ! .AND. SWF%ISRR_TFR%SR(ONE,K) > Z
                       SWF%SRRLOC(F)%HAS_RETURN  = TRUE
                       SWF%SRRLOC(F)%FULLY       = FALSE
                       EXIT
-                  ELSEIF(K == SWF%NSFR_RETURN) THEN
+                  ELSEIF(K == SWF%NSFR_RETURN) THEN                             ! searched all SRRs, only option now is to search for fully rourted flag.
                       IF(SWF%IRRFL .NE. Z .AND. SWF%H2ORETURN(ONE,F)==ONE) THEN !FULY => SWF%H2ORETURN(ONE,F))
                           !
                           IS_FULLY_RETURN = TRUE
@@ -1370,7 +1370,7 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
           STRM(12,I) = STRM(12,I) + SURPLUS
           !
           IF(SURPLUS < FLOW(ONE)) THEN
-              FLOW(ONE) = FLOW(ONE) - SURPLUS
+              FLOW(ONE) = FLOW(ONE) - SURPLUS  ! does this need to be adjusted by the extra NRD water?
           ELSE
               FLOW(ONE) = DZ
           END IF
