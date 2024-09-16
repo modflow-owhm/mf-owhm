@@ -349,12 +349,12 @@ MODULE FMP_MAIN_DRIVER
                        '(or just make sure the block is empty).')
     END IF
     !
-    IF(SWFL%REQ_SFR .AND. .NOT. WBS%HAS_SFR)  CALL STOP_ERROR(INFILE=IN_FMP, OUTPUT=IOUT,MSG= &
-                       'FMP SURFACE_WATER BLOCK ERROR. FMP features that require SFR '//            &
-                       'were declaired (e.g. Semi-Routed Deliveries), but SFR is NOT '//            &
-                       'a package declaired in the name for this simulation.'//NL//                 &
-                       'Please check input and remove any connections to SFR to '//                 &
-                       'continue.')
+    !!!IF(SWFL%REQ_SFR .AND. .NOT. WBS%HAS_SFR)  CALL STOP_ERROR(INFILE=IN_FMP, OUTPUT=IOUT,MSG= &
+    !!!                   'FMP SURFACE_WATER BLOCK ERROR. FMP features that require SFR '//            &
+    !!!                   'were declaired (e.g. Semi-Routed Deliveries), but SFR is NOT '//            &
+    !!!                   'a package declaired in the name for this simulation.'//NL//                 &
+    !!!                   'Please check input and remove any connections to SFR to '//                 &
+    !!!                   'continue.')
     !
     IF(ALLOT%HAS_SW_ALLOTMENT .AND. .NOT. WBS%HAS_SFR)  &  !fix this
                                 CALL STOP_ERROR(INFILE=IN_FMP, OUTPUT=IOUT,MSG=                       &
@@ -367,7 +367,7 @@ MODULE FMP_MAIN_DRIVER
                        'FMP input failed to locate the "SURFACE_WATER" BLOCK (BEGIN SURFACE_WATER).'//NL//                  &
                        'No surface water deliveries will occur and all runoff is converted to deep percolation.'//NL//BLN// &
                        'If you want this behaivoir then ignore this warning.'//BLN)
-        CALL SWFL%NO_SURFACE_WATER_DATA(FDIM, IOUT)
+        CALL SWFL%NO_SURFACE_WATER_DATA(FDIM, IOUT, NSEG)
     END IF
     !
     IF(.NOT. WBS%HAS_CLIM) CALL CLIMATE%SETUP_NO_CLIMATE_DATA(FDIM, IOUT)
@@ -526,7 +526,7 @@ MODULE FMP_MAIN_DRIVER
         CALL SWFL%NEXT(FDIM, WBS%FID_ARRAY, WBS%NEW_FID, WBS%H2OSOURCE%SW, WBS%AREA)
     END IF
     !
-    IF(SWFL%BUILD_FULLY_ROUTED_RETURN) THEN
+    IF(SWFL%BUILD_FULLY_ROUTED_RETURN) THEN ! implies SWFL%HAS_SFR is true
         !
         CALL SWFL%BUILD_FULLY_ROUTED_RETURN_SRRLOC(WBS%FID_ARRAY, IDIVAR, ISTRM, STRM)
     END IF
@@ -781,28 +781,28 @@ MODULE FMP_MAIN_DRIVER
            SFR_RUNOFF(I)=DBLE(STRM(12,I))
        END IF
        END DO
-    END IF
-    !
-    IF(SWFL%HAS_SRD) THEN  ! SWF%ISRD%ARRAY CHANGED SWF%ISRD%SEGRCH
-      !
-      IF(KPER==1 .OR. SWFL%ISRD_TFR%TRANSIENT) THEN 
-          WRITE(IOUT,'(/1x,A, /A)') 'SEMI-ROUTED DELIVERIES TO FARMS (LOCATION OF DIVERSION-POINTS):', '  WBS  SEG  RCH  FRACTION'
-          DO F=ONE, SWFL%NFARM
-            DO K = ONE, SWFL%SRDLOC(F)%N                        
-               ASSOCIATE(S  => ISTRM(4,SWFL%SRDLOC(F)%ISTRM(K)),    &
-                         R  => ISTRM(5,SWFL%SRDLOC(F)%ISTRM(K)),    &
-                         WT =>         SWFL%SRDLOC(F)%WT(K)     )
-                         !
-                         IF(WT>-0.0001) THEN !0.123456
-                             WRITE(IOUT,'(3I5, 1x,F9.6)') F, S, R, WT
-                         ELSE
-                             WRITE(IOUT,'(3I5, 2x,A)'   ) F, S, R, '--'    
-                         END IF
-                         !
-               END ASSOCIATE
-            END DO
-          END DO
-      END IF
+       !
+       IF(SWFL%HAS_SRD) THEN  ! SWF%ISRD%ARRAY CHANGED SWF%ISRD%SEGRCH
+         !
+         IF(KPER==1 .OR. SWFL%ISRD_TFR%TRANSIENT) THEN 
+             WRITE(IOUT,'(/1x,A, /A)') 'SEMI-ROUTED DELIVERIES TO FARMS (LOCATION OF DIVERSION-POINTS):', '  WBS  SEG  RCH  FRACTION'
+             DO F=ONE, SWFL%NFARM
+               DO K = ONE, SWFL%SRDLOC(F)%N
+                  ASSOCIATE(S  => ISTRM(4,SWFL%SRDLOC(F)%ISTRM(K)),    &
+                            R  => ISTRM(5,SWFL%SRDLOC(F)%ISTRM(K)),    &
+                            WT =>         SWFL%SRDLOC(F)%WT(K)     )
+                            !
+                            IF(WT>-0.0001) THEN !0.123456
+                                WRITE(IOUT,'(3I5, 1x,F9.6)') F, S, R, WT
+                            ELSE
+                                WRITE(IOUT,'(3I5, 2x,A)'   ) F, S, R, '--'    
+                            END IF
+                            !
+                  END ASSOCIATE
+               END DO
+             END DO
+         END IF
+       END IF
     END IF
     !
     IF(FMPOUT%HAS_ROUT == TWO .AND. KPER>SPSTART) THEN
@@ -948,13 +948,15 @@ MODULE FMP_MAIN_DRIVER
                !
                CALL WBS%CHECK_SOIL_ID(SOIL%SID)
                !
-               DO CONCURRENT (NF=ONE:SWFL%NFARM)
-                                           SWFL%BUILD_FRR(NF) = SWFL%SRRLOC(NF)%HAS_RETURN .AND. SWFL%SRRLOC(NF)%FULLY
-               END DO
-               !
-               SWFL%BUILD_FULLY_ROUTED_RETURN = ANY(SWFL%BUILD_FRR)
-               !
-               IF(SWFL%BUILD_FULLY_ROUTED_RETURN) CALL SWFL%BUILD_FULLY_ROUTED_RETURN_SRRLOC(WBS%FID_ARRAY, IDIVAR, ISTRM, STRM)
+               IF (SWFL%HAS_SFR) THEN
+                   DO CONCURRENT (NF=ONE:SWFL%NFARM)
+                                               SWFL%BUILD_FRR(NF) = SWFL%SRRLOC(NF)%HAS_RETURN .AND. SWFL%SRRLOC(NF)%FULLY
+                   END DO
+                   !
+                   SWFL%BUILD_FULLY_ROUTED_RETURN = ANY(SWFL%BUILD_FRR)
+                   !
+                   IF(SWFL%BUILD_FULLY_ROUTED_RETURN) CALL SWFL%BUILD_FULLY_ROUTED_RETURN_SRRLOC(WBS%FID_ARRAY, IDIVAR, ISTRM, STRM)
+               END IF
           END IF
           !
           RELOAD_CROP = TRUE
@@ -1524,28 +1526,28 @@ MODULE FMP_MAIN_DRIVER
          RDEL=TF-ND-QR
          CALL SWFL%SET_DEMAND_INI(NF, RDEL)  ! Note negative demand is set to zero
          !
-         IF(ND.LE.TF) THEN
-             !
-             IF(ALLOT%HAS_SW_ALLOTMENT) THEN
-                 IF(RDEL > ALLOT%SW_RATE_LIM(NF)) THEN
-                    RDEL = ALLOT%SW_RATE_LIM(NF)
-                 END IF
-             END IF
-             !
-             IF(WBS%HAS_SWO)THEN
-                            IF(RDEL > SWODAT%FMP_SW_LIMIT(NF))  RDEL=SWODAT%FMP_SW_LIMIT(NF)
-             END IF
-             !
-             CALL SWFL%APPLY_SRD_DEMAND(NF,RDEL,SFR_DELIV)
-             RDEL = SWFL%SRDLOC(NF)%TOT_DMD_MET
-         ELSE
-             RDEL=-SURPLUS1       !recharge cumulative surplus of nrd (if desired to be sent to SW) into canal
-             CALL SWFL%APPLY_SRD_SURPLUS(NF,SURPLUS1,STRM)
+         IF(SWFL%HAS_SRD) THEN
+            IF(ND.LE.TF) THEN
+                !
+                IF(ALLOT%HAS_SW_ALLOTMENT) THEN
+                    IF(RDEL > ALLOT%SW_RATE_LIM(NF)) THEN
+                       RDEL = ALLOT%SW_RATE_LIM(NF)
+                    END IF
+                END IF
+                !
+                IF(WBS%HAS_SWO)THEN
+                               IF(RDEL > SWODAT%FMP_SW_LIMIT(NF))  RDEL=SWODAT%FMP_SW_LIMIT(NF)
+                END IF
+                !
+                CALL SWFL%APPLY_SRD_DEMAND(NF,RDEL,SFR_DELIV)
+                ! RDEL = SWFL%SRDLOC(NF)%TOT_DMD_MET !          -> RDEL never used?
+            ELSE  ! SURPLUS1 is lost if it has no where to go
+                CALL SWFL%APPLY_SRD_SURPLUS(NF,SURPLUS1,STRM) !recharge cumulative surplus of nrd (if desired to be sent to SW) into canal
+            END IF
          END IF
          !
       ELSE
-         RDEL = DZ
-         CALL SWFL%SET_DEMAND_INI(NF, RDEL) 
+         CALL SWFL%SET_DEMAND_INI(NF, DZ) ! No surface water supply, so no demand for it
       END IF
       !
       CALL WBS%SUPPLY(NF)%SET_SFR(SWFL%SRDLOC(NF)%TOT_DMD_MET)
@@ -2016,7 +2018,7 @@ MODULE FMP_MAIN_DRIVER
       END IF
     END IF
     !
-    IF(SWFL%NSFR_DELIV > Z) THEN !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    IF(SWFL%NSFR_DELIV > Z .and. SWFL%HAS_SFR) THEN !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
           !
           IF(KITER == 7) SWFL%SRD_TOL_CNT = Z
           !
