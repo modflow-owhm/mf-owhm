@@ -93,6 +93,7 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
       LOGICAL:: TFR_READ   = FALSE
       LOGICAL:: ALWAYS_BUILD_FULLY_ROUTED_RETURN = FALSE
       LOGICAL:: BUILD_FULLY_ROUTED_RETURN = FALSE  ! = ANY(BUILD_FRR)
+      LOGICAL:: ALLOW_RETURN_FLOW_TO_LEAVE_MODEL = FALSE
       LOGICAL:: CMD_RUNOFF_PRNT = TRUE
       LOGICAL:: HAS_ADDED_RUNOFF = FALSE
       LOGICAL:: HAS_ADDED_RUNOFF_FLUX = FALSE
@@ -197,6 +198,7 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
     SWF%TFR_READ    = FALSE
     SWF%BUILD_FULLY_ROUTED_RETURN = FALSE
     SWF%ALWAYS_BUILD_FULLY_ROUTED_RETURN = FALSE
+    SWF%ALLOW_RETURN_FLOW_TO_LEAVE_MODEL = FALSE
     !
     IF(ALLOCATED(SWF%H2ORETURN )) DEALLOCATE(SWF%H2ORETURN )
     IF(ALLOCATED(SWF%SRDLOC    )) DEALLOCATE(SWF%SRDLOC    )
@@ -228,6 +230,8 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
     SWF%HAS_SFR      = NSEG > Z
     SWF%NORETURNFLOW = TRUE
     SWF%NORETURNFLOW_TFR_FLAG = Z
+    !
+    SWF%ALLOW_RETURN_FLOW_TO_LEAVE_MODEL = FALSE
     !
     SWF%HAS_SW      = FALSE
     !SWF%HAS_RET     = FALSE
@@ -362,6 +366,10 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
                         CASE DEFAULT
                                    SWF%NORETURNFLOW = TRUE
                         END SELECT
+                        !
+      CASE ("ALLOW_RETURN_FLOW_TO_LEAVE_MODEL")
+                        WRITE(BL%IOUT,'(A)') '   ALLOW_RETURN_FLOW_TO_LEAVE_MODEL KEYWORD FOUND. Runoff that has no where to go will leave the model.'
+                        SWF%ALLOW_RETURN_FLOW_TO_LEAVE_MODEL = TRUE
                         !
       CASE ("RETURN_FLOW_CHOICES")
                         WRITE(BL%IOUT,'(A)') '   RETURN_FLOW_CHOICES             KEYWORD FOUND. NOW LOADING STATIC/TRANSIENT KEYWORD AND THEN LIST STYLE SEGMENT AND REACH INTEGERS.'
@@ -1898,6 +1906,8 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
     INTEGER:: F
     TYPE(WARNING_TYPE):: WRN
     !
+    IF(SWF%ALLOW_RETURN_FLOW_TO_LEAVE_MODEL) RETURN
+    !
     CALL WRN%INIT()
     !
     WRN_PRT = FALSE
@@ -1916,25 +1926,34 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
     !
     IF(WRN_PRT) THEN
        CALL WRN%CHECK(HED=NL//REPEAT('-',71)//NL//'   THIS IS A SOFT WARNING, IGNORE IT IF YOU INTENTIONALLY WANT THIS.  |'//NL//REPEAT('-',71)//BLN//   &
-       'WBS runoff > 0, but WBS no SFR return flow point was defined, so runoff will leave the model domain.'//BLN//         &
-       'This occurs because either SFR is not used in simulation,'//NL//                                                     &
-       'or you have ROUTED_RETURN_ANY_REACH or ROUTED_RETURN_ANY_NON_DIVERSION_REACH option,'//NL//                          &
-       '   but no SFR reaches are found in the WBS/FARM area to send the runoff,'//NL//                                      &
-       'or you set NO_RETURN_FLOW, but runoff was generated outside of FMP, such as the DRT-FMP link.'//BLN//                &
-       'Since the surface water runoff has no where to go it is removed from the model.'//BLN//                              &
-       'If you want to keep runoff within the model please define either'//NL//                                              &
-       '   define for the WBS a SEMI_ROUTED_RETURN location or'//NL//                                                        &
-       '   define for the WBS the NO_RETURN_FLOW keyword to force surface runoff to reinfiltrate as deep percolation'//BLN// &
-       'NOTE 1: If you define a wbs with a SEMI_ROUTED_RETURN and set the runoff segment to 0 (zero),'//NL//                 &
-       '           then runoff leaves model without a this warning.'//BLN//                                                  &
-       'NOTE 2: The NO_RETURN_FLOW flag supercedes SEMI_ROUTED_RETURN'//NL//                                                 &
-       '           and will disable all return flow points to'//NL//                                                         &
-       '           (a) force all FMP generated runoff to infiltrate and'//NL//                                               &
-       '           (b) force external to FMP runoff to leave the model (and raise this warning).'//BLN//                     &
-       'NOTE 3: If all the model cells beneath the surface are IBOUND=0, '//NL//                 &
-       '           then all deep percolation is always shifted to runoff.'//BLN//                                                  &
-       'The following are the WBS/FARMS that had runoff leave the model domain'//BLN//                                       &
-       '   WBS   RUNOFF',                                                                                                    &
+       'WBS runoff > 0, but WBS no SFR return flow point was defined in the SURFACE_WATER block,'//NL//                         &
+       'so runoff will leave the model domain.'//BLN//                                                                          &
+       'This occurs because one or more of the following happened: '//NL//                                                      &
+       '   1) SFR is not used in simulation,'//NL//                                                                             &
+       '   2) Input has the ROUTED_RETURN_ANY_REACH or ROUTED_RETURN_ANY_NON_DIVERSION_REACH option,'//NL//                     &
+       '           but no SFR reaches are in the WBS/FARM area to send the runoff;'//NL//                                       &
+       '   3) Input has the NO_RETURN_FLOW option with the optional integer flags (1 or 0)'//NL//                               &
+       '           that indicate the WBS does not enable it (eg "NO_RETURN_FLOW CONTANT 0" disables it for all WBS);'//NL//     &
+       '   4) Input has the NO_RETURN_FLOW option, but FMP recieved external/added runoff that did not originate'//NL//         &
+       '           from precipitation or irrigation, such as the DRT-FMP link or ADDED_RUNOFF option;'//NL//                    &
+       '   5) Deep percolation happend at a location with all IBOUND=0 model cells beneath the land surface,'//NL//             &
+       '           this results in shifting the flow to runoff because it cannot infiltrate (see note 2).'//BLN//               &
+       'Since the surface water runoff has no where to go it is removed from the model.'//BLN//                                 &
+       'If you want to keep runoff within the model please do one of the following:'//NL//                                      &
+       '   1) define for the WBS a SEMI_ROUTED_RETURN location (requires SFR package);'//NL//                                   &
+       '   2) define for the WBS the NO_RETURN_FLOW keyword to force surface runoff to reinfiltrate as deep percolation'//NL//  &
+       '           (or if you use the optional integer flags, set it to 1 for the WBS with the lost runoff).'//BLN//            &
+       'If you want runoff to leave the model and disable this warning please do one of the following:'//NL//                   &
+       '   1) add the ALLOW_RETURN_FLOW_TO_LEAVE_MODEL option (does not require SFR);'//NL//                                    &
+       '   2) define a WBS with a SEMI_ROUTED_RETURN and set the runoff segment to 0 (zero; requires SFR)'//BLN//               &
+       'NOTE 1: The NO_RETURN_FLOW flag supercedes SEMI_ROUTED_RETURN, ROUTED_RETURN_ANY_REACH,'//NL//                          &
+       '           and ROUTED_RETURN_ANY_NON_DIVERSION_REACH and will disable all return flow points to'//NL//                  &
+       '           (a) force all FMP generated runoff to infiltrate and'//NL//                                                  &
+       '           (b) force external/added runoff to leave the model (and raise this warning).'//BLN//                         &
+       'NOTE 2: If all the model cells beneath the surface are IBOUND=0,'//NL//                                                 &
+       '           then all deep percolation is always shifted to runoff.'//BLN//                                               &
+       'The following are the WBS/FARMS that had runoff leave the model domain'//BLN//                                          &
+       '   WBS   RUNOFF',                                                                                                       &
         OUTPUT=SWF%IOUT, CMD_PRINT=SWF%CMD_RUNOFF_PRNT, NO_NL=TRUE, TAIL=BLN//'This warning appears the first time FMP has a WBS with runoff > 0 and the runoff leaves the model domain.'//NL)
         !
         IF(SWF%CMD_RUNOFF_PRNT) SWF%CMD_RUNOFF_PRNT = FALSE

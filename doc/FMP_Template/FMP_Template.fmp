@@ -996,6 +996,9 @@ BEGIN SURFACE_WATER
    # 
    # *** This block is required if you want to have runoff. 
    #     Otherwise, all runoff is converted to deep percolation (implies: NO_RETURN_FLOW).
+   #       If all you want is runoff to leave the model, use the ALLOW_RETURN_FLOW_TO_LEAVE_MODEL keyword.
+   #
+   # *** It is recommended to include the ALLOW_RETURN_FLOW_TO_LEAVE_MODEL keyword.
    #
    # ------------------------------------------------------------------------------------------------------------------
    #
@@ -1125,8 +1128,10 @@ BEGIN SURFACE_WATER
    #   2) Specify the SFR segments/reaches that receive runoff, or define runoff to leave model (SEMI_ROUTED_RETURN)
    #   3) Prorate runoff across all SFR reaches within a WBS.                                   (ROUTED_RETURN_ANY_REACH)
    #      If WBS has no SFR reaches, then runoff leaves the model and a warning is raised.
+   #   4) Runoff leaves the model domain without warning.                                       (ALLOW_RETURN_FLOW_TO_LEAVE_MODEL)
    #
    # If WBS is defined with multiple runoff options, then the previous order determines which one is selected.
+   #   For example NO_RETURN_FLOW flow is chosen over ALLOW_RETURN_FLOW_TO_LEAVE_MODEL and SEMI_ROUTED_RETURN if all are specified.
    #
    # ------------------------------------------------------------------------------------------------------------------
    #
@@ -1196,6 +1201,16 @@ BEGIN SURFACE_WATER
    #   This slows the simulation runtime down and should only be enabled when SFR has segment/reaches moving (not inflow but its physical location)
    #
    REBUILD_FULLY_ROUTED_RETURN
+   #
+   # ------------------------------------------------------------------------------------------------------------------
+   #
+   # 4) ALLOW_RETURN_FLOW_TO_LEAVE_MODEL indicates that runoff flows out of the model domain. 
+   #
+   # *** Note, if SFR is not part of simulation, 
+   #     then runoff is converted to deep percolation. 
+   #     This keyword, retains the runoff and allows it to leave the model.
+   #
+   ALLOW_RETURN_FLOW_TO_LEAVE_MODEL
    #
    # ------------------------------------------------------------------------------------------------------------------
    #

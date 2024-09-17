@@ -1046,6 +1046,16 @@ span {
    </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># ALL KEYWORDS ARE OPTIONAL
 </span><span class="sc24">   </span><span class="sc2">#
+</span><span class="sc24">   </span><span class="sc2"># The Surface Water Block defines:
+</span><span class="sc24">   </span><span class="sc2">#   1) Surface water deliveries to meet demand
+</span><span class="sc24">   </span><span class="sc2">#   2) How Runoff/Return Flow is Handled
+</span><span class="sc24">   </span><span class="sc2"># 
+</span><span class="sc24">   </span><span class="sc2"># *** This block is required if you want to have runoff. 
+</span><span class="sc24">   </span><span class="sc2">#     Otherwise, all runoff is converted to deep percolation (implies: NO_RETURN_FLOW).
+</span><span class="sc24">   </span><span class="sc2">#       If all you want is runoff to leave the model, use the ALLOW_RETURN_FLOW_TO_LEAVE_MODEL keyword.
+</span><span class="sc24">   </span><span class="sc2">#
+</span><span class="sc24">   </span><span class="sc2"># *** It is recommended to include the ALLOW_RETURN_FLOW_TO_LEAVE_MODEL keyword.
+</span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># ------------------------------------------------------------------------------------------------------------------
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># NON_ROUTED_DELIVERY (NRD) is quantity of water that is available to a WBS.
@@ -1167,16 +1177,19 @@ span {
    </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># ------------------------------------------------------------------------------------------------------------------
 </span><span class="sc24">   </span><span class="sc2">#
-</span><span class="sc24">   </span><span class="sc2"># Defining How Runoff is Handled
+</span><span class="sc24">   </span><span class="sc2"># Defining How Runoff/Return Flow is Handled
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># WBS Runoff has four options for how is it is applied. (Note they are listed in order of priority)
-</span><span class="sc24">   </span><span class="sc2">#   1) Require all runoff to re-infiltrate as deep percolation. (NORETURNFLOW)
+</span><span class="sc24">   </span><span class="sc2">#   1) Require all runoff to re-infiltrate as deep percolation.                              (NORETURNFLOW)
 </span><span class="sc24">   </span><span class="sc2">#   2) Specify the SFR segments/reaches that receive runoff, or define runoff to leave model (SEMI_ROUTED_RETURN)
-</span><span class="sc24">   </span><span class="sc2">#   3) Prorate runoff across all SFR reaches within a WBS. If no SFR reaches are found then
-</span><span class="sc24">   </span><span class="sc2">#   4) If a WBS does not have anywhere to apply runoff then it leaves the model domain and a warning is raised.
+</span><span class="sc24">   </span><span class="sc2">#   3) Prorate runoff across all SFR reaches within a WBS.                                   (ROUTED_RETURN_ANY_REACH)
+</span><span class="sc24">   </span><span class="sc2">#      If WBS has no SFR reaches, then runoff leaves the model and a warning is raised.
+</span><span class="sc24">   </span><span class="sc2">#   4) Runoff leaves the model domain without warning.                                       (ALLOW_RETURN_FLOW_TO_LEAVE_MODEL)
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># If WBS is defined with multiple runoff options, then the previous order determines which one is selected.
-</span><span class="sc24">   </span><span class="sc2">#   For example NORETURN flow is chosen over SEMI_ROUTED_RETURN if both are specified.
+</span><span class="sc24">   </span><span class="sc2">#   For example NO_RETURN_FLOW flow is chosen over ALLOW_RETURN_FLOW_TO_LEAVE_MODEL and SEMI_ROUTED_RETURN if all are specified.
+</span><span class="sc24">   </span><span class="sc2">#
+</span><span class="sc24">   </span><span class="sc2"># ------------------------------------------------------------------------------------------------------------------
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># 1) NO_RETURN_FLOW indicates that surface runoff re-infiltrates as deep percolation.
 </span><span class="sc24">   </span><span class="sc2">#
@@ -1187,6 +1200,8 @@ span {
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc6">NO_RETURN_FLOW</span><span class="sc24">  </span><span class="sc12">[</span><span class="sc24"> </span><span class="sc7">LAI</span><span class="sc12">[</span><span class="sc0">S</span><span class="sc12">,</span><span class="sc0">T</span><span class="sc12">,</span><span class="sc0">L</span><span class="sc12">]</span><span class="sc24"> </span><span class="sc12">]</span><span class="sc24">
    </span><span class="sc2">#
+</span><span class="sc24">   </span><span class="sc2"># ------------------------------------------------------------------------------------------------------------------
+</span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># 2) SEMI_ROUTED_RETURN points to the specific SFR segments and reaches that receive runoff
 </span><span class="sc24">   </span><span class="sc2">#    NSFR_RETURN in the GLOBAL BLOCK defines the number of List-Style Loads records loaded.
 </span><span class="sc24">   </span><span class="sc2">#
@@ -1208,7 +1223,7 @@ span {
 </span><span class="sc24">   </span><span class="sc2">#        ***If FRAC is NOT specified (or specified as -1), then the fraction of runoff automatically determined
 </span><span class="sc24">   </span><span class="sc2">#           as the ratio of ISRR's length to the total length of all return flow points for the WBS --note if there is a mixture of FRAC defined and not defined for a WBS, then it defaults to length prorating.
 </span><span class="sc24">   </span><span class="sc2">#
-</span><span class="sc24">   </span><span class="sc2">#     For Example with NSFR_RETURN = 6, the following allows WBS 4 and 5's return flow locations
+</span><span class="sc24">   </span><span class="sc2">#     For Example with NSFR_RETURN = 7, the following defines the SEMI_ROUTED_RETURN:
 </span><span class="sc24">   </span><span class="sc2">#       ISRR, WBS_ID, SEGMENT, REACH, [FRAC]
 </span><span class="sc24">   </span><span class="sc2">#          1     4     3         2    0.6   # 60% of WBS 4's runoff is applied to Seg 3, RCH 4
 </span><span class="sc24">   </span><span class="sc2">#          2     4     14        0    0.4   # 40% of WBS 4's runoff is applied to all reaches in Seg 14. The runoff is length prorated for each of the SEG 14's reaches.
@@ -1216,9 +1231,11 @@ span {
 </span><span class="sc24">   </span><span class="sc2">#          4     0                          # ISRR is disabled and ignored
 </span><span class="sc24">   </span><span class="sc2">#          5     6     16        2          # No FRAC indicates that WBS 6 will length prorate all its return flow locations
 </span><span class="sc24">   </span><span class="sc2">#          6     6     17        0          # WBS 6 includes all reaches from SEG 15, length prorates along with SEG 16, RCH 2
+</span><span class="sc24">   </span><span class="sc2">#          7     3     0         0          # WBS 3 runoff is removed from the model (flows out of simulation domain)
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc6">SEMI_ROUTED_RETURN</span><span class="sc24"> </span><span class="sc7">LAI</span><span class="sc12">[</span><span class="sc0">S</span><span class="sc12">,</span><span class="sc0">T</span><span class="sc12">,</span><span class="sc0">L-3</span><span class="sc12">]</span><span class="sc24">
    </span><span class="sc2">#
+</span><span class="sc24">   </span><span class="sc2"># ------------------------------------------------------------------------------------------------------------------
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># 3) FULLY ROUTED RETURN indicates that a WBS will search for any SFR reaches
 </span><span class="sc24">   </span><span class="sc2">#    that are within the WBS. It will then length prorate the runoff to those reaches
@@ -1226,11 +1243,10 @@ span {
 </span><span class="sc24">   </span><span class="sc2">#    for any WBS that does not have a 1 for NO_RETURN_FLOW or defined with a SEMI_ROUTED_RETURN
 </span><span class="sc24">   </span><span class="sc2">#        ***Note only one of two keywords may be present. They differ in telling FMP
 </span><span class="sc24">   </span><span class="sc2">#           if diversion segments should be included in the search.
+</span><span class="sc24">   </span><span class="sc2">#        ***Note if SFR is not part of the simulation, then an error is raised.
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc6">ROUTED_RETURN_ANY_NON_DIVERSION_REACH</span><span class="sc24">  </span><span class="sc2"># WBS return flow (runoff) goes to all non-diversion SEGMENT/REACH located in WBS
 </span><span class="sc24">   </span><span class="sc6">ROUTED_RETURN_ANY_REACH</span><span class="sc24">                </span><span class="sc2"># WBS return flow (runoff) goes to all               SEGMENT/REACH located in WBS
-</span><span class="sc24">   </span><span class="sc2">#
-</span><span class="sc24">   </span><span class="sc2"># ------------------------------------------------------------------------------------------------------------------
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># By default the FULLY ROUTED RETURN network is determined only when the FMP WBS IDs change spatial location.
 </span><span class="sc24">   </span><span class="sc2">#   This saves computation time, since the fully routed network return locations should not change.
@@ -1241,6 +1257,16 @@ span {
 </span><span class="sc24">   </span><span class="sc2">#   This slows the simulation runtime down and should only be enabled when SFR has segment/reaches moving (not inflow but its physical location)
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc6">REBUILD_FULLY_ROUTED_RETURN</span><span class="sc24">
+   </span><span class="sc2">#
+</span><span class="sc24">   </span><span class="sc2"># ------------------------------------------------------------------------------------------------------------------
+</span><span class="sc24">   </span><span class="sc2">#
+</span><span class="sc24">   </span><span class="sc2"># 4) ALLOW_RETURN_FLOW_TO_LEAVE_MODEL indicates that runoff flows out of the model domain. 
+</span><span class="sc24">   </span><span class="sc2">#
+</span><span class="sc24">   </span><span class="sc2"># *** Note, if SFR is not part of simulation, 
+</span><span class="sc24">   </span><span class="sc2">#     then runoff is converted to deep percolation. 
+</span><span class="sc24">   </span><span class="sc2">#     This keyword, retains the runoff and allows it to leave the model.
+</span><span class="sc24">   </span><span class="sc2">#
+</span><span class="sc24">   </span><span class="sc6">ALLOW_RETURN_FLOW_TO_LEAVE_MODEL</span><span class="sc24">
    </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># ------------------------------------------------------------------------------------------------------------------
 </span><span class="sc24">   </span><span class="sc2">#

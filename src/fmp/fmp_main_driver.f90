@@ -366,7 +366,13 @@ MODULE FMP_MAIN_DRIVER
         CALL WARNING_MESSAGE(OUTPUT=IOUT,MSG=                                                                                &
                        'FMP input failed to locate the "SURFACE_WATER" BLOCK (BEGIN SURFACE_WATER).'//NL//                  &
                        'No surface water deliveries will occur and all runoff is converted to deep percolation.'//NL//BLN// &
-                       'If you want this behaivoir then ignore this warning.'//BLN)
+                       'If you want this behaivoir then ignore this warning.'//NL//BLN//       &
+                       'If you want to include runoff, at a minimum include this block'//NL//  &
+                       '   with the "ALLOW_RETURN_FLOW_TO_LEAVE_MODEL" keyword.'//NL//         &
+                       '   That is:'//NL//                                                     &
+                       '           BEGIN SURFACE_WATER'//NL//                                  &
+                       '              ALLOW_RETURN_FLOW_TO_LEAVE_MODEL'//NL//                  &
+                       '           END'//BLN)
         CALL SWFL%NO_SURFACE_WATER_DATA(FDIM, IOUT, NSEG)
     END IF
     !
