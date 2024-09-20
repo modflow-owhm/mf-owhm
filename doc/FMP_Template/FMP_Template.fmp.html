@@ -171,10 +171,10 @@ span {
 #                   or more simply just:
 #                                         DEFICIENCY_SCENARIO STATIC LIST  CONSTANT 1
 #
-#                   An example of List-Style with 2 properties loaded (e.g. EFFICIENCY keyword).
+#                   An example of List-Style with 2 properties loaded (e.g. IRRIGATION_EFFICIENCY keyword).
 #                   Record ID is the the WBS number, and represents where the properties are applied,
-#                   and after the RecID is the EFFICIENCY for each irrigation type for that WBS.
-#                                         EFFICIENCY STATIC LIST  INTERNAL
+#                   and after the RecID is the IRRIGATION_EFFICIENCY for each irrigation type for that WBS.
+#                                         IRRIGATION_EFFICIENCY STATIC LIST  INTERNAL
 #                                            #RecID  IRR1  IRR2
 #                                               1    0.6   0.8
 #                                               2    0.6   0.8
@@ -183,9 +183,9 @@ span {
 #
 #                   Array-Style reads NROW by NCOL values
 #                   to apply properties spatially rather then through the record ID
-#                   The keyword EFFICIENCY supports both List-Style and Array-Style.
+#                   The keyword IRRIGATION_EFFICIENCY supports both List-Style and Array-Style.
 #                   The following is Array-Style:
-#                                         EFFICIENCY STATIC ARRAY  INTERNAL
+#                                         IRRIGATION_EFFICIENCY STATIC ARRAY  INTERNAL
 #                                               0.6  0.6  0.6  0.8  0.8
 #                                               0.6  0.6  0.6  0.8  0.8
 #                                               0.6  0.6  0.6  0.8  0.8
@@ -583,7 +583,7 @@ span {
 </span><span class="sc24">   </span><span class="sc6">NCROP</span><span class="sc24">       </span><span class="sc7">INT</span><span class="sc24">
    </span><span class="sc6">NSOIL</span><span class="sc24">       </span><span class="sc7">INT</span><span class="sc24">
    </span><span class="sc2">#
-</span><span class="sc24">   </span><span class="sc2">#   NIRRIGATE  =&gt; No. of Irrigation Types (# of columns in EFFICIENCY) -- Set to zero if not specified
+</span><span class="sc24">   </span><span class="sc2">#   NIRRIGATE  =&gt; No. of Irrigation Types (# of columns in IRRIGATION_EFFICIENCY) -- Set to zero if not specified
 </span><span class="sc24">   </span><span class="sc2">#   NRD_TYPES  =&gt; No. of Non-Routed Deliveries (NRD) Types, this is the number of NRD triplets specified
 </span><span class="sc24">   </span><span class="sc2">#                        (NRD List Load is: NRD_TYPES*3 Columns) -- Set to zero if not specified
 </span><span class="sc24">   </span><span class="sc2">#   NSFR_DELIV =&gt; No. of SFR semi-routed delivery    (SRD) points that are defined.
@@ -739,7 +739,7 @@ span {
 </span><span class="sc24">   </span><span class="sc2"># ------------------------------------------------------------------------------------------------------------------
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2">#  Only REQUIRED keyword in block,
-</span><span class="sc24">   </span><span class="sc2">#       the rest will be set to default values if not specified. Note that EFFICIENCY is required when NIRRIGATE &gt; 0
+</span><span class="sc24">   </span><span class="sc2">#       the rest will be set to default values if not specified. Note that IRRIGATION_EFFICIENCY is required when NIRRIGATE &gt; 0
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># READ 2D Array of INT that are from 0 to NWBS to indicate the spatial area and location of each WBS.
 </span><span class="sc24">   </span><span class="sc2">#   In older publications, the WBS LOCATION was abbreviated as FID.
@@ -748,34 +748,36 @@ span {
    </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># ------------------------------------------------------------------------------------------------------------------
 </span><span class="sc24">   </span><span class="sc2">#
-</span><span class="sc24">   </span><span class="sc2"># EFFICIENCY is REQUIRED if NIRRIGATE &gt; 0
+</span><span class="sc24">   </span><span class="sc2"># IRRIGATION_EFFICIENCY is REQUIRED if NIRRIGATE &gt; 0
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># Irrigation Efficiency (OFE) is between 0-1 and represents OFE=CIR/DEMAND,
 </span><span class="sc24">   </span><span class="sc2">#    where CIR is the crop irrigation requirement under perfect efficiency
-</span><span class="sc24">   </span><span class="sc2">#    and Demand is the necessary water demand to meet the CIR
+</span><span class="sc24">   </span><span class="sc2">#    and Demand is the necessary water demand to meet the CIR.
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># List-Style Loads NWBS x NIRRIGATE and Array-Style Loads NROW x NCOL
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># OFE is tied to the IRRIGATION type, GLOBAL DIMENSION keyword NIRRIGATE.
 </span><span class="sc24">   </span><span class="sc2">#   If a crop is irrigated then it's IRRIGATION flag is &gt;0 and set equal to the irrigation type (1 to NIRRIGATE).
-</span><span class="sc24">   </span><span class="sc2">#   If EFFICIENCY input is set to ARRAY, then the (ROW, COL) that the crop is located in determines its OFE when irrigated.
-</span><span class="sc24">   </span><span class="sc2">#   If EFFICIENCY input is set to LIST,  then the WBS located at the crop's (ROW, COL) determines the EFFICIENCY row
-</span><span class="sc24">   </span><span class="sc2">#                                             and the crop's IRRIGATION flag determines the EFFICIENCY column.
+</span><span class="sc24">   </span><span class="sc2">#   If IRRIGATION_EFFICIENCY input is set to ARRAY, then the (ROW, COL) that the crop is located in determines its OFE when irrigated.
+</span><span class="sc24">   </span><span class="sc2">#   If IRRIGATION_EFFICIENCY input is set to LIST,  then the WBS located at the crop's (ROW, COL) determines the IRRIGATION_EFFICIENCY row
+</span><span class="sc24">   </span><span class="sc2">#                                             and the crop's IRRIGATION flag determines the IRRIGATION_EFFICIENCY column.
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2">#      ***Note that the old OFE input was NFARM by NCROP, to mimic this behavior just set NIRRIGATE=NCROP
 </span><span class="sc24">   </span><span class="sc2">#         and define each crop that is irrigated with an IRRIGATION flag equal to the CROP ID.
+</span><span class="sc24">   </span><span class="sc2">#      ***This keyword was preivously, "EFFICIENCY", which is still supported for backward compatibility.
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2">#
-</span><span class="sc24">   </span><span class="sc6">EFFICIENCY</span><span class="sc24">    </span><span class="sc7">LAI</span><span class="sc12">[</span><span class="sc0">S</span><span class="sc12">,</span><span class="sc0">T</span><span class="sc12">,</span><span class="sc0">A</span><span class="sc12">,</span><span class="sc0">L-NIRRIGATE</span><span class="sc12">]</span><span class="sc24">
+</span><span class="sc24">   </span><span class="sc6">IRRIGATION_EFFICIENCY</span><span class="sc24">    </span><span class="sc7">LAI</span><span class="sc12">[</span><span class="sc0">S</span><span class="sc12">,</span><span class="sc0">T</span><span class="sc12">,</span><span class="sc0">A</span><span class="sc12">,</span><span class="sc0">L-NIRRIGATE</span><span class="sc12">]</span><span class="sc24">
    </span><span class="sc2">#
-</span><span class="sc24">   </span><span class="sc2"># When water supply does not meet demand the EFFICIENCY (OFE)
+</span><span class="sc24">   </span><span class="sc2"># When water supply does not meet demand the IRRIGATION_EFFICIENCY (OFE)
 </span><span class="sc24">   </span><span class="sc2"># can improve to 1.0 or remain the same.
 </span><span class="sc24">   </span><span class="sc2"># EFFICIENCY_IMPROVEMENT is a 0 or 1 flag to indicate if efficiency improvement is allowed.
 </span><span class="sc24">   </span><span class="sc2">#   0 - Efficiency remains the same, crop transpiration reduced due to supply shortfall
 </span><span class="sc24">   </span><span class="sc2">#   1 - Efficiency improves until it reaches 1.0, then crop transpiration reduced
 </span><span class="sc24">   </span><span class="sc2">#   If not specified then automatically set to 0, so OFE is held constant based on user input. That is "EFFICIENCY_IMPROVEMENT CONSTANT 0"
+</span><span class="sc24">   </span><span class="sc2">#      ***Note, this keyword was preivously, "EFFICIENCY_IMPROVEMENT", which is still supported for backward compatibility.
 </span><span class="sc24">   </span><span class="sc2">#
-</span><span class="sc24">   </span><span class="sc6">EFFICIENCY_IMPROVEMENT</span><span class="sc24">    </span><span class="sc7">LAI</span><span class="sc12">[</span><span class="sc0">S</span><span class="sc12">,</span><span class="sc0">T</span><span class="sc12">,</span><span class="sc0">A</span><span class="sc12">,</span><span class="sc0">L-NIRRIGATE</span><span class="sc12">]</span><span class="sc24">
+</span><span class="sc24">   </span><span class="sc6">IRRIGATION_EFFICIENCY_IMPROVEMENT</span><span class="sc24">    </span><span class="sc7">LAI</span><span class="sc12">[</span><span class="sc0">S</span><span class="sc12">,</span><span class="sc0">T</span><span class="sc12">,</span><span class="sc0">A</span><span class="sc12">,</span><span class="sc0">L-NIRRIGATE</span><span class="sc12">]</span><span class="sc24">
    </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># ------------------------------------------------------------------------------------------------------------------
 </span><span class="sc24">   </span><span class="sc2">#
@@ -1617,7 +1619,7 @@ span {
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2">#        =0 Indicates that it is not irrigated
 </span><span class="sc24">   </span><span class="sc2">#        &gt;0 Indicates crop is irrigated and the number is the irrigation type
-</span><span class="sc24">   </span><span class="sc2">#              The INT specified is the column in EFFICIENCY (WBS Block)
+</span><span class="sc24">   </span><span class="sc2">#              The INT specified is the column in IRRIGATION_EFFICIENCY (WBS Block)
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc6">IRRIGATION</span><span class="sc24">       </span><span class="sc7">LAI</span><span class="sc12">[</span><span class="sc0">S</span><span class="sc12">,</span><span class="sc0">T</span><span class="sc12">,</span><span class="sc0">A</span><span class="sc12">,</span><span class="sc0">L</span><span class="sc12">]</span><span class="sc24">
    </span><span class="sc2">#
@@ -1709,7 +1711,7 @@ span {
    </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># Inefficient losses from irrigation is the extra water required to meet an irrigation requirement
-</span><span class="sc24">   </span><span class="sc2"># They are a result of the EFFICIENCY being less than 1
+</span><span class="sc24">   </span><span class="sc2"># They are a result of the IRRIGATION_EFFICIENCY being less than 1
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># SURFACEWATER_LOSS_FRACTION_IRRIGATION: indicates
 </span><span class="sc24">   </span><span class="sc2">#     the fraction of inefficient losses from irrigation that go
