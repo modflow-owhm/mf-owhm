@@ -11,7 +11,7 @@ cd "$SHELLDIR"
 #
 #---- Get location of find  --------------------------------------------------------------
 #
-source ../findfind.sh
+source ../bash_variables/findfind.sh
 #
 #---- Keep No File Warnings From Happening  ----------------------------------------------
 #

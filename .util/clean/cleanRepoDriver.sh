@@ -1,14 +1,18 @@
 #!/bin/env bash 
-
+#
 # Set command arg to 
 #  "example" to only do example/outputs
-#  "lib" to only do lib folder
-#  "object" to only do the obj folder
-# Nothing to do both
+#  "lib"     to only do lib folder
+#  "object"  to only do the obj folder
+#  "nopause" disables stopping script at completion.
+# 
+#    Not including one or more of 
+#       "example", "lib", or "object" args
+#       will automatically select all three.
 #
 #shopt -s nocasematch
 #
-#---- Get Shell Scripts path  ------------------------------------------------------------
+#---- Get Shell Script path  -------------------------------------------------------------
 #
 SHELLDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 #
@@ -20,14 +24,11 @@ cd "$SHELLDIR"
 #
 source ../bash_variables/findfind.sh
 #
-#
 #---- Get NL and BLN variables  ----------------------------------------------------------
 #
 source ../bash_variables/setNL.sh
 #
-#
-#---- Run Script  ------------------------------------------------------------------------
-#
+#---- Parse Arguments  -------------------------------------------------------------------
 #
 T="true"
 F="false"
@@ -61,14 +62,14 @@ do
   esac
 done
 
-#---- Run Script  ------------------------------------------------------------------------
-#
 if [ $ALL = $T ]; then
                  EX=$T
                  OBJ=$T
                  LIB=$T
 fi
 
+#---- Clean Repo  ------------------------------------------------------------------------
+#
 #Clean out the object file output
 if [ $OBJ = $T ]; then
              bash ./cleanObj.sh "nopause"
@@ -97,6 +98,8 @@ then
 else
    echo "${BLN}Repo Now Clean.${NL}"
 fi
+#
+echo ""
 #---- Random Notes - Ignore  -------------------------------------------------------------
 #
 # find ./obj -not \(-name 'obj' -or -name '*odt' -or -name '*.jpg' \) -delete
