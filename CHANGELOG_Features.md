@@ -12,7 +12,7 @@
 
 &nbsp;
 
-## 2.3.1-b2
+## 2.3.1-b3
 
 TBA
 
@@ -26,7 +26,13 @@ The main executable added support for basic command arguments. The current argum
 
 ### `FMP` Improvements
 
-* `SURFACE_WATER` block `ADDED_RUNOFF` keyword.:
+* Renamed input keywords:
+     * The original keywords are still supported to maintain backward compatibility,  
+          but the new versions are now used in the FMP_Template and LIST output.
+     * `EFFICIENCY` keyword changed to `IRRIGATION_EFFICIENCY`
+     * `EFFICIENCY_IMPROVEMENT ` keyword changed to `IRRIGATION_EFFICIENCY_IMPROVEMENT`
+
+* `SURFACE_WATER` block `ADDED_RUNOFF` keyword.
      * `ADDED_RUNOFF` specifies additional runoff that is included in the model.
           This is added to the calculated runoff from precipitation and irrigation.
      * `ADDED_RUNOFF` is effected by any modification to a WBS runoff, such as,  
@@ -40,6 +46,10 @@ The main executable added support for basic command arguments. The current argum
             and reads NWBS scale factors and applies them by WBS.
           * Array-Style input reads an NROW by NCOL array of runoff values.
           * List-Style reads NWBS records that specify the total added runoff for each WBS.
+* `SURFACE_WATER` block `ALLOW_RETURN_FLOW_TO_LEAVE_MODEL` keyword.
+     * Indicates that runoff that is has no semi- or fully-routed return location may leave the model without raising a warning. This is useful if you want to have runoff in a simulation that does not include `SFR`.
+
+* If `SFR` is not part of the simulation and the `SURFACE_WATER block` has:`SEMI_ROUTED_DELIVERY`, `SEMI_ROUTED_RETURN`, or `ROUTED_RETURN_ANY_REACH`, `ROUTED_RETURN_ANY_NON_DIVERSION_REACH` specified, then a warning is raised and they are disabled. Previously, a error was raised and the simulation stopped.
 
 ------
 
