@@ -1,0 +1,33 @@
+BEGIN LINEFEED
+        OPEN/CLOSE ./feedfiles/SFR_FeedFile_Inflow.txt
+END LINEFEED
+#
+BEGIN OPTIONS
+    #
+    # Suppress writing SFR stream network to LIST file after reading input.
+    NO_PRINT
+    #
+    # Read network for first stress period, then reuse for rest of simulation.
+    #   Use Time Series Input, TABFILEs, or LineFeed to specify segment FLOW
+    AUTOMATIC_NEGATIVE_ITMP
+    #
+    # Output Files ----------------------------------------------------------------------------------------------------------------------------------
+    #   Generic_Output is a place holder for the output file location.
+    #   The file name that is commented to the right is the recommended name.
+    #   Example use:
+    #               DBFILE   ./output/SFR_Streamflow.txt
+    #
+    # Print for each SFR reach, for all time steps, in a column based format, reach inflow, seepage, reach outflow, and base properties.
+    DBFILE     ./output/SFR_Streamflow.txt                  # SFR_Streamflow.txt Segment/Reach -> inflow/outflow/seepage
+
+END OPTIONS
+#
+-4   1    0   0   86400   0.0001  9    0      1             # (Part   1c) NSTRM,  NSS, NSFRPAR, NPARSEG, CONST, DLEAK, ISTCB1, ISTCB2, ISFROPT         
+1    3    1   1   1       100     95   0.01   1.0   1.0     # (Part   2)  KRCH    IRCH    JRCH    ISEG    IREACH  RCHLEN  STRTOP  SLOPE   STRTHICK        STRHC1
+1    3    2   1   2       100     94   0.01   1.0   1.0     # (Part   2)  KRCH    IRCH    JRCH    ISEG    IREACH  RCHLEN  STRTOP  SLOPE   STRTHICK        STRHC1
+1    3    3   1   3       100     93   0.01   1.0   1.0     # (Part   2)  KRCH    IRCH    JRCH    ISEG    IREACH  RCHLEN  STRTOP  SLOPE   STRTHICK        STRHC1
+1    3    4   1   4       100     92   0.01   1.0   1.0     # (Part   2)  KRCH    IRCH    JRCH    ISEG    IREACH  RCHLEN  STRTOP  SLOPE   STRTHICK        STRHC1
+1 0 0                                                       # SP 1 (Part 5) ITMP IRDFLG IPTFLG
+1 1 0 0 0 0 0 0 0.03                                        # (Part 6a) NSEG ICALC OUTSEG IUPSEG FLOW RUNOFF ETSW PPTSW ROUGHCH
+   0.5                                                      # (Part 6b) WIDTH1
+   0.5                                                      # (Part 6c) WIDTH2

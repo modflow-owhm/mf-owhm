@@ -1,0 +1,15 @@
+#Input
+#Package    Unit  File
+DIS            12 owhm_gmg_example.dis
+BAS6           13 owhm_gmg_example.bas
+#OC            39 owhm_gmg_example.oc  # The output control is specified instead with BAS options instead
+GMG            18 owhm_gmg_example.gmg
+LPF            14 owhm_gmg_example.lpf
+GHB            15 owhm_gmg_example.ghb
+FMP            16 owhm_gmg_example.fmp
+MNW2           17 owhm_gmg_example.mnw2
+SFR            19 owhm_gmg_example.sfr
+#Output
+LIST           11 ./output/owhm_gmg_example.lst  WRITE
+DATA(BINARY)    9 ./output/owhm_gmg_example.cbc  WRITE
+#DATA           37 ./output/owhm_gmg_example.fhd  WRITE
