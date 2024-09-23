@@ -18,12 +18,12 @@ cd "$SHELLDIR"
 #
 #---- Get location of find  --------------------------------------------------------------
 #
-source ../findfind.sh
+source ../bash_variables/findfind.sh
 #
 #
 #---- Get NL and BLN variables  ----------------------------------------------------------
 #
-source ../setNL.sh
+source ../bash_variables/setNL.sh
 #
 #
 #---- Run Script  ------------------------------------------------------------------------

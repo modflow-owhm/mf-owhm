@@ -600,7 +600,7 @@ MODULE CROP_DATA_FMP_MODULE
                         !
                         CALL PARSE_WORD_UP(LINE,LLOC,ISTART,ISTOP)
                         SELECT CASE(LINE(ISTART:ISTOP))
-                        CASE("STATIC","TRANSIENT","LIST")
+                        CASE("STATIC", "TRANSIENT", "LIST", "CONSTANT", "INTERNAL")
                                    LLOC = ISTART
                                    CALL CDAT%ZERO_CU_TO_BARE%INIT('CU_TO_BARE',  LLOC, LINE, BL%IOUT, BL%IU, CDAT%NCROP, ONE, Z, Z, SCRATCH=BL%SCRATCH)
                         CASE DEFAULT
@@ -620,7 +620,7 @@ MODULE CROP_DATA_FMP_MODULE
                         CASE("RATE")
                                                CALL CDAT%ADMD%INIT('ADMD',       LLOC, LINE, BL%IOUT, BL%IU, CDAT%NCROP, NFARM, NROW, NCOL, NFARM, BYFARM, CDAT%NCROP, BYCROP,CDAT%NIRRG, BYIRRIGATE, SCRATCH=BL%SCRATCH, LISTARRAY=TRUE, CDIM=CDIM, NONEG=TRUE)
                                                CDAT%DEMAND_EXT_FLUX = FALSE
-                        CASE DEFAULT;          CALL STOP_ERROR(OUTPUT=CDAT%LOUT, MSG='FMP CROP BLOCK ERROR. IF YOU SPECIFY KEYWORD "ADDED_DEMAND", YOU MUST FOLLOW IT WITH THE KEYWORD "LENGTH" OR "RATE"'//NL//'TO INDICATE ADDED DEMAND IS LENGTH PER TIME OR VOLUME PER TIME.')
+                        CASE DEFAULT;          CALL STOP_ERROR(OUTPUT=CDAT%LOUT, MSG='FMP CROP BLOCK ERROR. IF YOU SPECIFY KEYWORD "ADDED_DEMAND", YOU MUST FOLLOW IT WITH THE KEYWORD "LENGTH", "FLUX" OR "RATE"'//NL//'TO INDICATE ADDED DEMAND IS LENGTH PER TIME OR VOLUME PER TIME.')
                         END SELECT
                         !
                         CDAT%HAS_DEMAND_EXT = TRUE
@@ -663,7 +663,7 @@ MODULE CROP_DATA_FMP_MODULE
                         !
                         CALL PARSE_WORD_UP(LINE,LLOC,ISTART,ISTOP)
                         SELECT CASE(LINE(ISTART:ISTOP))
-                        CASE("STATIC","TRANSIENT","LIST")
+                        CASE("STATIC", "TRANSIENT", "LIST", "CONSTANT", "INTERNAL")
                                    LLOC = ISTART
                                    CALL CDAT%FEI_CHECK%INIT('FEI_CHECK',  LLOC, LINE, BL%IOUT, BL%IU, CDAT%NCROP, ONE, Z, Z, SCRATCH=BL%SCRATCH)
                         CASE DEFAULT

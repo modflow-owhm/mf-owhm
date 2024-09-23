@@ -1,0 +1,3 @@
+# Name  WBS  LAYER ROW  COL   QMAX   Date_Start  Date_End  -Note that Date_ can be specified as a date, stress period number of keyword (such as NPER)
+Well1    1    2     4    2    1.0e5   1           NPER    # Regular Farm Well, well available    from SP 1  to SP 120
+Well2    1   MNW    2    3    2.0e5   60          NPER    # Well is Linked to MNW2 and available from SP 60 to SP 120

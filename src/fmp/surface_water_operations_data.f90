@@ -2403,7 +2403,7 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
                                                  WRITE(BL%IOUT,'(A)') "   BY_IRRIGATED_AREA KEYWORD FOUND. THE DISTRICT ALLOCATION WILL BE SPLIT BASED ON THE MODEL'S IRRIGATED AREA"
                                                  SWO%DIST_ALLOC_FRAC_TYP = ONE
                                                  !
-                        CASE("LIST","TRANSIENT","STATIC", "CONSTANT")
+                        CASE("LIST", "TRANSIENT", "STATIC", "CONSTANT", "INTERNAL")
                                                  WRITE(BL%IOUT,'(A)') '   '//LINE(ISTART:ISTOP)//' KEYWORD FOUND. NOW LOADING FRACTIONS WITH LIST_ARRAY INPUT, THEN LOADING NFARM + NAUX FRACTIONS THAT INDICATE HOW A DISTRIC ALLOCATION IS SPLIT AMONG THE FARMS AND AUXDEMs.'
                                                  SWO%DIST_ALLOC_FRAC_TYP = TWO
                                                  LLOC = N
