@@ -1191,14 +1191,18 @@ span {
 </span><span class="sc24">   </span><span class="sc2"># If WBS is defined with multiple runoff options, then the previous order determines which one is selected.
 </span><span class="sc24">   </span><span class="sc2">#   For example NO_RETURN_FLOW flow is chosen over ALLOW_RETURN_FLOW_TO_LEAVE_MODEL and SEMI_ROUTED_RETURN if all are specified.
 </span><span class="sc24">   </span><span class="sc2">#
+</span><span class="sc24">   </span><span class="sc2">#      ***Note: There cannot be deep percolation if all cells beneath the land surface are IBOUND=0 (not simulated/solid rock).
+</span><span class="sc24">   </span><span class="sc2">#               That is, all deep percolation is converted to runoff if it does not have a model layer to flow to.
+</span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># ------------------------------------------------------------------------------------------------------------------
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># 1) NO_RETURN_FLOW indicates that surface runoff re-infiltrates as deep percolation.
+</span><span class="sc24">   </span><span class="sc2">#     This converts all runoff into deep percolation (has no effect if all cells beneath are IBOUND=0).
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2">#     LAI[S,T,L] is optional. If not specified then all WBS have NO_RETURN_FLOW.
 </span><span class="sc24">   </span><span class="sc2">#     if included then specify NWBS records that have either
-</span><span class="sc24">   </span><span class="sc2">#        a  1 to indicate the WBS has NO_RETURN_FLOW/No runoff
-</span><span class="sc24">   </span><span class="sc2">#        or 0 to indicate that it does have return flow and Options 2, 3, and 4 decide the runoff location
+</span><span class="sc24">   </span><span class="sc2">#       a  1 to indicate the WBS has NO_RETURN_FLOW/No runoff (all runoff is converted to deep percolation)
+</span><span class="sc24">   </span><span class="sc2">#       or 0 to not enable NO_RETURN_FLOW for the WBS (runoff and deep percolation are calculated as normal.)
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc6">NO_RETURN_FLOW</span><span class="sc24">  </span><span class="sc12">[</span><span class="sc24"> </span><span class="sc7">LAI</span><span class="sc12">[</span><span class="sc0">S</span><span class="sc12">,</span><span class="sc0">T</span><span class="sc12">,</span><span class="sc0">L</span><span class="sc12">]</span><span class="sc24"> </span><span class="sc12">]</span><span class="sc24">
    </span><span class="sc2">#

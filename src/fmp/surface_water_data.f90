@@ -367,7 +367,7 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
                                    SWF%NORETURNFLOW = TRUE
                         END SELECT
                         !
-      CASE ("ALLOW_RETURN_FLOW_TO_LEAVE_MODEL")
+      CASE ("ALLOW_RETURN_FLOW_TO_LEAVE_MODEL", "ALLOW_RETURNFLOW_TO_LEAVE_MODEL")
                         WRITE(BL%IOUT,'(A)') '   ALLOW_RETURN_FLOW_TO_LEAVE_MODEL KEYWORD FOUND. Runoff that has no where to go will leave the model.'
                         SWF%ALLOW_RETURN_FLOW_TO_LEAVE_MODEL = TRUE
                         !

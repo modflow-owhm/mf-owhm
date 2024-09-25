@@ -1135,14 +1135,18 @@ BEGIN SURFACE_WATER
    # If WBS is defined with multiple runoff options, then the previous order determines which one is selected.
    #   For example NO_RETURN_FLOW flow is chosen over ALLOW_RETURN_FLOW_TO_LEAVE_MODEL and SEMI_ROUTED_RETURN if all are specified.
    #
+   #      ***Note: There cannot be deep percolation if all cells beneath the land surface are IBOUND=0 (not simulated/solid rock).
+   #               That is, all deep percolation is converted to runoff if it does not have a model layer to flow to.
+   #
    # ------------------------------------------------------------------------------------------------------------------
    #
    # 1) NO_RETURN_FLOW indicates that surface runoff re-infiltrates as deep percolation.
+   #     This converts all runoff into deep percolation (has no effect if all cells beneath are IBOUND=0).
    #
    #     LAI[S,T,L] is optional. If not specified then all WBS have NO_RETURN_FLOW.
    #     if included then specify NWBS records that have either
-   #        a  1 to indicate the WBS has NO_RETURN_FLOW/No runoff
-   #        or 0 to indicate that it does have return flow and Options 2, 3, and 4 decide the runoff location
+   #       a  1 to indicate the WBS has NO_RETURN_FLOW/No runoff (all runoff is converted to deep percolation)
+   #       or 0 to not enable NO_RETURN_FLOW for the WBS (runoff and deep percolation are calculated as normal.)
    #
    NO_RETURN_FLOW  [ LAI[S,T,L] ]
    #
