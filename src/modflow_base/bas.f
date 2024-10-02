@@ -6769,13 +6769,33 @@ C  Save global data for a grid.
 !
 !      END SUBROUTINE
 
-      PURE SUBROUTINE CHECK_CBC_GLOBAL_UNIT(ICBC)
-      USE GLOBAL, ONLY: NOCBC, CBC_GLOBAL_UNIT
-      IMPLICIT NONE
-      INTEGER, intent(inout) :: ICBC
+      pure subroutine get_cbc_global_unit(global_cbc, no_cbc, 
+     +                                    flow_package)
+      use GLOBAL, only: NOCBC, CBC_GLOBAL_UNIT
+      implicit none
+      integer, intent(out):: global_cbc
+      logical, intent(out):: no_cbc
+      logical, intent(in ):: flow_package
       !
-      IF(CBC_GLOBAL_UNIT /= 0)  ICBC = CBC_GLOBAL_UNIT
+      global_cbc = CBC_GLOBAL_UNIT
       !
-      IF( NOCBC > 1 ) ICBC = 0
+      no_cbc = NOCBC == 2 .or. (NOCBC == 1 .and. .not. flow_package)
       !
-      END SUBROUTINE
+      end subroutine
+
+      pure subroutine check_cbc_global_unit(icbc, flow_package)
+      use GLOBAL, only: NOCBC, CBC_GLOBAL_UNIT
+      implicit none
+      integer, intent(inout) :: icbc
+      logical, intent(in):: flow_package
+      !
+      ! NOCBC =  2 -> disable cbc
+      ! NOCBC =  1 -> disable cbc for all packages except flow based
+      ! NOCBC = -1 -> cbc writes every time step
+      ! NOCBC = -2 -> cbc writes last time step of each stress period
+      !
+      if(CBC_GLOBAL_UNIT /= 0)  icbc = CBC_GLOBAL_UNIT
+      !
+      if(NOCBC == 2 .or. (NOCBC == 1 .and. .not. flow_package)) icbc = 0
+      !
+      end subroutine

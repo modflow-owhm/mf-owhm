@@ -365,8 +365,24 @@ C1------IDENTIFY PACKAGE AND INITIALIZE.
       CALL URWORD(line, lloc, istart, istop, 2, IUZFCB2, r, IOUT, In)
       !
       ! CHECK IF GLOBAL SHUTDOWN OF CBC IS IN EFFECT
-      CALL CHECK_CBC_GLOBAL_UNIT(IUZFCB1)
-      CALL CHECK_CBC_GLOBAL_UNIT(IUZFCB2)
+      ! get_cbc_global_unit(global_cbc, no_cbc, flow_package)
+      call get_cbc_global_unit(I, found, .TRUE.)
+      if (found) then
+          if(IUZFCB1 > 0) IUZFCB1 = 0
+          if(IUZFCB2 > 0) IUZFCB2 = 0
+      else if(I /= 0) then  ! Try to honor any -flag requests for infiltration to binary
+          if(IUZFCB2 == 0 .and. IUZFCB2 == 0 .or. 
+     +      (IUZFCB2 < 0 .and. IUZFCB2 < 0)) then
+              IUZFCB2 = I
+          else if(IUZFCB1 < 0) then
+              IUZFCB2 = I
+          else if(IUZFCB2 < 0) then
+              IUZFCB1 = I
+          else
+              IUZFCB1 = 0
+              IUZFCB2 = I
+          end if
+      end if
       !
       IUZFB22 = IUZFCB2
       IUZFB11 = IUZFCB1
