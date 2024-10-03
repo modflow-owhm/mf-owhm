@@ -904,7 +904,7 @@ C
       CALL URWORD(line, lloc, istart, istop, 2, ISTCB1, r, IOUT, In)
       !
       ! CHECK IF GLOBAL SHUTDOWN OF CBC IS IN EFFECT
-       CALL CHECK_CBC_GLOBAL_UNIT(ISTCB1)
+       CALL CHECK_CBC_GLOBAL_UNIT(ISTCB1, .FALSE.)
       !
       CALL URWORD(line, lloc, istart, istop, 2, ISTCB2, r, IOUT, In)
       IF ( OUTSEGFLAG > 0 ) THEN

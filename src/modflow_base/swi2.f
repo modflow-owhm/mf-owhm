@@ -339,7 +339,7 @@ C---------READ DATASET 1
         CALL URWORD(line, lloc, istart, istop, 2,ISWIOBS, r, IOUT, In)
         !
         ! CHECK IF GLOBAL SHUTDOWN OF CBC IS IN EFFECT
-        CALL CHECK_CBC_GLOBAL_UNIT(ISWICB)
+        CALL CHECK_CBC_GLOBAL_UNIT(ISWICB, .TRUE.)
         !
 C         TEST FOR KEYWORD ARGUMENTS
         DO
