@@ -6,7 +6,21 @@
 
 # Version 2.3.1-b3  — Develop–Beta Release
 
-&nbsp; 
+### Important Notes
+
+This is the `develop` branch of MODFLOW-OWHM. It is the current code state that is builds the preliminary beta releases.   
+For publications, it is recommended to use the current production release from the [main](https://code.usgs.gov/modflow/mf-owhm/-/tree/main) and [release](https://code.usgs.gov/modflow/mf-owhm/-/tree/release) branches  
+(or request a beta release be converted to a production release).
+
+Preliminary Beta Download  &nbsp;  &nbsp; &nbsp; &nbsp; ➣ &nbsp; **[v2.3.1-b3](https://code.usgs.gov/modflow/mf-owhm/-/archive/2.3.1-b3/mf-owhm-2.3.1-b3.zip)** &nbsp; &nbsp; `( 9-24-2024 )`
+
+Production Release Download &nbsp; &nbsp; ➣ &nbsp; **[v2.3.0](https://code.usgs.gov/modflow/mf-owhm/-/archive/2.3.0/mf-owhm-2.3.0.zip)** &nbsp; &nbsp; &nbsp; &nbsp; `( 1-15-2024 )`
+
+All past releases are in the [Tags](https://code.usgs.gov/modflow/mf-owhm/-/tags) section.
+
+For new users, it is recommended to read the first 20 pages of the [OWHM Main Body](https://pubs.usgs.gov/tm/06/a60/tm6A60_body.pdf) and [Appendix 4](https://pubs.usgs.gov/tm/06/a60/tm6A60_appendix4.pdf) for an overview. For developing new models, please refer to the doc folder for help documents and the [FMP_template](https://code.usgs.gov/modflow/mf-owhm/-/tree/develop/doc/FMP_Template) for a full input description of FMP (the template is a regular text file, and there is an html file for viewing with syntax highlighting). Note that the template, contains a lot of header #comments for providing an overview of the read utilities of OHWM. Please see [CHANGELOG](CHANGELOG.md) for a current list of changes and new features are documented in [CHANGELOG_Features](CHANGELOG_Features.md).
+
+### Develop and Beta Summary
 
 The `develop` branch contains intermediate code and bug fixes for MODFLOW-OWHM. When the code is in a state that it compiles and passes the example tests, then a beta release is made and posted to the `beta` branch. These releases have NOT undergone USGS peer review and contain the preliminary disclaimer. The develop branch is stable and is eventually merged into the main branch for USGS code peer review. 
 
@@ -14,9 +28,7 @@ The `beta` branch is only for beta compiled executables, beta README.pdf, beta C
 
 Any commit stored on the `beta` branch may be dropped or rebased to save on online storage. Beta releases are not meant to be used in official publications, but are available to provide rapid release of bug fixes and new features for users to take advantage of. If a beta commit that you need is removed, then you can obtain the code it is based off of by finding in the `develop` branch a commit named `v2.X.Y-bZ`, where `X`, `Y`, and `Z` pertain to the beta version's minor, patch and beta numbers. For example, the commit `v2.3.1-b3`  would contain the code that was compiled to make the beta version 2.3.1-b3 (that is, the third beta release of version 2.3.1).
 
-The web location for the `beta` and `develop` branches are:  
-https://code.usgs.gov/modflow/mf-owhm/-/tree/beta  
-https://code.usgs.gov/modflow/mf-owhm/-/tree/develop
+The following is the regular README.md used in official releases.
 
 &nbsp; 
 
