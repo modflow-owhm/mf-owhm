@@ -3133,7 +3133,7 @@ MODULE FMP_MAIN_DRIVER
       CHARACTER(16):: TEXT
       CHARACTER(14):: TIMEUNIT
       CHARACTER(14):: TIME
-      INTEGER IRCH(NCOL,NROW)
+      ! INTEGER IRCH(NCOL,NROW) -- replaced by WBS%IWRK
       INTEGER I,IL,IR,IC,IBD,J,NF,NOPT                                  !FORMERLY IMPLICIT INTEGER
       REAL ROUT, RIN                                                    !FORMERLY IMPLICIT REAL
       DOUBLE PRECISION RATIN,RATOUT
@@ -3169,9 +3169,9 @@ MODULE FMP_MAIN_DRIVER
       !
       DO CONCURRENT (IR=1:NROW, IC=1:NCOL) 
                                 IF(UPLAY(IC,IR)>Z) THEN
-                                                   IRCH(IC,IR) = UPLAY(IC,IR)
+                                                   WBS%IWRK(IC,IR) = UPLAY(IC,IR)
                                 ELSE
-                                                   IRCH(IC,IR) = ONE
+                                                   WBS%IWRK(IC,IR) = ONE
                                 END IF
       END DO
       !
@@ -3270,11 +3270,11 @@ MODULE FMP_MAIN_DRIVER
                  !       (FIRST RECORD CONTAINS LAYER NUMBERS; SECOND RECORD CONTAINS FLOW VALUES).
                  !
                  DO I=1,NROW
-                            WRITE(WBS%IOUT,'(*(I12))') IRCH(:,I)
+                            WRITE(WBS%IOUT,'(*(I12))') WBS%IWRK(:,I)
                  ENDDO
                  !
                  DO I=1,NROW
-                            WRITE(WBS%IOUT,'(*(ES15.7))') ( BUFF(J,I,IRCH(J,I)), J=1, NCOL )
+                            WRITE(WBS%IOUT,'(*(ES15.7))') ( BUFF(J,I,WBS%IWRK(J,I)), J=1, NCOL )
                  ENDDO
                  !
              ENDIF
@@ -3303,11 +3303,11 @@ MODULE FMP_MAIN_DRIVER
               !       (FIRST RECORD CONTAINS LAYER NUMBERS; SECOND RECORD CONTAINS FLOW VALUES).
               !
               DO I=1,NROW
-                        WRITE(FMPOUT%FNRCH_ARRAY%IU,FMT='(*(I12))') IRCH(:,I)
+                        WRITE(FMPOUT%FNRCH_ARRAY%IU,FMT='(*(I12))') WBS%IWRK(:,I)
               ENDDO
               !
               DO I=1,NROW
-                        WRITE(FMPOUT%FNRCH_ARRAY%IU,'(*(ES15.7))') ( BUFF(J,I,IRCH(J,I)), J=1, NCOL )
+                        WRITE(FMPOUT%FNRCH_ARRAY%IU,'(*(ES15.7))') ( BUFF(J,I,WBS%IWRK(J,I)), J=1, NCOL )
               ENDDO
           ENDIF
       ENDIF
@@ -3338,7 +3338,7 @@ MODULE FMP_MAIN_DRIVER
                             NOPT=2
                           ENDIF
                           !     
-                          CALL UBDSV3(KSTP,KPER,TEXT,FMPOUT%FNR_CBC,BUFF,IRCH,NOPT,NCOL,NROW,NLAY,WBS%IOUT,DELT,PERTIM,TOTIM,IBOUND)
+                          CALL UBDSV3(KSTP,KPER,TEXT,FMPOUT%FNR_CBC,BUFF,WBS%IWRK,NOPT,NCOL,NROW,NLAY,WBS%IOUT,DELT,PERTIM,TOTIM,IBOUND)
       ENDIF
       !
       !7===== UPDATE VOLUMETRIC BUDGET FOR FARM NET RECHARGE ======================================================
@@ -3379,7 +3379,7 @@ MODULE FMP_MAIN_DRIVER
     CHARACTER(14):: TIME
     DATA TEXTET  /'EVAPORATION AND TRANSIPIRATION TOTALS  '/
     DATA TEXTETS /'EVAPORATION AND TRANSIPIRATION COMBINED'/
-    INTEGER:: IRCH(NCOL,NROW)
+    ! INTEGER:: IRCH(NCOL,NROW) -- replaced by WBS%IWRK
     INTEGER:: I,IL,IR,IC,J,NF
     DOUBLE PRECISION:: EVAP,TRAN
     !
@@ -3409,14 +3409,14 @@ MODULE FMP_MAIN_DRIVER
         COL_LP: DO IC=1,NCOL
                 !
                 !2B1----LOOP THROUGH CELLS IN A VERTICAL COLUMN TO FIND WHERE TO PLACE FARM NET RECHARGE.
-                IRCH(IC,IR)=1
+                WBS%IWRK(IC,IR)=1
                 LAY_LP: DO IL=1,NLAY
                                 !2B2----IF CELL IS CONSTANT HEAD MOVE ON TO NEXT HORIZONTAL LOCATION.
                                 IF(IBOUND(IC,IR,IL).LT.0) EXIT LAY_LP
                                 !
                                 !2B3----IF CELL IS INACTIVE MOVE DOWN TO NEXT CELL.
                                 IF(IBOUND(IC,IR,IL).EQ.0 .OR. HNEW(IC,IR,IL).LE.BOTM(IC,IR,IL))  CYCLE LAY_LP
-                                IRCH(IC,IR)=IL
+                                WBS%IWRK(IC,IR)=IL
                                 EXIT LAY_LP
                 END DO LAY_LP
         END DO COL_LP
@@ -3440,7 +3440,7 @@ MODULE FMP_MAIN_DRIVER
            !3B2----WRITE TWO RECORDS WHEN MULTIPLE LAYERS HAVE ET.
            !       (FIRST RECORD CONTAINS LAYER NUMBERS; SECOND RECORD CONTAINS EVAPORATION+TRANSPIRATION).
            DO I=1,NROW
-                  WRITE(FMPOUT%ET_ARRAY_SUM%IU,FMT)(IRCH(J,I),J=1,NCOL)
+                  WRITE(FMPOUT%ET_ARRAY_SUM%IU,FMT)(WBS%IWRK(J,I),J=1,NCOL)
            END DO
            !-------WRITE ONE RECORD OF EVAPORATION+TRANSPIRATION VALUES IF ONLY ONE LAYER
            DO I=1,NROW
@@ -3469,7 +3469,7 @@ MODULE FMP_MAIN_DRIVER
            !3B2----WRITE TWO RECORDS WHEN MULTIPLE LAYERS HAVE ET.
            !       (FIRST RECORD CONTAINS LAYER NUMBERS; SECOND RECORD CONTAINS EVAPORATION; THIRD RECORD HAS TRANSPIRATION).
            DO I=1,NROW
-             WRITE(FMPOUT%ET_ARRAY_SEP%IU,FMT)(IRCH(J,I),J=1,NCOL)
+             WRITE(FMPOUT%ET_ARRAY_SEP%IU,FMT)(WBS%IWRK(J,I),J=1,NCOL)
            END DO
            !-------WRITE ONE RECORD OF EVAPORATION VALUES IF ONLY ONE LAYER
            DO I=1,NROW

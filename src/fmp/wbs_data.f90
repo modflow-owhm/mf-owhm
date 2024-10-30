@@ -131,6 +131,7 @@ MODULE WBS_DATA_FMP_MODULE
       INTEGER,                 DIMENSION(:),   ALLOCATABLE:: FALLOW_RANK, MAX_FALLOW_RANK
       INTEGER,                 DIMENSION(:,:), ALLOCATABLE:: FID_ARRAY
       INTEGER,                 DIMENSION(:,:), ALLOCATABLE:: HIERARCHY_ARRAY
+      INTEGER,                 DIMENSION(:,:), ALLOCATABLE:: IWRK  ! work array for holding layer numbers for CBC.
       !
       DOUBLE PRECISION,        DIMENSION(:,:), ALLOCATABLE:: GSE
       DOUBLE PRECISION,        DIMENSION(:,:), ALLOCATABLE:: AREA
@@ -293,6 +294,7 @@ MODULE WBS_DATA_FMP_MODULE
              WBS%CROP_DEMAND_ARRAY(NCOL, NROW) , &
              WBS%DPERC            (NCOL, NROW) , &
              WBS%RUNOFF           (NCOL, NROW), SOURCE=DZ )
+    ALLOCATE(WBS%IWRK(NCOL, NROW))
     !
     CALL WBS%H2OSOURCE%ALLOC(WBS%NFARM)
     WBS%H2OSOURCE%GW  = TRUE
