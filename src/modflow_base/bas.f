@@ -874,8 +874,8 @@ C2------CALCULATE UPPER MOST ACTIVE/NONDRY LAYER
       !          UPLAY = K
       !    END WHERE
       !END DO
-      DO J=1, NROW
-      DO I=1, NCOL
+      DO J=ONE, NROW
+      DO I=ONE, NCOL
          DO K=ONE,NLAY
              IF(IBOUND(I,J,K) /= Z) THEN
                                     UPLAY(I,J) = K
@@ -885,8 +885,8 @@ C2------CALCULATE UPPER MOST ACTIVE/NONDRY LAYER
       END DO
       END DO
       !
-      DO J=1, NROW
-      DO I=1, NCOL
+      DO J=ONE, NROW
+      DO I=ONE, NCOL
       IF(UPLAY(I,J) > Z) THEN !Assumes that there are no convertible layers beneath confine layers
           UP = UPLAY(I,J)
           N  = LBOTM(UP)
