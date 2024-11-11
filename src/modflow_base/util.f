@@ -2844,7 +2844,7 @@ C
 !*********!!11-----RETURN
 !*********!      END SUBROUTINE GWF2UPW1AR
       SUBROUTINE PRINTARRAY(IGRID,ORIGIN,DIROUT,IOUT)  !COULD ADD FLAG FOR WHAT ARRAY TO PRINT OUT
-      USE, INTRINSIC:: IEEE_ARITHMETIC, ONLY: IEEE_VALUE, IEEE_QUIET_NAN 
+      USE, INTRINSIC:: IEEE_ARITHMETIC, ONLY: IEEE_VALUE, IEEE_QUIET_NAN
       USE GENERIC_OPEN_INTERFACE, ONLY: GENERIC_OPEN
       USE GLOBAL,        ONLY: NCOL,NROW,NLAY,DELR,DELC,BOTM,LBOTM,
      +                         ISSFLG,LAYHDT,IBOUND
@@ -2886,12 +2886,14 @@ C
       REAL,    POINTER, DIMENSION(:,:,:),CONTIGUOUS ::T_SC2
       REAL,    POINTER, DIMENSION(:,:,:),CONTIGUOUS ::T_HK
       REAL,ALLOCATABLE, DIMENSION(:,:,:) ::BUFF
+      INTEGER,ALLOCATABLE, DIMENSION(:,:) ::UPLAY
       REAL:: NaN
 
       CHARACTER(256)::FN
       CHARACTER(32)::SGRID,SLAY,SCOL,SFMT
       
       ALLOCATE(BUFF(NCOL,NROW,NLAY))
+      ALLOCATE(UPLAY(NCOL,NROW), SOURCE=0)
       NaN = IEEE_VALUE(NaN, IEEE_QUIET_NAN)
       
       IF (ORIGIN == 1)THEN                                              !USING LPF
@@ -2925,19 +2927,80 @@ C
       WRITE(SFMT,'(I32)')NCOL
       SGRID=ADJUSTL(SGRID)
       SFMT='('//TRIM(ADJUSTL(SFMT))//'ES20.10)'
+      !-------------------------------------------------------------- Upper Active
+      !Initial upper most active layer
+      FN=DIR//'UPLAY_G'//TRIM(SGRID)//'.txt'
+      IU = 0
+      CALL GENERIC_OPEN(FN, IU, IOUT,                                ! Use GENERIC_OPEN to make any missing folders
+     +         ACTION='WRITE', FORM='FORMATTED',
+     +         ACCESS='SEQUENTIAL', STATUS='REPLACE',
+     +         BUFFER_BLOCKSIZE=16384, BUFFER_COUNT=1)
+      WRITE(IU,'(3I10,A,10x,A)')NROW,NCOL,IGRID,
+     +  ' Initial_Upper_Most_Active_Layer','NROW,NCOL,IGRID' !HEADER INFORMATION
+      DO J=1, NROW
+      DO I=1, NCOL
+         DO K=1, NLAY
+             IF(IBOUND(I,J,K) /= Z) THEN
+                                    UPLAY(I,J) = K
+                                    EXIT
+             END IF
+         END DO
+      END DO
+      END DO
+      DO I=1,NROW
+        WRITE(IU,"(*(I6))") UPLAY(:,I)
+      END DO
+      CLOSE(IU)
+      !-------------------------------------------------------------- AREA
+      !BUFF = Area
+      DO I=1,NROW
+      DO J=1,NCOL
+        BUFF(J,I,1)=DELR(J)*DELC(I)
+      END DO
+      END DO
+      !
+      FN=DIR//'AREA_G'//TRIM(SGRID)//'.txt'
+      OPEN(NEWUNIT=IU,FILE=FN,
+     +       STATUS='REPLACE',POSITION='REWIND',ACTION='WRITE') 
+      WRITE(IU,'(3I10,A,10x,A)')NROW,NCOL,IGRID,' AREA',
+     +                       'NROW,NCOL,IGRID' !HEADER INFORMATION
+      DO I=1,NROW
+        WRITE(IU,SFMT)BUFF(:,I,1)
+      END DO
+      CLOSE(IU)
+      !-------------------------------------------------------------- THICK
+      !BUFF = THICK or NaN
+      DO K=1,NLAY
+      DO I=1,NROW
+      DO J=1,NCOL
+        IF(IBOUND(J,I,K) /= Z) THEN
+          BUFF(J,I,K)=BOTM(J,I,LBOTM(K)-1)-BOTM(J,I,LBOTM(K))
+        ELSE
+          BUFF(J,I,K) = NaN
+        END IF
+      END DO
+      END DO
+      END DO
+      !
+      DO K=1, NLAY
+        WRITE(SLAY,'(I32)')K
+        FN=DIR//'THK_G'//TRIM(SGRID)//'_L'//TRIM(ADJUSTL(SLAY))//'.txt'
+        OPEN(NEWUNIT=IU,FILE=FN,
+     +         STATUS='REPLACE',POSITION='REWIND',ACTION='WRITE') 
+        WRITE(IU,'(4I10,A,10x,A)')NROW,NCOL,K,IGRID,' THICK',
+     +                         'NROW,NCOL,LAY,IGRID' !HEADER INFORMATION
+        DO I=1,NROW
+          WRITE(IU,SFMT)BUFF(:,I,K)
+        END DO
+        CLOSE(IU)
+      END DO
       !-------------------------------------------------------------- HKR
-      !WHERE (IBOUND /= Z)
-      !                   BUFF = T_HK
-      !ELSEWHERE
-      !                   BUFF = NaN
-      !END WHERE
+      !BUFF = HKR or NaN
       DO K=1, NLAY
       DO I=1, NROW
       DO J=1, NCOL
       IF(IBOUND(J,I,K) /= Z) THEN
                              BUFF(J,I,K) = T_HK(J,I,K)
-      ELSE
-                             BUFF(J,I,K) = NaN
       END IF
       END DO
       END DO
@@ -2946,13 +3009,8 @@ C
       DO K=1, NLAY
         WRITE(SLAY,'(I32)')K
         FN=DIR//'HKR_G'//TRIM(SGRID)//'_L'//TRIM(ADJUSTL(SLAY))//'.txt'
-        IU = 0
-        CALL GENERIC_OPEN(FN, IU, IOUT,
-     +           ACTION='WRITE', FORM='FORMATTED',
-     +           ACCESS='SEQUENTIAL', STATUS='REPLACE',
-     +           BUFFER_BLOCKSIZE=16384, BUFFER_COUNT=1)
-!        OPEN(NEWUNIT=IU,FILE=FN,WARN=
-!     +         STATUS='REPLACE',POSITION='REWIND',ACTION='WRITE') 
+        OPEN(NEWUNIT=IU,FILE=FN,
+     +         STATUS='REPLACE',POSITION='REWIND',ACTION='WRITE') 
         WRITE(IU,'(4I10,A,10x,A)')NROW,NCOL,K,IGRID,'  HKR',
      +                         'NROW,NCOL,LAY,IGRID' !HEADER INFORMATION
         DO I=1,NROW
@@ -2961,6 +3019,7 @@ C
         CLOSE(IU)
       END DO
       !-------------------------------------------------------------- HKC
+      !BUFF = HKC or NaN
       DO K=1, NLAY
         WRITE(SLAY,'(I32)')K
         FN=DIR//'HKC_G'//TRIM(SGRID)//'_L'//TRIM(ADJUSTL(SLAY))//'.txt'
@@ -3014,39 +3073,95 @@ C
       END DO
       !      
       IF(ANY(ISSFLG == Z))THEN
-      !-------------------------------------------------------------- SC1 
-      !BUFF = SC1 or NaN
+       !-------------------------------------------------------------- SC1
+       !BUFF = SC1 or NaN
        WHERE(IBOUND /= Z)        !SET BUFFER TO STORACE COEFICIENT 1
                        BUFF=T_SC1
        END WHERE
-       IF    (ORIGIN == 1) THEN                                         !USING LPF
-!         FORALL(I=1:NROW,J=1:NCOL,K=1:NLAY,IBOUND(J,I,K) /= Z)          !Ss=SC/(dr*dc*thick)       
-!     +     BUFF(J,I,K)=BUFF(J,I,K)/( DELR(J)*DELC(I)            
-!     +                    *(BOTM(J,I,LBOTM(K)-1)-BOTM(J,I,LBOTM(K))) )
+       IF(ORIGIN == 2) THEN                                         !USING UPW -> SC = Ss/(dr*dc) - so need to add missing thick!
          DO K=1,NLAY
          DO I=1,NROW
          DO J=1,NCOL
            IF(IBOUND(J,I,K) /= Z) THEN
-          BUFF(J,I,K)=BUFF(J,I,K)/( DELR(J)*DELC(I)                     !Ss=SC/(dr*dc*thick)   
-     +                    *(BOTM(J,I,LBOTM(K)-1)-BOTM(J,I,LBOTM(K))) )
-          END IF
-         END DO
-         END DO
-         END DO
-       ELSEIF(ORIGIN == 2) THEN                                         !USING UPW
-!         FORALL(I=1:NROW,J=1:NCOL,K=1:NLAY,IBOUND(J,I,K) /= Z)          !Ss=SC/(dr*dc)
-!     +     BUFF(J,I,K)=BUFF(J,I,K)/( DELR(J)*DELC(I) )
-         DO K=1,NLAY
-         DO I=1,NROW
-         DO J=1,NCOL
-           IF(IBOUND(J,I,K) /= Z) THEN                                  !Ss=SC/(dr*dc)
-            BUFF(J,I,K)=BUFF(J,I,K)/( DELR(J)*DELC(I) )
-          END IF
+             BUFF(J,I,K)=BUFF(J,I,K) 
+     +                   * (BOTM(J,I,LBOTM(K)-1)-BOTM(J,I,LBOTM(K)))
+           END IF
          END DO
          END DO
          END DO
        END IF
-       !-------------------------------------------------------------- SC2 
+       !
+       DO K=1, NLAY
+         WRITE(SLAY,'(I32)')K
+         FN=DIR//'SC1_G'//TRIM(SGRID)//'_L'//TRIM(ADJUSTL(SLAY))//'.txt'
+         OPEN(NEWUNIT=IU,FILE=FN,
+     +          STATUS='REPLACE',POSITION='REWIND',ACTION='WRITE') 
+         WRITE(IU,'(4I10,A,10x,A)')NROW,NCOL,K,IGRID,'  SC1',
+     +                          'NROW,NCOL,LAY,IGRID' !HEADER INFORMATION
+         DO I=1,NROW
+           WRITE(IU,SFMT)BUFF(:,I,K)
+         END DO
+         CLOSE(IU)
+       END DO
+       !-------------------------------------------------------------- SC2 -> Sy 
+       !BUFF = SC2 or NaN
+       IF(ANY(LAYHDT /= Z)) THEN                                        !THERE IS ATLEAST ONE CONVERTABLE LAYER
+        DO K=1,NLAY
+          N = T_LAYTYP(K)
+          IF(N > 0) THEN
+             DO I=1,NROW
+             DO J=1,NCOL
+               IF(IBOUND(J,I,K) /= Z) THEN                              !SC2 = Sy/(dr*dc)
+                    BUFF(J,I,K) = T_SC2(J,I,N)
+               END IF
+             END DO
+             END DO
+          END IF
+        END DO
+        !
+        DO K=1, NLAY
+         N = T_LAYTYP(K)
+         IF(N > 0) THEN
+          WRITE(SLAY,'(I32)')K
+         FN=DIR//'SC2_G'//TRIM(SGRID)//'_L'//TRIM(ADJUSTL(SLAY))//'.txt'
+          OPEN(NEWUNIT=IU,FILE=FN,
+     +           STATUS='REPLACE',POSITION='REWIND',ACTION='WRITE') 
+          WRITE(IU,'(4I10,A,10x,A)')NROW,NCOL,K,IGRID,'  SC2',
+     +                           'NROW,NCOL,LAY,IGRID' !HEADER INFORMATION
+          DO I=1,NROW
+            WRITE(IU,SFMT)BUFF(:,I,N)
+          END DO
+          CLOSE(IU)
+         END IF
+        END DO
+       END IF
+       !-------------------------------------------------------------- SC1 -> Ss 
+       !BUFF = SC1 or NaN
+       WHERE(IBOUND /= Z)        !SET BUFFER TO STORACE COEFICIENT 1
+                       BUFF=T_SC1
+       END WHERE
+       IF    (ORIGIN == 1) THEN                                         !USING LPF -> Ss=SC/(dr*dc*thick)
+         DO K=1,NLAY
+         DO I=1,NROW
+         DO J=1,NCOL
+           IF(IBOUND(J,I,K) /= Z) THEN
+             BUFF(J,I,K)=BUFF(J,I,K)/( DELR(J)*DELC(I)
+     +                   * (BOTM(J,I,LBOTM(K)-1)-BOTM(J,I,LBOTM(K))) )
+           END IF
+         END DO
+         END DO
+         END DO
+       ELSEIF(ORIGIN == 2) THEN                                         !USING UPW -> Ss=SC/(dr*dc)
+         DO K=1,NLAY
+         DO I=1,NROW
+         DO J=1,NCOL
+           IF(IBOUND(J,I,K) /= Z) THEN
+             BUFF(J,I,K)=BUFF(J,I,K)/( DELR(J)*DELC(I) )
+           END IF
+         END DO
+         END DO
+         END DO
+       END IF
        !
        DO K=1, NLAY
          WRITE(SLAY,'(I32)')K
@@ -3060,7 +3175,8 @@ C
          END DO
          CLOSE(IU)
        END DO
-       !
+       !-------------------------------------------------------------- SC2 -> Sy 
+       !BUFF = SC2 or NaN
        IF(ANY(LAYHDT /= Z)) THEN                                        !THERE IS ATLEAST ONE CONVERTABLE LAYER
         DO K=1,NLAY
           N = T_LAYTYP(K)
@@ -3091,7 +3207,7 @@ C
          END IF
         END DO
        END IF
-      END IF
+      END IF  ! ANY(ISSFLG == Z)
       
       T_LAYTYP =>NULL()
       T_CHANI  =>NULL()
