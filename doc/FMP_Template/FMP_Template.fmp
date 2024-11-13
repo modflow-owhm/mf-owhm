@@ -1742,6 +1742,15 @@ BEGIN LAND_USE
    #
    ZERO_CONSUMPTIVE_USE_BECOMES_BARE_SOIL [ LAI[S,T,L] ]
    #
+   # The FMP Potential Consumptive Use/Potential Evapotranspiration (CU) is split in to 
+   # potential transpiration (Tpot) and potential evaporation (Epot) based on the 
+   # TRANSPIRATION_FRACTION (FTR). By default, unused Tpot is added back to the Epot to honor CU. 
+   # That is, given Tact < Tpot then Epot = CU - Tact.
+   # If NO_TPOT_SHIFT_TO_EPOT option is present, then this feature is disabled. 
+   # That is, Tpot = CU*FTR and Epot = CU*(1-FTR)
+   #
+   NO_TPOT_SHIFT_TO_EPOT
+   #
    #
    # If LAND_USE_AREA_FRACTION is selected then the sum of all crops within a single model cell may be less than 1.
    #     When this occurs, the remaining area is treated as bare soil/fallowed land.
