@@ -518,6 +518,7 @@ C     ------------------------------------------------------------------
       !
       ALLOCATE(DO_FM_BD,          SOURCE=TRUE)
       ALLOCATE(SFR_FIX_BOT,       SOURCE=FALSE)
+      ALLOCATE(SFR_FIX_BOT_WRN,   SOURCE=TRUE)
       ALLOCATE(SFR_AUTO_NEG_ITMP, SOURCE=FALSE)
       !
       ALLOCATE(CNVG_WRN)
@@ -1587,28 +1588,36 @@ C         Number of reaches in segment added to ISEG
       CALL ERR%CHECK(HED='SFR FATAL ERRORS'//NL,
      +                   INFILE=IN,OUTPUT=IOUT,TAIL=NL,KILL=TRUE)
       !
-      IF(ERR2%RAISED) THEN
+      IF(ERR2%RAISED .AND. SFR_FIX_BOT_WRN) THEN
+      SFR_FIX_BOT_WRN = FALSE
       IF(SFR_FIX_BOT) THEN
        !   
-       CALL ERR2%CHECK(HED='SFR HAS SEGMENT/REACHES WITH A STREAMBED '//
-     +          'BOTTOM'//NL//'DEEPER THEN THE BOTTOM OF THE MODEL '//
-     +          'CELL IT IS ASSIGNED TOO.'//NL//
-     +          'THE FOLLOWING HAD THEIR STREAMBED ELEVATION '//
-     +          'CHANGED TO THE CELL BOTTOM:'//BLN//
+       CALL ERR2%CHECK(HED='SFR has SEGMENT/REACHES with a streambed '//
+     +          'bottom'//NL//'deeper then the bottom of the model '//
+     +          'cell it is assigned too.'//NL//
+     +          'The following had their streambed elevation '//
+     +          'changed to the cell bottom:'//BLN//
      +          '   SEG    RCH     LAY    ROW    COL'//
      +          '      STREAMBED      CELL_BOT',
      +          INFILE=IN, OUTPUT=IOUT, TAIL=NL, NO_NL=TRUE)
       ELSE   
-       CALL ERR2%CHECK(HED='SFR HAS SEGMENT/REACHES WITH A STREAMBED '//
-     +      'BOTTOM'//NL//'DEEPER THEN THE BOTTOM OF THE MODEL '//
-     +      'CELL IT IS ASSIGNED TOO.'//NL//
-     +   'EITHER FIX THE STREAMBED FOR THE FOLLOWING LIST'//NL//
-     +   'OR INCLUDE THE SFR OPTION "FIX_STREAM_BOTTOM" TO INDICATE '//
-     +   'THAT WHEN THE STREAMBED ELEVATION IS LESS THAN THE '//
-     +      'CELL BOTTOM, IT IS SET TO THE CELL BOTTOM.'//BLN//
+       CALL ERR2%CHECK(HED='SFR has SEGMENT/REACHES with a streambed '//
+     +   'bottom'//NL//'deeper then the bottom of the model '//
+     +   'cell it is assigned too.'//NL//
+     +   'Please make sure you want this to happen as it might be '//
+     +   'conceptually incorrect.'//NL//
+     +   '   - This often occurs if SFR moves the reach-layer '//
+     +   'assignment upward.'//NL//
+     +   '   - Note 1: You can disable reach-layer adjustment with '//
+     +   'the SFR options "NO_REACH_LAYER_CHANGE" or '//
+     +   '"REACH_LAYER_CHANGE_DEEPER"'//NL//
+     +   '   - Note 2: You can automatically fix the reach bottom '//
+     +   'with the SFR option "FIX_STREAM_BOTTOM".'//BLN//
+     +   'The following list are SFR reaches whose stream bottom '//
+     +   'is deeper than then its model layer bottom.'//NL//
      +      '   SEG    RCH     LAY    ROW    COL'//
      +      '      STREAMBED      CELL_BOT',
-     +      INFILE=IN, OUTPUT=IOUT, TAIL=NL, KILL=TRUE, NO_NL=TRUE)
+     +      INFILE=IN, OUTPUT=IOUT, TAIL=NL, NO_NL=TRUE)
       END IF
       END IF
 C
@@ -2594,7 +2603,8 @@ C21-----STOP IF ICALC LESS THAN 0 AND GREATER THAN 4.
       !!!
       
       !
-      IF(ERR%RAISED) THEN
+      IF(ERR%RAISED .AND. SFR_FIX_BOT_WRN) THEN
+      SFR_FIX_BOT_WRN = .FALSE.
       IF(SFR_FIX_BOT) THEN
        !   
        CALL ERR%CHECK(HED='SFR HAS SEGMENT/REACHES WITH A STREAMBED '//
@@ -2605,19 +2615,27 @@ C21-----STOP IF ICALC LESS THAN 0 AND GREATER THAN 4.
      +          '   SEG    RCH     LAY    ROW    COL'//
      +          '      STREAMBED      CELL_BOT',
      +          INFILE=IN, OUTPUT=IOUT, TAIL=NL, INIT=TRUE, NO_NL=TRUE)
-      ELSE   
-       CALL ERR%CHECK(HED='SFR HAS SEGMENT/REACHES WITH A STREAMBED '//
-     +      'BOTTOM'//NL//'DEEPER THEN THE BOTTOM OF THE MODEL '//
-     +      'CELL IT IS ASSIGNED TOO.'//NL//
-     +   'EITHER FIX THE STREAMBED FOR THE FOLLOWING LIST'//NL//
-     +   'OR INCLUDE THE SFR OPTION "FIX_STREAM_BOTTOM" TO INDICATE '//
-     +   'THAT WHEN THE STREAMBED ELEVATION IS LESS THAN THE '//
-     +      'CELL BOTTOM, IT IS SET TO THE CELL BOTTOM.'//BLN//
+      ELSE 
+       CALL ERR%CHECK(HED='SFR has SEGMENT/REACHES with a streambed '//
+     +   'bottom'//NL//'deeper then the bottom of the model '//
+     +   'cell it is assigned too.'//NL//
+     +   'Please make sure you want this to happen as it might be '//
+     +   'conceptually incorrect.'//NL//
+     +   '   - This often occurs if SFR moves the reach-layer '//
+     +   'assignment upward.'//NL//
+     +   '   - Note 1: You can disable reach-layer adjustment with '//
+     +   'the SFR options "NO_REACH_LAYER_CHANGE" or '//
+     +   '"REACH_LAYER_CHANGE_DEEPER"'//NL//
+     +   '   - Note 2: You can automatically fix the reach bottom '//
+     +   'with the SFR option "FIX_STREAM_BOTTOM".'//BLN//
+     +   'The following list are SFR reaches whose stream bottom '//
+     +   'is deeper than then its model layer bottom.'//NL//
      +      '   SEG    RCH     LAY    ROW    COL'//
      +      '      STREAMBED      CELL_BOT',
-     +      INFILE=IN, OUTPUT=IOUT, TAIL=NL, KILL=TRUE, NO_NL=TRUE)
+     +      INFILE=IN, OUTPUT=IOUT, TAIL=NL, INIT=TRUE, NO_NL=TRUE) 
       END IF
       END IF
+      IF(ERR%RAISED) CALL ERR%INIT()  ! Reset the error message
       !!!
 C
 C22-----CHECK VALUES IN STREAM CROSS SECTION LIST (XSEC).
@@ -2650,10 +2668,10 @@ C22-----CHECK VALUES IN STREAM CROSS SECTION LIST (XSEC).
             END DO
           END IF
         END DO
-      CALL ERR%CHECK(HED='SFR HAS SEGMENTS WITH BAD EIGHT '//
-     +          'POINT CROSS SECTION DISCRIPTIONS.'//NL//
-     +          'THE FOLLOWING SEGMENT AND POINT NUMBER (PNT) '//
-     +          'NEED TO BE FIXED. VALUE IS HE LOADED INPUT.'//BLN//
+      CALL ERR%CHECK(HED='SFR has segments with bad 8-'//
+     +          'Point cross section discriptions.'//NL//
+     +          'The following segment and point numbers (PNT) that '//
+     +          'need to be fixed. VALUE is the loaded input.'//BLN//
      +          '   SEG   PNT      VALUE  COMMENT',
      +          INFILE=IN,OUTPUT=IOUT,TAIL=NL,KILL=TRUE, NO_NL=TRUE)
  9030   FORMAT (/, ' *** WARNING *** STREAMBED THICKNESS', 
@@ -10803,6 +10821,7 @@ C     ------------------------------------------------------------------
       DEALLOCATE (GWFSFRDAT(IGRID)%DO_FM_BD)
       DEALLOCATE(GWFSFRDAT(IGRID)%SFR_PRNT)
       DEALLOCATE(GWFSFRDAT(IGRID)%SFR_FIX_BOT)
+      DEALLOCATE(GWFSFRDAT(IGRID)%SFR_FIX_BOT_WRN)
       DEALLOCATE(GWFSFRDAT(IGRID)%SFR_AUTO_NEG_ITMP)
       !
       IF(GWFSFRDAT(IGRID)%SFR_FRES    %IS_OPEN .OR. 
@@ -10981,6 +11000,7 @@ C NULLIFY THE LOCAL POINTERS
         DO_FM_BD         =>NULL()
         SFR_PRNT         => NULL()
         SFR_FIX_BOT      =>NULL()
+        SFR_FIX_BOT_WRN  =>NULL()
         SFR_AUTO_NEG_ITMP=>NULL()
         CNVG_WRN         =>NULL()
         !
@@ -11138,6 +11158,7 @@ C     ------------------------------------------------------------------
       DO_FM_BD          =>GWFSFRDAT(IGRID)%DO_FM_BD
       SFR_PRNT          =>GWFSFRDAT(IGRID)%SFR_PRNT
       SFR_FIX_BOT       =>GWFSFRDAT(IGRID)%SFR_FIX_BOT
+      SFR_FIX_BOT_WRN   =>GWFSFRDAT(IGRID)%SFR_FIX_BOT_WRN
       SFR_AUTO_NEG_ITMP=>GWFSFRDAT(IGRID)%SFR_AUTO_NEG_ITMP
       CNVG_WRN          =>GWFSFRDAT(IGRID)%CNVG_WRN
       !
@@ -11296,6 +11317,7 @@ C     ------------------------------------------------------------------
       GWFSFRDAT(IGRID)%DO_FM_BD          => DO_FM_BD
       GWFSFRDAT(IGRID)%SFR_PRNT          => SFR_PRNT
       GWFSFRDAT(IGRID)%SFR_FIX_BOT       => SFR_FIX_BOT
+      GWFSFRDAT(IGRID)%SFR_FIX_BOT_WRN   => SFR_FIX_BOT_WRN
       GWFSFRDAT(IGRID)%SFR_AUTO_NEG_ITMP => SFR_AUTO_NEG_ITMP
       GWFSFRDAT(IGRID)%CNVG_WRN          => CNVG_WRN
       !
