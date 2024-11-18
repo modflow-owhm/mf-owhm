@@ -675,6 +675,18 @@ span {
 </span><span class="sc24">   </span><span class="sc6">FARM_WELL_CBC</span><span class="sc24">           </span><span class="sc7">INT</span><span class="sc24">                          </span><span class="sc2">#IFWLCB -- INT IS THE CBC UNIT TO WRITE TO, Set to zero if not specified
 </span><span class="sc24">   </span><span class="sc6">FARM_NET_RECHARGE_CBC</span><span class="sc24">   </span><span class="sc7">INT</span><span class="sc24">                          </span><span class="sc2">#IFNRCB -- INT IS THE CBC UNIT TO WRITE TO, Set to zero if not specified
 </span><span class="sc24">   </span><span class="sc2">#
+</span><span class="sc24">   </span><span class="sc2"># The Cell-By-Cell (CBC) binary for Farm Net Recharge (FNR) yields
+</span><span class="sc24">   </span><span class="sc2">#    a binary such that ZoneBudget calculates IN as only Deep Percolation (DP)
+</span><span class="sc24">   </span><span class="sc2">#    and OUT as only ETgw. 
+</span><span class="sc24">   </span><span class="sc2"># Previous to OWHMv2.3.1, the FNR was done on a cell by cell basis, that is 
+</span><span class="sc24">   </span><span class="sc2">#    each model cell stored the difference, DP-ETgw. This resulted in 
+</span><span class="sc24">   </span><span class="sc2">#    the ZoneBudget IN term being the sum of cells whose net had DP &gt; ETgw, and OUT for the converse. 
+</span><span class="sc24">   </span><span class="sc2">#    Note, the total, IN-OUT should result in the same solution within a zone. 
+</span><span class="sc24">   </span><span class="sc2"># COMPOSITE_FARM_NET_RECHARGE_CBC enables this legacy feature (that is, each cell a FNR).
+</span><span class="sc24">   </span><span class="sc2">#    It is not recommended to include this, unless you need the legacy (IN, OUT) values.
+</span><span class="sc24">   </span><span class="sc2">#
+</span><span class="sc24">   </span><span class="sc6">COMPOSITE_FARM_NET_RECHARGE_CBC</span><span class="sc24">
+   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># The following will either use a predefined name (specified at comment)
 </span><span class="sc24">   </span><span class="sc2">#   or write file to GENERIC_OUTPUT location/name
 </span><span class="sc24">   </span><span class="sc2">#

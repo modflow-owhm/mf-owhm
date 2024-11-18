@@ -619,6 +619,18 @@ BEGIN OUTPUT
    FARM_WELL_CBC           INT                          #IFWLCB -- INT IS THE CBC UNIT TO WRITE TO, Set to zero if not specified
    FARM_NET_RECHARGE_CBC   INT                          #IFNRCB -- INT IS THE CBC UNIT TO WRITE TO, Set to zero if not specified
    #
+   # The Cell-By-Cell (CBC) binary for Farm Net Recharge (FNR) yields
+   #    a binary such that ZoneBudget calculates IN as only Deep Percolation (DP)
+   #    and OUT as only ETgw. 
+   # Previous to OWHMv2.3.1, the FNR was done on a cell by cell basis, that is 
+   #    each model cell stored the difference, DP-ETgw. This resulted in 
+   #    the ZoneBudget IN term being the sum of cells whose net had DP > ETgw, and OUT for the converse. 
+   #    Note, the total, IN-OUT should result in the same solution within a zone. 
+   # COMPOSITE_FARM_NET_RECHARGE_CBC enables this legacy feature (that is, each cell a FNR).
+   #    It is not recommended to include this, unless you need the legacy (IN, OUT) values.
+   #
+   COMPOSITE_FARM_NET_RECHARGE_CBC
+   #
    # The following will either use a predefined name (specified at comment)
    #   or write file to GENERIC_OUTPUT location/name
    #
