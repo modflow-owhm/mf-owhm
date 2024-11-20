@@ -4725,7 +4725,7 @@ C2----OPEN LIST FILE
      +             ACCESS='SEQUENTIAL', STATUS='REPLACE', ASYNC=ASYN,
      +             BUFFER_BLOCKSIZE=BUFBLOCKSIZE, BUFFER_COUNT=BUFCOUNT)
             NFILE=NFILE+1
-            CALL PRINT_MAIN_HEADER(IOUT)
+            CALL PRINT_MAIN_HEADER(IOUT, FILACT)  ! FILACT is just a dummy arg
             !
             CALL DATE%NOW()
             WRITE(IOUT,'( A/, 4x,2A/,A,//)') REPEAT("∙",62),
@@ -5770,6 +5770,7 @@ C
           RCloseL2BAS   = DZ
           GW_SOLVER     = BLNK
           GW_FLOW_PACK  = BLNK
+          OWHM_VERSION  = BLNK
           !
           MXPAR  = Z
           MXCLST = Z

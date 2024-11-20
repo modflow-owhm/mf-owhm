@@ -8,7 +8,7 @@
 !
 !     ******************************************************************
 !
-SUBROUTINE PRINT_MAIN_HEADER(IU)  ! Set to 6 for cmd prompt or use output_unit from: "use, intrinsic:: iso_fortran_env, only: output_unit"
+SUBROUTINE PRINT_MAIN_HEADER(IU, VERSION)  ! Set to 6 for cmd prompt or use output_unit from: "use, intrinsic:: iso_fortran_env, only: output_unit"
   !
   USE, INTRINSIC:: ISO_FORTRAN_ENV, ONLY: stdout=>OUTPUT_UNIT
   USE CONSTANTS, ONLY: NL
@@ -16,9 +16,10 @@ SUBROUTINE PRINT_MAIN_HEADER(IU)  ! Set to 6 for cmd prompt or use output_unit f
   !
   IMPLICIT NONE
   !
-  INTEGER, INTENT(IN)::IU
+  INTEGER,      INTENT(IN   )::IU
+  CHARACTER(*), INTENT(INOUT)::VERSION
   !
-  !1 ASSIGN VERSION NUMBER AND DATE
+  ! ASSIGN VERSION NUMBER AND DATE
   !
   CHARACTER(:),ALLOCATABLE:: VERSION_OWHM
   CHARACTER(:),ALLOCATABLE:: VERSION_MF, VERSION_FMP
@@ -29,7 +30,7 @@ SUBROUTINE PRINT_MAIN_HEADER(IU)  ! Set to 6 for cmd prompt or use output_unit f
   CHARACTER(:),ALLOCATABLE:: Revision
   !
   VERSION_OWHM='2.3'
-  Revision    ='1-b3'
+  Revision    ='1-b4'
   VERSION_MF  ='1.12'
   VERSION_FMP ='4.1'
   VERSION_SWR ='1.04'
@@ -38,6 +39,10 @@ SUBROUTINE PRINT_MAIN_HEADER(IU)  ! Set to 6 for cmd prompt or use output_unit f
   VERSION_NWT ='1.3'
   VERSION_CFP ='1.09.57'
   VERSION_SWO ='1.0'
+  !
+  VERSION = VERSION_OWHM // "." // Revision
+  !
+  IF(IU == 0) RETURN
   !
   IF(IU == stdout) THEN
                    WRITE (IU,'(A)') ''
@@ -122,6 +127,7 @@ SUBROUTINE COMMAND_ARGUMENT_CHECK(program_continue)
   integer :: narg, iarg, i, j, p, ONE
   logical :: FALSE
   character(128) :: arg
+  character(16) :: version
   FALSE = .FALSE.
   ONE = 1
   NARG = command_argument_count()
@@ -162,11 +168,11 @@ SUBROUTINE COMMAND_ARGUMENT_CHECK(program_continue)
              write(stdout,'(A,/)') REPEAT('-',84)
              write(stdout,'(A,/)') "Now printing the standard header before exiting the program."
              write(stdout,'(A,/)') REPEAT('-',84)
-             call PRINT_MAIN_HEADER(stdout)
+             call PRINT_MAIN_HEADER(stdout, version)
              program_continue = FALSE
              EXIT
          case("v", "version")
-             call PRINT_MAIN_HEADER(stdout)
+             call PRINT_MAIN_HEADER(stdout, version)
              program_continue = FALSE
              EXIT
          end select
@@ -274,7 +280,7 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
   !
   !2------WRITE BANNER TO SCREEN AND DEFINE CONSTANTS.
   !
-  CALL PRINT_MAIN_HEADER(STDOUT)  !PRINT TO COMMAND PROMPT  --Note STDOUT=6
+  CALL PRINT_MAIN_HEADER(STDOUT, OWHM_VERSION)  !PRINT TO COMMAND PROMPT  --Note STDOUT=6
   !
   NAM_UNIT = Z
   LGR_UNIT = Z
@@ -734,7 +740,7 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
           ICNVG   = Z
           !
           IF(INPUT_CHECK) THEN
-                                 ! Note that if IINPUT_CHECK = True, then FASTFORWARD = True
+                                 ! Note that if INPUT_CHECK = True, then FASTFORWARD = True
                                  !
                                  IF( .NOT.( KPER == ONE .AND. KSTP == ONE ) )  THEN ! BY PASS FM LOOPS AND GRID LOOPS
                                      !
