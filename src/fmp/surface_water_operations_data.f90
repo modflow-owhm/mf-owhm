@@ -523,7 +523,7 @@ MODULE SWO_HIERARCHY_DATA_TYPES
                     IF    (TRANSFER > DZ) THEN
                                           STOR_TRAN = TRANSFER * TRAN_FRAC  ! AVAILIBLE FOR IMMEDIATE RELEASE, REMAINDER AVAILIBLE AFTER RELEASES -- DEFAULT IS TRAN_FRAC = 0.5 FOR HALF BEING AVAILBLE AND HALF HELD
                     ELSEIF(TRANSFER < DZ) THEN
-                                          STOR_TRAN = TRANSFER              !TRANFER REMOVES WATER, ENSURE IT SUPERCEDES RELEASES IN PRIORITY
+                                          STOR_TRAN = TRANSFER              !TRANSFER REMOVES WATER, ENSURE IT SUPERCEDES RELEASES IN PRIORITY
                     ELSE
                                           STOR_TRAN = DZ
                     END IF
