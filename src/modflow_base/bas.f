@@ -2349,8 +2349,8 @@ C4------PRINT TOTAL BUDGET IF REQUESTED
         IF ( SAVE_HEAD_FLAG == 1 ) THEN
           BLOCK
               CHARACTER(8):: SPTS
-              SPTS(1:4) = TRANSFER( KPER, SPTS(1:4) )     !  I = TRANSFER(c, I)  !GET SP
-              SPTS(5:8) = TRANSFER( KSTP, SPTS(5:8) )     !  J = TRANSFER(PRINT_HEAD(n)%EXTRA(5:8), J)  !GET TS
+              SPTS(1:4) = TRANSFER( INT(KPER, INT32), SPTS(1:4) )     !  I = TRANSFER(c, I)  !GET SP
+              SPTS(5:8) = TRANSFER( INT(KSTP, INT32), SPTS(5:8) )     !  J = TRANSFER(PRINT_HEAD(n)%EXTRA(5:8), J)  !GET TS
               DO I=1, SIZE(PRINT_HEAD)
                  IF( SPTS == PRINT_HEAD(I)%EXTRA ) THEN
                                                    n = I
@@ -2449,8 +2449,8 @@ C4------PRINT TOTAL BUDGET IF REQUESTED
         IF ( PRINT_HEAD_FLAG == 1 ) THEN
           BLOCK
               CHARACTER(8):: SPTS
-              SPTS(1:4) = TRANSFER( KPER, SPTS(1:4) )     !  I = TRANSFER(c, I)  !GET SP
-              SPTS(5:8) = TRANSFER( KSTP, SPTS(5:8) )     !  J = TRANSFER(PRINT_HEAD(n)%EXTRA(5:8), J)  !GET TS
+              SPTS(1:4) = TRANSFER( INT(KPER, INT32), SPTS(1:4) )     !  I = TRANSFER(c, I)  !GET SP
+              SPTS(5:8) = TRANSFER( INT(KSTP, INT32), SPTS(5:8) )     !  J = TRANSFER(PRINT_HEAD(n)%EXTRA(5:8), J)  !GET TS
               DO I=1, SIZE(PRINT_HEAD)
                  IF( SPTS == PRINT_HEAD(I)%EXTRA ) THEN
                                                    n = I
@@ -2520,8 +2520,8 @@ C4------PRINT TOTAL BUDGET IF REQUESTED
         IF ( PRINT_WTAB_FLAG == 1 ) THEN
           BLOCK
               CHARACTER(8):: SPTS
-              SPTS(1:4) = TRANSFER( KPER, SPTS(1:4) )     !  I = TRANSFER(c, I)  !GET SP
-              SPTS(5:8) = TRANSFER( KSTP, SPTS(5:8) )     !  J = TRANSFER(PRINT_WTAB(n)%EXTRA(5:8), J)  !GET TS
+              SPTS(1:4) = TRANSFER( INT(KPER, INT32), SPTS(1:4) )     !  I = TRANSFER(c, I)  !GET SP
+              SPTS(5:8) = TRANSFER( INT(KSTP, INT32), SPTS(5:8) )     !  J = TRANSFER(PRINT_WTAB(n)%EXTRA(5:8), J)  !GET TS
               DO I=1, SIZE(PRINT_WTAB)
                  IF( SPTS == PRINT_WTAB(I)%EXTRA ) THEN
                                                    n = I
@@ -2588,8 +2588,8 @@ C4------PRINT TOTAL BUDGET IF REQUESTED
         IF ( PRINT_WDEP_FLAG == 1 ) THEN
           BLOCK
               CHARACTER(8):: SPTS
-              SPTS(1:4) = TRANSFER( KPER, SPTS(1:4) )     !  I = TRANSFER(c, I)  !GET SP
-              SPTS(5:8) = TRANSFER( KSTP, SPTS(5:8) )     !  J = TRANSFER(PRINT_WDEP(n)%EXTRA(5:8), J)  !GET TS
+              SPTS(1:4) = TRANSFER( INT(KPER, INT32), SPTS(1:4) )     !  I = TRANSFER(c, I)  !GET SP
+              SPTS(5:8) = TRANSFER( INT(KSTP, INT32), SPTS(5:8) )     !  J = TRANSFER(PRINT_WDEP(n)%EXTRA(5:8), J)  !GET TS
               DO I=1, SIZE(PRINT_WDEP)
                  IF( SPTS == PRINT_WDEP(I)%EXTRA ) THEN
                                                    n = I
