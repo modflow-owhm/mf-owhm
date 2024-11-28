@@ -2038,7 +2038,7 @@ C     ------------------------------------------------------------------
      +                                        IEEE_QUIET_NAN,
      +                                        IEEE_POSITIVE_INF,
      +                                        IEEE_NEGATIVE_INF
-      USE, INTRINSIC:: ISO_FORTRAN_ENV, ONLY: REAL32
+      USE, INTRINSIC:: ISO_FORTRAN_ENV, ONLY: INT32, REAL32
       USE CONSTANTS,   ONLY: BLNK, BLN, NL, TRUE, FALSE, DZ, D10, Z, ONE
       USE GLOBAL,      ONLY:ITMUNI,IOUT,NCOL,NROW,NLAY,HNEW,STRT,DDREF,
      1                      INPUT_CHECK,WORST_CELL_MASS_BALANCE,IBOUND,
