@@ -961,13 +961,18 @@ BEGIN CLIMATE
    # ------------------------------------------------------------------------------------------------------------------
    #
    # Specify recharge that is sent directly to the bottom of the root zone.
-   #  The recharge is not consumed by crops and is treated as deep percolation
+   # The recharge is not consumed by crops and is added to deep percolation.
+   # The deep percolation is then passed to either UZF (FINF) or the water table (RCH-like).
    #
-   #  The deep percolation is then passed to either UZF or the water table.
+   # If a specific cell has all layers with IBOUND=0, then the deep percolation
+   # for that cell is converted to runoff (normal FMP operation).
+   # If the cell is not associated with a Water Balance Subregion (WBS), 
+   # then the deep percolation still occurs, but it is not tracked by 
+   # FMP WBS based outputs.
    #
-   #  The keyword LENGTH or FLUX indicates that the input is in model units of length (L/T)
-   #  The keyword RATE indicates that the input is in volumetric rate                 (L^3/T)
-   #     --This feature mimics both the RCH package Infiltration and UZF Recharge.
+   # The keyword LENGTH or FLUX indicates that the input is in model units of length (L/T)
+   # The keyword RATE indicates that the input is in volumetric rate                 (L^3/T)
+   #    --This feature mimics both the RCH package Infiltration and UZF Recharge.
    #
    # DIRECT_RECHARGE can be specified multiple times and the sum of the recharge arrays 
    # are applied to deep percolation. That is you can have something like:
