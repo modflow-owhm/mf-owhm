@@ -2920,7 +2920,7 @@ C
       END IF
       
       !DIR='.\'                                                          !CAN BE A READ IN VARIABLE TO SPECIFY LOCATION OF FILES
-      DIR=TRIM(ADJUSTL(DIROUT))//'PARAM_'                                  !ADDED FIRST PART OF FILE NAME TO KEEP ALL FILES IN SAME ALPHABETICAL LOCATION
+      DIR=TRIM(ADJUSTL(DIROUT))//'param_'                                  !ADDED FIRST PART OF FILE NAME TO KEEP ALL FILES IN SAME ALPHABETICAL LOCATION
       !NL=(/'HKR_G','HKC_G','HKV_G','SC1_G','SC2_G'/)                   !Note that interally MF does a wierd averaging between SS and SY between timesteps
       !
       WRITE(SGRID,'(I32)')IGRID
@@ -2929,7 +2929,7 @@ C
       SFMT='('//TRIM(ADJUSTL(SFMT))//'ES20.10)'
       !-------------------------------------------------------------- Upper Active
       !Initial upper most active layer
-      FN=DIR//'UPLAY_G'//TRIM(SGRID)//'.txt'
+      FN=DIR//'uplay_g'//TRIM(SGRID)//'.txt'
       IU = 0
       CALL GENERIC_OPEN(FN, IU, IOUT,                                ! Use GENERIC_OPEN to make any missing folders
      +         ACTION='WRITE', FORM='FORMATTED',
@@ -2959,7 +2959,7 @@ C
       END DO
       END DO
       !
-      FN=DIR//'AREA_G'//TRIM(SGRID)//'.txt'
+      FN=DIR//'area_g'//TRIM(SGRID)//'.txt'
       OPEN(NEWUNIT=IU,FILE=FN,
      +       STATUS='REPLACE',POSITION='REWIND',ACTION='WRITE') 
       WRITE(IU,'(3I10,A,10x,A)')NROW,NCOL,IGRID,' AREA',
@@ -2984,7 +2984,7 @@ C
       !
       DO K=1, NLAY
         WRITE(SLAY,'(I32)')K
-        FN=DIR//'THK_G'//TRIM(SGRID)//'_L'//TRIM(ADJUSTL(SLAY))//'.txt'
+        FN=DIR//'thk_g'//TRIM(SGRID)//'_L'//TRIM(ADJUSTL(SLAY))//'.txt'
         OPEN(NEWUNIT=IU,FILE=FN,
      +         STATUS='REPLACE',POSITION='REWIND',ACTION='WRITE') 
         WRITE(IU,'(4I10,A,10x,A)')NROW,NCOL,K,IGRID,' THICK',
@@ -3008,7 +3008,7 @@ C
       !
       DO K=1, NLAY
         WRITE(SLAY,'(I32)')K
-        FN=DIR//'HKR_G'//TRIM(SGRID)//'_L'//TRIM(ADJUSTL(SLAY))//'.txt'
+        FN=DIR//'hkr_g'//TRIM(SGRID)//'_L'//TRIM(ADJUSTL(SLAY))//'.txt'
         OPEN(NEWUNIT=IU,FILE=FN,
      +         STATUS='REPLACE',POSITION='REWIND',ACTION='WRITE') 
         WRITE(IU,'(4I10,A,10x,A)')NROW,NCOL,K,IGRID,'  HKR',
@@ -3022,7 +3022,7 @@ C
       !BUFF = HKC or NaN
       DO K=1, NLAY
         WRITE(SLAY,'(I32)')K
-        FN=DIR//'HKC_G'//TRIM(SGRID)//'_L'//TRIM(ADJUSTL(SLAY))//'.txt'
+        FN=DIR//'hkc_g'//TRIM(SGRID)//'_L'//TRIM(ADJUSTL(SLAY))//'.txt'
         OPEN(NEWUNIT=IU,FILE=FN,
      +         STATUS='REPLACE',POSITION='REWIND',ACTION='WRITE') 
         WRITE(IU,'(4I10,A,10x,A)')NROW,NCOL,K,IGRID,'  HKC',
@@ -3061,7 +3061,7 @@ C
       !
       DO K=1, NLAY
         WRITE(SLAY,'(I32)')K
-        FN=DIR//'VKA_G'//TRIM(SGRID)//'_L'//TRIM(ADJUSTL(SLAY))//'.txt'
+        FN=DIR//'vka_g'//TRIM(SGRID)//'_L'//TRIM(ADJUSTL(SLAY))//'.txt'
         OPEN(NEWUNIT=IU,FILE=FN,
      +         STATUS='REPLACE',POSITION='REWIND',ACTION='WRITE') 
         WRITE(IU,'(4I10,A,10x,A)')NROW,NCOL,K,IGRID,'  VKA',
@@ -3093,7 +3093,7 @@ C
        !
        DO K=1, NLAY
          WRITE(SLAY,'(I32)')K
-         FN=DIR//'SC1_G'//TRIM(SGRID)//'_L'//TRIM(ADJUSTL(SLAY))//'.txt'
+         FN=DIR//'sc1_g'//TRIM(SGRID)//'_L'//TRIM(ADJUSTL(SLAY))//'.txt'
          OPEN(NEWUNIT=IU,FILE=FN,
      +          STATUS='REPLACE',POSITION='REWIND',ACTION='WRITE') 
          WRITE(IU,'(4I10,A,10x,A)')NROW,NCOL,K,IGRID,'  SC1',
@@ -3123,7 +3123,7 @@ C
          N = T_LAYTYP(K)
          IF(N > 0) THEN
           WRITE(SLAY,'(I32)')K
-         FN=DIR//'SC2_G'//TRIM(SGRID)//'_L'//TRIM(ADJUSTL(SLAY))//'.txt'
+         FN=DIR//'sc2_g'//TRIM(SGRID)//'_L'//TRIM(ADJUSTL(SLAY))//'.txt'
           OPEN(NEWUNIT=IU,FILE=FN,
      +           STATUS='REPLACE',POSITION='REWIND',ACTION='WRITE') 
           WRITE(IU,'(4I10,A,10x,A)')NROW,NCOL,K,IGRID,'  SC2',
@@ -3165,7 +3165,7 @@ C
        !
        DO K=1, NLAY
          WRITE(SLAY,'(I32)')K
-         FN=DIR//'Ss_G'//TRIM(SGRID)//'_L'//TRIM(ADJUSTL(SLAY))//'.txt'
+         FN=DIR//'ss_g'//TRIM(SGRID)//'_L'//TRIM(ADJUSTL(SLAY))//'.txt'
          OPEN(NEWUNIT=IU,FILE=FN,
      +          STATUS='REPLACE',POSITION='REWIND',ACTION='WRITE') 
          WRITE(IU,'(4I10,A,10x,A)')NROW,NCOL,K,IGRID,'  Ss ',
@@ -3195,7 +3195,7 @@ C
          N = T_LAYTYP(K)
          IF(N > 0) THEN
           WRITE(SLAY,'(I32)')K
-          FN=DIR//'Sy_G'//TRIM(SGRID)//'_L'//TRIM(ADJUSTL(SLAY))//'.txt'
+          FN=DIR//'sy_g'//TRIM(SGRID)//'_L'//TRIM(ADJUSTL(SLAY))//'.txt'
           OPEN(NEWUNIT=IU,FILE=FN,
      +           STATUS='REPLACE',POSITION='REWIND',ACTION='WRITE') 
           WRITE(IU,'(4I10,A,10x,A)')NROW,NCOL,K,IGRID,'  Sy ',
