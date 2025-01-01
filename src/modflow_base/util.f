@@ -2935,8 +2935,8 @@ C
      +         ACTION='WRITE', FORM='FORMATTED',
      +         ACCESS='SEQUENTIAL', STATUS='REPLACE',
      +         BUFFER_BLOCKSIZE=16384, BUFFER_COUNT=1)
-      WRITE(IU,'(3I10,A,10x,A)')NROW,NCOL,IGRID,
-     +  ' Initial_Upper_Most_Active_Layer','NROW,NCOL,IGRID' !HEADER INFORMATION
+      WRITE(IU,'(4I10,A,10x,A)')NROW,NCOL,NLAY,IGRID,
+     +  ' Initial_Upper_Most_Active_Layer','NROW,NCOL,NLAY,IGRID' !HEADER INFORMATION
       DO J=1, NROW
       DO I=1, NCOL
          DO K=1, NLAY
@@ -2962,8 +2962,8 @@ C
       FN=DIR//'area_g'//TRIM(SGRID)//'.txt'
       OPEN(NEWUNIT=IU,FILE=FN,
      +       STATUS='REPLACE',POSITION='REWIND',ACTION='WRITE') 
-      WRITE(IU,'(3I10,A,10x,A)')NROW,NCOL,IGRID,' AREA',
-     +                       'NROW,NCOL,IGRID' !HEADER INFORMATION
+      WRITE(IU,'(4I10,A,10x,A)')NROW,NCOL,NLAY,IGRID,' AREA',
+     +                       'NROW,NCOL,NLAY,IGRID' !HEADER INFORMATION
       DO I=1,NROW
         WRITE(IU,SFMT)BUFF(:,I,1)
       END DO
