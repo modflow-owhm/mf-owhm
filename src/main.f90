@@ -710,17 +710,24 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
               !
           END DO GRID_AD   ! -------------------------------------------------------------------------------------------------------------------------
           !
-          IF(KSTP == ONE .AND. HAS_STARTDATE) THEN
-              WRITE(*,24) KPER,KSTP,DATE_SP(KPER)%TS(0)%STR_MONTHYEAR()
-          ELSE
-              WRITE(*,25) KPER,KSTP                            !seb moved outside of IGRID LOOP
+          IF(KSTP == ONE) THEN
+             IF(FASTFORWARD .AND. HAS_STARTDATE) THEN
+                WRITE(*,26) KPER,KSTP,DATE_SP(KPER)%TS(0)%STR_MONTHYEAR()
+             ELSEIF(FASTFORWARD) THEN
+                WRITE(*,27) KPER,KSTP      
+             ELSEIF(HAS_STARTDATE) THEN
+                WRITE(*,24) KPER,KSTP,DATE_SP(KPER)%TS(0)%STR_MONTHYEAR()
+             ELSE
+                WRITE(*,25) KPER,KSTP
+             END IF
           END IF
           !
           !24  FORMAT(' Solving:  Stress Period: ',i6,4x,'Time step: ',i6,4x,'Groundwater-Flow Eqn.',14x A)
           !25  FORMAT(' Solving:  Stress Period: ',i6,4x,'Time step: ',i6,4x,'Groundwater-Flow Eqn.')
           24  FORMAT(' Solving:  Stress Period: ',i6,4x,'Time step: ',i6,14x,A)
           25  FORMAT(' Solving:  Stress Period: ',i6,4x,'Time step: ',i6)
-          26  FORMAT('Skipping:  Stress Period: ',i6,4x,'Time step: ',i6)
+          26  FORMAT('Skipping:  Stress Period: ',i6,4x,'Time step: ',i6,14x,A)
+          27  FORMAT('Skipping:  Stress Period: ',i6,4x,'Time step: ',i6)
           !
           ! If simulation is too fast, then disable cmd iteration printing
           IF(ITER_PRINT) THEN
