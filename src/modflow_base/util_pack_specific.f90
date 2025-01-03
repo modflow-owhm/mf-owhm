@@ -2223,7 +2223,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
               WRITE(IOUT,'(17x, A)')'The Cell-By-Cell (CBC) flows are written at the end of every time step.'
           CASE('CBC_LAST_TIMESTEP')
               NOCBC=-2
-              WRITE(IOUT,'(17x, A)')'TThe Cell-By-Cell (CBC) flows are written at the end of every stress period (the end of the last time step).'
+              WRITE(IOUT,'(17x, A)')'The Cell-By-Cell (CBC) flows are written at the end of every stress period (the end of the last time step).'
               !
           CASE('NO_DIM_CHECK', 'NODIMCHECK')
                   WARN_DIM = FALSE
