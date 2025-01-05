@@ -1451,7 +1451,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
                           PRNT_RES, PRNT_RES_LIM, PRNT_RES_CUM, PRNT_RES_CUM_ARR,                                &
                           PRNT_CUM_HEAD_CHNG, CUM_HEAD_CHNG, CUM_HEAD_CHNG_E10,IBDOPT
   USE GLOBAL,       ONLY: NOCBC, CBC_GLOBAL_UNIT, BIN_REAL_KIND, IXSEC, IFREFM, NLAY, NROW, NCOL, NPER,  &
-                          SPEND, SPSTART, INPUT_CHECK, CMD_ITER_INFO, NO_CONST_HEAD
+                          SPEND, SPSTART, INPUT_CHECK, LIMIT_FASTFORWARD_OUTPUT, CMD_ITER_INFO, NO_CONST_HEAD
   USE PARAMMODULE,  ONLY: MXPAR,MXCLST,MXINST,PROPPRINT
   !
   USE GLOBAL,       ONLY: ITMUNI, NSTP, SPTIM, PERLEN
@@ -1496,7 +1496,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
     CASE('FREE', 'NOFREE', 'XSECTION', 'CHTOCH', 'PRINTTIME', 'PAUSE', 'BUDGETDB',                     &
          'SHOWPROGRESS', 'SHOW_PROGRESS', 'NOSHOWPROGRESS', 'NO_SHOWPROGRESS', 'NO_SHOW_PROGRESS',     &
          'TIME_INFO', 'PRINT_TIME_INFO',                                                               &
-         'INPUT_CHECK', 'INPUTCHECK', 'FASTFORWARD',                                                   &
+         'INPUT_CHECK', 'LIMIT_FASTFORWARD_OUTPUT', 'INPUTCHECK', 'FASTFORWARD',                       &
          'PRINT', 'PRINT_HEAD', 'PRINT_WATER_TABLE', 'PRINT_WATER_DEPTH',                              &
          'PRINT_CONVERGENCE', 'PRINT_FLOW_RESIDUAL', 'PRINT_RELATIVE_VOLUME_ERROR', 'PRINT_RELATIVE_VOL_ERROR', &
          'START', 'STARTDATE', 'START_DATE', 'DATE_START', 'DATESTART',                                &
@@ -1678,7 +1678,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
     CASE('FREE', 'NOFREE', 'XSECTION', 'CHTOCH', 'PRINTTIME', 'PAUSE', 'BUDGETDB',                     &
          'SHOWPROGRESS', 'SHOW_PROGRESS', 'NOSHOWPROGRESS', 'NO_SHOWPROGRESS', 'NO_SHOW_PROGRESS',     &
          'TIME_INFO', 'PRINT_TIME_INFO',                                                               &
-         'INPUT_CHECK', 'INPUTCHECK', 'FASTFORWARD',                                                   &
+         'INPUT_CHECK', 'LIMIT_FASTFORWARD_OUTPUT', 'INPUTCHECK', 'FASTFORWARD',                       &
          'PRINT', 'PRINT_HEAD', 'PRINT_WATER_TABLE', 'PRINT_WATER_DEPTH',                              &
          'PRINT_CONVERGENCE', 'PRINT_FLOW_RESIDUAL', 'PRINT_RELATIVE_VOLUME_ERROR', 'PRINT_RELATIVE_VOL_ERROR', &
          'START', 'STARTDATE', 'START_DATE', 'DATE_START', 'DATESTART',                                &
@@ -2305,6 +2305,10 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
               SPEND   = SPSTART
               INPUT_CHECK = TRUE
               IFASTFORWARD = TWO
+              !
+          CASE('LIMIT_FASTFORWARD_OUTPUT')
+              WRITE(IOUT,'(17x, A)')'LIMIT_FASTFORWARD_OUTPUT option will not write to the CBC and reduce output during fast forwarded stress periods.'
+              LIMIT_FASTFORWARD_OUTPUT = TRUE
               !
           CASE('PAUSE')
               USE_PAUSE = TRUE

@@ -529,6 +529,7 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
   STRESS_PERIOD: DO KPER = ONE, NPER  ! ============================================================================================================
       !
       FASTFORWARD = KPER < SPSTART .OR. SPEND < KPER .OR. INPUT_CHECK
+      IF(SPEND < KPER .AND. LIMIT_FASTFORWARD_OUTPUT) EXIT STRESS_PERIOD  ! Simulation is over and no dummy output
       !
       ! If simulation is too fast, then disable cmd iteration printing
       ! If ITER_PRINT = TRUE, then CALL CMD_PRINT_STOP(ITER_SIZE) else CALL CMD_PRINT_ITER(KITER, ITER_SIZE)
