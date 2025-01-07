@@ -2314,40 +2314,44 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
               USE_PAUSE = TRUE
               !
           CASE('FASTFORWARD')
-              !
-              CALL PARSE_WORD(BL%LINE,LLOC,ISTART,ISTOP) !STARTING DATE
-              IF( IS_INTEGER(BL%LINE(ISTART:ISTOP)) ) THEN
-                  !
-                  CALL GET_INTEGER(BL%LINE,LLOC,ISTART,ISTOP,IOUT,INBAS,SPSTART,TRUE,MSG='FASTFORWARD ERROR -- '//'FAILED TO IDENTIFY STARTING STRESS PERIOD')
-              ELSEIF( .NOT. HAS_STARTDATE ) THEN
-                  CALL STOP_ERROR(BL%LINE,INBAS,IOUT,                                                                          &
-                                            'FASTFORWARD ERROR -- FAILED TO IDENTIFY A STARTING STRESSS PERIOD No.'//NL//                &
-                                            'AND THERE IS NOT A STARTING DATE SPECIFIED IN THE DIS (viz. "START_DATE" KEYWORD)'//NL//     &
-                                            'TO MAKE OneWater DATE AWARE'//NL//'AND ALLOW THE USE OF CALENDAR DATES AS AN INPUT TO THE FASTWORD FEATURE')
+              IF(INPUT_CHECK) THEN
+                 CALL PARSE_WORD(BL%LINE,LLOC,ISTART,ISTOP) !STARTING DATE -> Just move past arguments in case of option line
+                 CALL PARSE_WORD(BL%LINE,LLOC,ISTART,ISTOP) !ENDING DATE
               ELSE
-                  CALL DATE%INIT( BL%LINE(ISTART:ISTOP), 0.001D0 )
-                  IF(  DATE%NOT_SET() ) CALL STOP_ERROR(TRIM(BL%LINE),INBAS,IOUT,'FASTFORWARD ERROR -- FAILED TO IDENTIFY STARTING STRESS PERIOD No.'//NL//'OR STARTING CALENDAR DATE'//NL//'FOR FASTFORWARD TO IDENTIFY STARTING POINT.')
-                  !
-                  CALL DATE_TO_SP(DATE,SPSTART)
+                 CALL PARSE_WORD(BL%LINE,LLOC,ISTART,ISTOP) !STARTING DATE
+                 IF( IS_INTEGER(BL%LINE(ISTART:ISTOP)) ) THEN
+                     !
+                     CALL GET_INTEGER(BL%LINE,LLOC,ISTART,ISTOP,IOUT,INBAS,SPSTART,TRUE,MSG='FASTFORWARD ERROR -- '//'FAILED TO IDENTIFY STARTING STRESS PERIOD')
+                 ELSEIF( .NOT. HAS_STARTDATE ) THEN
+                     CALL STOP_ERROR(BL%LINE,INBAS,IOUT,                                                                          &
+                                               'FASTFORWARD ERROR -- FAILED TO IDENTIFY A STARTING STRESSS PERIOD No.'//NL//                &
+                                               'AND THERE IS NOT A STARTING DATE SPECIFIED IN THE DIS (viz. "START_DATE" KEYWORD)'//NL//     &
+                                               'TO MAKE OneWater DATE AWARE'//NL//'AND ALLOW THE USE OF CALENDAR DATES AS AN INPUT TO THE FASTWORD FEATURE')
+                 ELSE
+                     CALL DATE%INIT( BL%LINE(ISTART:ISTOP), 0.001D0 )
+                     IF(  DATE%NOT_SET() ) CALL STOP_ERROR(TRIM(BL%LINE),INBAS,IOUT,'FASTFORWARD ERROR -- FAILED TO IDENTIFY STARTING STRESS PERIOD No.'//NL//'OR STARTING CALENDAR DATE'//NL//'FOR FASTFORWARD TO IDENTIFY STARTING POINT.')
+                     !
+                     CALL DATE_TO_SP(DATE,SPSTART)
+                 END IF
+                 !
+                 CALL PARSE_WORD(BL%LINE,LLOC,ISTART,ISTOP) !ENDING DATE
+                 IF( IS_INTEGER(BL%LINE(ISTART:ISTOP)) ) THEN
+                     !
+                     CALL GET_INTEGER(BL%LINE,LLOC,ISTART,ISTOP,IOUT,INBAS,SPEND,TRUE,MSG='FASTFORWARD ERROR -- '//'FAILED TO IDENTIFY ENDING STRESS PERIOD')
+                 ELSE
+                     CALL DATE%INIT( BL%LINE(ISTART:ISTOP), 0.001D0 )
+                     IF(  DATE%IS_SET() ) THEN
+                         CALL DATE_TO_SP(DATE,SPEND)
+                     ELSE
+                         SPEND = NPER
+                         CALL WARNING_MESSAGE(BL%LINE,INBAS,IOUT,                                                                     &
+                                                'MINOR WARNING: FASTFORWARD -- FAILED TO IDENTIFY AN ENDING STRESSS PERIOD No.'//NL//   &
+                                                'NOR AN ENDING CALENDAR DATE'//NL//                                                     &
+                                                'SO IT WILL BE ASSUMED TO HAVE AN ENDING AT STRESSS PERIOD AT NPER')
+                     END IF
+                 END IF
+                 IFASTFORWARD = ONE
               END IF
-              !
-              CALL PARSE_WORD(BL%LINE,LLOC,ISTART,ISTOP) !ENDING DATE
-              IF( IS_INTEGER(BL%LINE(ISTART:ISTOP)) ) THEN
-                  !
-                  CALL GET_INTEGER(BL%LINE,LLOC,ISTART,ISTOP,IOUT,INBAS,SPEND,TRUE,MSG='FASTFORWARD ERROR -- '//'FAILED TO IDENTIFY ENDING STRESS PERIOD')
-              ELSE
-                  CALL DATE%INIT( BL%LINE(ISTART:ISTOP), 0.001D0 )
-                  IF(  DATE%IS_SET() ) THEN
-                      CALL DATE_TO_SP(DATE,SPEND)
-                  ELSE
-                      SPEND = NPER
-                      CALL WARNING_MESSAGE(BL%LINE,INBAS,IOUT,                                                                     &
-                                             'MINOR WARNING: FASTFORWARD -- FAILED TO IDENTIFY AN ENDING STRESSS PERIOD No.'//NL//   &
-                                             'NOR AN ENDING CALENDAR DATE'//NL//                                                     &
-                                             'SO IT WILL BE ASSUMED TO HAVE AN ENDING AT STRESSS PERIOD AT NPER')
-                  END IF
-              END IF
-              IFASTFORWARD = ONE
           CASE DEFAULT
                      IF(NO_OPT_LINE) THEN
                                CALL WRN%ADD(BL%LINE//BLN)
