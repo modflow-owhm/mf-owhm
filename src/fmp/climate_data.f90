@@ -535,13 +535,17 @@ MODULE CLIMATE_DATA_FMP_MODULE
     !
     IF (CLIM%HAS_RECHARGE) THEN
                  DO I=ONE, CLIM%NDRCH
-                           DO K=ONE, CLIM%DIRECT_RECHARGE(I)%N
-                                DIM1 = CLIM%DIRECT_RECHARGE(I)%DIM(ONE,K)
-                                DIM2 = CLIM%DIRECT_RECHARGE(I)%DIM(TWO,K)
-                                !
-                                DPERC(DIM1,DIM2) = DPERC(DIM1,DIM2) + CLIM%DIRECT_RECHARGE(I)%VAL(K)
-                                !
-                           END DO
+                           IF(CLIM%DIRECT_RECHARGE(I)%IS_CONSTANT) THEN
+                               DPERC = DPERC + CLIM%DIRECT_RECHARGE(I)%VAL(ONE)
+                           ELSE
+                               DO K=ONE, CLIM%DIRECT_RECHARGE(I)%N
+                                    DIM1 = CLIM%DIRECT_RECHARGE(I)%DIM(ONE,K)
+                                    DIM2 = CLIM%DIRECT_RECHARGE(I)%DIM(TWO,K)
+                                    !
+                                    DPERC(DIM1,DIM2) = DPERC(DIM1,DIM2) + CLIM%DIRECT_RECHARGE(I)%VAL(K)
+                                    !
+                               END DO
+                           END IF
                  END DO
     END IF
     !
