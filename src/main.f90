@@ -924,8 +924,13 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
                    !
                    !--------------CHECK IF FASTFORWARD FEATURE IS IN EFFECT
                    !
-                   IF ( FASTFORWARD .AND. IGRID==NGRIDS) CYCLE TIME_STEP
-                   IF ( FASTFORWARD ) CYCLE GRID_FM
+                   IF ( FASTFORWARD ) THEN
+                                      IF (LIMIT_FASTFORWARD_OUTPUT .AND. IGRID==NGRIDS) THEN 
+                                          CYCLE TIME_STEP
+                                      ELSE 
+                                          CYCLE GRID_FM
+                                      END IF
+                   END IF
                    !
                    CALL BAS_PRE_SOLVER(IGRID, KPER, KSTP, KITER) !SAVE PREVIOUS HNEW AND SET UP ADVANCE DAMPING IF REQUESTED
                    !
