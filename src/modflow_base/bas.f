@@ -2047,7 +2047,7 @@ C     ------------------------------------------------------------------
      1                      INPUT_CHECK,WORST_CELL_MASS_BALANCE,IBOUND,
      2                      MAX_RELATIVE_VOL_ERROR,NPER,NSTP,BUFF,RBUF,
      +                      GSE,CELL_MASS_BALANCE, HOLD, ALLOC_DDREF, 
-     +                      WTABLE, IXSEC
+     +                      WTABLE, IXSEC, SPSTART
       USE GWFBASMODULE,ONLY:DELT,PERTIM,TOTIM,IHDDFL,IBUDFL,BUDGETDB,
      +                     MSUM,VBVL,VBNM,IDDREF,IUBGT,PDIFFPRT,DATE_SP,
      +                     MAX_REL_VOL_ERROR,MAX_REL_VOL_INVOKED,
@@ -2076,7 +2076,7 @@ C     ------------------------------------------------------------------
       LOGICAL:: HAS_PDIFFPRT
       DOUBLE PRECISION:: ERR, VERR, VOL, RAT
       REAL:: TOTRIN,TOTROT
-      LOGICAL:: LAST_TS
+      LOGICAL:: LAST_TS, SET_HEADER
       DOUBLE PRECISION:: NAN, inf, ninf
       DOUBLE PRECISION, dimension(:), allocatable:: HD 
 C     ------------------------------------------------------------------
@@ -2107,8 +2107,10 @@ C PRINT OUT BUDGET DATABASE
          ELSE
              DATE = '  NaN'
          END IF
+         SET_HEADER = KSTP==1 .AND. 
+     +               (KPER==SPSTART .OR. (KPER==1 .AND. INPUT_CHECK))
          CALL WRITE_DATEBASE(BUDGETDB,MSUM,VBNM,VBVL,KSTP,KPER,TOTIM,
-     +                       DELT,DATE)
+     +                       DELT,DATE,SET_HEADER)
       END IF
 C
 C
