@@ -62,7 +62,7 @@ MODULE GLOBAL
   LOGICAL,                                   POINTER:: NO_CONST_HEAD                       ! Set to false if there is CHD pack or IBOUND<0
   LOGICAL,                                   POINTER:: SUBLNK                              ! VARIABLE THAT INDICATES THAT SUBLINK IS ACTIVE. IT IS SET TO FALSE BY DEFAULT AND ALTERED BY SUBPACKAGE
   LOGICAL,                                   POINTER:: INPUT_CHECK
-  LOGICAL,                                   POINTER:: LIMIT_FASTFORWARD_OUTPUT
+  LOGICAL,                                   POINTER:: LIMIT_INPUT_CHECK_OUTPUT
   LOGICAL,                                   POINTER:: BACKTRACKING
   INTEGER,                                   POINTER:: BIN_REAL_KIND                      !KIND VALUE TO USE FOR ULT BINARY WRITERS --DEFAULT IS SNGL/32bit/4byte
   INTEGER,   DIMENSION(:),       CONTIGUOUS, POINTER:: IUNIT
@@ -117,7 +117,7 @@ MODULE GLOBAL
      INTEGER,                                   POINTER:: KPERSTART,KSTPSTART,IUNITSTART
      LOGICAL,                                   POINTER:: SUBLNK                              !seb VARIABLE THAT INDICATES THAT SUBLINK IS ACTIVE. IT IS SET TO FALSE BY DEFAULT AND ALTERED BY SUBPACKAGE
      LOGICAL,                                   POINTER:: INPUT_CHECK
-     LOGICAL,                                   POINTER:: LIMIT_FASTFORWARD_OUTPUT
+     LOGICAL,                                   POINTER:: LIMIT_INPUT_CHECK_OUTPUT
      LOGICAL,                                   POINTER:: BACKTRACKING
      INTEGER,                                   POINTER:: BIN_REAL_KIND                      !KIND VALUE TO USE FOR ULT BINARY WRITERS --DEFAULT IS SNGL/32bit/4byte
      INTEGER,   DIMENSION(:),       CONTIGUOUS, POINTER:: IUNIT

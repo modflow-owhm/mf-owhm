@@ -19,7 +19,7 @@ C     ------------------------------------------------------------------
      4                     BOTM,HOLD,IBOUND,CR,CC,CV,HCOF,RHS,BUFF,STRT,
      5                     DDREF,IRESTART,KPERSTART,KSTPSTART,
      6                     IUNITSTART,SPSTART,SPEND,NOCBC,RBUF,
-     7                     INPUT_CHECK,LIMIT_FASTFORWARD_OUTPUT,
+     7                     INPUT_CHECK,LIMIT_INPUT_CHECK_OUTPUT,
      8                     BIN_REAL_KIND,HNEW_OLD,SPTIM,
      9                     BACKTRACKING, CBC_GLOBAL_UNIT, ALLOC_DDREF,
      1                     RCloseBAS, HCloseBAS, RCloseL2BAS
@@ -182,11 +182,11 @@ C1------grids to be defined.
       PDIFFPRT = 5                                                     ! IF PERCENT ERROR GOES ABOVE 5% THEN PRINT TO CMD PROMPT
       IF(IGRID == ONE)THEN
         ALLOCATE(NO_CONST_HEAD, SUBLNK,BIN_REAL_KIND)
-        ALLOCATE(INPUT_CHECK, LIMIT_FASTFORWARD_OUTPUT)
+        ALLOCATE(INPUT_CHECK, LIMIT_INPUT_CHECK_OUTPUT)
         NO_CONST_HEAD = FALSE
         SUBLNK      = FALSE
         INPUT_CHECK = FALSE
-        LIMIT_FASTFORWARD_OUTPUT = FALSE
+        LIMIT_INPUT_CHECK_OUTPUT = FALSE
         BIN_REAL_KIND = REAL32  !SINGLE PRECISION BINARY OUTPUT
       END IF
 C
@@ -5783,7 +5783,7 @@ C
           !
           DEALLOCATE(SUBLNK)
           DEALLOCATE(INPUT_CHECK)
-          DEALLOCATE(LIMIT_FASTFORWARD_OUTPUT)
+          DEALLOCATE(LIMIT_INPUT_CHECK_OUTPUT)
           DEALLOCATE(BIN_REAL_KIND)
       END IF
       !

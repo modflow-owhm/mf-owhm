@@ -529,7 +529,7 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
   STRESS_PERIOD: DO KPER = ONE, NPER  ! ============================================================================================================
       !
       FASTFORWARD = KPER < SPSTART .OR. SPEND < KPER .OR. INPUT_CHECK
-      IF(SPEND < KPER .AND. LIMIT_FASTFORWARD_OUTPUT) EXIT STRESS_PERIOD  ! Simulation is over and no dummy output
+      IF(SPEND < KPER .AND. LIMIT_INPUT_CHECK_OUTPUT) EXIT STRESS_PERIOD  ! Simulation is over and no dummy output
       !
       ! If simulation is too fast, then disable cmd iteration printing
       ! If ITER_PRINT = TRUE, then CALL CMD_PRINT_STOP(ITER_SIZE) else CALL CMD_PRINT_ITER(KITER, ITER_SIZE)
@@ -925,7 +925,7 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
                    !--------------CHECK IF FASTFORWARD FEATURE IS IN EFFECT
                    !
                    IF ( FASTFORWARD ) THEN
-                                      IF (LIMIT_FASTFORWARD_OUTPUT .AND. IGRID==NGRIDS) THEN 
+                                      IF (LIMIT_INPUT_CHECK_OUTPUT .AND. IGRID==NGRIDS) THEN 
                                           CYCLE TIME_STEP
                                       ELSE 
                                           CYCLE GRID_FM
