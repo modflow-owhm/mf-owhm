@@ -2430,20 +2430,27 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
                                                                      CALL PARSE_WORD(PRINT_HEAD_LIST%LN,LLOC,ISTART,ISTOP) ! CHECK IF TS IS SPECIFIED
                                                                      !
                                                                      IF( IS_INTEGER(PRINT_HEAD_LIST%LN(ISTART:ISTOP)) ) THEN
-                                                                         CALL GET_INTEGER(PRINT_HEAD_LIST%LN,LLOC,ISTART,ISTOP,IOUT,INBAS, ITMP(2,N), TRUE, MSG='FOUND BAS OPTION "PRINT_HEAD  END"'//NL//'BUT FAILED TO LOAD THE TIME STEP NUMBER. YOU CAN SET IT TO ZERO OR NEGATIVE TO AUTOMATICALLY USE THE LAST TIME STEP')
+                                                                         CALL GET_INTEGER(PRINT_HEAD_LIST%LN,LLOC,ISTART,ISTOP,IOUT,INBAS, ITMP(2,N), TRUE, MSG='FOUND BAS OPTION "PRINT_HEAD NPER"'//NL//'BUT FAILED TO LOAD THE TIME STEP NUMBER. YOU CAN SET IT TO ZERO OR NEGATIVE TO AUTOMATICALLY USE THE LAST TIME STEP')
                                                                      ELSE
-                                                                         LLOC = J
-                                                                         ITMP(2,N) = NSTP( NPER )
+                                                                         ITMP(2,N) = Z
+                                                                         IF( PRINT_HEAD_LIST%LN(ISTART:ISTOP) /= "NSTP") LLOC = J
                                                                      END IF
                                                                      !
                      ELSEIF( IS_INTEGER(PRINT_HEAD_LIST%LN(ISTART:ISTOP)) .OR. .NOT. HAS_STARTDATE) THEN
                          !
                          CALL GET_INTEGER(PRINT_HEAD_LIST%LN,LLOC,ISTART,ISTOP,IOUT,INBAS, ITMP(1,N), TRUE,MSG='FOUND BAS OPTION "PRINT_HEAD"'//NL//'BUT FAILED TO LOAD THE STESS PERIOD NUMBER')
-                         CALL GET_INTEGER(PRINT_HEAD_LIST%LN,LLOC,ISTART,ISTOP,IOUT,INBAS, ITMP(2,N), HAS_ERROR=FOUND_BEGIN)  !
-                         IF(FOUND_BEGIN) THEN
-                                         LLOC = ISTART
-                                         ITMP(2,N) = Z
+                         !
+                         CALL PARSE_WORD_UP(PRINT_HEAD_LIST%LN,LLOC,ISTART,ISTOP) ! Find location if TS
+                         IF( PRINT_HEAD_LIST%LN(ISTART:ISTOP) == "NSTP") THEN
+                             ITMP(2,N) = Z
+                         ELSE
+                             CALL GET_INTEGER(PRINT_HEAD_LIST%LN,LLOC,ISTART,ISTOP,IOUT,INBAS, ITMP(2,N), TRUE, HAS_ERROR=FOUND_BEGIN)
+                             IF(FOUND_BEGIN) THEN
+                                             LLOC = ISTART
+                                             ITMP(2,N) = Z
+                             END IF
                          END IF
+
                      ELSE
                          CALL DATE%INIT( PRINT_HEAD_LIST%LN(ISTART:ISTOP), 0.001D0 )
                          IF(  DATE%NOT_SET() ) CALL STOP_ERROR(PRINT_HEAD_LIST%LN,INBAS,IOUT,'FOUND BAS OPTION "PRINT_HEAD"'//NL//'BUT FAILED TO LOAD THE EITHER A DATE OR SPECIFIED STESS PERIOD AND TIME STEP NUMBERS')
