@@ -18,7 +18,7 @@ Boyce, S.E., Hanson, R.T., Ferguson, I., Schmid, W., Henson, W., Reimann, T., Me
 
 &nbsp;
 
-## 2.3.1-b3
+## 2.3.1-b4
 
 TBA
 
@@ -30,6 +30,9 @@ abc
 
 ### Fixed
 * `FMP` Farm Process
+  * `BREAKING CHANGE`: Farm Net Recharge (`FNR`) writes to the Cell-By-Cell (`CBC`) in a way that separates Evapotranspiration from Groundwater (`ETgw`) and Deep Percolation (`DPERC`). This changes the volumetric budget so the `FNR` `IN` only contains `DPERC` and `FNR` `OUT` only contains `ETgw`. Note the net of `IN-OUT` remains the same.
+    * Previously, the FMP writes `FNR` as `DPERC-ETgw` that is stored as a single array. This resulted in programs, such as ZoneBudget, to collect FNR IN as being the set of locations who had a net-in rather than just being `DPERC`. 
+    * Now, `FNR` is written using the list-style/compact `CBC` writer that enables writing separate records for `ETgw` and `DPERC`.
   * SFR is not required when using the `SURFACE_WATER` block options: `SEMI_ROUTED_DELIVERY`, `SEMI_ROUTED_RETURN`, or `ROUTED_RETURN_ANY_REACH`, `ROUTED_RETURN_ANY_NON_DIVERSION_REACH`. Instead, if SFR is not part of the simulation, they are disabled a warning is raised.
   * `BARE_PRECIPITATION_CONSUMPTION_FRACTION` removed from FMP_Template.
     * The Farm Process input template, [doc/FMP_Template/FMP_Template.fmp](doc/FMP_Template/FMP_Template.fmp), incorrectly had a legacy keyword. This option was superseded by the `SOIL` block `EFFECTIVE_PRECIPITATION_TABLE` and the `CLIMATE` block `PRECIPITATION_POTENTIAL_CONSUMPTION`, which are applied to both bare and non-bare land uses.
@@ -51,7 +54,9 @@ abc
         `1  0   # WBS 2 has it disabled`  
         `1  1   # WBS 3 has it enabled`  
   * Cleaned up information written to the list file that describe the Groundwater Allotment that is assigned. 
-  
+  * `ADDED_DEMAND` without specifying the `ADDED_DEMAND_RUNOFF_SPLIT` now raises a warning.
+  * If a model is started at a stress period other than 1 with the `FASTFORWARD` `BAS` option, then the headers were not written to the various FMP output files. This is now fixed.
+
 * `BAS` Basic Package
   * `PRINT_WATER_DEPTH` output file wrote an empty line to `PRINT_WATER_TABLE` output file.
     * Fixed `PRINT_WATER_DEPTH` from using the unit number associated with the BAS option `PRINT_WATER_TABLE` when writing an empty line to separate records. If `PRINT_WATER_TABLE`, then a random file called fort.xxx with xxx being a random number, would be written with nothing but blank spaces.
@@ -61,8 +66,11 @@ abc
     * The NWT solver instruction manual defines that a set of numbers are read after the `SPECIFY` keyword option. However, the MODFLOW-NWT source code allows for the `CONTINUE` keyword option to appear after `SPECIFY` and before the numerical parameters. This is also the default behavior for FloPy when making a NWT solver file. This feature was added back to maintain compatibility with MODFLOW-NWT and FloPy.
     * It is recommended to use the BAS option `NO_FAILED_CONVERGENCE_STOP`, which has the same effect and is not solver dependent.
 
+* `UZF` did not set correctly the `CBC` unit number when using the GLOBAL `CBC` unit from the `BAS` package.
+* `SFR` changed reach depth error to warning to allow a simulation to continue.
 * `SWO` Surface Water Operations
   * Improved warning message descriptions.
+  * `ULOAD` error when reading the `ABSOLUTE_CONVERGENCE_CRITERIA` and `RELATIVE_CONVERGENCE_CRITERIA` keywords that erroneously raised "Unable to open EXTERNAL XYZ" error, where XYZ was a random, small integer. This problem arose because the `ULOAD` unit number must be set to zero to indicate a new file or unit number must be specified, so the last value stored in that number was passed in resulting in the error message.
   * `RESERVOIR_SPLIT_FRACTIONS` keyword added.
     * In an early beta release of SWO, the split reservoir setting required the keyword `RESERVOIR_SPLIT_FRACTIONS`, however for the final release of SWO this keyword was changed to `RESERVOIR_PRIMARY_REREGULATION_SPLIT`. For backward compatibility, both keywords are now checked for and serve the same purpose.
 
@@ -80,7 +88,7 @@ abc
     * The search algorithm for finding the time interval no longer raises an index error if the time falls within the first interval. 
     * The algorithm was also refactored to improve the execution speed.
   * Remove potential of taking `sqrt` of a negative number.
-  
+
 * `validate_example_results.f90` 
   * Fixed missing character initialization.
 
@@ -90,6 +98,8 @@ abc
   * The example driver bash script runs all the example problems and then runs a Fortran tool to check if they match a known hash value. If one or more examples do not match, then the Fortran tool returns a non-zero exit status code. However, on some versions of bash this would instead exit the entire script preventing the clean up and closing comments from running. Instead a set of if and conditional `||` are used to check if the examples pass and then the script completes normally.
 
 * `options.print_convergence.txt` fixed an incorrect header description.
+
+* `BiF` code updates that fix an issue with the `COMPRESSED_VALUE_STORAGE` not correctly handling zero stored values. This only occurs when it previously had a value and then was reallocated to no values.
 
 
 ### Refactoring
