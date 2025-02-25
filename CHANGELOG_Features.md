@@ -12,7 +12,7 @@
 
 &nbsp;
 
-## 2.3.1-b3
+## 2.3.1-b4
 
 TBA
 
@@ -24,6 +24,14 @@ The main executable added support for basic command arguments. The current argum
   * `-v` &nbsp; &nbsp; &nbsp; `--version`
     *  Print out the mf-owhm version number, then exit program.
 
+### `BAS` Improvements
+
+* `OPTIONS` Block
+  * `PRINT_PROPERTY` now includes files for `SC1`, `SC2`, cell surface `AREA`, an layer `THICK`ness.
+  * `PRINT_PROPERTY` file names changed to lower case.
+  * `LIMIT_INPUT_CHECK_OUTPUT` option indicates that writing output should be minimized when using the `INPUT_CHECK` option. This has no effect if not using `INPUT_CHECK`.
+
+
 ### `FMP` Improvements
 
 * Renamed input keywords:
@@ -31,6 +39,9 @@ The main executable added support for basic command arguments. The current argum
           but the new versions are now used in the FMP_Template and LIST output.
      * `EFFICIENCY` keyword changed to `IRRIGATION_EFFICIENCY`
      * `EFFICIENCY_IMPROVEMENT ` keyword changed to `IRRIGATION_EFFICIENCY_IMPROVEMENT`
+
+* `Land_Use`  block `NO_TPOT_SHIFT_TO_EPOT` keyword.
+     * The FMP Potential Consumptive Use/Potential Evapotranspiration (`CU`) is split in to potential transpiration (`Tpot`) and potential evaporation (`Epot`) based on the `TRANSPIRATION_FRACTION` (`FTR`). By default, unused `Tpot` is added back to the `Epot` to honor `CU`. That is, if `Tact < Tpot` then `Epot = CU - Tact`. If `NO_TPOT_SHIFT_TO_EPOT` option is present, then this feature is disabled. That is, `Tpot = CU*FTR` and `Epot = CU*(1-FTR)` and do not change.
 
 * `SURFACE_WATER` block `ADDED_RUNOFF` keyword.
      * `ADDED_RUNOFF` specifies additional runoff that is included in the model.
@@ -50,6 +61,12 @@ The main executable added support for basic command arguments. The current argum
      * Indicates that runoff that is has no semi- or fully-routed return location may leave the model without raising a warning. This is useful if you want to have runoff in a simulation that does not include `SFR`.
 
 * If `SFR` is not part of the simulation and the `SURFACE_WATER block` has:`SEMI_ROUTED_DELIVERY`, `SEMI_ROUTED_RETURN`, or `ROUTED_RETURN_ANY_REACH`, `ROUTED_RETURN_ANY_NON_DIVERSION_REACH` specified, then a warning is raised and they are disabled. Previously, a error was raised and the simulation stopped.
+
+### General Improvements
+
+* `examples/mf-owhm-gmg` added.
+  * The standard `mf-owhm` examples using the `GMG` solver (not part of standard OWHM because it is written in C).
+
 
 ------
 

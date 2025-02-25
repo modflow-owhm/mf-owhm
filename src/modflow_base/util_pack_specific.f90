@@ -984,7 +984,7 @@ MODULE BUDGET_DATEBASE_WRITER
   !
   CONTAINS
   !
-  SUBROUTINE WRITE_DATEBASE(DB, MSUM, VBNM, VBVL, KSTP, KPER, TOTIM, DELT, DATE)
+  SUBROUTINE WRITE_DATEBASE(DB, MSUM, VBNM, VBVL, KSTP, KPER, TOTIM, DELT, DATE, SET_HEADER)
     INTEGER,                         INTENT(IN   ):: MSUM
     TYPE(GENERIC_OUTPUT_FILE),       INTENT(INOUT):: DB
     REAL,          DIMENSION(4,MSUM),INTENT(IN   ):: VBVL
@@ -992,6 +992,7 @@ MODULE BUDGET_DATEBASE_WRITER
     CHARACTER(19),                   INTENT(IN   ):: DATE
     INTEGER,                         INTENT(IN   ):: KSTP, KPER
     REAL,                            INTENT(IN   ):: TOTIM, DELT
+    LOGICAL,                         INTENT(IN   ):: SET_HEADER
     INTEGER:: MSUM1, I, J
     CHARACTER(:), ALLOCATABLE:: LN, BIN_REC
     CHARACTER(16):: TEXT, TEXT2
@@ -1001,7 +1002,7 @@ MODULE BUDGET_DATEBASE_WRITER
     !
     MSUM1 = MSUM-ONE
     !
-    IF(KPER==ONE .AND. KSTP==ONE) THEN
+    IF(SET_HEADER) THEN
         !
         IF(DB%BINARY) THEN
             LN = CAST2STR(MSUM1+FIVE)//'      DATE_START             PER             STP            DELT         SIMTIME'
@@ -1451,7 +1452,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
                           PRNT_RES, PRNT_RES_LIM, PRNT_RES_CUM, PRNT_RES_CUM_ARR,                                &
                           PRNT_CUM_HEAD_CHNG, CUM_HEAD_CHNG, CUM_HEAD_CHNG_E10,IBDOPT
   USE GLOBAL,       ONLY: NOCBC, CBC_GLOBAL_UNIT, BIN_REAL_KIND, IXSEC, IFREFM, NLAY, NROW, NCOL, NPER,  &
-                          SPEND, SPSTART, INPUT_CHECK, CMD_ITER_INFO, NO_CONST_HEAD
+                          SPEND, SPSTART, INPUT_CHECK, LIMIT_INPUT_CHECK_OUTPUT, CMD_ITER_INFO, NO_CONST_HEAD
   USE PARAMMODULE,  ONLY: MXPAR,MXCLST,MXINST,PROPPRINT
   !
   USE GLOBAL,       ONLY: ITMUNI, NSTP, SPTIM, PERLEN
@@ -1496,7 +1497,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
     CASE('FREE', 'NOFREE', 'XSECTION', 'CHTOCH', 'PRINTTIME', 'PAUSE', 'BUDGETDB',                     &
          'SHOWPROGRESS', 'SHOW_PROGRESS', 'NOSHOWPROGRESS', 'NO_SHOWPROGRESS', 'NO_SHOW_PROGRESS',     &
          'TIME_INFO', 'PRINT_TIME_INFO',                                                               &
-         'INPUT_CHECK', 'INPUTCHECK', 'FASTFORWARD',                                                   &
+         'INPUT_CHECK', 'LIMIT_FASTFORWARD_OUTPUT', 'LIMIT_INPUT_CHECK_OUTPUT', 'INPUTCHECK', 'FASTFORWARD',    &
          'PRINT', 'PRINT_HEAD', 'PRINT_WATER_TABLE', 'PRINT_WATER_DEPTH',                              &
          'PRINT_CONVERGENCE', 'PRINT_FLOW_RESIDUAL', 'PRINT_RELATIVE_VOLUME_ERROR', 'PRINT_RELATIVE_VOL_ERROR', &
          'START', 'STARTDATE', 'START_DATE', 'DATE_START', 'DATESTART',                                &
@@ -1678,7 +1679,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
     CASE('FREE', 'NOFREE', 'XSECTION', 'CHTOCH', 'PRINTTIME', 'PAUSE', 'BUDGETDB',                     &
          'SHOWPROGRESS', 'SHOW_PROGRESS', 'NOSHOWPROGRESS', 'NO_SHOWPROGRESS', 'NO_SHOW_PROGRESS',     &
          'TIME_INFO', 'PRINT_TIME_INFO',                                                               &
-         'INPUT_CHECK', 'INPUTCHECK', 'FASTFORWARD',                                                   &
+         'INPUT_CHECK', 'LIMIT_FASTFORWARD_OUTPUT', 'LIMIT_INPUT_CHECK_OUTPUT', 'INPUTCHECK', 'FASTFORWARD',   &
          'PRINT', 'PRINT_HEAD', 'PRINT_WATER_TABLE', 'PRINT_WATER_DEPTH',                              &
          'PRINT_CONVERGENCE', 'PRINT_FLOW_RESIDUAL', 'PRINT_RELATIVE_VOLUME_ERROR', 'PRINT_RELATIVE_VOL_ERROR', &
          'START', 'STARTDATE', 'START_DATE', 'DATE_START', 'DATESTART',                                &
@@ -2081,7 +2082,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
               !
           CASE('MAX_RELATIVE_VOLUME_ERROR','MAX_RELATIVE_VOL_ERROR')
                 !
-                CALL GET_NUMBER(BL%LINE,LLOC,ISTART,ISTOP,IOUT,INBAS, MAX_REL_VOL_ERROR,MSG='FOUND BAS OPTION "MAX_RELATIVE_VOL_ERROR"'//NL//'BUT FAILED TO THE NUMBER LOCATED AFTER THE KEYWORD')
+                CALL GET_NUMBER(BL%LINE,LLOC,ISTART,ISTOP,IOUT,INBAS, MAX_REL_VOL_ERROR,MSG='FOUND BAS OPTION "MAX_RELATIVE_VOL_ERROR"'//NL//'BUT FAILED TO FIND THE NUMBER LOCATED AFTER THE KEYWORD')
                 !
           CASE('MIN_SOLVER_ITERATION','MIN_SOLVER_ITER')
               !
@@ -2223,7 +2224,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
               WRITE(IOUT,'(17x, A)')'The Cell-By-Cell (CBC) flows are written at the end of every time step.'
           CASE('CBC_LAST_TIMESTEP')
               NOCBC=-2
-              WRITE(IOUT,'(17x, A)')'TThe Cell-By-Cell (CBC) flows are written at the end of every stress period (the end of the last time step).'
+              WRITE(IOUT,'(17x, A)')'The Cell-By-Cell (CBC) flows are written at the end of every stress period (the end of the last time step).'
               !
           CASE('NO_DIM_CHECK', 'NODIMCHECK')
                   WARN_DIM = FALSE
@@ -2306,44 +2307,52 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
               INPUT_CHECK = TRUE
               IFASTFORWARD = TWO
               !
+          CASE('LIMIT_INPUT_CHECK_OUTPUT', 'LIMIT_FASTFORWARD_OUTPUT')
+              WRITE(IOUT,'(17x, A)')'LIMIT_INPUT_CHECK_OUTPUT option enabled. If INPUT_CHECK is enabled, then minimal output is written.'
+              LIMIT_INPUT_CHECK_OUTPUT = TRUE
+              !
           CASE('PAUSE')
               USE_PAUSE = TRUE
               !
           CASE('FASTFORWARD')
-              !
-              CALL PARSE_WORD(BL%LINE,LLOC,ISTART,ISTOP) !STARTING DATE
-              IF( IS_INTEGER(BL%LINE(ISTART:ISTOP)) ) THEN
-                  !
-                  CALL GET_INTEGER(BL%LINE,LLOC,ISTART,ISTOP,IOUT,INBAS,SPSTART,TRUE,MSG='FASTFORWARD ERROR -- '//'FAILED TO IDENTIFY STARTING STRESS PERIOD')
-              ELSEIF( .NOT. HAS_STARTDATE ) THEN
-                  CALL STOP_ERROR(BL%LINE,INBAS,IOUT,                                                                          &
-                                            'FASTFORWARD ERROR -- FAILED TO IDENTIFY A STARTING STRESSS PERIOD No.'//NL//                &
-                                            'AND THERE IS NOT A STARTING DATE SPECIFIED IN THE DIS (viz. "START_DATE" KEYWORD)'//NL//     &
-                                            'TO MAKE OneWater DATE AWARE'//NL//'AND ALLOW THE USE OF CALENDAR DATES AS AN INPUT TO THE FASTWORD FEATURE')
+              IF(INPUT_CHECK) THEN
+                 CALL PARSE_WORD(BL%LINE,LLOC,ISTART,ISTOP) !STARTING DATE -> Just move past arguments in case of option line
+                 CALL PARSE_WORD(BL%LINE,LLOC,ISTART,ISTOP) !ENDING DATE
               ELSE
-                  CALL DATE%INIT( BL%LINE(ISTART:ISTOP), 0.001D0 )
-                  IF(  DATE%NOT_SET() ) CALL STOP_ERROR(TRIM(BL%LINE),INBAS,IOUT,'FASTFORWARD ERROR -- FAILED TO IDENTIFY STARTING STRESS PERIOD No.'//NL//'OR STARTING CALENDAR DATE'//NL//'FOR FASTFORWARD TO IDENTIFY STARTING POINT.')
-                  !
-                  CALL DATE_TO_SP(DATE,SPSTART)
+                 CALL PARSE_WORD(BL%LINE,LLOC,ISTART,ISTOP) !STARTING DATE
+                 IF( IS_INTEGER(BL%LINE(ISTART:ISTOP)) ) THEN
+                     !
+                     CALL GET_INTEGER(BL%LINE,LLOC,ISTART,ISTOP,IOUT,INBAS,SPSTART,TRUE,MSG='FASTFORWARD ERROR -- '//'FAILED TO IDENTIFY STARTING STRESS PERIOD')
+                 ELSEIF( .NOT. HAS_STARTDATE ) THEN
+                     CALL STOP_ERROR(BL%LINE,INBAS,IOUT,                                                                          &
+                                               'FASTFORWARD ERROR -- FAILED TO IDENTIFY A STARTING STRESSS PERIOD No.'//NL//                &
+                                               'AND THERE IS NOT A STARTING DATE SPECIFIED IN THE DIS (viz. "START_DATE" KEYWORD)'//NL//     &
+                                               'TO MAKE OneWater DATE AWARE'//NL//'AND ALLOW THE USE OF CALENDAR DATES AS AN INPUT TO THE FASTWORD FEATURE')
+                 ELSE
+                     CALL DATE%INIT( BL%LINE(ISTART:ISTOP), 0.001D0 )
+                     IF(  DATE%NOT_SET() ) CALL STOP_ERROR(TRIM(BL%LINE),INBAS,IOUT,'FASTFORWARD ERROR -- FAILED TO IDENTIFY STARTING STRESS PERIOD No.'//NL//'OR STARTING CALENDAR DATE'//NL//'FOR FASTFORWARD TO IDENTIFY STARTING POINT.')
+                     !
+                     CALL DATE_TO_SP(DATE,SPSTART)
+                 END IF
+                 !
+                 CALL PARSE_WORD(BL%LINE,LLOC,ISTART,ISTOP) !ENDING DATE
+                 IF( IS_INTEGER(BL%LINE(ISTART:ISTOP)) ) THEN
+                     !
+                     CALL GET_INTEGER(BL%LINE,LLOC,ISTART,ISTOP,IOUT,INBAS,SPEND,TRUE,MSG='FASTFORWARD ERROR -- '//'FAILED TO IDENTIFY ENDING STRESS PERIOD')
+                 ELSE
+                     CALL DATE%INIT( BL%LINE(ISTART:ISTOP), 0.001D0 )
+                     IF(  DATE%IS_SET() ) THEN
+                         CALL DATE_TO_SP(DATE,SPEND)
+                     ELSE
+                         SPEND = NPER
+                         CALL WARNING_MESSAGE(BL%LINE,INBAS,IOUT,                                                                     &
+                                                'MINOR WARNING: FASTFORWARD -- FAILED TO IDENTIFY AN ENDING STRESSS PERIOD No.'//NL//   &
+                                                'NOR AN ENDING CALENDAR DATE'//NL//                                                     &
+                                                'SO IT WILL BE ASSUMED TO HAVE AN ENDING AT STRESSS PERIOD AT NPER')
+                     END IF
+                 END IF
+                 IFASTFORWARD = ONE
               END IF
-              !
-              CALL PARSE_WORD(BL%LINE,LLOC,ISTART,ISTOP) !ENDING DATE
-              IF( IS_INTEGER(BL%LINE(ISTART:ISTOP)) ) THEN
-                  !
-                  CALL GET_INTEGER(BL%LINE,LLOC,ISTART,ISTOP,IOUT,INBAS,SPEND,TRUE,MSG='FASTFORWARD ERROR -- '//'FAILED TO IDENTIFY ENDING STRESS PERIOD')
-              ELSE
-                  CALL DATE%INIT( BL%LINE(ISTART:ISTOP), 0.001D0 )
-                  IF(  DATE%IS_SET() ) THEN
-                      CALL DATE_TO_SP(DATE,SPEND)
-                  ELSE
-                      SPEND = NPER
-                      CALL WARNING_MESSAGE(BL%LINE,INBAS,IOUT,                                                                     &
-                                             'MINOR WARNING: FASTFORWARD -- FAILED TO IDENTIFY AN ENDING STRESSS PERIOD No.'//NL//   &
-                                             'NOR AN ENDING CALENDAR DATE'//NL//                                                     &
-                                             'SO IT WILL BE ASSUMED TO HAVE AN ENDING AT STRESSS PERIOD AT NPER')
-                  END IF
-              END IF
-              IFASTFORWARD = ONE
           CASE DEFAULT
                      IF(NO_OPT_LINE) THEN
                                CALL WRN%ADD(BL%LINE//BLN)
@@ -2421,20 +2430,27 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
                                                                      CALL PARSE_WORD(PRINT_HEAD_LIST%LN,LLOC,ISTART,ISTOP) ! CHECK IF TS IS SPECIFIED
                                                                      !
                                                                      IF( IS_INTEGER(PRINT_HEAD_LIST%LN(ISTART:ISTOP)) ) THEN
-                                                                         CALL GET_INTEGER(PRINT_HEAD_LIST%LN,LLOC,ISTART,ISTOP,IOUT,INBAS, ITMP(2,N), TRUE, MSG='FOUND BAS OPTION "PRINT_HEAD  END"'//NL//'BUT FAILED TO LOAD THE TIME STEP NUMBER. YOU CAN SET IT TO ZERO OR NEGATIVE TO AUTOMATICALLY USE THE LAST TIME STEP')
+                                                                         CALL GET_INTEGER(PRINT_HEAD_LIST%LN,LLOC,ISTART,ISTOP,IOUT,INBAS, ITMP(2,N), TRUE, MSG='FOUND BAS OPTION "PRINT_HEAD NPER"'//NL//'BUT FAILED TO LOAD THE TIME STEP NUMBER. YOU CAN SET IT TO ZERO OR NEGATIVE TO AUTOMATICALLY USE THE LAST TIME STEP')
                                                                      ELSE
-                                                                         LLOC = J
-                                                                         ITMP(2,N) = NSTP( NPER )
+                                                                         ITMP(2,N) = Z
+                                                                         IF( PRINT_HEAD_LIST%LN(ISTART:ISTOP) /= "NSTP") LLOC = J
                                                                      END IF
                                                                      !
                      ELSEIF( IS_INTEGER(PRINT_HEAD_LIST%LN(ISTART:ISTOP)) .OR. .NOT. HAS_STARTDATE) THEN
                          !
                          CALL GET_INTEGER(PRINT_HEAD_LIST%LN,LLOC,ISTART,ISTOP,IOUT,INBAS, ITMP(1,N), TRUE,MSG='FOUND BAS OPTION "PRINT_HEAD"'//NL//'BUT FAILED TO LOAD THE STESS PERIOD NUMBER')
-                         CALL GET_INTEGER(PRINT_HEAD_LIST%LN,LLOC,ISTART,ISTOP,IOUT,INBAS, ITMP(2,N), HAS_ERROR=FOUND_BEGIN)  !
-                         IF(FOUND_BEGIN) THEN
-                                         LLOC = ISTART
-                                         ITMP(2,N) = Z
+                         !
+                         CALL PARSE_WORD_UP(PRINT_HEAD_LIST%LN,LLOC,ISTART,ISTOP) ! Find location if TS
+                         IF( PRINT_HEAD_LIST%LN(ISTART:ISTOP) == "NSTP") THEN
+                             ITMP(2,N) = Z
+                         ELSE
+                             CALL GET_INTEGER(PRINT_HEAD_LIST%LN,LLOC,ISTART,ISTOP,IOUT,INBAS, ITMP(2,N), TRUE, HAS_ERROR=FOUND_BEGIN)
+                             IF(FOUND_BEGIN) THEN
+                                             LLOC = ISTART
+                                             ITMP(2,N) = Z
+                             END IF
                          END IF
+
                      ELSE
                          CALL DATE%INIT( PRINT_HEAD_LIST%LN(ISTART:ISTOP), 0.001D0 )
                          IF(  DATE%NOT_SET() ) CALL STOP_ERROR(PRINT_HEAD_LIST%LN,INBAS,IOUT,'FOUND BAS OPTION "PRINT_HEAD"'//NL//'BUT FAILED TO LOAD THE EITHER A DATE OR SPECIFIED STESS PERIOD AND TIME STEP NUMBERS')

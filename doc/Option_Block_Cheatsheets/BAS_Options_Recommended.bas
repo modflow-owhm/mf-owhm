@@ -66,11 +66,18 @@ BEGIN OPTIONS
     # Print the budget information in a column based format for all packages in a single file.
     BUDGETDB               Generic_Output    # package_flow_budget.txt
     #
+    # Write to the directory, OUT_DIR, a set of files that are major aquifer properties (eg HK, VK, SY, SS, SC, THICK, AREA). 
+    PRINT_PROPERTY              OUT_DIR              # ./aquiferProperty/
+    #
     # Write at the end of the simulation the cumulative volume errors (L^3) for the entire model grid.
     CUMULATIVE_RESIDUAL_ERROR_ARRAY Generic_Output   # Cumulative_Model_Error.txt
     #
     # Prints for each time step, the number of iterations required to solve and the mass error.
     PRINT_ITERATION_INFO   Generic_Output            # iter_info.txt
+    #
+    # File that prints for all time steps the Time step Date/Length information.
+    #   This is useful for post-processing tools.
+    PRINT_TIME_INFO        Generic_Output            # model_time_info.txt
     #
     # Print convergence information by iteration for every time step to a file.
     #  Useful for diagnosing model construction problems for time steps that fail to converge.

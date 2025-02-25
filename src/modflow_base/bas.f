@@ -19,9 +19,10 @@ C     ------------------------------------------------------------------
      4                     BOTM,HOLD,IBOUND,CR,CC,CV,HCOF,RHS,BUFF,STRT,
      5                     DDREF,IRESTART,KPERSTART,KSTPSTART,
      6                     IUNITSTART,SPSTART,SPEND,NOCBC,RBUF,
-     7                     INPUT_CHECK,BIN_REAL_KIND,HNEW_OLD,SPTIM,
-     8                     BACKTRACKING, CBC_GLOBAL_UNIT, ALLOC_DDREF,
-     9                     RCloseBAS, HCloseBAS, RCloseL2BAS
+     7                     INPUT_CHECK,LIMIT_INPUT_CHECK_OUTPUT,
+     8                     BIN_REAL_KIND,HNEW_OLD,SPTIM,
+     9                     BACKTRACKING, CBC_GLOBAL_UNIT, ALLOC_DDREF,
+     1                     RCloseBAS, HCloseBAS, RCloseL2BAS
       USE GLOBAL,     ONLY:NO_CONST_HEAD, SUBLNK, UPLAY, UPLAY_IDX,
      +                     WTABLE, WTABLE_OLD
       USE GLOBAL,     ONLY: SUPER_NAMES
@@ -180,10 +181,12 @@ C1------grids to be defined.
       !
       PDIFFPRT = 5                                                     ! IF PERCENT ERROR GOES ABOVE 5% THEN PRINT TO CMD PROMPT
       IF(IGRID == ONE)THEN
-        ALLOCATE(NO_CONST_HEAD, SUBLNK,INPUT_CHECK,BIN_REAL_KIND)
+        ALLOCATE(NO_CONST_HEAD, SUBLNK,BIN_REAL_KIND)
+        ALLOCATE(INPUT_CHECK, LIMIT_INPUT_CHECK_OUTPUT)
         NO_CONST_HEAD = FALSE
         SUBLNK      = FALSE
         INPUT_CHECK = FALSE
+        LIMIT_INPUT_CHECK_OUTPUT = FALSE
         BIN_REAL_KIND = REAL32  !SINGLE PRECISION BINARY OUTPUT
       END IF
 C
@@ -874,8 +877,8 @@ C2------CALCULATE UPPER MOST ACTIVE/NONDRY LAYER
       !          UPLAY = K
       !    END WHERE
       !END DO
-      DO J=1, NROW
-      DO I=1, NCOL
+      DO J=ONE, NROW
+      DO I=ONE, NCOL
          DO K=ONE,NLAY
              IF(IBOUND(I,J,K) /= Z) THEN
                                     UPLAY(I,J) = K
@@ -885,8 +888,8 @@ C2------CALCULATE UPPER MOST ACTIVE/NONDRY LAYER
       END DO
       END DO
       !
-      DO J=1, NROW
-      DO I=1, NCOL
+      DO J=ONE, NROW
+      DO I=ONE, NCOL
       IF(UPLAY(I,J) > Z) THEN !Assumes that there are no convertible layers beneath confine layers
           UP = UPLAY(I,J)
           N  = LBOTM(UP)
@@ -2038,13 +2041,13 @@ C     ------------------------------------------------------------------
      +                                        IEEE_QUIET_NAN,
      +                                        IEEE_POSITIVE_INF,
      +                                        IEEE_NEGATIVE_INF
-      USE, INTRINSIC:: ISO_FORTRAN_ENV, ONLY: REAL32
+      USE, INTRINSIC:: ISO_FORTRAN_ENV, ONLY: INT32, REAL32
       USE CONSTANTS,   ONLY: BLNK, BLN, NL, TRUE, FALSE, DZ, D10, Z, ONE
       USE GLOBAL,      ONLY:ITMUNI,IOUT,NCOL,NROW,NLAY,HNEW,STRT,DDREF,
      1                      INPUT_CHECK,WORST_CELL_MASS_BALANCE,IBOUND,
      2                      MAX_RELATIVE_VOL_ERROR,NPER,NSTP,BUFF,RBUF,
      +                      GSE,CELL_MASS_BALANCE, HOLD, ALLOC_DDREF, 
-     +                      WTABLE, IXSEC
+     +                      WTABLE, IXSEC, SPSTART
       USE GWFBASMODULE,ONLY:DELT,PERTIM,TOTIM,IHDDFL,IBUDFL,BUDGETDB,
      +                     MSUM,VBVL,VBNM,IDDREF,IUBGT,PDIFFPRT,DATE_SP,
      +                     MAX_REL_VOL_ERROR,MAX_REL_VOL_INVOKED,
@@ -2073,7 +2076,7 @@ C     ------------------------------------------------------------------
       LOGICAL:: HAS_PDIFFPRT
       DOUBLE PRECISION:: ERR, VERR, VOL, RAT
       REAL:: TOTRIN,TOTROT
-      LOGICAL:: LAST_TS
+      LOGICAL:: LAST_TS, SET_HEADER
       DOUBLE PRECISION:: NAN, inf, ninf
       DOUBLE PRECISION, dimension(:), allocatable:: HD 
 C     ------------------------------------------------------------------
@@ -2104,8 +2107,10 @@ C PRINT OUT BUDGET DATABASE
          ELSE
              DATE = '  NaN'
          END IF
+         SET_HEADER = KSTP==1 .AND. 
+     +               (KPER==SPSTART .OR. (KPER==1 .AND. INPUT_CHECK))
          CALL WRITE_DATEBASE(BUDGETDB,MSUM,VBNM,VBVL,KSTP,KPER,TOTIM,
-     +                       DELT,DATE)
+     +                       DELT,DATE,SET_HEADER)
       END IF
 C
 C
@@ -2349,8 +2354,8 @@ C4------PRINT TOTAL BUDGET IF REQUESTED
         IF ( SAVE_HEAD_FLAG == 1 ) THEN
           BLOCK
               CHARACTER(8):: SPTS
-              SPTS(1:4) = TRANSFER( KPER, SPTS(1:4) )     !  I = TRANSFER(c, I)  !GET SP
-              SPTS(5:8) = TRANSFER( KSTP, SPTS(5:8) )     !  J = TRANSFER(PRINT_HEAD(n)%EXTRA(5:8), J)  !GET TS
+              SPTS(1:4) = TRANSFER( INT(KPER, INT32), SPTS(1:4) )     !  I = TRANSFER(c, I)  !GET SP
+              SPTS(5:8) = TRANSFER( INT(KSTP, INT32), SPTS(5:8) )     !  J = TRANSFER(PRINT_HEAD(n)%EXTRA(5:8), J)  !GET TS
               DO I=1, SIZE(PRINT_HEAD)
                  IF( SPTS == PRINT_HEAD(I)%EXTRA ) THEN
                                                    n = I
@@ -2449,8 +2454,8 @@ C4------PRINT TOTAL BUDGET IF REQUESTED
         IF ( PRINT_HEAD_FLAG == 1 ) THEN
           BLOCK
               CHARACTER(8):: SPTS
-              SPTS(1:4) = TRANSFER( KPER, SPTS(1:4) )     !  I = TRANSFER(c, I)  !GET SP
-              SPTS(5:8) = TRANSFER( KSTP, SPTS(5:8) )     !  J = TRANSFER(PRINT_HEAD(n)%EXTRA(5:8), J)  !GET TS
+              SPTS(1:4) = TRANSFER( INT(KPER, INT32), SPTS(1:4) )     !  I = TRANSFER(c, I)  !GET SP
+              SPTS(5:8) = TRANSFER( INT(KSTP, INT32), SPTS(5:8) )     !  J = TRANSFER(PRINT_HEAD(n)%EXTRA(5:8), J)  !GET TS
               DO I=1, SIZE(PRINT_HEAD)
                  IF( SPTS == PRINT_HEAD(I)%EXTRA ) THEN
                                                    n = I
@@ -2520,8 +2525,8 @@ C4------PRINT TOTAL BUDGET IF REQUESTED
         IF ( PRINT_WTAB_FLAG == 1 ) THEN
           BLOCK
               CHARACTER(8):: SPTS
-              SPTS(1:4) = TRANSFER( KPER, SPTS(1:4) )     !  I = TRANSFER(c, I)  !GET SP
-              SPTS(5:8) = TRANSFER( KSTP, SPTS(5:8) )     !  J = TRANSFER(PRINT_WTAB(n)%EXTRA(5:8), J)  !GET TS
+              SPTS(1:4) = TRANSFER( INT(KPER, INT32), SPTS(1:4) )     !  I = TRANSFER(c, I)  !GET SP
+              SPTS(5:8) = TRANSFER( INT(KSTP, INT32), SPTS(5:8) )     !  J = TRANSFER(PRINT_WTAB(n)%EXTRA(5:8), J)  !GET TS
               DO I=1, SIZE(PRINT_WTAB)
                  IF( SPTS == PRINT_WTAB(I)%EXTRA ) THEN
                                                    n = I
@@ -2588,8 +2593,8 @@ C4------PRINT TOTAL BUDGET IF REQUESTED
         IF ( PRINT_WDEP_FLAG == 1 ) THEN
           BLOCK
               CHARACTER(8):: SPTS
-              SPTS(1:4) = TRANSFER( KPER, SPTS(1:4) )     !  I = TRANSFER(c, I)  !GET SP
-              SPTS(5:8) = TRANSFER( KSTP, SPTS(5:8) )     !  J = TRANSFER(PRINT_WDEP(n)%EXTRA(5:8), J)  !GET TS
+              SPTS(1:4) = TRANSFER( INT(KPER, INT32), SPTS(1:4) )     !  I = TRANSFER(c, I)  !GET SP
+              SPTS(5:8) = TRANSFER( INT(KSTP, INT32), SPTS(5:8) )     !  J = TRANSFER(PRINT_WDEP(n)%EXTRA(5:8), J)  !GET TS
               DO I=1, SIZE(PRINT_WDEP)
                  IF( SPTS == PRINT_WDEP(I)%EXTRA ) THEN
                                                    n = I
@@ -4725,7 +4730,7 @@ C2----OPEN LIST FILE
      +             ACCESS='SEQUENTIAL', STATUS='REPLACE', ASYNC=ASYN,
      +             BUFFER_BLOCKSIZE=BUFBLOCKSIZE, BUFFER_COUNT=BUFCOUNT)
             NFILE=NFILE+1
-            CALL PRINT_MAIN_HEADER(IOUT)
+            CALL PRINT_MAIN_HEADER(IOUT, FILACT)  ! FILACT is just a dummy arg
             !
             CALL DATE%NOW()
             WRITE(IOUT,'( A/, 4x,2A/,A,//)') REPEAT("∙",62),
@@ -5770,6 +5775,7 @@ C
           RCloseL2BAS   = DZ
           GW_SOLVER     = BLNK
           GW_FLOW_PACK  = BLNK
+          OWHM_VERSION  = BLNK
           !
           MXPAR  = Z
           MXCLST = Z
@@ -5777,6 +5783,7 @@ C
           !
           DEALLOCATE(SUBLNK)
           DEALLOCATE(INPUT_CHECK)
+          DEALLOCATE(LIMIT_INPUT_CHECK_OUTPUT)
           DEALLOCATE(BIN_REAL_KIND)
       END IF
       !
@@ -6769,13 +6776,33 @@ C  Save global data for a grid.
 !
 !      END SUBROUTINE
 
-      PURE SUBROUTINE CHECK_CBC_GLOBAL_UNIT(ICBC)
-      USE GLOBAL, ONLY: NOCBC, CBC_GLOBAL_UNIT
-      IMPLICIT NONE
-      INTEGER, intent(inout) :: ICBC
+      pure subroutine get_cbc_global_unit(global_cbc, no_cbc, 
+     +                                    flow_package)
+      use GLOBAL, only: NOCBC, CBC_GLOBAL_UNIT
+      implicit none
+      integer, intent(out):: global_cbc
+      logical, intent(out):: no_cbc
+      logical, intent(in ):: flow_package
       !
-      IF(CBC_GLOBAL_UNIT /= 0)  ICBC = CBC_GLOBAL_UNIT
+      global_cbc = CBC_GLOBAL_UNIT
       !
-      IF( NOCBC > 1 ) ICBC = 0
+      no_cbc = NOCBC == 2 .or. (NOCBC == 1 .and. .not. flow_package)
       !
-      END SUBROUTINE
+      end subroutine
+
+      pure subroutine check_cbc_global_unit(icbc, flow_package)
+      use GLOBAL, only: NOCBC, CBC_GLOBAL_UNIT
+      implicit none
+      integer, intent(inout) :: icbc
+      logical, intent(in):: flow_package
+      !
+      ! NOCBC =  2 -> disable cbc
+      ! NOCBC =  1 -> disable cbc for all packages except flow based
+      ! NOCBC = -1 -> cbc writes every time step
+      ! NOCBC = -2 -> cbc writes last time step of each stress period
+      !
+      if(CBC_GLOBAL_UNIT /= 0)  icbc = CBC_GLOBAL_UNIT
+      !
+      if(NOCBC == 2 .or. (NOCBC == 1 .and. .not. flow_package)) icbc = 0
+      !
+      end subroutine

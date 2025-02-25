@@ -73,6 +73,7 @@
         LOGICAL,          SAVE,                    POINTER:: SWO_ENABLED
         LOGICAL,          SAVE,                    POINTER:: DO_FM_BD
         LOGICAL,          SAVE,                    POINTER:: SFR_FIX_BOT
+        LOGICAL,          SAVE,                    POINTER:: SFR_FIX_BOT_WRN
         LOGICAL,          SAVE,                    POINTER:: SFR_AUTO_NEG_ITMP
         TYPE(WARNING_TYPE),                  SAVE, POINTER:: CNVG_WRN
         !
@@ -155,6 +156,7 @@
         LOGICAL,                             POINTER:: SWO_ENABLED
         LOGICAL,                             POINTER:: DO_FM_BD
         LOGICAL,                             POINTER:: SFR_FIX_BOT
+        LOGICAL,                             POINTER:: SFR_FIX_BOT_WRN
         LOGICAL,                             POINTER:: SFR_AUTO_NEG_ITMP
         TYPE(WARNING_TYPE),                  POINTER:: CNVG_WRN
         !

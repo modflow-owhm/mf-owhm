@@ -675,6 +675,18 @@ span {
 </span><span class="sc24">   </span><span class="sc6">FARM_WELL_CBC</span><span class="sc24">           </span><span class="sc7">INT</span><span class="sc24">                          </span><span class="sc2">#IFWLCB -- INT IS THE CBC UNIT TO WRITE TO, Set to zero if not specified
 </span><span class="sc24">   </span><span class="sc6">FARM_NET_RECHARGE_CBC</span><span class="sc24">   </span><span class="sc7">INT</span><span class="sc24">                          </span><span class="sc2">#IFNRCB -- INT IS THE CBC UNIT TO WRITE TO, Set to zero if not specified
 </span><span class="sc24">   </span><span class="sc2">#
+</span><span class="sc24">   </span><span class="sc2"># The Cell-By-Cell (CBC) binary for Farm Net Recharge (FNR) yields
+</span><span class="sc24">   </span><span class="sc2">#    a binary such that ZoneBudget calculates IN as only Deep Percolation (DP)
+</span><span class="sc24">   </span><span class="sc2">#    and OUT as only ETgw. 
+</span><span class="sc24">   </span><span class="sc2"># Previous to OWHMv2.3.1, the FNR was done on a cell by cell basis, that is 
+</span><span class="sc24">   </span><span class="sc2">#    each model cell stored the difference, DP-ETgw. This resulted in 
+</span><span class="sc24">   </span><span class="sc2">#    the ZoneBudget IN term being the sum of cells whose net had DP &gt; ETgw, and OUT for the converse. 
+</span><span class="sc24">   </span><span class="sc2">#    Note, the total, IN-OUT should result in the same solution within a zone. 
+</span><span class="sc24">   </span><span class="sc2"># COMPOSITE_FARM_NET_RECHARGE_CBC enables this legacy feature (that is, each cell a FNR).
+</span><span class="sc24">   </span><span class="sc2">#    It is not recommended to include this, unless you need the legacy (IN, OUT) values.
+</span><span class="sc24">   </span><span class="sc2">#
+</span><span class="sc24">   </span><span class="sc6">COMPOSITE_FARM_NET_RECHARGE_CBC</span><span class="sc24">
+   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># The following will either use a predefined name (specified at comment)
 </span><span class="sc24">   </span><span class="sc2">#   or write file to GENERIC_OUTPUT location/name
 </span><span class="sc24">   </span><span class="sc2">#
@@ -1191,14 +1203,18 @@ span {
 </span><span class="sc24">   </span><span class="sc2"># If WBS is defined with multiple runoff options, then the previous order determines which one is selected.
 </span><span class="sc24">   </span><span class="sc2">#   For example NO_RETURN_FLOW flow is chosen over ALLOW_RETURN_FLOW_TO_LEAVE_MODEL and SEMI_ROUTED_RETURN if all are specified.
 </span><span class="sc24">   </span><span class="sc2">#
+</span><span class="sc24">   </span><span class="sc2">#      ***Note: There cannot be deep percolation if all cells beneath the land surface are IBOUND=0 (not simulated/solid rock).
+</span><span class="sc24">   </span><span class="sc2">#               That is, all deep percolation is converted to runoff if it does not have a model layer to flow to.
+</span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># ------------------------------------------------------------------------------------------------------------------
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># 1) NO_RETURN_FLOW indicates that surface runoff re-infiltrates as deep percolation.
+</span><span class="sc24">   </span><span class="sc2">#     This converts all runoff into deep percolation (has no effect if all cells beneath are IBOUND=0).
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2">#     LAI[S,T,L] is optional. If not specified then all WBS have NO_RETURN_FLOW.
 </span><span class="sc24">   </span><span class="sc2">#     if included then specify NWBS records that have either
-</span><span class="sc24">   </span><span class="sc2">#        a  1 to indicate the WBS has NO_RETURN_FLOW/No runoff
-</span><span class="sc24">   </span><span class="sc2">#        or 0 to indicate that it does have return flow and Options 2, 3, and 4 decide the runoff location
+</span><span class="sc24">   </span><span class="sc2">#       a  1 to indicate the WBS has NO_RETURN_FLOW/No runoff (all runoff is converted to deep percolation)
+</span><span class="sc24">   </span><span class="sc2">#       or 0 to not enable NO_RETURN_FLOW for the WBS (runoff and deep percolation are calculated as normal.)
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc6">NO_RETURN_FLOW</span><span class="sc24">  </span><span class="sc12">[</span><span class="sc24"> </span><span class="sc7">LAI</span><span class="sc12">[</span><span class="sc0">S</span><span class="sc12">,</span><span class="sc0">T</span><span class="sc12">,</span><span class="sc0">L</span><span class="sc12">]</span><span class="sc24"> </span><span class="sc12">]</span><span class="sc24">
    </span><span class="sc2">#
@@ -1793,6 +1809,15 @@ span {
 </span><span class="sc24">   </span><span class="sc2">#        0 to disable for the crop
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc6">ZERO_CONSUMPTIVE_USE_BECOMES_BARE_SOIL</span><span class="sc24"> </span><span class="sc12">[</span><span class="sc24"> </span><span class="sc7">LAI</span><span class="sc12">[</span><span class="sc0">S</span><span class="sc12">,</span><span class="sc0">T</span><span class="sc12">,</span><span class="sc0">L</span><span class="sc12">]</span><span class="sc24"> </span><span class="sc12">]</span><span class="sc24">
+   </span><span class="sc2">#
+</span><span class="sc24">   </span><span class="sc2"># The FMP Potential Consumptive Use/Potential Evapotranspiration (CU) is split in to 
+</span><span class="sc24">   </span><span class="sc2"># potential transpiration (Tpot) and potential evaporation (Epot) based on the 
+</span><span class="sc24">   </span><span class="sc2"># TRANSPIRATION_FRACTION (FTR). By default, unused Tpot is added back to the Epot to honor CU. 
+</span><span class="sc24">   </span><span class="sc2"># That is, given Tact &lt; Tpot then Epot = CU - Tact.
+</span><span class="sc24">   </span><span class="sc2"># If NO_TPOT_SHIFT_TO_EPOT option is present, then this feature is disabled. 
+</span><span class="sc24">   </span><span class="sc2"># That is, Tpot = CU*FTR and Epot = CU*(1-FTR)
+</span><span class="sc24">   </span><span class="sc2">#
+</span><span class="sc24">   </span><span class="sc6">NO_TPOT_SHIFT_TO_EPOT</span><span class="sc24">
    </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># If LAND_USE_AREA_FRACTION is selected then the sum of all crops within a single model cell may be less than 1.

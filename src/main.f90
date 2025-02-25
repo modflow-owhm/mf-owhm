@@ -8,7 +8,7 @@
 !
 !     ******************************************************************
 !
-SUBROUTINE PRINT_MAIN_HEADER(IU)  ! Set to 6 for cmd prompt or use output_unit from: "use, intrinsic:: iso_fortran_env, only: output_unit"
+SUBROUTINE PRINT_MAIN_HEADER(IU, VERSION)  ! Set to 6 for cmd prompt or use output_unit from: "use, intrinsic:: iso_fortran_env, only: output_unit"
   !
   USE, INTRINSIC:: ISO_FORTRAN_ENV, ONLY: stdout=>OUTPUT_UNIT
   USE CONSTANTS, ONLY: NL
@@ -16,9 +16,10 @@ SUBROUTINE PRINT_MAIN_HEADER(IU)  ! Set to 6 for cmd prompt or use output_unit f
   !
   IMPLICIT NONE
   !
-  INTEGER, INTENT(IN)::IU
+  INTEGER,      INTENT(IN   )::IU
+  CHARACTER(*), INTENT(INOUT)::VERSION
   !
-  !1 ASSIGN VERSION NUMBER AND DATE
+  ! ASSIGN VERSION NUMBER AND DATE
   !
   CHARACTER(:),ALLOCATABLE:: VERSION_OWHM
   CHARACTER(:),ALLOCATABLE:: VERSION_MF, VERSION_FMP
@@ -29,7 +30,7 @@ SUBROUTINE PRINT_MAIN_HEADER(IU)  ! Set to 6 for cmd prompt or use output_unit f
   CHARACTER(:),ALLOCATABLE:: Revision
   !
   VERSION_OWHM='2.3'
-  Revision    ='1-b3'
+  Revision    ='1-b4'
   VERSION_MF  ='1.12'
   VERSION_FMP ='4.1'
   VERSION_SWR ='1.04'
@@ -38,6 +39,10 @@ SUBROUTINE PRINT_MAIN_HEADER(IU)  ! Set to 6 for cmd prompt or use output_unit f
   VERSION_NWT ='1.3'
   VERSION_CFP ='1.09.57'
   VERSION_SWO ='1.0'
+  !
+  VERSION = VERSION_OWHM // "." // Revision
+  !
+  IF(IU == 0) RETURN
   !
   IF(IU == stdout) THEN
                    WRITE (IU,'(A)') ''
@@ -122,6 +127,7 @@ SUBROUTINE COMMAND_ARGUMENT_CHECK(program_continue)
   integer :: narg, iarg, i, j, p, ONE
   logical :: FALSE
   character(128) :: arg
+  character(16) :: version
   FALSE = .FALSE.
   ONE = 1
   NARG = command_argument_count()
@@ -162,11 +168,11 @@ SUBROUTINE COMMAND_ARGUMENT_CHECK(program_continue)
              write(stdout,'(A,/)') REPEAT('-',84)
              write(stdout,'(A,/)') "Now printing the standard header before exiting the program."
              write(stdout,'(A,/)') REPEAT('-',84)
-             call PRINT_MAIN_HEADER(stdout)
+             call PRINT_MAIN_HEADER(stdout, version)
              program_continue = FALSE
              EXIT
          case("v", "version")
-             call PRINT_MAIN_HEADER(stdout)
+             call PRINT_MAIN_HEADER(stdout, version)
              program_continue = FALSE
              EXIT
          end select
@@ -274,7 +280,7 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
   !
   !2------WRITE BANNER TO SCREEN AND DEFINE CONSTANTS.
   !
-  CALL PRINT_MAIN_HEADER(STDOUT)  !PRINT TO COMMAND PROMPT  --Note STDOUT=6
+  CALL PRINT_MAIN_HEADER(STDOUT, OWHM_VERSION)  !PRINT TO COMMAND PROMPT  --Note STDOUT=6
   !
   NAM_UNIT = Z
   LGR_UNIT = Z
@@ -523,6 +529,7 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
   STRESS_PERIOD: DO KPER = ONE, NPER  ! ============================================================================================================
       !
       FASTFORWARD = KPER < SPSTART .OR. SPEND < KPER .OR. INPUT_CHECK
+      IF(SPEND < KPER .AND. LIMIT_INPUT_CHECK_OUTPUT) EXIT STRESS_PERIOD  ! Simulation is over and no dummy output
       !
       ! If simulation is too fast, then disable cmd iteration printing
       ! If ITER_PRINT = TRUE, then CALL CMD_PRINT_STOP(ITER_SIZE) else CALL CMD_PRINT_ITER(KITER, ITER_SIZE)
@@ -704,17 +711,24 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
               !
           END DO GRID_AD   ! -------------------------------------------------------------------------------------------------------------------------
           !
-          IF(KSTP == ONE .AND. HAS_STARTDATE) THEN
-              WRITE(*,24) KPER,KSTP,DATE_SP(KPER)%TS(0)%STR_MONTHYEAR()
-          ELSE
-              WRITE(*,25) KPER,KSTP                            !seb moved outside of IGRID LOOP
+          IF(KSTP == ONE) THEN
+             IF(FASTFORWARD .AND. HAS_STARTDATE) THEN
+                WRITE(*,26) KPER,KSTP,DATE_SP(KPER)%TS(0)%STR_MONTHYEAR()
+             ELSEIF(FASTFORWARD) THEN
+                WRITE(*,27) KPER,KSTP      
+             ELSEIF(HAS_STARTDATE) THEN
+                WRITE(*,24) KPER,KSTP,DATE_SP(KPER)%TS(0)%STR_MONTHYEAR()
+             ELSE
+                WRITE(*,25) KPER,KSTP
+             END IF
           END IF
           !
           !24  FORMAT(' Solving:  Stress Period: ',i6,4x,'Time step: ',i6,4x,'Groundwater-Flow Eqn.',14x A)
           !25  FORMAT(' Solving:  Stress Period: ',i6,4x,'Time step: ',i6,4x,'Groundwater-Flow Eqn.')
           24  FORMAT(' Solving:  Stress Period: ',i6,4x,'Time step: ',i6,14x,A)
           25  FORMAT(' Solving:  Stress Period: ',i6,4x,'Time step: ',i6)
-          26  FORMAT('Skipping:  Stress Period: ',i6,4x,'Time step: ',i6)
+          26  FORMAT('Skipping:  Stress Period: ',i6,4x,'Time step: ',i6,14x,A)
+          27  FORMAT('Skipping:  Stress Period: ',i6,4x,'Time step: ',i6)
           !
           ! If simulation is too fast, then disable cmd iteration printing
           IF(ITER_PRINT) THEN
@@ -734,7 +748,7 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
           ICNVG   = Z
           !
           IF(INPUT_CHECK) THEN
-                                 ! Note that if IINPUT_CHECK = True, then FASTFORWARD = True
+                                 ! Note that if INPUT_CHECK = True, then FASTFORWARD = True
                                  !
                                  IF( .NOT.( KPER == ONE .AND. KSTP == ONE ) )  THEN ! BY PASS FM LOOPS AND GRID LOOPS
                                      !
@@ -910,8 +924,13 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
                    !
                    !--------------CHECK IF FASTFORWARD FEATURE IS IN EFFECT
                    !
-                   IF ( FASTFORWARD .AND. IGRID==NGRIDS) CYCLE TIME_STEP
-                   IF ( FASTFORWARD ) CYCLE GRID_FM
+                   IF ( FASTFORWARD ) THEN
+                                      IF (LIMIT_INPUT_CHECK_OUTPUT .AND. IGRID==NGRIDS) THEN 
+                                          CYCLE TIME_STEP
+                                      ELSE 
+                                          CYCLE GRID_FM
+                                      END IF
+                   END IF
                    !
                    CALL BAS_PRE_SOLVER(IGRID, KPER, KSTP, KITER) !SAVE PREVIOUS HNEW AND SET UP ADVANCE DAMPING IF REQUESTED
                    !

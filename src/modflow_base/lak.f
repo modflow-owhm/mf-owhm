@@ -174,7 +174,7 @@ Cdep  transient simulations when THETA is negative.
         END IF
       !
       ! CHECK IF GLOBAL SHUTDOWN OF CBC IS IN EFFECT
-      CALL CHECK_CBC_GLOBAL_UNIT(ILKCB)
+      CALL CHECK_CBC_GLOBAL_UNIT(ILKCB, .FALSE.)
       !
       
 Cdep    Set default values for number of iterations and closure criteria

@@ -381,8 +381,8 @@ MODULE FMP_MAIN_DRIVER
     CALL FCROP%SETUP_DEPENDENT_PARTS(FDIM, WBS, CLIMATE, SOIL, IOUT)
     !
     ! CHECK IF GLOBAL SHUTDOWN OF CBC IS IN EFFECT
-    CALL CHECK_CBC_GLOBAL_UNIT( FMPOUT%WEL_CBC )
-    CALL CHECK_CBC_GLOBAL_UNIT( FMPOUT%FNR_CBC )
+    CALL CHECK_CBC_GLOBAL_UNIT( FMPOUT%WEL_CBC, .FALSE. )
+    CALL CHECK_CBC_GLOBAL_UNIT( FMPOUT%FNR_CBC, .FALSE. )
     !
     !IF( NOCBC>0 .AND. FMPOUT%WEL_CBC > 1) FMPOUT%WEL_CBC = 0
     !IF( NOCBC>0 .AND. FMPOUT%FNR_CBC > 3) FMPOUT%FNR_CBC = 0
@@ -542,7 +542,7 @@ MODULE FMP_MAIN_DRIVER
     !
     CALL FCROP%CALC_WBS_IRRIGATED_AREA(WBS)
     !
-    IF(  FCROP%OUT_INPUT%IS_OPEN)  CALL FCROP%PRINT_OUT_INPUT(WBS,KPER,1)
+    IF(  FCROP%OUT_INPUT%IS_OPEN)  CALL FCROP%PRINT_OUT_INPUT(WBS,KPER,1,KPER==1)
     !
     !2A-----READ ALLOTMENT PROPERTIES -- MUST BE AFTER CALC_WBS_IRRIGATED_AREA
     IF(WBS%HAS_ALLOT) THEN
@@ -980,7 +980,7 @@ MODULE FMP_MAIN_DRIVER
           CALL FCROP%NEXT(WBS, CLIMATE, SOIL, FDIM%CROP_BY_TIMESTEP)
           CALL FCROP%CALC_WBS_IRRIGATED_AREA(WBS)
           !
-          IF(   FCROP%OUT_INPUT%IS_OPEN)  CALL FCROP%PRINT_OUT_INPUT(WBS,KPER,KSTP)
+          IF(   FCROP%OUT_INPUT%IS_OPEN)  CALL FCROP%PRINT_OUT_INPUT(WBS,KPER,KSTP,FALSE)
           !
           IF(WBS%HAS_SALT) CALL SALT%CROP_BY_TS(FCROP)
       END IF
@@ -2098,7 +2098,7 @@ MODULE FMP_MAIN_DRIVER
   END SUBROUTINE
   !
   SUBROUTINE FMP_BD(KITER,KPER,KSTP,IGRID,NGRIDS,ILGR,LGRITER)
-    USE GLOBAL,       ONLY: SPTIM, INPUT_CHECK,NCOL,NROW,NLAY
+    USE GLOBAL,       ONLY: SPTIM, INPUT_CHECK,NCOL,NROW,NLAY,SPSTART
     USE GWFBASMODULE, ONLY: HAS_STARTDATE, DATE_SP, TOTIM
     USE FMP_GLOBAL,   ONLY: FDIM, WBS, CLIMATE, FCROP, FMPOUT,SALT,SOIL,SWFL,FMPOPT,FMP_LGR_PNT,DRTFLOW, SWODAT
     USE GWFSFRMODULE, ONLY: SEG, STRM
@@ -2113,6 +2113,7 @@ MODULE FMP_MAIN_DRIVER
     CHARACTER(16):: TXT
     CHARACTER(19):: DATETIME
     INTEGER:: NF
+    LOGICAL:: SKIP, SET_HEADER
     !
     INTERFACE
        SUBROUTINE UTILSAV2D(FL,COMPACT,BUF,TEXT,KSTP,KPER,PERTIM,TOTIM,NCOL,NROW,NLAY,DATE)
@@ -2148,6 +2149,8 @@ MODULE FMP_MAIN_DRIVER
     CALL SGWF2MNW1PNT(Igrid)
     !
     DELT = SPTIM(KPER)%DT(KSTP)
+    SKIP = INPUT_CHECK
+    SET_HEADER = KSTP==1 .AND. (KPER==SPSTART .OR. (KPER==1 .AND. INPUT_CHECK))
     !
     IF(HAS_STARTDATE) THEN  !SET SP STARTING DATE
         DATE     = DATE_SP(KPER)%TS(KSTP-1)%STR()
@@ -2177,15 +2180,15 @@ MODULE FMP_MAIN_DRIVER
         CALL FCROP%CALC_WBS_EFFICIENCY(WBS)              !POPULATES WBS%EFF
     END IF
     !
-    CALL FCROP%CALC_TTOT_ETOT_TGWA_EGWA_TOTALS(WBS,INPUT_CHECK)   !POPULATES FCROP%TTOT, WBS%TTOT, FCROP%ETOT, WBS%ETOT, etc.
+    CALL FCROP%CALC_TTOT_ETOT_TGWA_EGWA_TOTALS(WBS,SKIP)   !POPULATES FCROP%TTOT, WBS%TTOT, FCROP%ETOT, WBS%ETOT, etc.
     !
     !      ...ALLOW CONVERGENCE CRITERIA FOR MNW WELL PUMPAGE LINKED TO FARM PROCESS
     !
     IF(WBS%HAS_MNW2 .AND. FMPOPT%HAS_MNWCLOSE)    CALL FMP4QCNVG() !FMP3QCNVG CALL ADDED BY SCHMID, added inuit for NWT by rth --seb removed passing MNW1/MNW2 IUNITS
     !
-    CALL FMP3WELBD(KSTP,KPER,DELT,DATETIME,IGRID)!FMP3WELBD & FMP3FNRBD CALLS ADDED BY SCHMID, added inuit for NWT by rth
+    CALL FMP3WELBD(KSTP, KPER, DELT, DATETIME, IGRID, SET_HEADER)!FMP3WELBD & FMP3FNRBD CALLS ADDED BY SCHMID, added inuit for NWT by rth
     !
-    CALL FMP3FNRBD(KSTP,KPER,IGRID)
+    CALL FMP3FNRBD(KSTP, KPER, IGRID)
     !
     CALL FMP3ETPRT(KSTP,KPER,IGRID)
     !
@@ -2203,39 +2206,39 @@ MODULE FMP_MAIN_DRIVER
     !
     !  Crop Output
     !
-    IF(FCROP%OUT_BYFARMCROP%IS_OPEN) CALL FCROP%PRINT_OUT_BYFARM_BYCROP(WBS, KPER, KSTP, DELT, TIM, DATETIME)
-    IF(FCROP%OUT_BYFARM    %IS_OPEN) CALL FCROP%PRINT_OUT_BYFARM       (WBS, KPER, KSTP, DELT, TIM, DATETIME)
-    IF(FCROP%OUT_BYCROP    %IS_OPEN) CALL FCROP%PRINT_OUT_BYCROP       (WBS, KPER, KSTP, DELT, TIM, DATETIME)
-    IF(FCROP%OUT_ALL       %IS_OPEN) CALL FCROP%PRINT_OUT_ALL_CROP     (WBS, KPER, KSTP, DELT, TIM, DATETIME)
-    IF(FCROP%OUT_DETAIL    %IS_OPEN) CALL FCROP%PRINT_OUT_DETAIL_CROP  (WBS, KPER, KSTP, DELT, TIM, DATETIME)
-    IF(FCROP%OUT_BARE      %IS_OPEN) CALL FCROP%PRINT_OUT_BARE         (WBS, KPER, KSTP, DELT, TIM, DATETIME, SOIL%CAPILLARY_FRINGE)
+    IF(FCROP%OUT_BYFARMCROP%IS_OPEN) CALL FCROP%PRINT_OUT_BYFARM_BYCROP(WBS, KPER, KSTP, DELT, TIM, DATETIME, SET_HEADER)
+    IF(FCROP%OUT_BYFARM    %IS_OPEN) CALL FCROP%PRINT_OUT_BYFARM       (WBS, KPER, KSTP, DELT, TIM, DATETIME, SET_HEADER)
+    IF(FCROP%OUT_BYCROP    %IS_OPEN) CALL FCROP%PRINT_OUT_BYCROP       (WBS, KPER, KSTP, DELT, TIM, DATETIME, SET_HEADER)
+    IF(FCROP%OUT_ALL       %IS_OPEN) CALL FCROP%PRINT_OUT_ALL_CROP     (WBS, KPER, KSTP, DELT, TIM, DATETIME, SET_HEADER)
+    IF(FCROP%OUT_DETAIL    %IS_OPEN) CALL FCROP%PRINT_OUT_DETAIL_CROP  (WBS, KPER, KSTP, DELT, TIM, DATETIME, SET_HEADER)
+    IF(FCROP%OUT_BARE      %IS_OPEN) CALL FCROP%PRINT_OUT_BARE         (WBS, KPER, KSTP, DELT, TIM, DATETIME, SOIL%CAPILLARY_FRINGE, SET_HEADER)
     !
-    IF(FCROP%OUT_ET        %IS_OPEN) CALL FCROP%PRINT_OUT_ET(WBS, CLIMATE, KPER, KSTP, DELT, TIM, DATETIME)
+    IF(FCROP%OUT_ET        %IS_OPEN) CALL FCROP%PRINT_OUT_ET(WBS, CLIMATE, KPER, KSTP, DELT, TIM, DATETIME, SET_HEADER)
     !
-    IF(ALLOCATED(FCROP%OUT_CROP)) CALL FCROP%PRINT_OUT_SPECIFIED(WBS, KPER, KSTP, DELT, TIM, DATETIME)
+    IF(ALLOCATED(FCROP%OUT_CROP)) CALL FCROP%PRINT_OUT_SPECIFIED(WBS, KPER, KSTP, DELT, TIM, DATETIME, SET_HEADER)
     !
     !  Salt Output-----------------------------------------------------------------------
     !
     IF(WBS%HAS_SALT) THEN 
-            IF(SALT%OUT_BYFARM    %IS_OPEN) CALL SALT%PRINT_OUT_BYFARM       (FCROP, WBS, KPER, KSTP, DELT, TIM, DATETIME)
-            IF(SALT%OUT_BYFARMCROP%IS_OPEN) CALL SALT%PRINT_OUT_BYFARM_BYCROP(FCROP, WBS, KPER, KSTP, DELT, TIM, DATETIME)
-            IF(SALT%OUT_ALL       %IS_OPEN) CALL SALT%PRINT_OUT_ALL_CROP     (FCROP, WBS, KPER, KSTP, DELT, TIM, DATETIME)
+            IF(SALT%OUT_BYFARM    %IS_OPEN) CALL SALT%PRINT_OUT_BYFARM       (FCROP, WBS, KPER, KSTP, DELT, TIM, DATETIME, SET_HEADER)
+            IF(SALT%OUT_BYFARMCROP%IS_OPEN) CALL SALT%PRINT_OUT_BYFARM_BYCROP(FCROP, WBS, KPER, KSTP, DELT, TIM, DATETIME, SET_HEADER)
+            IF(SALT%OUT_ALL       %IS_OPEN) CALL SALT%PRINT_OUT_ALL_CROP     (FCROP, WBS, KPER, KSTP, DELT, TIM, DATETIME, SET_HEADER)
     END IF
     !
     !  SURFACE WATER DELIVERY/RETURN OUTPUT-------------------------------------------------------
     !
     IF(SWFL%HAS_SW) THEN
-             IF(SWFL%OUT_SFR_SRD      %IS_OPEN ) CALL SWFL%PRINT_OUT_SFR_SRD      (STRM, KPER, KSTP, DELT, TIM, DATETIME)
-             IF(SWFL%OUT_SFR_SRD_BYWBS%IS_OPEN ) CALL SWFL%PRINT_OUT_SFR_SRD_BYWBS(STRM, KPER, KSTP, DELT, TIM, DATETIME)
-             IF(SWFL%OUT_SFR_SRR      %IS_OPEN ) CALL SWFL%PRINT_OUT_SFR_SRR      (STRM, KPER, KSTP, DELT, TIM, DATETIME)
-             IF(SWFL%OUT_SFR_RET      %IS_OPEN ) CALL SWFL%PRINT_OUT_SFR_RET      (STRM, KPER, KSTP, DELT, TIM, DATETIME)
+             IF(SWFL%OUT_SFR_SRD      %IS_OPEN ) CALL SWFL%PRINT_OUT_SFR_SRD      (STRM, KPER, KSTP, DELT, TIM, DATETIME, SET_HEADER)
+             IF(SWFL%OUT_SFR_SRD_BYWBS%IS_OPEN ) CALL SWFL%PRINT_OUT_SFR_SRD_BYWBS(STRM, KPER, KSTP, DELT, TIM, DATETIME, SET_HEADER)
+             IF(SWFL%OUT_SFR_SRR      %IS_OPEN ) CALL SWFL%PRINT_OUT_SFR_SRR      (STRM, KPER, KSTP, DELT, TIM, DATETIME, SET_HEADER)
+             IF(SWFL%OUT_SFR_RET      %IS_OPEN ) CALL SWFL%PRINT_OUT_SFR_RET      (STRM, KPER, KSTP, DELT, TIM, DATETIME, SET_HEADER)
     END IF
     !
     !  NON-ROUTED DELIVERY OUTPUT----------------------------------------------------------------
     !
     IF(SWFL%HAS_NRD) THEN
-             IF(SWFL%OUT_NRD_BUD_WBS%IS_OPEN ) CALL SWFL%PRINT_OUT_NRD_BUD_BYWBS(KPER, KSTP, DELT, TIM, DATETIME)
-             IF(SWFL%OUT_NRD_BUD    %IS_OPEN ) CALL SWFL%PRINT_OUT_NRD_BUD      (KPER, KSTP, DELT, TIM, DATETIME)
+             IF(SWFL%OUT_NRD_BUD_WBS%IS_OPEN ) CALL SWFL%PRINT_OUT_NRD_BUD_BYWBS(KPER, KSTP, DELT, TIM, DATETIME, SET_HEADER)
+             IF(SWFL%OUT_NRD_BUD    %IS_OPEN ) CALL SWFL%PRINT_OUT_NRD_BUD      (KPER, KSTP, DELT, TIM, DATETIME, SET_HEADER)
     END IF
     !
     !  Layer Based Output-----------------------------------------------------------------------
@@ -2585,7 +2588,7 @@ MODULE FMP_MAIN_DRIVER
   END SUBROUTINE
   !
   !
-  SUBROUTINE FMP3WELBD(KSTP,KPER,DELT,DATE,IGRID)
+  SUBROUTINE FMP3WELBD(KSTP,KPER,DELT,DATE,IGRID,SET_HEADER)
     !     ******************************************************************
     !     CALCUALTE AND PRINT FARM DEMAND AND SUPPLY BUDGET
     !     CALCULATE AND PRINT COMPACT OR DETAILED FARM BUDGET
@@ -2608,6 +2611,7 @@ MODULE FMP_MAIN_DRIVER
     INTEGER, INTENT(IN):: KSTP,KPER,IGRID
     DOUBLE PRECISION, INTENT(IN):: DELT
     CHARACTER(*),     INTENT(IN):: DATE
+    LOGICAL,          INTENT(IN):: SET_HEADER
     CHARACTER(16),DIMENSION(1):: FWLAUX
     !
     CHARACTER(16):: TEXT
@@ -2895,12 +2899,12 @@ MODULE FMP_MAIN_DRIVER
                   TFDROLD = WBS%DEMAND
            END WHERE
            !
-           CALL FWELL%PRINT_SMOOTHED_PUMPING( KPER, KSTP, TOTIM, DATE )
-           CALL FWELL%PRINT_BYWELL( KPER,KSTP,DELT,REALTIM,DATE )
-           CALL FWELL%PRINT_BYFARM( KPER,KSTP,DELT,REALTIM,DATE,TFDROLD,WBS%DEMAND )
-           CALL FWELL%PRINT_BYMNW ( KPER,KSTP,DELT,REALTIM,DATE )
+           CALL FWELL%PRINT_SMOOTHED_PUMPING( KPER, KSTP, TOTIM, DATE, SET_HEADER )
+           CALL FWELL%PRINT_BYWELL( KPER, KSTP, DELT, REALTIM, DATE, SET_HEADER )
+           CALL FWELL%PRINT_BYFARM( KPER, KSTP, DELT, REALTIM, DATE, TFDROLD,WBS%DEMAND, SET_HEADER )
+           CALL FWELL%PRINT_BYMNW ( KPER, KSTP, DELT, REALTIM, DATE, SET_HEADER )
            !
-           IF(FWELL(1)%OUT_BYLAYER%IS_OPEN) CALL FWELL%PRINT_BYLAYER( KPER,KSTP,DELT,REALTIM,DATE,WBS )
+           IF(FWELL(1)%OUT_BYLAYER%IS_OPEN) CALL FWELL%PRINT_BYLAYER( KPER, KSTP, DELT, REALTIM, DATE, WBS, SET_HEADER )
            !
            !8F4----PRINT FLOW RATE PER FARM-WELL TO LIST-FILE IF REQUESTED
            !
@@ -3122,21 +3126,22 @@ MODULE FMP_MAIN_DRIVER
       !  CALCULATE AND PRINT VOLUMETRIC BUDGET FOR FARM NET RECHARGE
       !
       USE FMP_GLOBAL,  ONLY:IFA,FMPOUT,FMP_LGR_PNT, WBS,FCROP 
-      USE FMPBLK,      ONLY:TPL,TPU,ZERO,ZER
+      USE FMPBLK,      ONLY:TPL,TPU
       USE GLOBAL,      ONLY:NCOL,NROW,NLAY,IBOUND,BUFF,ITMUNI, UPLAY,UPLAY,INPUT_CHECK
       USE GWFBASMODULE,ONLY:DELT,VBVL,VBNM,MSUM,ICBCFL,PERTIM,TOTIM
       USE GWFUZFMODULE, ONLY: IUZFBND
-      USE CONSTANTS, ONLY: TRUE, FALSE, Z, ONE, DZ, UNO
+      USE CONSTANTS, ONLY: TRUE, FALSE, Z, ONE, TWO, DZ, UNO
       !
       INTEGER, INTENT(IN):: KSTP,KPER,IGRID
       !
       CHARACTER(16):: TEXT
       CHARACTER(14):: TIMEUNIT
       CHARACTER(14):: TIME
-      INTEGER IRCH(NCOL,NROW)
-      INTEGER I,IL,IR,IC,IBD,J,NF,NOPT                                  !FORMERLY IMPLICIT INTEGER
-      REAL ROUT, RIN                                                    !FORMERLY IMPLICIT REAL
-      DOUBLE PRECISION RATIN,RATOUT
+      ! INTEGER IRCH(NCOL,NROW) -- replaced by WBS%IWRK
+      INTEGER:: I,IL,IR,IC,IBD,J,NF,NOPT,NLIST
+      REAL:: ROUT, RIN
+      DOUBLE PRECISION:: RATIN,RATOUT
+      LOGICAL :: SKIP
       !
       CALL FMP_LGR_PNT(IGRID)
       TEXT = 'FARM  NET  RECH.'
@@ -3145,6 +3150,7 @@ MODULE FMP_MAIN_DRIVER
       !
       RATIN  = DZ
       RATOUT = DZ
+      SKIP = INPUT_CHECK
       !
       !1===== DEFINE TIME UNIT LABEL FOR "LABEL HEADER" ==========================================================
       IF(ITMUNI.EQ.1) TIMEUNIT='       SECONDS'
@@ -3159,36 +3165,29 @@ MODULE FMP_MAIN_DRIVER
       END IF
       !
       !2A2----CLEAR THE BUFFER & SET FLAG FOR SAVING CELL-BY-CELL FLOW TERMS.
-      DO CONCURRENT (IC=1:NCOL,IR=1:NROW,IL=1:NLAY) 
-                                                   BUFF(IC,IR,IL)=ZER  
-      END DO
       !
       DO CONCURRENT (IR=1:NROW, IC=1:NCOL) 
                                           WBS%FNRCH(IC,IR) = DZ
       END DO
       !
-      DO CONCURRENT (IR=1:NROW, IC=1:NCOL) 
-                                IF(UPLAY(IC,IR)>Z) THEN
-                                                   IRCH(IC,IR) = UPLAY(IC,IR)
-                                ELSE
-                                                   IRCH(IC,IR) = ONE
-                                END IF
+      DO IR=ONE, WBS%NROW
+      DO IC=ONE, WBS%NCOL
+          IF(UPLAY(IC,IR)>Z) THEN
+                             WBS%IWRK(IC,IR) = UPLAY(IC,IR)
+          ELSE
+                             WBS%IWRK(IC,IR) = ONE
+          END IF
+      END DO
       END DO
       !
-      IF(.NOT. INPUT_CHECK) THEN
+      IF(.NOT. SKIP) THEN
          IF(WBS%UZF_LINK) THEN
-             !DO CONCURRENT (IR=ONE:WBS%NROW, IC=ONE:WBS%NCOL, WBS%DPERC(IC,IR)>DZ       &
-             !                                                .AND. IUZFBND(IC,IR)<ONE   &
-             !                                                .AND. UPLAY(IC,IR)>Z)
              DO IR=ONE, WBS%NROW
              DO IC=ONE, WBS%NCOL
-             IL = UPLAY(IC,IR) 
-             IF(      WBS%DPERC(IC,IR)>DZ  &
-                .AND. IUZFBND(IC,IR)<ONE   &
-                .AND. IL>Z                  ) THEN
+             IF(      WBS%DPERC(IC,IR) > DZ &
+                .AND. IUZFBND(IC,IR) < ONE  &
+                .AND. UPLAY(IC,IR) > Z      ) THEN
                    WBS%FNRCH(IC,IR) = WBS%DPERC(IC,IR)
-                   !
-                   BUFF(IC,IR,IL) = SNGL(WBS%DPERC(IC,IR))
                    RATIN = RATIN + WBS%DPERC(IC,IR)
              END IF
              END DO
@@ -3196,12 +3195,8 @@ MODULE FMP_MAIN_DRIVER
          ELSE
              DO IR=ONE, WBS%NROW
              DO IC=ONE, WBS%NCOL
-             IL = UPLAY(IC,IR) 
-             IF(WBS%DPERC(IC,IR)>DZ .AND. IL>Z) THEN
-                   !
+             IF( WBS%DPERC(IC,IR) > DZ .AND. UPLAY(IC,IR) > Z ) THEN
                    WBS%FNRCH(IC,IR) = WBS%DPERC(IC,IR)
-                   !
-                   BUFF(IC,IR,IL) = SNGL(WBS%DPERC(IC,IR))
                    RATIN = RATIN + WBS%DPERC(IC,IR)
              END IF
              END DO
@@ -3211,13 +3206,8 @@ MODULE FMP_MAIN_DRIVER
          IF(FCROP%NCROP > Z) THEN
              DO IR=ONE, WBS%NROW
              DO IC=ONE, WBS%NCOL
-             IL = UPLAY(IC,IR) 
-             IF(FCROP%TGWA(IC,IR)>DZ .AND. IL>Z) THEN
-                             !
-                             BUFF(IC,IR,IL)   = BUFF(IC,IR,IL)   - SNGL(FCROP%TGWA(IC,IR))
-                             !
+             IF( FCROP%TGWA(IC,IR) > DZ .AND. UPLAY(IC,IR) > Z ) THEN
                              WBS%FNRCH(IC,IR) = WBS%FNRCH(IC,IR) - FCROP%TGWA(IC,IR)
-                             !
                              RATOUT = RATOUT + FCROP%TGWA(IC,IR)
              END IF
              END DO
@@ -3227,14 +3217,9 @@ MODULE FMP_MAIN_DRIVER
          IF(FCROP%NCROP > Z .OR. FCROP%CHECK_BARE) THEN
              DO IR=ONE, WBS%NROW
              DO IC=ONE, WBS%NCOL
-             IL = UPLAY(IC,IR) 
-             IF(FCROP%EGWA(IC,IR)>DZ .AND. IL>Z) THEN
-                             !
-                             BUFF(IC,IR,IL)   = BUFF(IC,IR,IL) - SNGL(FCROP%EGWA(IC,IR))
-                             !
-                             RATOUT = RATOUT + FCROP%EGWA(IC,IR)
-                             !
+             IF( FCROP%EGWA(IC,IR) > DZ .AND. UPLAY(IC,IR) > Z ) THEN
                              WBS%FNRCH(IC,IR) = WBS%FNRCH(IC,IR) - FCROP%EGWA(IC,IR)
+                             RATOUT = RATOUT + FCROP%EGWA(IC,IR)
              END IF
              END DO
              END DO
@@ -3263,18 +3248,18 @@ MODULE FMP_MAIN_DRIVER
                  !3B1----WRITE ONE RECORD OF FLOW VALUES IF ONLY ONE LAYER
                  !
                  DO I=1,NROW
-                           WRITE(WBS%IOUT,'(*(ES15.7))') BUFF(:,I,1)
+                           WRITE(WBS%IOUT,'(*(ES15.7))') WBS%FNRCH(:,I)
                  ENDDO
              ELSE
                  !3B2----WRITE TWO RECORDS WHEN MULTIPLE LAYERS RECEIVE NET-RECHARGE.
                  !       (FIRST RECORD CONTAINS LAYER NUMBERS; SECOND RECORD CONTAINS FLOW VALUES).
                  !
                  DO I=1,NROW
-                            WRITE(WBS%IOUT,'(*(I12))') IRCH(:,I)
+                            WRITE(WBS%IOUT,'(*(I12))') WBS%IWRK(:,I)
                  ENDDO
                  !
                  DO I=1,NROW
-                            WRITE(WBS%IOUT,'(*(ES15.7))') ( BUFF(J,I,IRCH(J,I)), J=1, NCOL )
+                            WRITE(WBS%IOUT,'(*(ES15.7))') WBS%FNRCH(:,I) ! ( BUFF(J,I,WBS%IWRK(J,I)), J=1, NCOL )
                  ENDDO
                  !
              ENDIF
@@ -3296,18 +3281,18 @@ MODULE FMP_MAIN_DRIVER
           IF(NLAY.EQ.1) THEN
               !
               DO I=1,NROW
-                        WRITE(FMPOUT%FNRCH_ARRAY%IU,'(*(ES15.7))') BUFF(:,I,1)  !4A2A---WRITE ONE RECORD OF FLOW VALUES IF ONLY ONE LAYER
+                        WRITE(FMPOUT%FNRCH_ARRAY%IU,'(*(ES15.7))')  WBS%FNRCH(:,I)   !4A2A---WRITE ONE RECORD OF FLOW VALUES IF ONLY ONE LAYER
               ENDDO
           ELSE
               !4A2B---WRITE TWO RECORDS WHEN MULTIPLE LAYERS RECEIVE NET-RECHARGE.
               !       (FIRST RECORD CONTAINS LAYER NUMBERS; SECOND RECORD CONTAINS FLOW VALUES).
               !
               DO I=1,NROW
-                        WRITE(FMPOUT%FNRCH_ARRAY%IU,FMT='(*(I12))') IRCH(:,I)
+                        WRITE(FMPOUT%FNRCH_ARRAY%IU,FMT='(*(I12))') WBS%IWRK(:,I)
               ENDDO
               !
               DO I=1,NROW
-                        WRITE(FMPOUT%FNRCH_ARRAY%IU,'(*(ES15.7))') ( BUFF(J,I,IRCH(J,I)), J=1, NCOL )
+                        WRITE(FMPOUT%FNRCH_ARRAY%IU,'(*(ES15.7))')  WBS%FNRCH(:,I)   ! ( BUFF(J,I,WBS%IWRK(J,I)), J=1, NCOL )
               ENDDO
           ENDIF
       ENDIF
@@ -3325,21 +3310,105 @@ MODULE FMP_MAIN_DRIVER
       !
       !6B-----CELL-BY-CELL NET RECHARGE FLOW RATES WILL BE SAVED AS 2-D ARRAY IN A BINARY FILE, IF
       !       "COMPACT BUDGET" IS SPECIFIED IN OUTPUT CONTROL.
-      IF(FMPOUT%FNR_CBC.GT.3.AND.IBD.EQ.1) THEN
-                                      CALL UBUDSV(KSTP,KPER,TEXT,FMPOUT%FNR_CBC,BUFF,NCOL,NROW,NLAY,WBS%IOUT)
-      ELSEIF(IBD.EQ.2) THEN
+      !
+      IF(.NOT. FMPOUT%COMPOSITE_FNR .AND. IBD > Z) THEN
+         ! BUFF(:,:,1) -> DPERC; BUFF(:,:,2) -> ETgw
+         BUFF(:,:,1:2) = 0.0  
+         NLIST = Z
+         IF(WBS%UZF_LINK) THEN
+             DO IR=ONE, WBS%NROW
+             DO IC=ONE, WBS%NCOL
+                IF ( UPLAY(IC,IR) < ONE ) CYCLE
+                !
+                IF( WBS%DPERC(IC,IR) > DZ .AND. IUZFBND(IC,IR) < ONE ) THEN
+                      BUFF(IC,IR,1) = SNGL(WBS%DPERC(IC,IR))
+                      NLIST = NLIST + ONE
+                END IF
+             END DO
+             END DO
+         ELSE
+             DO IR=ONE, WBS%NROW
+             DO IC=ONE, WBS%NCOL
+                IF ( UPLAY(IC,IR) > Z .AND. WBS%DPERC(IC,IR) > DZ ) THEN
+                      BUFF(IC,IR,1) = SNGL(WBS%DPERC(IC,IR))
+                      NLIST = NLIST + ONE
+                END IF
+             END DO
+             END DO
+         END IF
+         !
+         IF(FCROP%NCROP > Z) THEN
+             DO IR=ONE, WBS%NROW
+             DO IC=ONE, WBS%NCOL
+                IF ( UPLAY(IC,IR) > Z .AND. FCROP%TGWA(IC,IR) > DZ) THEN
+                      BUFF(IC,IR,2) = -SNGL(FCROP%TGWA(IC,IR))
+                END IF
+             END DO
+             END DO
+         END IF
+         !
+         IF(FCROP%NCROP > Z .OR. FCROP%CHECK_BARE) THEN
+             DO IR=ONE, WBS%NROW
+             DO IC=ONE, WBS%NCOL
+                IF ( UPLAY(IC,IR) > Z .AND. FCROP%EGWA(IC,IR) > DZ ) THEN
+                      BUFF(IC,IR,2) = BUFF(IC,IR,2) - SNGL(FCROP%EGWA(IC,IR))
+                END IF
+             END DO
+             END DO
+             !
+             DO IR=ONE, WBS%NROW
+             DO IC=ONE, WBS%NCOL
+                IF( BUFF(IC,IR,2) < DZ ) NLIST = NLIST + ONE  ! Build the counter fpr FCROP%TGWA and FCROP%EGWA
+             END DO
+             END DO
+         END IF
+         !
+         CALL UBDSV2(KSTP,KPER,TEXT,FMPOUT%FNR_CBC,NCOL,NROW,NLAY,NLIST,WBS%IOUT,DELT,PERTIM,TOTIM,IBOUND)
+         !
+         IF ( NLIST > Z ) THEN
+             DO IR=ONE, WBS%NROW
+             DO IC=ONE, WBS%NCOL
+                IF ( UPLAY(IC,IR) < ONE ) CYCLE
+                IL = UPLAY(IC,IR)
+                !
+                IF( BUFF(IC,IR,1) > 0.0 ) THEN   ! No kind to make it default REAL, which is what BUFF is
+                   CALL UBDSVA(FMPOUT%FNR_CBC,NCOL,NROW,IC,IR,IL,BUFF(IC,IR,1),IBOUND,NLAY)
+                END IF
+                !
+                IF( BUFF(IC,IR,2) < 0.0 ) THEN   
+                   CALL UBDSVA(FMPOUT%FNR_CBC,NCOL,NROW,IC,IR,IL,BUFF(IC,IR,2),IBOUND,NLAY)
+                END IF
+             END DO
+             END DO
+         END IF
+         !
+      ELSE IF(IBD > Z) THEN
+             DO IR=ONE, WBS%NROW
+             DO IC=ONE, WBS%NCOL
+                IF ( UPLAY(IC,IR) > Z ) THEN
+                    BUFF(IC,IR,UPLAY(IC,IR)) = SNGL(WBS%FNRCH(IC,IR))
+                ELSE
+                    BUFF(IC,IR,UPLAY(IC,IR)) = 0.0
+                END IF
+             END DO
+             END DO
+             !
+             IF(IBD == ONE) THEN
+                          CALL UBUDSV(KSTP,KPER,TEXT,FMPOUT%FNR_CBC,BUFF,NCOL,NROW,NLAY,WBS%IOUT)
+             ELSE IF(IBD == TWO) THEN
                           !6B1----WRITE ONE RECORD OF FLOW VALUES IF ONLY ONE LAYER
-                          IF(NLAY.EQ.1) THEN
-                            NOPT=1
+                          IF(NLAY == ONE) THEN
+                            NOPT = ONE
                           ELSE
                             !
                             !6B2----WRITE TWO RECORDS WHEN MULTIPLE LAYERS RECEIVE NET-RECHARGE.
                             !       (FIRST RECORD CONTAINS LAYER NUMBERS; SECOND RECORD CONTAINS FLOW VALUES).
-                            NOPT=2
+                            NOPT = TWO
                           ENDIF
                           !     
-                          CALL UBDSV3(KSTP,KPER,TEXT,FMPOUT%FNR_CBC,BUFF,IRCH,NOPT,NCOL,NROW,NLAY,WBS%IOUT,DELT,PERTIM,TOTIM,IBOUND)
-      ENDIF
+                          CALL UBDSV3(KSTP,KPER,TEXT,FMPOUT%FNR_CBC,BUFF,WBS%IWRK,NOPT,NCOL,NROW,NLAY,WBS%IOUT,DELT,PERTIM,TOTIM,IBOUND)
+             END IF
+      END IF
       !
       !7===== UPDATE VOLUMETRIC BUDGET FOR FARM NET RECHARGE ======================================================
       !
@@ -3379,7 +3448,7 @@ MODULE FMP_MAIN_DRIVER
     CHARACTER(14):: TIME
     DATA TEXTET  /'EVAPORATION AND TRANSIPIRATION TOTALS  '/
     DATA TEXTETS /'EVAPORATION AND TRANSIPIRATION COMBINED'/
-    INTEGER:: IRCH(NCOL,NROW)
+    ! INTEGER:: IRCH(NCOL,NROW) -- replaced by WBS%IWRK
     INTEGER:: I,IL,IR,IC,J,NF
     DOUBLE PRECISION:: EVAP,TRAN
     !
@@ -3409,14 +3478,14 @@ MODULE FMP_MAIN_DRIVER
         COL_LP: DO IC=1,NCOL
                 !
                 !2B1----LOOP THROUGH CELLS IN A VERTICAL COLUMN TO FIND WHERE TO PLACE FARM NET RECHARGE.
-                IRCH(IC,IR)=1
+                WBS%IWRK(IC,IR)=1
                 LAY_LP: DO IL=1,NLAY
                                 !2B2----IF CELL IS CONSTANT HEAD MOVE ON TO NEXT HORIZONTAL LOCATION.
                                 IF(IBOUND(IC,IR,IL).LT.0) EXIT LAY_LP
                                 !
                                 !2B3----IF CELL IS INACTIVE MOVE DOWN TO NEXT CELL.
                                 IF(IBOUND(IC,IR,IL).EQ.0 .OR. HNEW(IC,IR,IL).LE.BOTM(IC,IR,IL))  CYCLE LAY_LP
-                                IRCH(IC,IR)=IL
+                                WBS%IWRK(IC,IR)=IL
                                 EXIT LAY_LP
                 END DO LAY_LP
         END DO COL_LP
@@ -3440,7 +3509,7 @@ MODULE FMP_MAIN_DRIVER
            !3B2----WRITE TWO RECORDS WHEN MULTIPLE LAYERS HAVE ET.
            !       (FIRST RECORD CONTAINS LAYER NUMBERS; SECOND RECORD CONTAINS EVAPORATION+TRANSPIRATION).
            DO I=1,NROW
-                  WRITE(FMPOUT%ET_ARRAY_SUM%IU,FMT)(IRCH(J,I),J=1,NCOL)
+                  WRITE(FMPOUT%ET_ARRAY_SUM%IU,FMT)(WBS%IWRK(J,I),J=1,NCOL)
            END DO
            !-------WRITE ONE RECORD OF EVAPORATION+TRANSPIRATION VALUES IF ONLY ONE LAYER
            DO I=1,NROW
@@ -3469,7 +3538,7 @@ MODULE FMP_MAIN_DRIVER
            !3B2----WRITE TWO RECORDS WHEN MULTIPLE LAYERS HAVE ET.
            !       (FIRST RECORD CONTAINS LAYER NUMBERS; SECOND RECORD CONTAINS EVAPORATION; THIRD RECORD HAS TRANSPIRATION).
            DO I=1,NROW
-             WRITE(FMPOUT%ET_ARRAY_SEP%IU,FMT)(IRCH(J,I),J=1,NCOL)
+             WRITE(FMPOUT%ET_ARRAY_SEP%IU,FMT)(WBS%IWRK(J,I),J=1,NCOL)
            END DO
            !-------WRITE ONE RECORD OF EVAPORATION VALUES IF ONLY ONE LAYER
            DO I=1,NROW

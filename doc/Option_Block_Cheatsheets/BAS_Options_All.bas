@@ -41,6 +41,10 @@ BEGIN OPTIONS
     #          is carried forward and used as the starting head for STR.         --Note that INPUT_CHECK is the same as  FASTFORWARD NPER+1
     FASTFORWARD STR STP
     #
+    # Only applies if FASTFORWARD is in use.
+    #   Include to limit output written to output files (e.g. list or cell-by-cell files)
+    #   for stress periods are skipped by FASTFORWARD or INPUT_CHECK.
+    LIMIT_FASTFORWARD_OUTPUT
     #
     # Has the same effect as including the "COMPACT BUDGET" in the Output Control (OC) package
     COMPACT BUDGET 
