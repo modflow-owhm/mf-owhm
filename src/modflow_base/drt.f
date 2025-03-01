@@ -377,7 +377,7 @@ C3---------IF THE CELL IS INTERNAL GET THE DRAIN DATA and subtract the displacem
       RETURN
       END SUBROUTINE
 C--------------------------------------------------------------------------
-      SUBROUTINE GWF2DRT7RP(IN,IGRID)
+      SUBROUTINE GWF2DRT7RP(IN, KPER, IGRID)
 C     ******************************************************************
 C     READ DRAIN HEAD, CONDUCTANCE AND BOTTOM ELEVATION.  IF THE
 C     RETURNFLOW OPTION IS SELECTED, READ RECIPIENT CELL AND PROPORTION.
@@ -404,7 +404,7 @@ C     ------------------------------------------------------------------
       CALL SGWF2DRT7PNT(IGRID)
       CALL FMP_LGR_PNT(IGRID)
       !
-      IF(DRT_AUTO_NEG_ITMP) THEN
+      IF(DRT_AUTO_NEG_ITMP .AND. KPER > 1) THEN
           ITMP = NEG
           NP   = Z
       ELSE
