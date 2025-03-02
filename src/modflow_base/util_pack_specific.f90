@@ -2830,6 +2830,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
     !
     !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     !
+    IF ( SPSTART < ONE ) SPSTART = ONE
     IF    (IFASTFORWARD == ONE) THEN
               WRITE(IOUT,'(/,3A,/,/,33x,2A,/,33x,2A,/,/,A,/)')                     &
                     REPEAT('#',35),                                                &

@@ -284,7 +284,7 @@ C
       MXCLST    = 2000000
       MXINST    = 50000
       MXBUD     = 100
-      SPSTART   = Z
+      SPSTART   = ONE
       SPEND     = NPER+1
       WARN_DIM  = TRUE
       DEALLOCATE_MULT=FALSE

@@ -30,7 +30,7 @@ SUBROUTINE PRINT_MAIN_HEADER(IU, VERSION)  ! Set to 6 for cmd prompt or use outp
   CHARACTER(:),ALLOCATABLE:: Revision
   !
   VERSION_OWHM='2.3'
-  Revision    ='1-b4a'
+  Revision    ='1-b4b'
   VERSION_MF  ='1.12'
   VERSION_FMP ='4.1'
   VERSION_SWR ='1.04'
@@ -616,7 +616,7 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
           !
           IF(IUNIT(61) /= Z) CALL FMP_RP(KKPER,IGRID)
           !
-          IF(IUNIT(40) /= Z) CALL GWF2DRT7RP(IUNIT(40),IGRID)             !DRT must be after FMP_RP
+          IF(IUNIT(40) /= Z) CALL GWF2DRT7RP(IUNIT(40),KKPER,IGRID)             !DRT must be after FMP_RP
           IF(IUNIT(64) /= Z) CALL GWF2SWR7RP(IUNIT(64),KKPER,IGRID)       !SWR - JDH
           !
           IF(IUNIT(66) /= Z) CALL GWF2AG7AD(IUNIT(66),KKPER)
