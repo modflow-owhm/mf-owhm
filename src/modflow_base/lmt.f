@@ -35,7 +35,7 @@ C last modified: 06-23-2016
 C last modified: 10-21-2010 swm: added MTMNW1 & MTMNW2
 C last modified: 06-23-2016
 C      
-      USE CONSTANTS,ONLY:BLNK, NL, BLN
+      USE CONSTANTS,ONLY:BLNK, NL, BLN, Z
       USE OPENSPEC
       USE GLOBAL,   ONLY:NCOL,NROW,NLAY,NPER,NODES,NIUNIT,IUNIT,
      &                   ISSFLG,IBOUND,IOUT
@@ -57,23 +57,47 @@ C--USE FILE SPECIFICATION of MODFLOW-2005
       REAL          R
       !INCLUDE 'openspec.inc'
       LOGICAL       LOP,FIRSTVAL
-      CHARACTER(5),DIMENSION(NIUNIT):: CUNIT
-      CHARACTER(4)   SETDEFLT
-      CHARACTER(768):: LINE,FNAME,NME
-      CHARACTER(8)   OUTPUT_FILE_HEADER
-      CHARACTER(11)  OUTPUT_FILE_FORMAT,HDRTXT
-      DATA          INLMT,MTBCF,MTLPF,MTHUF,MTWEL,MTDRN,MTRCH,MTEVT,
-     &              MTRIV,MTSTR,MTGHB,MTRES,MTFHB,MTDRT,MTETS,MTSUB,
-     &              MTIBS,MTTLK,MTLAK,MTMNW,MTSWT,MTSFR,MTUZF,MTSWR,
-     &              MTWEL1,MTFMP,MTRIP,MTSWI
-     &              /28*0/
-C     -----------------------------------------------------------------    
+      CHARACTER(  5), DIMENSION(NIUNIT):: CUNIT
+      CHARACTER(  4)::  SETDEFLT
+      CHARACTER(768):: LINE, FNAME, NME
+      CHARACTER(  8):: OUTPUT_FILE_HEADER
+      CHARACTER( 11)::  OUTPUT_FILE_FORMAT, HDRTXT
+C     -----------------------------------------------------------------
+      INLMT  = Z
+      MTBCF  = Z
+      MTLPF  = Z
+      MTHUF  = Z
+      MTWEL  = Z
+      MTDRN  = Z
+      MTRCH  = Z
+      MTEVT  = Z
+      MTRIV  = Z
+      MTSTR  = Z
+      MTGHB  = Z
+      MTRES  = Z
+      MTFHB  = Z
+      MTDRT  = Z
+      MTETS  = Z
+      MTSUB  = Z
+      MTIBS  = Z
+      MTTLK  = Z
+      MTLAK  = Z
+      MTMNW  = Z
+      MTSWT  = Z
+      MTSFR  = Z
+      MTUZF  = Z
+      MTSWR  = Z
+      MTWEL1 = Z
+      MTFMP  = Z
+      MTRIP  = Z
+      MTSWI  = Z
+      
       ALLOCATE(ISSMT3D,IUMT3D,ILMTFMT,ISFRUZFCONNECT,ILAKUZFCONNECT,
      +         ISFRLAKCONNECT,ISNKUZFCONNECT,NPCKGTXT,IUZFFLOWS,
-     +         ISFRFLOWS,ILAKFLOWS,NLAKCON, SOURCE=0)
+     +         ISFRFLOWS,ILAKFLOWS,NLAKCON, SOURCE=Z)
       ALLOCATE(IGWET(NCOL,NROW))
       ALLOCATE(IUZFRCH(NCOL,NROW))
-      NPCKGTXT=0
+      NPCKGTXT=Z
       SETDEFLT='NA'
 C
 C--SET POINTERS FOR THE CURRENT GRID 
@@ -104,73 +128,73 @@ C--CHECK for OPTIONS/PACKAGES USED IN CURRENT SIMULATION
           MTGHB=IUNIT(IU)
         ELSEIF(CUNIT(IU).EQ.'STR ') THEN
           MTSTR=IUNIT(IU)
-          IF(MTSTR.NE.0) NPCKGTXT = NPCKGTXT + 1
+          IF(MTSTR /= Z) NPCKGTXT = NPCKGTXT + 1
         ELSEIF(CUNIT(IU).EQ.'RES ') THEN
           MTRES=IUNIT(IU)
-          IF(MTRES.NE.0) NPCKGTXT = NPCKGTXT + 1
+          IF(MTRES /= Z) NPCKGTXT = NPCKGTXT + 1
         ELSEIF(CUNIT(IU).EQ.'FHB ') THEN
           MTFHB=IUNIT(IU)
-          IF(MTFHB.NE.0) NPCKGTXT = NPCKGTXT + 1
+          IF(MTFHB /= Z) NPCKGTXT = NPCKGTXT + 1
         ELSEIF(CUNIT(IU).EQ.'DRT ') THEN
           MTDRT=IUNIT(IU)
-          IF(MTDRT.NE.0) NPCKGTXT = NPCKGTXT + 1
+          IF(MTDRT /= Z) NPCKGTXT = NPCKGTXT + 1
         ELSEIF(CUNIT(IU).EQ.'ETS ') THEN
           MTETS=IUNIT(IU)
-          IF(MTETS.NE.0) NPCKGTXT = NPCKGTXT + 1
+          IF(MTETS /= Z) NPCKGTXT = NPCKGTXT + 1
         ELSEIF(CUNIT(IU).EQ.'SUB ') THEN
-          IF(MTSUB.NE.0) MTSUB=IUNIT(IU)
+          IF(MTSUB /= Z) MTSUB=IUNIT(IU)
         ELSEIF(CUNIT(IU).EQ.'IBS ') THEN
           MTIBS=IUNIT(IU)
-          IF(MTIBS.NE.0) NPCKGTXT = NPCKGTXT + 1
+          IF(MTIBS /= Z) NPCKGTXT = NPCKGTXT + 1
         ELSEIF(CUNIT(IU).EQ.'TLK ') THEN
           MTTLK=IUNIT(IU)
-          IF(MTTLK.NE.0) NPCKGTXT = NPCKGTXT + 1
+          IF(MTTLK /= Z) NPCKGTXT = NPCKGTXT + 1
         ELSEIF(CUNIT(IU).EQ.'MNW1') THEN
           MTMNW1=IUNIT(IU)
-          IF(MTMNW1.NE.0) NPCKGTXT = NPCKGTXT + 1
+          IF(MTMNW1 /= Z) NPCKGTXT = NPCKGTXT + 1
         ELSEIF(CUNIT(IU).EQ.'MNW2') THEN
 !swm: store separate to not get clobbered by MNW1
           MTMNW2=IUNIT(IU)
-          IF(MTMNW2.NE.0) NPCKGTXT = NPCKGTXT + 1
+          IF(MTMNW2 /= Z) NPCKGTXT = NPCKGTXT + 1
         ELSEIF(CUNIT(IU).EQ.'LAK ') THEN
           MTLAK=IUNIT(IU)
-          IF(MTLAK.NE.0) NPCKGTXT = NPCKGTXT + 1        
+          IF(MTLAK /= Z) NPCKGTXT = NPCKGTXT + 1        
         ELSEIF(CUNIT(IU).EQ.'SWT ') THEN
           MTSWT=IUNIT(IU)        
-          IF(MTSWT.NE.0) NPCKGTXT = NPCKGTXT + 1
+          IF(MTSWT /= Z) NPCKGTXT = NPCKGTXT + 1
         ELSEIF(CUNIT(IU).EQ.'SFR ') THEN
           MTSFR=IUNIT(IU)
-          IF(MTSFR.NE.0) NPCKGTXT = NPCKGTXT + 1
+          IF(MTSFR /= Z) NPCKGTXT = NPCKGTXT + 1
         ELSEIF(CUNIT(IU).EQ.'UZF ') THEN
           MTUZF=IUNIT(IU)
-          IF(MTUZF.NE.0) NPCKGTXT = NPCKGTXT + 1
+          IF(MTUZF /= Z) NPCKGTXT = NPCKGTXT + 1
         ELSEIF(CUNIT(IU).EQ.'FMP ') THEN   !rth
           MTFMP=IUNIT(IU)
-          IF(MTFMP.NE.0) NPCKGTXT = NPCKGTXT + 1
+          IF(MTFMP /= Z) NPCKGTXT = NPCKGTXT + 1
         ELSEIF(CUNIT(IU).EQ.'RIP ') THEN   !rth
           MTRIP=IUNIT(IU)
-          IF(MTRIP.NE.0) NPCKGTXT = NPCKGTXT + 1
+          IF(MTRIP /= Z) NPCKGTXT = NPCKGTXT + 1
         ELSEIF(CUNIT(IU).EQ.'SWI ') THEN   !rth
           MTSWI=IUNIT(IU)
-          IF(MTSWI.NE.0) NPCKGTXT = NPCKGTXT + 1
+          IF(MTSWI /= Z) NPCKGTXT = NPCKGTXT + 1
         ELSEIF(CUNIT(IU).EQ.'SWR ') THEN   !rth
           MTSWR=IUNIT(IU)
-          IF(MTSWR.NE.0) NPCKGTXT = NPCKGTXT + 1
+          IF(MTSWR /= Z) NPCKGTXT = NPCKGTXT + 1
         ELSEIF(CUNIT(IU).EQ.'WEL1') THEN
 !swm dirty hack          MTWEL1=IUNIT(IU)
-!swm dirty hack            IF(MTWEL1.NE.0) NPCKGTXT = NPCKGTXT + 1
-          IF(MTWEL.NE.0 .AND. IUNIT(IU).NE.0) THEN !swm: check if WEL already active
+!swm dirty hack            IF(MTWEL1 /= Z) NPCKGTXT = NPCKGTXT + 1
+          IF(MTWEL /= Z .AND. IUNIT(IU) /= Z) THEN !swm: check if WEL already active
             CALL USTOP('SIMULTANEOUS USE OF WEL AND WEL1 IS NOT '//
      &            'SUPPORTED IN MT3D')
-          ELSEIF(IUNIT(IU).NE.0) THEN  ! WEL not active, but WEL1 active
+          ELSEIF(IUNIT(IU) /= Z) THEN  ! WEL not active, but WEL1 active
           MTWEL=IUNIT(IU)  !swm: Note - reusing MTWEL, which means original WEL and new WEL cannot be used together!!!
-            IF(MTWEL.NE.0) NPCKGTXT = NPCKGTXT + 1  !swm: redundant to check, but being consistent
+            IF(MTWEL /= Z) NPCKGTXT = NPCKGTXT + 1  !swm: redundant to check, but being consistent
           END IF
         ENDIF
       ENDDO 
 !swm: SET MTMNW IF EITHER MNW1 OR MNW2 IS ACTIVE
-      IF(MTMNW1.NE.0) MTMNW=MTMNW1
-      IF(MTMNW2.NE.0) MTMNW=MTMNW2
+      IF(MTMNW1 /= Z) MTMNW=MTMNW1
+      IF(MTMNW2 /= Z) MTMNW=MTMNW2
 C
 C--IF LMT8 PACKAGE IS NOT ACTIVATED, SKIP TO END AND RETURN
       IF(INLMT.EQ.0) GOTO 9999
@@ -194,18 +218,18 @@ C--ASSIGN DEFAULTS TO LMT INPUT VARIABLES AND OUTPUT FILE NAME
 C
 C--READ ONE LINE OF LMT PACKAGE INPUT FILE
    5  FIRSTVAL=.TRUE.
-      ISFRLAKCONNECT=0
-      ISFRUZFCONNECT=0
-      ILAKUZFCONNECT=0
-      ISNKUZFCONNECT=0
-      IUZFFLOWS=0
-      ISFRFLOWS=0
-      ILAKFLOWS=0
+      ISFRLAKCONNECT=Z
+      ISFRUZFCONNECT=Z
+      ILAKUZFCONNECT=Z
+      ISNKUZFCONNECT=Z
+      IUZFFLOWS=Z
+      ISFRFLOWS=Z
+      ILAKFLOWS=Z
 C
 C--IF UZF IS ACTIVE, THEN NPCKGTXT SHOULD AUTOMATICALLY BE INCREMENTED BY 1 BY VIRTUE OF THE
 C  FACT THAT 'CONNECT SNK UZF' IS ACTIVE NO MATTER WHICH OPTIONS ARE OR ARE NOT SPECIFIED.
 C  (REGARDLESS OF WHETHER UZF IS ROUTING FLOW OR IS ONLY ACTING AS A BOUNDARY CONDITION)
-      IF(MTUZF.NE.0) THEN
+      IF(MTUZF /= Z) THEN
         NPCKGTXT = NPCKGTXT + 1
         ISNKUZFCONNECT=1
       ENDIF
@@ -280,19 +304,19 @@ C--CHECK FOR "PACKAGE_FLOWS" KEYWORD AND GET INPUT
         ENDIF
         IF(LINE(ISTART:ISTOP).EQ.'ALL'.OR.SETDEFLT.EQ.'ALL') THEN ! ALL = "all available"
           !Activate connections in SFR, LAK, and UZF, provided they are active
-          IF(MTUZF.NE.0.AND.IUZFOPT.NE.0) THEN
+          IF(MTUZF /= Z.AND.IUZFOPT /= Z) THEN
             IUZFFLOWS=1
           ENDIF
-          IF(MTSFR.NE.0) THEN
+          IF(MTSFR /= Z) THEN
             ISFRFLOWS=1
           ENDIF
-          IF(MTLAK.NE.0) THEN
+          IF(MTLAK /= Z) THEN
             ILAKFLOWS=1
           ENDIF
           !edm: Determine which combinations of packages is active to determine 
           !     how many CONNECTions there are (UZF -> SFR)
           IF(IUZFFLOWS.EQ.1.AND.ISFRFLOWS.EQ.1.AND.
-     &                        IUZFOPT.NE.0.AND.IRUNFLG.NE.0) THEN
+     &                        IUZFOPT /= Z.AND.IRUNFLG /= Z) THEN
             LOOP1:DO I=1,NROW
               DO J=1,NCOL
                 IF(IRUNBND(J,I).GT.0.AND.ISFRUZFCONNECT.NE.1) THEN ! check IRUNBND for at least 1 positive connection
@@ -304,7 +328,7 @@ C--CHECK FOR "PACKAGE_FLOWS" KEYWORD AND GET INPUT
             ENDDO LOOP1
           ENDIF
           IF(IUZFFLOWS.EQ.1.AND.ILAKFLOWS.EQ.1.AND.   ! (UZF -> LAK)
-     &                        IUZFOPT.NE.0.AND.IRUNFLG.NE.0) THEN
+     &                        IUZFOPT /= Z.AND.IRUNFLG /= Z) THEN
             DO I=1,NROW
               DO J=1,NCOL
                 IF(IRUNBND(J,I).LT.0.AND.ILAKUZFCONNECT.NE.1) THEN ! check IRUNBND for at least 1 negative (lake) connection
@@ -332,7 +356,7 @@ C  indicating that there is at least one SFR->LAK or LAK->SFR connection.
      +         LINE(ISTART:ISTOP).EQ.'UZF') THEN
           SELECT CASE (LINE(ISTART:ISTOP))
             CASE ('SFR')
-              IF(MTSFR.NE.0) THEN
+              IF(MTSFR /= Z) THEN
                 ISFRFLOWS=1
               ENDIF
               ! Determine if a LAK connection exists. UZF connections only exist 
@@ -352,7 +376,7 @@ C  indicating that there is at least one SFR->LAK or LAK->SFR connection.
               ENDIF
               FIRSTVAL=.FALSE.
             CASE ('LAK')
-              IF(MTLAK.NE.0) THEN
+              IF(MTLAK /= Z) THEN
                 ILAKFLOWS=1
               ENDIF
               ! Determine if a SFR connection exists. UZF connections only exist 
@@ -372,12 +396,12 @@ C  indicating that there is at least one SFR->LAK or LAK->SFR connection.
               ENDIF
               FIRSTVAL=.FALSE.
             CASE ('UZF')
-              IF(MTUZF.NE.0) THEN
+              IF(MTUZF /= Z) THEN
                 IUZFFLOWS=1
               ENDIF
               ! Determine if SFR/LAK connections exist and set on a case by case basis. 
-              IF(IUZFFLOWS.EQ.1.AND.MTSFR.NE.0.AND.
-     &                            IUZFOPT.NE.0.AND.IRUNFLG.NE.0) THEN
+              IF(IUZFFLOWS.EQ.1.AND.MTSFR /= Z.AND.
+     &                            IUZFOPT /= Z.AND.IRUNFLG /= Z) THEN
                 LOOP2:DO I=1,NROW
                   DO J=1,NCOL
                     IF(IRUNBND(J,I).GT.0) THEN ! check IRUNBND for at least 1 positive connection
@@ -388,8 +412,8 @@ C  indicating that there is at least one SFR->LAK or LAK->SFR connection.
                   ENDDO
                 ENDDO LOOP2
               ENDIF
-              IF(IUZFFLOWS.EQ.1.AND.MTLAK.NE.0.AND.
-     &                            IUZFOPT.NE.0.AND.IRUNFLG.NE.0) THEN
+              IF(IUZFFLOWS.EQ.1.AND.MTLAK /= Z.AND.
+     &                            IUZFOPT /= Z.AND.IRUNFLG /= Z) THEN
                 LOOP3:DO I=1,NROW
                   DO J=1,NCOL
                     IF(IRUNBND(J,I).LT.0) THEN ! check IRUNBND for at least 1 negative (lake) connection
@@ -508,7 +532,7 @@ C
       ENDDO
 C
 C--ERROR CHECKING BEFORE OUTPUT
-      IF(MTEVT.NE.0.AND.MTETS.NE.0) THEN
+      IF(MTEVT /= Z.AND.MTETS /= Z) THEN
           WRITE(IOUT,1300)
         WRITE(*,1300)
         CALL USTOP(' ')
@@ -518,7 +542,7 @@ C--ERROR CHECKING BEFORE OUTPUT
      &  /1X,'Only one is allowed in the same transport simulation.')
 C
 C--WRITE A HEADER TO MODFLOW-MT3DMS LINK FILE
-      IF(MTSFR.NE.0.OR.MTLAK.NE.0.OR.MTUZF.NE.0) THEN
+      IF(MTSFR /= Z.OR.MTLAK /= Z.OR.MTUZF /= Z) THEN
         HDRTXT='MTGS1.00.00'
       IF(OUTPUT_FILE_HEADER.EQ.'EXTENDED') THEN        
         IF(ILMTFMT.EQ.0) THEN
@@ -557,87 +581,87 @@ C--WRITE THE NUMBER OF FLOW PACKAGE TEXT ENTRIES THAT ARE TO BE READ NEXT
 C
 C--WRITE NPCKGTXT RECORDS TO THE FLOW-TRANSPORT LINK FILE (CHARACTER(20))
           IF(ILMTFMT.EQ.0) THEN
-            IF(MTSTR.NE.0) WRITE(IUMT3D)   '                 STR'  ! Stream package
-            IF(MTRES.NE.0) WRITE(IUMT3D)   '                 RES'  ! Reservoir package
-            IF(MTFHB.NE.0) WRITE(IUMT3D)   '                 FHB'  ! Flow and Head Boundary package
-            IF(MTDRT.NE.0) WRITE(IUMT3D)   '                 DRT'  ! Drain Return package
-            IF(MTETS.NE.0) WRITE(IUMT3D)   '                 ETS'  ! Segmented ET package
-C            IF(MTIBS.NE.0) WRITE(IUMT3D)   '                 IBS'  ! Interbed Storage
-C            IF(MTTLK.NE.0) WRITE(IUMT3D)   '                 TLK'  ! Transient Leakage
-            IF(MTMNW.NE.0) WRITE(IUMT3D)   '                 MNW'  ! Multi-node well package
-C            IF(MTSWT.NE.0) WRITE(IUMT3D)   '                 SWT'  ! Subsidence and Aquifer-System Compaction Package for Water-Table Aquifers
-            IF(MTUZF.NE.0.AND.IUZFFLOWS.EQ.0)
+            IF(MTSTR /= Z) WRITE(IUMT3D)   '                 STR'  ! Stream package
+            IF(MTRES /= Z) WRITE(IUMT3D)   '                 RES'  ! Reservoir package
+            IF(MTFHB /= Z) WRITE(IUMT3D)   '                 FHB'  ! Flow and Head Boundary package
+            IF(MTDRT /= Z) WRITE(IUMT3D)   '                 DRT'  ! Drain Return package
+            IF(MTETS /= Z) WRITE(IUMT3D)   '                 ETS'  ! Segmented ET package
+C            IF(MTIBS /= Z) WRITE(IUMT3D)   '                 IBS'  ! Interbed Storage
+C            IF(MTTLK /= Z) WRITE(IUMT3D)   '                 TLK'  ! Transient Leakage
+            IF(MTMNW /= Z) WRITE(IUMT3D)   '                 MNW'  ! Multi-node well package
+C            IF(MTSWT /= Z) WRITE(IUMT3D)   '                 SWT'  ! Subsidence and Aquifer-System Compaction Package for Water-Table Aquifers
+            IF(MTUZF /= Z.AND.IUZFFLOWS.EQ.0)
      &                     WRITE(IUMT3D)   '                 UZF'  ! Unsaturated-zone Flow package
-            IF(MTUZF.NE.0.AND.IUZFFLOWS.NE.0)
+            IF(MTUZF /= Z.AND.IUZFFLOWS /= Z)
      &                     WRITE(IUMT3D)   '           UZF FLOWS'
-            IF(MTLAK.NE.0.AND.ILAKFLOWS.EQ.0) THEN 
+            IF(MTLAK /= Z.AND.ILAKFLOWS.EQ.0) THEN 
                            WRITE(IUMT3D)   '                 LAK'  ! Lake package
-            ELSEIF(MTLAK.NE.0.AND.ILAKFLOWS.NE.0) THEN
+            ELSEIF(MTLAK /= Z.AND.ILAKFLOWS /= Z) THEN
                            WRITE(IUMT3D)   '           LAK FLOWS'
             ENDIF
-            IF(MTSFR.NE.0.AND.ISFRFLOWS.EQ.0) THEN
+            IF(MTSFR /= Z.AND.ISFRFLOWS.EQ.0) THEN
                            WRITE(IUMT3D)   '                 SFR'  ! Streamflow Routing package
-            ELSEIF(MTSFR.NE.0.AND.ISFRFLOWS.NE.0) THEN
+            ELSEIF(MTSFR /= Z.AND.ISFRFLOWS /= Z) THEN
               IF(ITRFLG.EQ.0) THEN
                 WRITE(IUMT3D)              '        SFR FLOWS SS'
               ELSEIF(ITRFLG.EQ.1) THEN
                 WRITE(IUMT3D)              '        SFR FLOWS TR'
               ENDIF
             ENDIF
-            IF(MTSWR.NE.0) WRITE(IUMT3D)   '                 SWR'  ! Surface-water Routing package
-            IF(MTWEL1.NE.0) WRITE(IUMT3D)  '                WEL1'  !seb    !swm: this will need some rethinking
-            IF(ISFRLAKCONNECT.NE.0) 
+            IF(MTSWR /= Z) WRITE(IUMT3D)   '                 SWR'  ! Surface-water Routing package
+            IF(MTWEL1 /= Z) WRITE(IUMT3D)  '                WEL1'  !seb    !swm: this will need some rethinking
+            IF(ISFRLAKCONNECT /= Z) 
      &                     WRITE(IUMT3D)   '     CONNECT SFR LAK'
-            IF(ISFRUZFCONNECT.NE.0) 
+            IF(ISFRUZFCONNECT /= Z) 
      &                     WRITE(IUMT3D)   '     CONNECT SFR UZF'
-            IF(ILAKUZFCONNECT.NE.0) 
+            IF(ILAKUZFCONNECT /= Z) 
      &                     WRITE(IUMT3D)   '     CONNECT LAK UZF'
-            IF(ISNKUZFCONNECT.NE.0.OR.MTUZF.NE.0)
+            IF(ISNKUZFCONNECT /= Z.OR.MTUZF /= Z)
      &                     WRITE(IUMT3D)   '     CONNECT SNK UZF'
-!            IF(MTFMP.NE.0) WRITE(IUMT3D) '                 FMP'  ! swm: added FMP - not supported
-!            IF(MTRIP.NE.0) WRITE(IUMT3D) '                 RIP'  ! swm: added RIP - not supported
-!            IF(MTSWI.NE.0) WRITE(IUMT3D) '                 SWI'  ! swm: added SWI - not supported
+!            IF(MTFMP /= Z) WRITE(IUMT3D) '                 FMP'  ! swm: added FMP - not supported
+!            IF(MTRIP /= Z) WRITE(IUMT3D) '                 RIP'  ! swm: added RIP - not supported
+!            IF(MTSWI /= Z) WRITE(IUMT3D) '                 SWI'  ! swm: added SWI - not supported
           ELSEIF(ILMTFMT.EQ.1) THEN
-            IF(MTSTR.NE.0) WRITE(IUMT3D,*) '                 STR'  ! Stream package
-            IF(MTRES.NE.0) WRITE(IUMT3D,*) '                 RES'  ! Reservoir package
-            IF(MTFHB.NE.0) WRITE(IUMT3D,*) '                 FHB'  ! Flow and Head Boundary package
-            IF(MTDRT.NE.0) WRITE(IUMT3D,*) '                 DRT'  ! Drain Return package
-            IF(MTETS.NE.0) WRITE(IUMT3D,*) '                 ETS'  ! Segmented ET package
-C            IF(MTIBS.NE.0) WRITE(IUMT3D,*) '                 IBS'  ! Interbed Storage
-C            IF(MTTLK.NE.0) WRITE(IUMT3D,*) '                 TLK'  ! Transient Leakage
-            IF(MTMNW.NE.0) WRITE(IUMT3D,*) '                 MNW'  ! Multi-node well package
-C            IF(MTSWT.NE.0) WRITE(IUMT3D,*) '                 SWT'  ! Subsidence and Aquifer-System Compaction Package for Water-Table Aquifers
-            IF(MTUZF.NE.0.AND.IUZFFLOWS.EQ.0) 
+            IF(MTSTR /= Z) WRITE(IUMT3D,*) '                 STR'  ! Stream package
+            IF(MTRES /= Z) WRITE(IUMT3D,*) '                 RES'  ! Reservoir package
+            IF(MTFHB /= Z) WRITE(IUMT3D,*) '                 FHB'  ! Flow and Head Boundary package
+            IF(MTDRT /= Z) WRITE(IUMT3D,*) '                 DRT'  ! Drain Return package
+            IF(MTETS /= Z) WRITE(IUMT3D,*) '                 ETS'  ! Segmented ET package
+C            IF(MTIBS /= Z) WRITE(IUMT3D,*) '                 IBS'  ! Interbed Storage
+C            IF(MTTLK /= Z) WRITE(IUMT3D,*) '                 TLK'  ! Transient Leakage
+            IF(MTMNW /= Z) WRITE(IUMT3D,*) '                 MNW'  ! Multi-node well package
+C            IF(MTSWT /= Z) WRITE(IUMT3D,*) '                 SWT'  ! Subsidence and Aquifer-System Compaction Package for Water-Table Aquifers
+            IF(MTUZF /= Z.AND.IUZFFLOWS.EQ.0) 
      &                     WRITE(IUMT3D,*) '                 UZF'  ! Unsaturated-zone Flow package
-            IF(MTUZF.NE.0.AND.IUZFFLOWS.NE.0) 
+            IF(MTUZF /= Z.AND.IUZFFLOWS /= Z) 
      &                     WRITE(IUMT3D,*) '           UZF FLOWS'
-            IF(MTLAK.NE.0.AND.ILAKFLOWS.EQ.0) THEN
+            IF(MTLAK /= Z.AND.ILAKFLOWS.EQ.0) THEN
                            WRITE(IUMT3D,*) '                 LAK'  ! Lake package
-            ELSEIF(MTLAK.NE.0.AND.ILAKFLOWS.NE.0) THEN
+            ELSEIF(MTLAK /= Z.AND.ILAKFLOWS /= Z) THEN
                            WRITE(IUMT3D,*) '           LAK FLOWS'
             ENDIF
-            IF(MTSFR.NE.0.AND.ISFRFLOWS.EQ.0) THEN
+            IF(MTSFR /= Z.AND.ISFRFLOWS.EQ.0) THEN
                            WRITE(IUMT3D,*) '                 SFR'  ! Streamflow Routing package
-            ELSEIF(MTSFR.NE.0.AND.ISFRFLOWS.NE.0) THEN
+            ELSEIF(MTSFR /= Z.AND.ISFRFLOWS /= Z) THEN
               IF(ITRFLG.EQ.0) THEN
                 WRITE(IUMT3D,*)            '        SFR FLOWS SS'
               ELSEIF(ITRFLG.EQ.1) THEN
                 WRITE(IUMT3D,*)            '        SFR FLOWS TR'
               ENDIF
             ENDIF
-            IF(MTSWR.NE.0)  WRITE(IUMT3D,*) '                 SWR'  ! Surface-water Routing package
-            IF(MTWEL1.NE.0) WRITE(IUMT3D,*) '                WEL1'  !seb     !swm: Need to revisit (see Scott's note at the top)
-            IF(ISFRLAKCONNECT.NE.0) 
+            IF(MTSWR /= Z)  WRITE(IUMT3D,*) '                 SWR'  ! Surface-water Routing package
+            IF(MTWEL1 /= Z) WRITE(IUMT3D,*) '                WEL1'  !seb     !swm: Need to revisit (see Scott's note at the top)
+            IF(ISFRLAKCONNECT /= Z) 
      &                     WRITE(IUMT3D,*) '     CONNECT SFR LAK'
-            IF(ISFRUZFCONNECT.NE.0) 
+            IF(ISFRUZFCONNECT /= Z) 
      &                     WRITE(IUMT3D,*) '     CONNECT SFR UZF'
-            IF(ILAKUZFCONNECT.NE.0) 
+            IF(ILAKUZFCONNECT /= Z) 
      &                     WRITE(IUMT3D,*) '     CONNECT LAK UZF'
-            IF(ISNKUZFCONNECT.NE.0.OR.MTUZF.NE.0)
+            IF(ISNKUZFCONNECT /= Z.OR.MTUZF /= Z)
      &                     WRITE(IUMT3D,*) '     CONNECT SNK UZF'
-!            IF(MTFMP.NE.0) WRITE(IUMT3D,*) '                 FMP'  ! swm: added FMP - not supported
-!            IF(MTRIP.NE.0) WRITE(IUMT3D,*) '                 RIP'  ! swm: added RIP - not supported
-!            IF(MTSWI.NE.0) WRITE(IUMT3D,*) '                 SWI'  ! swm: added SWI - not supported
+!            IF(MTFMP /= Z) WRITE(IUMT3D,*) '                 FMP'  ! swm: added FMP - not supported
+!            IF(MTRIP /= Z) WRITE(IUMT3D,*) '                 RIP'  ! swm: added RIP - not supported
+!            IF(MTSWI /= Z) WRITE(IUMT3D,*) '                 SWI'  ! swm: added SWI - not supported
           ENDIF
         ENDIF
       ENDIF
