@@ -55,6 +55,12 @@ span {
 </head>
 <body>
 <div style="float: left; white-space: pre; line-height: 1; background: #FFFFFF; "><span class="sc2">#
+#
+##########################################################################################################################
+#   If you just want to go to the input template, search for: BEGIN GLOBAL DIMENSION  or go to Line 522                  #
+##########################################################################################################################
+#
+#
 # FMP4 ALL INPUT OPTIONS
 #
 #   This is a simple text file that provides the FMP basic block input structure
@@ -1017,13 +1023,18 @@ span {
 </span><span class="sc24">   </span><span class="sc2"># ------------------------------------------------------------------------------------------------------------------
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># Specify recharge that is sent directly to the bottom of the root zone.
-</span><span class="sc24">   </span><span class="sc2">#  The recharge is not consumed by crops and is treated as deep percolation
+</span><span class="sc24">   </span><span class="sc2"># The recharge is not consumed by crops and is added to deep percolation.
+</span><span class="sc24">   </span><span class="sc2"># The deep percolation is then passed to either UZF (FINF) or the water table (RCH-like).
 </span><span class="sc24">   </span><span class="sc2">#
-</span><span class="sc24">   </span><span class="sc2">#  The deep percolation is then passed to either UZF or the water table.
+</span><span class="sc24">   </span><span class="sc2"># If a specific cell has all layers with IBOUND=0, then the deep percolation
+</span><span class="sc24">   </span><span class="sc2"># for that cell is converted to runoff (normal FMP operation).
+</span><span class="sc24">   </span><span class="sc2"># If the cell is not associated with a Water Balance Subregion (WBS), 
+</span><span class="sc24">   </span><span class="sc2"># then the deep percolation still occurs, but it is not tracked by 
+</span><span class="sc24">   </span><span class="sc2"># FMP WBS based outputs.
 </span><span class="sc24">   </span><span class="sc2">#
-</span><span class="sc24">   </span><span class="sc2">#  The keyword LENGTH or FLUX indicates that the input is in model units of length (L/T)
-</span><span class="sc24">   </span><span class="sc2">#  The keyword RATE indicates that the input is in volumetric rate                 (L^3/T)
-</span><span class="sc24">   </span><span class="sc2">#     --This feature mimics both the RCH package Infiltration and UZF Recharge.
+</span><span class="sc24">   </span><span class="sc2"># The keyword LENGTH or FLUX indicates that the input is in model units of length (L/T)
+</span><span class="sc24">   </span><span class="sc2"># The keyword RATE indicates that the input is in volumetric rate                 (L^3/T)
+</span><span class="sc24">   </span><span class="sc2">#    --This feature mimics both the RCH package Infiltration and UZF Recharge.
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># DIRECT_RECHARGE can be specified multiple times and the sum of the recharge arrays 
 </span><span class="sc24">   </span><span class="sc2"># are applied to deep percolation. That is you can have something like:
