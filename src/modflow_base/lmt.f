@@ -126,6 +126,9 @@ C--CHECK for OPTIONS/PACKAGES USED IN CURRENT SIMULATION
           MTRIV=IUNIT(IU)
         ELSEIF(CUNIT(IU).EQ.'GHB ') THEN
           MTGHB=IUNIT(IU)
+        !ELSEIF(CUNIT(IU).EQ.'WEL1') THEN  -> requires modification to MT3D to add second wel package
+        !  MTWEL1=IUNIT(IU)
+        !  IF(MTWEL1 /= Z) NPCKGTXT = NPCKGTXT + 1
         ELSEIF(CUNIT(IU).EQ.'STR ') THEN
           MTSTR=IUNIT(IU)
           IF(MTSTR /= Z) NPCKGTXT = NPCKGTXT + 1
@@ -180,16 +183,6 @@ C--CHECK for OPTIONS/PACKAGES USED IN CURRENT SIMULATION
         ELSEIF(CUNIT(IU).EQ.'SWR ') THEN   !rth
           MTSWR=IUNIT(IU)
           IF(MTSWR /= Z) NPCKGTXT = NPCKGTXT + 1
-        ELSEIF(CUNIT(IU).EQ.'WEL1') THEN
-!swm dirty hack          MTWEL1=IUNIT(IU)
-!swm dirty hack            IF(MTWEL1 /= Z) NPCKGTXT = NPCKGTXT + 1
-          IF(MTWEL /= Z .AND. IUNIT(IU) /= Z) THEN !swm: check if WEL already active
-            CALL USTOP('SIMULTANEOUS USE OF WEL AND WEL1 IS NOT '//
-     &            'SUPPORTED IN MT3D')
-          ELSEIF(IUNIT(IU) /= Z) THEN  ! WEL not active, but WEL1 active
-          MTWEL=IUNIT(IU)  !swm: Note - reusing MTWEL, which means original WEL and new WEL cannot be used together!!!
-            IF(MTWEL /= Z) NPCKGTXT = NPCKGTXT + 1  !swm: redundant to check, but being consistent
-          END IF
         ENDIF
       ENDDO 
 !swm: SET MTMNW IF EITHER MNW1 OR MNW2 IS ACTIVE
@@ -486,12 +479,12 @@ C--OPEN THE LINK-MT3DMS OUTPUT FILE NEEDED BY MT3DMS
 C--AND PRINT AN IDENTIFYING MESSAGE IN MODFLOW OUTPUT FILE  
       INQUIRE(UNIT=IUMT3D,OPENED=LOP)
       IF(LOP) THEN
-        CALL UTF8_BOM_OFFSET_REWIND(IUMT3D)
         IF(ILMTFMT.EQ.1) CALL USTOP(
      +   'LINKER FILE PREVIOUSLY LISTED IN THE MODFLOW NAME FILE.'//NL//
      +   'REMOVE ITS LISTING FROM WITHIN THE NAME FILE '//NL//
      +   'AND PROVIDE LINKER FILE NAME AND UNIT NUMBER ONLY IN '//
      +   'THE LMT INPUT FILE.')
+        CALL UTF8_BOM_OFFSET_REWIND(IUMT3D)
       ELSE
         IF(ILMTFMT.EQ.0) THEN
           OPEN(IUMT3D,FILE=FNAME,FORM=FORM,ACCESS=ACCESS,
@@ -670,7 +663,7 @@ C------SAVE POINTER DATA TO ARRARYS
 C
 C--NORMAL RETURN
       RETURN
-      END
+      END SUBROUTINE
 C
       SUBROUTINE LMT8BD(KKSTP,KKPER,IGRID)
 C **********************************************************************
@@ -3513,11 +3506,15 @@ C--GET LAYER, ROW & COLUMN OF CELL CONTAINING DRAIN.
         Q=ZERO
         ILR=0
         IF(IDRTFL.GT.0) THEN
-          QIN=ZERO
-          ILR=DRTF(6,L)
-          IRR=DRTF(7,L)
-          ICR=DRTF(8,L)
-          IF(IBOUND(ICR,IRR,ILR).LE.0) ILR=0
+          IF ( ILR <= 0 ) THEN  ! DRT water passed to SFR, SWR, or FMP
+              QIN=ZERO; ILR=0; IRR=0; ICR=0
+          ELSE
+              QIN=ZERO
+              ILR=DRTF(6,L)
+              IRR=DRTF(7,L)
+              ICR=DRTF(8,L)
+              IF(IBOUND(ICR,IRR,ILR).LE.0) ILR=0
+           END IF
         ENDIF                
 C
 C--IF CELL IS NO-FLOW OR CONSTANT-HEAD, IGNORE IT.
