@@ -68,6 +68,8 @@ C     -----------------------------------------------------------------
       MTLPF  = Z
       MTHUF  = Z
       MTWEL  = Z
+      MTWEL1 = Z
+      MTWEL2 = Z
       MTDRN  = Z
       MTRCH  = Z
       MTEVT  = Z
@@ -87,7 +89,6 @@ C     -----------------------------------------------------------------
       MTSFR  = Z
       MTUZF  = Z
       MTSWR  = Z
-      MTWEL1 = Z
       MTFMP  = Z
       MTRIP  = Z
       MTSWI  = Z
@@ -115,7 +116,9 @@ C--CHECK for OPTIONS/PACKAGES USED IN CURRENT SIMULATION
         ELSEIF(CUNIT(IU).EQ.'HUF2' .OR. CUNIT(IU).EQ.'HUF') THEN
           MTHUF=IUNIT(IU)
         ELSEIF(CUNIT(IU).EQ.'WEL ') THEN
-          MTWEL=IUNIT(IU)
+          MTWEL2=IUNIT(IU)
+        ELSEIF(CUNIT(IU).EQ.'WEL1') THEN ! WEL and WEL1 merge output
+          MTWEL1=IUNIT(IU)
         ELSEIF(CUNIT(IU).EQ.'DRN ') THEN
           MTDRN=IUNIT(IU)
         ELSEIF(CUNIT(IU).EQ.'RCH ') THEN
@@ -126,9 +129,6 @@ C--CHECK for OPTIONS/PACKAGES USED IN CURRENT SIMULATION
           MTRIV=IUNIT(IU)
         ELSEIF(CUNIT(IU).EQ.'GHB ') THEN
           MTGHB=IUNIT(IU)
-        !ELSEIF(CUNIT(IU).EQ.'WEL1') THEN  -> requires modification to MT3D to add second wel package
-        !  MTWEL1=IUNIT(IU)
-        !  IF(MTWEL1 /= Z) NPCKGTXT = NPCKGTXT + 1
         ELSEIF(CUNIT(IU).EQ.'STR ') THEN
           MTSTR=IUNIT(IU)
           IF(MTSTR /= Z) NPCKGTXT = NPCKGTXT + 1
@@ -188,6 +188,10 @@ C--CHECK for OPTIONS/PACKAGES USED IN CURRENT SIMULATION
 !swm: SET MTMNW IF EITHER MNW1 OR MNW2 IS ACTIVE
       IF(MTMNW1 /= Z) MTMNW=MTMNW1
       IF(MTMNW2 /= Z) MTMNW=MTMNW2
+      
+!     SET MTWEL IF EITHER WEL1 OR WEL IS ACTIVE
+      IF(MTWEL1 /= Z) MTWEL=MTWEL1
+      IF(MTWEL2 /= Z) MTWEL=MTWEL2
 C
 C--IF LMT8 PACKAGE IS NOT ACTIVATED, SKIP TO END AND RETURN
       IF(INLMT.EQ.0) GOTO 9999
@@ -602,7 +606,6 @@ C            IF(MTSWT /= Z) WRITE(IUMT3D)   '                 SWT'  ! Subsidence
               ENDIF
             ENDIF
             IF(MTSWR /= Z) WRITE(IUMT3D)   '                 SWR'  ! Surface-water Routing package
-            IF(MTWEL1 /= Z) WRITE(IUMT3D)  '                WEL1'  !seb    !swm: this will need some rethinking
             IF(ISFRLAKCONNECT /= Z) 
      &                     WRITE(IUMT3D)   '     CONNECT SFR LAK'
             IF(ISFRUZFCONNECT /= Z) 
@@ -643,7 +646,6 @@ C            IF(MTSWT /= Z) WRITE(IUMT3D,*) '                 SWT'  ! Subsidence
               ENDIF
             ENDIF
             IF(MTSWR /= Z)  WRITE(IUMT3D,*) '                 SWR'  ! Surface-water Routing package
-            IF(MTWEL1 /= Z) WRITE(IUMT3D,*) '                WEL1'  !seb     !swm: Need to revisit (see Scott's note at the top)
             IF(ISFRLAKCONNECT /= Z) 
      &                     WRITE(IUMT3D,*) '     CONNECT SFR LAK'
             IF(ISFRUZFCONNECT /= Z) 
@@ -678,9 +680,13 @@ C
       USE LMTMODULE,ONLY:ISSMT3D,IUMT3D,ILMTFMT,ILAKUZFCONNECT,
      &                   ISFRUZFCONNECT,ISFRLAKCONNECT,NPCKGTXT,
      &                   IUZFFLOWS,ISFRFLOWS,ILAKFLOWS
+      
+      LOGICAL :: WEL1, WEL2
 
 C--SWM: SWAP POINTERS FOR LMT DATA TO CURRENT GRID
         CALL SLMT8PNT(IGRID)
+        WEL2 = IUNIT( 2) /= 0
+        WEL1 = IUNIT(67) /= 0
 C
 C--WRITE A NOTIFICATION LINE TO MODFLOW OUTPUT FILE
         WRITE(IOUT,9876) IUMT3D,KKSTP,KKPER
@@ -698,11 +704,10 @@ C--COLLECT AND SAVE ALL RELEVANT FLOW MODEL INFORMATION
         IF(IUNIT(37).NE.0) 
      &   CALL LMT8HUF7(ILMTFMT,ISSMT3D,IUMT3D,
      &   KKSTP,KKPER,IUNIT(47),IGRID)
-        IF(IUNIT(67) .NE.0) ! swm added call to original WEL package
-     &   CALL LMT8WEL7(IUNIT(62),ILMTFMT,IUMT3D,KKSTP,KKPER,IGRID)  
-        IF(IUNIT(2) .NE.0) 
-     &   CALL LMT8WEL8(IUNIT(62),ILMTFMT,IUMT3D,KKSTP,KKPER,IGRID)    !swm changed to LMT8WEL8
-        IF(IUNIT(3) .NE.0) 
+        IF(WEL1 .or. WEL2) 
+     &   CALL LMT8WEL(WEL1,WEL2,IUNIT(62),ILMTFMT,IUMT3D,
+     &                KKSTP,KKPER,IGRID)  
+        IF(IUNIT(3) /= 0) 
      &   CALL LMT8DRN7(ILMTFMT,IUMT3D,KKSTP,KKPER,IGRID)
         IF(IUNIT(8) .NE.0) 
      &   CALL LMT8RCH7(ILMTFMT,IUMT3D,KKSTP,KKPER,IGRID)
@@ -2428,142 +2433,114 @@ C--RETURN
       END
 C
 C
-      SUBROUTINE LMT8WEL7(IUNITUPW,ILMTFMT,IUMT3D,KSTP,KPER,IGRID)
+      SUBROUTINE LMT8WEL(WEL1,WEL2,IUNITUPW,ILMTFMT,IUMT3D,
+     +                   KSTP,KPER,IGRID)
 C *********************************************************************
 C SAVE WELL CELL LOCATIONS AND VOLUMETRIC FLOW RATES FOR USE BY MT3D.
 C *********************************************************************
-C Modified from  Harbaugh (2005)
-C last modified: 06-23-2016
-C
-      USE GLOBAL,      ONLY:NCOL,NROW,NLAY,IBOUND,BOTM,LBOTM,HNEW
-      USE GWFWELMODULE,ONLY:NWELLS,WELL,PSIRAMP
-      USE GWFUPWMODULE,ONLY:LAYTYPUPW
-      CHARACTER(16) TEXT
-      double precision bbot, Hh, cof1, cof2, cof3, Qp, x, s
-      double precision ttop
-C      
-C--SET POINTERS FOR THE CURRENT GRID   
-cswm: already set in      CALL SGWF2WEL7PNT(IGRID)
-C      
-!swm      TEXT='WEL1'   
-      TEXT='WEL'   !swm - setting as WEL to be compatible with MT3D-USGS.  Should probably make OWHM's new WEL package WEL2
-      ZERO=0.
-C
-C--WRITE AN IDENTIFYING HEADER
-      IF(ILMTFMT.EQ.0) THEN
-        WRITE(IUMT3D) KPER,KSTP,NCOL,NROW,NLAY,TEXT,NWELLS
-      ELSEIF(ILMTFMT.EQ.1) THEN
-        WRITE(IUMT3D,*) KPER,KSTP,NCOL,NROW,NLAY
-        WRITE(IUMT3D,*) TEXT,NWELLS
-      ENDIF
-C
-C--IF THERE ARE NO WELLS RETURN
-      IF(NWELLS.LE.0) GO TO 9999
-C
-C--WRITE WELL LOCATION AND RATE ONE AT A TIME
-      DO L=1,NWELLS
-        IL=WELL(1,L)
-        IR=WELL(2,L)
-        IC=WELL(3,L)
-C
-C--IF CELL IS EXTERNAL Q=0
-        Q=ZERO
-        IF(IBOUND(IC,IR,IL).GT.0) THEN
-          Q=WELL(4,L)
-        IF ( IUNITUPW.NE.0 ) THEN
-        IF ( LAYTYPUPW(il).GT.0 ) THEN
-          bbot = Botm(IC, IR, Lbotm(IL))
-          ttop = Botm(IC, IR, Lbotm(IL)-1)
-          Hh = HNEW(ic,ir,il)
-          x = (Hh-bbot)
-          s = PSIRAMP
-          s = s*(Ttop-Bbot)
-          aa = -1.0d0/(s**2.0d0)
-          b = 2.0d0/s
-          cof1 = x**2.0D0
-          cof2 = -(2.0D0*x)/(s**3.0D0)
-          cof3 = 3.0D0/(s**2.0D0)
-          Qp = cof1*(cof2+cof3)
-          IF ( x.LT.0.0D0 ) THEN
-            Qp = 0.0D0
-          ELSEIF ( x-s.GT.-1.0e-14 ) THEN
-            Qp = 1.0D0
-          END IF
-          IF ( Qp.LT.1.0 ) THEN
-            Q = Q*Qp
-          END IF
-        END IF
-        END IF
-        END IF
-        IF(ILMTFMT.EQ.0) THEN
-          WRITE(IUMT3D) IL,IR,IC,Q
-        ELSEIF(ILMTFMT.EQ.1) THEN
-          WRITE(IUMT3D,*) IL,IR,IC,Q
-        ENDIF
-      ENDDO
-C
-C--RETURN
- 9999 RETURN
-      END
-C
-      SUBROUTINE LMT8WEL8(IUNITUPW,ILMTFMT,IUMT3D,KSTP,KPER,IGRID)
-C *********************************************************************
-C SAVE WELL CELL LOCATIONS AND VOLUMETRIC FLOW RATES FOR USE BY MT3D.
-C *********************************************************************
-C Modified from  Harbaugh (2005) Modified more by SEB 2015
+C Modified from  Harbaugh (2005) Modified more by SEB 2015 and 2025
 C last modified: 08-08-2008
 C
       USE GLOBAL,      ONLY:NCOL,NROW,NLAY,IBOUND,BOTM,LBOTM,HNEW,LAYHDT
+      USE GWFWELMODULE, ONLY:NWELLS1=>NWELLS,
+     +                       WELL1=>WELL,
+     +                       PSIRAMP1=>PSIRAMP
       USE GWFWEL2MODULE,ONLY:NWELLS,WELDATA,PHIRAMP,
-     +                      WELSMOOTHING, NWT_SOLVER
+     +                       WELSMOOTHING, NWT_SOLVER
       USE WEL_SUBROUTINES, ONLY: WEL_SMOOTH
       USE GWFUPWMODULE,ONLY:LAYTYPUPW
+      LOGICAL :: WEL1, WEL2
       CHARACTER(16) TEXT
-      double precision bbot, Hh, cof1, cof2, Qp
-      double precision ttop,dQp
+      double precision bbot, Hh, cof1, cof2, cof3, Qp, x, s
+      double precision ttop, dQp
 C      
 C--SET POINTERS FOR THE CURRENT GRID   
 cswm: already set in      CALL SGWF2WEL7PNT(IGRID)
 C      
       TEXT='WEL'   
       ZERO=0.
+      nw = 0
+      if(wel2) nw = nw
+      if(wel1) nw = nw + NWELLS1
 C
 C--WRITE AN IDENTIFYING HEADER
       IF(ILMTFMT.EQ.0) THEN
-        WRITE(IUMT3D) KPER,KSTP,NCOL,NROW,NLAY,TEXT,NWELLS
+        WRITE(IUMT3D) KPER,KSTP,NCOL,NROW,NLAY,TEXT,nw
       ELSEIF(ILMTFMT.EQ.1) THEN
         WRITE(IUMT3D,*) KPER,KSTP,NCOL,NROW,NLAY
-        WRITE(IUMT3D,*) TEXT,NWELLS
+        WRITE(IUMT3D,*) TEXT,nw
       ENDIF
 C
 C--IF THERE ARE NO WELLS RETURN
-      IF(NWELLS.LE.0) GO TO 9999
+      IF(nw.LE.0) RETURN
 C
 C--WRITE WELL LOCATION AND RATE ONE AT A TIME
-      DO I=1,NWELLS
-       IL=WELDATA(I)%LAY;  IR=WELDATA(I)%ROW;  IC=WELDATA(I)%COL
+      if(wel2) then
+        DO I=1,NWELLS
+         IL=WELDATA(I)%LAY;  IR=WELDATA(I)%ROW;  IC=WELDATA(I)%COL
 C
 C--IF CELL IS EXTERNAL Q=0
-        Q=ZERO
-        IF(IBOUND(IC,IR,IL).GT.0) Q=WELDATA(I)%VAL(1)
-        IF ( WELSMOOTHING  .AND. Q.LT.ZERO .AND. LAYHDT(IL).NE.0) THEN
-         Hh = HNEW(ic,ir,il)
-         bbot = Botm(IC, IR, Lbotm(IL))
-         ttop = Botm(IC, IR, Lbotm(IL)-1)
-         !
-         Q = Q*WEL_SMOOTH(PHIRAMP,Hh,Ttop,Bbot)  
-        END IF
-        IF(ILMTFMT.EQ.0) THEN
-          WRITE(IUMT3D) IL,IR,IC,Q
-        ELSEIF(ILMTFMT.EQ.1) THEN
-          WRITE(IUMT3D,*) IL,IR,IC,Q
-        ENDIF
-      ENDDO
+          Q=ZERO
+          IF(IBOUND(IC,IR,IL).GT.0) Q=WELDATA(I)%VAL(1)
+          IF ( WELSMOOTHING  .AND. Q.LT.ZERO .AND. LAYHDT(IL).NE.0) THEN
+           Hh = HNEW(ic,ir,il)
+           bbot = Botm(IC, IR, Lbotm(IL))
+           ttop = Botm(IC, IR, Lbotm(IL)-1)
+           !
+           Q = Q*WEL_SMOOTH(PHIRAMP,Hh,Ttop,Bbot)  
+          END IF
+          IF(ILMTFMT.EQ.0) THEN
+            WRITE(IUMT3D) IL,IR,IC,Q
+          ELSEIF(ILMTFMT.EQ.1) THEN
+            WRITE(IUMT3D,*) IL,IR,IC,Q
+          ENDIF
+        ENDDO
+      end if
 C
+      if(wel1) then
+        DO L=1,NWELLS1
+          IL=WELL1(1,L)
+          IR=WELL1(2,L)
+          IC=WELL1(3,L)
+C
+C--IF CELL IS EXTERNAL Q=0
+          Q=ZERO
+          IF(IBOUND(IC,IR,IL) > 0) THEN
+            Q=WELL1(4,L)
+          IF ( IUNITUPW /= 0 ) THEN
+          IF ( LAYTYPUPW(il).GT.0 ) THEN
+            bbot = Botm(IC, IR, Lbotm(IL))
+            ttop = Botm(IC, IR, Lbotm(IL)-1)
+            Hh = HNEW(ic,ir,il)
+            x = (Hh-bbot)
+            s = PSIRAMP1
+            s = s*(Ttop-Bbot)
+            aa = -1.0d0/(s**2.0d0)
+            b = 2.0d0/s
+            cof1 = x**2.0D0
+            cof2 = -(2.0D0*x)/(s**3.0D0)
+            cof3 = 3.0D0/(s**2.0D0)
+            Qp = cof1*(cof2+cof3)
+            IF ( x.LT.0.0D0 ) THEN
+              Qp = 0.0D0
+            ELSEIF ( x-s.GT.-1.0e-14 ) THEN
+              Qp = 1.0D0
+            END IF
+            IF ( Qp.LT.1.0 ) THEN
+              Q = Q*Qp
+            END IF
+          END IF
+          END IF
+          END IF
+          IF(ILMTFMT.EQ.0) THEN
+            WRITE(IUMT3D) IL,IR,IC,Q
+          ELSEIF(ILMTFMT.EQ.1) THEN
+            WRITE(IUMT3D,*) IL,IR,IC,Q
+          ENDIF
+        ENDDO
+      end if
 C--RETURN
- 9999 RETURN
-      END
-C
+      END SUBROUTINE
 C
 C
       SUBROUTINE LMT8DRN7(ILMTFMT,IUMT3D,KSTP,KPER,IGRID)
