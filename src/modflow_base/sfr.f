@@ -402,7 +402,7 @@ C     ------------------------------------------------------------------
       USE GWFHUFMODULE, ONLY: SC2HUF
       USE GWFUPWMODULE, ONLY: SC2UPW,HKUPW,VKAUPW
       USE ICHKSTRBOT_MODULE
-      USE TABLEFILE_INTERFACE,ONLY: TABFILEPARSE,TABFILELINKS,         ! seb
+      USE TABLEFILE_INTERFACE,ONLY: TABFILEPARSE,TABFILELINKS,
      +                              TABFILEPACKINDEX
       USE LINE_FEEDER,          ONLY: LINE_FEED
       USE ERROR_INTERFACE,      ONLY: STOP_ERROR, WARNING_MESSAGE
@@ -577,7 +577,7 @@ C
       !IF(IUNIT(49).NE.0) NINTOT = 0  !LMT
       NINTOT  = Z  !LMT
       NSFRAUX = Z
-      SFRFEED=>NULL()
+      SFR_FEED_FLOW=>NULL()
       NO_LINEFEED = TRUE
       !
       ALLOCATE(SFRTABFILE) 
@@ -614,8 +614,8 @@ C
          !
       ELSEIF(BL%NAME == 'LINEFEED' .AND. BL%NLINE>0) THEN
          !
-         ALLOCATE(SFRFEED)
-         CALL SFRFEED%INIT(BL)    !=>FEED_ALLOCATE(IN,IOUT,LINE)
+         ALLOCATE(SFR_FEED_FLOW)
+         CALL SFR_FEED_FLOW%INIT(BL)    !=>FEED_ALLOCATE(IN,IOUT,LINE)
          NO_LINEFEED = FALSE
          !
       ELSEIF(BL%NAME == 'TIME_SERIES'       .OR. 
@@ -856,13 +856,13 @@ C
       CALL TABFILEPARSE(IN,IOUT,LINE,SFRTABFILE)
       CALL TABFILELINKS(IN,IOUT,LINE,SFRTABFILE)   
       !
-      !ALLOCATE SFRFEED VARIABLE AND OPTIONALLY READ IN FEED FILE LOCATIONS
+      !ALLOCATE SFR_FEED_FLOW VARIABLE AND OPTIONALLY READ IN FEED FILE LOCATIONS
       IF(NO_LINEFEED) THEN
-          ALLOCATE(SFRFEED)
-          CALL SFRFEED%INIT(IN,IOUT,LINE)
+          ALLOCATE(SFR_FEED_FLOW)
+          CALL SFR_FEED_FLOW%INIT(IN,IOUT,LINE)
       END IF
       ! LOAD MODEL CELLS THAT WILL BE DESCRIBED BY THE LINE FEED
-      CALL SFRFEED%CELLS(1, 0, 0, 0)     !=>FEED_CELLS(LDIM,NPROP,NAUX,IPRT)
+      CALL SFR_FEED_FLOW%CELLS(1, 0, 0, 0)     !=>FEED_CELLS(LDIM,NPROP,NAUX,IPRT)
       !
 !     IF(NUMTAB>0) THEN
 !         ! 
@@ -2151,7 +2151,7 @@ C-------SET POINTERS FOR CURRENT GRID.
       CALL SGWF2SUB7PNT(IGRID)  !seb lgr
       !
       !READ IN NEXT LINE IN LINE_FEED FILE WHICH CONTAINS THE CURRENT STRESS PERIODS DATA
-      CALL SFRFEED%NEXTLINE()
+      CALL SFR_FEED_FLOW%NEXTLINE()
       !
       IERR = 0
       IFLG = 0
@@ -3240,7 +3240,8 @@ C     ------------------------------------------------------------------
       USE GWFBASMODULE, ONLY: TOTIM, DATE_SP
       USE GWFSFRMODULE, ONLY: NSS, NUMTAB, ISFRLIST,
      +                        SEG, FXLKOT, IDIVAR, CLOSEZERO, 
-     +                        IOUT, SFRTABFILE, SFRFEED, TIME_SERIES
+     +                        IOUT, SFRTABFILE, TIME_SERIES, 
+     +                        SFR_FEED_FLOW
       USE GLOBAL,              ONLY: SUBLNK
       USE CONSTANTS,           ONLY: ONE, Z, YEARTOL
       USE TABLEFILE_INTERFACE, ONLY: TABFILEUPDATE
@@ -3271,13 +3272,14 @@ C1------CALL LINEAR INTERPOLATION ROUTINE
       !
       !IF TABFILE OPTION IS USED UPDATE THE TABFILES AND APPLY FLOW TO SEGEMENTS
       IF(SFRTABFILE%NTAB > 0) THEN
-         CALL TABFILEUPDATE( SFRTABFILE,'SFR',KSTP, SEG(2,:) )             !seb UPDATES THE FLOW FOR ALL SEGMENTS LINKED TO A TABFILE
+         CALL TABFILEUPDATE( SFRTABFILE,'SFR',KSTP, SEG(2,:) )         ! UPDATES THE FLOW FOR ALL SEGMENTS LINKED TO A TABFILE
       END IF
       !
       ! APPLY THE NEW FEED DATA TO THE SFR PACKAGE ARRAY
       !
-      IF (SFRFEED%NFEED > 0) THEN
-        CALL SFRFEED%FEED_SFR(SEG(:,:NSS),2,' SEGMENT            VALUE')
+      IF (SFR_FEED_FLOW%NFEED > 0) THEN
+        CALL SFR_FEED_FLOW%FEED_SFR(SEG(:,:NSS),2,
+     +                              ' SEGMENT            FLOW')
       END IF
       !
       IF(TIME_SERIES%NFIL > 0) THEN
@@ -4158,7 +4160,7 @@ C33-----ESTIMATE DEPTH FOR ENDPOINTS WHEN ICALC IS 1.
               END IF
               IF ( flobot2.GT.flowc ) flobot2 = flowc
               !
-              ! seb Scotts wonderful fix for invalid floating operations...yay for scott!
+              ! Scotts wonderful fix for invalid floating operations...yay for scott!
               IF(qcnst<NEARZERO) THEN
                   depth2 = 0D0
                   depth1 = 0D0
@@ -10836,10 +10838,10 @@ C     ------------------------------------------------------------------
       DEALLOCATE(GWFSFRDAT(IGRID)%HNEW_FACTOR)
       DEALLOCATE(GWFSFRDAT(IGRID)%UPLAY_ADJUST)
       ! GFORTRAN compiler error work-around for pointer data type FINAL statement
-      SFRFEED=>GWFSFRDAT(IGRID)%SFRFEED
-      GWFSFRDAT(IGRID)%SFRFEED=>NULL()
-      DEALLOCATE(SFRFEED)
-      SFRFEED=>NULL()
+      SFR_FEED_FLOW=>GWFSFRDAT(IGRID)%SFR_FEED_FLOW
+      GWFSFRDAT(IGRID)%SFR_FEED_FLOW=>NULL()
+      DEALLOCATE(SFR_FEED_FLOW)
+      SFR_FEED_FLOW=>NULL()
       !
       DBFILE =>GWFSFRDAT(IGRID)%DBFILE 
       GWFSFRDAT(IGRID)%DBFILE =>NULL()
@@ -10866,7 +10868,7 @@ C     ------------------------------------------------------------------
       DEALLOCATE(CNVG_WRN)
       CNVG_WRN=>NULL()
       !
-      !DEALLOCATE (GWFSFRDAT(IGRID)%SFRFEED)
+      !DEALLOCATE (GWFSFRDAT(IGRID)%SFR_FEED_FLOW)
       !DEALLOCATE (GWFSFRDAT(IGRID)%DBFILE )
       !DEALLOCATE (GWFSFRDAT(IGRID)%TIME_SERIES      )
       !DEALLOCATE(GWFSFRDAT(IGRID)%CNVG_WRN)
@@ -10982,7 +10984,7 @@ C NULLIFY THE LOCAL POINTERS
         NSEGDIM         =>NULL()
         factor          =>NULL()
         SFRTABFILE      =>NULL()                    !seb
-        SFRFEED         =>NULL()
+        SFR_FEED_FLOW   =>NULL()
         DBFILE          =>NULL()
         IOUT            =>NULL()
         !
@@ -11142,7 +11144,7 @@ C     ------------------------------------------------------------------
       STRHC1KVFLAG=>GWFSFRDAT(IGRID)%STRHC1KVFLAG
       Nfoldflbt=>GWFSFRDAT(IGRID)%Nfoldflbt
       SFRTABFILE=>GWFSFRDAT(IGRID)%SFRTABFILE
-      SFRFEED   =>GWFSFRDAT(IGRID)%SFRFEED
+      SFR_FEED_FLOW=>GWFSFRDAT(IGRID)%SFR_FEED_FLOW
       DBFILE    =>GWFSFRDAT(IGRID)%DBFILE 
       IOUT      =>GWFSFRDAT(IGRID)%IOUT
       !
@@ -11299,8 +11301,8 @@ C     ------------------------------------------------------------------
       GWFSFRDAT(IGRID)%STRHC1KHFLAG=>STRHC1KHFLAG
       GWFSFRDAT(IGRID)%STRHC1KVFLAG=>STRHC1KVFLAG
       GWFSFRDAT(IGRID)%Nfoldflbt=>Nfoldflbt
-      GWFSFRDAT(IGRID)%SFRTABFILE=>SFRTABFILE                           !seb
-      GWFSFRDAT(IGRID)%SFRFEED=>SFRFEED
+      GWFSFRDAT(IGRID)%SFRTABFILE=>SFRTABFILE
+      GWFSFRDAT(IGRID)%SFR_FEED_FLOW=>SFR_FEED_FLOW
       GWFSFRDAT(IGRID)%DBFILE =>DBFILE 
       GWFSFRDAT(IGRID)%IOUT   =>IOUT
       !
