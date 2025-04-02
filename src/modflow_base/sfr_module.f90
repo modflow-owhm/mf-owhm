@@ -81,6 +81,7 @@
         INTEGER,                   SAVE,           POINTER:: IOUT
         TYPE(TABFILETYPE1IDX),     SAVE,           POINTER:: SFRTABFILE
         TYPE(LINE_FEED),           SAVE,           POINTER:: SFR_FEED_FLOW
+        TYPE(LINE_FEED),           SAVE,           POINTER:: SFR_FEED_RUNOFF
         TYPE(GENERIC_OUTPUT_FILE), SAVE,           POINTER:: DBFILE
         TYPE(TIME_SERIES_FILE_GROUP),SAVE,         POINTER:: TIME_SERIES
         INTEGER,    DIMENSION(:),  SAVE,           POINTER, CONTIGUOUS:: SEG_NSTRM
@@ -164,6 +165,7 @@
         INTEGER,                             POINTER:: IOUT
         TYPE(TABFILETYPE1IDX),               POINTER:: SFRTABFILE
         TYPE(LINE_FEED),                     POINTER:: SFR_FEED_FLOW
+        TYPE(LINE_FEED),                     POINTER:: SFR_FEED_RUNOFF
         TYPE(GENERIC_OUTPUT_FILE),           POINTER:: DBFILE
         TYPE(TIME_SERIES_FILE_GROUP),        POINTER:: TIME_SERIES
         INTEGER,    DIMENSION(:),            POINTER, CONTIGUOUS:: SEG_NSTRM

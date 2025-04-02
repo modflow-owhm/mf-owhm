@@ -443,7 +443,8 @@ C     ------------------------------------------------------------------
       REAL:: r, seglen, sumlen, thsslpe, thislpe, uhcslpe, rchlen, dist
       REAL:: epsslpe
       CHARACTER(16):: TEXT
-      logical:: found, checktabfile, NO_LINEFEED, FOUND_BEGIN, HAS_OPT
+      logical:: found, checktabfile, FOUND_BEGIN, HAS_OPT
+      logical:: NO_LINEFEED_FLOW, NO_LINEFEED_RUNOFF
       TYPE(GENERIC_BLOCK_READER):: BL
       TYPE(WARNING_TYPE):: WRN,WRN2,ERR,ERR2
       DOUBLE PRECISION:: DTMP
@@ -577,8 +578,10 @@ C
       !IF(IUNIT(49).NE.0) NINTOT = 0  !LMT
       NINTOT  = Z  !LMT
       NSFRAUX = Z
-      SFR_FEED_FLOW=>NULL()
-      NO_LINEFEED = TRUE
+      SFR_FEED_FLOW   => NULL()
+      SFR_FEED_RUNOFF => NULL()
+      NO_LINEFEED_FLOW = TRUE
+      NO_LINEFEED_RUNOFF = TRUE
       !
       ALLOCATE(SFRTABFILE) 
       checktabfile = TRUE
@@ -611,12 +614,19 @@ C
       IF(BL%NAME == 'BUDGET_GROUP' .OR. BL%NAME == 'BUDGET_GROUPS') THEN
          CALL WRN%ADD(BL%NAME//' BLOCK IS NOT YET SUPPORTED FOR SFR.'
      +               //NL//'ITS CONTENTS WILL BE IGNORED.'//NL )
+      !
+      ELSEIF(BL%NAME == 'LINEFEED') THEN
+         IF (BL%NLINE < 1) CYCLE         ! empty linefeed block
          !
-      ELSEIF(BL%NAME == 'LINEFEED' .AND. BL%NLINE>0) THEN
-         !
-         ALLOCATE(SFR_FEED_FLOW)
-         CALL SFR_FEED_FLOW%INIT(BL)    !=>FEED_ALLOCATE(IN,IOUT,LINE)
-         NO_LINEFEED = FALSE
+         IF(BL%GET_EXTRA(1) == 'RUNOFF') THEN  ! found 'BEGIN LINEFEED RUNOFF'
+            ALLOCATE(SFR_FEED_RUNOFF)
+            CALL SFR_FEED_RUNOFF%INIT(BL)
+            NO_LINEFEED_RUNOFF = FALSE
+         ELSE
+            ALLOCATE(SFR_FEED_FLOW)
+            CALL SFR_FEED_FLOW%INIT(BL)
+            NO_LINEFEED_FLOW = FALSE
+         END IF
          !
       ELSEIF(BL%NAME == 'TIME_SERIES'       .OR. 
      +       BL%NAME == 'TIME_SERIES_INPUT' .OR. 
@@ -857,12 +867,19 @@ C
       CALL TABFILELINKS(IN,IOUT,LINE,SFRTABFILE)   
       !
       !ALLOCATE SFR_FEED_FLOW VARIABLE AND OPTIONALLY READ IN FEED FILE LOCATIONS
-      IF(NO_LINEFEED) THEN
+      IF(NO_LINEFEED_FLOW) THEN
           ALLOCATE(SFR_FEED_FLOW)
-          CALL SFR_FEED_FLOW%INIT(IN,IOUT,LINE)
+          CALL SFR_FEED_FLOW%INIT(IN,IOUT,LINE,LABEL='FLOW')
       END IF
       ! LOAD MODEL CELLS THAT WILL BE DESCRIBED BY THE LINE FEED
       CALL SFR_FEED_FLOW%CELLS(1, 0, 0, 0)     !=>FEED_CELLS(LDIM,NPROP,NAUX,IPRT)
+      !
+      IF(NO_LINEFEED_RUNOFF) THEN
+          ALLOCATE(SFR_FEED_RUNOFF)
+          CALL SFR_FEED_RUNOFF%INIT(IN,IOUT,LINE,LABEL='RUNOFF')
+      END IF
+      ! LOAD MODEL CELLS THAT WILL BE DESCRIBED BY THE LINE FEED
+      CALL SFR_FEED_RUNOFF%CELLS(1, 0, 0, 0)
       !
 !     IF(NUMTAB>0) THEN
 !         ! 
@@ -2152,6 +2169,7 @@ C-------SET POINTERS FOR CURRENT GRID.
       !
       !READ IN NEXT LINE IN LINE_FEED FILE WHICH CONTAINS THE CURRENT STRESS PERIODS DATA
       CALL SFR_FEED_FLOW%NEXTLINE()
+      CALL SFR_FEED_RUNOFF%NEXTLINE()
       !
       IERR = 0
       IFLG = 0
@@ -3241,7 +3259,7 @@ C     ------------------------------------------------------------------
       USE GWFSFRMODULE, ONLY: NSS, NUMTAB, ISFRLIST,
      +                        SEG, FXLKOT, IDIVAR, CLOSEZERO, 
      +                        IOUT, SFRTABFILE, TIME_SERIES, 
-     +                        SFR_FEED_FLOW
+     +                        SFR_FEED_FLOW, SFR_FEED_RUNOFF
       USE GLOBAL,              ONLY: SUBLNK
       USE CONSTANTS,           ONLY: ONE, Z, YEARTOL
       USE TABLEFILE_INTERFACE, ONLY: TABFILEUPDATE
@@ -3280,6 +3298,11 @@ C1------CALL LINEAR INTERPOLATION ROUTINE
       IF (SFR_FEED_FLOW%NFEED > 0) THEN
         CALL SFR_FEED_FLOW%FEED_SFR(SEG(:,:NSS),2,
      +                              ' SEGMENT            FLOW')
+      END IF
+      !
+      IF (SFR_FEED_RUNOFF%NFEED > 0) THEN
+        CALL SFR_FEED_RUNOFF%FEED_SFR(SEG(:,:NSS),3,
+     +                              ' SEGMENT            RUNOFF')
       END IF
       !
       IF(TIME_SERIES%NFIL > 0) THEN
@@ -10843,6 +10866,11 @@ C     ------------------------------------------------------------------
       DEALLOCATE(SFR_FEED_FLOW)
       SFR_FEED_FLOW=>NULL()
       !
+      SFR_FEED_RUNOFF=>GWFSFRDAT(IGRID)%SFR_FEED_FLOW
+      GWFSFRDAT(IGRID)%SFR_FEED_RUNOFF=>NULL()
+      DEALLOCATE(SFR_FEED_RUNOFF)
+      SFR_FEED_RUNOFF=>NULL()
+      !
       DBFILE =>GWFSFRDAT(IGRID)%DBFILE 
       GWFSFRDAT(IGRID)%DBFILE =>NULL()
       DEALLOCATE(DBFILE )
@@ -10869,6 +10897,7 @@ C     ------------------------------------------------------------------
       CNVG_WRN=>NULL()
       !
       !DEALLOCATE (GWFSFRDAT(IGRID)%SFR_FEED_FLOW)
+      !DEALLOCATE (GWFSFRDAT(IGRID)%SFR_FEED_RUNOFF)
       !DEALLOCATE (GWFSFRDAT(IGRID)%DBFILE )
       !DEALLOCATE (GWFSFRDAT(IGRID)%TIME_SERIES      )
       !DEALLOCATE(GWFSFRDAT(IGRID)%CNVG_WRN)
@@ -10985,6 +11014,7 @@ C NULLIFY THE LOCAL POINTERS
         factor          =>NULL()
         SFRTABFILE      =>NULL()                    !seb
         SFR_FEED_FLOW   =>NULL()
+        SFR_FEED_RUNOFF =>NULL()
         DBFILE          =>NULL()
         IOUT            =>NULL()
         !
@@ -11144,7 +11174,8 @@ C     ------------------------------------------------------------------
       STRHC1KVFLAG=>GWFSFRDAT(IGRID)%STRHC1KVFLAG
       Nfoldflbt=>GWFSFRDAT(IGRID)%Nfoldflbt
       SFRTABFILE=>GWFSFRDAT(IGRID)%SFRTABFILE
-      SFR_FEED_FLOW=>GWFSFRDAT(IGRID)%SFR_FEED_FLOW
+      SFR_FEED_FLOW  =>GWFSFRDAT(IGRID)%SFR_FEED_FLOW
+      SFR_FEED_RUNOFF=>GWFSFRDAT(IGRID)%SFR_FEED_RUNOFF
       DBFILE    =>GWFSFRDAT(IGRID)%DBFILE 
       IOUT      =>GWFSFRDAT(IGRID)%IOUT
       !
@@ -11302,7 +11333,8 @@ C     ------------------------------------------------------------------
       GWFSFRDAT(IGRID)%STRHC1KVFLAG=>STRHC1KVFLAG
       GWFSFRDAT(IGRID)%Nfoldflbt=>Nfoldflbt
       GWFSFRDAT(IGRID)%SFRTABFILE=>SFRTABFILE
-      GWFSFRDAT(IGRID)%SFR_FEED_FLOW=>SFR_FEED_FLOW
+      GWFSFRDAT(IGRID)%SFR_FEED_FLOW  =>SFR_FEED_FLOW
+      GWFSFRDAT(IGRID)%SFR_FEED_RUNOFF=>SFR_FEED_RUNOFF
       GWFSFRDAT(IGRID)%DBFILE =>DBFILE 
       GWFSFRDAT(IGRID)%IOUT   =>IOUT
       !
