@@ -4450,18 +4450,19 @@ C THIS SUBROUTINE IS CALLED ONLY IF THE 'SFR2' PACKAGE IS USED IN
 C THE MODFLOW SOLUTION.
 C ******************************************************************
 C DATE CREATED: 4-01-2016
-      USE GLOBAL,       ONLY:NCOL,NROW,NLAY,IOUT,IBOUND,IUNIT
+      USE CONSTANTS,    ONLY:Z
+      USE GLOBAL,       ONLY:NCOL,NROW,NLAY,IOUT,IBOUND,IUNIT,UPLAY
       USE GWFSFRMODULE, ONLY:NSTRM,ISTRM,STRM,ISEG,NSEGDIM,SEG,
      &                       IOTSG,IDIVAR,FXLKOT,NSS,DVRSFLW,SGOTFLW,
      &                       STROUT,NINTOT,ITRFLG,ITRFLG,NFLOWTYPE,
-     &                       FLOWTYPE
+     &                       FLOWTYPE,UPLAY_ADJUST
       USE GWFLAKMODULE, ONLY:VOL,NSFRLAK,LAKSFR,ILKSEG,ILKRCH,SWLAK
       USE LMTMODULE,    ONLY:ISFRFLOWS
 C
       IMPLICIT NONE
 C
       CHARACTER(16) TEXT
-      INTEGER MXSGMT,MXRCH,LASTRCH,L,NREACH,LL,IL,IC,IR,ILAY,
+      INTEGER MXSGMT,MXRCH,LASTRCH,L,NREACH,LL,IL,IC,IR,ILAY,UP,
      &        KSTP,KPER,IUMT3D,ISTSG,ILMTFMT,ISSMT3D,IGRID
       INTEGER I,J,III,JJJ,LK,IDISP,NINFLOW,ITRIB,IUPSEG,IUPRCH,USED,
      &        LENGTH
@@ -4529,15 +4530,15 @@ C--LOOP THROUGH EACH STREAM CELL AND WRITE EXCHANGE WITH AQUIFER
         STRLEN = STRM(1, L)
 C
 C25-----SEARCH FOR UPPER MOST ACTIVE CELL IN STREAM REACH.
-        ILAY = IL
-        TOPCELL1: DO WHILE (ILAY.LE.NLAY)
-          IF(IBOUND(IC,IR,ILAY).EQ.0) THEN
-            ILAY = ILAY + 1
-          ELSE
-            EXIT TOPCELL1
-          END IF
-        END DO TOPCELL1
-        IF (ILAY.LE.NLAY) IL = ILAY
+        UP = UPLAY(IC,IR)
+        !
+        IF( UP > Z ) THEN
+           IF(UPLAY_ADJUST == 1) THEN                               ! UPLAY_ADJUST => 0 do not adjust layers, 1 adjust layer if deeper, 2 use current upper most active layer)
+                           IF(il <  UP) il = UP
+           ELSEIF(UPLAY_ADJUST == 2) THEN 
+                           IF(il /= UP .AND. UP>Z) il = UP
+           END IF
+        END IF
 C
 C-------WRITE GW-SW INTERACTION TERMS TO FTL FILE UNDER THE HEADING "SFR"
 C       Strm(11, L): FLOW TO/FROM AQUIFER
