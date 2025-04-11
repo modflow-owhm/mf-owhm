@@ -494,7 +494,6 @@ C     ------------------------------------------------------------------
       ALLOCATE(IOUT)
       ALLOCATE(THETAB, FLUXB, FLUXHLD2)
       ALLOCATE(Nfoldflbt, NUMTAB, ROWTAB)
-      IF(IUNIT(49).NE.Z) ALLOCATE(NFLOWTYPE)
       !
       ALLOCATE(HD_RELAX,    SOURCE=UNO)
       ALLOCATE(HNEW_FACTOR, SOURCE=UNO)
@@ -564,16 +563,10 @@ C         DLEAK, ISTCB1, ISTCB2.
       factor           = UNO
       NFLOWTYPE        = Z
       iface            = Z
-      IF(IUNIT(49) > Z) THEN  !IUNIT(49): LMT
-        FLOWTYPE(1) = 'NA'
-        FLOWTYPE(2) = 'NA'
-        FLOWTYPE(3) = 'NA'
-        FLOWTYPE(4) = 'NA'
-        FLOWTYPE(5) = 'NA'
-      ENDIF
       SFRUZINFIL   = DZ
       SFRUZDELSTOR = DZ
       SFRUZRECH    = DZ
+      FLOWTYPE     = 'NA'   ! used by LMT / IUNIT(49)
 C
       !IF(IUNIT(49).NE.0) NINTOT = 0  !LMT
       NINTOT  = Z  !LMT
