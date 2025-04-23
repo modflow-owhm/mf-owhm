@@ -118,6 +118,19 @@ BEGIN OPTIONS
     # 
     PRINT_WATER_DEPTH  SPTS  Generic_Output  [SIGFIG  NDIG]
     #
+    # PRINT_WATER_TABLE_LAYER {LIST, ARRAY} use the same input options as PRINT_HEAD, but 
+    #   the output for WTLAY, which is the layer that has the head for the upper most active layer 
+    #   with the HEAD > that layer's bottom elevation (upper most saturated cell).
+    #   If all layers have IBOUND=0, then the layer is set to zero.
+    #      The versions differ in how the output is formatted, with:
+    #        PRINT_WATER_TABLE_LAYER LIST  - Writes the water table layers in a column based format with the header: SP TS ROW COL WTLAY
+    #        PRINT_WATER_TABLE_LAYER Array - Writes a PRINT_HEAD style header followed by a NROW by NCOL array of layer numbers.
+    #
+    PRINT_WATER_TABLE_LAYER LIST   SPTS  Generic_Output
+    # 
+    PRINT_WATER_TABLE_LAYER ARRAY  SPTS  Generic_Output
+    #
+    #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Save entire model grid head value using the MODFLOW-2005 standard write utility.
     #   This produces an equivalent output to OUTPUT CONTROL options "SAVE HEAD" or "PRINT HEAD"

@@ -48,6 +48,7 @@ C     ------------------------------------------------------------------
      +                      PRINT_HEAD,PRINT_HEAD_FLAG,
      +                      PRINT_WTAB,PRINT_WTAB_FLAG,
      +                      PRINT_WDEP,PRINT_WDEP_FLAG,
+     +                      PRINT_UPLAY,PRINT_UPLAY_FLAG,
      +                      ADAMP_INPUT, BAS_ADAMP, BAS_ADAMP_TOL,
      +                      BAS_ADAMP_TOL2,HED_CHNG2, HED_CHNG3,
      +                      HED_LOCK,INTER_INFO,HAS_STARTDATE,
@@ -136,11 +137,13 @@ C1------grids to be defined.
       ALLOCATE(PRINT_HEAD_FLAG, SOURCE=0) 
       ALLOCATE(PRINT_WTAB_FLAG, SOURCE=0)
       ALLOCATE(PRINT_WDEP_FLAG, SOURCE=0)
+      ALLOCATE(PRINT_UPLAY_FLAG, SOURCE=0)
       !
       ALLOCATE(SAVE_HEAD)
       ALLOCATE(PRINT_HEAD(1))
       ALLOCATE(PRINT_WTAB(1))
       ALLOCATE(PRINT_WDEP(1))
+      ALLOCATE(PRINT_UPLAY(1))
       !PRINT_HEAD(1)%EXTRA = ""  ! Allocate as empty to indicate option not in use
       !
       ALLOCATE(RCloseBAS, HCloseBAS, RCloseL2BAS)
@@ -2047,7 +2050,7 @@ C     ------------------------------------------------------------------
      1                      INPUT_CHECK,WORST_CELL_MASS_BALANCE,IBOUND,
      2                      MAX_RELATIVE_VOL_ERROR,NPER,NSTP,BUFF,RBUF,
      +                      GSE,CELL_MASS_BALANCE, HOLD, ALLOC_DDREF, 
-     +                      WTABLE, IXSEC, SPSTART
+     +                      WTABLE, IXSEC, SPSTART,UPLAY
       USE GWFBASMODULE,ONLY:DELT,PERTIM,TOTIM,IHDDFL,IBUDFL,BUDGETDB,
      +                     MSUM,VBVL,VBNM,IDDREF,IUBGT,PDIFFPRT,DATE_SP,
      +                     MAX_REL_VOL_ERROR,MAX_REL_VOL_INVOKED,
@@ -2058,6 +2061,7 @@ C     ------------------------------------------------------------------
      +                     PRINT_HEAD,PRINT_HEAD_FLAG,
      +                     PRINT_WTAB,PRINT_WTAB_FLAG,
      +                     PRINT_WDEP,PRINT_WDEP_FLAG,
+     +                     PRINT_UPLAY,PRINT_UPLAY_FLAG,
      +                     PRNT_CUM_HEAD_CHNG, CUM_HEAD_CHNG,
      +                     CUM_HEAD_CHNG_E10, HDRY
       USE ALLOC_INTERFACE,   ONLY: ALLOC
@@ -2070,6 +2074,7 @@ C     ------------------------------------------------------------------
       REAL,    INTENT(INOUT):: BUDPERC
       !
       CHARACTER(19):: DATE
+      CHARACTER(8) :: FMT
 
       INTEGER:: IPFLG
       INTEGER:: R, C, L, I, J, K, N
@@ -2650,6 +2655,78 @@ C4------PRINT TOTAL BUDGET IF REQUESTED
              !
              WRITE(PRINT_WDEP(n)%IU, PRINT_WDEP(n)%FMT) HD
           END DO
+          !
+        END IF
+      END IF
+      !
+      ! Print Water Table Layer Arrays if Requested ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      !
+      IF(PRINT_UPLAY_FLAG /= 0) THEN
+        !
+        n  = 0
+        !
+        IF ( PRINT_UPLAY_FLAG == 1 ) THEN
+          BLOCK
+              CHARACTER(8):: SPTS
+              SPTS(1:4) = TRANSFER( INT(KPER, INT32), SPTS(1:4) )     !  I = TRANSFER(c, I)  !GET SP
+              SPTS(5:8) = TRANSFER( INT(KSTP, INT32), SPTS(5:8) )     !  J = TRANSFER(PRINT_UPLAY(n)%EXTRA(5:8), J)  !GET TS
+              DO I=1, SIZE(PRINT_UPLAY)
+                 IF( SPTS == PRINT_UPLAY(I)%EXTRA ) THEN
+                                                   n = I
+                                                   EXIT                ! Only one file per SP/TS
+                 END IF
+              END DO
+          END BLOCK
+        ELSEIF(PRINT_UPLAY_FLAG == 2) THEN  ! Last Time Step
+                 if(kstp==nstp(kper))  n = 1
+        ELSEIF(PRINT_UPLAY_FLAG == 3) THEN  ! Every Time Step
+                                       n = 1
+        END IF
+        !
+        IF ( n > 0 ) THEN
+          !
+          CALL PRINT_UPLAY(n)%SIZE_CHECK()
+          !
+          IF(PRINT_UPLAY(n)%FMT == "LIST") THEN
+             IF     (NLAY < 10)    THEN; FMT = "(4I6,I2)"
+             ELSEIF (NLAY < 100)   THEN; FMT = "(4I6,I3)"
+             ELSEIF (NLAY < 1000)  THEN; FMT = "(4I6,I4)"
+             ELSEIF (NLAY < 10000) THEN; FMT = "(4I6,I5)"
+             ELSE;                       FMT = "(4I6,I8)"
+             END IF
+             !
+             WRITE(PRINT_UPLAY(n)%IU,'(A)')
+     +                               "    SP    TS   ROW   COL  WTLAY"
+             !
+             DO I=1, NROW
+             DO J=1, NCOL
+                WRITE(PRINT_UPLAY(n)%IU, FMT) kper,kstp,I,J, UPLAY(J,I)
+             END DO
+             END DO
+          ELSE
+             IF (NLAY < 10)        THEN; FMT = "(*(I2))"
+             ELSEIF (NLAY < 100)   THEN; FMT = "(*(I3))"
+             ELSEIF (NLAY < 1000)  THEN; FMT = "(*(I4))"
+             ELSEIF (NLAY < 10000) THEN; FMT = "(*(I5))"
+             ELSE;                       FMT = "(*(I8))"
+             END IF
+             WRITE(PRINT_UPLAY(n)%IU,'(A)', ADVANCE='NO')
+     +       "SP TS  "//NUM2STR(KPER)//"  "//NUM2STR(KSTP)//
+     +       "  ITER "//NUM2STR(KITER)//"  DELT "//NUM2STR(DELT)//
+     +       "  (NROW,NCOL) = ("//NUM2STR(NROW)//", "//
+     +                            NUM2STR(NCOL)//")   "//
+     +       "ERROR "//NUM2STR(ABS(BUDPERC))//" %  "
+             !
+             IF(HAS_STARTDATE) THEN
+                 WRITE(PRINT_UPLAY(n)%IU,'(A,4x)',ADVANCE='NO')
+     +                     DATE_SP(KPER)%TS(KSTP-1)%STR_MONTHYEAR()
+             END IF
+             WRITE(PRINT_UPLAY(n)%IU,"(A)") "WATER_TABLE_LAYER"
+             !
+             DO I=1, NROW
+                WRITE(PRINT_UPLAY(n)%IU, FMT) UPLAY(:,I)
+             END DO
+          END IF
           !
         END IF
       END IF

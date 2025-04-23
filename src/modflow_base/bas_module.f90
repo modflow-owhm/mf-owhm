@@ -91,6 +91,9 @@ MODULE GWFBASMODULE
   TYPE(GENERIC_OUTPUT_FILE), DIMENSION(:), POINTER, SAVE, CONTIGUOUS:: PRINT_WDEP
   INTEGER,                                 POINTER, SAVE            :: PRINT_WDEP_FLAG  ! 0: not in use, 1 in use and SP specified, 2, print last time step, 3 print every timestep
   !
+  TYPE(GENERIC_OUTPUT_FILE), DIMENSION(:), POINTER, SAVE, CONTIGUOUS:: PRINT_UPLAY
+  INTEGER,                                 POINTER, SAVE            :: PRINT_UPLAY_FLAG  ! 0: not in use, 1 in use and SP specified, 2, print last time step, 3 print every timestep
+  !
   LOGICAL,          POINTER, SAVE:: DAMPEN_START
   INTEGER,          POINTER, SAVE:: DAMPEN_START_ITR
   DOUBLE PRECISION, POINTER, SAVE:: DAMPEN_START_DMP
@@ -191,6 +194,9 @@ MODULE GWFBASMODULE
     !
     TYPE(GENERIC_OUTPUT_FILE), DIMENSION(:), POINTER, CONTIGUOUS:: PRINT_WDEP
     INTEGER,                                 POINTER            :: PRINT_WDEP_FLAG  ! 0: not in use, 1 in use and SP specified, 2, print last time step, 3 print every timestep
+    !
+    TYPE(GENERIC_OUTPUT_FILE), DIMENSION(:), POINTER, CONTIGUOUS:: PRINT_UPLAY
+    INTEGER,                                 POINTER            :: PRINT_UPLAY_FLAG  ! 0: not in use, 1 in use and SP specified, 2, print last time step, 3 print every timestep
     !
     LOGICAL,          POINTER:: DAMPEN_START
     INTEGER,          POINTER:: DAMPEN_START_ITR

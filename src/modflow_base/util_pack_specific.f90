@@ -1447,6 +1447,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
                           ABOVE_GSE_LIM, ABOVE_GSE_PRT_LIM, ABOVE_GSE_PRT,                                       &
                           SAVE_HEAD,  SAVE_HEAD_FLAG,                                                            &
                           PRINT_HEAD, PRINT_HEAD_FLAG, PRINT_WTAB, PRINT_WTAB_FLAG, PRINT_WDEP, PRINT_WDEP_FLAG, &
+                          PRINT_UPLAY, PRINT_UPLAY_FLAG,                                                         &
                           DEALLOCATE_MULT, STOPER, PDIFFPRT, HAS_STARTDATE,PRNT_RES,                             &
                           INTER_INFO, BUDGETDB, DATE_SP, REALTIM, USE_LEAP_YR, REALTIM_PER, REALTIM,             &
                           PRNT_RES, PRNT_RES_LIM, PRNT_RES_CUM, PRNT_RES_CUM_ARR,                                &
@@ -1498,7 +1499,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
          'SHOWPROGRESS', 'SHOW_PROGRESS', 'NOSHOWPROGRESS', 'NO_SHOWPROGRESS', 'NO_SHOW_PROGRESS',     &
          'TIME_INFO', 'PRINT_TIME_INFO',                                                               &
          'INPUT_CHECK', 'LIMIT_FASTFORWARD_OUTPUT', 'LIMIT_INPUT_CHECK_OUTPUT', 'INPUTCHECK', 'FASTFORWARD',    &
-         'PRINT', 'PRINT_HEAD', 'PRINT_WATER_TABLE', 'PRINT_WATER_DEPTH',                              &
+         'PRINT', 'PRINT_HEAD', 'PRINT_WATER_TABLE', 'PRINT_WATER_DEPTH', 'PRINT_WATER_TABLE_LAYER',            &
          'PRINT_CONVERGENCE', 'PRINT_FLOW_RESIDUAL', 'PRINT_RELATIVE_VOLUME_ERROR', 'PRINT_RELATIVE_VOL_ERROR', &
          'START', 'STARTDATE', 'START_DATE', 'DATE_START', 'DATESTART',                                &
          'LEAPYEARS', 'LEAPYEAR', 'STARTTIME',                                                         &
@@ -1642,6 +1643,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
     TYPE(CHARACTER_LINKED_LIST):: PRINT_HEAD_LIST
     TYPE(CHARACTER_LINKED_LIST):: PRINT_WTAB_LIST
     TYPE(CHARACTER_LINKED_LIST):: PRINT_WDEP_LIST
+    TYPE(CHARACTER_LINKED_LIST):: PRINT_UPLY_LIST
     INTEGER, DIMENSION(:,:), ALLOCATABLE:: ITMP
     !CHARACTER(:), ALLOCATABLE:: TEXT
     !
@@ -1650,6 +1652,7 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
     CALL PRINT_HEAD_LIST%INIT()
     CALL PRINT_WTAB_LIST%INIT()
     CALL PRINT_WDEP_LIST%INIT()
+    CALL PRINT_UPLY_LIST%INIT()
     !
     IFASTFORWARD = Z
     !
@@ -1679,8 +1682,8 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
     CASE('FREE', 'NOFREE', 'XSECTION', 'CHTOCH', 'PRINTTIME', 'PAUSE', 'BUDGETDB',                     &
          'SHOWPROGRESS', 'SHOW_PROGRESS', 'NOSHOWPROGRESS', 'NO_SHOWPROGRESS', 'NO_SHOW_PROGRESS',     &
          'TIME_INFO', 'PRINT_TIME_INFO',                                                               &
-         'INPUT_CHECK', 'LIMIT_FASTFORWARD_OUTPUT', 'LIMIT_INPUT_CHECK_OUTPUT', 'INPUTCHECK', 'FASTFORWARD',   &
-         'PRINT', 'PRINT_HEAD', 'PRINT_WATER_TABLE', 'PRINT_WATER_DEPTH',                              &
+         'INPUT_CHECK', 'LIMIT_FASTFORWARD_OUTPUT', 'LIMIT_INPUT_CHECK_OUTPUT', 'INPUTCHECK', 'FASTFORWARD',    &
+         'PRINT', 'PRINT_HEAD', 'PRINT_WATER_TABLE', 'PRINT_WATER_DEPTH','PRINT_WATER_TABLE_LAYER',             &
          'PRINT_CONVERGENCE', 'PRINT_FLOW_RESIDUAL', 'PRINT_RELATIVE_VOLUME_ERROR', 'PRINT_RELATIVE_VOL_ERROR', &
          'START', 'STARTDATE', 'START_DATE', 'DATE_START', 'DATESTART',                                &
          'LEAPYEARS', 'LEAPYEAR', 'STARTTIME',                                                         &
@@ -2001,6 +2004,25 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
               CALL PRINT_WDEP_LIST%ADD(ADJUSTL(BL%LINE(LLOC:)))
               !
               IF(HAS_OPT_LINE) THEN                                       ! ' 20  4  ./MyFile.txt'
+                 CALL PARSE_WORD(BL%LINE,LLOC,ISTART,ISTOP) ! Move Pass SP
+                 IF( BL%LINE(ISTART:ISTOP) == "NPER") THEN
+                                                     CALL PARSE_WORD(BL%LINE,LLOC,ISTART,ISTOP) ! Move Pass TS
+                                                     IF(IS_INTEGER(BL%LINE(ISTART:ISTOP))) CALL PARSE_WORD(BL%LINE,LLOC,ISTART,ISTOP)  ! Move Past File
+                                                     !
+                 ELSEIF( BL%LINE(ISTART:ISTOP) == "LAST_TIMESTEP" .OR. BL%LINE(ISTART:ISTOP) == "EVERY_TIMESTEP" ) THEN
+                                                                               CONTINUE
+                 ELSEIF( IS_INTEGER(BL%LINE(ISTART:ISTOP)) .OR. .NOT. HAS_STARTDATE) THEN
+                     CALL PARSE_WORD(BL%LINE,LLOC,ISTART,ISTOP) ! Move Pass TS
+                     IF(IS_INTEGER(BL%LINE(ISTART:ISTOP))) CALL PARSE_WORD(BL%LINE,LLOC,ISTART,ISTOP)  ! Move Past File
+                 END IF
+              END IF
+              !
+          CASE('PRINT_WATER_TABLE_LAYER') ! OUTER_START NTERM FILE
+              !
+              CALL PRINT_UPLY_LIST%ADD(ADJUSTL(BL%LINE(LLOC:)))
+              !
+              IF(HAS_OPT_LINE) THEN                                       ! 'LIST/ARRAY 20  4  ./MyFile.txt'
+                 CALL PARSE_WORD(BL%LINE,LLOC,ISTART,ISTOP) ! Move pass second keyword
                  CALL PARSE_WORD(BL%LINE,LLOC,ISTART,ISTOP) ! Move Pass SP
                  IF( BL%LINE(ISTART:ISTOP) == "NPER") THEN
                                                      CALL PARSE_WORD(BL%LINE,LLOC,ISTART,ISTOP) ! Move Pass TS
@@ -2823,6 +2845,164 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
                      PRINT_WDEP(I)%EXTRA(1:4) = CAST2STR(ITMP(1,I))     !Convert SP No. to character for storage - note could do PRINT_WDEP(I)%EXTRA(:) = CAST2STR(ITMP(:,I)) to do both Row and Col at same time
                      PRINT_WDEP(I)%EXTRA(5:8) = CAST2STR(ITMP(2,I))     !Convert TS No. to character for storage
                      CALL PRINT_WDEP_LIST%NEXT_LINE()
+             END DO
+             DEALLOCATE(ITMP, STAT=I)  !No long need array - Future use may have a different size.
+          END IF
+    END IF
+    !
+    !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    !
+    K = PRINT_UPLY_LIST%LEN()
+    IF(K>Z) THEN
+          WRITE(IOUT,'(1x, A)', ADVANCE='NO') 'Setting up PRINT_WATER_TABLE_LAYER option for '
+          !
+          CALL PRINT_UPLY_LIST%FIRST_LINE()
+          !
+          PRINT_UPLAY_FLAG = 1
+          DO I=1, K
+                  !
+                  LLOC = ONE
+                  CALL PARSE_WORD_UP(PRINT_UPLY_LIST%LN,LLOC,ISTART,ISTOP) ! GET SECOND KEYWORD
+                  !
+                  KEY = PRINT_UPLY_LIST%LN(ISTART:ISTOP)
+                  !
+                  CALL PARSE_WORD_UP(PRINT_UPLY_LIST%LN,LLOC,ISTART,ISTOP) ! Find location if SP
+                  !
+                  IF    ( PRINT_UPLY_LIST%LN(ISTART:ISTOP) == "LAST_TIMESTEP" ) THEN
+                                                                                PRINT_UPLAY_FLAG = 2
+                  ELSEIF( PRINT_UPLY_LIST%LN(ISTART:ISTOP) == "EVERY_TIMESTEP") THEN
+                                                                                PRINT_UPLAY_FLAG = 3
+                  END IF
+                  !
+                  IF(PRINT_UPLAY_FLAG > 1) THEN
+                     !
+                     J = LLOC
+                     CALL PARSE_WORD(PRINT_UPLY_LIST%LN,LLOC,ISTART,ISTOP)                     !Capture File Name for output
+                     LLOC = ISTART
+                     IF(PRINT_UPLAY_FLAG == 2) THEN
+                         WRITE(IOUT,'(A, 2x, A)') "LAST_TIMESTEP", PRINT_UPLY_LIST%LN(ISTART:)
+                     ELSE
+                         WRITE(IOUT,'(A, 2x, A)') "EVERY_TIMESTEP", PRINT_UPLY_LIST%LN(ISTART:)
+                     END IF
+                     !
+                     CALL PRINT_UPLAY(1)%OPEN(PRINT_UPLY_LIST%LN, LLOC, IOUT, INBAS, NO_BINARY=TRUE, SPLITMAXCOUNT=Z)
+                     !
+                     SELECT CASE(KEY)
+                         CASE ("LIST");  PRINT_UPLAY(1)%FMT = "LIST"
+                         CASE ("ARRAY"); PRINT_UPLAY(1)%FMT = BLNK
+                         CASE DEFAULT; CALL STOP_ERROR(PRINT_UPLY_LIST%LN,INBAS,IOUT,'FOUND BAS OPTION "PRINT_WATER_TABLE_LAYER"'//NL//'BUT IT MUST BE FOLLOWED BY THE KEYWORD "LIST" OR "ARRAY".')
+                     END SELECT
+                     !
+                     EXIT
+                  END IF
+          END DO
+          !
+          IF(PRINT_UPLAY_FLAG == 1) THEN
+             WRITE(IOUT,'(A)')
+             WRITE(IOUT,'(A)') 'FORMAT    SP    TS   FILE'
+             ALLOCATE(ITMP(3,K), SOURCE=Z)
+             CALL PRINT_UPLY_LIST%FIRST_LINE()
+             N = 1
+             PWTLAY: DO I=1, K
+                     !
+                     LLOC = ONE
+                     CALL PARSE_WORD_UP(PRINT_UPLY_LIST%LN,LLOC,ISTART,ISTOP) ! GET SECOND KEYWORD
+                     !
+                     KEY = PRINT_UPLY_LIST%LN(ISTART:ISTOP)
+                     SELECT CASE(KEY)
+                         CASE ("LIST");  ITMP(3,N) = 1
+                         CASE ("ARRAY"); CONTINUE
+                         CASE DEFAULT; CALL STOP_ERROR(PRINT_UPLY_LIST%LN,INBAS,IOUT,'FOUND BAS OPTION "PRINT_WATER_TABLE_LAYER"'//NL//'BUT IT MUST BE FOLLOWED BY THE KEYWORD "LIST" OR "ARRAY".')
+                     END SELECT
+                     !
+                     !
+                     CALL PARSE_WORD_UP(PRINT_UPLY_LIST%LN,LLOC,ISTART,ISTOP) ! Find location if SP
+                     IF( PRINT_UPLY_LIST%LN(ISTART:ISTOP) == "NPER") THEN
+                                                                     ITMP(1,N) = NPER
+                                                                     !
+                                                                     J = LLOC
+                                                                     CALL PARSE_WORD(PRINT_UPLY_LIST%LN,LLOC,ISTART,ISTOP) ! CHECK IF TS IS SPECIFIED
+                                                                     !
+                                                                     IF( IS_INTEGER(PRINT_UPLY_LIST%LN(ISTART:ISTOP)) ) THEN
+                                                                         CALL GET_INTEGER(PRINT_UPLY_LIST%LN,LLOC,ISTART,ISTOP,IOUT,INBAS, ITMP(2,N), TRUE, MSG='FOUND BAS OPTION "PRINT_WATER_TABLE_LAYER  END"'//NL//'BUT FAILED TO LOAD THE TIME STEP NUMBER. YOU CAN SET IT TO ZERO OR NEGATIVE TO AUTOMATICALLY USE THE LAST TIME STEP')
+                                                                     ELSE
+                                                                         LLOC = J
+                                                                         ITMP(2,N) = NSTP( NPER )
+                                                                     END IF
+                                                                     !
+                     ELSEIF( IS_INTEGER(PRINT_UPLY_LIST%LN(ISTART:ISTOP)) .OR. .NOT. HAS_STARTDATE) THEN
+                         !
+                         CALL GET_INTEGER(PRINT_UPLY_LIST%LN,LLOC,ISTART,ISTOP,IOUT,INBAS, ITMP(1,N), TRUE,MSG='FOUND BAS OPTION "PRINT_WATER_TABLE_LAYER"'//NL//'BUT FAILED TO LOAD THE STESS PERIOD NUMBER')
+                         CALL GET_INTEGER(PRINT_UPLY_LIST%LN,LLOC,ISTART,ISTOP,IOUT,INBAS, ITMP(2,N), HAS_ERROR=FOUND_BEGIN)  !
+                         IF(FOUND_BEGIN) THEN
+                                         LLOC = ISTART
+                                         ITMP(2,N) = Z
+                         END IF
+                     ELSE
+                         CALL DATE%INIT( PRINT_UPLY_LIST%LN(ISTART:ISTOP), 0.001D0 )
+                         IF(  DATE%NOT_SET() ) CALL STOP_ERROR(PRINT_UPLY_LIST%LN,INBAS,IOUT,'FOUND BAS OPTION "PRINT_WATER_TABLE_LAYER"'//NL//'BUT FAILED TO LOAD THE EITHER A DATE OR SPECIFIED STESS PERIOD AND TIME STEP NUMBERS')
+                         !
+                         CALL DATE_TO_SPTS(DATE, ITMP(1,N), ITMP(2,N))
+                     END IF
+                     !
+                     IF(ITMP(1,N) <    1) ITMP(1,N) = 1
+                     IF(ITMP(1,N) > NPER) ITMP(1,N) = NPER
+                     !
+                     J = NSTP( ITMP(1,N) )
+                     IF(ITMP(2,N) < 1) ITMP(2,N) = J
+                     IF(ITMP(2,N) > J) ITMP(2,N) = J
+                     !
+                     J = LLOC
+                     CALL PARSE_WORD(PRINT_UPLY_LIST%LN,LLOC,ISTART,ISTOP)                     !Capture File Name for output
+                     !
+                     IF (N>1) THEN
+                        DO J=1, N-1
+                            IF( ITMP(1,J)==ITMP(1,N) .AND. ITMP(2,J)==ITMP(2,N) ) THEN
+                                WRITE(IOUT,'(2I6, 3x, 2A)') ITMP(:,I), PRINT_UPLY_LIST%LN(ISTART:ISTOP), '  <- SP/TS already defined, ignoring this entry'
+                                CALL PRINT_UPLY_LIST%DEL_LINE()
+                                CYCLE PWTLAY
+                            END IF
+                        END DO
+                     END IF
+                     !
+                     WRITE(IOUT,'(A, 2I6, 3x, A)') KEY(:6), ITMP(:2,I), PRINT_UPLY_LIST%LN(ISTART:ISTOP)
+                     LLOC = ISTART
+                     !
+                     ! Drop SPTS/DATE part of line
+                     DIM = LEN(PRINT_UPLY_LIST%LN)
+                     II  = Z
+                     DO JJ=LLOC, DIM
+                         II = II + ONE
+                         PRINT_UPLY_LIST%LN(II:II) = PRINT_UPLY_LIST%LN(JJ:JJ)
+                     END DO
+                     II = II + ONE
+                     IF(II <= DIM) PRINT_UPLY_LIST%LN(II:DIM) = BLNK
+                     !
+                     CALL PRINT_UPLY_LIST%NEXT_LINE()
+                     N = N+1
+             END DO PWTLAY
+             !
+             K = PRINT_UPLY_LIST%LEN()
+             IF(K > 1) THEN
+                      DEALLOCATE(PRINT_UPLAY)
+                        ALLOCATE(PRINT_UPLAY(K))
+             END IF
+             !
+             CALL PRINT_UPLY_LIST%FIRST_LINE()
+             DO I=1, K
+                     LLOC = ONE
+                     CALL PRINT_UPLAY(I)%OPEN(PRINT_UPLY_LIST%LN, LLOC, IOUT, INBAS, NO_BINARY=TRUE, SPLITMAXCOUNT=Z)
+                     IF(ITMP(3,I) > 0) THEN
+                         PRINT_UPLAY(I)%FMT = "LIST"
+                     ELSE
+                         PRINT_UPLAY(I)%FMT = BLNK
+                     END IF
+                     !
+                     IF(ALLOCATED(PRINT_UPLAY(I)%EXTRA)) DEALLOCATE(PRINT_UPLAY(I)%EXTRA)
+                     ALLOCATE(CHARACTER(8):: PRINT_UPLAY(I)%EXTRA)
+                     PRINT_UPLAY(I)%EXTRA(1:4) = CAST2STR(ITMP(1,I))     !Convert SP No. to character for storage - note could do PRINT_UPLAY(I)%EXTRA(:) = CAST2STR(ITMP(:,I)) to do both Row and Col at same time
+                     PRINT_UPLAY(I)%EXTRA(5:8) = CAST2STR(ITMP(2,I))     !Convert TS No. to character for storage
+                     CALL PRINT_UPLY_LIST%NEXT_LINE()
              END DO
              DEALLOCATE(ITMP, STAT=I)  !No long need array - Future use may have a different size.
           END IF
