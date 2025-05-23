@@ -30,7 +30,7 @@ SUBROUTINE PRINT_MAIN_HEADER(IU, VERSION)  ! Set to 6 for cmd prompt or use outp
   CHARACTER(:),ALLOCATABLE:: Revision
   !
   VERSION_OWHM='2.3'
-  Revision    ='1-b4'
+  Revision    ='1-b5'
   VERSION_MF  ='1.12'
   VERSION_FMP ='4.1'
   VERSION_SWR ='1.04'
@@ -531,9 +531,9 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
       FASTFORWARD = KPER < SPSTART .OR. SPEND < KPER .OR. INPUT_CHECK
       IF(SPEND < KPER .AND. LIMIT_INPUT_CHECK_OUTPUT) EXIT STRESS_PERIOD  ! Simulation is over and no dummy output
       !
-      ! If simulation is too fast, then disable cmd iteration printing
+      ! If simulation is too fast, then disable cmd iteration printing; only check for the first 3 simulated stress period
       ! If ITER_PRINT = TRUE, then CALL CMD_PRINT_STOP(ITER_SIZE) else CALL CMD_PRINT_ITER(KITER, ITER_SIZE)
-      IF(KPER == 3)  THEN
+      IF(KPER == SPSTART + 2)  THEN
          IF(CMD_ITER_INFO /= Z) ITER_PRINT = CPU_TIME >= 0. .AND. FINISH > Z .AND. START > Z  .AND. CPU_TIME < 0.2
       END IF
       !
@@ -767,7 +767,11 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
                                  END DO
                                  !
                                  IF(KSTP == ONE) INTER = INTER//' skipped  '
-                                 IF( .NOT.( KPER == ONE .AND. KSTP == ONE ) ) CYCLE TIME_STEP  !SKIP TIME STEPS BEFORE SPSTART AND AFTER IT
+                                 IF( .NOT.( KPER == ONE .AND. KSTP == ONE ) ) THEN
+                                     ICNVG = ONE
+                                     KITER = ONE
+                                     CYCLE TIME_STEP  !SKIP TIME STEPS BEFORE SPSTART AND AFTER IT
+                                 END IF
           ELSE
                ISTP = ISTP + ONE
           END IF
@@ -925,6 +929,7 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
                    !--------------CHECK IF FASTFORWARD FEATURE IS IN EFFECT
                    !
                    IF ( FASTFORWARD ) THEN
+                                      ICNVG = ONE
                                       IF (LIMIT_INPUT_CHECK_OUTPUT .AND. IGRID==NGRIDS) THEN 
                                           CYCLE TIME_STEP
                                       ELSE 
@@ -1261,20 +1266,22 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
               IF(IUNIT(63) /= Z) CALL GWF2NWT1BD(KITER,IGRID)
               !
               !  Observation simulated equivalents
-              CALL OBS2BAS7SE(IUNIT(28),IGRID)
-              !
-              IF(IUNIT(33) /= Z) CALL OBS2DRN7SE(IGRID)
-              IF(IUNIT(34) /= Z) CALL OBS2RIV7SE(IGRID)
-              IF(IUNIT(35) /= Z) CALL OBS2GHB7SE(IGRID)
-              IF(IUNIT(38) /= Z) CALL OBS2CHD7SE(KKPER, IUNIT(62), IGRID)
-              IF(IUNIT(41) /= Z) CALL OBS2DRT7SE(IGRID)
-              IF(IUNIT(43) /= Z) THEN
-                                   CALL GWF2HYD7BAS7SE(1,IGRID)
-                                   IF(IUNIT(19) /= Z) CALL GWF2HYD7IBS7SE(1,IGRID)
-                                   IF(IUNIT(54) /= Z) CALL GWF2HYD7SUB7SE(1,IGRID)
-                                   IF(IUNIT(57) /= Z) CALL GWF2HYD7SWT7SE(1,IGRID)
-                                   IF(IUNIT(18) /= Z) CALL GWF2HYD7STR7SE(1,IGRID)
-                                   IF(IUNIT(44) /= Z) CALL GWF2HYD7SFR7SE(1,IGRID)
+              IF(.not. FASTFORWARD) THEN
+                  CALL OBS2BAS7SE(IUNIT(28),IGRID)
+                  !
+                  IF(IUNIT(33) /= Z) CALL OBS2DRN7SE(IGRID)
+                  IF(IUNIT(34) /= Z) CALL OBS2RIV7SE(IGRID)
+                  IF(IUNIT(35) /= Z) CALL OBS2GHB7SE(IGRID)
+                  IF(IUNIT(38) /= Z) CALL OBS2CHD7SE(KKPER, IUNIT(62), IGRID)
+                  IF(IUNIT(41) /= Z) CALL OBS2DRT7SE(IGRID)
+                  IF(IUNIT(43) /= Z) THEN
+                                       CALL GWF2HYD7BAS7SE(1,IGRID)
+                                       IF(IUNIT(19) /= Z) CALL GWF2HYD7IBS7SE(1,IGRID)
+                                       IF(IUNIT(54) /= Z) CALL GWF2HYD7SUB7SE(1,IGRID)
+                                       IF(IUNIT(57) /= Z) CALL GWF2HYD7SWT7SE(1,IGRID)
+                                       IF(IUNIT(18) /= Z) CALL GWF2HYD7STR7SE(1,IGRID)
+                                       IF(IUNIT(44) /= Z) CALL GWF2HYD7SFR7SE(1,IGRID)
+                  END IF
               END IF
               !
               !7C5---PRINT AND/OR SAVE DATA.
@@ -1287,7 +1294,7 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
                          HCSV,IERR,HPCG,DAMPPCGT,ISSFLG(KKPER),HDRY,       &
                          IHCOFADD,BPOLY)
               !
-              CALL GWF2BAS7OT(KKSTP,KKPER,ICNVG,1,IGRID,BUDPERC,KITER,MXITER)
+              CALL GWF2BAS7OT(KKSTP,KKPER,ICNVG,1,IGRID,BUDPERC,KITER,MXITER,FASTFORWARD)
               !
               IF(IUNIT(19) /= Z) CALL GWF2IBS7OT(KKSTP,KKPER,IUNIT(19),IGRID)
               !

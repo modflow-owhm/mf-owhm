@@ -66,8 +66,7 @@ C     ------------------------------------------------------------------
       USE ERROR_INTERFACE,      ONLY: STOP_ERROR, WARNING_MESSAGE
       USE FILE_IO_INTERFACE,    ONLY: COMMENT_INDEX, READ_TO_DATA
       USE PARSE_WORD_INTERFACE, ONLY: PARSE_WORD, PARSE_WORD_UP
-      USE STRINGS,              ONLY: UPPER, GET,
-     +                                GET_INTEGER, GET_NUMBER, GET_WORD
+      USE STRINGS,              ONLY: UPPER, GET, GET_NUMBER, GET_WORD
       USE NUM2STR_INTERFACE,                ONLY: NUM2STR, INTFMT
       USE DATE_OPERATOR_INSTRUCTION,        ONLY: DATE_OPERATOR
       USE GENERIC_BLOCK_READER_INSTRUCTION, ONLY: GENERIC_BLOCK_READER
@@ -2033,7 +2032,7 @@ C
       END SUBROUTINE
       !
       SUBROUTINE GWF2BAS7OT(KSTP,KPER,ICNVG,ISA,IGRID,BUDPERC,
-     +                      KITER,MXITER)
+     +                      KITER,MXITER,FASTFORWARD)
 C     ******************************************************************
 C     OUTPUT TIME, VOLUMETRIC BUDGET, HEAD, AND DRAWDOWN
 C     ******************************************************************
@@ -2071,6 +2070,7 @@ C     ------------------------------------------------------------------
       USE BAS_UTIL, ONLY: MASS_ERROR_PRINT
       IMPLICIT NONE
       INTEGER, INTENT(IN   ):: KSTP,KPER,ICNVG,ISA,IGRID,KITER,MXITER
+      LOGICAL, INTENT(IN   ):: FASTFORWARD
       REAL,    INTENT(INOUT):: BUDPERC
       !
       CHARACTER(19):: DATE
@@ -2104,6 +2104,11 @@ C
 C1------CLEAR PRINTOUT FLAG (IPFLG)
       IPFLG = Z
       BUDPERC=1.E30
+      !
+      IF(FASTFORWARD) THEN
+          VBVL    = 0.0
+          BUDPERC = 0.0
+      END IF
 C
 C PRINT OUT BUDGET DATABASE
       IF(BUDGETDB%IU /= 0) THEN
