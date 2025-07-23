@@ -486,10 +486,8 @@ C     ------------------------------------------------------------------
       ALLOCATE (STRHC1KHFLAG,STRHC1KVFLAG)
       ALLOCATE (FLOWTYPE(5)) ! POSITION 1: VOLUME; 2: REACH LENGTH; 3: PRECIP; 4: EVAP; 5: RUNOFF
       ALLOCATE (NFLOWTYPE)
-      !IF(IUNIT(49).NE.0) THEN
       ALLOCATE (NINTOT)                             !EDM - FOR LMT
-      !ENDIF
-      ALLOCATE (FACTOR,FACTORKH,FACTORKV)
+      ALLOCATE(FACTOR,FACTORKH,FACTORKV)
       ALLOCATE(DBFILE)
       ALLOCATE(IOUT)
       ALLOCATE(THETAB, FLUXB, FLUXHLD2)
@@ -566,10 +564,8 @@ C         DLEAK, ISTCB1, ISTCB2.
       SFRUZINFIL   = DZ
       SFRUZDELSTOR = DZ
       SFRUZRECH    = DZ
-      FLOWTYPE     = 'NA'   ! used by LMT / IUNIT(49)
-C
-      !IF(IUNIT(49).NE.0) NINTOT = 0  !LMT
-      NINTOT  = Z  !LMT
+      FLOWTYPE     = 'NA'   ! only used by LMT / IUNIT(49)
+      NINTOT  = Z           ! only used by LMT / IUNIT(49)
       NSFRAUX = Z
       SFR_FEED_FLOW   => NULL()
       SFR_FEED_RUNOFF => NULL()
@@ -2438,10 +2434,10 @@ C16-----PRINT WARNING IF TALLIED SEGMENTS LESS THAN NSS.
 C
 C17-----PRINT INPUT DATA IF IRDFLG IS ZERO.
 C         SKIP IF INPUT READ BY REACHES (ISFROPT = 1, 3, OR 5)
-        IF(SFR_PRNT.AND.Iunitgwt==0) THEN
+      IF(SFR_PRNT.AND.Iunitgwt==0) THEN
         IF ( IRDFLG.LE.0 ) CALL SGWF2SFR7PRSEG(NSS, 1, Iunitgwt, Kkper,
      +                                         Nsol, Iouts)
-        END IF
+      END IF
 C
 C18-----COMPUTE STREAM REACH VARIABLES.
         irch = 1
