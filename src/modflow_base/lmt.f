@@ -1,4 +1,3 @@
-C SCOTT DEAL WITH MTWEL1
 C
 C ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 C LINK-MT3DMS (LMT) PACKAGE V8 FOR MODFLOW-OWHM
@@ -171,18 +170,18 @@ C--CHECK for OPTIONS/PACKAGES USED IN CURRENT SIMULATION
         ELSEIF(CUNIT(IU).EQ.'UZF ') THEN
           MTUZF=IUNIT(IU)
           IF(MTUZF /= Z) NPCKGTXT = NPCKGTXT + 1
-        ELSEIF(CUNIT(IU).EQ.'FMP ') THEN   !rth
-          MTFMP=IUNIT(IU)
-          IF(MTFMP /= Z) NPCKGTXT = NPCKGTXT + 1
-        ELSEIF(CUNIT(IU).EQ.'RIP ') THEN   !rth
-          MTRIP=IUNIT(IU)
-          IF(MTRIP /= Z) NPCKGTXT = NPCKGTXT + 1
-        ELSEIF(CUNIT(IU).EQ.'SWI ') THEN   !rth
-          MTSWI=IUNIT(IU)
-          IF(MTSWI /= Z) NPCKGTXT = NPCKGTXT + 1
-        ELSEIF(CUNIT(IU).EQ.'SWR ') THEN   !rth
-          MTSWR=IUNIT(IU)
-          IF(MTSWR /= Z) NPCKGTXT = NPCKGTXT + 1
+        !ELSEIF(CUNIT(IU).EQ.'FMP ') THEN   !rth - seb if uncomented need to add corresponding: `C--WRITE NPCKGTXT RECORDS
+        !  MTFMP=IUNIT(IU)
+        !  IF(MTFMP /= Z) NPCKGTXT = NPCKGTXT + 1
+        !ELSEIF(CUNIT(IU).EQ.'RIP ') THEN   !rth
+        !  MTRIP=IUNIT(IU)
+        !  IF(MTRIP /= Z) NPCKGTXT = NPCKGTXT + 1
+        !ELSEIF(CUNIT(IU).EQ.'SWI ') THEN   !rth
+        !  MTSWI=IUNIT(IU)
+        !  IF(MTSWI /= Z) NPCKGTXT = NPCKGTXT + 1
+        !ELSEIF(CUNIT(IU).EQ.'SWR ') THEN   !rth
+        !  MTSWR=IUNIT(IU)
+        !  IF(MTSWR /= Z) NPCKGTXT = NPCKGTXT + 1
         ENDIF
       ENDDO 
 !swm: SET MTMNW IF EITHER MNW1 OR MNW2 IS ACTIVE
@@ -4557,6 +4556,15 @@ C--LOOP THROUGH EACH STREAM CELL AND WRITE EXCHANGE WITH OTHER STREAM REACHES
           TEXT='SFR FLOWS TR'
         ENDIF
 C
+        J=0
+        DO I=1, SIZE(FLOWTYPE)
+            IF(FLOWTYPE(I).NE.'' .AND. FLOWTYPE(I).NE.'NA') THEN
+               J=J+1
+               PRNTSFRQTYP(J) = FLOWTYPE(I)
+            END IF
+      END DO
+      NFLOWTYPE = J
+C
 C--WRITE AN IDENTIFYING HEADER
         IF(ILMTFMT.EQ.0) THEN
           WRITE(IUMT3D) KPER,KSTP,TEXT,NSTRM,NFLOWTYPE,NINTOT
@@ -4566,13 +4574,6 @@ C--WRITE AN IDENTIFYING HEADER
         ENDIF
 C
 C--WILL WRITE CFLOWTYPE A TOTAL OF NFLOWTYPE TIMES [MAX(NFLOWTYPE)=4]
-        J=0
-        DO I=1, SIZE(FLOWTYPE)
-            IF(FLOWTYPE(I).NE.'' .AND. FLOWTYPE(I).NE.'NA') THEN
-               J=J+1
-               PRNTSFRQTYP(J) = FLOWTYPE(I)
-            END IF
-        END DO
         !
         IF(ILMTFMT.EQ.0) THEN
           WRITE(IUMT3D) PRNTSFRQTYP(:NFLOWTYPE) 
