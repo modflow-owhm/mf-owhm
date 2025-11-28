@@ -609,11 +609,11 @@ C         DLEAK, ISTCB1, ISTCB2.
          !
          IF(BL%GET_EXTRA(1) == 'RUNOFF') THEN  ! found 'BEGIN LINEFEED RUNOFF'
             ALLOCATE(SFR_FEED_RUNOFF)
-            CALL SFR_FEED_RUNOFF%INIT(BL)
+            CALL SFR_FEED_RUNOFF%INIT(BL, LABEL="RUNOFF")
             NO_LINEFEED_RUNOFF = FALSE
          ELSE
             ALLOCATE(SFR_FEED_FLOW)
-            CALL SFR_FEED_FLOW%INIT(BL)
+            CALL SFR_FEED_FLOW%INIT(BL, LABEL="INFLOW")
             NO_LINEFEED_FLOW = FALSE
          END IF
          !
@@ -2145,7 +2145,7 @@ C     ------------------------------------------------------------------
      +        jj, jk, k5, k6, k7, kk, ksfropt, kss, ktot, l, lstbeg,
      +        nseg, nstrpts,krck,irck,jrck,ireachck, j, numval,iunitnum,
      +        ILP,ierr,IFLG,LLOC,ISTART,ISTOP !WSCHMID/RTH
-      LOGICAL:: HAS_ERROR
+      LOGICAL:: HAS_ERROR, HAS_LMT, HAS_FMP
       CHARACTER(LEN=200)::LINE
       REAL TTIME,TRATE
       TYPE(WARNING_TYPE):: ERR, WRN
@@ -2169,6 +2169,9 @@ C1------READ ITMP FLAG TO REUSE NON-PARAMETER DATA, 2 PRINTING FLAGS,
 C         AND NUMBER OF PARAMETERS BEING USED IN CURRENT STRESS PERIOD. 
       iss = ISSFLG(Kkper)
       zero = 1.0E-7
+      HAS_LMT = IUNIT(49).NE.0
+      HAS_FMP = IUNIT(61).NE.0
+      ! 
 Cdep added NSFRPAR to IF statement
       !IF ( Kkper.GT.1 ) THEN
       !  IF ( NSFRPAR.EQ.0 ) THEN
@@ -2300,6 +2303,38 @@ C         ACTIVATE PARAMETERS BEING USED IN CURRENT STRESS PERIOD.
           CALL SGWF2SFR7PARMOV(In, Iunitgwt, Nsol)
         END DO
       END IF
+C
+C17b----Apply any runoff specified by LINEFEED.
+      IF (SFR_FEED_RUNOFF%NFEED > 0) THEN
+       CALL SFR_FEED_RUNOFF%FEED_SFR(SEG(:,:NSS),3,
+     +                             ' SEGMENT            RUNOFF')
+C
+       IF(ITMP < 0) THEN
+        irch = 0
+        DO nseg = 1, NSS
+          seglen = SEG(1, nseg)
+          runoff = SEG(3, nseg)
+          DO ii = 1, ISEG(4, nseg)
+             irch = irch + 1
+             rchlen = STRM(1, irch)
+             STRM(12, irch) = runoff*(rchlen/seglen)
+          END DO
+        END DO
+        !
+        IF(HAS_LMT) THEN  !IUNIT(49): LMT
+          NFLOWTYPE = 0
+          FLOWTYPE  = 'NA'
+          FLOWTYPE(1)='VOLUME'
+          FLOWTYPE(2)='RCHLEN'
+          IF(HAS_FMP) FLOWTYPE(5)='RUNOFF' ! Assume FMP is always going to send some sort of runoff
+          DO nseg = 1, NSS
+           IF(SEG(3,nseg)/=0.and.FLOWTYPE(5)=='NA') FLOWTYPE(5)='RUNOFF'
+           IF(SEG(4,nseg)/=0.and.FLOWTYPE(4)=='NA') FLOWTYPE(4)='EVAP'
+           IF(SEG(5,nseg)/=0.and.FLOWTYPE(3)=='NA') FLOWTYPE(3)='PRECIP'
+          END DO
+        ENDIF 
+       END IF ! (ITMP < 0) THEN
+      END IF ! (SFR_FEED_RUNOFF%NFEED > 0) THEN
 C
 C8------CHECK FOR ERRORS IN SEGMENT DATA.
       IF ( ITMP.GT.0 .OR. NSFRPAR.NE.0 ) THEN
@@ -3287,11 +3322,6 @@ C1------CALL LINEAR INTERPOLATION ROUTINE
       IF (SFR_FEED_FLOW%NFEED > 0) THEN
         CALL SFR_FEED_FLOW%FEED_SFR(SEG(:,:NSS),2,
      +                              ' SEGMENT            FLOW')
-      END IF
-      !
-      IF (SFR_FEED_RUNOFF%NFEED > 0) THEN
-        CALL SFR_FEED_RUNOFF%FEED_SFR(SEG(:,:NSS),3,
-     +                              ' SEGMENT            RUNOFF')
       END IF
       !
       IF(TIME_SERIES%NFIL > 0) THEN
@@ -10855,7 +10885,7 @@ C     ------------------------------------------------------------------
       DEALLOCATE(SFR_FEED_FLOW)
       SFR_FEED_FLOW=>NULL()
       !
-      SFR_FEED_RUNOFF=>GWFSFRDAT(IGRID)%SFR_FEED_FLOW
+      SFR_FEED_RUNOFF=>GWFSFRDAT(IGRID)%SFR_FEED_RUNOFF
       GWFSFRDAT(IGRID)%SFR_FEED_RUNOFF=>NULL()
       DEALLOCATE(SFR_FEED_RUNOFF)
       SFR_FEED_RUNOFF=>NULL()
