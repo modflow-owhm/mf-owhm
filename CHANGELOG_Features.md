@@ -12,9 +12,9 @@
 
 &nbsp;
 
-## 2.3.1-b4
+## 2.3.1
 
-TBA
+2025-12-10
 
 ### `MF-OWHM` Command Argument Support
 
@@ -27,10 +27,36 @@ The main executable added support for basic command arguments. The current argum
 ### `BAS` Improvements
 
 * `OPTIONS` Block
+  * `PRINT_WATER_TABLE_LAYER` is a new an option that writes the upper most active layer number.
+    * The input format is identical to follows the same input as `PRINT_HEAD` (see Section 2.2.0 / `BAS` — Options Block — Improvements)
   * `PRINT_PROPERTY` now includes files for `SC1`, `SC2`, cell surface `AREA`, an layer `THICK`ness.
   * `PRINT_PROPERTY` file names changed to lower case.
   * `LIMIT_INPUT_CHECK_OUTPUT` option indicates that writing output should be minimized when using the `INPUT_CHECK` option. This has no effect if not using `INPUT_CHECK`.
 
+### `SFR` Improvements
+
+* `LINEFEED` Alternative Input now supports overwriting the `FLOW` and `RUNOFF` input variables.
+  * The `BEGIN LINEFEED` block input checks for a third word, such as:
+    * `BEGIN LINEFEED FLOW`  
+    * `BEGIN LINEFEED RUNOFF` 
+    * Or, if the third word is not present, then it will default to `FLOW` to preserve backward compatibility.
+  * The following is an example input for both the `FLOW` and `RUNOFF` blocks (note the block order does not matter).
+
+```
+BEGIN LINEFEED FLOW
+   # Feedfiles specify the segment 'FLOW' input variable
+   #
+   FEEDFILE     # repeat as needed
+   #
+END LINEFEED
+
+BEGIN LINEFEED RUNOFF
+   # Feedfiles specify the segment 'RUNOFF' input variable
+   #
+   FEEDFILE     # repeat as needed
+   #
+END LINEFEED
+```
 
 ### `FMP` Improvements
 
@@ -589,7 +615,6 @@ MONTHLY  -4   SS        # MONTHLY input with 4 time steps, and first stress peri
 - `PRINT_HEAD         SPTS  GENERIC_OUTPUT   [SIGFIG  NDIG]`  
      `PRINT_WATER_TABLE  SPTS   Generic_Output  [SIGFIG  NDIG]`  
      `PRINT_WATER_DEPTH  SPTS   Generic_Output  [SIGFIG  NDIG]`
-
      - Expands option added in [Version 2.0.2](#2.0.2) to include 
           the post-keyword `SIGFIG` specifies the number of significant figure digits to write out (`NDIG`).
           For example:  
