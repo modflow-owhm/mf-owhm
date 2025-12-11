@@ -18,15 +18,11 @@ Boyce, S.E., Hanson, R.T., Ferguson, I., Schmid, W., Henson, W., Reimann, T., Me
 
 &nbsp;
 
-## 2.3.1-b4
+## 2.3.1
 
-TBA
+2025-12-10
 
-git commit log: `git log --reverse 455800a6bf6138e1b00c5ee17b6eb2108614e2e3^..HEAD`
-
-### HEADER1
-
-abc
+git commit log: `git log --reverse 455800a6bf6138e1b00c5ee17b6eb2108614e2e3^..e915dcdc65a2a8418f6ef57d3f8015d6750b24a9`
 
 ### Fixed
 * `FMP` Farm Process
@@ -60,7 +56,9 @@ abc
 * `BAS` Basic Package
   * `PRINT_WATER_DEPTH` output file wrote an empty line to `PRINT_WATER_TABLE` output file.
     * Fixed `PRINT_WATER_DEPTH` from using the unit number associated with the BAS option `PRINT_WATER_TABLE` when writing an empty line to separate records. If `PRINT_WATER_TABLE`, then a random file called fort.xxx with xxx being a random number, would be written with nothing but blank spaces.
-
+  * `FASTFORWARD` caused `HOB` to not write out the header at the top of its output.
+  * `FASTFORWARD` caused `HYD` to not write skipped time steps with `HYDNOH`.
+  
 * `NWT` Newton Solver (MF-OWHM specific version)
   * Allow keyword `CONTINUE` after the `SPECIFY` keyword.
     * The NWT solver instruction manual defines that a set of numbers are read after the `SPECIFY` keyword option. However, the MODFLOW-NWT source code allows for the `CONTINUE` keyword option to appear after `SPECIFY` and before the numerical parameters. This is also the default behavior for FloPy when making a NWT solver file. This feature was added back to maintain compatibility with MODFLOW-NWT and FloPy.
@@ -82,6 +80,9 @@ abc
   * Fixed incorrect handling of duplicate variable names.
     * If a variable name, in the variable definition input is specified twice, then only one value should be stored. However, if a user happen to define the same variable name in the `PROPERTY` and `RETURN` variable blocks, then slang would correctly drop the duplicate from the `PROPERTY` block, but incorrectly drop the last variable defined in the block. However if the user entered a bad number, then either the variable was set to a random value or resulted in a runtime index error.
 
+* `DRT` Drains with Return Flow (MF-OWHM specific version)
+  * `AUTOMATIC_NEGATIVE_ITMP` option for drains that used FMP to collect the drain flow as runoff did not update the corresponding Water Balance Subregion (WBS) if the DRT cell was set to automatically determine the WBS and the WBS changes by stress period. This issue has been fixed.
+  
 * `CFP` Conduit Flow Process (MF-OWHM specific version)
   * Fixed an input read error for the advanced CFP input, which reads in a set of boundary condition flags to modify the input structure. If the advanced input is skipped, then an `X` must be used as a placeholder. However, this raised an error that the option was not found.
   * Index error for Time-Dependent Boundary Conditions (TD)
@@ -688,3 +689,4 @@ Naming convention of source files:
 - `_interface` indicates source code contains a generic `INTERFACE` call for a set of subroutines for a specific task.
 - `_instruction` indicates source code defines one or more `Derived Data Types` definitions (Fortran Objects) and their associated methods (subroutines and functions associated with the object). 
 
+clear
