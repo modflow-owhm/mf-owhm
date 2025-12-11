@@ -2475,6 +2475,25 @@ C         SKIP IF INPUT READ BY REACHES (ISFROPT = 1, 3, OR 5)
       END IF
 C
 C18-----COMPUTE STREAM REACH VARIABLES.
+C
+C--SET SOME VALUES NEEDED BY THE LMT PACKAGE
+C--AS EACH SEGMENT IS READ, DETERMINE IF ANY OF THE FOLLOWING ARE ACTIVE
+C  (1) STORAGE (TRANSIENT ROUTING); (2) PRECIP; (3) EVAP; (4) USER-SPECIFIED RUNOFF; 
+C  (5) RUNOFF FROM UZF1 PACKAGE; (6) UNSATURATED FLOW BENEATH REACH (NOT AVAILABLE YET)
+        !
+        IF(HAS_LMT) THEN  !IUNIT(49): LMT
+          NFLOWTYPE = 0
+          FLOWTYPE  = 'NA'
+          FLOWTYPE(1)='VOLUME'
+          FLOWTYPE(2)='RCHLEN'
+          IF(HAS_FMP) FLOWTYPE(5)='RUNOFF' ! Assume FMP is always going to send some sort of runoff
+          DO nseg = 1, NSS
+           IF(SEG(3,nseg)/=0.and.FLOWTYPE(5)=='NA') FLOWTYPE(5)='RUNOFF'
+           IF(SEG(4,nseg)/=0.and.FLOWTYPE(4)=='NA') FLOWTYPE(4)='EVAP'
+           IF(SEG(5,nseg)/=0.and.FLOWTYPE(3)=='NA') FLOWTYPE(3)='PRECIP'
+          END DO
+        ENDIF
+        !
         irch = 1
         ksfropt = 0
         DO nseg = 1, NSS
@@ -2485,33 +2504,6 @@ C18-----COMPUTE STREAM REACH VARIABLES.
           etsw = SEG(4, nseg)
           pptsw = SEG(5, nseg)
           sumlen = 0.0
-C
-C--SET SOME VALUES NEEDED BY THE LMT PACKAGE
-C--AS EACH SEGMENT IS READ, DETERMINE IF ANY OF THE FOLLOWING ARE ACTIVE
-C  (1) STORAGE (TRANSIENT ROUTING); (2) PRECIP; (3) EVAP; (4) USER-SPECIFIED RUNOFF; 
-C  (5) RUNOFF FROM UZF1 PACKAGE; (6) UNSATURATED FLOW BENEATH REACH (NOT AVAILABLE YET)
-          IF(IUNIT(49).NE.0) THEN  !IUNIT(49): LMT
-            IF(FLOWTYPE(1).EQ.'NA') THEN !Originally: (ITRFLG.EQ.1.AND.FLOWTYPE(1).EQ.'NA')
-              NFLOWTYPE = NFLOWTYPE + 1
-              FLOWTYPE(1)='VOLUME'
-            ENDIF
-            IF(FLOWTYPE(2).EQ.'NA') THEN
-              NFLOWTYPE = NFLOWTYPE + 1
-              FLOWTYPE(2)='RCHLEN'
-            ENDIF
-            IF(SEG(5,nseg).NE.0.AND.FLOWTYPE(3).EQ.'NA') THEN  ! CHECK FOR SURFACE WATER PRECIP
-              NFLOWTYPE = NFLOWTYPE + 1
-              FLOWTYPE(3)='PRECIP'
-            ENDIF
-            IF(SEG(4,nseg).NE.0.AND.FLOWTYPE(4).EQ.'NA') THEN  ! CHECK FOR SURFACE WATER EVAP
-              NFLOWTYPE = NFLOWTYPE + 1
-              FLOWTYPE(4)='EVAP'
-            ENDIF
-            IF(SEG(3,nseg).NE.0.AND.FLOWTYPE(5).EQ.'NA') THEN  ! CHECK FOR USER-SPECIFIED RUNOFF
-              NFLOWTYPE = NFLOWTYPE + 1
-              FLOWTYPE(5)='RUNOFF'
-            ENDIF
-          ENDIF
 C
 C19-----COMPUTE VARIABLES NEEDED FOR STREAM LEAKAGE.
           IF ( icalc.EQ.0 .OR. icalc.EQ.1 ) THEN
@@ -5329,7 +5321,7 @@ C     ------------------------------------------------------------------
       DOUBLE PRECISION, DIMENSION(16):: DB_OUT
       EXTERNAL CALC_XSA
       DOUBLE PRECISION CALC_XSA
-      LOGICAL:: NO_GW, FIXED_HEAD_CELL
+      LOGICAL:: NO_GW, FIXED_HEAD_CELL, HAS_LMT
       DOUBLE PRECISION:: MX_FLO, MX_STG 
 C     ------------------------------------------------------------------
 C     LOCAL STATIC VARIABLES
@@ -5393,7 +5385,8 @@ C         ACCUMULATORS (RATIN AND RATOUT).
       SFRUZRECH = 0.0
       FNETSEEP = 0.0
       maxwav = NSFRSETS*NSTRAIL
-      IF(IUNIT(49).NE.0) NINTOT = 0  !IUNIT(49): LMT
+      HAS_LMT = IUNIT(49).NE.0
+      NINTOT = 0  !IF(IUNIT(49).NE.0) -> LMT
       IF ( IUZT.EQ.1) THEN
         SFRUZBD(4) = zero
         SFRUZBD(5) = zero
@@ -5614,10 +5607,8 @@ C7------SET FLOWIN EQUAL TO STREAM SEGMENT INFLOW IF FIRST REACH.
               flowin = 0
             END IF
 !EDM - Count connection for LMT
-            IF(IUNIT(49).NE.0) THEN  !IUNIT(49): LMT
-              IF ( ISEG(3, istsg).EQ.5 ) THEN  
-                NINTOT = NINTOT + 1 
-              ENDIF
+            IF(HAS_LMT) THEN  !IUNIT(49): LMT
+              IF ( ISEG(3, istsg).EQ.5 ) NINTOT = NINTOT + 1 
             ENDIF
             IF ( IDIVAR(1,istsg).EQ.0 ) 
      +          sfrbudg_in = sfrbudg_in + SEG(2, istsg)
@@ -5667,7 +5658,7 @@ C20-----SET FLOW INTO DIVERSION IF SEGMENT IS DIVERSION.
 !EDM - For LMT
                 IF( IDIVAR(1,istsg).GT.0 ) THEN
                   flowin = DVRSFLW(istsg)
-                  IF(IUNIT(49).NE.0) NINTOT = NINTOT + 1
+                  IF(HAS_LMT) NINTOT = NINTOT + 1
                 ENDIF
               END IF
             END IF
@@ -5680,17 +5671,13 @@ C22-----SUM TRIBUTARY OUTFLOW AND USE AS INFLOW INTO DOWNSTREAM SEGMENT.
                 IF ( istsg.EQ.IOTSG(itrib) ) THEN
                   trbflw = SGOTFLW(itrib)
                   flowin = flowin + trbflw
-                  IF(IUNIT(49).NE.0) THEN  !IUNIT(49): LMT
-                    NINTOT = NINTOT + 1   !EDM
-                  ENDIF
+                  IF(HAS_LMT) NINTOT = NINTOT + 1   !EDM
                 END IF
                 itrib = itrib + 1
               END DO
               flowin = flowin + SEG(2, istsg)  !SEG(2,istsg) stores specified inflow, and should have a spot in "Headwaters" flows
-              IF(IUNIT(49).NE.0) THEN  !IUNIT(49): LMT
-              IF(ABS(SEG(2,ISTSG)) > NEARZERO_15) THEN  !Possible to have both tributary inflow and specified inflow. if the latter exist, count it next
-                  NINTOT = NINTOT + 1   !EDM
-              ENDIF
+              IF(HAS_LMT) THEN  !IUNIT(49): LMT
+                IF(ABS(SEG(2,ISTSG)) > NEARZERO_15) NINTOT = NINTOT + 1         !Possible to have both tributary inflow and specified inflow. if the latter exist, count it next
               END IF
 C
 C23-----CHECK IF SPECIFIED "FLOW" IS WITHDRAWAL (i.e., negative), THAT WATER IS AVAILABLE.
@@ -5707,15 +5694,13 @@ C24-----SET INFLOW EQUAL TO OUTFLOW FROM UPSTREAM REACH, WHEN REACH
 C         GREATER THAN 1.
           ELSE IF ( nreach.GT.1 ) THEN
             flowin = STRM(9, ll)
-            IF(IUNIT(49).NE.0) THEN  !IUNIT(49): LMT
-              NINTOT = NINTOT + 1    !EDM
-            ENDIF
+            IF(HAS_LMT) NINTOT = NINTOT + 1
           END IF
           !
           IF( flowin > MX_FLO ) flowin = MX_FLO
 C
 C- EDM -IF OUTSEG=0 THEN SEGMENT IS A NETWORK SINK AND SHOULD BE COUNTED FOR LMT
-          IF(IUNIT(49).NE.0) THEN  !IUNIT(49): LMT
+          IF(HAS_LMT) THEN  !IUNIT(49): LMT
             IF(IOTSG(ISTSG).EQ.0.AND.NREACH.EQ.ISEG(4,ISTSG)) THEN
               NINTOT = NINTOT + 1
             ENDIF

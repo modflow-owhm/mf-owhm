@@ -61,7 +61,9 @@ C--USE FILE SPECIFICATION of MODFLOW-2005
       CHARACTER(768):: LINE, FNAME, NME
       CHARACTER(  8):: OUTPUT_FILE_HEADER
       CHARACTER( 11)::  OUTPUT_FILE_FORMAT, HDRTXT
+      INTEGER :: FMP_UNIT
 C     -----------------------------------------------------------------
+      FMP_UNIT = IUNIT(61)
       INLMT  = Z
       MTBCF  = Z
       MTLPF  = Z
