@@ -12,9 +12,9 @@ This is the `develop` branch of MODFLOW-OWHM. It is the current code state that 
 For publications, it is recommended to use the current production release from the [main](https://code.usgs.gov/modflow/mf-owhm/-/tree/main) and [release](https://code.usgs.gov/modflow/mf-owhm/-/tree/release) branches  
 (or request a beta release be converted to a production release).
 
-Preliminary Beta Download  &nbsp;  &nbsp; &nbsp; &nbsp; ➣ &nbsp; **[v2.3.1-b4](https://code.usgs.gov/modflow/mf-owhm/-/archive/2.3.1-b4/mf-owhm-2.3.1-b4.zip)** &nbsp; &nbsp; `( 2-25-2025 )`
+~~Preliminary Beta Download  &nbsp;  &nbsp; &nbsp; &nbsp; ➣ &nbsp; **[v2.3.1-b4](https://code.usgs.gov/modflow/mf-owhm/-/archive/2.3.1-b4/mf-owhm-2.3.1-b4.zip)** &nbsp; &nbsp; `( 2-25-2025 )`~~
 
-Production Release Download &nbsp; &nbsp; ➣ &nbsp; **[v2.3.0](https://code.usgs.gov/modflow/mf-owhm/-/archive/2.3.0/mf-owhm-2.3.0.zip)** &nbsp; &nbsp; &nbsp; &nbsp; `( 1-15-2024 )`
+Production Release Download &nbsp; &nbsp; ➣ &nbsp; **[v2.3.1](https://code.usgs.gov/modflow/mf-owhm/-/archive/2.3.1/mf-owhm-2.3.1.zip)** &nbsp; &nbsp; &nbsp; &nbsp; `( 12-12-2025 )`
 
 All past releases are in the [Tags](https://code.usgs.gov/modflow/mf-owhm/-/tags) section.
 
@@ -155,11 +155,7 @@ To obtain this repository via git run:
 
 ## Code Citation
 
-> Boyce, S.E., 2024, MODFLOW One-Water Hydrologic Flow Model (MF-OWHM) Conjunctive Use and Integrated Hydrologic Flow Modeling Software, version 2.3.0: U.S. Geological Survey Software Release, https://doi.org/10.5066/P9P8I8GS
-
-And if you use Surface Water Operations (`SWO`) in your project:
-
-> Boyce, S.E. and Ferguson, I.M., 2024, MODFLOW One-Water Hydrologic Flow Model (MF-OWHM) Conjunctive Use and Integrated Hydrologic Flow Modeling Software with Surface Water Operations, version 2.3.0: U.S. Geological Survey Software Release, https://doi.org/10.5066/P9P8I8GS
+> Boyce, S.E., 2025, MODFLOW One-Water Hydrologic Flow Model (MF-OWHM) Conjunctive Use and Integrated Hydrologic Flow Modeling Software, version 2.3.1: U.S. Geological Survey Software Release, https://doi.org/10.5066/P9P8I8GS
 
 ## Documentation Citation
 
