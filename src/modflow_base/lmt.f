@@ -766,6 +766,44 @@ C
       RETURN
       END
 C
+C
+      subroutine lmt8sub2flow(ncol, nrow, nlay, buff, igrid)
+      use gwfsubmodule ,only: has_delay_bed, has_inst_bed, 
+     &                        bud_ins, bud_dly,
+     &                        ln, ldn, ndb, nndb
+      implicit none
+      !
+      integer, intent(in) :: ncol,nrow,nlay,igrid
+      real, dimension(ncol,nrow,nlay):: buff
+      integer :: i, j, k, ib
+      !
+      call sgwf2sub7pnt(igrid)
+      !
+      if(has_inst_bed) then
+          do ib=1, nndb
+            k = ln(ib)
+            do j=1, nrow
+            do i=1, ncol
+                buff(i,j,k) = buff(i,j,k) + bud_ins(i,j,ib)
+            end do
+            end do
+          end do
+      end if
+      !
+      if(has_delay_bed) then
+          do ib=1, ndb
+            k = ldn(ib)
+            do j=1, nrow
+            do i=1, ncol
+                buff(i,j,k) = buff(i,j,k) + bud_dly(i,j,ib)
+            end do
+            end do
+          end do
+      end if
+      !
+      end subroutine
+C
+C
       SUBROUTINE LMT8BCF7(ILMTFMT,ISSMT3D,IUMT3D,KSTP,KPER,IGRID)
 C *********************************************************************
 C SAVE SATURATED CELL THICKNESS; FLOW ACROSS THREE CELL INTERFACES;
@@ -777,7 +815,7 @@ C Modified from Harbaugh (2005)
 C last modified: 06-23-2016
 C
       USE GLOBAL,      ONLY:NCOL,NROW,NLAY,ISSFLG,IBOUND,HNEW,HOLD,
-     &                      BUFF,CR,CC,CV,BOTM,LBOTM
+     &                      BUFF,CR,CC,CV,BOTM,LBOTM,IUNIT
       USE GWFBASMODULE,ONLY:DELT
       USE GWFBCFMODULE,ONLY:LAYCON,SC1,SC2
       CHARACTER(16) TEXT     
@@ -1004,6 +1042,8 @@ C--CALCULATE FLOW FROM STORAGE (VARIABLE HEAD CELLS ONLY)
         ENDDO
       ENDDO
 C
+      if(iunit(54)/=0) call lmt8sub2flow(ncol, nrow, nlay, buff, igrid)
+C
 C--RECORD CONTENTS OF BUFFER.
   704 IF(ILMTFMT.EQ.0) THEN
         WRITE(IUMT3D) KPER,KSTP,NCOL,NROW,NLAY,TEXT
@@ -1146,7 +1186,7 @@ C Modified from Harbaugh(2005)
 C last modified: 06-23-2016
 C
       USE GLOBAL,      ONLY:NCOL,NROW,NLAY,ISSFLG,IBOUND,HNEW,HOLD,
-     &                      BUFF,CR,CC,CV,BOTM,LBOTM
+     &                      BUFF,CR,CC,CV,BOTM,LBOTM,IUNIT
       USE GWFBASMODULE,ONLY:DELT
       USE GWFLPFMODULE,ONLY:LAYTYP,SC1,SC2
       CHARACTER(16) TEXT
@@ -1372,6 +1412,8 @@ C--CALCULATE FLOW FROM STORAGE (VARIABLE HEAD CELLS ONLY)
         ENDDO
       ENDDO
 C
+      if(iunit(54)/=0) call lmt8sub2flow(ncol, nrow, nlay, buff, igrid)
+C
 C--RECORD CONTENTS OF BUFFER.
   704 IF(ILMTFMT.EQ.0) THEN
         WRITE(IUMT3D) KPER,KSTP,NCOL,NROW,NLAY,TEXT
@@ -1513,7 +1555,7 @@ C Modified from Harbaugh(2005)
 C last modified: 06-23-2016
 C
       USE GLOBAL,      ONLY:NCOL,NROW,NLAY,ISSFLG,IBOUND,HNEW,HOLD,
-     &                      BUFF,CR,CC,CV,BOTM,LBOTM
+     &                      BUFF,CR,CC,CV,BOTM,LBOTM,IUNIT
       USE GWFBASMODULE,ONLY:DELT
       USE GWFUPWMODULE,ONLY:LAYTYPUPW,SC1,SC2UPW,Sn,So
       USE GWFNWTMODULE,ONLY:Icell 
@@ -1813,6 +1855,8 @@ C--CALCULATE FLOW FROM STORAGE (VARIABLE HEAD CELLS ONLY)
         ENDDO
       ENDDO
 C
+      if(iunit(54)/=0) call lmt8sub2flow(ncol, nrow, nlay, buff, igrid)
+C
 C--RECORD CONTENTS OF BUFFER.
   704 IF(ILMTFMT.EQ.0) THEN
         WRITE(IUMT3D) KPER,KSTP,NCOL,NROW,NLAY,TEXT
@@ -2036,7 +2080,7 @@ C Modified from Anderman and Hill (2000), Harbaugh (2005)
 C last modified: 06-23-2016
 C
       USE GLOBAL,      ONLY:NCOL,NROW,NLAY,ISSFLG,IBOUND,HNEW,HOLD,BOTM,
-     &                      LBOTM,DELR,DELC,BUFF,IOUT,CR,CC,CV,KND
+     &                      LBOTM,DELR,DELC,BUFF,IOUT,CR,CC,CV,KND,IUNIT
       USE GWFBASMODULE,ONLY:DELT
       USE GWFHUFMODULE,ONLY:LTHUF,SC1,HUFTHK,NHUF,VDHT      
       CHARACTER(16) TEXT
@@ -2285,6 +2329,9 @@ C
           ENDDO
         ENDDO
       ENDDO
+C
+      if(iunit(54)/=0) call lmt8sub2flow(ncol, nrow, nlay, buff, igrid)
+C
 C
 C--RECORD CONTENTS OF BUFFER.
   704 IF(ILMTFMT.EQ.0) THEN

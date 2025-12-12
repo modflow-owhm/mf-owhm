@@ -41,6 +41,8 @@
         REAL,   SAVE, DIMENSION(:,:),   POINTER,CONTIGUOUS:: DVB
         REAL,   SAVE, DIMENSION(:,:,:), POINTER,CONTIGUOUS:: DVZ                  !SUB-Linkage rth
         REAL,   SAVE, DIMENSION(:,:,:), POINTER,CONTIGUOUS:: DVZC                 !WSCHMID
+        REAL,   SAVE, DIMENSION(:,:,:), POINTER,CONTIGUOUS:: BUD_INS              ! Holds budget/storage flow for instantaneous and delay, only allocated if using LMT
+        REAL,   SAVE, DIMENSION(:,:,:), POINTER,CONTIGUOUS:: BUD_DLY
         TYPE(GENERIC_OUTPUT_FILE),SAVE,DIMENSION(:),POINTER,CONTIGUOUS::
      +                                                        DELAY_HED
         INTEGER,SAVE, DIMENSION(:,:),POINTER,CONTIGUOUS:: DELAY_HED_ID
@@ -84,6 +86,8 @@
         REAL,    DIMENSION(:,:),   POINTER,CONTIGUOUS:: DVB
         REAL,    DIMENSION(:,:,:), POINTER,CONTIGUOUS:: DVZ             ! SUB-Linkage rth
         REAL,    DIMENSION(:,:,:), POINTER,CONTIGUOUS:: DVZC
+        REAL,    DIMENSION(:,:,:), POINTER,CONTIGUOUS:: BUD_INS         ! Holds budget/storage flow for instantaneous and delay, only allocated if using LMT
+        REAL,    DIMENSION(:,:,:), POINTER,CONTIGUOUS:: BUD_DLY
         TYPE(GENERIC_OUTPUT_FILE),DIMENSION(:),POINTER,CONTIGUOUS::
      +                                                        DELAY_HED
         INTEGER, DIMENSION(:,:),POINTER,CONTIGUOUS:: DELAY_HED_ID
@@ -105,6 +109,7 @@ C     ------------------------------------------------------------------
       USE CONSTANTS,   ONLY: Z, TRUE, FALSE, SNGL_ninf, NewLine=>NL
       USE GLOBAL,      ONLY:IOUT,NCOL,NROW,NLAY,ISSFLG,NPER,NSTP,HNEW,
      1                      DELR,DELC,BOTM,LBOTM,SUBLNK,LAYCBD,IUNIT
+!     2                      ,CVSALT_MT3D
       USE GWFBASMODULE,ONLY:HDRY
       USE GWFSUBMODULE,ONLY:IIBSCB,ITMIN,NNDB,NDB,NMZ,NN,ND2,IDSAVE,
      1                      AC1,AC2,ISBOCF,ISBOCU,
@@ -114,6 +119,7 @@ C     ------------------------------------------------------------------
      5                      LPFLNK,DVZ,DELAY_HED,DELAY_HED_ID,
      6                      DVZC,NOCOMV,SEPARTE_FLOWS,
      7                      HAS_DELAY_BED,HAS_INST_BED,HAS_LMT
+     8                      ,BUD_INS,BUD_DLY
       USE ERROR_INTERFACE,      ONLY: STOP_ERROR, WARNING_MESSAGE
       USE FILE_IO_INTERFACE,    ONLY: READ_TO_DATA
       USE PARSE_WORD_INTERFACE, ONLY: PARSE_WORD, PARSE_WORD_UP
@@ -579,6 +585,10 @@ C
 C10-----ALLOCATE MEMORY.
       ALLOCATE(OCFLGS(21,NSTPT))
       ALLOCATE(OCLAY(NLAY))
+      !
+      ALLOCATE(BUD_INS(1,1,1))  ! Temp allocation in case it is not used
+      ALLOCATE(BUD_DLY(1,1,1))
+      !
       IF(HAS_INST_BED) THEN
          ALLOCATE(HC(NND1),   SOURCE=NOCOMV)
          ALLOCATE(SCE(NND1),  SOURCE=zero)
@@ -587,6 +597,10 @@ C10-----ALLOCATE MEMORY.
          ALLOCATE(SUBE(NND1), SOURCE=zero)
          ALLOCATE(SUBV(NND1), SOURCE=zero)
          ALLOCATE(ILSYS(NNDB),SOURCE=0)
+         IF(HAS_LMT) THEN
+             DEALLOCATE(BUD_INS)
+             ALLOCATE(BUD_INS(NCOL,NROW,NNDB)) 
+         END IF
       ELSE
          ALLOCATE(HC(1))
          ALLOCATE(SCE(1))
@@ -610,6 +624,10 @@ C10-----ALLOCATE MEMORY.
          ALLOCATE(A1(NN),     SOURCE=zero)
          ALLOCATE(A2(NN),     SOURCE=zero)
          ALLOCATE(BB(NN),     SOURCE=zero)
+         IF(HAS_LMT) THEN
+             DEALLOCATE(BUD_DLY)
+             ALLOCATE(BUD_DLY(NCOL,NROW,NDB)) 
+         END IF
       ELSE
          ALLOCATE(NZ(1))
          ALLOCATE(DZ(1))
@@ -1454,6 +1472,7 @@ C     ------------------------------------------------------------------
      2                        NN,ND2,NDB,NNDB,IIBSCB,
      3                        DVZ,NOCOMV,SEPARTE_FLOWS,          !SUB-Linkage rth 
      4                        HAS_DELAY_BED,HAS_INST_BED
+     5                        ,HAS_LMT,BUD_INS,BUD_DLY
       CHARACTER(16) TEXT(4)
       DOUBLE PRECISION::HHNEW,HHOLD,BOT
       REAL:: STORIN_ELAS, STOROT_ELAS, STORIN_VIRG, STOROT_VIRG
@@ -1492,7 +1511,11 @@ C1------SET IF CELL-BY-CELL FLOW TERMS ARE NEEDED.
       IF(ISSFLG(KPER).EQ.0) TLED=1./DELT
       !
       CALL SET_ZERO(NCOL,NROW,NLAY,DVZ)
-      !                                                      !SUB-Linkage rth
+      !
+      IF(HAS_LMT) THEN
+         CALL SET_ZERO(NCOL,NROW,NNDB,BUD_INS)
+         CALL SET_ZERO(NCOL,NROW, NDB,BUD_DLY)
+      END IF
 C
 C2------RUN THROUGH EVERY CELL IN THE GRID WITH INTERBED STORAGE.
       IF(HAS_INST_BED) THEN
@@ -1576,6 +1599,8 @@ C10-----IF C-B-C FLOW TERMS ARE TO BE SAVED THEN ADD RATE TO BUFFER.
              BUFF(IC,IR,K)=BUFF(IC,IR,K)+STRG*TLED
          END IF
        END IF
+       !
+       IF(HAS_LMT) BUD_INS(IC,IR,K) = BUD_INS(IC,IR,K) + STRGE*TLED
 C
 C11-----SEE IF FLOW IS INTO OR OUT OF STORAGE.
        !IF(STRG.LE.ZERO) THEN
@@ -1778,6 +1803,8 @@ C22A----ACCUMULATE ELASTIC AND INELASTIC COMPACTION SEPARATELY (May, 2009)
              BUFF(IC,IR,K)=BUFF(IC,IR,K)+STRGS*TLED
          END IF
        END IF
+       !
+       IF(HAS_LMT) BUD_DLY(IC,IR,K) = BUD_DLY(IC,IR,K) + STRGE*TLED
        !
        RATBSM=RATBSM-RATS
        !IF(RATS.LE.ZERO) THEN
@@ -2914,6 +2941,9 @@ C
       DEALLOCATE (GWFSUBDAT(IGRID)%HAS_LMT)
       DEALLOCATE (GWFSUBDAT(IGRID)%DELAY_HED   )
       DEALLOCATE (GWFSUBDAT(IGRID)%DELAY_HED_ID)
+      
+      DEALLOCATE (GWFSUBDAT(IGRID)%BUD_INS)
+      DEALLOCATE (GWFSUBDAT(IGRID)%BUD_DLY)
 C
 C NULLIFY THE LOCAL POINTERS
       IF(IGRID.EQ.1)THEN
@@ -2963,6 +2993,8 @@ C NULLIFY THE LOCAL POINTERS
         HAS_LMT =>NULL()
       DELAY_HED    =>NULL()
       DELAY_HED_ID =>NULL()
+      BUD_INS      =>NULL()
+      BUD_DLY      =>NULL()
       END IF
 C2-----RETURN
       RETURN
@@ -3023,6 +3055,8 @@ C
       HAS_LMT=>GWFSUBDAT(IGRID)%HAS_LMT
       DELAY_HED     => GWFSUBDAT(IGRID)%DELAY_HED 
       DELAY_HED_ID  => GWFSUBDAT(IGRID)%DELAY_HED_ID
+      BUD_INS       => GWFSUBDAT(IGRID)%BUD_INS
+      BUD_DLY       => GWFSUBDAT(IGRID)%BUD_DLY
 C
       RETURN 
       END SUBROUTINE
@@ -3081,6 +3115,8 @@ C
       GWFSUBDAT(IGRID)%HAS_LMT=>HAS_LMT
       GWFSUBDAT(IGRID)%DELAY_HED     => DELAY_HED 
       GWFSUBDAT(IGRID)%DELAY_HED_ID  => DELAY_HED_ID
+      GWFSUBDAT(IGRID)%BUD_INS       => BUD_INS
+      GWFSUBDAT(IGRID)%BUD_DLY       => BUD_DLY
 C
       RETURN
       END SUBROUTINE
