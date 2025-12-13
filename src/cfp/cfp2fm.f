@@ -405,16 +405,16 @@ C--BARC**FOR CASES OF Z=0                                               !TR: 201
               ELSEIF ( X.GT.DZ .AND. Y.LT.NEARZERO_30 ) THEN
                 L_NODE(I) = L_NODE(I) + X/DOS * TORTUOS(ITEST)          !TR: 2012 04 25 CADS / 
               ELSE
-                L_NODE(I) = L_NODE(I) + (DSQRT(X**DOS+Y**DOS)/DOS)      !TR: 2012 04 25 CADS / 
+                L_NODE(I) = L_NODE(I) + (DSQRT(X**2+Y**2)/DOS)      !TR: 2012 04 25 CADS / 
      +                     * TORTUOS(ITEST)                             !TR: 2012 04 25 CADS / 
               ENDIF
 C
 C--BARC**FOR CASES OF Z>0
             ELSEIF ( X.LT.NEARZERO_30 .AND. Y.GT.DZ ) THEN
-              L_NODE(I) = L_NODE(I) + (DSQRT(Y**DOS+Z**DOS)/DOS)        !TR: 2012 04 25 CADS / 
+              L_NODE(I) = L_NODE(I) + (DSQRT(Y**2+Z**2)/DOS)        !TR: 2012 04 25 CADS / 
      +                     * TORTUOS(ITEST)                             !TR: 2012 04 25 CADS / 
             ELSEIF ( X.GT.DZ .AND. Y.LT.NEARZERO_30 ) THEN
-              L_NODE(I) = L_NODE(I) + (DSQRT(X**DOS+Z**DOS)/DOS)        !TR: 2012 04 25 CADS / 
+              L_NODE(I) = L_NODE(I) + (DSQRT(X**2+Z**2)/DOS)        !TR: 2012 04 25 CADS / 
      +                     * TORTUOS(ITEST)                             !TR: 2012 04 25 CADS / 
             ELSE
               L_NODE(I) = L_NODE(I) + Z * TORTUOS(ITEST)                !TR: 2012 04 25 CADS / 
@@ -489,14 +489,14 @@ C--BARC**FOR CASES OF Z=0
               ELSEIF ( X.GT.DZ .AND. Y.LT.NEARZERO_30 ) THEN
                 LENGTH = X/DOS
               ELSE
-                LENGTH = DSQRT(X**DOS+Y**DOS)/DOS
+                LENGTH = DSQRT(X**2+Y**2)/DOS
               ENDIF
 C
 C--BARC**FOR CASES OF Z>0
             ELSEIF ( X.LT.NEARZERO_30 .AND. Y.GT.DZ ) THEN
-              LENGTH = DSQRT(Y**DOS+Z**DOS)/DOS
+              LENGTH = DSQRT(Y**2+Z**2)/DOS
             ELSEIF ( X.GT.DZ .AND. Y.LT.NEARZERO_30 ) THEN
-              LENGTH = DSQRT(X**DOS+Z**DOS)/DOS
+              LENGTH = DSQRT(X**2+Z**2)/DOS
             ELSE
               LENGTH = Z
             ENDIF
@@ -529,12 +529,12 @@ C--BARC**PARTIALLY SATURATED CONDUIT
                   NODEWETTD = HC(I) - NODEBOT(I)
                   DKNOT = CON_DATA(ITEST, 2)
                   THETA = DOS*ASIN                                      
-     +                    (DOS*DSQRT((DKNOT/DOS)**DOS-(NODEWETTD-       
-     +                    DKNOT/DOS)**DOS)/DKNOT)
+     +                    (DOS*DSQRT((DKNOT/DOS)**2-(NODEWETTD-       
+     +                    DKNOT/DOS)**2)/DKNOT)
                   IF ( HC(I).GE.GEOHIGHT(I) ) THETA = TWOPI - THETA
                   AT = PI*CON_DATA(ITEST, 2)*
      +                 0.5*(LENGTH*TORTUOS(ITEST))
-                  AF = ((ONE8TH*(THETA-SIN(THETA))*DKNOT**DOS*
+                  AF = ((ONE8TH*(THETA-SIN(THETA))*DKNOT**2*
      +                   0.5*(LENGTH*TORTUOS(ITEST)))/AT)
  
                   IF(LSURFACEDEP.EQ.1)ALPHA=PI*LENGTH*TORTUOS(ITEST)
@@ -547,12 +547,12 @@ C--BARC**ELSE MODFLOW HEAD>HC
      +                        - NODEBOT(I)
                   DKNOT = CON_DATA(ITEST, 2)
                   THETA = DOS*ASIN                                      
-     +                    (DOS*DSQRT((DKNOT/DOS)**DOS-(NODEWETTD-       
-     +                    DKNOT/DOS)**DOS)/DKNOT)
+     +                    (DOS*DSQRT((DKNOT/DOS)**2-(NODEWETTD-       
+     +                    DKNOT/DOS)**2)/DKNOT)
                   IF ( HC(I).GE.GEOHIGHT(I) ) THETA = TWOPI - THETA
                   AT = PI*CON_DATA(ITEST, 2)*
      +                 0.5*(LENGTH*TORTUOS(ITEST))
-                  AF = ((ONE8TH*(THETA-SIN(THETA))*DKNOT**DOS*
+                  AF = ((ONE8TH*(THETA-SIN(THETA))*DKNOT**2*
      +                   0.5*(LENGTH*TORTUOS(ITEST)))/AT)
  
                   IF(LSURFACEDEP.EQ.1)ALPHA=PI*LENGTH*TORTUOS(ITEST)
@@ -584,12 +584,12 @@ C--BARC**PARTIALLY-SATURATED CONDUIT**
                 NODEWETTD = HC(I) - NODEBOT(I)
                 DKNOT = CON_DATA(ITEST, 2)
                 THETA = DOS*ASIN                                        
-     +                  (DOS*DSQRT((DKNOT/DOS)**DOS-(NODEWETTD-         
-     +                  DKNOT/DOS)**DOS)/DKNOT)
+     +                  (DOS*DSQRT((DKNOT/DOS)**2-(NODEWETTD-         
+     +                  DKNOT/DOS)**2)/DKNOT)
                 IF ( HC(I).GE.GEOHIGHT(I) ) THETA = TWOPI - THETA
                 AT = PI*CON_DATA(ITEST, 2)*
      +               0.5*(LENGTH*TORTUOS(ITEST))
-                AF = ((ONE8TH*(THETA-SIN(THETA))*DKNOT**DOS*
+                AF = ((ONE8TH*(THETA-SIN(THETA))*DKNOT**2*
      +                 0.5*(LENGTH*TORTUOS(ITEST)))/AT)
  
                 IF(LSURFACEDEP.EQ.1)ALPHA=PI*LENGTH*TORTUOS(ITEST)
@@ -741,7 +741,7 @@ C--LOCAL VARIABLES
 C---------------------------------------------------------------------------
       NORM = 0.0D0
       DO I = 1, N
-        NORM = NORM + VEC(I)**2.0D0
+        NORM = NORM + VEC(I)**2
       ENDDO
       NORM = DSQRT(NORM)
 C
@@ -795,7 +795,7 @@ C  ADD FLOW OF ALL TUBES AT NODE I WHICH ARE ACTIVE
             IF ( NBR(I,J+4).EQ.0 ) CYCLE
             TUB = NBR(I,J+4+NNOD)
             EQ_MAT(I,NBR(I,J+4))=EQ_MAT(I, NBR(I,J+4))-C                
-     +                           *CON_DATA(TUB,2)**4.D0/CON_DATA(TUB,3)
+     +                           *CON_DATA(TUB,2)**4/CON_DATA(TUB,3)
             EQ_MAT(I,I) = EQ_MAT(I,I) - EQ_MAT(I,NBR(I,J+4))
           ENDDO
 C 
@@ -1070,14 +1070,14 @@ C
           TUBEWETTD = TUBEHMID - TUBEBOTMID 
           DKNOT = CON_DATA(I, 2)
           THETA = DOS*ASIN                                              
-     +            (DOS*DSQRT((DKNOT/DOS)**DOS-(TUBEWETTD-DKNOT/DOS)     
-     +            **DOS)/DKNOT)
+     +            (DOS*DSQRT((DKNOT/DOS)**2-(TUBEWETTD-DKNOT/DOS)     
+     +            **2)/DKNOT)
           IF ( TUBEHMID.GE.TUBEMIDMID ) THETA = TWOPI - THETA
           DEQV = DKNOT - DKNOT*(SIN(THETA)/THETA)
           DTUBE(I,3) = DEQV                                             !TR: 2014 07 31 SAVE DEQV IN DTUBE FOR TRANSPORT ROUTINES
 C 
 C--BARC**ADD THIS
-          APF = ONE8TH*(THETA-SIN(THETA))*DEQV**DOS
+          APF = ONE8TH*(THETA-SIN(THETA))*DEQV**2
 C
 C--SORT RE-NUMBERS:
           IF ( TURB(I).EQ.0 ) THEN
@@ -1314,7 +1314,7 @@ C
 C--AVOID DIVISION WITH DZ
       H = DABS(HA-HE)
       IF ( H.NE.0.0D0 ) THEN
-        Y = DSQRT(H*G*D**5.D0*PI**2.D0/(8.D0*L))
+        Y = DSQRT(H*G*D**5.D0*PI**2/(8.D0*L))
         TURBI = SIGNUM*(-2.D0)                                          
      +          *Y*DLOG10(2.51D0*PI*NU*D/(4.D0*Y)+KK/(3.71D0*D))
 C
@@ -1388,7 +1388,7 @@ C--AVOID DIVISION WITH DZ
       IF ( H.NE.0.D0 ) THEN
 C 
 C--BARC**FOR PARIALLY-FILLED CONDITONS:
-        Y = DSQRT((2.D0*H*G*D*APF**2.D0)/L)
+        Y = DSQRT((2.D0*H*G*D*APF**2)/L)
         TURBI_PF = SIGNUM*(-2.D0)                                       
      +             *Y*DLOG10(2.51D0*PI*NU*D/(4.D0*Y)+KK/(3.71D0*D))
 C
@@ -1441,7 +1441,7 @@ C--LOCAL VARIABLES
       DOUBLE PRECISION C
 C
       C = PI*G/(NU*128.D0)
-      LAMIN = C*D**4.D0*(HA-HE)/L
+      LAMIN = C*D**4*(HA-HE)/L
       END FUNCTION LAMIN
 C
 C
@@ -1473,7 +1473,7 @@ C--ARGUMENTS
       DOUBLE PRECISION, INTENT(IN) :: HA, HE, D, L, NU, G, PI, APF
 C 
 C--BARC**RIGHT EQUATION FOR PARTAILLY FULL CONDITIONS
-      LAMIN_PF = (D**2.D0*G*(HA-HE)*APF)/(32.D0*NU*L)
+      LAMIN_PF = (D**2*G*(HA-HE)*APF)/(32.D0*NU*L)
 C
       END FUNCTION LAMIN_PF
 C
@@ -1548,7 +1548,8 @@ C
 C--BARC**ADD THIS FOR OVERLAND FLOW
       DOUBLE PRECISION QT
 C
-      DOUBLE PRECISION MAT_A(ACTIVENODE, ACTIVENODE), VEC_B(ACTIVENODE)
+      !DOUBLE PRECISION MAT_A(ACTIVENODE, ACTIVENODE), VEC_B(ACTIVENODE)
+      DOUBLE PRECISION, ALLOCATABLE :: MAT_A(:, :), VEC_B(:)
       DOUBLE PRECISION OSC(5),OSCSUM5, OSCSUM5_P,OSCSUM4, OSCSUM4_P     !TR: 2013 07 05 OSC // OSC = ARRAY WITH HEAD CHANGE, OSCSUM = SUM OF CRITERIAS, OSCSUM_P = PREVIOUS VALUE OF OSCSUM
       INTEGER I,II,III                                                  !TR: 2013 07 05 OSC
       LOGICAL OSCFLG                                                    !TR: 2013 07 05 OSC
@@ -1557,7 +1558,8 @@ C--BARC**ADD THIS FOR OVERLAND FLOW
       INTEGER N,T,BNOD,ENOD
 C-----------------------------------------------------------------------
 C
-C--INI      
+C--INI
+      ALLOCATE(MAT_A(ACTIVENODE, ACTIVENODE), VEC_B(ACTIVENODE))
       KONV = Z
       OSC = DZ                                                           !TR: 2013 07 05 OSC
       OSCFLG = FALSE                                                    !TR: 2013 07 05 OSC
@@ -1704,7 +1706,9 @@ CB      ROF(N) = DZ
 C--BARC**SET ROF
 CB       ROF(N) = QTUBIN(N)
 CB       PRINT*,N, ROF(N)
-	ENDDO
+      ENDDO
+C
+      DEALLOCATE(MAT_A, VEC_B, STAT=I)
 C
       END SUBROUTINE ITERA_NEW
 C
@@ -2163,7 +2167,7 @@ C
 C--ARGUMENTS
       DOUBLE PRECISION, INTENT(IN) :: PI, G, NU, D, L
 C
-      LAMI_ABL = PI*G*D**4.D0/(128.D0*L*NU)
+      LAMI_ABL = PI*G*D**4/(128.D0*L*NU)
       END FUNCTION LAMI_ABL
 C
 C
@@ -2825,14 +2829,14 @@ C--BARC**FOR CASES OF Z=0
                 ELSEIF ( X.GT.DZ .AND. Y.LT.NEARZERO_30 ) THEN
                   LENGTH = X/DOS
                 ELSE
-                  LENGTH = DSQRT(X**DOS+Y**DOS)/DOS
+                  LENGTH = DSQRT(X**2+Y**2)/DOS
                 ENDIF
 C
 C--BARC**FOR CASES OF Z>0
               ELSEIF ( X.LT.NEARZERO_30 .AND. Y.GT.DZ ) THEN
-                LENGTH = DSQRT(Y**DOS+Z**DOS)/DOS
+                LENGTH = DSQRT(Y**2+Z**2)/DOS
               ELSEIF ( X.GT.DZ .AND. Y.LT.NEARZERO_30 ) THEN
-                LENGTH = DSQRT(X**DOS+Z**DOS)/DOS
+                LENGTH = DSQRT(X**2+Z**2)/DOS
               ELSE
                 LENGTH = Z
               ENDIF
@@ -2855,19 +2859,27 @@ C
               LENGTH = LENGTH * TORTUOS(ITEST)                          !TR: 2012 06 08 COMPUTE LENGTH
 C
 C--PREVIOUS ITERATION              
+              THETA = DZ
               WETTDNEW = B_MAT_P(I) - TUBEBOT1
               DKNOT = CON_DATA(ITEST, 2)
-              THETA = DOS*ASIN(DOS*DSQRT((DKNOT/DOS)**DOS               
-     +                -(WETTDNEW-DKNOT/DOS)**DOS)/DKNOT)
+              IF (WETTDNEW < CON_DATA(ITEST,2) .AND.
+     +            WETTDNEW > DZ                     ) THEN
+                        THETA = DOS*ASIN(DOS*DSQRT((DKNOT/DOS)**2
+     +                          -(WETTDNEW-DKNOT/DOS)**2)/DKNOT)
+              END IF
               IF ( B_MAT_P(I).GE.GEOHIGHT(I) ) THETA = TWOPI - THETA   !TR: 2012 06 08 REPLACED B BY B_MAT
               IF (WETTDNEW.GE.CON_DATA(ITEST,2)) THETA = TWOPI         !TR: 2012 06 08 CONSIDER FILLED PIPE / PREVENT 'NAN' = FULL CASE
               IF (WETTDNEW.LE.DZ) THETA = DZ                        !TR: 2012 06 11 CONSIDER DRY PIPE / PREVENT 'NAN' = DRY CASE
-              VNEW = ONE8TH*(THETA-SIN(THETA))*DKNOT**DOS*LENGTH        !TR: 2012 06 08 REPLACED LTOURT BY LENGTH
+              VNEW = ONE8TH*(THETA-SIN(THETA))*DKNOT**2*LENGTH        !TR: 2012 06 08 REPLACED LTOURT BY LENGTH
 C
 C--PREVIOUS TIMESTEP
+              THETA = DZ
               WETTDOLD = B_MAT_O(I) - TUBEBOT1
-              THETA = DOS*ASIN(DOS*DSQRT((DKNOT/DOS)**DOS               
-     +                -(WETTDOLD-DKNOT/DOS)**DOS)/DKNOT)
+              IF (WETTDOLD < CON_DATA(ITEST,2) .AND. 
+     +            WETTDOLD > DZ) THEN
+                        THETA = DOS*ASIN(DOS*DSQRT((DKNOT/DOS)**2
+     +                          -(WETTDOLD-DKNOT/DOS)**2)/DKNOT)
+              END IF
               IF ( B_MAT_O(I).GE.GEOHIGHT(I) ) THETA = TWOPI - THETA
               IF (WETTDOLD.GE.CON_DATA(ITEST,2)) THETA = TWOPI          !TR: 2012 06 08 CONSIDER FILLED PIPE / PREVENT 'NAN'
               IF (WETTDOLD.LE.DZ) THETA = DZ                            !TR: 2012 06 11 CONSIDER DRY PIPE / PREVENT 'NAN' = DRY CASE              

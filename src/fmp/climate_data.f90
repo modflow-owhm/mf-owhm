@@ -72,7 +72,7 @@ MODULE CLIMATE_DATA_FMP_MODULE
     CALL DEALLOCATE_CLIMATE(CLIM)
   END SUBROUTINE
   !
-  PURE ELEMENTAL SUBROUTINE DEALLOCATE_CLIMATE(CLIM)
+  IMPURE ELEMENTAL SUBROUTINE DEALLOCATE_CLIMATE(CLIM)
     CLASS(CLIMATE_DATA), INTENT(INOUT)::CLIM
     !
     IF(ALLOCATED(CLIM%REF_ET))           DEALLOCATE(CLIM%REF_ET)
@@ -182,7 +182,7 @@ MODULE CLIMATE_DATA_FMP_MODULE
                         !
                         ALLOCATE(CLIM%REF_ET(NCOL,NROW))
       CASE ("REFERENCE_ET_TO_BARE")
-                        WRITE(BL%IOUT,'(A)') '   REFERENCE_ET_TO_BARE                KEYWORD FOUND. NOW LOADING STATIC/TRANSIENT KEYWORD AND THEN ARRAY OF REFERENCE ET VALUES.'
+                        WRITE(BL%IOUT,'(A)') '   REFERENCE_ET_TO_BARE                  KEYWORD FOUND. NOW LOADING STATIC/TRANSIENT KEYWORD AND THEN ARRAY OF REFERENCE ET VALUES.'
                         READ_REF_ET_TO_BARE = TRUE
                         CALL GET_NUMBER(LINE,LLOC,ISTART,ISTOP,BL%IOUT,BL%IU,CLIM%REF_ET_TO_BARE,  MSG='FMP CLIMATE BLOCK: "REFERENCE_ET_TO_BARE" FAILED TO LOAD THE NUMBER SPECIFIED AFTER THE KEYWORD.')
       CASE ("POTENTIAL_EVAPORATION_BARE","ETR_BARE")
@@ -535,13 +535,17 @@ MODULE CLIMATE_DATA_FMP_MODULE
     !
     IF (CLIM%HAS_RECHARGE) THEN
                  DO I=ONE, CLIM%NDRCH
-                           DO K=ONE, CLIM%DIRECT_RECHARGE(I)%N
-                                DIM1 = CLIM%DIRECT_RECHARGE(I)%DIM(ONE,K)
-                                DIM2 = CLIM%DIRECT_RECHARGE(I)%DIM(TWO,K)
-                                !
-                                DPERC(DIM1,DIM2) = DPERC(DIM1,DIM2) + CLIM%DIRECT_RECHARGE(I)%VAL(K)
-                                !
-                           END DO
+                           IF(CLIM%DIRECT_RECHARGE(I)%IS_CONSTANT) THEN
+                               DPERC = DPERC + CLIM%DIRECT_RECHARGE(I)%VAL(ONE)
+                           ELSE
+                               DO K=ONE, CLIM%DIRECT_RECHARGE(I)%N
+                                    DIM1 = CLIM%DIRECT_RECHARGE(I)%DIM(ONE,K)
+                                    DIM2 = CLIM%DIRECT_RECHARGE(I)%DIM(TWO,K)
+                                    !
+                                    DPERC(DIM1,DIM2) = DPERC(DIM1,DIM2) + CLIM%DIRECT_RECHARGE(I)%VAL(K)
+                                    !
+                               END DO
+                           END IF
                  END DO
     END IF
     !

@@ -1,9 +1,8 @@
       MODULE GWFDRTMODULE
-        USE LINE_FEEDER,                     ONLY: LINE_FEED
+        !USE LINE_FEEDER,                     ONLY: LINE_FEED
         USE BUDGET_GROUP_INTERFACE,          ONLY: BUDGET_GROUP
         USE GENERIC_OUTPUT_FILE_INSTRUCTION, ONLY: GENERIC_OUTPUT_FILE
-        PRIVATE:: LINE_FEED, BUDGET_GROUP, 
-     +            GENERIC_OUTPUT_FILE
+        PRIVATE:: BUDGET_GROUP, GENERIC_OUTPUT_FILE
         !
         LOGICAL,SAVE, POINTER:: DRT_AUTO_NEG_ITMP
         LOGICAL,SAVE, POINTER:: HAS_FMP, HAS_SFR, HAS_SWR
@@ -49,7 +48,7 @@ C     ------------------------------------------------------------------
      1                       IDRTPB,IDRTFL,NRFLOW,NOPRDT,DRTF,DRTAUX,
      2                       PRTFIL,DRTBUD,DRTGRP,GRP_RTN,DRTDB,
      3                       DRT_AUTO_NEG_ITMP,HAS_FMP, HAS_SFR, HAS_SWR
-      USE LINE_FEEDER,          ONLY: LINE_FEED
+      !USE LINE_FEEDER,          ONLY: LINE_FEED
       USE ERROR_INTERFACE,      ONLY: STOP_ERROR
       USE FILE_IO_INTERFACE,    ONLY: READ_TO_DATA
       USE PARSE_WORD_INTERFACE, ONLY: PARSE_WORD_UP
@@ -202,7 +201,7 @@ C     READ ITEM 1
       ENDIF
       !
       ! CHECK IF GLOBAL SHUTDOWN OF CBC IS IN EFFECT
-      CALL CHECK_CBC_GLOBAL_UNIT(IDRTCB)
+      CALL CHECK_CBC_GLOBAL_UNIT(IDRTCB, .FALSE.)
       !
 C
       IF (NPDRT > Z) THEN
@@ -377,7 +376,7 @@ C3---------IF THE CELL IS INTERNAL GET THE DRAIN DATA and subtract the displacem
       RETURN
       END SUBROUTINE
 C--------------------------------------------------------------------------
-      SUBROUTINE GWF2DRT7RP(IN,IGRID)
+      SUBROUTINE GWF2DRT7RP(IN, KPER, IGRID)
 C     ******************************************************************
 C     READ DRAIN HEAD, CONDUCTANCE AND BOTTOM ELEVATION.  IF THE
 C     RETURNFLOW OPTION IS SELECTED, READ RECIPIENT CELL AND PROPORTION.
@@ -404,7 +403,7 @@ C     ------------------------------------------------------------------
       CALL SGWF2DRT7PNT(IGRID)
       CALL FMP_LGR_PNT(IGRID)
       !
-      IF(DRT_AUTO_NEG_ITMP) THEN
+      IF(DRT_AUTO_NEG_ITMP .AND. KPER > 1) THEN
           ITMP = NEG
           NP   = Z
       ELSE

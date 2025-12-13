@@ -12,6 +12,92 @@
 
 &nbsp;
 
+## 2.3.1
+
+2025-12-10
+
+### `MF-OWHM` Command Argument Support
+
+The main executable added support for basic command arguments. The current arguments supported are:
+  * `-h` &nbsp; &nbsp; &nbsp; `--help`
+    * Print out supported command arguments, then exit program.
+  * `-v` &nbsp; &nbsp; &nbsp; `--version`
+    *  Print out the mf-owhm version number, then exit program.
+
+### `BAS` Improvements
+
+* `OPTIONS` Block
+  * `PRINT_WATER_TABLE_LAYER` is a new an option that writes the upper most active layer number.
+    * The input format is identical to follows the same input as `PRINT_HEAD` (see Section 2.2.0 / `BAS` — Options Block — Improvements)
+  * `PRINT_PROPERTY` now includes files for `SC1`, `SC2`, cell surface `AREA`, an layer `THICK`ness.
+  * `PRINT_PROPERTY` file names changed to lower case.
+  * `LIMIT_INPUT_CHECK_OUTPUT` option indicates that writing output should be minimized when using the `INPUT_CHECK` option. This has no effect if not using `INPUT_CHECK`.
+
+### `SFR` Improvements
+
+* `LINEFEED` Alternative Input now supports overwriting the `FLOW` and `RUNOFF` input variables.
+  * The `BEGIN LINEFEED` block input checks for a third word, such as:
+    * `BEGIN LINEFEED FLOW`  
+    * `BEGIN LINEFEED RUNOFF` 
+    * Or, if the third word is not present, then it will default to `FLOW` to preserve backward compatibility.
+  * The following is an example input for both the `FLOW` and `RUNOFF` blocks (note the block order does not matter).
+
+```
+BEGIN LINEFEED FLOW
+   # Feedfiles specify the segment 'FLOW' input variable
+   #
+   FEEDFILE     # repeat as needed
+   #
+END LINEFEED
+
+BEGIN LINEFEED RUNOFF
+   # Feedfiles specify the segment 'RUNOFF' input variable
+   #
+   FEEDFILE     # repeat as needed
+   #
+END LINEFEED
+```
+
+### `FMP` Improvements
+
+* Renamed input keywords:
+     * The original keywords are still supported to maintain backward compatibility,  
+          but the new versions are now used in the FMP_Template and LIST output.
+     * `EFFICIENCY` keyword changed to `IRRIGATION_EFFICIENCY`
+     * `EFFICIENCY_IMPROVEMENT ` keyword changed to `IRRIGATION_EFFICIENCY_IMPROVEMENT`
+
+* `Land_Use`  block `NO_TPOT_SHIFT_TO_EPOT` keyword.
+     * The FMP Potential Consumptive Use/Potential Evapotranspiration (`CU`) is split in to potential transpiration (`Tpot`) and potential evaporation (`Epot`) based on the `TRANSPIRATION_FRACTION` (`FTR`). By default, unused `Tpot` is added back to the `Epot` to honor `CU`. That is, if `Tact < Tpot` then `Epot = CU - Tact`. If `NO_TPOT_SHIFT_TO_EPOT` option is present, then this feature is disabled. That is, `Tpot = CU*FTR` and `Epot = CU*(1-FTR)` and do not change.
+
+* `SURFACE_WATER` block `ADDED_RUNOFF` keyword.
+     * `ADDED_RUNOFF` specifies additional runoff that is included in the model.
+          This is added to the calculated runoff from precipitation and irrigation.
+     * `ADDED_RUNOFF` is effected by any modification to a WBS runoff, such as,  
+          the `NO_RETURN_FLOW` option will change added runoff to deep percolation.
+     * `ADDED_RUNOFF` must be followed by the secondary keyword `FLUX` or `RATE` to  
+          indicate the units of the input. 
+          *  `FLUX` indicates input is length per time (L/T).
+          *  `RATE` indicates input is volume per time (L^3/T)
+     * `ADDED_RUNOFF {FLUX, RATE} LAI[S,T,A,L]`
+          * The List-Array Input supports the advanced scale factor `SFAC ByWBS`
+            and reads NWBS scale factors and applies them by WBS.
+          * Array-Style input reads an NROW by NCOL array of runoff values.
+          * List-Style reads NWBS records that specify the total added runoff for each WBS.
+* `SURFACE_WATER` block `ALLOW_RETURN_FLOW_TO_LEAVE_MODEL` keyword.
+     * Indicates that runoff that is has no semi- or fully-routed return location may leave the model without raising a warning. This is useful if you want to have runoff in a simulation that does not include `SFR`.
+
+* If `SFR` is not part of the simulation and the `SURFACE_WATER block` has:`SEMI_ROUTED_DELIVERY`, `SEMI_ROUTED_RETURN`, or `ROUTED_RETURN_ANY_REACH`, `ROUTED_RETURN_ANY_NON_DIVERSION_REACH` specified, then a warning is raised and they are disabled. Previously, a error was raised and the simulation stopped.
+
+### General Improvements
+
+* `examples/mf-owhm-gmg` added.
+  * The standard `mf-owhm` examples using the `GMG` solver (not part of standard OWHM because it is written in C).
+
+
+------
+
+&nbsp;
+
 ## 2.3.0
 
 2024-01-10
@@ -529,7 +615,6 @@ MONTHLY  -4   SS        # MONTHLY input with 4 time steps, and first stress peri
 - `PRINT_HEAD         SPTS  GENERIC_OUTPUT   [SIGFIG  NDIG]`  
      `PRINT_WATER_TABLE  SPTS   Generic_Output  [SIGFIG  NDIG]`  
      `PRINT_WATER_DEPTH  SPTS   Generic_Output  [SIGFIG  NDIG]`
-
      - Expands option added in [Version 2.0.2](#2.0.2) to include 
           the post-keyword `SIGFIG` specifies the number of significant figure digits to write out (`NDIG`).
           For example:  

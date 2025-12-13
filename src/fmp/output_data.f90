@@ -25,6 +25,8 @@ MODULE OUTPUT_DATA_FMP_MODULE!, ONLY: OUTPUT_DATA, INITIALIZE_OUTPUT_DATA
       !INTEGER:: ISDPFL  = Z
       !INTEGER:: IFBPFL  = Z
       INTEGER:: HAS_ROUT= Z  ! 1 = STATIC, 2 = TRANSIENT 
+      LOGICAL :: COMPOSITE_FNR = FALSE
+      !LOGICAL :: SEPARATE_CBC  = FALSE
       TYPE(GENERIC_OUTPUT_FILE):: WBS_WATER_USE
       TYPE(GENERIC_OUTPUT_FILE):: FDS
       TYPE(GENERIC_OUTPUT_FILE):: FB_COMPACT
@@ -106,6 +108,8 @@ MODULE OUTPUT_DATA_FMP_MODULE!, ONLY: OUTPUT_DATA, INITIALIZE_OUTPUT_DATA
     !
     WRITE(BL%IOUT,'(/A/)') 'OUTPUT BLOCK FOUND AND NOW LOADING OUTPUT OPTIONS'
     !
+    OFL%COMPOSITE_FNR = FALSE
+    !OFL%SEPARATE_CBC  = FALSE
     !
     ERROR='ERROR'
     !
@@ -136,6 +140,14 @@ MODULE OUTPUT_DATA_FMP_MODULE!, ONLY: OUTPUT_DATA, INITIALIZE_OUTPUT_DATA
                                  OFL%FNR_CBC = Z
                         END IF
                         !
+      CASE ("COMPOSITE_FNR_CBC","COMPOSITE_FARM_NET_RECHARGE_CBC")
+                        WRITE(BL%IOUT,'(A)') '   COMPOSITE_FARM_NET_RECHARGE_CBC (COMPOSITE_FNR_CBC)   OUTPUT KEYWORD FOUND.)'
+                        OFL%COMPOSITE_FNR = TRUE
+                        !
+!     CASE ("SEPARATE_FLOWS_CBC","SEPARATE_FLOW_CBC")
+!                       WRITE(BL%IOUT,'(A)') '   SEPARATE_FLOWS_CBC OUTPUT KEYWORD FOUND.)'
+!                       OFL%SEPARATE_CBC = TRUE
+!                       !
 !      CASE ("ISDPFL")
 !                        WRITE(BL%IOUT,'(A)') '   ISDPFL              OUTPUT KEYWORD FOUND. NOW READING THE INTEGER FLAG.'
 !                        CALL GET_INTEGER(BL%LINE,LLOC,ISTART,ISTOP,BL%IOUT,BL%IU,OFL%ISDPFL,  MSG='FMP OUTPUT BLOCK ERROR; OUTPUT ISDPFL FAILED TO LOAD ITS INTEGER FLAG.')
@@ -223,7 +235,7 @@ MODULE OUTPUT_DATA_FMP_MODULE!, ONLY: OUTPUT_DATA, INITIALIZE_OUTPUT_DATA
                         CALL PARSE_WORD_UP(BL%LINE,LLOC,ISTART,ISTOP)
                         SELECT CASE ( BL%LINE(ISTART:ISTOP) )
                         CASE("SUM")      
-                                           WRITE(BL%IOUT,'(A)') 'FOUND SUM KEYWORD, NOW OPENING GENERIC_OUTPUT FILE. IF NOTHING SPECIFIED THEN OPENING FILE: "ET_ARRAY.out"'
+                                           WRITE(BL%IOUT,'(42x,A)') 'FOUND SUM KEYWORD, NOW OPENING GENERIC_OUTPUT FILE. IF NOTHING SPECIFIED THEN OPENING FILE: "ET_ARRAY.out"'
                                            IF(BL%LINE(LLOC:) == BLNK) THEN
                                                    LLOC=ONE
                                                    CALL OFL%ET_ARRAY_SUM%OPEN("ET_ARRAY.out",LLOC,BL%IOUT,BL%IU)
@@ -233,7 +245,7 @@ MODULE OUTPUT_DATA_FMP_MODULE!, ONLY: OUTPUT_DATA, INITIALIZE_OUTPUT_DATA
                                                    IF(OFL%ET_ARRAY_SUM%IU==Z)  CALL OFL%ET_ARRAY_SUM%OPEN("ET_ARRAY.out",LLOC,BL%IOUT,BL%IU)
                                            END IF
                         CASE("SEPARATE")      
-                                           WRITE(BL%IOUT,'(A)') 'FOUND SEPARATE KEYWORD, NOW OPENING GENERIC_OUTPUT FILE. IF NOTHING SPECIFIED THEN OPENING FILE: "E_n_T_ARRAY.out"'
+                                           WRITE(BL%IOUT,'(42x,A)') 'FOUND SEPARATE KEYWORD, NOW OPENING GENERIC_OUTPUT FILE. IF NOTHING SPECIFIED THEN OPENING FILE: "E_n_T_ARRAY.out"'
                                            IF(BL%LINE(LLOC:) == BLNK) THEN
                                                    LLOC=ONE
                                                    CALL OFL%ET_ARRAY_SEP%OPEN("E_n_T_ARRAY.out",LLOC,BL%IOUT,BL%IU)

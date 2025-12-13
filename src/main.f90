@@ -8,7 +8,7 @@
 !
 !     ******************************************************************
 !
-SUBROUTINE PRINT_MAIN_HEADER(IU)  ! Set to 6 for cmd prompt or use output_unit from: "use, intrinsic:: iso_fortran_env, only: output_unit"
+SUBROUTINE PRINT_MAIN_HEADER(IU, VERSION)  ! Set to 6 for cmd prompt or use output_unit from: "use, intrinsic:: iso_fortran_env, only: output_unit"
   !
   USE, INTRINSIC:: ISO_FORTRAN_ENV, ONLY: stdout=>OUTPUT_UNIT
   USE CONSTANTS, ONLY: NL
@@ -16,9 +16,10 @@ SUBROUTINE PRINT_MAIN_HEADER(IU)  ! Set to 6 for cmd prompt or use output_unit f
   !
   IMPLICIT NONE
   !
-  INTEGER, INTENT(IN)::IU
+  INTEGER,      INTENT(IN   )::IU
+  CHARACTER(*), INTENT(INOUT)::VERSION
   !
-  !1 ASSIGN VERSION NUMBER AND DATE
+  ! ASSIGN VERSION NUMBER AND DATE
   !
   CHARACTER(:),ALLOCATABLE:: VERSION_OWHM
   CHARACTER(:),ALLOCATABLE:: VERSION_MF, VERSION_FMP
@@ -29,7 +30,7 @@ SUBROUTINE PRINT_MAIN_HEADER(IU)  ! Set to 6 for cmd prompt or use output_unit f
   CHARACTER(:),ALLOCATABLE:: Revision
   !
   VERSION_OWHM='2.3'
-  Revision    ='0'
+  Revision    ='1'
   VERSION_MF  ='1.12'
   VERSION_FMP ='4.1'
   VERSION_SWR ='1.04'
@@ -39,11 +40,23 @@ SUBROUTINE PRINT_MAIN_HEADER(IU)  ! Set to 6 for cmd prompt or use output_unit f
   VERSION_CFP ='1.09.57'
   VERSION_SWO ='1.0'
   !
+  VERSION = VERSION_OWHM // "." // Revision
+  !
+  IF(IU == 0) RETURN
+  !
   IF(IU == stdout) THEN
                    WRITE (IU,'(A)') ''
   ELSE
                    WRITE (IU,'(A,/,20x,A,/,/)') '💧🧙💦🌊  <-These symbols help text editors identify file as Unicode UTF8.', &
                                                 'UTF8 is not necessary to view numerical results, but no UTF8 support can have artifacts where non-ascii symbols are used (such as the degree symbol).'
+  END IF
+  !
+  IF(SCAN(Revision, "-rcb") > 0) THEN
+      WRITE(IU,'(A, /, /, A, /, A)')  &
+          " This software version is a Beta Release (-b) or Release Canidate (-rc).", &
+          " This software is preliminary and is subject to revision.", &
+          " It is being provided to meet the need for timely best science and ", &
+          "    has not received final approval by the U.S. Geological Survey (USGS)."
   END IF
   !
   WRITE (IU,'(4A)') 'MODFLOW-OWHM v', VERSION_OWHM,".",Revision !(:MIN(len_trim(Revision), 4))
@@ -93,84 +106,80 @@ END SUBROUTINE
 !
 !
 PROGRAM MODFLOW_OWHM
-  IMPLICIT NONE
-  CHARACTER(1):: NAME_FILE                  !If blank then MF-OWHM checks command arguments
+  implicit none
+  character(1):: name_file                  !If blank then MF-OWHM checks command arguments
+  logical:: program_continue
   !
-  NAME_FILE = ""
-  CALL MODFLOW_OWHM_RUN(NAME_FILE)
+  program_continue = .TRUE.
+  call command_argument_check(program_continue)
   !
-  !CALL MODFLOW_OWHM_RUN('bcf2ss.nam'      )
-  !CALL MODFLOW_OWHM_RUN('etsdrt.nam'      )
-  !CALL MODFLOW_OWHM_RUN('fhb.nam'         )
-  !CALL MODFLOW_OWHM_RUN('ibs2k.nam'       )
-  !CALL MODFLOW_OWHM_RUN('l1a2k.nam'       )
-  !CALL MODFLOW_OWHM_RUN('l1b2k.nam'       )
-  !CALL MODFLOW_OWHM_RUN('l1b2k_bath.nam'  )
-  !CALL MODFLOW_OWHM_RUN('mnw1.nam'        )
-  !CALL MODFLOW_OWHM_RUN('restest.nam'     )
-  !CALL MODFLOW_OWHM_RUN('str.nam'         )
-  !CALL MODFLOW_OWHM_RUN('swtex4.nam'      )
-  !CALL MODFLOW_OWHM_RUN('tc2hufv4.nam'    )
-  !CALL MODFLOW_OWHM_RUN('test1ss.nam'     )
-  !CALL MODFLOW_OWHM_RUN('test1tr.nam'     )
-  !CALL MODFLOW_OWHM_RUN('testsfr2.nam'    )
-  !CALL MODFLOW_OWHM_RUN('testsfr2_tab.nam')
-  !CALL MODFLOW_OWHM_RUN('tr2k_s3.nam'     )
-  !CALL MODFLOW_OWHM_RUN('twri.nam'        )
-  !CALL MODFLOW_OWHM_RUN('twrihfb.nam'     )
-  !CALL MODFLOW_OWHM_RUN('twrip.nam'       )
-  !CALL MODFLOW_OWHM_RUN('MNW2-Fig28.nam'  )
-  !CALL MODFLOW_OWHM_RUN('UZFtest2.nam'    )
-  !
-  !CALL CHDIR('../mf-2005-nwt')
-  !
-  !CALL MODFLOW_OWHM_RUN('etsdrt_nwt.nam'      )
-  !CALL MODFLOW_OWHM_RUN('swtex4_nwt.nam'      )
-  !CALL MODFLOW_OWHM_RUN('test1ss_nwt.nam'     )
-  !CALL MODFLOW_OWHM_RUN('test1tr_nwt.nam'     )
-  !CALL MODFLOW_OWHM_RUN('testsfr2_nwt.nam'    )
-  !CALL MODFLOW_OWHM_RUN('testsfr2_tab_nwt.nam')
-  !CALL MODFLOW_OWHM_RUN('twrip_nwt.nam'       )
-  !CALL MODFLOW_OWHM_RUN('MNW2-Fig28_nwt.nam'  )
-  !CALL MODFLOW_OWHM_RUN('UZFtest2_nwt.nam'    )
-  !
-  !CALL CHDIR('../mf-nwt')
-  !
-  !CALL MODFLOW_OWHM_RUN('Pr1a_MFNWT.nam'      )
-  !CALL MODFLOW_OWHM_RUN('Pr1b_MFNWT.nam'      )
-  !CALL MODFLOW_OWHM_RUN('Pr2MFNWT.nam'        )
-  !CALL MODFLOW_OWHM_RUN('Pr3_MFNWT_higher.nam')
-  !CALL MODFLOW_OWHM_RUN('Pr3_MFNWT_lower.nam' )
-  !CALL MODFLOW_OWHM_RUN('swi2ex4sww.nam'      )
-  !
-  !CALL CHDIR('../mf-swr')
-  !
-  !CALL MODFLOW_OWHM_RUN('SWRSample01.01min.nam')
-  !CALL MODFLOW_OWHM_RUN('SWRSample01.nam'      )
-  !CALL MODFLOW_OWHM_RUN('SWRSample02.nam'      )
-  !CALL MODFLOW_OWHM_RUN('SWRSample03.nam'      )
-  !CALL MODFLOW_OWHM_RUN('SWRSample04.nam'      )
-  !CALL MODFLOW_OWHM_RUN('SWRSample05-nwt.nam'  )
-  !
-  !CALL CHDIR('../mf-swi')
-  !
-  !CALL MODFLOW_OWHM_RUN( 'swi2ex1.nam'         )
-  !CALL MODFLOW_OWHM_RUN( 'swi2ex2_cont.nam'    )
-  !CALL MODFLOW_OWHM_RUN( 'swi2ex2_strat.nam'   )
-  !CALL MODFLOW_OWHM_RUN( 'swi2ex3.nam'         )
-  !CALL MODFLOW_OWHM_RUN( 'swi2ex4_2d.nam'      )
-  !CALL MODFLOW_OWHM_RUN( 'swi2ex4_2d_sww.nam'  )
-  !CALL MODFLOW_OWHM_RUN( 'swi2ex5.nam'         )
-  !CALL MODFLOW_OWHM_RUN( 'swi2ex6_1.nam'       )
-  !CALL MODFLOW_OWHM_RUN( 'swi2ex6_2.nam'       )
-  !CALL MODFLOW_OWHM_RUN( 'swi2ex6_3_0.005.nam' )
-  !CALL MODFLOW_OWHM_RUN( 'swi2ex6_3_0.010.nam' )
-  !CALL MODFLOW_OWHM_RUN( 'swi2ex6_3_0.100.nam' )
-  !CALL MODFLOW_OWHM_RUN( 'swi2ex6_3_1.000.nam' )
-  !!
-  !CONTINUE
+  if(program_continue) then
+      name_file = ""
+      call MODFLOW_OWHM_RUN(name_file)
+  end if
   !
 END PROGRAM MODFLOW_OWHM
+!
+SUBROUTINE COMMAND_ARGUMENT_CHECK(program_continue)
+  use, intrinsic:: iso_fortran_env, only: stdout=>output_unit
+  implicit none
+  logical, intent(inout) :: program_continue
+  integer :: narg, iarg, i, j, p, ONE
+  logical :: FALSE
+  character(128) :: arg
+  character(16) :: version
+  FALSE = .FALSE.
+  ONE = 1
+  NARG = command_argument_count()
+  !
+  if (NARG < ONE) return
+  !
+  do iarg=ONE, NARG
+     call get_command_argument(iarg, arg)
+     arg = adjustl(arg)
+     !
+     if (arg(1:1) == "-") then   ! command argument found
+         !
+         j = scan(arg, "=:") - 1
+         if(j < 1) j = len_trim(arg)
+         !
+         do i=2, j
+             p = INDEX( "ABCDEFGHIJKLMNOPQRSTUVWXYZ", arg(I:I))
+             !
+             IF(p > 0) arg(I:I) = "abcdefghijklmnopqrstuvwxyz"(p:p)
+         END DO
+         !
+         i = 2
+         if (arg(2:2) == "-") i = 3
+         !
+         select case (arg(i:j))
+         case("h", "help")
+             write(stdout,'(A,/)')
+             write(stdout,'(A,/)') "MODFLOW-OWHM Help Menu"
+             write(stdout,'(A,/)') REPEAT('-',84)
+             write(stdout,'(A,/)') "Command arguments supported:"
+             write(stdout,'(A,/)') "-h --help      : This menu"
+             write(stdout,'(A)'  ) "-v --version   : Print the verison of the software."
+             write(stdout,'(A)'  ) '                 The version is printed as "MODFLOW-OWHM vX.Y.Z-bA"'
+             write(stdout,'(A)'  ) '                    where X, Y, Z, and A are set to the version numbers'
+             write(stdout,'(A,/)') '                       "-bA" is only present for beta releases'
+             write(stdout,'(A)'  ) "NameFile       : If no - is present, then the input is assumed to be"
+             write(stdout,'(A,/, /)') "                 the MODFLOW-OWHM name file and the simulation starts."
+             write(stdout,'(A,/)') REPEAT('-',84)
+             write(stdout,'(A,/)') "Now printing the standard header before exiting the program."
+             write(stdout,'(A,/)') REPEAT('-',84)
+             call PRINT_MAIN_HEADER(stdout, version)
+             program_continue = FALSE
+             EXIT
+         case("v", "version")
+             call PRINT_MAIN_HEADER(stdout, version)
+             program_continue = FALSE
+             EXIT
+         end select
+     end if
+  end do
+  !
+END SUBROUTINE
 !
 SUBROUTINE MODFLOW_OWHM_RUN(NAME)
   !
@@ -271,7 +280,7 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
   !
   !2------WRITE BANNER TO SCREEN AND DEFINE CONSTANTS.
   !
-  CALL PRINT_MAIN_HEADER(STDOUT)  !PRINT TO COMMAND PROMPT  --Note STDOUT=6
+  CALL PRINT_MAIN_HEADER(STDOUT, OWHM_VERSION)  !PRINT TO COMMAND PROMPT  --Note STDOUT=6
   !
   NAM_UNIT = Z
   LGR_UNIT = Z
@@ -520,10 +529,11 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
   STRESS_PERIOD: DO KPER = ONE, NPER  ! ============================================================================================================
       !
       FASTFORWARD = KPER < SPSTART .OR. SPEND < KPER .OR. INPUT_CHECK
+      IF(SPEND < KPER .AND. LIMIT_INPUT_CHECK_OUTPUT) EXIT STRESS_PERIOD  ! Simulation is over and no dummy output
       !
-      ! If simulation is too fast, then disable cmd iteration printing
+      ! If simulation is too fast, then disable cmd iteration printing; only check for the first 3 simulated stress period
       ! If ITER_PRINT = TRUE, then CALL CMD_PRINT_STOP(ITER_SIZE) else CALL CMD_PRINT_ITER(KITER, ITER_SIZE)
-      IF(KPER == 3)  THEN
+      IF(KPER == SPSTART + 2)  THEN
          IF(CMD_ITER_INFO /= Z) ITER_PRINT = CPU_TIME >= 0. .AND. FINISH > Z .AND. START > Z  .AND. CPU_TIME < 0.2
       END IF
       !
@@ -606,7 +616,7 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
           !
           IF(IUNIT(61) /= Z) CALL FMP_RP(KKPER,IGRID)
           !
-          IF(IUNIT(40) /= Z) CALL GWF2DRT7RP(IUNIT(40),IGRID)             !DRT must be after FMP_RP
+          IF(IUNIT(40) /= Z) CALL GWF2DRT7RP(IUNIT(40),KKPER,IGRID)             !DRT must be after FMP_RP
           IF(IUNIT(64) /= Z) CALL GWF2SWR7RP(IUNIT(64),KKPER,IGRID)       !SWR - JDH
           !
           IF(IUNIT(66) /= Z) CALL GWF2AG7AD(IUNIT(66),KKPER)
@@ -701,17 +711,24 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
               !
           END DO GRID_AD   ! -------------------------------------------------------------------------------------------------------------------------
           !
-          IF(KSTP == ONE .AND. HAS_STARTDATE) THEN
-              WRITE(*,24) KPER,KSTP,DATE_SP(KPER)%TS(0)%STR_MONTHYEAR()
-          ELSE
-              WRITE(*,25) KPER,KSTP                            !seb moved outside of IGRID LOOP
+          IF(KSTP == ONE) THEN
+             IF(FASTFORWARD .AND. HAS_STARTDATE) THEN
+                WRITE(*,26) KPER,KSTP,DATE_SP(KPER)%TS(0)%STR_MONTHYEAR()
+             ELSEIF(FASTFORWARD) THEN
+                WRITE(*,27) KPER,KSTP      
+             ELSEIF(HAS_STARTDATE) THEN
+                WRITE(*,24) KPER,KSTP,DATE_SP(KPER)%TS(0)%STR_MONTHYEAR()
+             ELSE
+                WRITE(*,25) KPER,KSTP
+             END IF
           END IF
           !
           !24  FORMAT(' Solving:  Stress Period: ',i6,4x,'Time step: ',i6,4x,'Groundwater-Flow Eqn.',14x A)
           !25  FORMAT(' Solving:  Stress Period: ',i6,4x,'Time step: ',i6,4x,'Groundwater-Flow Eqn.')
           24  FORMAT(' Solving:  Stress Period: ',i6,4x,'Time step: ',i6,14x,A)
           25  FORMAT(' Solving:  Stress Period: ',i6,4x,'Time step: ',i6)
-          26  FORMAT('Skipping:  Stress Period: ',i6,4x,'Time step: ',i6)
+          26  FORMAT('Skipping:  Stress Period: ',i6,4x,'Time step: ',i6,14x,A)
+          27  FORMAT('Skipping:  Stress Period: ',i6,4x,'Time step: ',i6)
           !
           ! If simulation is too fast, then disable cmd iteration printing
           IF(ITER_PRINT) THEN
@@ -731,7 +748,7 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
           ICNVG   = Z
           !
           IF(INPUT_CHECK) THEN
-                                 ! Note that if IINPUT_CHECK = True, then FASTFORWARD = True
+                                 ! Note that if INPUT_CHECK = True, then FASTFORWARD = True
                                  !
                                  IF( .NOT.( KPER == ONE .AND. KSTP == ONE ) )  THEN ! BY PASS FM LOOPS AND GRID LOOPS
                                      !
@@ -750,7 +767,11 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
                                  END DO
                                  !
                                  IF(KSTP == ONE) INTER = INTER//' skipped  '
-                                 IF( .NOT.( KPER == ONE .AND. KSTP == ONE ) ) CYCLE TIME_STEP  !SKIP TIME STEPS BEFORE SPSTART AND AFTER IT
+                                 IF( .NOT.( KPER == ONE .AND. KSTP == ONE ) ) THEN
+                                     ICNVG = ONE
+                                     KITER = ONE
+                                     CYCLE TIME_STEP  !SKIP TIME STEPS BEFORE SPSTART AND AFTER IT
+                                 END IF
           ELSE
                ISTP = ISTP + ONE
           END IF
@@ -907,8 +928,14 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
                    !
                    !--------------CHECK IF FASTFORWARD FEATURE IS IN EFFECT
                    !
-                   IF ( FASTFORWARD .AND. IGRID==NGRIDS) CYCLE TIME_STEP
-                   IF ( FASTFORWARD ) CYCLE GRID_FM
+                   IF ( FASTFORWARD ) THEN
+                                      ICNVG = ONE
+                                      IF (LIMIT_INPUT_CHECK_OUTPUT .AND. IGRID==NGRIDS) THEN 
+                                          CYCLE TIME_STEP
+                                      ELSE 
+                                          CYCLE GRID_FM
+                                      END IF
+                   END IF
                    !
                    CALL BAS_PRE_SOLVER(IGRID, KPER, KSTP, KITER) !SAVE PREVIOUS HNEW AND SET UP ADVANCE DAMPING IF REQUESTED
                    !
@@ -1239,20 +1266,22 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
               IF(IUNIT(63) /= Z) CALL GWF2NWT1BD(KITER,IGRID)
               !
               !  Observation simulated equivalents
-              CALL OBS2BAS7SE(IUNIT(28),IGRID)
-              !
-              IF(IUNIT(33) /= Z) CALL OBS2DRN7SE(IGRID)
-              IF(IUNIT(34) /= Z) CALL OBS2RIV7SE(IGRID)
-              IF(IUNIT(35) /= Z) CALL OBS2GHB7SE(IGRID)
-              IF(IUNIT(38) /= Z) CALL OBS2CHD7SE(KKPER, IUNIT(62), IGRID)
-              IF(IUNIT(41) /= Z) CALL OBS2DRT7SE(IGRID)
-              IF(IUNIT(43) /= Z) THEN
-                                   CALL GWF2HYD7BAS7SE(1,IGRID)
-                                   IF(IUNIT(19) /= Z) CALL GWF2HYD7IBS7SE(1,IGRID)
-                                   IF(IUNIT(54) /= Z) CALL GWF2HYD7SUB7SE(1,IGRID)
-                                   IF(IUNIT(57) /= Z) CALL GWF2HYD7SWT7SE(1,IGRID)
-                                   IF(IUNIT(18) /= Z) CALL GWF2HYD7STR7SE(1,IGRID)
-                                   IF(IUNIT(44) /= Z) CALL GWF2HYD7SFR7SE(1,IGRID)
+              IF(.not. FASTFORWARD) THEN
+                  CALL OBS2BAS7SE(IUNIT(28),IGRID)
+                  !
+                  IF(IUNIT(33) /= Z) CALL OBS2DRN7SE(IGRID)
+                  IF(IUNIT(34) /= Z) CALL OBS2RIV7SE(IGRID)
+                  IF(IUNIT(35) /= Z) CALL OBS2GHB7SE(IGRID)
+                  IF(IUNIT(38) /= Z) CALL OBS2CHD7SE(KKPER, IUNIT(62), IGRID)
+                  IF(IUNIT(41) /= Z) CALL OBS2DRT7SE(IGRID)
+                  IF(IUNIT(43) /= Z) THEN
+                                       CALL GWF2HYD7BAS7SE(1,IGRID)
+                                       IF(IUNIT(19) /= Z) CALL GWF2HYD7IBS7SE(1,IGRID)
+                                       IF(IUNIT(54) /= Z) CALL GWF2HYD7SUB7SE(1,IGRID)
+                                       IF(IUNIT(57) /= Z) CALL GWF2HYD7SWT7SE(1,IGRID)
+                                       IF(IUNIT(18) /= Z) CALL GWF2HYD7STR7SE(1,IGRID)
+                                       IF(IUNIT(44) /= Z) CALL GWF2HYD7SFR7SE(1,IGRID)
+                  END IF
               END IF
               !
               !7C5---PRINT AND/OR SAVE DATA.
@@ -1265,7 +1294,7 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
                          HCSV,IERR,HPCG,DAMPPCGT,ISSFLG(KKPER),HDRY,       &
                          IHCOFADD,BPOLY)
               !
-              CALL GWF2BAS7OT(KKSTP,KKPER,ICNVG,1,IGRID,BUDPERC,KITER,MXITER)
+              CALL GWF2BAS7OT(KKSTP,KKPER,ICNVG,1,IGRID,BUDPERC,KITER,MXITER,FASTFORWARD)
               !
               IF(IUNIT(19) /= Z) CALL GWF2IBS7OT(KKSTP,KKPER,IUNIT(19),IGRID)
               !

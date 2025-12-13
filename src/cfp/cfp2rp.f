@@ -670,7 +670,7 @@ C
         ENDIF
 C
 C--CALCULATE TOTAL LENGTH AFTER PYTHAGORAS
-        LENGTH = DSQRT(X**DOS+Y**DOS+Z**DOS)
+        LENGTH = DSQRT(X**2+Y**2+Z**2)
         CON_DATA(J, 3) = TORTUOS(J)*LENGTH
 C 
         IF ( CON_DATA(J,3).LT.NEARZERO_30 ) WRITE (IOUT, *)                

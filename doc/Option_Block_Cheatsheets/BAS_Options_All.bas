@@ -41,6 +41,10 @@ BEGIN OPTIONS
     #          is carried forward and used as the starting head for STR.         --Note that INPUT_CHECK is the same as  FASTFORWARD NPER+1
     FASTFORWARD STR STP
     #
+    # Only applies if FASTFORWARD is in use.
+    #   Include to limit output written to output files (e.g. list or cell-by-cell files)
+    #   for stress periods are skipped by FASTFORWARD or INPUT_CHECK.
+    LIMIT_FASTFORWARD_OUTPUT
     #
     # Has the same effect as including the "COMPACT BUDGET" in the Output Control (OC) package
     COMPACT BUDGET 
@@ -144,7 +148,7 @@ BEGIN OPTIONS
     #
     # PRINT_WATER_TABLE and PRINT_WATER_DEPTH use the same input options as PRINT_HEAD, but 
     #   the output for:
-    #        PRINT_WATER_TABLE is the water table elevation, which is defined as the head for the upper most layer with the HEAD > that layer's bottom elevation (upper most saturated cell)
+    #        PRINT_WATER_TABLE is the water table elevation, which is defined as the head for the upper most active layer with the HEAD > that layer's bottom elevation (upper most saturated cell)
     #        PRINT_WATER_DEPTH is the depth to the water table from the ground surface elevation (GSE). That is, GSE minus the water table elevation. 
     #           GSE is ether the top elevation of the upper most active cell
     #                  or specified in the DIS package with the SURFACE_ELEVATION option.
@@ -152,6 +156,18 @@ BEGIN OPTIONS
     PRINT_WATER_TABLE  SPTS  Generic_Output  [SIGFIG  NDIG]
     # 
     PRINT_WATER_DEPTH  SPTS  Generic_Output  [SIGFIG  NDIG]
+    #
+    # PRINT_WATER_TABLE_LAYER {LIST, ARRAY} use the same input options as PRINT_HEAD, but 
+    #   the output for WTLAY, which is the layer that has the head for the upper most active layer 
+    #   with the HEAD > that layer's bottom elevation (upper most saturated cell).
+    #   If all layers have IBOUND=0, then the layer is set to zero.
+    #      The versions differ in how the output is formatted, with:
+    #        PRINT_WATER_TABLE_LAYER LIST  - Writes the water table layers in a column based format with the header: SP TS ROW COL WTLAY
+    #        PRINT_WATER_TABLE_LAYER Array - Writes a PRINT_HEAD style header followed by a NROW by NCOL array of layer numbers.
+    #
+    PRINT_WATER_TABLE_LAYER LIST   SPTS  Generic_Output
+    # 
+    PRINT_WATER_TABLE_LAYER ARRAY  SPTS  Generic_Output
     #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Save entire model grid head value using the MODFLOW-2005 standard write utility.

@@ -19,12 +19,11 @@ External collaborators (non-USGS) are free to join, but require a USGS employee 
 
 Please contact one of the following with your name, affiliation, email, desired username, and sentence as to why you want to be added to the code.usgs.gov
 
-| Contact       | Email              |
-| ------------- | ------------------ |
-| Scott Boyce   | <seboyce@usgs.gov> |
-| Zach Stanko   | <zstanko@usgs.gov> |
-| Wes Henson    | <whenson@usgs.gov> |
-| Claudia Faunt | <ccfaunt@usgs.gov> |
+| Contact           | Email                 |
+| ----------------- | --------------------- |
+| John (Ryan) Banta | <jbanta@usgs.gov>     |
+| Zach Stanko       | <zstanko@usgs.gov>    |
+| Jon Traum         | <jtraum@usgs.gov>     |
 
 
 
@@ -71,7 +70,6 @@ If you have direct contributions you would like considered for incorporation int
 [1]: https://code.usgs.gov/software-release/inventory/issues
 [2]: https://docs.gitlab.com/ee/gitlab-basics/fork-project.html
 [3]: https://docs.gitlab.com/ee/gitlab-basics/add-merge-request.html
-
 
 
 

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/env bash
 
 # This will be the location of the exectuable that will be used by
 # All of the batch scripts in this folder
@@ -28,6 +28,24 @@ if [ "$1" = "debug" ]; then
     fi
 fi
 #
+# ---- GMG command arg given  ---------------------------------------------------------------------------
+#
+if [ "$2" = "gmg" ]; then
+    if [ "$OS" = "Windows_NT" ]
+    then
+      PROGRAM=mf-owhm-gmg.exe
+    else
+      PROGRAM=mf-owhm-gmg.nix
+    fi
+    if [ "$1" = "debug" ]; then
+        if [ "$OS" = "Windows_NT" ]
+        then
+          PROGRAM=mf-owhm-gmg-debug.exe
+        else
+          PROGRAM=mf-owhm-gmg-debug.nix
+        fi
+    fi
+fi
 #
 # ---- Override and use specified PROGRAM. Uncomment and set to use  --------------------------------------
 #

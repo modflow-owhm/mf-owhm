@@ -76,13 +76,14 @@ C     INITIALIZE AND READ VARIABLES FOR HEAD OBSERVATIONS
 C     ******************************************************************
 C     SPECIFICATIONS:
 C     ------------------------------------------------------------------
-      USE GLOBAL, ONLY: NCOL,NROW,NLAY,
+      USE GLOBAL, ONLY: NCOL,NROW,NLAY,SPSTART,
      1                  NPER,NSTP,PERLEN,TSMULT,ISSFLG,IOUT,ITRSS
       USE OBSBASMODULE
       USE GWFBASMODULE,ONLY: HAS_STARTDATE
       USE FILE_IO_INTERFACE, ONLY: READ_TO_DATA
       USE STRINGS,           ONLY: GET_NUMBER, GET_INTEGER
 C
+      INTEGER, INTENT(IN) :: IUHDOB, IGRID
       CHARACTER(768):: LINE
       CHARACTER(10)::DATE
       CHARACTER(13)::DYEAR
@@ -94,6 +95,11 @@ C1------ALLOCATE AND INITIALIZE TIME STEP COUNTER FOR USE BY ANY
 C1------OBSERVATION PACKAGE.
       ALLOCATE(ITS)
       ITS=0
+      IF(SPSTART > 1) THEN       ! Account for stress period/time steps that are skipped -- could do it as: ITS = SUM(NSTP(:SPSTART-1))
+          DO I=1, SPSTART-1 
+              ITS = ITS + NSTP(I)
+          END DO
+      END IF
       IF(IUHDOB.EQ.0) GO TO 700
 C
 C2------ALLOCATE OTHER SCALARS IF HEAD OBSERVATIONS ARE BEING SPECIFIED.
@@ -472,6 +478,7 @@ C19-----RETURN.
   700 CALL SOBS2BAS7PSV(IUHDOB,IGRID)
       
       END SUBROUTINE
+C
       SUBROUTINE OBS2BAS7SE(IUHDOB,IGRID)
 C     ******************************************************************
 C     INTERPOLATE HEADS.  ACCOUNT FOR DRY CELLS, IF NEEDED.

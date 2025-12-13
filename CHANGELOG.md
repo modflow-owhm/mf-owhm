@@ -4,7 +4,7 @@
 
 **[New Feature Changelog](CHANGELOG_Features.md)**
 
-Boyce, S.E., 2023, MODFLOW One-Water Hydrologic Flow Model (MF-OWHM) Conjunctive Use and Integrated Hydrologic Flow Modeling Software, version X.Y.Z: U.S. Geological Survey Software Release, https://doi.org/10.5066/P9P8I8GS
+Boyce, S.E., 2025, MODFLOW One-Water Hydrologic Flow Model (MF-OWHM) Conjunctive Use and Integrated Hydrologic Flow Modeling Software, version X.Y.Z: U.S. Geological Survey Software Release, https://doi.org/10.5066/P9P8I8GS
 
 Boyce, S.E., Hanson, R.T., Ferguson, I., Schmid, W., Henson, W., Reimann, T., Mehl, S.M., and Earll, M.M., 2020, One-Water Hydrologic Flow Model: A MODFLOW based conjunctive-use simulation software: U.S. Geological Survey Techniques and Methods 6–A60, 435 p., https://doi.org/10.3133/tm6A60
 
@@ -18,11 +18,127 @@ Boyce, S.E., Hanson, R.T., Ferguson, I., Schmid, W., Henson, W., Reimann, T., Me
 
 &nbsp;
 
+## 2.3.1
+
+2025-12-10
+
+git commit log: `git log --reverse 455800a6bf6138e1b00c5ee17b6eb2108614e2e3^..e915dcdc65a2a8418f6ef57d3f8015d6750b24a9`
+
+### Fixed
+* `FMP` Farm Process
+  * `BREAKING CHANGE`: Farm Net Recharge (`FNR`) writes to the Cell-By-Cell (`CBC`) in a way that separates Evapotranspiration from Groundwater (`ETgw`) and Deep Percolation (`DPERC`). This changes the volumetric budget so the `FNR` `IN` only contains `DPERC` and `FNR` `OUT` only contains `ETgw`. Note the net of `IN-OUT` remains the same.
+    * Previously, the FMP writes `FNR` as `DPERC-ETgw` that is stored as a single array. This resulted in programs, such as ZoneBudget, to collect FNR IN as being the set of locations who had a net-in rather than just being `DPERC`. 
+    * Now, `FNR` is written using the list-style/compact `CBC` writer that enables writing separate records for `ETgw` and `DPERC`.
+  * SFR is not required when using the `SURFACE_WATER` block options: `SEMI_ROUTED_DELIVERY`, `SEMI_ROUTED_RETURN`, or `ROUTED_RETURN_ANY_REACH`, `ROUTED_RETURN_ANY_NON_DIVERSION_REACH`. Instead, if SFR is not part of the simulation, they are disabled a warning is raised.
+  * `BARE_PRECIPITATION_CONSUMPTION_FRACTION` removed from FMP_Template.
+    * The Farm Process input template, [doc/FMP_Template/FMP_Template.fmp](doc/FMP_Template/FMP_Template.fmp), incorrectly had a legacy keyword. This option was superseded by the `SOIL` block `EFFECTIVE_PRECIPITATION_TABLE` and the `CLIMATE` block `PRECIPITATION_POTENTIAL_CONSUMPTION`, which are applied to both bare and non-bare land uses.
+  * Deep percolation conversion to runoff if all model cells are `IBOUND=0` beneath it.
+    * If all the cells beneath the land surface are `IBOUND=0`, then deep percolation is shifted to runoff. This was correctly implemented for the solver, but not for the output files. This should improve some of the reported mass errors in a simulation, but will not change the actual head solution.
+  * Keywords that support optional List-Array Input (LAI) failed to identify the LAI keyword if it was `CONSTANT` or `INTERNAL`. 
+    * Several FMP keywords may only be the keyword itself to apply to all records, or optionally specify a `LAI[S,T,L]` input to specify the input on a record by record basis.
+    * This effected:  
+      `NO_RETURN_FLOW`  
+      `ZERO_CONSUMPTIVE_USE_BECOMES_BARE_SOIL`  
+      `EVAPORATION_IRRIGATION_FRACTION_SUM_ONE_CORRECTION`  
+      `ALLOCATION_BENEFICIARY_SPLIT`
+    * For example, `NO_RETURN_FLOW  [ LAI[S,T,L] ]` indicates that all runoff should be converted to deep percolation for all Farms/WBSs. The following is an example, where the last two bullets would not pick up the LAI keyword but now does (assumes `NWBS=3`):
+      * `NO_RETURN_FLOW   # Applies to all WBS`   
+      * `NO_RETURN_FLOW STATIC LIST OPEN/CLOSE no_return_flow.txt  # input located in no_return_flow.txt`   
+      * `NO_RETURN_FLOW CONSTANT 1   # Applies to all WBS - Now works`   
+      * `NO_RETURN_FLOW INTERNAL  # Specify for each WBS - Now works`  
+        `1  1   # WBS 1 has it enabled`     
+        `1  0   # WBS 2 has it disabled`  
+        `1  1   # WBS 3 has it enabled`  
+  * Cleaned up information written to the list file that describe the Groundwater Allotment that is assigned. 
+  * `ADDED_DEMAND` without specifying the `ADDED_DEMAND_RUNOFF_SPLIT` now raises a warning.
+  * If a model is started at a stress period other than 1 with the `FASTFORWARD` `BAS` option, then the headers were not written to the various FMP output files. This is now fixed.
+
+* `BAS` Basic Package
+  * `PRINT_WATER_DEPTH` output file wrote an empty line to `PRINT_WATER_TABLE` output file.
+    * Fixed `PRINT_WATER_DEPTH` from using the unit number associated with the BAS option `PRINT_WATER_TABLE` when writing an empty line to separate records. If `PRINT_WATER_TABLE`, then a random file called fort.xxx with xxx being a random number, would be written with nothing but blank spaces.
+  * `FASTFORWARD` caused `HOB` to not write out the header at the top of its output.
+  * `FASTFORWARD` caused `HYD` to not write skipped time steps with `HYDNOH`.
+  
+* `NWT` Newton Solver (MF-OWHM specific version)
+  * Allow keyword `CONTINUE` after the `SPECIFY` keyword.
+    * The NWT solver instruction manual defines that a set of numbers are read after the `SPECIFY` keyword option. However, the MODFLOW-NWT source code allows for the `CONTINUE` keyword option to appear after `SPECIFY` and before the numerical parameters. This is also the default behavior for FloPy when making a NWT solver file. This feature was added back to maintain compatibility with MODFLOW-NWT and FloPy.
+    * It is recommended to use the BAS option `NO_FAILED_CONVERGENCE_STOP`, which has the same effect and is not solver dependent.
+
+* `UZF` did not set correctly the `CBC` unit number when using the GLOBAL `CBC` unit from the `BAS` package.
+* `SFR` changed reach depth error to warning to allow a simulation to continue.
+* `SWO` Surface Water Operations
+  * Improved warning message descriptions.
+  * `ULOAD` error when reading the `ABSOLUTE_CONVERGENCE_CRITERIA` and `RELATIVE_CONVERGENCE_CRITERIA` keywords that erroneously raised "Unable to open EXTERNAL XYZ" error, where XYZ was a random, small integer. This problem arose because the `ULOAD` unit number must be set to zero to indicate a new file or unit number must be specified, so the last value stored in that number was passed in resulting in the error message.
+  * `RESERVOIR_SPLIT_FRACTIONS` keyword added.
+    * In an early beta release of SWO, the split reservoir setting required the keyword `RESERVOIR_SPLIT_FRACTIONS`, however for the final release of SWO this keyword was changed to `RESERVOIR_PRIMARY_REREGULATION_SPLIT`. For backward compatibility, both keywords are now checked for and serve the same purpose.
+
+* `Slang` MF-OWHM Language Interpreter (only used by SWO)
+  * `SFR.seg.INFLOW` and `SFR.seg.OUTFLOW` are now correctly set for iteration-based slang scripts.
+    * Slang can be invoked at different times of the simulation, model start, stress period start, time step start, iteration start, and at the end of those same times. For scripts invoked at the start of each iteration, the variables that are set to the inflow or outflow of a specific SFR segment reused the solution from the second iteration. It now updates with the solution of the previous iteration.
+  * Add check for valid `REQ.DELIVERY.FARM` variables.
+    * Slang property variables are set to values within MF-OWHM based on the current model state. The variables `REQ.DELIVERY.FARM.#` and `REQ.DELIVERY_VOL.FARM.#`, where # is replaced by a valid FARM/WBS number, are set to the water delivered to the WBS. However, if the user specified a number <1 or >NWBS resulted in random behavior, so a check was added to prevent this.
+  * Fixed incorrect handling of duplicate variable names.
+    * If a variable name, in the variable definition input is specified twice, then only one value should be stored. However, if a user happen to define the same variable name in the `PROPERTY` and `RETURN` variable blocks, then slang would correctly drop the duplicate from the `PROPERTY` block, but incorrectly drop the last variable defined in the block. However if the user entered a bad number, then either the variable was set to a random value or resulted in a runtime index error.
+
+* `DRT` Drains with Return Flow (MF-OWHM specific version)
+  * `AUTOMATIC_NEGATIVE_ITMP` option for drains that used FMP to collect the drain flow as runoff did not update the corresponding Water Balance Subregion (WBS) if the DRT cell was set to automatically determine the WBS and the WBS changes by stress period. This issue has been fixed.
+  
+* `CFP` Conduit Flow Process (MF-OWHM specific version)
+  * Fixed an input read error for the advanced CFP input, which reads in a set of boundary condition flags to modify the input structure. If the advanced input is skipped, then an `X` must be used as a placeholder. However, this raised an error that the option was not found.
+  * Index error for Time-Dependent Boundary Conditions (TD)
+    * The search algorithm for finding the time interval no longer raises an index error if the time falls within the first interval. 
+    * The algorithm was also refactored to improve the execution speed.
+  * Remove potential of taking `sqrt` of a negative number.
+
+* `validate_example_results.f90` 
+  * Fixed missing character initialization.
+
+  * Includes owhm-v2 simple examples as part of validation.
+
+* `examples/bash_example_run/1_RunValidation.sh`:
+  * The example driver bash script runs all the example problems and then runs a Fortran tool to check if they match a known hash value. If one or more examples do not match, then the Fortran tool returns a non-zero exit status code. However, on some versions of bash this would instead exit the entire script preventing the clean up and closing comments from running. Instead a set of if and conditional `||` are used to check if the examples pass and then the script completes normally.
+
+* `options.print_convergence.txt` fixed an incorrect header description.
+
+* `BiF` code updates that fix an issue with the `COMPRESSED_VALUE_STORAGE` not correctly handling zero stored values. This only occurs when it previously had a value and then was reallocated to no values.
+
+
+### Refactoring
+
+* `FMP`
+  * `EFFICIENCY` keyword changed to `IRRIGATION_EFFICIENCY`
+  * `EFFICIENCY_IMPROVEMENT ` keyword changed to `IRRIGATION_EFFICIENCY_IMPROVEMENT`
+    * The original keywords are still supported to maintain backward compatibility, but the new versions are now used in the FMP_Template and LIST output.
+
+* `LPF` and `UPW` improved wettable description.  
+  The LPF/UPW packages output the layer wettable description to the list file as `NEVER-DRY` or `WETTABLE`.  
+  To be more descriptive the variable now outputs:
+    * `NEVER-DRY`
+      * Indicates layer is confine
+    * `STAY-DRY`
+      * Indicates layer is convertible without wetting
+    * `WETTABLE`
+      * Indicates layer is convertible with wetting
+* `fmp_template.fmp`
+  * Several of the FMP keywords did not indicate the units of the input. This has been corrected to include the units for all keywords.
+
+* `CFP` changed automatic arrays to allocatable to remove potential of a stack overflow for large models.
+* `CFP` changed exponents from real to integers to improve speed.
+  * For example, `x**3.0` was changed to `x**3` to tell the compiler to expand the variable rather than using a floating point pow library. That is, `x**3` results in the compiler doing `x*x*x` in the assembly code.
+* LineFeed comment cleaning and changed Fortran equality letters to symbols (`.EQ.` was changed to `==`; `.GT.` was changed to `>`; ...)
+* `Slang` added to `TYPE(VARIABLE_NAME_MEANING)` the routine `SUBROUTINE EQUALITY_VARIABLE_NAME_MEANING`, which is assigned as the `GENERIC :: OPERATOR(==)` to allow variable equality checks.
+* Bash scripts now start with `#!/bin/env bash` instead of `#!/bin/bash`
+
+
+------
+
+&nbsp;
+
 ## 2.3.0
 
 2024-01-10
 
-git commit log: `git log 9d9f5b50c77a03b538e4ec818f5a67e7bcf3e5ea..HEAD`
+git commit log: `git log --reverse 9d9f5b50c77a03b538e4ec818f5a67e7bcf3e5ea^..455800a6bf6138e1b00c5ee17b6eb2108614e2e3`
 
 ### HYDFMT v1.2
 
@@ -276,7 +392,7 @@ Only MODE 1 is allowed until this issue is fixed.
 
 2022-01-20
 
-git commit log: `git log 4bfb023b3a0f18d8a53a35146f85a93528d6ddd0..9d9f5b50c77a03b538e4ec818f5a67e7bcf3e5ea` 
+git commit log: `git log --reverse 4bfb023b3a0f18d8a53a35146f85a93528d6ddd0^..9d9f5b50c77a03b538e4ec818f5a67e7bcf3e5ea` 
 
 ### ZoneBudget v3.2
 
@@ -430,7 +546,7 @@ Initial release of MODFLOW Surface Water Operations (`SWO`) in MF-OWHM
   simulating large-scale surface water management in MODFLOW-based hydrologic models:  
   Denver, Colo., Bureau of Reclamation Technical Memorandum no. 86-68210–2016-02, 96 p.
 
-git commit log: `git log d8ec82ae504a2aaec594ccd576f8674961f59404..4bfb023b3a0f18d8a53a35146f85a93528d6ddd0`
+git commit log: `git log --reverse d8ec82ae504a2aaec594ccd576f8674961f59404^..4bfb023b3a0f18d8a53a35146f85a93528d6ddd0`
 
 ### Fixed
 
@@ -467,7 +583,7 @@ git commit log: `git log d8ec82ae504a2aaec594ccd576f8674961f59404..4bfb023b3a0f1
 
 2021-05-25
 
-git commit log: `git log 3adf1e3b8e634d83b8296fd673b3e3360a5cae06..d8ec82ae504a2aaec594ccd576f8674961f59404` 
+git commit log: `git log --reverse 3adf1e3b8e634d83b8296fd673b3e3360a5cae06^..d8ec82ae504a2aaec594ccd576f8674961f59404` 
 
 ### Fixed
 
@@ -481,7 +597,7 @@ git commit log: `git log 3adf1e3b8e634d83b8296fd673b3e3360a5cae06..d8ec82ae504a2
 
 2021-05-15
 
-git commit log: `git log 12b331ce38c47a7e88f7da234c189ffa585d637a..3adf1e3b8e634d83b8296fd673b3e3360a5cae06`  
+git commit log: `git log --reverse 12b331ce38c47a7e88f7da234c189ffa585d637a^..3adf1e3b8e634d83b8296fd673b3e3360a5cae06`  
 or web view at: https://code.usgs.gov/modflow/mf-owhm/-/compare/2.0.1..2.0.2
 
 ### Merge ⯬ BiF v1.0.1
@@ -573,3 +689,4 @@ Naming convention of source files:
 - `_interface` indicates source code contains a generic `INTERFACE` call for a set of subroutines for a specific task.
 - `_instruction` indicates source code defines one or more `Derived Data Types` definitions (Fortran Objects) and their associated methods (subroutines and functions associated with the object). 
 
+clear

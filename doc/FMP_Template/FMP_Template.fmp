@@ -1,4 +1,10 @@
 #
+#
+##########################################################################################################################
+#   If you just want to go to the input template, search for: BEGIN GLOBAL DIMENSION  or go to Line 522                  #
+##########################################################################################################################
+#
+#
 # FMP4 ALL INPUT OPTIONS
 #
 #   This is a simple text file that provides the FMP basic block input structure
@@ -115,10 +121,10 @@
 #                   or more simply just:
 #                                         DEFICIENCY_SCENARIO STATIC LIST  CONSTANT 1
 #
-#                   An example of List-Style with 2 properties loaded (e.g. EFFICIENCY keyword).
+#                   An example of List-Style with 2 properties loaded (e.g. IRRIGATION_EFFICIENCY keyword).
 #                   Record ID is the the WBS number, and represents where the properties are applied,
-#                   and after the RecID is the EFFICIENCY for each irrigation type for that WBS.
-#                                         EFFICIENCY STATIC LIST  INTERNAL
+#                   and after the RecID is the IRRIGATION_EFFICIENCY for each irrigation type for that WBS.
+#                                         IRRIGATION_EFFICIENCY STATIC LIST  INTERNAL
 #                                            #RecID  IRR1  IRR2
 #                                               1    0.6   0.8
 #                                               2    0.6   0.8
@@ -127,9 +133,9 @@
 #
 #                   Array-Style reads NROW by NCOL values
 #                   to apply properties spatially rather then through the record ID
-#                   The keyword EFFICIENCY supports both List-Style and Array-Style.
+#                   The keyword IRRIGATION_EFFICIENCY supports both List-Style and Array-Style.
 #                   The following is Array-Style:
-#                                         EFFICIENCY STATIC ARRAY  INTERNAL
+#                                         IRRIGATION_EFFICIENCY STATIC ARRAY  INTERNAL
 #                                               0.6  0.6  0.6  0.8  0.8
 #                                               0.6  0.6  0.6  0.8  0.8
 #                                               0.6  0.6  0.6  0.8  0.8
@@ -527,7 +533,7 @@ BEGIN GLOBAL DIMENSION
    NCROP       INT
    NSOIL       INT
    #
-   #   NIRRIGATE  => No. of Irrigation Types (# of columns in EFFICIENCY) -- Set to zero if not specified
+   #   NIRRIGATE  => No. of Irrigation Types (# of columns in IRRIGATION_EFFICIENCY) -- Set to zero if not specified
    #   NRD_TYPES  => No. of Non-Routed Deliveries (NRD) Types, this is the number of NRD triplets specified
    #                        (NRD List Load is: NRD_TYPES*3 Columns) -- Set to zero if not specified
    #   NSFR_DELIV => No. of SFR semi-routed delivery    (SRD) points that are defined.
@@ -538,7 +544,7 @@ BEGIN GLOBAL DIMENSION
    NSFR_DELIV  INT
    NSFR_RETURN INT
    #
-   # SURFACE_ELEVATION is a 2D FLOAT ARRAY of land surface elevations
+   # SURFACE_ELEVATION is a 2D FLOAT ARRAY of land surface elevations (L)
    #    --Note you do not have to specify this, if it is specified DIS package keyword as "SURFACE_ELEVATION ULOAD". Where the keyword "SURFACE_ELEVATION" IS ON THE LINE BEFORE SPECIFYING TOP.
    #
    SURFACE_ELEVATION ULOAD
@@ -619,6 +625,18 @@ BEGIN OUTPUT
    FARM_WELL_CBC           INT                          #IFWLCB -- INT IS THE CBC UNIT TO WRITE TO, Set to zero if not specified
    FARM_NET_RECHARGE_CBC   INT                          #IFNRCB -- INT IS THE CBC UNIT TO WRITE TO, Set to zero if not specified
    #
+   # The Cell-By-Cell (CBC) binary for Farm Net Recharge (FNR) yields
+   #    a binary such that ZoneBudget calculates IN as only Deep Percolation (DP)
+   #    and OUT as only ETgw. 
+   # Previous to OWHMv2.3.1, the FNR was done on a cell by cell basis, that is 
+   #    each model cell stored the difference, DP-ETgw. This resulted in 
+   #    the ZoneBudget IN term being the sum of cells whose net had DP > ETgw, and OUT for the converse. 
+   #    Note, the total, IN-OUT should result in the same solution within a zone. 
+   # COMPOSITE_FARM_NET_RECHARGE_CBC enables this legacy feature (that is, each cell a FNR).
+   #    It is not recommended to include this, unless you need the legacy (IN, OUT) values.
+   #
+   COMPOSITE_FARM_NET_RECHARGE_CBC
+   #
    # The following will either use a predefined name (specified at comment)
    #   or write file to GENERIC_OUTPUT location/name
    #
@@ -683,7 +701,7 @@ BEGIN WATER_BALANCE_SUBREGION   #WBS
    # ------------------------------------------------------------------------------------------------------------------
    #
    #  Only REQUIRED keyword in block,
-   #       the rest will be set to default values if not specified. Note that EFFICIENCY is required when NIRRIGATE > 0
+   #       the rest will be set to default values if not specified. Note that IRRIGATION_EFFICIENCY is required when NIRRIGATE > 0
    #
    # READ 2D Array of INT that are from 0 to NWBS to indicate the spatial area and location of each WBS.
    #   In older publications, the WBS LOCATION was abbreviated as FID.
@@ -692,34 +710,36 @@ BEGIN WATER_BALANCE_SUBREGION   #WBS
    #
    # ------------------------------------------------------------------------------------------------------------------
    #
-   # EFFICIENCY is REQUIRED if NIRRIGATE > 0
+   # IRRIGATION_EFFICIENCY is REQUIRED if NIRRIGATE > 0
    #
    # Irrigation Efficiency (OFE) is between 0-1 and represents OFE=CIR/DEMAND,
    #    where CIR is the crop irrigation requirement under perfect efficiency
-   #    and Demand is the necessary water demand to meet the CIR
+   #    and Demand is the necessary water demand to meet the CIR.
    #
    # List-Style Loads NWBS x NIRRIGATE and Array-Style Loads NROW x NCOL
    #
    # OFE is tied to the IRRIGATION type, GLOBAL DIMENSION keyword NIRRIGATE.
    #   If a crop is irrigated then it's IRRIGATION flag is >0 and set equal to the irrigation type (1 to NIRRIGATE).
-   #   If EFFICIENCY input is set to ARRAY, then the (ROW, COL) that the crop is located in determines its OFE when irrigated.
-   #   If EFFICIENCY input is set to LIST,  then the WBS located at the crop's (ROW, COL) determines the EFFICIENCY row
-   #                                             and the crop's IRRIGATION flag determines the EFFICIENCY column.
+   #   If IRRIGATION_EFFICIENCY input is set to ARRAY, then the (ROW, COL) that the crop is located in determines its OFE when irrigated.
+   #   If IRRIGATION_EFFICIENCY input is set to LIST,  then the WBS located at the crop's (ROW, COL) determines the IRRIGATION_EFFICIENCY row
+   #                                             and the crop's IRRIGATION flag determines the IRRIGATION_EFFICIENCY column.
    #
    #      ***Note that the old OFE input was NFARM by NCROP, to mimic this behavior just set NIRRIGATE=NCROP
    #         and define each crop that is irrigated with an IRRIGATION flag equal to the CROP ID.
+   #      ***This keyword was preivously, "EFFICIENCY", which is still supported for backward compatibility.
    #
    #
-   EFFICIENCY    LAI[S,T,A,L-NIRRIGATE]
+   IRRIGATION_EFFICIENCY    LAI[S,T,A,L-NIRRIGATE]
    #
-   # When water supply does not meet demand the EFFICIENCY (OFE)
+   # When water supply does not meet demand the IRRIGATION_EFFICIENCY (OFE)
    # can improve to 1.0 or remain the same.
    # EFFICIENCY_IMPROVEMENT is a 0 or 1 flag to indicate if efficiency improvement is allowed.
    #   0 - Efficiency remains the same, crop transpiration reduced due to supply shortfall
    #   1 - Efficiency improves until it reaches 1.0, then crop transpiration reduced
    #   If not specified then automatically set to 0, so OFE is held constant based on user input. That is "EFFICIENCY_IMPROVEMENT CONSTANT 0"
+   #      ***Note, this keyword was preivously, "EFFICIENCY_IMPROVEMENT", which is still supported for backward compatibility.
    #
-   EFFICIENCY_IMPROVEMENT    LAI[S,T,A,L-NIRRIGATE]
+   IRRIGATION_EFFICIENCY_IMPROVEMENT    LAI[S,T,A,L-NIRRIGATE]
    #
    # ------------------------------------------------------------------------------------------------------------------
    #
@@ -776,21 +796,6 @@ BEGIN WATER_BALANCE_SUBREGION   #WBS
    #
    BARE_RUNOFF_FRACTION LAI[S,T,A,L]
    #
-   # If there is over-consumption through evaporation of precipitation over bare soil, this imposes a limit on that consumption.
-   #
-   # This is defined as a fraction of precipitation that falls on bare surface that is available for consumption (evaporation).
-   #
-   # Must be specified between 0 and 1, with a default value of 1 when not specified.
-   #
-   # Precipitation that is not available for consumption becomes either runoff or deep percolation
-   # Precipitation that is     available for consumption, but does not evaporate becomes either runoff or deep percolation
-   #
-   # This can be tied to SCS estimates of the fraction of consumption or user estimated.
-   #
-   # **If not specified then defaults to 1.0, for full potential consumption. That is "BARE_PRECIPITATION_CONSUMPTION_FRACTION CONSTANT 1.0"
-   #
-   BARE_PRECIPITATION_CONSUMPTION_FRACTION LAI[S,T,A]
-   #
    # ------------------------------------------------------------------------------------------------------------------
    #
    # If a WBS has specified an added irrigation demand, then defines the
@@ -811,12 +816,14 @@ BEGIN WATER_BALANCE_SUBREGION   #WBS
    #          --The crop must have an IRRIGATION flag >0 or the added demand cannot be applied.
    #
    #   This only applies to irrigated crops and the additional
-   #   demanded water only becomes surface runoff or deep percolation
+   #   demanded water only becomes surface runoff or deep percolation.
    #
-   #   In can be specified as a length per time (LENGTH or FLUX) or volume per time (RATE). --Both may be used at once.
+   #   The second keyword indicates the units of the input, where
+   #      LENGTH or FLUX indicates input is length per time (L/T)
+   #      RATE           indicates input is volume per time (L^3/T)
    #   The added demand is summed with other crop related added demands (e.g. CROP Block ADDED_DEMAND)
    #
-   #   You may specify both FLUX and RATE versions
+   #   You may specify both ADDED_CROP_DEMAND FLUX and ADDED_CROP_DEMAND RATE at the same time (but on different lines).
    #
    ADDED_CROP_DEMAND FLUX  LAI[S,T,L-NCROP]
    #
@@ -835,7 +842,7 @@ BEGIN SOIL
    #
    # ------------------------------------------------------------------------------------------------------------------
    #
-   # Specify soil capillary fringe depth. If specified with LIST,
+   # Specify soil capillary fringe depth (L). If specified with LIST,
    #         then record ID is the location in SOIL_ID that the capillary fringe is applied too.
    #
    #   If specified as ARRAY, then the (ROW,COL) location defines the models capillary fringe and SOIL_ID is not used.
@@ -945,7 +952,7 @@ BEGIN CLIMATE
    #
    # Optional keywords that define how Bare Soil Potential Evaporation is calculated
    #
-   # Potential evaporation rate of groundwater under Fallow and Bare Soil
+   # Potential evaporation rate of groundwater under Fallow and Bare Soil (L/T)
    #   ***If not specified then REFERENCE_ET is used in its place. If REFERENCE_ET is not specified then set to 0.0
    #
    POTENTIAL_EVAPORATION_BARE  LAI[S,T,A]
@@ -960,13 +967,18 @@ BEGIN CLIMATE
    # ------------------------------------------------------------------------------------------------------------------
    #
    # Specify recharge that is sent directly to the bottom of the root zone.
-   #  The recharge is not consumed by crops and is treated as deep percolation
+   # The recharge is not consumed by crops and is added to deep percolation.
+   # The deep percolation is then passed to either UZF (FINF) or the water table (RCH-like).
    #
-   #  The deep percolation is then passed to either UZF or the water table.
+   # If a specific cell has all layers with IBOUND=0, then the deep percolation
+   # for that cell is converted to runoff (normal FMP operation).
+   # If the cell is not associated with a Water Balance Subregion (WBS), 
+   # then the deep percolation still occurs, but it is not tracked by 
+   # FMP WBS based outputs.
    #
-   #  The keyword LENGTH or FLUX indicates that the input is in model units of length (L/T)
-   #  The keyword RATE indicates that the input is in volumetric rate                 (L^3/T)
-   #     --This feature mimics both the RCH package Infiltration and UZF Recharge.
+   # The keyword LENGTH or FLUX indicates that the input is in model units of length (L/T)
+   # The keyword RATE indicates that the input is in volumetric rate                 (L^3/T)
+   #    --This feature mimics both the RCH package Infiltration and UZF Recharge.
    #
    # DIRECT_RECHARGE can be specified multiple times and the sum of the recharge arrays 
    # are applied to deep percolation. That is you can have something like:
@@ -1002,6 +1014,16 @@ END CLIMATE
 BEGIN SURFACE_WATER
    #
    # ALL KEYWORDS ARE OPTIONAL
+   #
+   # The Surface Water Block defines:
+   #   1) Surface water deliveries to meet demand
+   #   2) How Runoff/Return Flow is Handled
+   # 
+   # *** This block is required if you want to have runoff. 
+   #     Otherwise, all runoff is converted to deep percolation (implies: NO_RETURN_FLOW).
+   #       If all you want is runoff to leave the model, use the ALLOW_RETURN_FLOW_TO_LEAVE_MODEL keyword.
+   #
+   # *** It is recommended to include the ALLOW_RETURN_FLOW_TO_LEAVE_MODEL keyword.
    #
    # ------------------------------------------------------------------------------------------------------------------
    #
@@ -1124,25 +1146,34 @@ BEGIN SURFACE_WATER
    #
    # ------------------------------------------------------------------------------------------------------------------
    #
-   # Defining How Runoff is Handled
+   # Defining How Runoff/Return Flow is Handled
    #
    # WBS Runoff has four options for how is it is applied. (Note they are listed in order of priority)
-   #   1) Require all runoff to re-infiltrate as deep percolation. (NORETURNFLOW)
+   #   1) Require all runoff to re-infiltrate as deep percolation.                              (NORETURNFLOW)
    #   2) Specify the SFR segments/reaches that receive runoff, or define runoff to leave model (SEMI_ROUTED_RETURN)
-   #   3) Prorate runoff across all SFR reaches within a WBS. If no SFR reaches are found then
-   #   4) If a WBS does not have anywhere to apply runoff then it leaves the model domain and a warning is raised.
+   #   3) Prorate runoff across all SFR reaches within a WBS.                                   (ROUTED_RETURN_ANY_REACH)
+   #      If WBS has no SFR reaches, then runoff leaves the model and a warning is raised.
+   #   4) Runoff leaves the model domain without warning.                                       (ALLOW_RETURN_FLOW_TO_LEAVE_MODEL)
    #
    # If WBS is defined with multiple runoff options, then the previous order determines which one is selected.
-   #   For example NORETURN flow is chosen over SEMI_ROUTED_RETURN if both are specified.
+   #   For example NO_RETURN_FLOW flow is chosen over ALLOW_RETURN_FLOW_TO_LEAVE_MODEL and SEMI_ROUTED_RETURN if all are specified.
+   #
+   #      ***Note: There cannot be deep percolation if all cells beneath the land surface are IBOUND=0 (not simulated/solid rock).
+   #               That is, all deep percolation is converted to runoff if it does not have a model layer to flow to.
+   #
+   # ------------------------------------------------------------------------------------------------------------------
    #
    # 1) NO_RETURN_FLOW indicates that surface runoff re-infiltrates as deep percolation.
+   #     This converts all runoff into deep percolation (has no effect if all cells beneath are IBOUND=0).
    #
    #     LAI[S,T,L] is optional. If not specified then all WBS have NO_RETURN_FLOW.
    #     if included then specify NWBS records that have either
-   #        a  1 to indicate the WBS has NO_RETURN_FLOW/No runoff
-   #        or 0 to indicate that it does have return flow and Options 2, 3, and 4 decide the runoff location
+   #       a  1 to indicate the WBS has NO_RETURN_FLOW/No runoff (all runoff is converted to deep percolation)
+   #       or 0 to not enable NO_RETURN_FLOW for the WBS (runoff and deep percolation are calculated as normal.)
    #
    NO_RETURN_FLOW  [ LAI[S,T,L] ]
+   #
+   # ------------------------------------------------------------------------------------------------------------------
    #
    # 2) SEMI_ROUTED_RETURN points to the specific SFR segments and reaches that receive runoff
    #    NSFR_RETURN in the GLOBAL BLOCK defines the number of List-Style Loads records loaded.
@@ -1165,7 +1196,7 @@ BEGIN SURFACE_WATER
    #        ***If FRAC is NOT specified (or specified as -1), then the fraction of runoff automatically determined
    #           as the ratio of ISRR's length to the total length of all return flow points for the WBS --note if there is a mixture of FRAC defined and not defined for a WBS, then it defaults to length prorating.
    #
-   #     For Example with NSFR_RETURN = 6, the following allows WBS 4 and 5's return flow locations
+   #     For Example with NSFR_RETURN = 7, the following defines the SEMI_ROUTED_RETURN:
    #       ISRR, WBS_ID, SEGMENT, REACH, [FRAC]
    #          1     4     3         2    0.6   # 60% of WBS 4's runoff is applied to Seg 3, RCH 4
    #          2     4     14        0    0.4   # 40% of WBS 4's runoff is applied to all reaches in Seg 14. The runoff is length prorated for each of the SEG 14's reaches.
@@ -1173,9 +1204,11 @@ BEGIN SURFACE_WATER
    #          4     0                          # ISRR is disabled and ignored
    #          5     6     16        2          # No FRAC indicates that WBS 6 will length prorate all its return flow locations
    #          6     6     17        0          # WBS 6 includes all reaches from SEG 15, length prorates along with SEG 16, RCH 2
+   #          7     3     0         0          # WBS 3 runoff is removed from the model (flows out of simulation domain)
    #
    SEMI_ROUTED_RETURN LAI[S,T,L-3]
    #
+   # ------------------------------------------------------------------------------------------------------------------
    #
    # 3) FULLY ROUTED RETURN indicates that a WBS will search for any SFR reaches
    #    that are within the WBS. It will then length prorate the runoff to those reaches
@@ -1183,11 +1216,10 @@ BEGIN SURFACE_WATER
    #    for any WBS that does not have a 1 for NO_RETURN_FLOW or defined with a SEMI_ROUTED_RETURN
    #        ***Note only one of two keywords may be present. They differ in telling FMP
    #           if diversion segments should be included in the search.
+   #        ***Note if SFR is not part of the simulation, then an error is raised.
    #
    ROUTED_RETURN_ANY_NON_DIVERSION_REACH  # WBS return flow (runoff) goes to all non-diversion SEGMENT/REACH located in WBS
    ROUTED_RETURN_ANY_REACH                # WBS return flow (runoff) goes to all               SEGMENT/REACH located in WBS
-   #
-   # ------------------------------------------------------------------------------------------------------------------
    #
    # By default the FULLY ROUTED RETURN network is determined only when the FMP WBS IDs change spatial location.
    #   This saves computation time, since the fully routed network return locations should not change.
@@ -1198,6 +1230,32 @@ BEGIN SURFACE_WATER
    #   This slows the simulation runtime down and should only be enabled when SFR has segment/reaches moving (not inflow but its physical location)
    #
    REBUILD_FULLY_ROUTED_RETURN
+   #
+   # ------------------------------------------------------------------------------------------------------------------
+   #
+   # 4) ALLOW_RETURN_FLOW_TO_LEAVE_MODEL indicates that runoff flows out of the model domain. 
+   #
+   # *** Note, if SFR is not part of simulation, 
+   #     then runoff is converted to deep percolation. 
+   #     This keyword, retains the runoff and allows it to leave the model.
+   #
+   ALLOW_RETURN_FLOW_TO_LEAVE_MODEL
+   #
+   # ------------------------------------------------------------------------------------------------------------------
+   #
+   # ADDED_RUNOFF is additional runoff that is included in the model. 
+   #   This is added to the runoff calculated from precipitation and irrigation.
+   #
+   #    --Note, NO_RETURN_FLOW converts ADDED_RUNOFF to deep percolation.
+   #
+   # The second keyword indicates the units of the input, where
+   #   LENGTH or FLUX indicates input is length per time (L/T).
+   #   RATE           indicates input is volume per time (L^3/T)
+   #
+   # Array-Style input reads an NROW by NCOL array of runoff values.
+   # List-Style reads NWBS records that specify the total runoff for each WBS.
+   #
+   ADDED_RUNOFF {FLUX, RATE} LAI[S,T,A,L]
    #
    # ------------------------------------------------------------------------------------------------------------------
    #
@@ -1506,8 +1564,8 @@ BEGIN LAND_USE
    #
    # ------------------------------------------------------------------------------------------------------------------
    #
-   # CROP_COEFFICIENT (Kc) is multiplied by the ETref to get CU -- input requires that REFERENCE_ET (ETref) to be specified
-   # CONSUMPTIVE_USE  (CF) specifies directly the CU
+   # CROP_COEFFICIENT (Kc; L/T) is multiplied by the ETref to get CU -- input requires that REFERENCE_ET (ETref) to be specified
+   # CONSUMPTIVE_USE  (CF; L/T) specifies directly the CU
    #
    # Potential Consumptive Use CU = CF + Kc*ETref
    #    If not specified then set to zero.
@@ -1532,13 +1590,13 @@ BEGIN LAND_USE
    #
    #        =0 Indicates that it is not irrigated
    #        >0 Indicates crop is irrigated and the number is the irrigation type
-   #              The INT specified is the column in EFFICIENCY (WBS Block)
+   #              The INT specified is the column in IRRIGATION_EFFICIENCY (WBS Block)
    #
    IRRIGATION       LAI[S,T,A,L]
    #
    # ------------------------------------------------------------------------------------------------------------------
    #
-   # Crop root depth below land surface.
+   # Crop root depth below land surface (L).
    #   Must be >0.0; NOT required or may be zero if GROUNDWATER_ROOT_INTERACTION = 0 or 1
    #
    ROOT_DEPTH       LAI[S,T,A,L]
@@ -1624,7 +1682,7 @@ BEGIN LAND_USE
    #
    #
    # Inefficient losses from irrigation is the extra water required to meet an irrigation requirement
-   # They are a result of the EFFICIENCY being less than 1
+   # They are a result of the IRRIGATION_EFFICIENCY being less than 1
    #
    # SURFACEWATER_LOSS_FRACTION_IRRIGATION: indicates
    #     the fraction of inefficient losses from irrigation that go
@@ -1651,7 +1709,7 @@ BEGIN LAND_USE
    #
    # If CONCEPT TWO, linear uptake, linear anoxia model is used, then
    # the ponding depth is a height of water above the land surface that the crop
-   # can tolerate.
+   # can tolerate (L).
    #
    #  CONCEPT TWO occurs when either ROOT_PRESSURE is not specified
    #            or for crops that have all four ROOT_PRESSUREs set to 0
@@ -1666,9 +1724,12 @@ BEGIN LAND_USE
    # demanded water only becomes surface runoff or deep percolation
    # based on the fraction specified in the WBS Block "ADDED_DEMAND_RUNOFF_SPLIT"
    #
-   # It may only be specified as a Length per Time (LENGTH or FLUX) or Volume per Time (RATE).
+   # The second keyword indicates the units of the input, where
+   #    LENGTH or FLUX indicates input is length per time (L/T)
+   #    RATE           indicates input is volume per time (L^3/T)
    #
-   # The added demand is summed with other added demands (e.g. WBS Block ADDED_CROP_DEMAND)
+   # The LAND_USE ADDED_DEMAND may only be specified once and is 
+   #    added demand is summed with other added demands (e.g. WBS Block ADDED_CROP_DEMAND)
    #
    ADDED_DEMAND  {FLUX, RATE}  LAI[S,T,A,L-NWBS]
    #
@@ -1703,6 +1764,15 @@ BEGIN LAND_USE
    #        0 to disable for the crop
    #
    ZERO_CONSUMPTIVE_USE_BECOMES_BARE_SOIL [ LAI[S,T,L] ]
+   #
+   # The FMP Potential Consumptive Use/Potential Evapotranspiration (CU) is split in to 
+   # potential transpiration (Tpot) and potential evaporation (Epot) based on the 
+   # TRANSPIRATION_FRACTION (FTR). By default, unused Tpot is added back to the Epot to honor CU. 
+   # That is, given Tact < Tpot then Epot = CU - Tact.
+   # If NO_TPOT_SHIFT_TO_EPOT option is present, then this feature is disabled. 
+   # That is, Tpot = CU*FTR and Epot = CU*(1-FTR)
+   #
+   NO_TPOT_SHIFT_TO_EPOT
    #
    #
    # If LAND_USE_AREA_FRACTION is selected then the sum of all crops within a single model cell may be less than 1.
@@ -2008,6 +2078,14 @@ END SURFACE_WATER_OPERATIONS
 #     #                                                                                                                                                  ###
 #     #                                                                                                                                                  ###
 #     PRECIPITATION_POTENTIAL_CONSUMPTION                  Reads ROW, COL, PrecipPot; Default is 1E100 for unspecified (ROW, COL)                        ###
+#     #                                                                                                                                                  ###
+#  END CLIMATE                                                                                                                                           ###
+#  #                                                                                                                                                     ###
+#  BEGIN SURFACE_WATER                                                                                                                                   ###
+#     #                                                                                                                                                  ###
+#     #                                                                                                                                                  ###
+#     ADDED_RUNOFF                                        Reads ROW, COL, RUNOFF;   Default is 0.0 for unspecified (ROW, COL)                            ###
+#     #                                                                                                                                                  ###
 #     #                                                                                                                                                  ###
 #  END CLIMATE                                                                                                                                           ###
 #  #                                                                                                                                                     ###

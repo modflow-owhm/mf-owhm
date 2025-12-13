@@ -1,0 +1,12 @@
+# FMP Semi-Routed Delivery Location Definition
+#
+# File opened by the Universal Loader (ULOAD).
+#
+# ISRD = Diversion Number                                       
+# WBS = Subregion where diversion is going to. 136 indicates that the diversion goes to outside the model.                                      
+# SEG = SFR Segment where diversion takes place                                 
+# RCH = SFR Reach where diversion takes place                                   
+# FRAC = Optional (leave blank). If Diversion > Demand, specifies fraction of water to take from each diversion point.                                  
+#
+# ISRD  WBS  SEG  RCH  [FRAC]
+  1     1    1    3    

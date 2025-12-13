@@ -66,11 +66,18 @@ BEGIN OPTIONS
     # Print the budget information in a column based format for all packages in a single file.
     BUDGETDB               Generic_Output    # package_flow_budget.txt
     #
+    # Write to the directory, OUT_DIR, a set of files that are major aquifer properties (eg HK, VK, SY, SS, SC, THICK, AREA). 
+    PRINT_PROPERTY              OUT_DIR              # ./aquiferProperty/
+    #
     # Write at the end of the simulation the cumulative volume errors (L^3) for the entire model grid.
     CUMULATIVE_RESIDUAL_ERROR_ARRAY Generic_Output   # Cumulative_Model_Error.txt
     #
     # Prints for each time step, the number of iterations required to solve and the mass error.
     PRINT_ITERATION_INFO   Generic_Output            # iter_info.txt
+    #
+    # File that prints for all time steps the Time step Date/Length information.
+    #   This is useful for post-processing tools.
+    PRINT_TIME_INFO        Generic_Output            # model_time_info.txt
     #
     # Print convergence information by iteration for every time step to a file.
     #  Useful for diagnosing model construction problems for time steps that fail to converge.
@@ -110,6 +117,19 @@ BEGIN OPTIONS
     PRINT_WATER_TABLE  SPTS  Generic_Output  [SIGFIG  NDIG]
     # 
     PRINT_WATER_DEPTH  SPTS  Generic_Output  [SIGFIG  NDIG]
+    #
+    # PRINT_WATER_TABLE_LAYER {LIST, ARRAY} use the same input options as PRINT_HEAD, but 
+    #   the output for WTLAY, which is the layer that has the head for the upper most active layer 
+    #   with the HEAD > that layer's bottom elevation (upper most saturated cell).
+    #   If all layers have IBOUND=0, then the layer is set to zero.
+    #      The versions differ in how the output is formatted, with:
+    #        PRINT_WATER_TABLE_LAYER LIST  - Writes the water table layers in a column based format with the header: SP TS ROW COL WTLAY
+    #        PRINT_WATER_TABLE_LAYER Array - Writes a PRINT_HEAD style header followed by a NROW by NCOL array of layer numbers.
+    #
+    PRINT_WATER_TABLE_LAYER LIST   SPTS  Generic_Output
+    # 
+    PRINT_WATER_TABLE_LAYER ARRAY  SPTS  Generic_Output
+    #
     #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Save entire model grid head value using the MODFLOW-2005 standard write utility.

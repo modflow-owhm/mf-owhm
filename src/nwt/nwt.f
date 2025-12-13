@@ -17,7 +17,8 @@
       USE ERROR_INTERFACE,          ONLY: WARNING_MESSAGE, STOP_ERROR
       USE FILE_IO_INTERFACE,        ONLY: READ_TO_DATA
       USE PARSE_WORD_INTERFACE,     ONLY: PARSE_WORD_UP
-      USE STRINGS,                  ONLY: GET_NUMBER, GET_INTEGER 
+      USE STRINGS,                  ONLY: GET_NUMBER, GET_INTEGER, 
+     +                                    GET_WORD
       USE ULOAD_AND_SFAC_INTERFACE, ONLY: ULOAD
       USE WARNING_TYPE_INSTRUCTION, ONLY: WARNING_TYPE
       USE POST_KEY_SUB,             ONLY: FILE_AND_POST_KEY_PARSE
@@ -44,7 +45,7 @@
       INTEGER:: lrwrk,liwrk,NODES,MBLACK,NJAF
       REAL:: Memuse1,Memuse2
       DOUBLE PRECISION:: THK,MXTHCK                                     !seb ADDED VARIABLES
-      LOGICAL:: THIN_CHECK, ADJUST_MXIter
+      LOGICAL:: THIN_CHECK, ADJUST_MXIter, opt_found
       TYPE(WARNING_TYPE):: WRN
 !     ------------------------------------------------------------------
 !
@@ -95,8 +96,22 @@
       HED_LIM       = IEEE_VALUE(THK, IEEE_QUIET_NAN)
       GSE_LIM(1,1)  = IEEE_VALUE(THK, IEEE_QUIET_NAN)
       ADJUST_MXIter = TRUE
+      IFDPARAM = Z
       !
       CALL READ_TO_DATA(LINE,IN,IOUT,IOUT)
+      lloc = ONE
+      CALL PARSE_WORD_UP(line, lloc, istart, istop)
+      SELECT CASE(line(istart:istop))
+      CASE('THIN_CELL_CHECK','MAX_HEAD_CHANGE',
+     +     'HEAD_DISTANCE_ABOVE_GSE_LIMIT','KEEP_MXITER',
+     +     'SIMPLE','MODERATE','COMPLEX','SPECIFIED','CONTINUE', 
+     +     'NO_CONVERGENCE_STOP', 'NO_FAILED_CONVERGENCE_STOP')
+            WRITE(IOUT,'(A)') "CHECKING NWT SOLVER OPTIONS"
+            opt_found = TRUE
+      CASE DEFAULT            
+            opt_found = FALSE
+      END SELECT
+      !
       DO
         lloc = ONE
         CALL PARSE_WORD_UP(line, lloc, istart, istop)    !Check for these keywords at start of solver input. Note MAX_HEAD_CHANGE can also appear in the normal options line
@@ -104,7 +119,7 @@
         SELECT CASE(line(istart:istop))
         CASE('THIN_CELL_CHECK')
            THIN_CHECK = TRUE
-           WRITE(IOUT,'(A)')
+           WRITE(IOUT,'(2A)') 'THIN_CELL_CHECK: ',
      1               ' THIN CELL CHECK THAT SETS IBOUND=0 IS ENABLED'
         CASE('MAX_HEAD_CHANGE')
             CALL GET_NUMBER(line, lloc, istart, istop,IOUT,IN,HED_LIM,
@@ -112,7 +127,9 @@
             IF(HED_LIM <=   0D0 ) HED_LIM=IEEE_VALUE(THK,IEEE_QUIET_NAN)
             IF(HED_LIM >= 0.9D30) HED_LIM=IEEE_VALUE(THK,IEEE_QUIET_NAN)
             IF(HED_LIM <  0.5D0 ) HED_LIM=0.5D0
+            WRITE(IOUT,'(A)')' MAX_HEAD_CHANGE '//NUM2STR(HED_LIM)
         CASE('HEAD_DISTANCE_ABOVE_GSE_LIMIT')
+            WRITE(IOUT,'(A)')' HEAD_DISTANCE_ABOVE_GSE_LIMIT'
             DEALLOCATE(GSE_LIM)
             ALLOCATE(GSE_LIM(NCOL,NROW))
             !
@@ -121,6 +138,7 @@
      +         '"HEAD_DISTANCE_ABOVE_GSE_LIMIT" failed to read the '//
      +         'NROW by NCOL array of GSE_LIM values.')
         CASE('KEEP_MXITER')
+            WRITE(IOUT,'(A)')' KEEP_MXITER'
             ADJUST_MXIter = FALSE
         CASE('SIMPLE')
             IFDPARAM=1
@@ -132,9 +150,11 @@
             IFDPARAM=3
             WRITE(IOUT,25)
         CASE('SPECIFIED')
+            WRITE(IOUT,'(2A)')' SPECIFIED OPTION -> ',
+     +       'NOW READING PARAMETERS AFTER THIS KEYWORD'
             IFDPARAM=4
-            WRITE(IOUT,26)
-            CALL READ_SPECIFIED_PROPERTIES(LINE,LLOC,IN,IOUT)
+            !WRITE(IOUT,26)
+            CALL READ_SPECIFIED_PROPERTIES(LINE,LLOC,IN,IOUT,ICNVGFLG)
         CASE('CONTINUE', 
      +       'NO_CONVERGENCE_STOP', 'NO_FAILED_CONVERGENCE_STOP')
            ICNVGFLG = 1
@@ -151,6 +171,7 @@
         END SELECT
         CALL READ_TO_DATA(LINE,IN,IOUT)
       END DO
+      if(opt_found) WRITE(IOUT,'(A)')
       !
       lloc = ONE
       CALL URWORD(line, lloc, istart, istop, 3, i, toldum, Iout, In)
@@ -177,10 +198,24 @@ C3B-----GET OPTIONS.
      1         ' INPUT VALUES REFLECT MODERETELY NONLINEAR MODEL')
    25 FORMAT(1X,'COMPLEX OPTION:',/,1X,'DEFAULT SOLVER',
      1 ' INPUT VALUES REFLECT STRONGLY NONLINEAR MODEL')
-   26 FORMAT(1X,'SPECIFIED OPTION:',/,1X,'SOLVER INPUT',
-     1 ' VALUES ARE SPECIFIED BY USER')
+!   26 FORMAT(1X,'SPECIFIED OPTION:',/,1X,'SOLVER INPUT',
+!     1 ' VALUES ARE SPECIFIED BY USER')
       
-      IFDPARAM = Z
+      opt_found = FALSE
+      LLOCSAVE = LLOC
+      CALL PARSE_WORD_UP(line, lloc, istart, istop)
+      SELECT CASE(line(istart:istop))
+      CASE('THIN_CELL_CHECK','MAX_HEAD_CHANGE',
+     +     'HEAD_DISTANCE_ABOVE_GSE_LIMIT','KEEP_MXITER',
+     +     'SIMPLE','MODERATE','COMPLEX','SPECIFIED','CONTINUE', 
+     +     'NO_CONVERGENCE_STOP', 'NO_FAILED_CONVERGENCE_STOP')
+            WRITE(IOUT,'(A)') "CHECKING NWT SOLVER OPTIONS"
+            opt_found = TRUE
+      CASE DEFAULT            
+            opt_found = FALSE
+      END SELECT
+      LLOC = LLOCSAVE
+      
       DO
         LLOCSAVE = LLOC
         CALL URWORD(LINE,LLOC,ISTART,ISTOP,1,I,R,IOUT,IN)
@@ -196,8 +231,9 @@ C3B-----GET OPTIONS.
            WRITE(IOUT,25)
         CASE('SPECIFIED')
            IFDPARAM=4
-           WRITE(IOUT,26)
-           CALL READ_SPECIFIED_PROPERTIES(LINE,LLOC,IN,IOUT)
+            WRITE(IOUT,'(2A)')' SPECIFIED OPTION -> ',
+     +       'NOW READING PARAMETERS AFTER THIS KEYWORD'
+           CALL READ_SPECIFIED_PROPERTIES(LINE,LLOC,IN,IOUT,ICNVGFLG)
         CASE('CONTINUE', 
      +       'NO_CONVERGENCE_STOP', 'NO_FAILED_CONVERGENCE_STOP')
            ICNVGFLG = 1
@@ -211,7 +247,7 @@ C3B-----GET OPTIONS.
            STOPER = 1E30
         CASE('THIN_CELL_CHECK')
            THIN_CHECK = TRUE
-           WRITE(IOUT,'(A)')
+           WRITE(IOUT,'(2A)') 'THIN_CELL_CHECK: ',
      1               ' THIN CELL CHECK THAT SETS IBOUND=0 IS ENABLED'
            !
         CASE('MAX_HEAD_CHANGE')
@@ -220,8 +256,10 @@ C3B-----GET OPTIONS.
            IF(HED_LIM <=   0D0 ) HED_LIM=IEEE_VALUE(THK,IEEE_QUIET_NAN)
            IF(HED_LIM >= 0.9D30) HED_LIM=IEEE_VALUE(THK,IEEE_QUIET_NAN)
            IF(HED_LIM <  0.5D0 ) HED_LIM=0.5D0
+           WRITE(IOUT,'(A)')' MAX_HEAD_CHANGE '//NUM2STR(HED_LIM)
            !
         CASE('HEAD_DISTANCE_ABOVE_GSE_LIMIT')
+           WRITE(IOUT,'(A)')' HEAD_DISTANCE_ABOVE_GSE_LIMIT'
            DEALLOCATE(GSE_LIM)
            ALLOCATE(GSE_LIM(NCOL,NROW))
            !
@@ -234,12 +272,14 @@ C3B-----GET OPTIONS.
      +        'NROW by NCOL array of GSE_LIM values.')
            !
         CASE('KEEP_MXITER')
+           WRITE(IOUT,'(A)')' KEEP_MXITER'
            ADJUST_MXIter = FALSE
         CASE DEFAULT
                     LLOC = LLOCSAVE
                     EXIT
         END SELECT
       END DO
+      if(opt_found) WRITE(IOUT,'(A)')
 !
 ! Don't need to read these when using default Options.
       IF ( IFDPARAM.EQ.4 ) THEN
@@ -581,14 +621,27 @@ C Allocage PCG if requested
            !
          END SUBROUTINE
          !
-         SUBROUTINE READ_SPECIFIED_PROPERTIES(LINE,LOC,IN,IOUT)
+         SUBROUTINE READ_SPECIFIED_PROPERTIES(LINE,LOC,IN,IOUT,ICNVGFLG)
            IMPLICIT NONE
            CHARACTER(*), INTENT(IN   ):: LINE
            INTEGER,      INTENT(INOUT):: LOC
            INTEGER,      INTENT(IN   ):: IN, IOUT
+           INTEGER,      INTENT(INOUT):: ICNVGFLG
            INTEGER:: I,J
            CHARACTER(44):: ER
            CHARACTER(64):: E1, E2, E3, E4, E5, E6, E7, E8
+           CHARACTER(32):: WORD
+           !
+           CALL GET_WORD(LINE,LOC,I,J,WORD)  ! flopy puts CONTINUE after SPECIFY
+           SELECT CASE(WORD)
+           CASE('CONTINUE', 
+     +          'NO_CONVERGENCE_STOP', 
+     +          'NO_FAILED_CONVERGENCE_STOP')
+               ICNVGFLG = ONE
+           CASE DEFAULT
+               LOC = I  ! Reset location cause keyword not found
+           END SELECT
+           !
            ER='Found option SPECIFIED, but failed to load: '    ! Lame way of doing error messages, but most compact method for fixed formatting
            E1 = ER // 'DBDTHETA'
            E2 = ER // 'DBDKAPPA'
@@ -611,6 +664,24 @@ C Allocage PCG if requested
            END IF
            !
          END SUBROUTINE
+         !
+         !SUBROUTINE SPECIFIED_CONTINUE_CHECK(LINE, LOC, ICNVGFLG)
+         !  IMPLICIT NONE
+         !  CHARACTER(*), INTENT(IN   ) :: LINE
+         !  INTEGER,      INTENT(INOUT) :: LOC, ICNVGFLG
+         !  CHARACTER(32) :: WORD
+         !  !
+         !  CALL GET_WORD(LINE,LOC,ISTART,ISTOP,WORD)
+         !  SELECT CASE(WORD)
+         !  CASE('CONTINUE', 
+     +   !       'NO_CONVERGENCE_STOP', 
+     +   !       'NO_FAILED_CONVERGENCE_STOP')
+         !      ICNVGFLG = ONE
+         !  CASE DEFAULT
+         !      LOC = ISTART
+         !  END SELECT
+         !  !
+         !END SUBROUTINE
          !
       END SUBROUTINE GWF2NWT1AR
       !

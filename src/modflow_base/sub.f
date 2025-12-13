@@ -7,6 +7,7 @@
         REAL,   SAVE,POINTER ::AC1,AC2
         LOGICAL,SAVE,POINTER ::HAS_DELAY_BED
         LOGICAL,SAVE,POINTER ::HAS_INST_BED
+        LOGICAL,SAVE,POINTER ::HAS_LMT
         LOGICAL,SAVE,POINTER ::LPFLNK                           ! SUB-Linkage rth seb MOVED SUBLINK TO BAS GLOBAL
         LOGICAL,SAVE,POINTER ::SEPARTE_FLOWS                    ! IF TRUE THEN KEEP INELASTIC/ELASTIC FLOWS SEPARATE
         REAL,   SAVE,POINTER ::NOCOMV                           ! value HC is set to when a cell goes dry
@@ -51,6 +52,8 @@
         LOGICAL, POINTER:: HAS_INST_BED
         LOGICAL, POINTER:: LPFLNK                            ! SUB-Linkage rth  seb removed ,SUBLNK it is now in global
         LOGICAL, POINTER:: SEPARTE_FLOWS
+        LOGICAL, POINTER ::HAS_LMT
+        REAL,    POINTER ::NOCOMV                            ! value HC is set to when a cell goes dry
         INTEGER, DIMENSION(:),     POINTER,CONTIGUOUS:: ISBOCF
         INTEGER, DIMENSION(:),     POINTER,CONTIGUOUS:: ISBOCU
         LOGICAL, DIMENSION(:,:),   POINTER,CONTIGUOUS:: OCFLGS
@@ -81,7 +84,6 @@
         REAL,    DIMENSION(:,:),   POINTER,CONTIGUOUS:: DVB
         REAL,    DIMENSION(:,:,:), POINTER,CONTIGUOUS:: DVZ             ! SUB-Linkage rth
         REAL,    DIMENSION(:,:,:), POINTER,CONTIGUOUS:: DVZC
-        REAL,                      POINTER ::NOCOMV                    ! value HC is set to when a cell goes dry
         TYPE(GENERIC_OUTPUT_FILE),DIMENSION(:),POINTER,CONTIGUOUS::
      +                                                        DELAY_HED
         INTEGER, DIMENSION(:,:),POINTER,CONTIGUOUS:: DELAY_HED_ID
@@ -102,7 +104,7 @@ C        SPECIFICATIONS:
 C     ------------------------------------------------------------------
       USE CONSTANTS,   ONLY: Z, TRUE, FALSE, SNGL_ninf, NewLine=>NL
       USE GLOBAL,      ONLY:IOUT,NCOL,NROW,NLAY,ISSFLG,NPER,NSTP,HNEW,
-     1                      DELR,DELC,BOTM,LBOTM,SUBLNK,LAYCBD !,BUFF 
+     1                      DELR,DELC,BOTM,LBOTM,SUBLNK,LAYCBD,IUNIT
       USE GWFBASMODULE,ONLY:HDRY
       USE GWFSUBMODULE,ONLY:IIBSCB,ITMIN,NNDB,NDB,NMZ,NN,ND2,IDSAVE,
      1                      AC1,AC2,ISBOCF,ISBOCU,
@@ -111,7 +113,7 @@ C     ------------------------------------------------------------------
      4                      A1,A2,BB,SUB,SUBE,SUBV,DP,DVB,
      5                      LPFLNK,DVZ,DELAY_HED,DELAY_HED_ID,
      6                      DVZC,NOCOMV,SEPARTE_FLOWS,
-     7                      HAS_DELAY_BED,HAS_INST_BED
+     7                      HAS_DELAY_BED,HAS_INST_BED,HAS_LMT
       USE ERROR_INTERFACE,      ONLY: STOP_ERROR, WARNING_MESSAGE
       USE FILE_IO_INTERFACE,    ONLY: READ_TO_DATA
       USE PARSE_WORD_INTERFACE, ONLY: PARSE_WORD, PARSE_WORD_UP
@@ -150,6 +152,9 @@ C
       !DATA ANAME(12)/'NUMBER OF BEDS IN SYSTEM'/
       DIMENSION IBUFF(NCOL,NROW)
 C     ------------------------------------------------------------------
+      !
+      ALLOCATE(HAS_LMT, SOURCE=IUNIT(49).NE.0)
+      !
       ALLOCATE (IIBSCB,ITMIN,NNDB,NDB,NMZ,NN,ND2,IDSAVE)                !SUB-Linkage rth
       ALLOCATE (AC1,AC2)
       ALLOCATE (HAS_DELAY_BED,HAS_INST_BED,LPFLNK)                      !SUB-Linkage rth
@@ -374,7 +379,7 @@ C4------CRITICAL HEAD ARRAYS.
      +      ERROR_VAL=Z)
       !
       ! CHECK IF GLOBAL SHUTDOWN OF CBC IS IN EFFECT
-      CALL CHECK_CBC_GLOBAL_UNIT(IIBSCB)
+      CALL CHECK_CBC_GLOBAL_UNIT(IIBSCB, .TRUE.)
       !
       IF(AC2.EQ.ZERO) AC2=1.0
       HAS_DELAY_BED  = TRUE
@@ -1440,6 +1445,7 @@ C     ******************************************************************
 C
 C     SPECIFICATIONS:
 C     ------------------------------------------------------------------
+      USE SET_ARRAY_INTERFACE, ONLY: SET_ZERO
       USE GLOBAL,       ONLY: IOUT,NCOL,NROW,NLAY,IBOUND,HNEW,HOLD,
      1                        BUFF,DELR,DELC,ISSFLG,BOTM,LBOTM
       USE GWFBASMODULE, ONLY: VBVL,VBNM,MSUM,ICBCFL,DELT
@@ -1484,25 +1490,16 @@ C1------SET IF CELL-BY-CELL FLOW TERMS ARE NEEDED.
       !
       CALL SGWF2SUB7PNT(IGRID)
       IF(ISSFLG(KPER).EQ.0) TLED=1./DELT
-ccrth INITIALIZE Vertical Displacement Array     
-        DO  K=1,NLAY                                                    !SUB-Linkage rth
-         DO  IR=1,NROW                                                  !SUB-Linkage rth
-          DO  IC=1,NCOL                                                 !SUB-Linkage rth
-           DVZ(IC,IR,K)=ZERO                                            !SUB-Linkage rth
-          enddo                                                         !SUB-Linkage rth
-         enddo                                                          !SUB-Linkage rth
-        enddo                                                           !SUB-Linkage rth
+      !
+      CALL SET_ZERO(NCOL,NROW,NLAY,DVZ)
+      !                                                      !SUB-Linkage rth
 C
 C2------RUN THROUGH EVERY CELL IN THE GRID WITH INTERBED STORAGE.
       IF(HAS_INST_BED) THEN
 C
 C3-------CELL-BY-CELL FLOW TERMS ARE NEEDED SET IBD AND CLEAR BUFFER.
        IF(IBD.EQ.1) THEN
-        DO 90 K=1,NLAY
-        DO 90 IR=1,NROW
-        DO 90 IC=1,NCOL
-        BUFF(IC,IR,K)=ZERO
-   90   CONTINUE
+           CALL SET_ZERO(NCOL,NROW,NLAY,BUFF)
        ENDIF
        STOIN=ZERO
        STOUT=ZERO
@@ -1661,8 +1658,8 @@ C15-----UPDATE PRECONSOLIDATION HEAD ARRAY
       !
       IF(HAS_DELAY_BED) THEN
        IF(IBD.EQ.1) THEN
-            BUFF=ZERO
-            IF(SEPARTE_FLOWS) BUF2 = ZERO
+            CALL SET_ZERO(NCOL,NROW,NLAY,BUFF)
+            IF(SEPARTE_FLOWS) CALL SET_ZERO(NCOL,NROW,NLAY,BUF2)
        ENDIF
        !
        STORIN_ELAS = ZERO 
@@ -2914,6 +2911,7 @@ C
       DEALLOCATE (GWFSUBDAT(IGRID)%DVZ)                                     !SUB-Linkage rth
       DEALLOCATE (GWFSUBDAT(IGRID)%DVZC)                                    !WSCHMID
       DEALLOCATE (GWFSUBDAT(IGRID)%NOCOMV)
+      DEALLOCATE (GWFSUBDAT(IGRID)%HAS_LMT)
       DEALLOCATE (GWFSUBDAT(IGRID)%DELAY_HED   )
       DEALLOCATE (GWFSUBDAT(IGRID)%DELAY_HED_ID)
 C
@@ -2962,8 +2960,9 @@ C NULLIFY THE LOCAL POINTERS
         DVZ     =>NULL()                                !SUB-Linkage rth
         DVZC    =>NULL()                                !WSCHMID
         NOCOMV  =>NULL()
-      DELAY_HED     =>NULL()
-      DELAY_HED_ID  =>NULL()
+        HAS_LMT =>NULL()
+      DELAY_HED    =>NULL()
+      DELAY_HED_ID =>NULL()
       END IF
 C2-----RETURN
       RETURN
@@ -2972,6 +2971,7 @@ C2-----RETURN
       SUBROUTINE SGWF2SUB7PNT(IGRID)
 C  Change SUB data to a different grid.
       USE GWFSUBMODULE
+      integer, intent(in) :: igrid
 C
       IIBSCB=>GWFSUBDAT(IGRID)%IIBSCB
       ITMIN=>GWFSUBDAT(IGRID)%ITMIN
@@ -3020,6 +3020,7 @@ C
       DVZ=>GWFSUBDAT(IGRID)%DVZ                                      !SUB-Linkage rth
       DVZC=>GWFSUBDAT(IGRID)%DVZC                                      !WSCHMID
       NOCOMV=>GWFSUBDAT(IGRID)%NOCOMV
+      HAS_LMT=>GWFSUBDAT(IGRID)%HAS_LMT
       DELAY_HED     => GWFSUBDAT(IGRID)%DELAY_HED 
       DELAY_HED_ID  => GWFSUBDAT(IGRID)%DELAY_HED_ID
 C
@@ -3077,6 +3078,7 @@ C
       GWFSUBDAT(IGRID)%DVZ=>DVZ                                      !SUB-Linkage rth
       GWFSUBDAT(IGRID)%DVZC=>DVZC                                      !WSCHMID
       GWFSUBDAT(IGRID)%NOCOMV=>NOCOMV
+      GWFSUBDAT(IGRID)%HAS_LMT=>HAS_LMT
       GWFSUBDAT(IGRID)%DELAY_HED     => DELAY_HED 
       GWFSUBDAT(IGRID)%DELAY_HED_ID  => DELAY_HED_ID
 C

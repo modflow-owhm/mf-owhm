@@ -1,0 +1,4 @@
+# GMG https://ca.water.usgs.gov/modeling-software/one-water-hydrologic-model/users-manual/index.html?gmg.htm
+1.0E-3  100  1.0E-3  100  # RCLOSE IITER HCLOSE MXITER
+0.9  0  0  0              # DAMP IADAMP IOUTGMG [IUNITMHC]
+0  0                      # ISM ISC 

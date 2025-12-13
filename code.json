@@ -1,10 +1,10 @@
 [
   {
-    "version": "2.3.0",
-    "status": "Production",
+    "version": "2.3.1",
+    "status": "Preliminary",
 
     "date": {
-      "metadataLastUpdated": "2024-01-10"
+      "metadataLastUpdated": "2025-12-12"
     },
 
     "downloadURL":   "https://code.usgs.gov/modflow/mf-owhm/-/archive/main/mf-owhm-main.zip",
@@ -12,7 +12,7 @@
 
     "contact": {
       "name": "Scott E. Boyce",
-      "email": "seboyce@usgs.gov",
+      "email": "seboyce@ucdavis.gov",
       "URL": "https://www.usgs.gov/staff-profiles/scott-boyce"
     },
 

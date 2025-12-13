@@ -402,7 +402,7 @@ C     ------------------------------------------------------------------
       USE GWFHUFMODULE, ONLY: SC2HUF
       USE GWFUPWMODULE, ONLY: SC2UPW,HKUPW,VKAUPW
       USE ICHKSTRBOT_MODULE
-      USE TABLEFILE_INTERFACE,ONLY: TABFILEPARSE,TABFILELINKS,         ! seb
+      USE TABLEFILE_INTERFACE,ONLY: TABFILEPARSE,TABFILELINKS,
      +                              TABFILEPACKINDEX
       USE LINE_FEEDER,          ONLY: LINE_FEED
       USE ERROR_INTERFACE,      ONLY: STOP_ERROR, WARNING_MESSAGE
@@ -443,7 +443,8 @@ C     ------------------------------------------------------------------
       REAL:: r, seglen, sumlen, thsslpe, thislpe, uhcslpe, rchlen, dist
       REAL:: epsslpe
       CHARACTER(16):: TEXT
-      logical:: found, checktabfile, NO_LINEFEED, FOUND_BEGIN, HAS_OPT
+      logical:: found, checktabfile, FOUND_BEGIN, HAS_OPT
+      logical:: NO_LINEFEED_FLOW, NO_LINEFEED_RUNOFF
       TYPE(GENERIC_BLOCK_READER):: BL
       TYPE(WARNING_TYPE):: WRN,WRN2,ERR,ERR2
       DOUBLE PRECISION:: DTMP
@@ -485,15 +486,12 @@ C     ------------------------------------------------------------------
       ALLOCATE (STRHC1KHFLAG,STRHC1KVFLAG)
       ALLOCATE (FLOWTYPE(5)) ! POSITION 1: VOLUME; 2: REACH LENGTH; 3: PRECIP; 4: EVAP; 5: RUNOFF
       ALLOCATE (NFLOWTYPE)
-      !IF(IUNIT(49).NE.0) THEN
       ALLOCATE (NINTOT)                             !EDM - FOR LMT
-      !ENDIF
-      ALLOCATE (FACTOR,FACTORKH,FACTORKV)
+      ALLOCATE(FACTOR,FACTORKH,FACTORKV)
       ALLOCATE(DBFILE)
       ALLOCATE(IOUT)
       ALLOCATE(THETAB, FLUXB, FLUXHLD2)
       ALLOCATE(Nfoldflbt, NUMTAB, ROWTAB)
-      IF(IUNIT(49).NE.Z) ALLOCATE(NFLOWTYPE)
       !
       ALLOCATE(HD_RELAX,    SOURCE=UNO)
       ALLOCATE(HNEW_FACTOR, SOURCE=UNO)
@@ -518,6 +516,7 @@ C     ------------------------------------------------------------------
       !
       ALLOCATE(DO_FM_BD,          SOURCE=TRUE)
       ALLOCATE(SFR_FIX_BOT,       SOURCE=FALSE)
+      ALLOCATE(SFR_FIX_BOT_WRN,   SOURCE=TRUE)
       ALLOCATE(SFR_AUTO_NEG_ITMP, SOURCE=FALSE)
       !
       ALLOCATE(CNVG_WRN)
@@ -562,22 +561,16 @@ C         DLEAK, ISTCB1, ISTCB2.
       factor           = UNO
       NFLOWTYPE        = Z
       iface            = Z
-      IF(IUNIT(49) > Z) THEN  !IUNIT(49): LMT
-        FLOWTYPE(1) = 'NA'
-        FLOWTYPE(2) = 'NA'
-        FLOWTYPE(3) = 'NA'
-        FLOWTYPE(4) = 'NA'
-        FLOWTYPE(5) = 'NA'
-      ENDIF
       SFRUZINFIL   = DZ
       SFRUZDELSTOR = DZ
       SFRUZRECH    = DZ
-C
-      !IF(IUNIT(49).NE.0) NINTOT = 0  !LMT
-      NINTOT  = Z  !LMT
+      FLOWTYPE     = 'NA'   ! only used by LMT / IUNIT(49)
+      NINTOT  = Z           ! only used by LMT / IUNIT(49)
       NSFRAUX = Z
-      SFRFEED=>NULL()
-      NO_LINEFEED = TRUE
+      SFR_FEED_FLOW   => NULL()
+      SFR_FEED_RUNOFF => NULL()
+      NO_LINEFEED_FLOW = TRUE
+      NO_LINEFEED_RUNOFF = TRUE
       !
       ALLOCATE(SFRTABFILE) 
       checktabfile = TRUE
@@ -610,12 +603,19 @@ C
       IF(BL%NAME == 'BUDGET_GROUP' .OR. BL%NAME == 'BUDGET_GROUPS') THEN
          CALL WRN%ADD(BL%NAME//' BLOCK IS NOT YET SUPPORTED FOR SFR.'
      +               //NL//'ITS CONTENTS WILL BE IGNORED.'//NL )
+      !
+      ELSEIF(BL%NAME == 'LINEFEED') THEN
+         IF (BL%NLINE < 1) CYCLE         ! empty linefeed block
          !
-      ELSEIF(BL%NAME == 'LINEFEED' .AND. BL%NLINE>0) THEN
-         !
-         ALLOCATE(SFRFEED)
-         CALL SFRFEED%INIT(BL)    !=>FEED_ALLOCATE(IN,IOUT,LINE)
-         NO_LINEFEED = FALSE
+         IF(BL%GET_EXTRA(1) == 'RUNOFF') THEN  ! found 'BEGIN LINEFEED RUNOFF'
+            ALLOCATE(SFR_FEED_RUNOFF)
+            CALL SFR_FEED_RUNOFF%INIT(BL, LABEL="RUNOFF")
+            NO_LINEFEED_RUNOFF = FALSE
+         ELSE
+            ALLOCATE(SFR_FEED_FLOW)
+            CALL SFR_FEED_FLOW%INIT(BL, LABEL="INFLOW")
+            NO_LINEFEED_FLOW = FALSE
+         END IF
          !
       ELSEIF(BL%NAME == 'TIME_SERIES'       .OR. 
      +       BL%NAME == 'TIME_SERIES_INPUT' .OR. 
@@ -855,13 +855,20 @@ C
       CALL TABFILEPARSE(IN,IOUT,LINE,SFRTABFILE)
       CALL TABFILELINKS(IN,IOUT,LINE,SFRTABFILE)   
       !
-      !ALLOCATE SFRFEED VARIABLE AND OPTIONALLY READ IN FEED FILE LOCATIONS
-      IF(NO_LINEFEED) THEN
-          ALLOCATE(SFRFEED)
-          CALL SFRFEED%INIT(IN,IOUT,LINE)
+      !ALLOCATE SFR_FEED_FLOW VARIABLE AND OPTIONALLY READ IN FEED FILE LOCATIONS
+      IF(NO_LINEFEED_FLOW) THEN
+          ALLOCATE(SFR_FEED_FLOW)
+          CALL SFR_FEED_FLOW%INIT(IN,IOUT,LINE,LABEL='FLOW')
       END IF
       ! LOAD MODEL CELLS THAT WILL BE DESCRIBED BY THE LINE FEED
-      CALL SFRFEED%CELLS(1, 0, 0, 0)     !=>FEED_CELLS(LDIM,NPROP,NAUX,IPRT)
+      CALL SFR_FEED_FLOW%CELLS(1, 0, 0, 0)     !=>FEED_CELLS(LDIM,NPROP,NAUX,IPRT)
+      !
+      IF(NO_LINEFEED_RUNOFF) THEN
+          ALLOCATE(SFR_FEED_RUNOFF)
+          CALL SFR_FEED_RUNOFF%INIT(IN,IOUT,LINE,LABEL='RUNOFF')
+      END IF
+      ! LOAD MODEL CELLS THAT WILL BE DESCRIBED BY THE LINE FEED
+      CALL SFR_FEED_RUNOFF%CELLS(1, 0, 0, 0)
       !
 !     IF(NUMTAB>0) THEN
 !         ! 
@@ -904,7 +911,7 @@ C
       CALL URWORD(line, lloc, istart, istop, 2, ISTCB1, r, IOUT, In)
       !
       ! CHECK IF GLOBAL SHUTDOWN OF CBC IS IN EFFECT
-       CALL CHECK_CBC_GLOBAL_UNIT(ISTCB1)
+       CALL CHECK_CBC_GLOBAL_UNIT(ISTCB1, .FALSE.)
       !
       CALL URWORD(line, lloc, istart, istop, 2, ISTCB2, r, IOUT, In)
       IF ( OUTSEGFLAG > 0 ) THEN
@@ -1587,28 +1594,36 @@ C         Number of reaches in segment added to ISEG
       CALL ERR%CHECK(HED='SFR FATAL ERRORS'//NL,
      +                   INFILE=IN,OUTPUT=IOUT,TAIL=NL,KILL=TRUE)
       !
-      IF(ERR2%RAISED) THEN
+      IF(ERR2%RAISED .AND. SFR_FIX_BOT_WRN) THEN
+      SFR_FIX_BOT_WRN = FALSE
       IF(SFR_FIX_BOT) THEN
        !   
-       CALL ERR2%CHECK(HED='SFR HAS SEGMENT/REACHES WITH A STREAMBED '//
-     +          'BOTTOM'//NL//'DEEPER THEN THE BOTTOM OF THE MODEL '//
-     +          'CELL IT IS ASSIGNED TOO.'//NL//
-     +          'THE FOLLOWING HAD THEIR STREAMBED ELEVATION '//
-     +          'CHANGED TO THE CELL BOTTOM:'//BLN//
+       CALL ERR2%CHECK(HED='SFR has SEGMENT/REACHES with a streambed '//
+     +          'bottom'//NL//'deeper then the bottom of the model '//
+     +          'cell it is assigned too.'//NL//
+     +          'The following had their streambed elevation '//
+     +          'changed to the cell bottom:'//BLN//
      +          '   SEG    RCH     LAY    ROW    COL'//
      +          '      STREAMBED      CELL_BOT',
      +          INFILE=IN, OUTPUT=IOUT, TAIL=NL, NO_NL=TRUE)
       ELSE   
-       CALL ERR2%CHECK(HED='SFR HAS SEGMENT/REACHES WITH A STREAMBED '//
-     +      'BOTTOM'//NL//'DEEPER THEN THE BOTTOM OF THE MODEL '//
-     +      'CELL IT IS ASSIGNED TOO.'//NL//
-     +   'EITHER FIX THE STREAMBED FOR THE FOLLOWING LIST'//NL//
-     +   'OR INCLUDE THE SFR OPTION "FIX_STREAM_BOTTOM" TO INDICATE '//
-     +   'THAT WHEN THE STREAMBED ELEVATION IS LESS THAN THE '//
-     +      'CELL BOTTOM, IT IS SET TO THE CELL BOTTOM.'//BLN//
+       CALL ERR2%CHECK(HED='SFR has SEGMENT/REACHES with a streambed '//
+     +   'bottom'//NL//'deeper then the bottom of the model '//
+     +   'cell it is assigned too.'//NL//
+     +   'Please make sure you want this to happen as it might be '//
+     +   'conceptually incorrect.'//NL//
+     +   '   - This often occurs if SFR moves the reach-layer '//
+     +   'assignment upward.'//NL//
+     +   '   - Note 1: You can disable reach-layer adjustment with '//
+     +   'the SFR options "NO_REACH_LAYER_CHANGE" or '//
+     +   '"REACH_LAYER_CHANGE_DEEPER"'//NL//
+     +   '   - Note 2: You can automatically fix the reach bottom '//
+     +   'with the SFR option "FIX_STREAM_BOTTOM".'//BLN//
+     +   'The following list are SFR reaches whose stream bottom '//
+     +   'is deeper than then its model layer bottom.'//NL//
      +      '   SEG    RCH     LAY    ROW    COL'//
      +      '      STREAMBED      CELL_BOT',
-     +      INFILE=IN, OUTPUT=IOUT, TAIL=NL, KILL=TRUE, NO_NL=TRUE)
+     +      INFILE=IN, OUTPUT=IOUT, TAIL=NL, NO_NL=TRUE)
       END IF
       END IF
 C
@@ -2130,7 +2145,7 @@ C     ------------------------------------------------------------------
      +        jj, jk, k5, k6, k7, kk, ksfropt, kss, ktot, l, lstbeg,
      +        nseg, nstrpts,krck,irck,jrck,ireachck, j, numval,iunitnum,
      +        ILP,ierr,IFLG,LLOC,ISTART,ISTOP !WSCHMID/RTH
-      LOGICAL:: HAS_ERROR
+      LOGICAL:: HAS_ERROR, HAS_LMT, HAS_FMP
       CHARACTER(LEN=200)::LINE
       REAL TTIME,TRATE
       TYPE(WARNING_TYPE):: ERR, WRN
@@ -2142,7 +2157,8 @@ C-------SET POINTERS FOR CURRENT GRID.
       CALL SGWF2SUB7PNT(IGRID)  !seb lgr
       !
       !READ IN NEXT LINE IN LINE_FEED FILE WHICH CONTAINS THE CURRENT STRESS PERIODS DATA
-      CALL SFRFEED%NEXTLINE()
+      CALL SFR_FEED_FLOW%NEXTLINE()
+      CALL SFR_FEED_RUNOFF%NEXTLINE()
       !
       IERR = 0
       IFLG = 0
@@ -2153,6 +2169,9 @@ C1------READ ITMP FLAG TO REUSE NON-PARAMETER DATA, 2 PRINTING FLAGS,
 C         AND NUMBER OF PARAMETERS BEING USED IN CURRENT STRESS PERIOD. 
       iss = ISSFLG(Kkper)
       zero = 1.0E-7
+      HAS_LMT = IUNIT(49).NE.0
+      HAS_FMP = IUNIT(61).NE.0
+      ! 
 Cdep added NSFRPAR to IF statement
       !IF ( Kkper.GT.1 ) THEN
       !  IF ( NSFRPAR.EQ.0 ) THEN
@@ -2284,6 +2303,38 @@ C         ACTIVATE PARAMETERS BEING USED IN CURRENT STRESS PERIOD.
           CALL SGWF2SFR7PARMOV(In, Iunitgwt, Nsol)
         END DO
       END IF
+C
+C17b----Apply any runoff specified by LINEFEED.
+      IF (SFR_FEED_RUNOFF%NFEED > 0) THEN
+       CALL SFR_FEED_RUNOFF%FEED_SFR(SEG(:,:NSS),3,
+     +                             ' SEGMENT            RUNOFF')
+C
+       IF(ITMP < 0) THEN
+        irch = 0
+        DO nseg = 1, NSS
+          seglen = SEG(1, nseg)
+          runoff = SEG(3, nseg)
+          DO ii = 1, ISEG(4, nseg)
+             irch = irch + 1
+             rchlen = STRM(1, irch)
+             STRM(12, irch) = runoff*(rchlen/seglen)
+          END DO
+        END DO
+        !
+        IF(HAS_LMT) THEN  !IUNIT(49): LMT
+          NFLOWTYPE = 0
+          FLOWTYPE  = 'NA'
+          FLOWTYPE(1)='VOLUME'
+          FLOWTYPE(2)='RCHLEN'
+          IF(HAS_FMP) FLOWTYPE(5)='RUNOFF' ! Assume FMP is always going to send some sort of runoff
+          DO nseg = 1, NSS
+           IF(SEG(3,nseg)/=0.and.FLOWTYPE(5)=='NA') FLOWTYPE(5)='RUNOFF'
+           IF(SEG(4,nseg)/=0.and.FLOWTYPE(4)=='NA') FLOWTYPE(4)='EVAP'
+           IF(SEG(5,nseg)/=0.and.FLOWTYPE(3)=='NA') FLOWTYPE(3)='PRECIP'
+          END DO
+        ENDIF 
+       END IF ! (ITMP < 0) THEN
+      END IF ! (SFR_FEED_RUNOFF%NFEED > 0) THEN
 C
 C8------CHECK FOR ERRORS IN SEGMENT DATA.
       IF ( ITMP.GT.0 .OR. NSFRPAR.NE.0 ) THEN
@@ -2418,12 +2469,31 @@ C16-----PRINT WARNING IF TALLIED SEGMENTS LESS THAN NSS.
 C
 C17-----PRINT INPUT DATA IF IRDFLG IS ZERO.
 C         SKIP IF INPUT READ BY REACHES (ISFROPT = 1, 3, OR 5)
-        IF(SFR_PRNT.AND.Iunitgwt==0) THEN
+      IF(SFR_PRNT.AND.Iunitgwt==0) THEN
         IF ( IRDFLG.LE.0 ) CALL SGWF2SFR7PRSEG(NSS, 1, Iunitgwt, Kkper,
      +                                         Nsol, Iouts)
-        END IF
+      END IF
 C
 C18-----COMPUTE STREAM REACH VARIABLES.
+C
+C--SET SOME VALUES NEEDED BY THE LMT PACKAGE
+C--AS EACH SEGMENT IS READ, DETERMINE IF ANY OF THE FOLLOWING ARE ACTIVE
+C  (1) STORAGE (TRANSIENT ROUTING); (2) PRECIP; (3) EVAP; (4) USER-SPECIFIED RUNOFF; 
+C  (5) RUNOFF FROM UZF1 PACKAGE; (6) UNSATURATED FLOW BENEATH REACH (NOT AVAILABLE YET)
+        !
+        IF(HAS_LMT) THEN  !IUNIT(49): LMT
+          NFLOWTYPE = 0
+          FLOWTYPE  = 'NA'
+          FLOWTYPE(1)='VOLUME'
+          FLOWTYPE(2)='RCHLEN'
+          IF(HAS_FMP) FLOWTYPE(5)='RUNOFF' ! Assume FMP is always going to send some sort of runoff
+          DO nseg = 1, NSS
+           IF(SEG(3,nseg)/=0.and.FLOWTYPE(5)=='NA') FLOWTYPE(5)='RUNOFF'
+           IF(SEG(4,nseg)/=0.and.FLOWTYPE(4)=='NA') FLOWTYPE(4)='EVAP'
+           IF(SEG(5,nseg)/=0.and.FLOWTYPE(3)=='NA') FLOWTYPE(3)='PRECIP'
+          END DO
+        ENDIF
+        !
         irch = 1
         ksfropt = 0
         DO nseg = 1, NSS
@@ -2434,33 +2504,6 @@ C18-----COMPUTE STREAM REACH VARIABLES.
           etsw = SEG(4, nseg)
           pptsw = SEG(5, nseg)
           sumlen = 0.0
-C
-C--SET SOME VALUES NEEDED BY THE LMT PACKAGE
-C--AS EACH SEGMENT IS READ, DETERMINE IF ANY OF THE FOLLOWING ARE ACTIVE
-C  (1) STORAGE (TRANSIENT ROUTING); (2) PRECIP; (3) EVAP; (4) USER-SPECIFIED RUNOFF; 
-C  (5) RUNOFF FROM UZF1 PACKAGE; (6) UNSATURATED FLOW BENEATH REACH (NOT AVAILABLE YET)
-          IF(IUNIT(49).NE.0) THEN  !IUNIT(49): LMT
-            IF(FLOWTYPE(1).EQ.'NA') THEN !Originally: (ITRFLG.EQ.1.AND.FLOWTYPE(1).EQ.'NA')
-              NFLOWTYPE = NFLOWTYPE + 1
-              FLOWTYPE(1)='VOLUME'
-            ENDIF
-            IF(FLOWTYPE(2).EQ.'NA') THEN
-              NFLOWTYPE = NFLOWTYPE + 1
-              FLOWTYPE(2)='RCHLEN'
-            ENDIF
-            IF(SEG(5,nseg).NE.0.AND.FLOWTYPE(3).EQ.'NA') THEN  ! CHECK FOR SURFACE WATER PRECIP
-              NFLOWTYPE = NFLOWTYPE + 1
-              FLOWTYPE(3)='PRECIP'
-            ENDIF
-            IF(SEG(4,nseg).NE.0.AND.FLOWTYPE(4).EQ.'NA') THEN  ! CHECK FOR SURFACE WATER EVAP
-              NFLOWTYPE = NFLOWTYPE + 1
-              FLOWTYPE(4)='EVAP'
-            ENDIF
-            IF(SEG(3,nseg).NE.0.AND.FLOWTYPE(5).EQ.'NA') THEN  ! CHECK FOR USER-SPECIFIED RUNOFF
-              NFLOWTYPE = NFLOWTYPE + 1
-              FLOWTYPE(5)='RUNOFF'
-            ENDIF
-          ENDIF
 C
 C19-----COMPUTE VARIABLES NEEDED FOR STREAM LEAKAGE.
           IF ( icalc.EQ.0 .OR. icalc.EQ.1 ) THEN
@@ -2594,7 +2637,8 @@ C21-----STOP IF ICALC LESS THAN 0 AND GREATER THAN 4.
       !!!
       
       !
-      IF(ERR%RAISED) THEN
+      IF(ERR%RAISED .AND. SFR_FIX_BOT_WRN) THEN
+      SFR_FIX_BOT_WRN = .FALSE.
       IF(SFR_FIX_BOT) THEN
        !   
        CALL ERR%CHECK(HED='SFR HAS SEGMENT/REACHES WITH A STREAMBED '//
@@ -2605,19 +2649,27 @@ C21-----STOP IF ICALC LESS THAN 0 AND GREATER THAN 4.
      +          '   SEG    RCH     LAY    ROW    COL'//
      +          '      STREAMBED      CELL_BOT',
      +          INFILE=IN, OUTPUT=IOUT, TAIL=NL, INIT=TRUE, NO_NL=TRUE)
-      ELSE   
-       CALL ERR%CHECK(HED='SFR HAS SEGMENT/REACHES WITH A STREAMBED '//
-     +      'BOTTOM'//NL//'DEEPER THEN THE BOTTOM OF THE MODEL '//
-     +      'CELL IT IS ASSIGNED TOO.'//NL//
-     +   'EITHER FIX THE STREAMBED FOR THE FOLLOWING LIST'//NL//
-     +   'OR INCLUDE THE SFR OPTION "FIX_STREAM_BOTTOM" TO INDICATE '//
-     +   'THAT WHEN THE STREAMBED ELEVATION IS LESS THAN THE '//
-     +      'CELL BOTTOM, IT IS SET TO THE CELL BOTTOM.'//BLN//
+      ELSE 
+       CALL ERR%CHECK(HED='SFR has SEGMENT/REACHES with a streambed '//
+     +   'bottom'//NL//'deeper then the bottom of the model '//
+     +   'cell it is assigned too.'//NL//
+     +   'Please make sure you want this to happen as it might be '//
+     +   'conceptually incorrect.'//NL//
+     +   '   - This often occurs if SFR moves the reach-layer '//
+     +   'assignment upward.'//NL//
+     +   '   - Note 1: You can disable reach-layer adjustment with '//
+     +   'the SFR options "NO_REACH_LAYER_CHANGE" or '//
+     +   '"REACH_LAYER_CHANGE_DEEPER"'//NL//
+     +   '   - Note 2: You can automatically fix the reach bottom '//
+     +   'with the SFR option "FIX_STREAM_BOTTOM".'//BLN//
+     +   'The following list are SFR reaches whose stream bottom '//
+     +   'is deeper than then its model layer bottom.'//NL//
      +      '   SEG    RCH     LAY    ROW    COL'//
      +      '      STREAMBED      CELL_BOT',
-     +      INFILE=IN, OUTPUT=IOUT, TAIL=NL, KILL=TRUE, NO_NL=TRUE)
+     +      INFILE=IN, OUTPUT=IOUT, TAIL=NL, INIT=TRUE, NO_NL=TRUE) 
       END IF
       END IF
+      IF(ERR%RAISED) CALL ERR%INIT()  ! Reset the error message
       !!!
 C
 C22-----CHECK VALUES IN STREAM CROSS SECTION LIST (XSEC).
@@ -2650,10 +2702,10 @@ C22-----CHECK VALUES IN STREAM CROSS SECTION LIST (XSEC).
             END DO
           END IF
         END DO
-      CALL ERR%CHECK(HED='SFR HAS SEGMENTS WITH BAD EIGHT '//
-     +          'POINT CROSS SECTION DISCRIPTIONS.'//NL//
-     +          'THE FOLLOWING SEGMENT AND POINT NUMBER (PNT) '//
-     +          'NEED TO BE FIXED. VALUE IS HE LOADED INPUT.'//BLN//
+      CALL ERR%CHECK(HED='SFR has segments with bad 8-'//
+     +          'Point cross section discriptions.'//NL//
+     +          'The following segment and point numbers (PNT) that '//
+     +          'need to be fixed. VALUE is the loaded input.'//BLN//
      +          '   SEG   PNT      VALUE  COMMENT',
      +          INFILE=IN,OUTPUT=IOUT,TAIL=NL,KILL=TRUE, NO_NL=TRUE)
  9030   FORMAT (/, ' *** WARNING *** STREAMBED THICKNESS', 
@@ -3222,7 +3274,8 @@ C     ------------------------------------------------------------------
       USE GWFBASMODULE, ONLY: TOTIM, DATE_SP
       USE GWFSFRMODULE, ONLY: NSS, NUMTAB, ISFRLIST,
      +                        SEG, FXLKOT, IDIVAR, CLOSEZERO, 
-     +                        IOUT, SFRTABFILE, SFRFEED, TIME_SERIES
+     +                        IOUT, SFRTABFILE, TIME_SERIES, 
+     +                        SFR_FEED_FLOW, SFR_FEED_RUNOFF
       USE GLOBAL,              ONLY: SUBLNK
       USE CONSTANTS,           ONLY: ONE, Z, YEARTOL
       USE TABLEFILE_INTERFACE, ONLY: TABFILEUPDATE
@@ -3253,13 +3306,14 @@ C1------CALL LINEAR INTERPOLATION ROUTINE
       !
       !IF TABFILE OPTION IS USED UPDATE THE TABFILES AND APPLY FLOW TO SEGEMENTS
       IF(SFRTABFILE%NTAB > 0) THEN
-         CALL TABFILEUPDATE( SFRTABFILE,'SFR',KSTP, SEG(2,:) )             !seb UPDATES THE FLOW FOR ALL SEGMENTS LINKED TO A TABFILE
+         CALL TABFILEUPDATE( SFRTABFILE,'SFR',KSTP, SEG(2,:) )         ! UPDATES THE FLOW FOR ALL SEGMENTS LINKED TO A TABFILE
       END IF
       !
       ! APPLY THE NEW FEED DATA TO THE SFR PACKAGE ARRAY
       !
-      IF (SFRFEED%NFEED > 0) THEN
-        CALL SFRFEED%FEED_SFR(SEG(:,:NSS),2,' SEGMENT            VALUE')
+      IF (SFR_FEED_FLOW%NFEED > 0) THEN
+        CALL SFR_FEED_FLOW%FEED_SFR(SEG(:,:NSS),2,
+     +                              ' SEGMENT            FLOW')
       END IF
       !
       IF(TIME_SERIES%NFIL > 0) THEN
@@ -4140,7 +4194,7 @@ C33-----ESTIMATE DEPTH FOR ENDPOINTS WHEN ICALC IS 1.
               END IF
               IF ( flobot2.GT.flowc ) flobot2 = flowc
               !
-              ! seb Scotts wonderful fix for invalid floating operations...yay for scott!
+              ! Scotts wonderful fix for invalid floating operations...yay for scott!
               IF(qcnst<NEARZERO) THEN
                   depth2 = 0D0
                   depth1 = 0D0
@@ -5267,7 +5321,7 @@ C     ------------------------------------------------------------------
       DOUBLE PRECISION, DIMENSION(16):: DB_OUT
       EXTERNAL CALC_XSA
       DOUBLE PRECISION CALC_XSA
-      LOGICAL:: NO_GW, FIXED_HEAD_CELL
+      LOGICAL:: NO_GW, FIXED_HEAD_CELL, HAS_LMT
       DOUBLE PRECISION:: MX_FLO, MX_STG 
 C     ------------------------------------------------------------------
 C     LOCAL STATIC VARIABLES
@@ -5331,7 +5385,8 @@ C         ACCUMULATORS (RATIN AND RATOUT).
       SFRUZRECH = 0.0
       FNETSEEP = 0.0
       maxwav = NSFRSETS*NSTRAIL
-      IF(IUNIT(49).NE.0) NINTOT = 0  !IUNIT(49): LMT
+      HAS_LMT = IUNIT(49).NE.0
+      NINTOT = 0  !IF(IUNIT(49).NE.0) -> LMT
       IF ( IUZT.EQ.1) THEN
         SFRUZBD(4) = zero
         SFRUZBD(5) = zero
@@ -5552,10 +5607,8 @@ C7------SET FLOWIN EQUAL TO STREAM SEGMENT INFLOW IF FIRST REACH.
               flowin = 0
             END IF
 !EDM - Count connection for LMT
-            IF(IUNIT(49).NE.0) THEN  !IUNIT(49): LMT
-              IF ( ISEG(3, istsg).EQ.5 ) THEN  
-                NINTOT = NINTOT + 1 
-              ENDIF
+            IF(HAS_LMT) THEN  !IUNIT(49): LMT
+              IF ( ISEG(3, istsg).EQ.5 ) NINTOT = NINTOT + 1 
             ENDIF
             IF ( IDIVAR(1,istsg).EQ.0 ) 
      +          sfrbudg_in = sfrbudg_in + SEG(2, istsg)
@@ -5605,7 +5658,7 @@ C20-----SET FLOW INTO DIVERSION IF SEGMENT IS DIVERSION.
 !EDM - For LMT
                 IF( IDIVAR(1,istsg).GT.0 ) THEN
                   flowin = DVRSFLW(istsg)
-                  IF(IUNIT(49).NE.0) NINTOT = NINTOT + 1
+                  IF(HAS_LMT) NINTOT = NINTOT + 1
                 ENDIF
               END IF
             END IF
@@ -5618,17 +5671,13 @@ C22-----SUM TRIBUTARY OUTFLOW AND USE AS INFLOW INTO DOWNSTREAM SEGMENT.
                 IF ( istsg.EQ.IOTSG(itrib) ) THEN
                   trbflw = SGOTFLW(itrib)
                   flowin = flowin + trbflw
-                  IF(IUNIT(49).NE.0) THEN  !IUNIT(49): LMT
-                    NINTOT = NINTOT + 1   !EDM
-                  ENDIF
+                  IF(HAS_LMT) NINTOT = NINTOT + 1   !EDM
                 END IF
                 itrib = itrib + 1
               END DO
               flowin = flowin + SEG(2, istsg)  !SEG(2,istsg) stores specified inflow, and should have a spot in "Headwaters" flows
-              IF(IUNIT(49).NE.0) THEN  !IUNIT(49): LMT
-              IF(ABS(SEG(2,ISTSG)) > NEARZERO_15) THEN  !Possible to have both tributary inflow and specified inflow. if the latter exist, count it next
-                  NINTOT = NINTOT + 1   !EDM
-              ENDIF
+              IF(HAS_LMT) THEN  !IUNIT(49): LMT
+                IF(ABS(SEG(2,ISTSG)) > NEARZERO_15) NINTOT = NINTOT + 1         !Possible to have both tributary inflow and specified inflow. if the latter exist, count it next
               END IF
 C
 C23-----CHECK IF SPECIFIED "FLOW" IS WITHDRAWAL (i.e., negative), THAT WATER IS AVAILABLE.
@@ -5645,15 +5694,13 @@ C24-----SET INFLOW EQUAL TO OUTFLOW FROM UPSTREAM REACH, WHEN REACH
 C         GREATER THAN 1.
           ELSE IF ( nreach.GT.1 ) THEN
             flowin = STRM(9, ll)
-            IF(IUNIT(49).NE.0) THEN  !IUNIT(49): LMT
-              NINTOT = NINTOT + 1    !EDM
-            ENDIF
+            IF(HAS_LMT) NINTOT = NINTOT + 1
           END IF
           !
           IF( flowin > MX_FLO ) flowin = MX_FLO
 C
 C- EDM -IF OUTSEG=0 THEN SEGMENT IS A NETWORK SINK AND SHOULD BE COUNTED FOR LMT
-          IF(IUNIT(49).NE.0) THEN  !IUNIT(49): LMT
+          IF(HAS_LMT) THEN  !IUNIT(49): LMT
             IF(IOTSG(ISTSG).EQ.0.AND.NREACH.EQ.ISEG(4,ISTSG)) THEN
               NINTOT = NINTOT + 1
             ENDIF
@@ -10803,6 +10850,7 @@ C     ------------------------------------------------------------------
       DEALLOCATE (GWFSFRDAT(IGRID)%DO_FM_BD)
       DEALLOCATE(GWFSFRDAT(IGRID)%SFR_PRNT)
       DEALLOCATE(GWFSFRDAT(IGRID)%SFR_FIX_BOT)
+      DEALLOCATE(GWFSFRDAT(IGRID)%SFR_FIX_BOT_WRN)
       DEALLOCATE(GWFSFRDAT(IGRID)%SFR_AUTO_NEG_ITMP)
       !
       IF(GWFSFRDAT(IGRID)%SFR_FRES    %IS_OPEN .OR. 
@@ -10817,10 +10865,15 @@ C     ------------------------------------------------------------------
       DEALLOCATE(GWFSFRDAT(IGRID)%HNEW_FACTOR)
       DEALLOCATE(GWFSFRDAT(IGRID)%UPLAY_ADJUST)
       ! GFORTRAN compiler error work-around for pointer data type FINAL statement
-      SFRFEED=>GWFSFRDAT(IGRID)%SFRFEED
-      GWFSFRDAT(IGRID)%SFRFEED=>NULL()
-      DEALLOCATE(SFRFEED)
-      SFRFEED=>NULL()
+      SFR_FEED_FLOW=>GWFSFRDAT(IGRID)%SFR_FEED_FLOW
+      GWFSFRDAT(IGRID)%SFR_FEED_FLOW=>NULL()
+      DEALLOCATE(SFR_FEED_FLOW)
+      SFR_FEED_FLOW=>NULL()
+      !
+      SFR_FEED_RUNOFF=>GWFSFRDAT(IGRID)%SFR_FEED_RUNOFF
+      GWFSFRDAT(IGRID)%SFR_FEED_RUNOFF=>NULL()
+      DEALLOCATE(SFR_FEED_RUNOFF)
+      SFR_FEED_RUNOFF=>NULL()
       !
       DBFILE =>GWFSFRDAT(IGRID)%DBFILE 
       GWFSFRDAT(IGRID)%DBFILE =>NULL()
@@ -10847,7 +10900,8 @@ C     ------------------------------------------------------------------
       DEALLOCATE(CNVG_WRN)
       CNVG_WRN=>NULL()
       !
-      !DEALLOCATE (GWFSFRDAT(IGRID)%SFRFEED)
+      !DEALLOCATE (GWFSFRDAT(IGRID)%SFR_FEED_FLOW)
+      !DEALLOCATE (GWFSFRDAT(IGRID)%SFR_FEED_RUNOFF)
       !DEALLOCATE (GWFSFRDAT(IGRID)%DBFILE )
       !DEALLOCATE (GWFSFRDAT(IGRID)%TIME_SERIES      )
       !DEALLOCATE(GWFSFRDAT(IGRID)%CNVG_WRN)
@@ -10963,7 +11017,8 @@ C NULLIFY THE LOCAL POINTERS
         NSEGDIM         =>NULL()
         factor          =>NULL()
         SFRTABFILE      =>NULL()                    !seb
-        SFRFEED         =>NULL()
+        SFR_FEED_FLOW   =>NULL()
+        SFR_FEED_RUNOFF =>NULL()
         DBFILE          =>NULL()
         IOUT            =>NULL()
         !
@@ -10981,6 +11036,7 @@ C NULLIFY THE LOCAL POINTERS
         DO_FM_BD         =>NULL()
         SFR_PRNT         => NULL()
         SFR_FIX_BOT      =>NULL()
+        SFR_FIX_BOT_WRN  =>NULL()
         SFR_AUTO_NEG_ITMP=>NULL()
         CNVG_WRN         =>NULL()
         !
@@ -11122,7 +11178,8 @@ C     ------------------------------------------------------------------
       STRHC1KVFLAG=>GWFSFRDAT(IGRID)%STRHC1KVFLAG
       Nfoldflbt=>GWFSFRDAT(IGRID)%Nfoldflbt
       SFRTABFILE=>GWFSFRDAT(IGRID)%SFRTABFILE
-      SFRFEED   =>GWFSFRDAT(IGRID)%SFRFEED
+      SFR_FEED_FLOW  =>GWFSFRDAT(IGRID)%SFR_FEED_FLOW
+      SFR_FEED_RUNOFF=>GWFSFRDAT(IGRID)%SFR_FEED_RUNOFF
       DBFILE    =>GWFSFRDAT(IGRID)%DBFILE 
       IOUT      =>GWFSFRDAT(IGRID)%IOUT
       !
@@ -11138,6 +11195,7 @@ C     ------------------------------------------------------------------
       DO_FM_BD          =>GWFSFRDAT(IGRID)%DO_FM_BD
       SFR_PRNT          =>GWFSFRDAT(IGRID)%SFR_PRNT
       SFR_FIX_BOT       =>GWFSFRDAT(IGRID)%SFR_FIX_BOT
+      SFR_FIX_BOT_WRN   =>GWFSFRDAT(IGRID)%SFR_FIX_BOT_WRN
       SFR_AUTO_NEG_ITMP=>GWFSFRDAT(IGRID)%SFR_AUTO_NEG_ITMP
       CNVG_WRN          =>GWFSFRDAT(IGRID)%CNVG_WRN
       !
@@ -11278,8 +11336,9 @@ C     ------------------------------------------------------------------
       GWFSFRDAT(IGRID)%STRHC1KHFLAG=>STRHC1KHFLAG
       GWFSFRDAT(IGRID)%STRHC1KVFLAG=>STRHC1KVFLAG
       GWFSFRDAT(IGRID)%Nfoldflbt=>Nfoldflbt
-      GWFSFRDAT(IGRID)%SFRTABFILE=>SFRTABFILE                           !seb
-      GWFSFRDAT(IGRID)%SFRFEED=>SFRFEED
+      GWFSFRDAT(IGRID)%SFRTABFILE=>SFRTABFILE
+      GWFSFRDAT(IGRID)%SFR_FEED_FLOW  =>SFR_FEED_FLOW
+      GWFSFRDAT(IGRID)%SFR_FEED_RUNOFF=>SFR_FEED_RUNOFF
       GWFSFRDAT(IGRID)%DBFILE =>DBFILE 
       GWFSFRDAT(IGRID)%IOUT   =>IOUT
       !
@@ -11296,6 +11355,7 @@ C     ------------------------------------------------------------------
       GWFSFRDAT(IGRID)%DO_FM_BD          => DO_FM_BD
       GWFSFRDAT(IGRID)%SFR_PRNT          => SFR_PRNT
       GWFSFRDAT(IGRID)%SFR_FIX_BOT       => SFR_FIX_BOT
+      GWFSFRDAT(IGRID)%SFR_FIX_BOT_WRN   => SFR_FIX_BOT_WRN
       GWFSFRDAT(IGRID)%SFR_AUTO_NEG_ITMP => SFR_AUTO_NEG_ITMP
       GWFSFRDAT(IGRID)%CNVG_WRN          => CNVG_WRN
       !

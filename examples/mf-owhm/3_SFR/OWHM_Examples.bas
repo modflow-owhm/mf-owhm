@@ -31,7 +31,7 @@ BEGIN OPTIONS
     # Print the budget information in a column based format for all packages in a single file.
     BUDGETDB                ./output/VolumetricBudget.txt 
     PRINT_HEAD   NPER       ./output/Head_NPER.txt 
-    CUMULATIVE_HEAD_CHANGE  ./output/CumHCHG.txt  
+    CUMULATIVE_HEAD_CHANGE  ./output/owhm_3_sfr_CumHCHG.txt  
     #
 END OPTIONS
 CONSTANT        1 # IBOUND Lay1

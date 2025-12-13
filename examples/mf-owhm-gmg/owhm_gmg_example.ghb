@@ -1,0 +1,40 @@
+BEGIN BUDGET_GROUPS
+            GHB_North
+            GHB_South
+END BUDGET_GROUPS
+#
+BEGIN LINEFEED
+               SFAC COND   1.0                    # Global Multiplier on GHB conductance for the FeedFiles
+               SFAC 1.0                           # Global Multiplier on GHB head        for the FeedFiles
+               ./feedfiles/GHB_FeedFile_North.txt # FeedFile to load--multiple files allowed, but one file per line
+END LINEFEED
+#
+BEGIN OPTIONS                         # Options can be defined via an options block or in Data Set 1
+  AUTOMATIC_NEGATIVE_ITMP
+  NOPRINT
+END OPTIONS
+# The TabFile keyword is defined after the block inputs
+#
+TABFILE 1 1 IGNORE_TIME SPBASIS TABEQN      # TABFILE NTAB OPTIONS-> IGNORE_TIME: Read 1 line per time step; SPBASIS: Read input by stress period instead of time step; TABEQN: Check for custom equation to be applied to TabFile.
+GHB_SouthTab  ./tabfiles/GHBTAB_South.txt   # Name to associate with tabfile (TABNAM) and the file to read (TABLOCATION)
+#
+4 9   # MXACTB IGHBCB Option - Note that the 4 GHBs defined in the FeedFile are automatically to MXACTB, so the actual total is MXACTB=8
+4 0   # ITMP NP 
+#
+# Lay Row Col  Bhead  Cond    BudgetGroup - No TabNam indicates that no Tabfile is associated with input
+# 1   1   1    -999   0.0     GHB_North   <- These are defined in the FeedFile and their count is auto-added to MXACTB
+# 1   1   2    -999   0.0     GHB_North
+# 1   1   3    -999   0.0     GHB_North
+# 1   1   4    -999   0.0     GHB_North
+# Lay Row Col  Bhead  Cond    BudgetGroup  TABNAM       SFAC TAB_EQN      The Bhead is over-written with the value in the TabFile
+  1   5    1    -999    5.0E+02  GHB_South     GHB_SouthTab  1.0  'TAB + 1.5'   # Equation states that tabfile value (TAB) has 1.5 added to it 
+  1   5    2    -999    5.0E+02  GHB_South     GHB_SouthTab  1.0  'TAB + 0.5'
+  1   5    3    -999    5.0E+02  GHB_South     GHB_SouthTab  1.0  'TAB - 0.5'
+  1   5    4    -999    5.0E+02  GHB_South     GHB_SouthTab  1.0  'TAB - 1.5'
+-1 0 # ITMP NP <-Data is reused for all SP but TABFILES and LINEFEED still apply
+-1 0 
+-1 0
+# Since the option "AUTOMATIC_NEGATIVE_ITMP" was specified ITMP and NP are never read.
+#   Instead the ITMP and NP specified in the first stress period is repeated until the end of the simulation,
+#   but the Bhead is updated via the FeedFile and TabFile
+# Normally ITMP and NP would require one for each stress period input.

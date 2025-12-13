@@ -1,8 +1,8 @@
 
 BAS Package Options block keyword PRINT_CONVERGENCE
 
-Writes for each time step's the convergence and mass 
-error information for the worst model cell.
+Writes for each time step's the head and the solver iteration's 
+change in head for the worst model cell.
 
 The output may be text or binary format.
 

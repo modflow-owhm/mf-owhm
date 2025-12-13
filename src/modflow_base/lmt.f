@@ -1,4 +1,3 @@
-C SCOTT DEAL WITH MTWEL1
 C
 C ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 C LINK-MT3DMS (LMT) PACKAGE V8 FOR MODFLOW-OWHM
@@ -35,7 +34,7 @@ C last modified: 06-23-2016
 C last modified: 10-21-2010 swm: added MTMNW1 & MTMNW2
 C last modified: 06-23-2016
 C      
-      USE CONSTANTS,ONLY:BLNK, NL, BLN
+      USE CONSTANTS,ONLY:BLNK, NL, BLN, Z
       USE OPENSPEC
       USE GLOBAL,   ONLY:NCOL,NROW,NLAY,NPER,NODES,NIUNIT,IUNIT,
      &                   ISSFLG,IBOUND,IOUT
@@ -57,23 +56,50 @@ C--USE FILE SPECIFICATION of MODFLOW-2005
       REAL          R
       !INCLUDE 'openspec.inc'
       LOGICAL       LOP,FIRSTVAL
-      CHARACTER(5),DIMENSION(NIUNIT):: CUNIT
-      CHARACTER(4)   SETDEFLT
-      CHARACTER(768):: LINE,FNAME,NME
-      CHARACTER(8)   OUTPUT_FILE_HEADER
-      CHARACTER(11)  OUTPUT_FILE_FORMAT,HDRTXT
-      DATA          INLMT,MTBCF,MTLPF,MTHUF,MTWEL,MTDRN,MTRCH,MTEVT,
-     &              MTRIV,MTSTR,MTGHB,MTRES,MTFHB,MTDRT,MTETS,MTSUB,
-     &              MTIBS,MTTLK,MTLAK,MTMNW,MTSWT,MTSFR,MTUZF,MTSWR,
-     &              MTWEL1,MTFMP,MTRIP,MTSWI
-     &              /28*0/
-C     -----------------------------------------------------------------    
+      CHARACTER(  5), DIMENSION(NIUNIT):: CUNIT
+      CHARACTER(  4)::  SETDEFLT
+      CHARACTER(768):: LINE, FNAME, NME
+      CHARACTER(  8):: OUTPUT_FILE_HEADER
+      CHARACTER( 11)::  OUTPUT_FILE_FORMAT, HDRTXT
+      INTEGER :: FMP_UNIT
+C     -----------------------------------------------------------------
+      FMP_UNIT = IUNIT(61)
+      INLMT  = Z
+      MTBCF  = Z
+      MTLPF  = Z
+      MTHUF  = Z
+      MTWEL  = Z
+      MTWEL1 = Z
+      MTWEL2 = Z
+      MTDRN  = Z
+      MTRCH  = Z
+      MTEVT  = Z
+      MTRIV  = Z
+      MTSTR  = Z
+      MTGHB  = Z
+      MTRES  = Z
+      MTFHB  = Z
+      MTDRT  = Z
+      MTETS  = Z
+      MTSUB  = Z
+      MTIBS  = Z
+      MTTLK  = Z
+      MTLAK  = Z
+      MTMNW  = Z
+      MTSWT  = Z
+      MTSFR  = Z
+      MTUZF  = Z
+      MTSWR  = Z
+      MTFMP  = Z
+      MTRIP  = Z
+      MTSWI  = Z
+      
       ALLOCATE(ISSMT3D,IUMT3D,ILMTFMT,ISFRUZFCONNECT,ILAKUZFCONNECT,
      +         ISFRLAKCONNECT,ISNKUZFCONNECT,NPCKGTXT,IUZFFLOWS,
-     +         ISFRFLOWS,ILAKFLOWS,NLAKCON, SOURCE=0)
+     +         ISFRFLOWS,ILAKFLOWS,NLAKCON, SOURCE=Z)
       ALLOCATE(IGWET(NCOL,NROW))
       ALLOCATE(IUZFRCH(NCOL,NROW))
-      NPCKGTXT=0
+      NPCKGTXT=Z
       SETDEFLT='NA'
 C
 C--SET POINTERS FOR THE CURRENT GRID 
@@ -91,7 +117,9 @@ C--CHECK for OPTIONS/PACKAGES USED IN CURRENT SIMULATION
         ELSEIF(CUNIT(IU).EQ.'HUF2' .OR. CUNIT(IU).EQ.'HUF') THEN
           MTHUF=IUNIT(IU)
         ELSEIF(CUNIT(IU).EQ.'WEL ') THEN
-          MTWEL=IUNIT(IU)
+          MTWEL2=IUNIT(IU)
+        ELSEIF(CUNIT(IU).EQ.'WEL1') THEN ! WEL and WEL1 merge output
+          MTWEL1=IUNIT(IU)
         ELSEIF(CUNIT(IU).EQ.'DRN ') THEN
           MTDRN=IUNIT(IU)
         ELSEIF(CUNIT(IU).EQ.'RCH ') THEN
@@ -104,73 +132,67 @@ C--CHECK for OPTIONS/PACKAGES USED IN CURRENT SIMULATION
           MTGHB=IUNIT(IU)
         ELSEIF(CUNIT(IU).EQ.'STR ') THEN
           MTSTR=IUNIT(IU)
-          IF(MTSTR.NE.0) NPCKGTXT = NPCKGTXT + 1
+          IF(MTSTR /= Z) NPCKGTXT = NPCKGTXT + 1
         ELSEIF(CUNIT(IU).EQ.'RES ') THEN
           MTRES=IUNIT(IU)
-          IF(MTRES.NE.0) NPCKGTXT = NPCKGTXT + 1
+          IF(MTRES /= Z) NPCKGTXT = NPCKGTXT + 1
         ELSEIF(CUNIT(IU).EQ.'FHB ') THEN
           MTFHB=IUNIT(IU)
-          IF(MTFHB.NE.0) NPCKGTXT = NPCKGTXT + 1
+          IF(MTFHB /= Z) NPCKGTXT = NPCKGTXT + 1
         ELSEIF(CUNIT(IU).EQ.'DRT ') THEN
           MTDRT=IUNIT(IU)
-          IF(MTDRT.NE.0) NPCKGTXT = NPCKGTXT + 1
+          IF(MTDRT /= Z) NPCKGTXT = NPCKGTXT + 1
         ELSEIF(CUNIT(IU).EQ.'ETS ') THEN
           MTETS=IUNIT(IU)
-          IF(MTETS.NE.0) NPCKGTXT = NPCKGTXT + 1
+          IF(MTETS /= Z) NPCKGTXT = NPCKGTXT + 1
         ELSEIF(CUNIT(IU).EQ.'SUB ') THEN
-          IF(MTSUB.NE.0) MTSUB=IUNIT(IU)
+          IF(MTSUB /= Z) MTSUB=IUNIT(IU)
         ELSEIF(CUNIT(IU).EQ.'IBS ') THEN
           MTIBS=IUNIT(IU)
-          IF(MTIBS.NE.0) NPCKGTXT = NPCKGTXT + 1
+          IF(MTIBS /= Z) NPCKGTXT = NPCKGTXT + 1
         ELSEIF(CUNIT(IU).EQ.'TLK ') THEN
           MTTLK=IUNIT(IU)
-          IF(MTTLK.NE.0) NPCKGTXT = NPCKGTXT + 1
+          IF(MTTLK /= Z) NPCKGTXT = NPCKGTXT + 1
         ELSEIF(CUNIT(IU).EQ.'MNW1') THEN
           MTMNW1=IUNIT(IU)
-          IF(MTMNW1.NE.0) NPCKGTXT = NPCKGTXT + 1
+          IF(MTMNW1 /= Z) NPCKGTXT = NPCKGTXT + 1
         ELSEIF(CUNIT(IU).EQ.'MNW2') THEN
 !swm: store separate to not get clobbered by MNW1
           MTMNW2=IUNIT(IU)
-          IF(MTMNW2.NE.0) NPCKGTXT = NPCKGTXT + 1
+          IF(MTMNW2 /= Z) NPCKGTXT = NPCKGTXT + 1
         ELSEIF(CUNIT(IU).EQ.'LAK ') THEN
           MTLAK=IUNIT(IU)
-          IF(MTLAK.NE.0) NPCKGTXT = NPCKGTXT + 1        
+          IF(MTLAK /= Z) NPCKGTXT = NPCKGTXT + 1        
         ELSEIF(CUNIT(IU).EQ.'SWT ') THEN
           MTSWT=IUNIT(IU)        
-          IF(MTSWT.NE.0) NPCKGTXT = NPCKGTXT + 1
+          IF(MTSWT /= Z) NPCKGTXT = NPCKGTXT + 1
         ELSEIF(CUNIT(IU).EQ.'SFR ') THEN
           MTSFR=IUNIT(IU)
-          IF(MTSFR.NE.0) NPCKGTXT = NPCKGTXT + 1
+          IF(MTSFR /= Z) NPCKGTXT = NPCKGTXT + 1
         ELSEIF(CUNIT(IU).EQ.'UZF ') THEN
           MTUZF=IUNIT(IU)
-          IF(MTUZF.NE.0) NPCKGTXT = NPCKGTXT + 1
-        ELSEIF(CUNIT(IU).EQ.'FMP ') THEN   !rth
-          MTFMP=IUNIT(IU)
-          IF(MTFMP.NE.0) NPCKGTXT = NPCKGTXT + 1
-        ELSEIF(CUNIT(IU).EQ.'RIP ') THEN   !rth
-          MTRIP=IUNIT(IU)
-          IF(MTRIP.NE.0) NPCKGTXT = NPCKGTXT + 1
-        ELSEIF(CUNIT(IU).EQ.'SWI ') THEN   !rth
-          MTSWI=IUNIT(IU)
-          IF(MTSWI.NE.0) NPCKGTXT = NPCKGTXT + 1
-        ELSEIF(CUNIT(IU).EQ.'SWR ') THEN   !rth
-          MTSWR=IUNIT(IU)
-          IF(MTSWR.NE.0) NPCKGTXT = NPCKGTXT + 1
-        ELSEIF(CUNIT(IU).EQ.'WEL1') THEN
-!swm dirty hack          MTWEL1=IUNIT(IU)
-!swm dirty hack            IF(MTWEL1.NE.0) NPCKGTXT = NPCKGTXT + 1
-          IF(MTWEL.NE.0 .AND. IUNIT(IU).NE.0) THEN !swm: check if WEL already active
-            CALL USTOP('SIMULTANEOUS USE OF WEL AND WEL1 IS NOT '//
-     &            'SUPPORTED IN MT3D')
-          ELSEIF(IUNIT(IU).NE.0) THEN  ! WEL not active, but WEL1 active
-          MTWEL=IUNIT(IU)  !swm: Note - reusing MTWEL, which means original WEL and new WEL cannot be used together!!!
-            IF(MTWEL.NE.0) NPCKGTXT = NPCKGTXT + 1  !swm: redundant to check, but being consistent
-          END IF
+          IF(MTUZF /= Z) NPCKGTXT = NPCKGTXT + 1
+        !ELSEIF(CUNIT(IU).EQ.'FMP ') THEN   !rth - seb if uncomented need to add corresponding: `C--WRITE NPCKGTXT RECORDS
+        !  MTFMP=IUNIT(IU)
+        !  IF(MTFMP /= Z) NPCKGTXT = NPCKGTXT + 1
+        !ELSEIF(CUNIT(IU).EQ.'RIP ') THEN   !rth
+        !  MTRIP=IUNIT(IU)
+        !  IF(MTRIP /= Z) NPCKGTXT = NPCKGTXT + 1
+        !ELSEIF(CUNIT(IU).EQ.'SWI ') THEN   !rth
+        !  MTSWI=IUNIT(IU)
+        !  IF(MTSWI /= Z) NPCKGTXT = NPCKGTXT + 1
+        !ELSEIF(CUNIT(IU).EQ.'SWR ') THEN   !rth
+        !  MTSWR=IUNIT(IU)
+        !  IF(MTSWR /= Z) NPCKGTXT = NPCKGTXT + 1
         ENDIF
       ENDDO 
 !swm: SET MTMNW IF EITHER MNW1 OR MNW2 IS ACTIVE
-      IF(MTMNW1.NE.0) MTMNW=MTMNW1
-      IF(MTMNW2.NE.0) MTMNW=MTMNW2
+      IF(MTMNW1 /= Z) MTMNW=MTMNW1
+      IF(MTMNW2 /= Z) MTMNW=MTMNW2
+      
+!     SET MTWEL IF EITHER WEL1 OR WEL IS ACTIVE
+      IF(MTWEL1 /= Z) MTWEL=MTWEL1
+      IF(MTWEL2 /= Z) MTWEL=MTWEL2
 C
 C--IF LMT8 PACKAGE IS NOT ACTIVATED, SKIP TO END AND RETURN
       IF(INLMT.EQ.0) GOTO 9999
@@ -194,18 +216,18 @@ C--ASSIGN DEFAULTS TO LMT INPUT VARIABLES AND OUTPUT FILE NAME
 C
 C--READ ONE LINE OF LMT PACKAGE INPUT FILE
    5  FIRSTVAL=.TRUE.
-      ISFRLAKCONNECT=0
-      ISFRUZFCONNECT=0
-      ILAKUZFCONNECT=0
-      ISNKUZFCONNECT=0
-      IUZFFLOWS=0
-      ISFRFLOWS=0
-      ILAKFLOWS=0
+      ISFRLAKCONNECT=Z
+      ISFRUZFCONNECT=Z
+      ILAKUZFCONNECT=Z
+      ISNKUZFCONNECT=Z
+      IUZFFLOWS=Z
+      ISFRFLOWS=Z
+      ILAKFLOWS=Z
 C
 C--IF UZF IS ACTIVE, THEN NPCKGTXT SHOULD AUTOMATICALLY BE INCREMENTED BY 1 BY VIRTUE OF THE
 C  FACT THAT 'CONNECT SNK UZF' IS ACTIVE NO MATTER WHICH OPTIONS ARE OR ARE NOT SPECIFIED.
 C  (REGARDLESS OF WHETHER UZF IS ROUTING FLOW OR IS ONLY ACTING AS A BOUNDARY CONDITION)
-      IF(MTUZF.NE.0) THEN
+      IF(MTUZF /= Z) THEN
         NPCKGTXT = NPCKGTXT + 1
         ISNKUZFCONNECT=1
       ENDIF
@@ -280,19 +302,19 @@ C--CHECK FOR "PACKAGE_FLOWS" KEYWORD AND GET INPUT
         ENDIF
         IF(LINE(ISTART:ISTOP).EQ.'ALL'.OR.SETDEFLT.EQ.'ALL') THEN ! ALL = "all available"
           !Activate connections in SFR, LAK, and UZF, provided they are active
-          IF(MTUZF.NE.0.AND.IUZFOPT.NE.0) THEN
+          IF(MTUZF /= Z.AND.IUZFOPT /= Z) THEN
             IUZFFLOWS=1
           ENDIF
-          IF(MTSFR.NE.0) THEN
+          IF(MTSFR /= Z) THEN
             ISFRFLOWS=1
           ENDIF
-          IF(MTLAK.NE.0) THEN
+          IF(MTLAK /= Z) THEN
             ILAKFLOWS=1
           ENDIF
           !edm: Determine which combinations of packages is active to determine 
           !     how many CONNECTions there are (UZF -> SFR)
           IF(IUZFFLOWS.EQ.1.AND.ISFRFLOWS.EQ.1.AND.
-     &                        IUZFOPT.NE.0.AND.IRUNFLG.NE.0) THEN
+     &                        IUZFOPT /= Z.AND.IRUNFLG /= Z) THEN
             LOOP1:DO I=1,NROW
               DO J=1,NCOL
                 IF(IRUNBND(J,I).GT.0.AND.ISFRUZFCONNECT.NE.1) THEN ! check IRUNBND for at least 1 positive connection
@@ -304,7 +326,7 @@ C--CHECK FOR "PACKAGE_FLOWS" KEYWORD AND GET INPUT
             ENDDO LOOP1
           ENDIF
           IF(IUZFFLOWS.EQ.1.AND.ILAKFLOWS.EQ.1.AND.   ! (UZF -> LAK)
-     &                        IUZFOPT.NE.0.AND.IRUNFLG.NE.0) THEN
+     &                        IUZFOPT /= Z.AND.IRUNFLG /= Z) THEN
             DO I=1,NROW
               DO J=1,NCOL
                 IF(IRUNBND(J,I).LT.0.AND.ILAKUZFCONNECT.NE.1) THEN ! check IRUNBND for at least 1 negative (lake) connection
@@ -332,7 +354,7 @@ C  indicating that there is at least one SFR->LAK or LAK->SFR connection.
      +         LINE(ISTART:ISTOP).EQ.'UZF') THEN
           SELECT CASE (LINE(ISTART:ISTOP))
             CASE ('SFR')
-              IF(MTSFR.NE.0) THEN
+              IF(MTSFR /= Z) THEN
                 ISFRFLOWS=1
               ENDIF
               ! Determine if a LAK connection exists. UZF connections only exist 
@@ -352,7 +374,7 @@ C  indicating that there is at least one SFR->LAK or LAK->SFR connection.
               ENDIF
               FIRSTVAL=.FALSE.
             CASE ('LAK')
-              IF(MTLAK.NE.0) THEN
+              IF(MTLAK /= Z) THEN
                 ILAKFLOWS=1
               ENDIF
               ! Determine if a SFR connection exists. UZF connections only exist 
@@ -372,12 +394,12 @@ C  indicating that there is at least one SFR->LAK or LAK->SFR connection.
               ENDIF
               FIRSTVAL=.FALSE.
             CASE ('UZF')
-              IF(MTUZF.NE.0) THEN
+              IF(MTUZF /= Z) THEN
                 IUZFFLOWS=1
               ENDIF
               ! Determine if SFR/LAK connections exist and set on a case by case basis. 
-              IF(IUZFFLOWS.EQ.1.AND.MTSFR.NE.0.AND.
-     &                            IUZFOPT.NE.0.AND.IRUNFLG.NE.0) THEN
+              IF(IUZFFLOWS.EQ.1.AND.MTSFR /= Z.AND.
+     &                            IUZFOPT /= Z.AND.IRUNFLG /= Z) THEN
                 LOOP2:DO I=1,NROW
                   DO J=1,NCOL
                     IF(IRUNBND(J,I).GT.0) THEN ! check IRUNBND for at least 1 positive connection
@@ -388,8 +410,8 @@ C  indicating that there is at least one SFR->LAK or LAK->SFR connection.
                   ENDDO
                 ENDDO LOOP2
               ENDIF
-              IF(IUZFFLOWS.EQ.1.AND.MTLAK.NE.0.AND.
-     &                            IUZFOPT.NE.0.AND.IRUNFLG.NE.0) THEN
+              IF(IUZFFLOWS.EQ.1.AND.MTLAK /= Z.AND.
+     &                            IUZFOPT /= Z.AND.IRUNFLG /= Z) THEN
                 LOOP3:DO I=1,NROW
                   DO J=1,NCOL
                     IF(IRUNBND(J,I).LT.0) THEN ! check IRUNBND for at least 1 negative (lake) connection
@@ -462,12 +484,12 @@ C--OPEN THE LINK-MT3DMS OUTPUT FILE NEEDED BY MT3DMS
 C--AND PRINT AN IDENTIFYING MESSAGE IN MODFLOW OUTPUT FILE  
       INQUIRE(UNIT=IUMT3D,OPENED=LOP)
       IF(LOP) THEN
-        CALL UTF8_BOM_OFFSET_REWIND(IUMT3D)
         IF(ILMTFMT.EQ.1) CALL USTOP(
      +   'LINKER FILE PREVIOUSLY LISTED IN THE MODFLOW NAME FILE.'//NL//
      +   'REMOVE ITS LISTING FROM WITHIN THE NAME FILE '//NL//
      +   'AND PROVIDE LINKER FILE NAME AND UNIT NUMBER ONLY IN '//
      +   'THE LMT INPUT FILE.')
+        CALL UTF8_BOM_OFFSET_REWIND(IUMT3D)
       ELSE
         IF(ILMTFMT.EQ.0) THEN
           OPEN(IUMT3D,FILE=FNAME,FORM=FORM,ACCESS=ACCESS,
@@ -508,7 +530,7 @@ C
       ENDDO
 C
 C--ERROR CHECKING BEFORE OUTPUT
-      IF(MTEVT.NE.0.AND.MTETS.NE.0) THEN
+      IF(MTEVT /= Z.AND.MTETS /= Z) THEN
           WRITE(IOUT,1300)
         WRITE(*,1300)
         CALL USTOP(' ')
@@ -518,14 +540,14 @@ C--ERROR CHECKING BEFORE OUTPUT
      &  /1X,'Only one is allowed in the same transport simulation.')
 C
 C--WRITE A HEADER TO MODFLOW-MT3DMS LINK FILE
-      IF(MTSFR.NE.0.OR.MTLAK.NE.0.OR.MTUZF.NE.0) THEN
+      IF(MTSFR /= Z.OR.MTLAK /= Z.OR.MTUZF /= Z) THEN
         HDRTXT='MTGS1.00.00'
       IF(OUTPUT_FILE_HEADER.EQ.'EXTENDED') THEN        
         IF(ILMTFMT.EQ.0) THEN
            WRITE(IUMT3D) HDRTXT,
      &     MTWEL,MTDRN,MTRCH,MTEVT,MTRIV,MTGHB,MTCHD,MTISS,MTNPER
           ELSEIF(ILMTFMT.EQ.1) THEN
-           WRITE(IUMT3D,*) HDRTXT,
+           WRITE(IUMT3D,"(1x, A, 9I8)") HDRTXT,
      &     MTWEL,MTDRN,MTRCH,MTEVT,MTRIV,MTGHB,MTCHD,MTISS,MTNPER
           ENDIF
         ENDIF
@@ -538,7 +560,7 @@ C--WRITE A HEADER TO MODFLOW-MT3DMS LINK FILE
      &     MTRES,MTFHB,MTDRT,MTETS,MTSUB,MTIBS,MTLAK,MTMNW,MTSWT,MTSFR,
      &     MTUZF
          ELSEIF(ILMTFMT.EQ.1) THEN
-           WRITE(IUMT3D,*) HDRTXT,
+           WRITE(IUMT3D,"(1x, A, *(I8))") HDRTXT,
      &     MTWEL,MTDRN,MTRCH,MTEVT,MTRIV,MTGHB,MTCHD,MTISS,MTNPER,MTSTR,
      &     MTRES,MTFHB,MTDRT,MTETS,MTSUB,MTIBS,MTLAK,MTMNW,MTSWT,MTSFR,
      &     MTUZF
@@ -552,92 +574,90 @@ C--WRITE THE NUMBER OF FLOW PACKAGE TEXT ENTRIES THAT ARE TO BE READ NEXT
           IF(ILMTFMT.EQ.0) THEN
             WRITE(IUMT3D) NPCKGTXT
           ELSEIF(ILMTFMT.EQ.1) THEN
-            WRITE(IUMT3D,*) NPCKGTXT
+            WRITE(IUMT3D,"(I6)") NPCKGTXT
           ENDIF
 C
 C--WRITE NPCKGTXT RECORDS TO THE FLOW-TRANSPORT LINK FILE (CHARACTER(20))
           IF(ILMTFMT.EQ.0) THEN
-            IF(MTSTR.NE.0) WRITE(IUMT3D)   '                 STR'  ! Stream package
-            IF(MTRES.NE.0) WRITE(IUMT3D)   '                 RES'  ! Reservoir package
-            IF(MTFHB.NE.0) WRITE(IUMT3D)   '                 FHB'  ! Flow and Head Boundary package
-            IF(MTDRT.NE.0) WRITE(IUMT3D)   '                 DRT'  ! Drain Return package
-            IF(MTETS.NE.0) WRITE(IUMT3D)   '                 ETS'  ! Segmented ET package
-C            IF(MTIBS.NE.0) WRITE(IUMT3D)   '                 IBS'  ! Interbed Storage
-C            IF(MTTLK.NE.0) WRITE(IUMT3D)   '                 TLK'  ! Transient Leakage
-            IF(MTMNW.NE.0) WRITE(IUMT3D)   '                 MNW'  ! Multi-node well package
-C            IF(MTSWT.NE.0) WRITE(IUMT3D)   '                 SWT'  ! Subsidence and Aquifer-System Compaction Package for Water-Table Aquifers
-            IF(MTUZF.NE.0.AND.IUZFFLOWS.EQ.0)
+            IF(MTSTR /= Z) WRITE(IUMT3D)   '                 STR'  ! Stream package
+            IF(MTRES /= Z) WRITE(IUMT3D)   '                 RES'  ! Reservoir package
+            IF(MTFHB /= Z) WRITE(IUMT3D)   '                 FHB'  ! Flow and Head Boundary package
+            IF(MTDRT /= Z) WRITE(IUMT3D)   '                 DRT'  ! Drain Return package
+            IF(MTETS /= Z) WRITE(IUMT3D)   '                 ETS'  ! Segmented ET package
+C            IF(MTIBS /= Z) WRITE(IUMT3D)   '                 IBS'  ! Interbed Storage
+C            IF(MTTLK /= Z) WRITE(IUMT3D)   '                 TLK'  ! Transient Leakage
+            IF(MTMNW /= Z) WRITE(IUMT3D)   '                 MNW'  ! Multi-node well package
+C            IF(MTSWT /= Z) WRITE(IUMT3D)   '                 SWT'  ! Subsidence and Aquifer-System Compaction Package for Water-Table Aquifers
+            IF(MTUZF /= Z.AND.IUZFFLOWS.EQ.0)
      &                     WRITE(IUMT3D)   '                 UZF'  ! Unsaturated-zone Flow package
-            IF(MTUZF.NE.0.AND.IUZFFLOWS.NE.0)
+            IF(MTUZF /= Z.AND.IUZFFLOWS /= Z)
      &                     WRITE(IUMT3D)   '           UZF FLOWS'
-            IF(MTLAK.NE.0.AND.ILAKFLOWS.EQ.0) THEN 
+            IF(MTLAK /= Z.AND.ILAKFLOWS.EQ.0) THEN 
                            WRITE(IUMT3D)   '                 LAK'  ! Lake package
-            ELSEIF(MTLAK.NE.0.AND.ILAKFLOWS.NE.0) THEN
+            ELSEIF(MTLAK /= Z.AND.ILAKFLOWS /= Z) THEN
                            WRITE(IUMT3D)   '           LAK FLOWS'
             ENDIF
-            IF(MTSFR.NE.0.AND.ISFRFLOWS.EQ.0) THEN
+            IF(MTSFR /= Z.AND.ISFRFLOWS.EQ.0) THEN
                            WRITE(IUMT3D)   '                 SFR'  ! Streamflow Routing package
-            ELSEIF(MTSFR.NE.0.AND.ISFRFLOWS.NE.0) THEN
+            ELSEIF(MTSFR /= Z.AND.ISFRFLOWS /= Z) THEN
               IF(ITRFLG.EQ.0) THEN
                 WRITE(IUMT3D)              '        SFR FLOWS SS'
               ELSEIF(ITRFLG.EQ.1) THEN
                 WRITE(IUMT3D)              '        SFR FLOWS TR'
               ENDIF
             ENDIF
-            IF(MTSWR.NE.0) WRITE(IUMT3D)   '                 SWR'  ! Surface-water Routing package
-            IF(MTWEL1.NE.0) WRITE(IUMT3D)  '                WEL1'  !seb    !swm: this will need some rethinking
-            IF(ISFRLAKCONNECT.NE.0) 
+            IF(MTSWR /= Z) WRITE(IUMT3D)   '                 SWR'  ! Surface-water Routing package
+            IF(ISFRLAKCONNECT /= Z) 
      &                     WRITE(IUMT3D)   '     CONNECT SFR LAK'
-            IF(ISFRUZFCONNECT.NE.0) 
+            IF(ISFRUZFCONNECT /= Z) 
      &                     WRITE(IUMT3D)   '     CONNECT SFR UZF'
-            IF(ILAKUZFCONNECT.NE.0) 
+            IF(ILAKUZFCONNECT /= Z) 
      &                     WRITE(IUMT3D)   '     CONNECT LAK UZF'
-            IF(ISNKUZFCONNECT.NE.0.OR.MTUZF.NE.0)
+            IF(ISNKUZFCONNECT /= Z.OR.MTUZF /= Z)
      &                     WRITE(IUMT3D)   '     CONNECT SNK UZF'
-!            IF(MTFMP.NE.0) WRITE(IUMT3D) '                 FMP'  ! swm: added FMP - not supported
-!            IF(MTRIP.NE.0) WRITE(IUMT3D) '                 RIP'  ! swm: added RIP - not supported
-!            IF(MTSWI.NE.0) WRITE(IUMT3D) '                 SWI'  ! swm: added SWI - not supported
+!            IF(MTFMP /= Z) WRITE(IUMT3D) '                 FMP'  ! swm: added FMP - not supported
+!            IF(MTRIP /= Z) WRITE(IUMT3D) '                 RIP'  ! swm: added RIP - not supported
+!            IF(MTSWI /= Z) WRITE(IUMT3D) '                 SWI'  ! swm: added SWI - not supported
           ELSEIF(ILMTFMT.EQ.1) THEN
-            IF(MTSTR.NE.0) WRITE(IUMT3D,*) '                 STR'  ! Stream package
-            IF(MTRES.NE.0) WRITE(IUMT3D,*) '                 RES'  ! Reservoir package
-            IF(MTFHB.NE.0) WRITE(IUMT3D,*) '                 FHB'  ! Flow and Head Boundary package
-            IF(MTDRT.NE.0) WRITE(IUMT3D,*) '                 DRT'  ! Drain Return package
-            IF(MTETS.NE.0) WRITE(IUMT3D,*) '                 ETS'  ! Segmented ET package
-C            IF(MTIBS.NE.0) WRITE(IUMT3D,*) '                 IBS'  ! Interbed Storage
-C            IF(MTTLK.NE.0) WRITE(IUMT3D,*) '                 TLK'  ! Transient Leakage
-            IF(MTMNW.NE.0) WRITE(IUMT3D,*) '                 MNW'  ! Multi-node well package
-C            IF(MTSWT.NE.0) WRITE(IUMT3D,*) '                 SWT'  ! Subsidence and Aquifer-System Compaction Package for Water-Table Aquifers
-            IF(MTUZF.NE.0.AND.IUZFFLOWS.EQ.0) 
+            IF(MTSTR /= Z) WRITE(IUMT3D,*) '                 STR'  ! Stream package
+            IF(MTRES /= Z) WRITE(IUMT3D,*) '                 RES'  ! Reservoir package
+            IF(MTFHB /= Z) WRITE(IUMT3D,*) '                 FHB'  ! Flow and Head Boundary package
+            IF(MTDRT /= Z) WRITE(IUMT3D,*) '                 DRT'  ! Drain Return package
+            IF(MTETS /= Z) WRITE(IUMT3D,*) '                 ETS'  ! Segmented ET package
+C            IF(MTIBS /= Z) WRITE(IUMT3D,*) '                 IBS'  ! Interbed Storage
+C            IF(MTTLK /= Z) WRITE(IUMT3D,*) '                 TLK'  ! Transient Leakage
+            IF(MTMNW /= Z) WRITE(IUMT3D,*) '                 MNW'  ! Multi-node well package
+C            IF(MTSWT /= Z) WRITE(IUMT3D,*) '                 SWT'  ! Subsidence and Aquifer-System Compaction Package for Water-Table Aquifers
+            IF(MTUZF /= Z.AND.IUZFFLOWS.EQ.0) 
      &                     WRITE(IUMT3D,*) '                 UZF'  ! Unsaturated-zone Flow package
-            IF(MTUZF.NE.0.AND.IUZFFLOWS.NE.0) 
+            IF(MTUZF /= Z.AND.IUZFFLOWS /= Z) 
      &                     WRITE(IUMT3D,*) '           UZF FLOWS'
-            IF(MTLAK.NE.0.AND.ILAKFLOWS.EQ.0) THEN
+            IF(MTLAK /= Z.AND.ILAKFLOWS.EQ.0) THEN
                            WRITE(IUMT3D,*) '                 LAK'  ! Lake package
-            ELSEIF(MTLAK.NE.0.AND.ILAKFLOWS.NE.0) THEN
+            ELSEIF(MTLAK /= Z.AND.ILAKFLOWS /= Z) THEN
                            WRITE(IUMT3D,*) '           LAK FLOWS'
             ENDIF
-            IF(MTSFR.NE.0.AND.ISFRFLOWS.EQ.0) THEN
+            IF(MTSFR /= Z.AND.ISFRFLOWS.EQ.0) THEN
                            WRITE(IUMT3D,*) '                 SFR'  ! Streamflow Routing package
-            ELSEIF(MTSFR.NE.0.AND.ISFRFLOWS.NE.0) THEN
+            ELSEIF(MTSFR /= Z.AND.ISFRFLOWS /= Z) THEN
               IF(ITRFLG.EQ.0) THEN
                 WRITE(IUMT3D,*)            '        SFR FLOWS SS'
               ELSEIF(ITRFLG.EQ.1) THEN
                 WRITE(IUMT3D,*)            '        SFR FLOWS TR'
               ENDIF
             ENDIF
-            IF(MTSWR.NE.0)  WRITE(IUMT3D,*) '                 SWR'  ! Surface-water Routing package
-            IF(MTWEL1.NE.0) WRITE(IUMT3D,*) '                WEL1'  !seb     !swm: Need to revisit (see Scott's note at the top)
-            IF(ISFRLAKCONNECT.NE.0) 
+            IF(MTSWR /= Z)  WRITE(IUMT3D,*) '                 SWR'  ! Surface-water Routing package
+            IF(ISFRLAKCONNECT /= Z) 
      &                     WRITE(IUMT3D,*) '     CONNECT SFR LAK'
-            IF(ISFRUZFCONNECT.NE.0) 
+            IF(ISFRUZFCONNECT /= Z) 
      &                     WRITE(IUMT3D,*) '     CONNECT SFR UZF'
-            IF(ILAKUZFCONNECT.NE.0) 
+            IF(ILAKUZFCONNECT /= Z) 
      &                     WRITE(IUMT3D,*) '     CONNECT LAK UZF'
-            IF(ISNKUZFCONNECT.NE.0.OR.MTUZF.NE.0)
+            IF(ISNKUZFCONNECT /= Z.OR.MTUZF /= Z)
      &                     WRITE(IUMT3D,*) '     CONNECT SNK UZF'
-!            IF(MTFMP.NE.0) WRITE(IUMT3D,*) '                 FMP'  ! swm: added FMP - not supported
-!            IF(MTRIP.NE.0) WRITE(IUMT3D,*) '                 RIP'  ! swm: added RIP - not supported
-!            IF(MTSWI.NE.0) WRITE(IUMT3D,*) '                 SWI'  ! swm: added SWI - not supported
+!            IF(MTFMP /= Z) WRITE(IUMT3D,*) '                 FMP'  ! swm: added FMP - not supported
+!            IF(MTRIP /= Z) WRITE(IUMT3D,*) '                 RIP'  ! swm: added RIP - not supported
+!            IF(MTSWI /= Z) WRITE(IUMT3D,*) '                 SWI'  ! swm: added SWI - not supported
           ENDIF
         ENDIF
       ENDIF
@@ -646,7 +666,7 @@ C------SAVE POINTER DATA TO ARRARYS
 C
 C--NORMAL RETURN
       RETURN
-      END
+      END SUBROUTINE
 C
       SUBROUTINE LMT8BD(KKSTP,KKPER,IGRID)
 C **********************************************************************
@@ -661,9 +681,13 @@ C
       USE LMTMODULE,ONLY:ISSMT3D,IUMT3D,ILMTFMT,ILAKUZFCONNECT,
      &                   ISFRUZFCONNECT,ISFRLAKCONNECT,NPCKGTXT,
      &                   IUZFFLOWS,ISFRFLOWS,ILAKFLOWS
+      
+      LOGICAL :: WEL1, WEL2
 
 C--SWM: SWAP POINTERS FOR LMT DATA TO CURRENT GRID
         CALL SLMT8PNT(IGRID)
+        WEL2 = IUNIT( 2) /= 0
+        WEL1 = IUNIT(67) /= 0
 C
 C--WRITE A NOTIFICATION LINE TO MODFLOW OUTPUT FILE
         WRITE(IOUT,9876) IUMT3D,KKSTP,KKPER
@@ -681,11 +705,10 @@ C--COLLECT AND SAVE ALL RELEVANT FLOW MODEL INFORMATION
         IF(IUNIT(37).NE.0) 
      &   CALL LMT8HUF7(ILMTFMT,ISSMT3D,IUMT3D,
      &   KKSTP,KKPER,IUNIT(47),IGRID)
-        IF(IUNIT(67) .NE.0) ! swm added call to original WEL package
-     &   CALL LMT8WEL7(IUNIT(62),ILMTFMT,IUMT3D,KKSTP,KKPER,IGRID)  
-        IF(IUNIT(2) .NE.0) 
-     &   CALL LMT8WEL8(IUNIT(62),ILMTFMT,IUMT3D,KKSTP,KKPER,IGRID)    !swm changed to LMT8WEL8
-        IF(IUNIT(3) .NE.0) 
+        IF(WEL1 .or. WEL2) 
+     &   CALL LMT8WEL(WEL1,WEL2,IUNIT(62),ILMTFMT,IUMT3D,
+     &                KKSTP,KKPER,IGRID)  
+        IF(IUNIT(3) /= 0) 
      &   CALL LMT8DRN7(ILMTFMT,IUMT3D,KKSTP,KKPER,IGRID)
         IF(IUNIT(8) .NE.0) 
      &   CALL LMT8RCH7(ILMTFMT,IUMT3D,KKSTP,KKPER,IGRID)
@@ -805,7 +828,7 @@ C--SAVE THE CONTENTS OF THE BUFFER
         WRITE(IUMT3D) KPER,KSTP,NCOL,NROW,NLAY,TEXT
         WRITE(IUMT3D) BUFF
       ELSEIF(ILMTFMT.EQ.1) THEN
-        WRITE(IUMT3D,*) KPER,KSTP,NCOL,NROW,NLAY
+        WRITE(IUMT3D,"(5I8)") KPER,KSTP,NCOL,NROW,NLAY
         WRITE(IUMT3D,*) TEXT
         WRITE(IUMT3D,*) BUFF
       ENDIF
@@ -841,7 +864,7 @@ C--RECORD CONTENTS OF BUFFER
         WRITE(IUMT3D) KPER,KSTP,NCOL,NROW,NLAY,TEXT
         WRITE(IUMT3D) BUFF
       ELSEIF(ILMTFMT.EQ.1) THEN
-        WRITE(IUMT3D,*) KPER,KSTP,NCOL,NROW,NLAY
+        WRITE(IUMT3D,"(5I8)") KPER,KSTP,NCOL,NROW,NLAY
         WRITE(IUMT3D,*) TEXT
         WRITE(IUMT3D,*) BUFF
       ENDIF
@@ -879,7 +902,7 @@ C--RECORD CONTENTS OF BUFFER.
         WRITE(IUMT3D) KPER,KSTP,NCOL,NROW,NLAY,TEXT
         WRITE(IUMT3D) BUFF
       ELSEIF(ILMTFMT.EQ.1) THEN
-        WRITE(IUMT3D,*) KPER,KSTP,NCOL,NROW,NLAY
+        WRITE(IUMT3D,"(5I8)") KPER,KSTP,NCOL,NROW,NLAY
         WRITE(IUMT3D,*) TEXT
         WRITE(IUMT3D,*) BUFF
       ENDIF
@@ -923,7 +946,7 @@ C--RECORD CONTENTS OF BUFFER.
         WRITE(IUMT3D) KPER,KSTP,NCOL,NROW,NLAY,TEXT
         WRITE(IUMT3D) BUFF
       ELSEIF(ILMTFMT.EQ.1) THEN
-        WRITE(IUMT3D,*) KPER,KSTP,NCOL,NROW,NLAY
+        WRITE(IUMT3D,"(5I8)") KPER,KSTP,NCOL,NROW,NLAY
         WRITE(IUMT3D,*) TEXT
         WRITE(IUMT3D,*) BUFF
       ENDIF
@@ -981,7 +1004,7 @@ C--RECORD CONTENTS OF BUFFER.
         WRITE(IUMT3D) KPER,KSTP,NCOL,NROW,NLAY,TEXT
         WRITE(IUMT3D) BUFF
       ELSEIF(ILMTFMT.EQ.1) THEN
-        WRITE(IUMT3D,*) KPER,KSTP,NCOL,NROW,NLAY
+        WRITE(IUMT3D,"(5I8)") KPER,KSTP,NCOL,NROW,NLAY
         WRITE(IUMT3D,*) TEXT
         WRITE(IUMT3D,*) BUFF
       ENDIF
@@ -1080,7 +1103,7 @@ C--RECORD CONTENTS OF BUFFER.
       IF(ILMTFMT.EQ.0) THEN
         WRITE(IUMT3D) KPER,KSTP,NCOL,NROW,NLAY,TEXT,NCNH
       ELSEIF(ILMTFMT.EQ.1) THEN
-        WRITE(IUMT3D,*) KPER,KSTP,NCOL,NROW,NLAY
+        WRITE(IUMT3D,"(5I8)") KPER,KSTP,NCOL,NROW,NLAY
         WRITE(IUMT3D,*) TEXT,NCNH
       ENDIF
 C
@@ -1172,7 +1195,7 @@ C--SAVE THE CONTENTS OF THE BUFFER
         WRITE(IUMT3D) KPER,KSTP,NCOL,NROW,NLAY,TEXT
         WRITE(IUMT3D) BUFF
       ELSEIF(ILMTFMT.EQ.1) THEN
-        WRITE(IUMT3D,*) KPER,KSTP,NCOL,NROW,NLAY
+        WRITE(IUMT3D,"(5I8)") KPER,KSTP,NCOL,NROW,NLAY
         WRITE(IUMT3D,*) TEXT
         WRITE(IUMT3D,*) BUFF
       ENDIF
@@ -1208,7 +1231,7 @@ C--RECORD CONTENTS OF BUFFER
         WRITE(IUMT3D) KPER,KSTP,NCOL,NROW,NLAY,TEXT
         WRITE(IUMT3D) BUFF
       ELSEIF(ILMTFMT.EQ.1) THEN
-        WRITE(IUMT3D,*) KPER,KSTP,NCOL,NROW,NLAY
+        WRITE(IUMT3D,"(5I8)") KPER,KSTP,NCOL,NROW,NLAY
         WRITE(IUMT3D,*) TEXT
         WRITE(IUMT3D,*) BUFF
       ENDIF
@@ -1246,7 +1269,7 @@ C--RECORD CONTENTS OF BUFFER.
         WRITE(IUMT3D) KPER,KSTP,NCOL,NROW,NLAY,TEXT
         WRITE(IUMT3D) BUFF
       ELSEIF(ILMTFMT.EQ.1) THEN
-        WRITE(IUMT3D,*) KPER,KSTP,NCOL,NROW,NLAY
+        WRITE(IUMT3D,"(5I8)") KPER,KSTP,NCOL,NROW,NLAY
         WRITE(IUMT3D,*) TEXT
         WRITE(IUMT3D,*) BUFF
       ENDIF
@@ -1290,7 +1313,7 @@ C--RECORD CONTENTS OF BUFFER.
         WRITE(IUMT3D) KPER,KSTP,NCOL,NROW,NLAY,TEXT
         WRITE(IUMT3D) BUFF
       ELSEIF(ILMTFMT.EQ.1) THEN
-        WRITE(IUMT3D,*) KPER,KSTP,NCOL,NROW,NLAY
+        WRITE(IUMT3D,"(5I8)") KPER,KSTP,NCOL,NROW,NLAY
         WRITE(IUMT3D,*) TEXT
         WRITE(IUMT3D,*) BUFF
       ENDIF
@@ -1349,7 +1372,7 @@ C--RECORD CONTENTS OF BUFFER.
         WRITE(IUMT3D) KPER,KSTP,NCOL,NROW,NLAY,TEXT
         WRITE(IUMT3D) BUFF
       ELSEIF(ILMTFMT.EQ.1) THEN
-        WRITE(IUMT3D,*) KPER,KSTP,NCOL,NROW,NLAY
+        WRITE(IUMT3D,"(5I8)") KPER,KSTP,NCOL,NROW,NLAY
         WRITE(IUMT3D,*) TEXT
         WRITE(IUMT3D,*) BUFF
       ENDIF
@@ -1448,7 +1471,7 @@ C--RECORD CONTENTS OF BUFFER.
       IF(ILMTFMT.EQ.0) THEN
         WRITE(IUMT3D) KPER,KSTP,NCOL,NROW,NLAY,TEXT,NCNH
       ELSEIF(ILMTFMT.EQ.1) THEN
-        WRITE(IUMT3D,*) KPER,KSTP,NCOL,NROW,NLAY
+        WRITE(IUMT3D,"(5I8)") KPER,KSTP,NCOL,NROW,NLAY
         WRITE(IUMT3D,*) TEXT,NCNH
       ENDIF
 C
@@ -1543,7 +1566,7 @@ C--SAVE THE CONTENTS OF THE BUFFER
         WRITE(IUMT3D) KPER,KSTP,NCOL,NROW,NLAY,TEXT
         WRITE(IUMT3D) BUFF
       ELSEIF(ILMTFMT.EQ.1) THEN
-        WRITE(IUMT3D,*) KPER,KSTP,NCOL,NROW,NLAY
+        WRITE(IUMT3D,"(5I8)") KPER,KSTP,NCOL,NROW,NLAY
         WRITE(IUMT3D,*) TEXT
         WRITE(IUMT3D,*) BUFF
       ENDIF
@@ -1595,7 +1618,7 @@ C--RECORD CONTENTS OF BUFFER
         WRITE(IUMT3D) KPER,KSTP,NCOL,NROW,NLAY,TEXT
         WRITE(IUMT3D) BUFF
       ELSEIF(ILMTFMT.EQ.1) THEN
-        WRITE(IUMT3D,*) KPER,KSTP,NCOL,NROW,NLAY
+        WRITE(IUMT3D,"(5I8)") KPER,KSTP,NCOL,NROW,NLAY
         WRITE(IUMT3D,*) TEXT
         WRITE(IUMT3D,*) BUFF
       ENDIF
@@ -1649,7 +1672,7 @@ C--RECORD CONTENTS OF BUFFER.
         WRITE(IUMT3D) KPER,KSTP,NCOL,NROW,NLAY,TEXT
         WRITE(IUMT3D) BUFF
       ELSEIF(ILMTFMT.EQ.1) THEN
-        WRITE(IUMT3D,*) KPER,KSTP,NCOL,NROW,NLAY
+        WRITE(IUMT3D,"(5I8)") KPER,KSTP,NCOL,NROW,NLAY
         WRITE(IUMT3D,*) TEXT
         WRITE(IUMT3D,*) BUFF
       ENDIF
@@ -1725,7 +1748,7 @@ C--RECORD CONTENTS OF BUFFER.
         WRITE(IUMT3D) KPER,KSTP,NCOL,NROW,NLAY,TEXT
         WRITE(IUMT3D) BUFF
       ELSEIF(ILMTFMT.EQ.1) THEN
-        WRITE(IUMT3D,*) KPER,KSTP,NCOL,NROW,NLAY
+        WRITE(IUMT3D,"(5I8)") KPER,KSTP,NCOL,NROW,NLAY
         WRITE(IUMT3D,*) TEXT
         WRITE(IUMT3D,*) BUFF
       ENDIF
@@ -1790,7 +1813,7 @@ C--RECORD CONTENTS OF BUFFER.
         WRITE(IUMT3D) KPER,KSTP,NCOL,NROW,NLAY,TEXT
         WRITE(IUMT3D) BUFF
       ELSEIF(ILMTFMT.EQ.1) THEN
-        WRITE(IUMT3D,*) KPER,KSTP,NCOL,NROW,NLAY
+        WRITE(IUMT3D,"(5I8)") KPER,KSTP,NCOL,NROW,NLAY
         WRITE(IUMT3D,*) TEXT
         WRITE(IUMT3D,*) BUFF
       ENDIF
@@ -1970,7 +1993,7 @@ C--RECORD CONTENTS OF BUFFER.
       IF(ILMTFMT.EQ.0) THEN
         WRITE(IUMT3D) KPER,KSTP,NCOL,NROW,NLAY,TEXT,NCNH
       ELSEIF(ILMTFMT.EQ.1) THEN
-        WRITE(IUMT3D,*) KPER,KSTP,NCOL,NROW,NLAY
+        WRITE(IUMT3D,"(5I8)") KPER,KSTP,NCOL,NROW,NLAY
         WRITE(IUMT3D,*) TEXT,NCNH
       ENDIF
 C
@@ -2062,7 +2085,7 @@ C--SAVE THE CONTENTS OF THE BUFFER
         WRITE(IUMT3D) KPER,KSTP,NCOL,NROW,NLAY,TEXT
         WRITE(IUMT3D) BUFF
       ELSEIF(ILMTFMT.EQ.1) THEN
-        WRITE(IUMT3D,*) KPER,KSTP,NCOL,NROW,NLAY
+        WRITE(IUMT3D,"(5I8)") KPER,KSTP,NCOL,NROW,NLAY
         WRITE(IUMT3D,*) TEXT
         WRITE(IUMT3D,*) BUFF
       ENDIF
@@ -2104,7 +2127,7 @@ C--RECORD CONTENTS OF BUFFER
         WRITE(IUMT3D) KPER,KSTP,NCOL,NROW,NLAY,TEXT
         WRITE(IUMT3D) BUFF
       ELSEIF(ILMTFMT.EQ.1) THEN
-        WRITE(IUMT3D,*) KPER,KSTP,NCOL,NROW,NLAY
+        WRITE(IUMT3D,"(5I8)") KPER,KSTP,NCOL,NROW,NLAY
         WRITE(IUMT3D,*) TEXT
         WRITE(IUMT3D,*) BUFF
       ENDIF
@@ -2148,7 +2171,7 @@ C--RECORD CONTENTS OF BUFFER.
         WRITE(IUMT3D) KPER,KSTP,NCOL,NROW,NLAY,TEXT
         WRITE(IUMT3D) BUFF
       ELSEIF(ILMTFMT.EQ.1) THEN
-        WRITE(IUMT3D,*) KPER,KSTP,NCOL,NROW,NLAY
+        WRITE(IUMT3D,"(5I8)") KPER,KSTP,NCOL,NROW,NLAY
         WRITE(IUMT3D,*) TEXT
         WRITE(IUMT3D,*) BUFF
       ENDIF
@@ -2192,7 +2215,7 @@ C--RECORD CONTENTS OF BUFFER.
         WRITE(IUMT3D) KPER,KSTP,NCOL,NROW,NLAY,TEXT
         WRITE(IUMT3D) BUFF
       ELSEIF(ILMTFMT.EQ.1) THEN
-        WRITE(IUMT3D,*) KPER,KSTP,NCOL,NROW,NLAY
+        WRITE(IUMT3D,"(5I8)") KPER,KSTP,NCOL,NROW,NLAY
         WRITE(IUMT3D,*) TEXT
         WRITE(IUMT3D,*) BUFF
       ENDIF
@@ -2263,7 +2286,7 @@ C--RECORD CONTENTS OF BUFFER.
         WRITE(IUMT3D) KPER,KSTP,NCOL,NROW,NLAY,TEXT
         WRITE(IUMT3D) BUFF
       ELSEIF(ILMTFMT.EQ.1) THEN
-        WRITE(IUMT3D,*) KPER,KSTP,NCOL,NROW,NLAY
+        WRITE(IUMT3D,"(5I8)") KPER,KSTP,NCOL,NROW,NLAY
         WRITE(IUMT3D,*) TEXT
         WRITE(IUMT3D,*) BUFF
       ENDIF
@@ -2384,7 +2407,7 @@ C--RECORD CONTENTS OF BUFFER.
       IF(ILMTFMT.EQ.0) THEN
         WRITE(IUMT3D) KPER,KSTP,NCOL,NROW,NLAY,TEXT,NCNH
       ELSEIF(ILMTFMT.EQ.1) THEN
-        WRITE(IUMT3D,*) KPER,KSTP,NCOL,NROW,NLAY
+        WRITE(IUMT3D,"(5I8)") KPER,KSTP,NCOL,NROW,NLAY
         WRITE(IUMT3D,*) TEXT,NCNH
       ENDIF
 C
@@ -2411,142 +2434,114 @@ C--RETURN
       END
 C
 C
-      SUBROUTINE LMT8WEL7(IUNITUPW,ILMTFMT,IUMT3D,KSTP,KPER,IGRID)
+      SUBROUTINE LMT8WEL(WEL1,WEL2,IUNITUPW,ILMTFMT,IUMT3D,
+     +                   KSTP,KPER,IGRID)
 C *********************************************************************
 C SAVE WELL CELL LOCATIONS AND VOLUMETRIC FLOW RATES FOR USE BY MT3D.
 C *********************************************************************
-C Modified from  Harbaugh (2005)
-C last modified: 06-23-2016
-C
-      USE GLOBAL,      ONLY:NCOL,NROW,NLAY,IBOUND,BOTM,LBOTM,HNEW
-      USE GWFWELMODULE,ONLY:NWELLS,WELL,PSIRAMP
-      USE GWFUPWMODULE,ONLY:LAYTYPUPW
-      CHARACTER(16) TEXT
-      double precision bbot, Hh, cof1, cof2, cof3, Qp, x, s
-      double precision ttop
-C      
-C--SET POINTERS FOR THE CURRENT GRID   
-cswm: already set in      CALL SGWF2WEL7PNT(IGRID)
-C      
-!swm      TEXT='WEL1'   
-      TEXT='WEL'   !swm - setting as WEL to be compatible with MT3D-USGS.  Should probably make OWHM's new WEL package WEL2
-      ZERO=0.
-C
-C--WRITE AN IDENTIFYING HEADER
-      IF(ILMTFMT.EQ.0) THEN
-        WRITE(IUMT3D) KPER,KSTP,NCOL,NROW,NLAY,TEXT,NWELLS
-      ELSEIF(ILMTFMT.EQ.1) THEN
-        WRITE(IUMT3D,*) KPER,KSTP,NCOL,NROW,NLAY
-        WRITE(IUMT3D,*) TEXT,NWELLS
-      ENDIF
-C
-C--IF THERE ARE NO WELLS RETURN
-      IF(NWELLS.LE.0) GO TO 9999
-C
-C--WRITE WELL LOCATION AND RATE ONE AT A TIME
-      DO L=1,NWELLS
-        IL=WELL(1,L)
-        IR=WELL(2,L)
-        IC=WELL(3,L)
-C
-C--IF CELL IS EXTERNAL Q=0
-        Q=ZERO
-        IF(IBOUND(IC,IR,IL).GT.0) THEN
-          Q=WELL(4,L)
-        IF ( IUNITUPW.NE.0 ) THEN
-        IF ( LAYTYPUPW(il).GT.0 ) THEN
-          bbot = Botm(IC, IR, Lbotm(IL))
-          ttop = Botm(IC, IR, Lbotm(IL)-1)
-          Hh = HNEW(ic,ir,il)
-          x = (Hh-bbot)
-          s = PSIRAMP
-          s = s*(Ttop-Bbot)
-          aa = -1.0d0/(s**2.0d0)
-          b = 2.0d0/s
-          cof1 = x**2.0D0
-          cof2 = -(2.0D0*x)/(s**3.0D0)
-          cof3 = 3.0D0/(s**2.0D0)
-          Qp = cof1*(cof2+cof3)
-          IF ( x.LT.0.0D0 ) THEN
-            Qp = 0.0D0
-          ELSEIF ( x-s.GT.-1.0e-14 ) THEN
-            Qp = 1.0D0
-          END IF
-          IF ( Qp.LT.1.0 ) THEN
-            Q = Q*Qp
-          END IF
-        END IF
-        END IF
-        END IF
-        IF(ILMTFMT.EQ.0) THEN
-          WRITE(IUMT3D) IL,IR,IC,Q
-        ELSEIF(ILMTFMT.EQ.1) THEN
-          WRITE(IUMT3D,*) IL,IR,IC,Q
-        ENDIF
-      ENDDO
-C
-C--RETURN
- 9999 RETURN
-      END
-C
-      SUBROUTINE LMT8WEL8(IUNITUPW,ILMTFMT,IUMT3D,KSTP,KPER,IGRID)
-C *********************************************************************
-C SAVE WELL CELL LOCATIONS AND VOLUMETRIC FLOW RATES FOR USE BY MT3D.
-C *********************************************************************
-C Modified from  Harbaugh (2005) Modified more by SEB 2015
+C Modified from  Harbaugh (2005) Modified more by SEB 2015 and 2025
 C last modified: 08-08-2008
 C
       USE GLOBAL,      ONLY:NCOL,NROW,NLAY,IBOUND,BOTM,LBOTM,HNEW,LAYHDT
+      USE GWFWELMODULE, ONLY:NWELLS1=>NWELLS,
+     +                       WELL1=>WELL,
+     +                       PSIRAMP1=>PSIRAMP
       USE GWFWEL2MODULE,ONLY:NWELLS,WELDATA,PHIRAMP,
-     +                      WELSMOOTHING, NWT_SOLVER
+     +                       WELSMOOTHING, NWT_SOLVER
       USE WEL_SUBROUTINES, ONLY: WEL_SMOOTH
       USE GWFUPWMODULE,ONLY:LAYTYPUPW
+      LOGICAL :: WEL1, WEL2
       CHARACTER(16) TEXT
-      double precision bbot, Hh, cof1, cof2, Qp
-      double precision ttop,dQp
+      double precision bbot, Hh, cof1, cof2, cof3, Qp, x, s
+      double precision ttop, dQp
 C      
 C--SET POINTERS FOR THE CURRENT GRID   
 cswm: already set in      CALL SGWF2WEL7PNT(IGRID)
 C      
       TEXT='WEL'   
       ZERO=0.
+      nw = 0
+      if(wel2) nw = nw
+      if(wel1) nw = nw + NWELLS1
 C
 C--WRITE AN IDENTIFYING HEADER
       IF(ILMTFMT.EQ.0) THEN
-        WRITE(IUMT3D) KPER,KSTP,NCOL,NROW,NLAY,TEXT,NWELLS
+        WRITE(IUMT3D) KPER,KSTP,NCOL,NROW,NLAY,TEXT,nw
       ELSEIF(ILMTFMT.EQ.1) THEN
-        WRITE(IUMT3D,*) KPER,KSTP,NCOL,NROW,NLAY
-        WRITE(IUMT3D,*) TEXT,NWELLS
+        WRITE(IUMT3D,"(5I8)") KPER,KSTP,NCOL,NROW,NLAY
+        WRITE(IUMT3D,*) TEXT,nw
       ENDIF
 C
 C--IF THERE ARE NO WELLS RETURN
-      IF(NWELLS.LE.0) GO TO 9999
+      IF(nw.LE.0) RETURN
 C
 C--WRITE WELL LOCATION AND RATE ONE AT A TIME
-      DO I=1,NWELLS
-       IL=WELDATA(I)%LAY;  IR=WELDATA(I)%ROW;  IC=WELDATA(I)%COL
+      if(wel2) then
+        DO I=1,NWELLS
+         IL=WELDATA(I)%LAY;  IR=WELDATA(I)%ROW;  IC=WELDATA(I)%COL
 C
 C--IF CELL IS EXTERNAL Q=0
-        Q=ZERO
-        IF(IBOUND(IC,IR,IL).GT.0) Q=WELDATA(I)%VAL(1)
-        IF ( WELSMOOTHING  .AND. Q.LT.ZERO .AND. LAYHDT(IL).NE.0) THEN
-         Hh = HNEW(ic,ir,il)
-         bbot = Botm(IC, IR, Lbotm(IL))
-         ttop = Botm(IC, IR, Lbotm(IL)-1)
-         !
-         Q = Q*WEL_SMOOTH(PHIRAMP,Hh,Ttop,Bbot)  
-        END IF
-        IF(ILMTFMT.EQ.0) THEN
-          WRITE(IUMT3D) IL,IR,IC,Q
-        ELSEIF(ILMTFMT.EQ.1) THEN
-          WRITE(IUMT3D,*) IL,IR,IC,Q
-        ENDIF
-      ENDDO
+          Q=ZERO
+          IF(IBOUND(IC,IR,IL).GT.0) Q=WELDATA(I)%VAL(1)
+          IF ( WELSMOOTHING  .AND. Q.LT.ZERO .AND. LAYHDT(IL).NE.0) THEN
+           Hh = HNEW(ic,ir,il)
+           bbot = Botm(IC, IR, Lbotm(IL))
+           ttop = Botm(IC, IR, Lbotm(IL)-1)
+           !
+           Q = Q*WEL_SMOOTH(PHIRAMP,Hh,Ttop,Bbot)  
+          END IF
+          IF(ILMTFMT.EQ.0) THEN
+            WRITE(IUMT3D) IL,IR,IC,Q
+          ELSEIF(ILMTFMT.EQ.1) THEN
+            WRITE(IUMT3D,"(3I7,ES24.15E3)") IL,IR,IC,Q
+          ENDIF
+        ENDDO
+      end if
 C
+      if(wel1) then
+        DO L=1,NWELLS1
+          IL=WELL1(1,L)
+          IR=WELL1(2,L)
+          IC=WELL1(3,L)
+C
+C--IF CELL IS EXTERNAL Q=0
+          Q=ZERO
+          IF(IBOUND(IC,IR,IL) > 0) THEN
+            Q=WELL1(4,L)
+          IF ( IUNITUPW /= 0 ) THEN
+          IF ( LAYTYPUPW(il).GT.0 ) THEN
+            bbot = Botm(IC, IR, Lbotm(IL))
+            ttop = Botm(IC, IR, Lbotm(IL)-1)
+            Hh = HNEW(ic,ir,il)
+            x = (Hh-bbot)
+            s = PSIRAMP1
+            s = s*(Ttop-Bbot)
+            aa = -1.0d0/(s**2.0d0)
+            b = 2.0d0/s
+            cof1 = x**2.0D0
+            cof2 = -(2.0D0*x)/(s**3.0D0)
+            cof3 = 3.0D0/(s**2.0D0)
+            Qp = cof1*(cof2+cof3)
+            IF ( x.LT.0.0D0 ) THEN
+              Qp = 0.0D0
+            ELSEIF ( x-s.GT.-1.0e-14 ) THEN
+              Qp = 1.0D0
+            END IF
+            IF ( Qp.LT.1.0 ) THEN
+              Q = Q*Qp
+            END IF
+          END IF
+          END IF
+          END IF
+          IF(ILMTFMT.EQ.0) THEN
+            WRITE(IUMT3D) IL,IR,IC,Q
+          ELSEIF(ILMTFMT.EQ.1) THEN
+          WRITE(IUMT3D,"(3I7,ES24.15E3)") IL,IR,IC,Q
+          ENDIF
+        ENDDO
+      end if
 C--RETURN
- 9999 RETURN
-      END
-C
+      END SUBROUTINE
 C
 C
       SUBROUTINE LMT8DRN7(ILMTFMT,IUMT3D,KSTP,KPER,IGRID)
@@ -2571,7 +2566,7 @@ C--WRITE AN IDENTIFYING HEADER
       IF(ILMTFMT.EQ.0) THEN
         WRITE(IUMT3D) KPER,KSTP,NCOL,NROW,NLAY,TEXT,NDRAIN
       ELSEIF(ILMTFMT.EQ.1) THEN
-        WRITE(IUMT3D,*) KPER,KSTP,NCOL,NROW,NLAY
+        WRITE(IUMT3D,"(5I8)") KPER,KSTP,NCOL,NROW,NLAY
         WRITE(IUMT3D,*) TEXT,NDRAIN
       ENDIF
 C
@@ -2608,7 +2603,7 @@ C--WRITE DRAIN LOCATION AND RATE
         IF(ILMTFMT.EQ.0) THEN
           WRITE(IUMT3D)   IL,IR,IC,Q
         ELSEIF(ILMTFMT.EQ.1) THEN
-          WRITE(IUMT3D,*) IL,IR,IC,Q
+          WRITE(IUMT3D,"(3I7,ES24.15E3)") IL,IR,IC,Q
         ENDIF  
 C        
       ENDDO
@@ -2641,7 +2636,7 @@ C--WRITE AN IDENTIFYING HEADER
       IF(ILMTFMT.EQ.0) THEN
         WRITE(IUMT3D) KPER,KSTP,NCOL,NROW,NLAY,TEXT,NRIVER
       ELSEIF(ILMTFMT.EQ.1) THEN
-        WRITE(IUMT3D,*) KPER,KSTP,NCOL,NROW,NLAY
+        WRITE(IUMT3D,"(5I8)") KPER,KSTP,NCOL,NROW,NLAY
         WRITE(IUMT3D,*) TEXT,NRIVER
       ENDIF
 C
@@ -2683,7 +2678,7 @@ C--WRITE RIVER REACH LOCATION AND RATE
         IF(ILMTFMT.EQ.0) THEN
           WRITE(IUMT3D) IL,IR,IC,RATE
         ELSEIF(ILMTFMT.EQ.1) THEN
-          WRITE(IUMT3D,*) IL,IR,IC,RATE
+          WRITE(IUMT3D,"(3I7,ES24.15E3)") IL,IR,IC,RATE
         ENDIF
 C        
       ENDDO
@@ -2701,6 +2696,7 @@ C *******************************************************************
 C Modified from Harbaugh (2005)
 C last modified: 06-23-2016
 C
+      USE SET_ARRAY_INTERFACE, ONLY: SET_ZERO
       USE GLOBAL,      ONLY:NCOL,NROW,NLAY,IBOUND,BUFF
       USE GWFRCHMODULE,ONLY:NRCHOP,RECH,IRCH
       CHARACTER(16) TEXT
@@ -2715,18 +2711,12 @@ C--WRITE AN IDENTIFYING HEADER
       IF(ILMTFMT.EQ.0) THEN
         WRITE(IUMT3D) KPER,KSTP,NCOL,NROW,NLAY,TEXT
       ELSEIF(ILMTFMT.EQ.1) THEN
-        WRITE(IUMT3D,*) KPER,KSTP,NCOL,NROW,NLAY
+        WRITE(IUMT3D,"(5I8)") KPER,KSTP,NCOL,NROW,NLAY
         WRITE(IUMT3D,*) TEXT
       ENDIF
 C
 C--CLEAR THE BUFFER.
-      DO IL=1,NLAY
-        DO IR=1,NROW
-          DO IC=1,NCOL
-            BUFF(IC,IR,IL)=ZERO
-          ENDDO
-        ENDDO
-      ENDDO
+      CALL SET_ZERO(NCOL, NROW, NLAY, BUFF)
 C
 C--IF NRCHOP=1 RECH GOES INTO LAYER 1.
       IF(NRCHOP.EQ.1) THEN
@@ -2799,7 +2789,7 @@ C--WRITE AN IDENTIFYING HEADER
       IF(ILMTFMT.EQ.0) THEN
         WRITE(IUMT3D) KPER,KSTP,NCOL,NROW,NLAY,TEXT
       ELSEIF(ILMTFMT.EQ.1) THEN
-        WRITE(IUMT3D,*) KPER,KSTP,NCOL,NROW,NLAY
+        WRITE(IUMT3D,"(5I8)") KPER,KSTP,NCOL,NROW,NLAY
         WRITE(IUMT3D,*) TEXT
       ENDIF
 C
@@ -2903,7 +2893,7 @@ C--WRITE AN IDENTIFYING HEADER
       IF(ILMTFMT.EQ.0) THEN
         WRITE(IUMT3D) KPER,KSTP,NCOL,NROW,NLAY,TEXT,NBOUND
       ELSEIF(ILMTFMT.EQ.1) THEN
-        WRITE(IUMT3D,*) KPER,KSTP,NCOL,NROW,NLAY
+        WRITE(IUMT3D,"(5I8)") KPER,KSTP,NCOL,NROW,NLAY
         WRITE(IUMT3D,*) TEXT,NBOUND
       ENDIF
 C
@@ -2936,7 +2926,7 @@ C--WRITE HEAD DEP. BOUND. LOCATION AND RATE
         IF(ILMTFMT.EQ.0) THEN
           WRITE(IUMT3D) IL,IR,IC,RATE
         ELSEIF(ILMTFMT.EQ.1) THEN
-          WRITE(IUMT3D,*) IL,IR,IC,RATE
+          WRITE(IUMT3D,"(3I7,ES24.15E3)") IL,IR,IC,RATE
         ENDIF
       ENDDO
 C
@@ -2967,7 +2957,7 @@ C--WRITE AN IDENTIFYING HEADER
       IF(ILMTFMT.EQ.0) THEN
         WRITE(IUMT3D) KPER,KSTP,NCOL,NROW,NLAY,TEXT,NFLW
       ELSEIF(ILMTFMT.EQ.1) THEN
-        WRITE(IUMT3D,*) KPER,KSTP,NCOL,NROW,NLAY
+        WRITE(IUMT3D,"(5I8)") KPER,KSTP,NCOL,NROW,NLAY
         WRITE(IUMT3D,*) TEXT,NFLW
       ENDIF
 C
@@ -2991,7 +2981,7 @@ C--WRITE SPECIFIED-FLOW CELL LOCATION AND RATE
         IF(ILMTFMT.EQ.0) THEN
           WRITE(IUMT3D) IL,IR,IC,Q
         ELSEIF(ILMTFMT.EQ.1) THEN
-          WRITE(IUMT3D,*) IL,IR,IC,Q
+          WRITE(IUMT3D,"(3I7,ES24.15E3)") IL,IR,IC,Q
         ENDIF
       ENDDO
 C
@@ -3096,7 +3086,7 @@ C--WRITE AN IDENTIFYING HEADER
       IF(ILMTFMT.EQ.0) THEN
         WRITE(IUMT3D) KPER,KSTP,NCOL,NROW,NLAY,TEXT,NTEMP
       ELSEIF(ILMTFMT.EQ.1) THEN
-        WRITE(IUMT3D,*) KPER,KSTP,NCOL,NROW,NLAY
+        WRITE(IUMT3D,"(5I8)") KPER,KSTP,NCOL,NROW,NLAY
         WRITE(IUMT3D,*) TEXT,NTEMP
       ENDIF
 C
@@ -3113,7 +3103,7 @@ C--WRITE RES CELL LOCATION AND FLOW RATE
               IF(ILMTFMT.EQ.0) THEN
                 WRITE(IUMT3D)   IL,IR,IC,RATE
               ELSEIF(ILMTFMT.EQ.1) THEN
-                WRITE(IUMT3D,*) IL,IR,IC,RATE
+                WRITE(IUMT3D,"(3I7,ES24.15E3)") IL,IR,IC,RATE
               ENDIF  
             ENDIF
           ENDDO
@@ -3146,7 +3136,7 @@ C--WRITE AN IDENTIFYING HEADER
       IF(ILMTFMT.EQ.0) THEN
         WRITE(IUMT3D) KPER,KSTP,NCOL,NROW,NLAY,TEXT,NSTREM
       ELSEIF(ILMTFMT.EQ.1) THEN
-        WRITE(IUMT3D,*) KPER,KSTP,NCOL,NROW,NLAY
+        WRITE(IUMT3D,"(5I8)") KPER,KSTP,NCOL,NROW,NLAY
         WRITE(IUMT3D,*) TEXT,NSTREM
       ENDIF
 C
@@ -3170,7 +3160,7 @@ C--WRITE STREAM REACH LOCATION AND RATE
         IF(ILMTFMT.EQ.0) THEN
           WRITE(IUMT3D) IL,IR,IC,RATE
         ELSEIF(ILMTFMT.EQ.1) THEN
-          WRITE(IUMT3D,*) IL,IR,IC,RATE
+          WRITE(IUMT3D,"(3I7,ES24.15E3)") IL,IR,IC,RATE
         ENDIF
 C        
       ENDDO
@@ -3201,7 +3191,7 @@ C--WRITE AN IDENTIFYING HEADER
       IF(ILMTFMT.EQ.0) THEN
         WRITE(IUMT3D) KPER,KSTP,NCOL,NROW,NLAY,TEXT,NWELL2
       ELSEIF(ILMTFMT.EQ.1) THEN
-        WRITE(IUMT3D,*) KPER,KSTP,NCOL,NROW,NLAY
+        WRITE(IUMT3D,"(5I8)") KPER,KSTP,NCOL,NROW,NLAY
         WRITE(IUMT3D,*) TEXT,NWELL2
       ENDIF
 C
@@ -3227,7 +3217,7 @@ C--SAVE TO OUTPUT FILE
         IF(ILMTFMT.EQ.0) THEN
           WRITE(IUMT3D) IL,IR,IC,Q,IDwell,QSW
         ELSEIF(ILMTFMT.EQ.1) THEN
-          WRITE(IUMT3D,*) IL,IR,IC,Q,IDwell,QSW
+          WRITE(IUMT3D,"(3I7,ES24.15E3,I12,F4.1)") IL,IR,IC,Q,IDwell,QSW
         ENDIF
       ENDDO
 C
@@ -3265,7 +3255,7 @@ C--WRITE AN IDENTIFYING HEADER
       IF(ILMTFMT.EQ.0) THEN
         WRITE(IUMT3D) KPER,KSTP,NCOL,NROW,NLAY,TEXT,NACTW
       ELSEIF(ILMTFMT.EQ.1) THEN
-        WRITE(IUMT3D,*) KPER,KSTP,NCOL,NROW,NLAY
+        WRITE(IUMT3D,"(5I8)") KPER,KSTP,NCOL,NROW,NLAY
         WRITE(IUMT3D,*) TEXT,NACTW
       ENDIF
 C
@@ -3299,7 +3289,7 @@ C--SAVE TO OUTPUT FILE
           IF(ILMTFMT.EQ.0) THEN
             WRITE(IUMT3D) IL,IR,IC,Q,IDwell,QSW
           ELSEIF(ILMTFMT.EQ.1) THEN
-            WRITE(IUMT3D,*) IL,IR,IC,Q,IDwell,QSW
+          WRITE(IUMT3D,"(3I7,ES24.15E3,I12,F4.1)") IL,IR,IC,Q,IDwell,QSW
           ENDIF
         enddo
       ENDDO
@@ -3333,7 +3323,7 @@ C--WRITE AN IDENTIFYING HEADER
       IF(ILMTFMT.EQ.0) THEN
         WRITE(IUMT3D) KPER,KSTP,NCOL,NROW,NLAY,TEXT
       ELSEIF(ILMTFMT.EQ.1) THEN
-        WRITE(IUMT3D,*) KPER,KSTP,NCOL,NROW,NLAY
+        WRITE(IUMT3D,"(5I8)") KPER,KSTP,NCOL,NROW,NLAY
         WRITE(IUMT3D,*) TEXT
       ENDIF      
 C
@@ -3472,7 +3462,7 @@ C--WRITE AN IDENTIFYING HEADER
       IF(ILMTFMT.EQ.0) THEN
         WRITE(IUMT3D) KPER,KSTP,NCOL,NROW,NLAY,TEXT,NDRTCL+NRFLOW
       ELSEIF(ILMTFMT.EQ.1) THEN
-        WRITE(IUMT3D,*) KPER,KSTP,NCOL,NROW,NLAY
+        WRITE(IUMT3D,"(5I8)") KPER,KSTP,NCOL,NROW,NLAY
         WRITE(IUMT3D,*) TEXT,NDRTCL+NRFLOW
       ENDIF      
 C
@@ -3489,11 +3479,15 @@ C--GET LAYER, ROW & COLUMN OF CELL CONTAINING DRAIN.
         Q=ZERO
         ILR=0
         IF(IDRTFL.GT.0) THEN
-          QIN=ZERO
-          ILR=DRTF(6,L)
-          IRR=DRTF(7,L)
-          ICR=DRTF(8,L)
-          IF(IBOUND(ICR,IRR,ILR).LE.0) ILR=0
+          IF ( ILR <= 0 ) THEN  ! DRT water passed to SFR, SWR, or FMP
+              QIN=ZERO; ILR=0; IRR=0; ICR=0
+          ELSE
+              QIN=ZERO
+              ILR=DRTF(6,L)
+              IRR=DRTF(7,L)
+              ICR=DRTF(8,L)
+              IF(IBOUND(ICR,IRR,ILR).LE.0) ILR=0
+           END IF
         ENDIF                
 C
 C--IF CELL IS NO-FLOW OR CONSTANT-HEAD, IGNORE IT.
@@ -3526,14 +3520,16 @@ C--WRITE DRT LOCATION AND RATE (both host and recipient)
         QSW=ZERO
 C       main drain (host to recipient cell)
         IF(ILMTFMT.EQ.0) WRITE(IUMT3D)   IL,IR,IC,Q,mhost,QSW
-        IF(ILMTFMT.EQ.1) WRITE(IUMT3D,*) IL,IR,IC,Q,mhost,QSW 
+        IF(ILMTFMT.EQ.1) WRITE(IUMT3D,"(3I7,ES24.15E3,I12,F4.1)") 
+     +                                             IL,IR,IC,Q,mhost,QSW
 C       return flow recipient cell 
         if(IDRTFL.GT.0 .AND. ILR.GT.0) then
           mhost = ncol*nrow*(IL-1) + ncol*(IR-1) + IC
           IF(ILMTFMT.EQ.0) THEN
             WRITE(IUMT3D)   ILR,IRR,ICR,QIN,mhost,QSW            
           ELSEIF(ILMTFMT.EQ.1) THEN 
-            WRITE(IUMT3D,*) ILR,IRR,ICR,QIN,mhost,QSW
+            WRITE(IUMT3D,"(3I7,ES24.15E3,I12,F4.1)") 
+     +                                         ILR,IRR,ICR,QIN,mhost,QSW
           ENDIF
         endif
       ENDDO   
@@ -3564,7 +3560,7 @@ C--WRITE AN IDENTIFYING HEADER
       IF(ILMTFMT.EQ.0) THEN
         WRITE(IUMT3D) KPER,KSTP,NCOL,NROW,NLAY,TEXT,NQAQCONN
       ELSEIF(ILMTFMT.EQ.1) THEN
-        WRITE(IUMT3D,*) KPER,KSTP,NCOL,NROW,NLAY
+        WRITE(IUMT3D,"(5I8)") KPER,KSTP,NCOL,NROW,NLAY
         WRITE(IUMT3D,*) TEXT,NQAQCONN
       ENDIF
 C
@@ -3588,7 +3584,7 @@ C--WRITE SWR REACH LOCATION AND RATE
           IF (ILMTFMT.EQ.0) THEN
               WRITE(IUMT3D) IL,IR,IC,RATE
           ELSE IF(ILMTFMT.EQ.1) THEN
-              WRITE(IUMT3D,*) IL,IR,IC,RATE
+              WRITE(IUMT3D,"(3I7,ES24.15E3)") IL,IR,IC,RATE
           END IF
         END DO
       END DO
@@ -3599,7 +3595,7 @@ C--WRITE AN IDENTIFYING HEADER
       IF(ILMTFMT.EQ.0) THEN
         WRITE(IUMT3D) KPER,KSTP,NCOL,NROW,NLAY,TEXT,NGWET
       ELSEIF(ILMTFMT.EQ.1) THEN
-        WRITE(IUMT3D,*) KPER,KSTP,NCOL,NROW,NLAY
+        WRITE(IUMT3D,"(5I8)") KPER,KSTP,NCOL,NROW,NLAY
         WRITE(IUMT3D,*) TEXT,NGWET
       ENDIF
 C
@@ -3626,7 +3622,7 @@ C--WRITE SWR REACH LOCATION AND RATE
         IF (ILMTFMT.EQ.0) THEN
             WRITE(IUMT3D) IL,IR,IC,RATE
         ELSE IF(ILMTFMT.EQ.1) THEN
-            WRITE(IUMT3D,*) IL,IR,IC,RATE
+            WRITE(IUMT3D,"(3I7,ES24.15E3)") IL,IR,IC,RATE
         END IF
       END DO
 C
@@ -3734,7 +3730,7 @@ C--WRITE AN IDENTIFYING HEADER
       IF(ILMTFMT.EQ.0) THEN
         WRITE(IUMT3D) KPER,KSTP,NCOL,NROW,NLAY,TEXT
       ELSEIF(ILMTFMT.EQ.1) THEN
-        WRITE(IUMT3D,*) KPER,KSTP,NCOL,NROW,NLAY
+        WRITE(IUMT3D,"(5I8)") KPER,KSTP,NCOL,NROW,NLAY
         WRITE(IUMT3D,*) TEXT
       ENDIF
 C
@@ -3804,7 +3800,7 @@ C--RECORD CONTENTS OF BUFFER.
           WRITE(IUMT3D)   ((IGWET(J,I),J=1,NCOL),I=1,NROW)
           WRITE(IUMT3D)   ((BUFF(J,I,1),J=1,NCOL),I=1,NROW)
         ELSEIF(ILMTFMT.EQ.1) THEN
-          WRITE(IUMT3D,*) KPER,KSTP,NCOL,NROW,NLAY
+          WRITE(IUMT3D,"(5I8)") KPER,KSTP,NCOL,NROW,NLAY
           WRITE(IUMT3D,*) TEXT
           WRITE(IUMT3D,*) ((IGWET(J,I),J=1,NCOL),I=1,NROW)
           WRITE(IUMT3D,*) ((BUFF(J,I,1),J=1,NCOL),I=1,NROW)
@@ -3881,7 +3877,7 @@ C--RECORD CONTENTS OF BUFFER.
         WRITE(IUMT3D) KPER,KSTP,NCOL,NROW,NLAY,TEXT1
         WRITE(IUMT3D) BUFF
       ELSEIF(ILMTFMT.EQ.1) THEN
-        WRITE(IUMT3D,*) KPER,KSTP,NCOL,NROW,NLAY
+        WRITE(IUMT3D,"(5I8)") KPER,KSTP,NCOL,NROW,NLAY
         WRITE(IUMT3D,*) TEXT1
         WRITE(IUMT3D,*) BUFF
       ENDIF
@@ -3919,7 +3915,7 @@ C--RECORD CONTENTS OF BUFFER.
         WRITE(IUMT3D) KPER,KSTP,NCOL,NROW,NLAY,TEXT2
         WRITE(IUMT3D) BUFF
       ELSEIF(ILMTFMT.EQ.1) THEN
-        WRITE(IUMT3D,*) KPER,KSTP,NCOL,NROW,NLAY
+        WRITE(IUMT3D,"(5I8)") KPER,KSTP,NCOL,NROW,NLAY
         WRITE(IUMT3D,*) TEXT2
         WRITE(IUMT3D,*) BUFF
       ENDIF
@@ -3960,7 +3956,7 @@ C--RECORD CONTENTS OF BUFFER.
         WRITE(IUMT3D) KPER,KSTP,NCOL,NROW,NLAY,TEXT3
         WRITE(IUMT3D) BUFF
       ELSEIF(ILMTFMT.EQ.1) THEN
-        WRITE(IUMT3D,*) KPER,KSTP,NCOL,NROW,NLAY
+        WRITE(IUMT3D,"(5I8)") KPER,KSTP,NCOL,NROW,NLAY
         WRITE(IUMT3D,*) TEXT3
         WRITE(IUMT3D,*) BUFF
       ENDIF
@@ -4044,7 +4040,7 @@ C--RECORD CONTENTS OF BUFFER.
         WRITE(IUMT3D) KPER,KSTP,NCOL,NROW,NLAY,TEXT1
         WRITE(IUMT3D) BUFF
       ELSEIF(ILMTFMT.EQ.1) THEN
-        WRITE(IUMT3D,*) KPER,KSTP,NCOL,NROW,NLAY
+        WRITE(IUMT3D,"(5I8)") KPER,KSTP,NCOL,NROW,NLAY
         WRITE(IUMT3D,*) TEXT1
         WRITE(IUMT3D,*) BUFF
       ENDIF
@@ -4084,7 +4080,7 @@ C--RECORD CONTENTS OF BUFFER.
         WRITE(IUMT3D) ((IGWET(J,I),J=1,NCOL),I=1,NROW)
         WRITE(IUMT3D) ((BUFF(J,I,1),J=1,NCOL),I=1,NROW)
       ELSEIF(ILMTFMT.EQ.1) THEN
-        WRITE(IUMT3D,*) KPER,KSTP,NCOL,NROW,NLAY
+        WRITE(IUMT3D,"(5I8)") KPER,KSTP,NCOL,NROW,NLAY
         WRITE(IUMT3D,*) TEXT2
         WRITE(IUMT3D,*) ((IGWET(J,I),J=1,NCOL),I=1,NROW)
         WRITE(IUMT3D,*) ((BUFF(J,I,1),J=1,NCOL),I=1,NROW)
@@ -4172,7 +4168,7 @@ C--WRITE AN IDENTIFYING HEADER
         IF(ILMTFMT.EQ.0) THEN
           WRITE(IUMT3D) KPER,KSTP,TEXT_SFR,NSFRCON
         ELSEIF(ILMTFMT.EQ.1) THEN
-          WRITE(IUMT3D,*) KPER,KSTP
+          WRITE(IUMT3D,"(2I8)") KPER,KSTP
           WRITE(IUMT3D,*) TEXT_SFR,NSFRCON
         ENDIF
 C
@@ -4251,7 +4247,7 @@ C--WRITE AN IDENTIFYING HEADER
         IF(ILMTFMT.EQ.0) THEN
           WRITE(IUMT3D) KPER,KSTP,TEXT_LAK,NLAKCON
         ELSEIF(ILMTFMT.EQ.1) THEN
-          WRITE(IUMT3D,*) KPER,KSTP
+          WRITE(IUMT3D,"(2I8)") KPER,KSTP
           WRITE(IUMT3D,*) TEXT_LAK,NLAKCON
         ENDIF
 C
@@ -4379,7 +4375,7 @@ C--WRITE AN IDENTIFYING HEADER
 92    IF(ILMTFMT.EQ.0) THEN
         WRITE(IUMT3D) KPER,KSTP,TEXT_SNK,NSNKCON
       ELSEIF(ILMTFMT.EQ.1) THEN
-        WRITE(IUMT3D,*) KPER,KSTP
+        WRITE(IUMT3D,"(2I8)") KPER,KSTP
         WRITE(IUMT3D,*) TEXT_SNK,NSNKCON
       ENDIF
 C
@@ -4455,18 +4451,19 @@ C THIS SUBROUTINE IS CALLED ONLY IF THE 'SFR2' PACKAGE IS USED IN
 C THE MODFLOW SOLUTION.
 C ******************************************************************
 C DATE CREATED: 4-01-2016
-      USE GLOBAL,       ONLY:NCOL,NROW,NLAY,IOUT,IBOUND,IUNIT
+      USE CONSTANTS,    ONLY:Z
+      USE GLOBAL,       ONLY:NCOL,NROW,NLAY,IOUT,IBOUND,IUNIT,UPLAY
       USE GWFSFRMODULE, ONLY:NSTRM,ISTRM,STRM,ISEG,NSEGDIM,SEG,
      &                       IOTSG,IDIVAR,FXLKOT,NSS,DVRSFLW,SGOTFLW,
      &                       STROUT,NINTOT,ITRFLG,ITRFLG,NFLOWTYPE,
-     &                       FLOWTYPE
+     &                       FLOWTYPE,UPLAY_ADJUST
       USE GWFLAKMODULE, ONLY:VOL,NSFRLAK,LAKSFR,ILKSEG,ILKRCH,SWLAK
       USE LMTMODULE,    ONLY:ISFRFLOWS
 C
       IMPLICIT NONE
 C
       CHARACTER(16) TEXT
-      INTEGER MXSGMT,MXRCH,LASTRCH,L,NREACH,LL,IL,IC,IR,ILAY,
+      INTEGER MXSGMT,MXRCH,LASTRCH,L,NREACH,LL,IL,IC,IR,ILAY,UP,
      &        KSTP,KPER,IUMT3D,ISTSG,ILMTFMT,ISSMT3D,IGRID
       INTEGER I,J,III,JJJ,LK,IDISP,NINFLOW,ITRIB,IUPSEG,IUPRCH,USED,
      &        LENGTH
@@ -4475,7 +4472,7 @@ C
       DOUBLE PRECISION CLOSEZERO
       LOGICAL WRITEVAL
       REAL, ALLOCATABLE          :: SFRFLOWVAL(:,:)
-      CHARACTER(16), DIMENSION(5) :: PRNTSFRQTYP
+      CHARACTER(16), DIMENSION(5):: PRNTSFRQTYP
       LOGICAL, DIMENSION(5)      :: MASK
 C
       DIMENSION LASTRCH(NSS)
@@ -4510,7 +4507,7 @@ C--WRITE AN IDENTIFYING HEADER
       IF(ILMTFMT.EQ.0) THEN
         WRITE(IUMT3D) KPER,KSTP,NCOL,NROW,NLAY,TEXT,NSTRM  !,NINTOT,MXSGMT,MXRCH
       ELSEIF(ILMTFMT.EQ.1) THEN
-        WRITE(IUMT3D,*) KPER,KSTP,NCOL,NROW,NLAY
+        WRITE(IUMT3D,"(5I8)") KPER,KSTP,NCOL,NROW,NLAY
         WRITE(IUMT3D,*) TEXT,NSTRM  !,NINTOT,MXSGMT,MXRCH
       ENDIF      
 C
@@ -4534,22 +4531,22 @@ C--LOOP THROUGH EACH STREAM CELL AND WRITE EXCHANGE WITH AQUIFER
         STRLEN = STRM(1, L)
 C
 C25-----SEARCH FOR UPPER MOST ACTIVE CELL IN STREAM REACH.
-        ILAY = IL
-        TOPCELL1: DO WHILE (ILAY.LE.NLAY)
-          IF(IBOUND(IC,IR,ILAY).EQ.0) THEN
-            ILAY = ILAY + 1
-          ELSE
-            EXIT TOPCELL1
-          END IF
-        END DO TOPCELL1
-        IF (ILAY.LE.NLAY) IL = ILAY
+        UP = UPLAY(IC,IR)
+        !
+        IF( UP > Z ) THEN
+           IF(UPLAY_ADJUST == 1) THEN                               ! UPLAY_ADJUST => 0 do not adjust layers, 1 adjust layer if deeper, 2 use current upper most active layer)
+                           IF(il <  UP) il = UP
+           ELSEIF(UPLAY_ADJUST == 2) THEN 
+                           IF(il /= UP .AND. UP>Z) il = UP
+           END IF
+        END IF
 C
 C-------WRITE GW-SW INTERACTION TERMS TO FTL FILE UNDER THE HEADING "SFR"
 C       Strm(11, L): FLOW TO/FROM AQUIFER
         IF(ILMTFMT.EQ.0) THEN
           WRITE(IUMT3D) IL,IR,IC,STRM(11,L)
         ELSEIF(ILMTFMT.EQ.1) THEN
-          WRITE(IUMT3D,*) IL,IR,IC,STRM(11,L)
+          WRITE(IUMT3D,"(3I7,ES24.15E3)") IL,IR,IC,STRM(11,L)
         ENDIF
       ENDDO
 C
@@ -4561,67 +4558,29 @@ C--LOOP THROUGH EACH STREAM CELL AND WRITE EXCHANGE WITH OTHER STREAM REACHES
           TEXT='SFR FLOWS TR'
         ENDIF
 C
+        J=0
+        DO I=1, SIZE(FLOWTYPE)
+            IF(FLOWTYPE(I).NE.'' .AND. FLOWTYPE(I).NE.'NA') THEN
+               J=J+1
+               PRNTSFRQTYP(J) = FLOWTYPE(I)
+            END IF
+      END DO
+      NFLOWTYPE = J
+C
 C--WRITE AN IDENTIFYING HEADER
         IF(ILMTFMT.EQ.0) THEN
           WRITE(IUMT3D) KPER,KSTP,TEXT,NSTRM,NFLOWTYPE,NINTOT
         ELSEIF(ILMTFMT.EQ.1) THEN
-          WRITE(IUMT3D,*) KPER,KSTP
+          WRITE(IUMT3D,"(2I8)") KPER,KSTP
           WRITE(IUMT3D,*) TEXT,NSTRM,NFLOWTYPE,NINTOT
         ENDIF
 C
 C--WILL WRITE CFLOWTYPE A TOTAL OF NFLOWTYPE TIMES [MAX(NFLOWTYPE)=4]
-        MASK=.FALSE.
-        IF(FLOWTYPE(1).EQ.'VOLUME') THEN
-          MASK(1) = .TRUE.
-        ENDIF
-        IF(FLOWTYPE(2).EQ.'RCHLEN') THEN
-          MASK(2) = .TRUE.
-        ENDIF
-        IF(FLOWTYPE(3).EQ.'PRECIP') THEN
-          MASK(3) = .TRUE.
-        ENDIF
-        IF(FLOWTYPE(4).EQ.'EVAP') THEN
-          MASK(4) = .TRUE.
-        ENDIF
-        IF(FLOWTYPE(5).EQ.'RUNOFF') THEN
-          MASK(5) = .TRUE.
-        ENDIF
-        PRNTSFRQTYP = PACK(FLOWTYPE, MASK)
-C--THE FOLLOWING PRINT STATEMENTS ONLY WORK BECAUSE VALUES HAVE BEEN CONSOLIDATED.
-        IF(NFLOWTYPE.EQ.1) THEN
-          IF(ILMTFMT.EQ.0) THEN
-            WRITE(IUMT3D) PRNTSFRQTYP(1)
-          ELSEIF(ILMTFMT.EQ.1) THEN
-            WRITE(IUMT3D,*) PRNTSFRQTYP(1)
-          ENDIF
-        ELSEIF(NFLOWTYPE.EQ.2) THEN
-          IF(ILMTFMT.EQ.0) THEN
-            WRITE(IUMT3D) PRNTSFRQTYP(1),PRNTSFRQTYP(2)
-          ELSEIF(ILMTFMT.EQ.1) THEN
-            WRITE(IUMT3D,*) PRNTSFRQTYP(1),PRNTSFRQTYP(2)
-          ENDIF
-        ELSEIF(NFLOWTYPE.EQ.3) THEN
-          IF(ILMTFMT.EQ.0) THEN
-            WRITE(IUMT3D) PRNTSFRQTYP(1),PRNTSFRQTYP(2),PRNTSFRQTYP(3)
-          ELSEIF(ILMTFMT.EQ.1) THEN
-            WRITE(IUMT3D,*) PRNTSFRQTYP(1),PRNTSFRQTYP(2),PRNTSFRQTYP(3)
-          ENDIF
-        ELSEIF(NFLOWTYPE.EQ.4) THEN
-          IF(ILMTFMT.EQ.0) THEN
-            WRITE(IUMT3D) PRNTSFRQTYP(1),PRNTSFRQTYP(2),PRNTSFRQTYP(3),
-     &                    PRNTSFRQTYP(4)
-          ELSEIF(ILMTFMT.EQ.1) THEN
-            WRITE(IUMT3D,*)PRNTSFRQTYP(1),PRNTSFRQTYP(2),PRNTSFRQTYP(3),
-     &                     PRNTSFRQTYP(4)
-          ENDIF
-        ELSEIF(NFLOWTYPE.EQ.5) THEN
-          IF(ILMTFMT.EQ.0) THEN
-            WRITE(IUMT3D) PRNTSFRQTYP(1),PRNTSFRQTYP(2),PRNTSFRQTYP(3),
-     &                    PRNTSFRQTYP(4),PRNTSFRQTYP(5)
-          ELSEIF(ILMTFMT.EQ.1) THEN
-            WRITE(IUMT3D,*)PRNTSFRQTYP(1),PRNTSFRQTYP(2),PRNTSFRQTYP(3),
-     &                     PRNTSFRQTYP(4),PRNTSFRQTYP(5)
-          ENDIF
+        !
+        IF(ILMTFMT.EQ.0) THEN
+          WRITE(IUMT3D) PRNTSFRQTYP(:NFLOWTYPE) 
+        ELSEIF(ILMTFMT.EQ.1) THEN
+          WRITE(IUMT3D,"(*(1x, A))") PRNTSFRQTYP(:NFLOWTYPE)
         ENDIF
 C
 C--FILL A 2D ARRAY OF SFRFLOWS(NFLOWTYPE,NRCH) THAT CONTAINS THE VOLUMETRIC 
@@ -4653,7 +4612,7 @@ C--WRITE THE ARRAY TO THE FTL FILE.
             IF(ILMTFMT.EQ.0) THEN
               WRITE(IUMT3D) SFRFLOWVAL(1,L)
             ELSEIF(ILMTFMT.EQ.1) THEN
-              WRITE(IUMT3D,*) SFRFLOWVAL(1,L)
+              WRITE(IUMT3D,"(*(ES24.15E3))") SFRFLOWVAL(1,L)
             ENDIF
           ENDDO
         ELSEIF(NFLOWTYPE.EQ.2) THEN
@@ -4661,7 +4620,8 @@ C--WRITE THE ARRAY TO THE FTL FILE.
             IF(ILMTFMT.EQ.0) THEN
               WRITE(IUMT3D) SFRFLOWVAL(1,L), SFRFLOWVAL(2,L)
             ELSEIF(ILMTFMT.EQ.1) THEN
-              WRITE(IUMT3D,*) SFRFLOWVAL(1,L), SFRFLOWVAL(2,L)
+              WRITE(IUMT3D,"(*(ES24.15E3))") 
+     +                                 SFRFLOWVAL(1,L), SFRFLOWVAL(2,L)
             ENDIF
           ENDDO
         ELSEIF(NFLOWTYPE.EQ.3) THEN
@@ -4670,8 +4630,8 @@ C--WRITE THE ARRAY TO THE FTL FILE.
               WRITE(IUMT3D) SFRFLOWVAL(1,L), SFRFLOWVAL(2,L), 
      &                      SFRFLOWVAL(3,L)
             ELSEIF(ILMTFMT.EQ.1) THEN
-              WRITE(IUMT3D,*) SFRFLOWVAL(1,L), SFRFLOWVAL(2,L),   
-     &                        SFRFLOWVAL(3,L)
+              WRITE(IUMT3D,"(*(ES24.15E3))") SFRFLOWVAL(1,L), 
+     &                      SFRFLOWVAL(2,L), SFRFLOWVAL(3,L)
             ENDIF
           ENDDO
         ELSEIF(NFLOWTYPE.EQ.4) THEN
@@ -4680,8 +4640,8 @@ C--WRITE THE ARRAY TO THE FTL FILE.
               WRITE(IUMT3D) SFRFLOWVAL(1,L), SFRFLOWVAL(2,L), 
      &                      SFRFLOWVAL(3,L), SFRFLOWVAL(4,L)
             ELSEIF(ILMTFMT.EQ.1) THEN
-              WRITE(IUMT3D,*) SFRFLOWVAL(1,L), SFRFLOWVAL(2,L), 
-     &                        SFRFLOWVAL(3,L), SFRFLOWVAL(4,L)
+              WRITE(IUMT3D,"(*(ES24.15E3))") SFRFLOWVAL(1,L), 
+     &                 SFRFLOWVAL(2,L), SFRFLOWVAL(3,L), SFRFLOWVAL(4,L)
             ENDIF
           ENDDO
         ELSEIF(NFLOWTYPE.EQ.5) THEN
@@ -4691,9 +4651,9 @@ C--WRITE THE ARRAY TO THE FTL FILE.
      &                      SFRFLOWVAL(3,L), SFRFLOWVAL(4,L), 
      &                      SFRFLOWVAL(5,L)
             ELSEIF(ILMTFMT.EQ.1) THEN
-              WRITE(IUMT3D,*) SFRFLOWVAL(1,L), SFRFLOWVAL(2,L), 
-     &                        SFRFLOWVAL(3,L), SFRFLOWVAL(4,L),
-     &                        SFRFLOWVAL(5,L)
+              WRITE(IUMT3D,"(*(ES24.15E3))") SFRFLOWVAL(1,L), 
+     &                        SFRFLOWVAL(2,L), SFRFLOWVAL(3,L), 
+     &                        SFRFLOWVAL(4,L), SFRFLOWVAL(5,L)
             ENDIF
           ENDDO
         ENDIF
@@ -4742,7 +4702,8 @@ C       or specified.
               IF(ILMTFMT.EQ.0) THEN
                 WRITE(IUMT3D) -999,L,IDISP,FLOWIN,XSA
               ELSEIF(ILMTFMT.EQ.1) THEN
-                WRITE(IUMT3D,*) -999,L,IDISP,FLOWIN,XSA
+                WRITE(IUMT3D,"(I5,I12,I3,2ES24.15E3)") -999,L,IDISP,
+     +                                                 FLOWIN,XSA
               ENDIF
 C
 C9--------COMPUTE INFLOW OF A STREAM SEGMENT EMANATING FROM A LAKE [IUNIT(22)].
@@ -4812,7 +4773,8 @@ C20-----SET FLOW INTO DIVERSION IF SEGMENT IS DIVERSION.
                 IF(ILMTFMT.EQ.0) THEN
                   WRITE(IUMT3D) I,L,IDISP,FLOWIN,XSA
                 ELSEIF(ILMTFMT.EQ.1) THEN
-                  WRITE(IUMT3D,*) I,L,IDISP,FLOWIN,XSA
+                  WRITE(IUMT3D,"(2I12,I3,2ES24.15E3)") I,L,IDISP,
+     +                                                 FLOWIN,XSA
                 ENDIF
 C
 C21-----CHECK TO SEE IF MORE THAN ONE TRIBUTARY OUTFLOW, WRITE EACH OF THE CONNECTIONS TO THE DOWNSTREAM SEGMENT.
@@ -4839,7 +4801,8 @@ C                    NINFLOW = NINFLOW+1
                     IF(ILMTFMT.EQ.0) THEN
                       WRITE(IUMT3D) J,L,IDISP,TRBFLW,XSA
                     ELSEIF(ILMTFMT.EQ.1) THEN
-                      WRITE(IUMT3D,*) J,L,IDISP,TRBFLW,XSA
+                      WRITE(IUMT3D,"(2I12,I3,2ES24.15E3)") J,L,IDISP,
+     +                                                       TRBFLW,XSA
                     ENDIF
                   END IF
                   ITRIB = ITRIB + 1
@@ -4862,7 +4825,8 @@ C         TO TRIBUTARY INFLOW (WHICH ARE PRINTED BY CODE ABOVE)
                   IF(ILMTFMT.EQ.0) THEN
                     WRITE(IUMT3D) -999,L,IDISP,USERFLOW,XSA
                   ELSEIF(ILMTFMT.EQ.1) THEN
-                    WRITE(IUMT3D,*) -999,L,IDISP,USERFLOW,XSA
+                    WRITE(IUMT3D,"(I5,I12,I3,2ES24.15E3)") -999,L,IDISP,
+     +                                                     USERFLOW,XSA
                   ENDIF        
                 ENDIF
               END IF
@@ -4890,7 +4854,7 @@ C            NINFLOW = 1
             IF(ILMTFMT.EQ.0) THEN
               WRITE(IUMT3D) I,L,IDISP,FLOWIN,XSA
             ELSEIF(ILMTFMT.EQ.1) THEN
-              WRITE(IUMT3D,*) I,L,IDISP,FLOWIN,XSA
+              WRITE(IUMT3D,"(2I12,I3,2ES24.15E3)") I,L,IDISP,FLOWIN,XSA
             ENDIF
           END IF
           IF(IOTSG(ISTSG).EQ.0.AND.NREACH.EQ.ISEG(4,ISTSG)) THEN
@@ -4898,7 +4862,8 @@ C            NINFLOW = 1
             IF(ILMTFMT.EQ.0) THEN
               WRITE(IUMT3D) L,-999,IDISP,STRM(9,L),XSA
             ELSEIF(ILMTFMT.EQ.1) THEN
-              WRITE(IUMT3D,*) L,-999,IDISP,STRM(9,L),XSA
+              WRITE(IUMT3D,"(I12,I5,I3,2ES24.15E3)") L,-999,IDISP,
+     +                                               STRM(9,L),XSA
             ENDIF
           ENDIF
         ENDDO
@@ -4985,7 +4950,7 @@ C--WRITE AN IDENTIFYING HEADER
       IF(ILMTFMT.EQ.0) THEN
         WRITE(IUMT3D) KPER,KSTP,TEXT,NSFRLAK
       ELSEIF(ILMTFMT.EQ.1) THEN
-        WRITE(IUMT3D,*) KPER,KSTP
+        WRITE(IUMT3D,"(2I8)") KPER,KSTP
         WRITE(IUMT3D,*) TEXT,NSFRLAK
       ENDIF 
 C-----WRITE EXCHANGE TERMS WITH SFR
@@ -5001,7 +4966,7 @@ C-----WRITE EXCHANGE TERMS WITH SFR
         IF(ILMTFMT.EQ.0) THEN
           WRITE(IUMT3D) J,LAKSFR(I),-1*SWLAK(I),0  ! 0 is a dummy place holder
         ELSEIF(ILMTFMT.EQ.1) THEN
-          WRITE(IUMT3D,*) J,LAKSFR(I),-1*SWLAK(I),0  
+          WRITE(IUMT3D,"(2I12,ES24.15E3,I3)") J,LAKSFR(I),-1*SWLAK(I),0
         ENDIF
       ENDDO      
 C
@@ -5044,7 +5009,7 @@ C--WRITE AN IDENTIFYING HEADER
       IF(ILMTFMT.EQ.0) THEN
         WRITE(IUMT3D) KPER,KSTP,NCOL,NROW,NLAY,TEXT,LKNODE
       ELSEIF(ILMTFMT.EQ.1) THEN
-        WRITE(IUMT3D,*) KPER,KSTP,NCOL,NROW,NLAY
+        WRITE(IUMT3D,"(5I8)") KPER,KSTP,NCOL,NROW,NLAY
         WRITE(IUMT3D,*) TEXT,LKNODE
       ENDIF 
 C
@@ -5058,7 +5023,7 @@ C-----WRITE EXCHANGE TERMS WITH GW. LKNODE=# OF LAK-AQIF INTERFACES
         IF(ILMTFMT.EQ.0) THEN
           WRITE(IUMT3D) IL,IR,IC,Q,LAKE,0
         ELSEIF(ILMTFMT.EQ.1) THEN
-          WRITE(IUMT3D,*) IL,IR,IC,Q,LAKE,0
+          WRITE(IUMT3D,"(3I7,ES24.15E3,I12,I2)") IL,IR,IC,Q,LAKE,0
         ENDIF        
       ENDDO
 C
@@ -5071,7 +5036,7 @@ C-----WRITE AN IDENTIFYING HEADER
         IF(ILMTFMT.EQ.0) THEN
           WRITE(IUMT3D) KPER,KSTP,TEXT,NLAKES,NLKFLWTYP,NLAKCON
         ELSEIF(ILMTFMT.EQ.1) THEN
-          WRITE(IUMT3D,*) KPER,KSTP
+          WRITE(IUMT3D,"(2I8)") KPER,KSTP
           WRITE(IUMT3D,*) TEXT,NLAKES,NLKFLWTYP,NLAKCON
         ENDIF 
         LKFLOWVAL=0
@@ -5100,43 +5065,45 @@ C--THE FOLLOWING PRINT STATEMENTS ONLY WORK BECAUSE VALUES HAVE BEEN CONSOLIDATE
           IF(ILMTFMT.EQ.0) THEN
             WRITE(IUMT3D) PRNTLAKQTYP(1)
           ELSEIF(ILMTFMT.EQ.1) THEN
-            WRITE(IUMT3D,*) PRNTLAKQTYP(1)
+            WRITE(IUMT3D,"(*(1x,A))") PRNTLAKQTYP(1)
           ENDIF
         ELSEIF(NLKFLWTYP.EQ.2) THEN
           IF(ILMTFMT.EQ.0) THEN
             WRITE(IUMT3D) PRNTLAKQTYP(1),PRNTLAKQTYP(2)
           ELSEIF(ILMTFMT.EQ.1) THEN
-            WRITE(IUMT3D,*) PRNTLAKQTYP(1),PRNTLAKQTYP(2)
+            WRITE(IUMT3D,"(*(1x,A))") PRNTLAKQTYP(1),PRNTLAKQTYP(2)
           ENDIF
         ELSEIF(NLKFLWTYP.EQ.3) THEN
           IF(ILMTFMT.EQ.0) THEN
             WRITE(IUMT3D) PRNTLAKQTYP(1),PRNTLAKQTYP(2),PRNTLAKQTYP(3)
           ELSEIF(ILMTFMT.EQ.1) THEN
-            WRITE(IUMT3D,*) PRNTLAKQTYP(1),PRNTLAKQTYP(2),PRNTLAKQTYP(3)
+            WRITE(IUMT3D,"(*(1x,A))") PRNTLAKQTYP(1),PRNTLAKQTYP(2),
+     +                                PRNTLAKQTYP(3)
           ENDIF
         ELSEIF(NLKFLWTYP.EQ.4) THEN
           IF(ILMTFMT.EQ.0) THEN
             WRITE(IUMT3D)PRNTLAKQTYP(1),PRNTLAKQTYP(2),PRNTLAKQTYP(3),
      &                   PRNTLAKQTYP(4)
           ELSEIF(ILMTFMT.EQ.1) THEN
-            WRITE(IUMT3D,*)PRNTLAKQTYP(1),PRNTLAKQTYP(2),PRNTLAKQTYP(3),
-     &                     PRNTLAKQTYP(4)
+            WRITE(IUMT3D,"(*(1x,A))") PRNTLAKQTYP(1), PRNTLAKQTYP(2),
+     &                                PRNTLAKQTYP(3), PRNTLAKQTYP(4)
           ENDIF
         ELSEIF(NLKFLWTYP.EQ.5) THEN
           IF(ILMTFMT.EQ.0) THEN
             WRITE(IUMT3D)PRNTLAKQTYP(1), PRNTLAKQTYP(2), PRNTLAKQTYP(3),
      &                   PRNTLAKQTYP(4), PRNTLAKQTYP(5)
           ELSEIF(ILMTFMT.EQ.1) THEN
-            WRITE(IUMT3D,*)PRNTLAKQTYP(1),PRNTLAKQTYP(2),PRNTLAKQTYP(3),
-     &                     PRNTLAKQTYP(4),PRNTLAKQTYP(5)
+            WRITE(IUMT3D,"(*(1x,A))") PRNTLAKQTYP(1), PRNTLAKQTYP(2),
+     &                PRNTLAKQTYP(3), PRNTLAKQTYP(4), PRNTLAKQTYP(5)
           ENDIF
         ELSEIF(NLKFLWTYP.EQ.6) THEN
           IF(ILMTFMT.EQ.0) THEN
             WRITE(IUMT3D)PRNTLAKQTYP(1), PRNTLAKQTYP(2), PRNTLAKQTYP(3),
      &                   PRNTLAKQTYP(4), PRNTLAKQTYP(5), PRNTLAKQTYP(6)
           ELSEIF(ILMTFMT.EQ.1) THEN
-            WRITE(IUMT3D,*)PRNTLAKQTYP(1),PRNTLAKQTYP(2),PRNTLAKQTYP(3),
-     &                     PRNTLAKQTYP(4),PRNTLAKQTYP(5),PRNTLAKQTYP(6)
+            WRITE(IUMT3D,"(*(1x,A))") PRNTLAKQTYP(1), PRNTLAKQTYP(2),
+     &                                PRNTLAKQTYP(3), PRNTLAKQTYP(4),
+     &                                PRNTLAKQTYP(5), PRNTLAKQTYP(6)
           ENDIF
         ENDIF
 C
@@ -5169,7 +5136,7 @@ C--WRITE THE ARRAY TO THE FTL FILE.
             IF(ILMTFMT.EQ.0) THEN
               WRITE(IUMT3D) LKFLOWVAL(1,L)
             ELSEIF(ILMTFMT.EQ.1) THEN
-              WRITE(IUMT3D,*) LKFLOWVAL(1,L)
+              WRITE(IUMT3D,"(*(ES24.15E3))") LKFLOWVAL(1,L)
             ENDIF
           ENDDO
         ELSEIF(NLKFLWTYP.EQ.2) THEN
@@ -5177,7 +5144,8 @@ C--WRITE THE ARRAY TO THE FTL FILE.
             IF(ILMTFMT.EQ.0) THEN
               WRITE(IUMT3D) LKFLOWVAL(1,L), LKFLOWVAL(2,L)
             ELSEIF(ILMTFMT.EQ.1) THEN
-              WRITE(IUMT3D,*) LKFLOWVAL(1,L), LKFLOWVAL(2,L)
+              WRITE(IUMT3D,"(*(ES24.15E3))")
+     &                      LKFLOWVAL(1,L), LKFLOWVAL(2,L)
             ENDIF
           ENDDO
         ELSEIF(NLKFLWTYP.EQ.3) THEN
@@ -5186,8 +5154,9 @@ C--WRITE THE ARRAY TO THE FTL FILE.
               WRITE(IUMT3D) LKFLOWVAL(1,L), LKFLOWVAL(2,L), 
      &                      LKFLOWVAL(3,L)
             ELSEIF(ILMTFMT.EQ.1) THEN
-              WRITE(IUMT3D,*) LKFLOWVAL(1,L), LKFLOWVAL(2,L),   
-     &                        LKFLOWVAL(3,L)
+              WRITE(IUMT3D,"(*(ES24.15E3))")
+     &                      LKFLOWVAL(1,L), LKFLOWVAL(2,L), 
+     &                      LKFLOWVAL(3,L)
             ENDIF
           ENDDO
         ELSEIF(NLKFLWTYP.EQ.4) THEN
@@ -5196,8 +5165,9 @@ C--WRITE THE ARRAY TO THE FTL FILE.
               WRITE(IUMT3D) LKFLOWVAL(1,L), LKFLOWVAL(2,L), 
      &                      LKFLOWVAL(3,L), LKFLOWVAL(4,L)
             ELSEIF(ILMTFMT.EQ.1) THEN
-              WRITE(IUMT3D,*) LKFLOWVAL(1,L), LKFLOWVAL(2,L), 
-     &                        LKFLOWVAL(3,L), LKFLOWVAL(4,L)
+              WRITE(IUMT3D,"(*(ES24.15E3))")
+     &                      LKFLOWVAL(1,L), LKFLOWVAL(2,L), 
+     &                      LKFLOWVAL(3,L), LKFLOWVAL(4,L)
             ENDIF
           ENDDO
         ELSEIF(NLKFLWTYP.EQ.5) THEN
@@ -5207,9 +5177,10 @@ C--WRITE THE ARRAY TO THE FTL FILE.
      &                      LKFLOWVAL(3,L), LKFLOWVAL(4,L), 
      &                      LKFLOWVAL(5,L)
             ELSEIF(ILMTFMT.EQ.1) THEN
-              WRITE(IUMT3D,*) LKFLOWVAL(1,L), LKFLOWVAL(2,L), 
-     &                        LKFLOWVAL(3,L), LKFLOWVAL(4,L), 
-     &                        LKFLOWVAL(5,L)
+              WRITE(IUMT3D,"(*(ES24.15E3))")
+     &                      LKFLOWVAL(1,L), LKFLOWVAL(2,L), 
+     &                      LKFLOWVAL(3,L), LKFLOWVAL(4,L), 
+     &                      LKFLOWVAL(5,L)
             ENDIF
           ENDDO
        ELSEIF(NLKFLWTYP.EQ.6) THEN
@@ -5219,9 +5190,10 @@ C--WRITE THE ARRAY TO THE FTL FILE.
      &                      LKFLOWVAL(3,L), LKFLOWVAL(4,L), 
      &                      LKFLOWVAL(5,L), LKFLOWVAL(6,L)
             ELSEIF(ILMTFMT.EQ.1) THEN
-              WRITE(IUMT3D,*) LKFLOWVAL(1,L), LKFLOWVAL(2,L), 
-     &                        LKFLOWVAL(3,L), LKFLOWVAL(4,L), 
-     &                        LKFLOWVAL(5,L), LKFLOWVAL(6,L)
+              WRITE(IUMT3D,"(*(ES24.15E3))") 
+     &                      LKFLOWVAL(1,L), LKFLOWVAL(2,L), 
+     &                      LKFLOWVAL(3,L), LKFLOWVAL(4,L), 
+     &                      LKFLOWVAL(5,L), LKFLOWVAL(6,L)
             ENDIF
           ENDDO
         ENDIF
