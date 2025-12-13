@@ -24,7 +24,7 @@ C     ------------------------------------------------------------------
      9                     BACKTRACKING, CBC_GLOBAL_UNIT, ALLOC_DDREF,
      1                     RCloseBAS, HCloseBAS, RCloseL2BAS
       USE GLOBAL,     ONLY:NO_CONST_HEAD, SUBLNK, UPLAY, UPLAY_IDX,
-     +                     WTABLE, WTABLE_OLD
+     +                     WTABLE, WTABLE_OLD, CVSALT_MT3D
       USE GLOBAL,     ONLY: SUPER_NAMES
       USE PARAMMODULE,ONLY:MXPAR,MXCLST,MXINST,ICLSUM,IPSUM,
      1                     INAMLOC,NMLTAR,NZONAR,NPVAL,
@@ -185,9 +185,11 @@ C1------grids to be defined.
       IF(IGRID == ONE)THEN
         ALLOCATE(NO_CONST_HEAD, SUBLNK,BIN_REAL_KIND)
         ALLOCATE(INPUT_CHECK, LIMIT_INPUT_CHECK_OUTPUT)
+        ALLOCATE(CVSALT_MT3D)
         NO_CONST_HEAD = FALSE
         SUBLNK      = FALSE
         INPUT_CHECK = FALSE
+        CVSALT_MT3D = FALSE
         LIMIT_INPUT_CHECK_OUTPUT = FALSE
         BIN_REAL_KIND = REAL32  !SINGLE PRECISION BINARY OUTPUT
       END IF
@@ -5865,6 +5867,7 @@ C
           !
           DEALLOCATE(SUBLNK)
           DEALLOCATE(INPUT_CHECK)
+          DEALLOCATE(CVSALT_MT3D)
           DEALLOCATE(LIMIT_INPUT_CHECK_OUTPUT)
           DEALLOCATE(BIN_REAL_KIND)
       END IF

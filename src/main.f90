@@ -60,11 +60,13 @@ SUBROUTINE PRINT_MAIN_HEADER(IU, VERSION)  ! Set to 6 for cmd prompt or use outp
   END IF
   !
   WRITE (IU,'(4A)') 'MODFLOW-OWHM v', VERSION_OWHM,".",Revision !(:MIN(len_trim(Revision), 4))
+  WRITE (IU,'(A)')  '             CV-SALT EDITION'
   !
   IF(IU /= stdout) WRITE(IU,'(/A/)') OWHM_HEADER()     ! Only print to file and skip cmd prompt
   !
   WRITE (IU,'(/, A)')     '                        MODFLOW'
   WRITE (IU,'(A)')        '            ONE-WATER HYDROLOGIC-FLOW MODEL'
+  WRITE (IU,'(A)')        '                    CV-Salt Edition'
 
   WRITE (IU,'(/, A)')     '    U.S. Geological Survey Modular Finite-Difference'
   WRITE (IU,'(A)')        '           Conjunctive Use Simulation Program'

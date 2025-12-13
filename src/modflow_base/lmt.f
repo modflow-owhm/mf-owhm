@@ -36,6 +36,7 @@ C last modified: 06-23-2016
 C      
       USE CONSTANTS,ONLY:BLNK, NL, BLN, Z
       USE OPENSPEC
+      USE GLOBAL,   ONLY:CVSALT_MT3D
       USE GLOBAL,   ONLY:NCOL,NROW,NLAY,NPER,NODES,NIUNIT,IUNIT,
      &                   ISSFLG,IBOUND,IOUT
       USE LMTMODULE,ONLY:ISSMT3D,IUMT3D,ILMTFMT,ILAKUZFCONNECT,
@@ -62,8 +63,10 @@ C--USE FILE SPECIFICATION of MODFLOW-2005
       CHARACTER(  8):: OUTPUT_FILE_HEADER
       CHARACTER( 11)::  OUTPUT_FILE_FORMAT, HDRTXT
       INTEGER :: FMP_UNIT
+      LOGICAL :: FMP_CVSALT
 C     -----------------------------------------------------------------
       FMP_UNIT = IUNIT(61)
+      FMP_CVSALT = CVSALT_MT3D .AND. FMP_UNIT /= Z
       INLMT  = Z
       MTBCF  = Z
       MTLPF  = Z
@@ -124,6 +127,7 @@ C--CHECK for OPTIONS/PACKAGES USED IN CURRENT SIMULATION
           MTDRN=IUNIT(IU)
         ELSEIF(CUNIT(IU).EQ.'RCH ') THEN
           MTRCH=IUNIT(IU)
+          !IF(MTRCH == Z .and. FMP_CVSALT) MTRCH = FMP_UNIT
         ELSEIF(CUNIT(IU).EQ.'EVT ') THEN
           MTEVT=IUNIT(IU)
         ELSEIF(CUNIT(IU).EQ.'RIV ') THEN
@@ -159,6 +163,7 @@ C--CHECK for OPTIONS/PACKAGES USED IN CURRENT SIMULATION
         ELSEIF(CUNIT(IU).EQ.'MNW2') THEN
 !swm: store separate to not get clobbered by MNW1
           MTMNW2=IUNIT(IU)
+          IF(MTMNW2 == Z .and. FMP_CVSALT) MTMNW2 = FMP_UNIT
           IF(MTMNW2 /= Z) NPCKGTXT = NPCKGTXT + 1
         ELSEIF(CUNIT(IU).EQ.'LAK ') THEN
           MTLAK=IUNIT(IU)
@@ -2698,6 +2703,8 @@ C last modified: 06-23-2016
 C
       USE SET_ARRAY_INTERFACE, ONLY: SET_ZERO
       USE GLOBAL,      ONLY:NCOL,NROW,NLAY,IBOUND,BUFF
+      !USE GLOBAL,      ONLY:CVSALT_MT3D,UPLAY
+      !USE FMP_GLOBAL,  ONLY:CLIMATE
       USE GWFRCHMODULE,ONLY:NRCHOP,RECH,IRCH
       CHARACTER(16) TEXT
 C
@@ -2717,6 +2724,21 @@ C--WRITE AN IDENTIFYING HEADER
 C
 C--CLEAR THE BUFFER.
       CALL SET_ZERO(NCOL, NROW, NLAY, BUFF)
+      
+      !if ( CVSALT_MT3D ) then
+      !    if(climate%ndrch > 0) then
+      !        call climate%direct_recharge(1)%decompress(buff(:,:,1))
+      !    END IF
+      !    !
+      !    if(ilmtfmt == 0) then
+      !      write(IUMT3D)   UPLAY        ! note this is zero for all ibound=0 instead of 1
+      !      write(IUMT3D)   buff(:,:,1)
+      !    elseif(ILMTFMT == 1) then
+      !      write(IUMT3D,*) UPLAY
+      !      write(IUMT3D,*) buff(:,:,1)
+      !    endif  
+      !    RETURN
+      !end if
 C
 C--IF NRCHOP=1 RECH GOES INTO LAYER 1.
       IF(NRCHOP.EQ.1) THEN
@@ -3237,10 +3259,18 @@ C Modified from MNW2 by Konikow and Hornberger (2009)
 C modification: 10-21-2010:  swm  
 C last modification: 2-16-2012:  awh
 C
-      USE GLOBAL,      ONLY:NCOL,NROW,NLAY,IBOUND
+      USE GLOBAL,      ONLY:CVSALT_MT3D,UPLAY
+      USE GLOBAL,      ONLY:NCOL,NROW,NLAY,IBOUND,BUFF
       USE GWFMNW2MODULE,ONLY:NMNW2,NTOTNOD,MNW2,MNWNOD,MNWMAX
-      INTEGER firstnode, lastnode
+      USE FMP_GLOBAL,  ONLY:CLIMATE
+      INTEGER firstnode, lastnode, ndrch
       CHARACTER(16) TEXT
+      !
+      ndrch = 0
+      if ( CVSALT_MT3D ) then
+          ndrch = NROW*NCOL !climate%direct_recharge(1)%n
+          call climate%direct_recharge(1)%decompress(buff(:,:,1))
+      end if
 C
 C--SET POINTERS FOR THE CURRENT GRID
 c swm: already set in GWF2MNW7BD      CALL SGWF2MNW7PNT(IGRID)
@@ -3253,10 +3283,10 @@ c swm: SET NUMBER OF ACTIVE WELL NODES BASED ON NMNW2 AND NTOTNOD
 C
 C--WRITE AN IDENTIFYING HEADER
       IF(ILMTFMT.EQ.0) THEN
-        WRITE(IUMT3D) KPER,KSTP,NCOL,NROW,NLAY,TEXT,NACTW
+        WRITE(IUMT3D) KPER,KSTP,NCOL,NROW,NLAY,TEXT,NACTW+ndrch
       ELSEIF(ILMTFMT.EQ.1) THEN
         WRITE(IUMT3D,"(5I8)") KPER,KSTP,NCOL,NROW,NLAY
-        WRITE(IUMT3D,*) TEXT,NACTW
+        WRITE(IUMT3D,*) TEXT,NACTW+ndrch
       ENDIF
 C
 C--IF THERE ARE NO WELLS RETURN
@@ -3294,8 +3324,48 @@ C--SAVE TO OUTPUT FILE
         enddo
       ENDDO
 C
+ 9999 if(CVSALT_MT3D) then
+          QSW=ZERO
+          iw = MNWMAX
+          DO IR=1,NROW
+            DO IC=1,NCOL
+              iw = iw + 1
+              IL = UPLAY(IC,IR)
+              IF(IL > 0) THEN
+                  Q  = buff(IC,IR,1)
+              ELSE
+                  IL = 1
+                  Q  = ZERO
+              END IF
+              !
+              IF(ILMTFMT == 0) THEN
+                WRITE(IUMT3D) IL,IR,IC,Q,iw,QSW
+              ELSEIF(ILMTFMT == 1) THEN
+                WRITE(IUMT3D,"(3I7,ES24.15E3,I12,F4.1)") 
+     +                                                 IL,IR,IC,Q,iw,QSW
+              ENDIF
+            end do
+          end do
+          !DO k=1, ndrch
+          !    iw = iw + 1
+          !    Q  = climate%direct_recharge(2)%val(k)
+          !    IC = climate%direct_recharge(2)%dim(1,k)
+          !    IR = climate%direct_recharge(2)%dim(2,k)
+          !    IL = UPLAY(IC,IR)
+          !    IF(IL < 1) THEN
+          !        IL = 1
+          !        Q  = ZERO
+          !    END IF
+          !    !
+          !    IF(ILMTFMT.EQ.0) THEN
+          !      WRITE(IUMT3D) IL,IR,IC,Q,iw,QSW
+          !    ELSEIF(ILMTFMT.EQ.1) THEN
+          !      WRITE(IUMT3D,*) IL,IR,IC,Q,iw,QSW
+          !    ENDIF
+          !END DO
+      end if    
 C--RETURN
- 9999 RETURN
+      RETURN
       END
 C
 C
