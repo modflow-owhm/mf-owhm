@@ -38,7 +38,7 @@
 			<Tool Name="VFManifestTool" SuppressStartupBanner="true"/>
 		</Configuration>
 		<Configuration Name="ReleaseIFX|x64" UseCompiler="ifxCompiler" OutputDirectory="$(SolutionDir)..\..\bin" IntermediateDirectory="$(SolutionDir)..\..\obj\vs_$(ProjectName)_$(Configuration)_$(Platform)" TargetName="$(ProjectName).ifx">
-			<Tool Name="VFFortranCompilerTool" AdditionalOptions="/assume:contiguous_pointer " SuppressStartupBanner="true" DebugInformationFormat="debugLineInfoOnly" OpenMPConditionalCompilation="false" OmpOffloadConstructs="ompOffloadNo" DisableSpecificDiagnostics="6717" RealKIND="realKIND8" FloatingPointExceptionHandling="fpe0" Traceback="true"/>
+			<Tool Name="VFFortranCompilerTool" AdditionalOptions="/assume:nan_compares" SuppressStartupBanner="true" DebugInformationFormat="debugLineInfoOnly" OpenMPConditionalCompilation="false" OmpOffloadConstructs="ompOffloadNo" DisableSpecificDiagnostics="6717" RealKIND="realKIND8" FloatingPointExceptionHandling="fpe1" Traceback="true"/>
 			<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" ProgramDatabaseFile="$(IntDir)\(TargetName).pdb" SubSystem="subSystemConsole" StackReserveSize="10485760" StackCommitSize="10485760"/>
 			<Tool Name="VFResourceCompilerTool"/>
 			<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
