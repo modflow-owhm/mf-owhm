@@ -9,6 +9,17 @@ Historically MODFLOW is compiled using ifort.
 Intel support for ifort ends in December, 2024.
 
 A future release will switch mf-owhm.exe to ifx.
+Currently there is an issue with ifx because it does not allow
+for NaN compares, which is used extensively in MODFLOW-OWHM.
+That is, 
+    x=NaN
+    then 
+    x == x  is always False for NaN
+
+IFX should accept the compiler flag, /assume:nan_compares 
+but it does not seem to fix the final executable to allow it.
+Instead I had to change the floating point model to all all NaN
+operations (ie, changing fpe0 to fpe1).
 
 The two compilers have similar runtimes, but due to
 different floating point models and optimizations 
