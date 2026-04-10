@@ -6712,7 +6712,7 @@ C     ******************************************************************
 C     COMPUTE STREAM DEPTH GIVEN FLOW USING 8-POINT CROSS SECTION
 !--------REVISED FOR MODFLOW-2005 RELEASE 1.9, FEBRUARY 6, 2012
 C     ******************************************************************
-      USE CONSTANTS, ONLY: DZ,NEARZERO_30
+      USE CONSTANTS, ONLY: DZ,NEARZERO_30,NEARZERO_15
       USE GWFSFRMODULE, ONLY: CONST, XSEC, NEARZERO, IOUT
       IMPLICIT NONE
       INTRINSIC DMIN1, SQRT, DABS
@@ -6763,6 +6763,11 @@ C3------ESTIMATE INITIAL DEPTH ASSUMING WIDE RECTANGULAR CHANNEL.
      +                   Wetperm, flow1, Totwdth)
         f1 = Flow - flow1
         depth2 = 1.1D0*depth1
+        if ( depth2 < NEARZERO_30 ) then
+                                             depth2 = NEARZERO_30
+        else if ( depth2 < NEARZERO_15 ) then
+                                             depth2 = depth2 * 10.0d0
+        end if
         stage = depth2 + ymin
         flow2 = DZ
         CALL GWF2SFR7FLW(stage, Istsg, Roughch, Roughbnk, Slope, 
@@ -6780,6 +6785,9 @@ C5------USE BISECTION METHOD.
           depth3 = (depth1+depth2)*0.5D0
 C
 C6------USE SECANT METHOD.
+        ELSE IF ( abs(f2-f1) < NEARZERO_30) THEN  ! depth1/depth2 result in near zero flow, so skip search
+          depth2 = depth1
+          depth3 = depth1
         ELSE
           depth3 = depth2 - (f2*(depth2-depth1)/(f2-f1))
         END IF
