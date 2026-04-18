@@ -619,7 +619,7 @@ ifeq ($(CMPLR), INTEL)
     STATICLNK:=-static -static-intel -qopenmp-link=static -static-libstdc++ -static-libgcc
   endif
   #
-  CFLAGS:=$(CFlagsINTEL)
+  CFLAGS:=$(CFlagsIntel)
 endif
 #
 ifeq ($(CMPLR), LLVM)
@@ -652,7 +652,12 @@ STATICLNK:=$(strip $(STATICLNK))
 #
 #SET UP PROGRAM NAME
 #
-bin_out ?= $(bin_dir)/$(PROGRAM)$(ext)
+bin_out ?= $(bin_dir)/$(PROGRAM)
+# If bin_out was passed without a file extension, append the platform-specific executable suffix.
+# This keeps VS Code tasks and manual make invocations consistent on Windows (.exe) and Linux/WSL (.nix).
+ifeq ($(findstring .,$(notdir $(bin_out))),)
+  override bin_out := $(bin_out)$(ext)
+endif
 #
 ###########################################################################
 ###########################################################################
