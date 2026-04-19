@@ -1,38 +1,27 @@
 {
   "source_dirs": [
-    "src",
-    "src/bif_lib",
-    "src/cfp",
-    "src/fmp",
-    "src/gmg_c",
-    "src/inc",
-    "src/main",
-    "src/modflow_base",
-    "src/nwt",
-    "obj"
+    "src/**",
+    "postprocessors/*/src"
   ],
 
   "excl_paths": [
-    "bin", 
-    "download", 
-    "doxygen", 
-    "icon", 
-    "img", 
-    "lib", 
-    "ide" 
+    "src/inc"
   ],
 
-  "excl_suffixes": [
-    ".u2d", 
-    ".vfproj", 
-    ".sln", 
-    ".txt", 
-    ".md", 
-    ".json", 
-    ".gitignore", 
-    ".gitattributes"
-  ],
-  
+  "pp_suffixes": [".fpp", ".FPP", ".F", ".F90"],
+  "pp_defs": {
+    "__unix__": "",
+    "__GFORTRAN__": ""
+  },
+
+  "disable_diagnostics": true,
+
+  "hover_signature": true,
+  "use_signature_help": true,
+  "incremental_sync": true,
+  "notify_init": true,
+
   "lowercase_intrinsics": false,
+  "disable_autoupdate": true,
   "debug_log": false
 }
