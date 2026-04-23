@@ -59,6 +59,9 @@ bin/**
 # Example output directories
 examples/**/output/**
 
+# Local scratch files that are never committed
+/untracked/
+
 # Intermediate Directories
 obj/**
 lib/**
