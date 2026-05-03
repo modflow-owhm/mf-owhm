@@ -3519,9 +3519,11 @@ C
            ! IMPORT:: INDIS, LINE, IOUT, NL   ! currently not supported by gfortran
            CHARACTER(*), INTENT(IN):: MSG
            CHARACTER(:), ALLOCATABLE:: ERR
+           INTEGER:: IERR
            !
-           BACKSPACE(INDIS)
-           READ(IN, '(A)') LINE
+           BACKSPACE(INDIS, IOSTAT=IERR)
+           IF(IERR == Z) READ(INDIS, '(A)', IOSTAT=IERR) LINE
+           IF(IERR /= Z) LINE = ''
            !
            ERR = 'Reached end of file (eof) when reading the '//
      +           'next input line.'//NL//NL
