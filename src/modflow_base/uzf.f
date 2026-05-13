@@ -371,8 +371,8 @@ C1------IDENTIFY PACKAGE AND INITIALIZE.
           if(IUZFCB1 > 0) IUZFCB1 = 0
           if(IUZFCB2 > 0) IUZFCB2 = 0
       else if(I /= 0) then  ! Try to honor any -flag requests for infiltration to binary
-          if(IUZFCB2 == 0 .and. IUZFCB2 == 0 .or. 
-     +      (IUZFCB2 < 0 .and. IUZFCB2 < 0)) then
+          if(IUZFCB1 == 0 .and. IUZFCB2 == 0 .or. 
+     +      (IUZFCB1 < 0 .and. IUZFCB2 < 0)) then
               IUZFCB2 = I
           else if(IUZFCB1 < 0) then
               IUZFCB2 = I
