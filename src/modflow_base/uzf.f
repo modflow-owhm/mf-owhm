@@ -3470,10 +3470,6 @@ C28-----COMPUTE UNSATURATED ERROR FOR EACH CELL.
      +                  .LT.CLOSEZERO .AND. ABS(UZTOTBAL(ic,ir,1))
      +                  .GT.CLOSEZERO ) THEN
                 prcntdif = 100.0D0*UZTOTBAL(ic,ir,2)/UZTOTBAL(ic, ir, 1)
-              ELSE IF ( ABS(UZTOTBAL(ic,ir,1)-UZTOTBAL(ic,ir,3))
-     +                  .LT.CLOSEZERO .AND. ABS(UZTOTBAL(ic,ir,1))
-     +                  .GT.CLOSEZERO ) THEN
-                prcntdif = 100.0D0*UZTOTBAL(ic, ir, 2)
               ELSE
                 prcntdif = 100.0D0*(UZTOTBAL(ic, ir, 1)
      +                     -UZTOTBAL(ic, ir, 3)-UZTOTBAL(ic, ir, 2))
