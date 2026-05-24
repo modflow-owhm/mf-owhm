@@ -231,6 +231,7 @@ null :=
 sp := ${null} ${null}
 sp2 := ${null}  ${null}
 sp4 := ${null}    ${null}
+comma := ,
 #${sp} := ${sp}    # ${sp}  function returns a space
 #${sp2} := ${sp2}  # ${sp2} function returns 2 spaces
 
@@ -614,6 +615,13 @@ endif
 ifeq ($(CMPLR), INTEL)
   mod:=-module $(int_dir)
   F90FLAGS:=$(F90FlagsIntel)
+  #
+  # ifx does not allow -check uninit together with -static, so drop it for a static ifx debug build
+  ifeq ($(notdir $(F90)), ifx)
+    ifeq ($(strip $(STATIC)), YES)
+      F90FLAGS:=$(subst $(comma)uninit,,$(F90FLAGS))
+    endif
+  endif
   ifeq ($(strip $(STATIC)), YES)
     STATIC   :=-static -static-intel -qopenmp-link=static -static-libstdc++ -static-libgcc
     STATICLNK:=-static -static-intel -qopenmp-link=static -static-libstdc++ -static-libgcc
