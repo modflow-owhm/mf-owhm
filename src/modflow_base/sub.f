@@ -2020,10 +2020,10 @@ C7------INCLUDING DELAY AND NO-DELAY INTERBEDS.
         DO 90 KQ=1,NDB
         K=LDN(KQ)
         LOC2=(KQ-1)*NCR+1
+        NEND=LOC2+NCOL*NROW-1                                           !line added by wschmid to be consistent with mf2005_1.8  seb MOVED OUT OF SUBSEQUENT IF
         IF(OCFLGS(5,NNSTP)) THEN
           WRITE(IOUT,82) KQ
   82   FORMAT(/,1X,' SYSTEM',I4,' OF DELAY BEDS:')
-         NEND=LOC2+NCOL*NROW-1                                          !line added by wschmid to be consistent with mf2005_1.8 
          IF(ISBOCF(3).LT.0) CALL ULAPRS(DCOM(LOC2:NEND),TEXT(4),KSTP,   !:NEND added by wschmid to be consistent with mf2005_1.8
      1            KPER,NCOL,NROW,K,-ISBOCF(3),IOUT)
          IF(ISBOCF(3).GE.0) CALL ULAPRW(DCOM(LOC2:NEND),TEXT(4),KSTP,   !:NEND added by wschmid to be consistent with mf2005_1.8
