@@ -556,7 +556,7 @@ ifeq ($(CFG), DEBUG)
    PROGRAM:=$(PROGRAM)-debug
    #
    F90FlagsIntel :=-O0 -g -debug -traceback -assume nocc_omp -fpe0 -fp-model source -nologo -warn nousage -check bounds,pointers,stack,format,output_conversion,uninit -diag-disable=10448
-   F90FlagsGCC   :=-O0 -g -w -fbacktrace -fdefault-double-8  -ffree-line-length-2048 -fmax-errors=10 -ffpe-trap=zero,overflow,underflow -finit-real=nan -fcheck=all # -fstack-usage #<= THIS PROVIDES LOTS OF INFO   -std=f2008
+   F90FlagsGCC   :=-O0 -g -w -fbacktrace -fdefault-double-8  -ffree-line-length-2048 -fmax-errors=10 -ffpe-trap=zero,overflow -finit-real=nan -fcheck=all # -fstack-usage #<= THIS PROVIDES LOTS OF INFO   -std=f2008
    F90FlagsLLVM  :=
    #
    CFlagsIntel   :=-O0 -debug -g  -fbuiltin 
