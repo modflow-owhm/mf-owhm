@@ -1059,7 +1059,11 @@ C-------STRAIGHT LINE WITH PARABOLIC SMOOTHING
       INTEGER ic, ir, il, nrncnl, ij, jj
       INTEGER ILM, ILP, IRM, IRP, ICM, ICP, itemp
 !     -----------------------------------------------------------------
-      LOGICAL, EXTERNAL:: HFBROUTECELL                                  !seb
+      INTERFACE                                                         !seb
+        PURE LOGICAL FUNCTION HFBROUTECELL(IC,IR,IL,IJ)
+          INTEGER, INTENT(IN):: IC,IR,IL,IJ
+        END FUNCTION
+      END INTERFACE
 !
 !ij is the number of active cells (row in sol. vector)
 !jj is the number of non-zero elements in the Jacobian
@@ -1147,7 +1151,11 @@ C
       INTEGER ic, ir, il, nrncnl, ij, jj
       INTEGER ILM, ILP, IRM, IRP, ICM, ICP, itemp
 !     -----------------------------------------------------------------
-      LOGICAL, EXTERNAL:: HFBROUTECELL                                  !seb
+      INTERFACE                                                         !seb
+        PURE LOGICAL FUNCTION HFBROUTECELL(IC,IR,IL,IJ)
+          INTEGER, INTENT(IN):: IC,IR,IL,IJ
+        END FUNCTION
+      END INTERFACE
 !
       jj = 0
       DO ij = 1, Numactive
@@ -2050,7 +2058,11 @@ C-----SET HNEW TO HDRY IF IPHRY>0
 !     SPECIFICATIONS:
 !     -----------------------------------------------------------------
       DOUBLE PRECISION, EXTERNAL:: Dhoriz  !Dvert, 
-      LOGICAL, EXTERNAL:: HFBROUTECELL                                  !seb
+      INTERFACE                                                         !seb
+        PURE LOGICAL FUNCTION HFBROUTECELL(IC,IR,IL,IJ)
+          INTEGER, INTENT(IN):: IC,IR,IL,IJ
+        END FUNCTION
+      END INTERFACE
 !     -----------------------------------------------------------------
 !     LOCAL VARIABLES
 !     -----------------------------------------------------------------
@@ -2214,7 +2226,11 @@ C seb USE HFB SPECIFIC DERIVATIVE CALCULATIONS
       DOUBLE PRECISION term1, term2, term3, term4, term5, term6, coef
       INTEGER ic, ir, il, icc, irr, ill
       INTEGER ij, iltyp, kstp, I, I1, I2, J, iDiag
-      LOGICAL, EXTERNAL:: HFBROUTECELL                                  !seb
+      INTERFACE                                                         !seb
+        PURE LOGICAL FUNCTION HFBROUTECELL(IC,IR,IL,IJ)
+          INTEGER, INTENT(IN):: IC,IR,IL,IJ
+        END FUNCTION
+      END INTERFACE
       LOGICAL:: HFBROUTE
 !     -----------------------------------------------------------------
       !
