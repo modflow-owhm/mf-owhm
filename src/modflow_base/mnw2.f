@@ -6795,7 +6795,7 @@ C     ******************************************************************
      1                       NODTOT,INTTOT,MNWAUX,MNW2,MNWNOD,MNWINT,
      2                       CapTable,SMALL,WELLID
       USE ERROR_INTERFACE,ONLY: STOP_ERROR
-      USE CONSTANTS,      ONLY: NL, BLN
+      USE CONSTANTS,      ONLY: NL, BLN, NEARZERO_20
       INTEGER:: PUMPCAP
       DOUBLE PRECISION qactCap,LIFTact,Hlift,hwell,m,b,
      & L1,L2,Q1,Q2
@@ -6864,7 +6864,7 @@ c     define points
         Q2=CapTable(iw,isecondL,2)
 c     calculate slope and intercept of line between the two points
         m = 0.0d0
-        if ( abs(L2-L2)>NEARZERO_20 ) m=(Q2-Q1)/(L2-L1)
+        if ( abs(L2-L1)>NEARZERO_20 ) m=(Q2-Q1)/(L2-L1)
         b=Q1-(m*L1)
 c     interpolate by finding Q on the line segment for actual lift
         qactCap=m*LIFTact+b
