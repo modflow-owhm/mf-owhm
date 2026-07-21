@@ -2625,7 +2625,7 @@ MODULE FMP_MAIN_DRIVER
                        TG,EG,TT,ET,P,SR,DP,EXT,TOTIN,TOTOUT,DISC,DRT,SRD,  &
                        EP,TP,EI,TI,NDOUT,SRDOUT,RDOUT,QFOUT,DR          !added local variable Q for NWT connection to Farm Wells by rth
     !
-    INTEGER:: FID, IWL2CB
+    INTEGER:: IWL2CB
     REAL,DIMENSION(5):: AUX_VEC
     !
     TEXT  = '      FARM WELLS'
@@ -2874,7 +2874,7 @@ MODULE FMP_MAIN_DRIVER
                          DO I=1, FWELL(NF)%DIM
                            IF(FWELL(NF)%ACT(I) .AND. FWELL(NF)%MNWLOC(I) > Z) THEN
                               IF(FWELL(NF)%LISTPRINT.AND.KPER.EQ.1.AND.IWL2CB.EQ.Z)THEN
-                                                                                   WRITE(WBS%IOUT,67) FID, FWELL(FID)%WELLID(I), FWELL(FID)%LRC(2:3,I)
+                                                                                   WRITE(WBS%IOUT,67) NF, FWELL(NF)%WELLID(I), FWELL(NF)%LRC(2:3,I)
                                                                                               67 FORMAT(1X,'CUMULATIVE PUMPING RATE OF FARM WELL,',I8,'LINKED TO MNW2 WELL ',A,' THAT IS LOCATED IN ROW ',I8,'COL ', I8, ' IS LISTED IN BINARY FILE' )
                               ENDIF
                               !
