@@ -673,7 +673,7 @@ C     ******************************************************************
 C
 C        SPECIFICATIONS:
 C     ------------------------------------------------------------------
-      USE GLOBAL,       ONLY:HNEW,HCOF,RHS,IBOUND
+      USE GLOBAL,       ONLY:HNEW,HCOF,RHS,IBOUND,IOUT
       USE GWFDRTMODULE, ONLY:NDRTCL,DRTF,IDRTFL, HAS_FMP
       USE FMP_GLOBAL,    ONLY:WBS,DRTFLOW, FMP_LGR_PNT
 C

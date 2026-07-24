@@ -278,7 +278,7 @@ C
 C        SPECIFICATIONS:
 C     ------------------------------------------------------------------
       USE GLOBAL,      ONLY:HNEW,LAYHDT,CR,CC,CV,BOTM,LBOTM,
-     1                      DELR,DELC,LAYCBD
+     1                      DELR,DELC,LAYCBD,IOUT
       USE GWFHFBMODULE,ONLY:NHFB,HFB
       USE CONSTANTS,   ONLY: Z, DZ, ONE
 C     ------------------------------------------------------------------

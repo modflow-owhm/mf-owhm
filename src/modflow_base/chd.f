@@ -238,7 +238,7 @@ C     SPECIFICATIONS:
 C     ------------------------------------------------------------------
       USE GLOBAL,      ONLY:HNEW,HOLD,PERLEN
       USE GWFBASMODULE,ONLY:PERTIM
-      USE GWFCHDMODULE,ONLY:NCHDS,CHDS
+      USE GWFCHDMODULE,ONLY:NCHDS,CHDS,LOUT
 C
       DOUBLE PRECISION DZERO,HB
 C     ------------------------------------------------------------------
