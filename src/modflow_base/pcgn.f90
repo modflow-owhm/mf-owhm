@@ -1301,7 +1301,7 @@ CONTAINS
     INTEGER :: N, NODE_SAVE
     DOUBLE PRECISION :: HTH
     ! ... ==============================================================
-    MXHCH=ZERO; HTH=ZERO; IB0_COUNT=0
+    MXHCH=ZERO; HTH=ZERO; IB0_COUNT=0; NODE_SAVE=0
     DO N=1,NODES
        IF (IBOUND(N)<1) THEN
           IF (IBOUND(N)==0) IB0_COUNT=IB0_COUNT+1
@@ -1336,7 +1336,7 @@ CONTAINS
     INTEGER :: N, NODE_SAVE
     DOUBLE PRECISION :: HTH
     ! ... ==============================================================
-    MXHCH=ZERO; HTH=ZERO
+    MXHCH=ZERO; HTH=ZERO; NODE_SAVE=Z
     IB0_COUNT=COUNT(IBND==Z)
     !
     DO CONCURRENT(N=1:DIM, IBND(N)>Z)
