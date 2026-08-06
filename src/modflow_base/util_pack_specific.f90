@@ -542,6 +542,8 @@ MODULE BAS_UTIL
                              DAY = DELT / 24.D0
                          CASE (5)                                !YEARS  --NO WAY TO CORRECT FOR LEAP YEARS FOR THIS CASE
                              DAY = DELT * 365.25D0
+                         CASE DEFAULT
+                             DAY = DELT
                        END SELECT
   TYPE IS(REAL(REAL32))
                        SELECT CASE (ITMUNI)
@@ -555,7 +557,11 @@ MODULE BAS_UTIL
                              DAY = DELT / 24.E0
                          CASE (5)                                !YEARS  --NO WAY TO CORRECT FOR LEAP YEARS FOR THIS CASE
                              DAY = DELT * 365.25
+                         CASE DEFAULT
+                             DAY = DELT
                        END SELECT
+  CLASS DEFAULT
+                       DAY = DZ
   END SELECT
   !
   END FUNCTION
