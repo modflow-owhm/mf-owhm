@@ -3802,6 +3802,8 @@ C                 CALCULATE SWISOLCR
                   ELSE
                     SWISOLCR(j,i) = 0.
                   END IF
+                ELSE
+                  SWISOLCR(j,i) = 0.
                 END IF
                 SWISOLCR(j,i) = SWISOLCR(j,i)-EPS(iz)*SWICR(j,i,k,iz)
 C
@@ -3813,6 +3815,8 @@ C                 CALCULATE SWISOLCC
                   ELSE
                     SWISOLCC(j,i)=0.
                   END IF
+                ELSE
+                  SWISOLCC(j,i)=0.
                 END IF
                 SWISOLCC(j,i) = SWISOLCC(j,i)-EPS(iz)*SWICC(j,i,k,iz)
 C
