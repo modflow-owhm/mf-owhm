@@ -90,7 +90,6 @@ C     + + + INCLUDE STATEMENTS + + +
       INCLUDE 'openspec.inc'
       INTERFACE
         INTEGER FUNCTION DAYS(DAT, LEAPYR)
-          IMPORT, ONLY: REAL64
           INTEGER,      INTENT(IN):: DAT
           CHARACTER(1), INTENT(IN):: LEAPYR
         END FUNCTION
@@ -109,13 +108,13 @@ C     + + + INCLUDE STATEMENTS + + +
         END SUBROUTINE
         !
         PURE SUBROUTINE ALLOC_DBL(VAR, DIM)
-          IMPORT, ONLY: REAL64
+          USE, INTRINSIC:: ISO_FORTRAN_ENV, ONLY: REAL64
           REAL(REAL64), DIMENSION(:), ALLOCATABLE, INTENT(INOUT):: VAR
           INTEGER,                                 INTENT(IN   ):: DIM
         END SUBROUTINE
         !
         SUBROUTINE OPEN_OUTPUT(BASE, EXT, IU, timlbl, num, wellid)
-          IMPORT, ONLY: REAL64
+          USE, INTRINSIC:: ISO_FORTRAN_ENV, ONLY: REAL64
           CHARACTER(*),                  INTENT(IN   ):: BASE, EXT  ! Base must be the exact size
           INTEGER,                       INTENT(INOUT):: IU
           CHARACTER(4),                  INTENT(IN   ):: timlbl
@@ -124,7 +123,7 @@ C     + + + INCLUDE STATEMENTS + + +
         END SUBROUTINE
         !
         PURE SUBROUTINE sng_to_dbl(dim, sng, dbl)
-          IMPORT, ONLY: REAL32, REAL64
+          USE, INTRINSIC:: ISO_FORTRAN_ENV, ONLY: REAL32, REAL64
           INTEGER,                      INTENT(IN ):: dim
           REAL(REAL32), DIMENSION(dim), INTENT(IN ):: sng
           REAL(REAL64), DIMENSION(dim), INTENT(OUT):: dbl
@@ -726,7 +725,7 @@ C     ------------------------------------------------------------------
 CC
       INTERFACE
         INTEGER FUNCTION DAYS(DAT, LEAPYR)
-          IMPORT, ONLY: REAL64
+          USE, INTRINSIC:: ISO_FORTRAN_ENV, ONLY: REAL64
           !
           INTEGER,      INTENT(IN):: DAT
           CHARACTER(1), INTENT(IN):: LEAPYR
@@ -1062,7 +1061,6 @@ cc
         !
         CONTAINS
            PURE FUNCTION BAD_FILE(FNAME) RESULT(MSG)
-             IMPORT, NONE
              IMPLICIT NONE
              CHARACTER(*), INTENT(IN):: FNAME
              CHARACTER(:), ALLOCATABLE:: MSG
