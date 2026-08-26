@@ -2682,7 +2682,7 @@ C
           END IF
       ELSE
           FN=BLNK
-          ISOPEN=FALSE
+          ISOPEN=.FALSE.
       END IF
       !
       IF(MSG /= BLNK) THEN
