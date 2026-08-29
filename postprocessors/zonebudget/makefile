@@ -255,7 +255,7 @@ ifeq ($(CFG), DEBUG)
    PROGRAM:=$(PROGRAM)_debug
    #
    F90FlagsIntel :=-O0 -g -debug -traceback -assume nocc_omp,ieee_compares -fpe0 -fp-model source -nologo -warn nousage -check bounds,pointers,stack,format,output_conversion,uninit
-   F90FlagsGCC   :=-O0 -g -w -fbacktrace -fdefault-double-8  -ffree-line-length-2048 -fmax-errors=10 -ffpe-trap=zero,overflow -finit-real=nan #-fstack-usage  #<= THIS PROVIDES LOTS OF INFO   -std=f2008
+   F90FlagsGCC   :=-O0 -g -w -fbacktrace -fdefault-double-8  -ffree-line-length-2048 -fmax-errors=10 -ffpe-trap=zero,overflow,invalid -finit-real=snan #-fstack-usage  #<= THIS PROVIDES LOTS OF INFO   -std=f2008
    F90FlagsLLVM  :=
 else
    # NOTE "-ip" can sometimes cause catastrophic error: **Internal compiler error:
