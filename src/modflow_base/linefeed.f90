@@ -798,7 +798,8 @@ CONTAINS
   !
   LDIM  = FEED%LDIM
   NPROP = FEED%NPROP
-  NAUX  = SIZE(PAK(1)%AUX,1)   
+  NAUX  = Z
+  IF(ALLOCATED(PAK(1)%AUX)) NAUX = SIZE(PAK(1)%AUX,1)
   NCAUX = SIZE(CAUX)
   ISTART=NTOT+1
   !
@@ -883,7 +884,8 @@ CONTAINS
   WRITE(IOUT,*)                                       !CARRAGE RETURN WHEN USING LINE FEED
   !
   LDIM  = FEED%LDIM                                      !THERE MUST BE AT LEAST ONE VALUE ALLOCATED OR PACKAGE WOULD NOT BE IN USE. THE CONTENTS DO NOT MATTER ONLY ITS SIZE
-  NAUX  = SIZE(PAK(1)%AUX,1)
+  NAUX  = Z
+  IF(ALLOCATED(PAK(1)%AUX)) NAUX = SIZE(PAK(1)%AUX,1)
   NCAUX = SIZE(CAUX)
   !
   !Write a label for the list if the list will be printed.
