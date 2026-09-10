@@ -1,81 +1,101 @@
 {
-    "ProgramName.Debug":   "mf-owhm-debug",
-    "ProgramName.Release": "mf-owhm",
-    "ProgramName.Ext":     ".exe",
+  // These two settings define the launcher current working directory and Name file location (relative to the CWD).
+  "ProgramRun.CWD": "${workspaceFolder}/examples/mf-2005",
+  "ProgramRun.NAM": "test1tr.nam",
+  
+  // Not recomened to change any of the following settings,
+  //   unless you know what you are doing
+  
+  "ProgramName.Debug": "mf-owhm-debug",
+  "ProgramName.Release": "mf-owhm",
+  "ProgramName.Dir": "bin",
+  "ProgramSRC.Dir": "src",
+  "ProgramOBJ.Dir": "obj",
 
-    "ProgramName.Dir":     "bin",
-    "ProgramSRC.Dir":      "src",
-    "ProgramOBJ.Dir":      "obj",
+  // Intel oneAPI environment scripts used by the ifx tasks:
+  //   SetVars  -> Linux/WSL setvars.sh (e.g. $HOME/.intel/oneapi-2026.1/setvars.sh or /opt/intel/oneapi/setvars.sh)
+  //   VarsBat  -> Windows vars.bat; "latest" follows the newest installed version
+  "ProgramIntel.SetVars": "${env:HOME}/.intel/oneapi-2026.1/setvars.sh",
+  "ProgramIntel.VarsBat": "C:\\Program Files (x86)\\Intel\\oneAPI\\compiler\\latest\\env\\vars.bat",
+  //   DevEnv   -> Visual Studio 2026 devenv.com, used to build the generated .slnx solution
+  "ProgramVS.DevEnv": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\Common7\\IDE\\devenv.com",
+
+  // CMake Tools and Meson extensions (optional; the tasks above work without them)
+  "cmake.configureOnOpen": false,
+  "cmake.buildDirectory": "${workspaceFolder}/build/vscode-cmake",
+  "cmake.generator": "Ninja",
+  "cmake.configureSettings": {
+    "OWHM_BIN_DIR": "${workspaceFolder}/bin"
+  },
+  "mesonbuild.configureOnOpen": false,
+  "mesonbuild.buildFolder": "build/vscode-meson",
+
+  "editor.fontLigatures": true,
+  "editor.mouseWheelZoom": true,
+  "editor.minimap.enabled": false,
+  "editor.multiCursorModifier": "ctrlCmd",
+  "diffEditor.ignoreTrimWhitespace": false,
+  "breadcrumbs.enabled": true,
+  "workbench.sideBar.location": "left",
+  "explorer.confirmDelete": false,
+  "window.zoomLevel": 0,
+
+  "files.associations": {
+    "*.fortls": "json",
+    "*.code-workspace": "json"
+  },
+
+  "files.exclude": {
+    "**/build": true,
+    "**/ide": true,
+    "**/.git": true,
+    "**/bin": true,
+    "**/obj": true,
+    "**/*.mod": true,
+    "**/*.o": true,
+    "**/*.obj": true,
+    "**/*.pdb": true,
+    "**/*.ilk": true
+  },
+
+  "[fortran]": {
+    "editor.acceptSuggestionOnEnter": "off"
+  },
+  "[FortranFreeForm]": {
+    "editor.acceptSuggestionOnEnter": "off"
+  },
+  "[FortranFixedForm]": {
+    "editor.rulers": [
+      6,
+      73
+    ],
+    "editor.acceptSuggestionOnEnter": "off"
+  },
+
+  "fortran.preferredCase": "lowercase",
+  "fortran.linter.compiler": "gfortran",
+  "fortran.linter.includePaths": [
+    "${workspaceFolder}/obj/**",
+    "${workspaceFolder}/lib/**"
+  ],
+  "fortran.linter.extraArgs": [
+    "-Wall"
+  ],
+  "fortran.linter.modOutput": "${workspaceFolder}/obj/.vscode-linter",
+  "fortran.provide.autocomplete": "fortls",
+  "fortran.provide.hover": "fortls",
+  "fortran.provide.symbols": "fortls",
+  "fortran.fortls.excludeDirectories": [
+    "${workspaceFolder}/obj/**",
+    "${workspaceFolder}/bin/**",
+    "${workspaceFolder}/.git/**"
+  ],
+  "fortran.fortls.variableHover": true,
+  "fortran.fortls.maxLineLength": 2048,
+  "fortran.fortls.maxCommentLineLength": 2048
     
-    "terminal.integrated.shell.windows": "C:\\Windows\\System32\\cmd.exe",
+  // "workbench.activityBar.visible": true,
+  // "workbench.sideBar.location": "left",
 
-    "editor.fontLigatures": true,
-    "editor.mouseWheelZoom": true,
-    "editor.minimap.enabled": false,
-    "editor.multiCursorModifier": "ctrlCmd",
-
-    "diffEditor.ignoreTrimWhitespace": false,
-
-    "breadcrumbs.enabled": true,
-
-    "workbench.activityBar.visible": true,
-    "workbench.sideBar.location": "left",
-
-    "files.associations": {
-        "*.fortls": "json",
-        "*.code-workspace": "json"
-    },
-
-    "files.exclude": {
-        "**/ide": true,
-        "**.mod": true,
-        "**.o": true
-    },
-
-    "[fortran]": {
-        "editor.acceptSuggestionOnEnter": "off"
-    },
-
-    "[FortranFreeForm]": {
-        "editor.acceptSuggestionOnEnter": "off"
-    },
-
-    "[fortran_fixed-form]": {
-        "editor.rulers": [
-            6,
-            73
-        ],
-        "editor.acceptSuggestionOnEnter": "off"
-    },
-
-    "fortran.symbols": [ "function", "subroutine"],
-    "fortran.provideCompletion": false,
-    "fortran.provideSymbols": false,
-    "fortran.provideHover": false,
-    "fortran.preferredCase": "uppercase",
-    "fortran.includePaths": ["obj"],
-    "fortran.linterExtraArgs": ["-Wall -Jobj"],
-    
-    "explorer.confirmDelete": false,
-
-    "window.zoomLevel": 0,
-
-    "fortran-ls.variableHover": true,
-    "fortran-ls.maxLineLength": 2048,
-    "fortran-ls.maxCommentLineLength": 2048,
-    //"fortran-ls.executablePath": "C:\\Anaconda3\\Scripts\\fortls",
-
-    //"code-runner.saveFileBeforeRun": true,
-    //"code-runner.saveAllFilesBeforeRun": true,
-    //"code-runner.ignoreSelection": true,
-    //"code-runner.clearPreviousOutput": true,
-    //"code-runner.runInTerminal": true,
-    //"code-runner.respectShebang": false,
-    //"code-runner.executorMapByFileExtension": {
-    //    ".f90": "fortran",
-    //    ".f": "fortran",
-    //    ".fpp": "fortran",
-    //    ".py": "python"
-    //},
 
 }

@@ -2,64 +2,711 @@
 // Hover to view descriptions of existing attributes.
 // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
 // ${config:XXX} specifies XXX in settings.json
+//
+// The `(settings.json)` versions use the current working directory and name file location
+//  that are specified in `.vscode/settings.json` as ProgramRun.CWD and ProgramRun.NAM
 {
-    "version": "0.2.0",
-    "configurations": [
+  "version": "0.2.0",
+  "configurations": [
+
+    // ------------------------------------------------------------------
+    // CMake builds: bin/mf-owhm-debug.nix (gdb, Linux and WSL) and
+    // bin/mf-owhm-debug.exe (Visual Studio debugger, native Windows ifx).
+    // The CMake tasks in tasks.json build the binary first.
+    // ------------------------------------------------------------------
+    {
+      "name": "CMake Debug (gfortran, gdb) (Specify)",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/${config:ProgramName.Dir}/${config:ProgramName.Debug}.nix",
+      "args": ["${input:mfowhmNameFile}"],
+      "stopAtEntry": false,
+      "cwd": "${input:mfowhmRunDirectory}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        { "description": "Enable pretty-printing for gdb", "text": "-enable-pretty-printing", "ignoreFailures": true }
+      ],
+      "preLaunchTask": "CMake: Build Debug (gfortran)"
+    },
+    {
+      "name": "CMake Debug (gfortran, gdb) (settings.json)",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/${config:ProgramName.Dir}/${config:ProgramName.Debug}.nix",
+      "args": ["${input:mfowhmNameFile}"],
+      "stopAtEntry": false,
+      "cwd": "${config:ProgramRun.CWD}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        { "description": "Enable pretty-printing for gdb", "text": "-enable-pretty-printing", "ignoreFailures": true }
+      ],
+      "preLaunchTask": "CMake: Build Debug (gfortran)"
+    },
+    {
+      "name": "CMake Debug (ifx, gdb) (Specify)",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/${config:ProgramName.Dir}/${config:ProgramName.Debug}.nix",
+      "args": ["${input:mfowhmNameFile}"],
+      "stopAtEntry": false,
+      "cwd": "${input:mfowhmRunDirectory}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        { "description": "Enable pretty-printing for gdb", "text": "-enable-pretty-printing", "ignoreFailures": true }
+      ],
+      "preLaunchTask": "CMake: Build Debug (ifx)"
+    },
+    {
+      "name": "CMake Debug (ifx, gdb) (settings.json)",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/${config:ProgramName.Dir}/${config:ProgramName.Debug}.nix",
+      "args": ["${input:mfowhmNameFile}"],
+      "stopAtEntry": false,
+      "cwd": "${config:ProgramRun.CWD}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        { "description": "Enable pretty-printing for gdb", "text": "-enable-pretty-printing", "ignoreFailures": true }
+      ],
+      "preLaunchTask": "CMake: Build Debug (ifx)"
+    },
+    {
+      "name": "Windows ifx: CMake Debug (Specify)",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/${config:ProgramName.Dir}/${config:ProgramName.Debug}.exe",
+      "args": ["${input:mfowhmNameFile}"],
+      "stopAtEntry": false,
+      "cwd": "${input:mfowhmRunDirectory}",
+      "environment": [],
+      "console": "integratedTerminal",
+      "preLaunchTask": "Windows ifx: CMake Build Debug"
+    },
+    {
+      "name": "Windows ifx: CMake Debug (settings.json)",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/${config:ProgramName.Dir}/${config:ProgramName.Debug}.exe",
+      "args": ["${input:mfowhmNameFile}"],
+      "stopAtEntry": false,
+      "cwd": "${config:ProgramRun.CWD}",
+      "environment": [],
+      "console": "integratedTerminal",
+      "preLaunchTask": "Windows ifx: CMake Build Debug"
+    },
+    {
+      "name": "Launch gfortran Debug (Specify)",
+      "type": "cppdbg",
+      "request": "launch",
+      "cwd": "${input:mfowhmRunDirectory}",
+      "program": "${workspaceFolder}/${config:ProgramName.Dir}/${config:ProgramName.Debug}.nix",
+      "windows": {
+        "program": "${workspaceFolder}/${config:ProgramName.Dir}/${config:ProgramName.Debug}.exe",
+        "miDebuggerPath": "gdb.exe"
+      },
+      "linux": {
+        "miDebuggerPath": "gdb"
+      },
+      "args": [
+        "${input:mfowhmNameFile}"
+      ],
+      "stopAtEntry": false,
+      "externalConsole": true,
+      "MIMode": "gdb",
+      "preLaunchTask": "Build gfortran Debug",
+      "setupCommands": [
         {
-            "name": "Debug gfortran",
-
-            "cwd": "${workspaceFolder}",
-            "args": [],
-            
-            "program": "${workspaceFolder}/${config:ProgramName.Dir}/${config:ProgramName.Debug}${config:ProgramName.Ext}",
-
-            "type": "cppdbg",
-            "request": "launch",
-            "targetArchitecture": "x86_64",
-
-            "MIMode": "gdb",
-            //"miDebuggerPath": "gdb",
-            //"windows": {"miDebuggerPath": "gdb.exe"},
-            
-            "stopAtEntry": false,
-            "externalConsole": true,
-            "preLaunchTask": "Debug gfortran",
-
-            "setupCommands": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
-                }
-            ]
-        },
-        {
-            "name": "Debug Rebuild gfortran",
-
-            "cwd": "${workspaceFolder}",
-            "args": [],
-            
-            "program": "${workspaceFolder}/${config:ProgramName.Dir}/${config:ProgramName.Debug}${config:ProgramName.Ext}",
-
-            "type": "cppdbg",
-            "request": "launch",
-            "targetArchitecture": "x86_64",
-
-            "MIMode": "gdb",
-            //"miDebuggerPath": "gdb",
-            //"windows": {"miDebuggerPath": "gdb.exe"},
-            
-            "stopAtEntry": false,
-            "externalConsole": true,
-            "preLaunchTask": "Debug Rebuild gfortran",
-
-            "setupCommands": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
-                }
-            ]
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
         }
-    ]
+      ],
+      "presentation": {
+        "group": "input-file"
+      }
+    },
+    {
+      "name": "Launch gfortran Debug (settings.json)",
+      "type": "cppdbg",
+      "request": "launch",
+      "cwd": "${config:ProgramRun.CWD}",
+      "program": "${workspaceFolder}/${config:ProgramName.Dir}/${config:ProgramName.Debug}.nix",
+      "windows": {
+        "program": "${workspaceFolder}/${config:ProgramName.Dir}/${config:ProgramName.Debug}.exe",
+        "miDebuggerPath": "gdb.exe"
+      },
+      "linux": {
+        "miDebuggerPath": "gdb"
+      },
+      "args": [
+        "${config:ProgramRun.NAM}"
+      ],
+      "stopAtEntry": false,
+      "externalConsole": true,
+      "MIMode": "gdb",
+      "preLaunchTask": "Build gfortran Debug",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "presentation": {
+        "group": "workspace-settings"
+      }
+    },
+    {
+      "name": "Launch gfortran Release (Specify)",
+      "type": "cppdbg",
+      "request": "launch",
+      "cwd": "${input:mfowhmRunDirectory}",
+      "program": "${workspaceFolder}/${config:ProgramName.Dir}/${config:ProgramName.Release}.nix",
+      "windows": {
+        "program": "${workspaceFolder}/${config:ProgramName.Dir}/${config:ProgramName.Release}.exe",
+        "miDebuggerPath": "gdb.exe"
+      },
+      "linux": {
+        "miDebuggerPath": "gdb"
+      },
+      "args": [
+        "${input:mfowhmNameFile}"
+      ],
+      "stopAtEntry": false,
+      "externalConsole": true,
+      "MIMode": "gdb",
+      "preLaunchTask": "Build gfortran Release",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "presentation": {
+        "group": "input-file"
+      }
+    },
+    {
+      "name": "Launch gfortran Release (settings.json)",
+      "type": "cppdbg",
+      "request": "launch",
+      "cwd": "${config:ProgramRun.CWD}",
+      "program": "${workspaceFolder}/${config:ProgramName.Dir}/${config:ProgramName.Release}.nix",
+      "windows": {
+        "program": "${workspaceFolder}/${config:ProgramName.Dir}/${config:ProgramName.Release}.exe",
+        "miDebuggerPath": "gdb.exe"
+      },
+      "linux": {
+        "miDebuggerPath": "gdb"
+      },
+      "args": [
+        "${config:ProgramRun.NAM}"
+      ],
+      "stopAtEntry": false,
+      "externalConsole": true,
+      "MIMode": "gdb",
+      "preLaunchTask": "Build gfortran Release",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "presentation": {
+        "group": "workspace-settings"
+      }
+    },
+    {
+      "name": "Launch gfortran Debug GMG (Specify)",
+      "type": "cppdbg",
+      "request": "launch",
+      "cwd": "${input:mfowhmRunDirectory}",
+      "program": "${workspaceFolder}/${config:ProgramName.Dir}/${config:ProgramName.Debug}-gmg.nix",
+      "windows": {
+        "program": "${workspaceFolder}/${config:ProgramName.Dir}/${config:ProgramName.Debug}-gmg.exe",
+        "miDebuggerPath": "gdb.exe"
+      },
+      "linux": {
+        "miDebuggerPath": "gdb"
+      },
+      "args": [
+        "${input:mfowhmNameFile}"
+      ],
+      "stopAtEntry": false,
+      "externalConsole": true,
+      "MIMode": "gdb",
+      "preLaunchTask": "Build gfortran Debug GMG",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "presentation": {
+        "group": "input-file"
+      }
+    },
+    {
+      "name": "Launch gfortran Debug GMG (settings.json)",
+      "type": "cppdbg",
+      "request": "launch",
+      "cwd": "${config:ProgramRun.CWD}",
+      "program": "${workspaceFolder}/${config:ProgramName.Dir}/${config:ProgramName.Debug}-gmg.nix",
+      "windows": {
+        "program": "${workspaceFolder}/${config:ProgramName.Dir}/${config:ProgramName.Debug}-gmg.exe",
+        "miDebuggerPath": "gdb.exe"
+      },
+      "linux": {
+        "miDebuggerPath": "gdb"
+      },
+      "args": [
+        "${config:ProgramRun.NAM}"
+      ],
+      "stopAtEntry": false,
+      "externalConsole": true,
+      "MIMode": "gdb",
+      "preLaunchTask": "Build gfortran Debug GMG",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "presentation": {
+        "group": "workspace-settings"
+      }
+    },
+    {
+      "name": "Launch gfortran Release GMG (Specify)",
+      "type": "cppdbg",
+      "request": "launch",
+      "cwd": "${input:mfowhmRunDirectory}",
+      "program": "${workspaceFolder}/${config:ProgramName.Dir}/${config:ProgramName.Release}-gmg.nix",
+      "windows": {
+        "program": "${workspaceFolder}/${config:ProgramName.Dir}/${config:ProgramName.Release}-gmg.exe",
+        "miDebuggerPath": "gdb.exe"
+      },
+      "linux": {
+        "miDebuggerPath": "gdb"
+      },
+      "args": [
+        "${input:mfowhmNameFile}"
+      ],
+      "stopAtEntry": false,
+      "externalConsole": true,
+      "MIMode": "gdb",
+      "preLaunchTask": "Build gfortran Release GMG",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "presentation": {
+        "group": "input-file"
+      }
+    },
+    {
+      "name": "Launch gfortran Release GMG (settings.json)",
+      "type": "cppdbg",
+      "request": "launch",
+      "cwd": "${config:ProgramRun.CWD}",
+      "program": "${workspaceFolder}/${config:ProgramName.Dir}/${config:ProgramName.Release}-gmg.nix",
+      "windows": {
+        "program": "${workspaceFolder}/${config:ProgramName.Dir}/${config:ProgramName.Release}-gmg.exe",
+        "miDebuggerPath": "gdb.exe"
+      },
+      "linux": {
+        "miDebuggerPath": "gdb"
+      },
+      "args": [
+        "${config:ProgramRun.NAM}"
+      ],
+      "stopAtEntry": false,
+      "externalConsole": true,
+      "MIMode": "gdb",
+      "preLaunchTask": "Build gfortran Release GMG",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "presentation": {
+        "group": "workspace-settings"
+      }
+    },
+    {
+      "name": "Launch ifx Debug (Linux) (Specify)",
+      "type": "cppdbg",
+      "request": "launch",
+      "cwd": "${input:mfowhmRunDirectory}",
+      "program": "${workspaceFolder}/${config:ProgramName.Dir}/${config:ProgramName.Debug}-ifx.nix",
+      "args": [
+        "${input:mfowhmNameFile}"
+      ],
+      "stopAtEntry": false,
+      "externalConsole": true,
+      "MIMode": "gdb",
+      "preLaunchTask": "Build ifx Debug",
+      "linux": {
+        "miDebuggerPath": "gdb"
+      },
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "presentation": {
+        "group": "input-file"
+      }
+    },
+    {
+      "name": "Launch ifx Debug (Linux) (settings.json)",
+      "type": "cppdbg",
+      "request": "launch",
+      "cwd": "${config:ProgramRun.CWD}",
+      "program": "${workspaceFolder}/${config:ProgramName.Dir}/${config:ProgramName.Debug}-ifx.nix",
+      "args": [
+        "${config:ProgramRun.NAM}"
+      ],
+      "stopAtEntry": false,
+      "externalConsole": true,
+      "MIMode": "gdb",
+      "preLaunchTask": "Build ifx Debug",
+      "linux": {
+        "miDebuggerPath": "gdb"
+      },
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "presentation": {
+        "group": "workspace-settings"
+      }
+    },
+    {
+      "name": "Launch ifx Release (Linux) (Specify)",
+      "type": "cppdbg",
+      "request": "launch",
+      "cwd": "${input:mfowhmRunDirectory}",
+      "program": "${workspaceFolder}/${config:ProgramName.Dir}/${config:ProgramName.Release}-ifx.nix",
+      "args": [
+        "${input:mfowhmNameFile}"
+      ],
+      "stopAtEntry": false,
+      "externalConsole": true,
+      "MIMode": "gdb",
+      "preLaunchTask": "Build ifx Release",
+      "linux": {
+        "miDebuggerPath": "gdb"
+      },
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "presentation": {
+        "group": "input-file"
+      }
+    },
+    {
+      "name": "Launch ifx Release (Linux) (settings.json)",
+      "type": "cppdbg",
+      "request": "launch",
+      "cwd": "${config:ProgramRun.CWD}",
+      "program": "${workspaceFolder}/${config:ProgramName.Dir}/${config:ProgramName.Release}-ifx.nix",
+      "args": [
+        "${config:ProgramRun.NAM}"
+      ],
+      "stopAtEntry": false,
+      "externalConsole": true,
+      "MIMode": "gdb",
+      "preLaunchTask": "Build ifx Release",
+      "linux": {
+        "miDebuggerPath": "gdb"
+      },
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "presentation": {
+        "group": "workspace-settings"
+      }
+    },
+    {
+      "name": "Launch ifx Debug GMG (Linux) (Specify)",
+      "type": "cppdbg",
+      "request": "launch",
+      "cwd": "${input:mfowhmRunDirectory}",
+      "program": "${workspaceFolder}/${config:ProgramName.Dir}/${config:ProgramName.Debug}-ifx-gmg.nix",
+      "args": [
+        "${input:mfowhmNameFile}"
+      ],
+      "stopAtEntry": false,
+      "externalConsole": true,
+      "MIMode": "gdb",
+      "preLaunchTask": "Build ifx Debug GMG",
+      "linux": {
+        "miDebuggerPath": "gdb"
+      },
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "presentation": {
+        "group": "input-file"
+      }
+    },
+    {
+      "name": "Launch ifx Debug GMG (Linux) (settings.json)",
+      "type": "cppdbg",
+      "request": "launch",
+      "cwd": "${config:ProgramRun.CWD}",
+      "program": "${workspaceFolder}/${config:ProgramName.Dir}/${config:ProgramName.Debug}-ifx-gmg.nix",
+      "args": [
+        "${config:ProgramRun.NAM}"
+      ],
+      "stopAtEntry": false,
+      "externalConsole": true,
+      "MIMode": "gdb",
+      "preLaunchTask": "Build ifx Debug GMG",
+      "linux": {
+        "miDebuggerPath": "gdb"
+      },
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "presentation": {
+        "group": "workspace-settings"
+      }
+    },
+    {
+      "name": "Launch ifx Release GMG (Linux) (Specify)",
+      "type": "cppdbg",
+      "request": "launch",
+      "cwd": "${input:mfowhmRunDirectory}",
+      "program": "${workspaceFolder}/${config:ProgramName.Dir}/${config:ProgramName.Release}-ifx-gmg.nix",
+      "args": [
+        "${input:mfowhmNameFile}"
+      ],
+      "stopAtEntry": false,
+      "externalConsole": true,
+      "MIMode": "gdb",
+      "preLaunchTask": "Build ifx Release GMG",
+      "linux": {
+        "miDebuggerPath": "gdb"
+      },
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "presentation": {
+        "group": "input-file"
+      }
+    },
+    {
+      "name": "Launch ifx Release GMG (Linux) (settings.json)",
+      "type": "cppdbg",
+      "request": "launch",
+      "cwd": "${config:ProgramRun.CWD}",
+      "program": "${workspaceFolder}/${config:ProgramName.Dir}/${config:ProgramName.Release}-ifx-gmg.nix",
+      "args": [
+        "${config:ProgramRun.NAM}"
+      ],
+      "stopAtEntry": false,
+      "externalConsole": true,
+      "MIMode": "gdb",
+      "preLaunchTask": "Build ifx Release GMG",
+      "linux": {
+        "miDebuggerPath": "gdb"
+      },
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "presentation": {
+        "group": "workspace-settings"
+      }
+    },
+    {
+      "name": "Launch ifx Debug (Windows) (Specify)",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "cwd": "${input:mfowhmRunDirectory}",
+      "program": "${workspaceFolder}/${config:ProgramName.Dir}/${config:ProgramName.Debug}-ifx.exe",
+      "args": [
+        "${input:mfowhmNameFile}"
+      ],
+      "stopAtEntry": false,
+      "console": "externalTerminal",
+      "preLaunchTask": "Build ifx Debug",
+      "presentation": {
+        "group": "input-file"
+      }
+    },
+    {
+      "name": "Launch ifx Debug (Windows) (settings.json)",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "cwd": "${config:ProgramRun.CWD}",
+      "program": "${workspaceFolder}/${config:ProgramName.Dir}/${config:ProgramName.Debug}-ifx.exe",
+      "args": [
+        "${config:ProgramRun.NAM}"
+      ],
+      "stopAtEntry": false,
+      "console": "externalTerminal",
+      "preLaunchTask": "Build ifx Debug",
+      "presentation": {
+        "group": "workspace-settings"
+      }
+    },
+    {
+      "name": "Launch ifx Release (Windows) (Specify)",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "cwd": "${input:mfowhmRunDirectory}",
+      "program": "${workspaceFolder}/${config:ProgramName.Dir}/${config:ProgramName.Release}-ifx.exe",
+      "args": [
+        "${input:mfowhmNameFile}"
+      ],
+      "stopAtEntry": false,
+      "console": "externalTerminal",
+      "preLaunchTask": "Build ifx Release",
+      "presentation": {
+        "group": "input-file"
+      }
+    },
+    {
+      "name": "Launch ifx Release (Windows) (settings.json)",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "cwd": "${config:ProgramRun.CWD}",
+      "program": "${workspaceFolder}/${config:ProgramName.Dir}/${config:ProgramName.Release}-ifx.exe",
+      "args": [
+        "${config:ProgramRun.NAM}"
+      ],
+      "stopAtEntry": false,
+      "console": "externalTerminal",
+      "preLaunchTask": "Build ifx Release",
+      "presentation": {
+        "group": "workspace-settings"
+      }
+    },
+    {
+      "name": "Launch ifx Debug GMG (Windows) (Specify)",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "cwd": "${input:mfowhmRunDirectory}",
+      "program": "${workspaceFolder}/${config:ProgramName.Dir}/${config:ProgramName.Debug}-ifx-gmg.exe",
+      "args": [
+        "${input:mfowhmNameFile}"
+      ],
+      "stopAtEntry": false,
+      "console": "externalTerminal",
+      "preLaunchTask": "Build ifx Debug GMG",
+      "presentation": {
+        "group": "input-file"
+      }
+    },
+    {
+      "name": "Launch ifx Debug GMG (Windows) (settings.json)",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "cwd": "${config:ProgramRun.CWD}",
+      "program": "${workspaceFolder}/${config:ProgramName.Dir}/${config:ProgramName.Debug}-ifx-gmg.exe",
+      "args": [
+        "${config:ProgramRun.NAM}"
+      ],
+      "stopAtEntry": false,
+      "console": "externalTerminal",
+      "preLaunchTask": "Build ifx Debug GMG",
+      "presentation": {
+        "group": "workspace-settings"
+      }
+    },
+    {
+      "name": "Launch ifx Release GMG (Windows) (Specify)",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "cwd": "${input:mfowhmRunDirectory}",
+      "program": "${workspaceFolder}/${config:ProgramName.Dir}/${config:ProgramName.Release}-ifx-gmg.exe",
+      "args": [
+        "${input:mfowhmNameFile}"
+      ],
+      "stopAtEntry": false,
+      "console": "externalTerminal",
+      "preLaunchTask": "Build ifx Release GMG",
+      "presentation": {
+        "group": "input-file"
+      }
+    },
+    {
+      "name": "Launch ifx Release GMG (Windows) (settings.json)",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "cwd": "${config:ProgramRun.CWD}",
+      "program": "${workspaceFolder}/${config:ProgramName.Dir}/${config:ProgramName.Release}-ifx-gmg.exe",
+      "args": [
+        "${config:ProgramRun.NAM}"
+      ],
+      "stopAtEntry": false,
+      "console": "externalTerminal",
+      "preLaunchTask": "Build ifx Release GMG",
+      "presentation": {
+        "group": "workspace-settings"
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "mfowhmRunDirectory",
+      "type": "promptString",
+      "description": "Working directory for the MF-OWHM run (the model/simulation directory)",
+      "default": "${workspaceFolder}"
+    },
+    {
+      "id": "mfowhmNameFile",
+      "type": "promptString",
+      "description": "NAME file argument to pass as argv[1], relative to the chosen working directory or absolute",
+      "default": "../input/name.txt"
+    }
+  ]
 }

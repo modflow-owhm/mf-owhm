@@ -1,94 +1,126 @@
 # [Visual Studio Code (vscode)](https://code.visualstudio.com/docs/editor/codebasics)
 
+VS Code support for MF-OWHM lives in the repository's `.vscode` folder:
 
+| File                       | Purpose                                                                                         |
+| -------------------------- | ----------------------------------------------------------------------------------------------- |
+| `.vscode/settings.json`    | Workspace settings: run directory and name file for the debugger, binary and directory names, Intel oneAPI script locations, editor and Fortran language-server settings. |
+| `.vscode/tasks.json`       | Build tasks for GNU Make, CMake and Meson (Linux and WSL) and for native Windows builds with Intel ifx. |
+| `.vscode/launch.json`      | Debugger launch configurations that build first and then run a model under `gdb` (Linux, WSL) or the Visual Studio debugger (Windows). |
+| `.vscode/extensions.json`  | Recommended extensions; VS Code offers to install them when the folder is opened.               |
 
-## Project Workspace
+Open the repository folder directly (File > Open Folder) or open the
+workspace file in this directory, `mf-owhm.code-workspace`, which points to
+the repository root. The workspace file holds no settings of its own.
 
-This file, `mf-owhm.code-workspace`, sets the root directory as the head of the path and points to the `.vscode` folder for recommended extensions, tasks for compiling, and settings.
+General build instructions, including how to set up Linux, WSL and Windows,
+are in [doc/BUILD.md](../../doc/BUILD.md).
 
-
+&nbsp;
 
 ## Extensions
 
-This project workspace includes the file `.vscode/extensions.json`
+| Extension                          | Identifier                     | Used for                                                              |
+| ---------------------------------- | ------------------------------ | --------------------------------------------------------------------- |
+| Modern Fortran                     | `fortran-lang.linter-gfortran` | Syntax highlighting, the `fortls` language server, gfortran linting. |
+| C/C++                              | `ms-vscode.cpptools`           | The `gdb` (cppdbg) and Visual Studio (cppvsdbg) debugger front ends. |
+| CMake Tools                        | `ms-vscode.cmake-tools`        | Optional: configure and build `CMakeLists.txt` from the status bar.  |
+| Meson                              | `mesonbuild.mesonbuild`        | Optional: syntax support and build integration for `meson.build`.    |
+| WSL                                | `ms-vscode-remote.remote-wsl`  | Run VS Code against the Linux side of Windows Subsystem for Linux.   |
+| Python                             | `ms-python.python`             | Optional: helper scripts.                                             |
 
-This checks for the following extensions and if they are not present automatically installs them:
+`fortls` itself is a separate program: install it with `uv tool install fortls`
+(or `pipx install fortls`). The repository's `.fortls` file configures it.
 
-- C/C++ for Visual Studio Code
-  - https://github.com/Microsoft/vscode-cpptools
-- Modern Fortran language support for VSCode
-  - https://github.com/krvajal/vscode-fortran-support
-- Fortran Breakpoint Support
-  - https://github.com/ekibun/FortranBreaker
-- EasyZoom
-  - https://github.com/nabeelvalley/EasyZoomVSCodeExtension
+&nbsp;
 
+## Settings to adjust
 
+In `.vscode/settings.json`:
 
-## Portable Windows VSCode
+* `ProgramRun.CWD` and `ProgramRun.NAM`: the model directory and name file
+  used by the "(settings.json)" launch configurations. The "(Specify)"
+  configurations prompt for them instead.
+* `ProgramIntel.SetVars`: the oneAPI `setvars.sh` the ifx tasks load on Linux
+  and WSL (default `~/.intel/oneapi-2026.1/setvars.sh`; use
+  `/opt/intel/oneapi/setvars.sh` for a system-wide install).
+* `ProgramIntel.VarsBat`: the oneAPI `vars.bat` used by the native Windows
+  tasks (default `C:\Program Files (x86)\Intel\oneAPI\compiler\latest\env\vars.bat`).
+* `ProgramVS.DevEnv`: the Visual Studio 2026 `devenv.com` that builds the
+  generated `.slnx` solution (CMake's own build step cannot pass a `.slnx`
+  to devenv yet).
+* `ProgramName.*`, `ProgramSRC.Dir`, `ProgramOBJ.Dir`: binary and directory
+  names; normally left alone.
 
-Microsoft provides a version of VSCode that does not require administrative privileges and only requires extracting a single `.zip`   file. Where you extract the file, lets call it `vscodePortable`, is where the `vscode.exe` is placed and can run the editor.
+&nbsp;
 
-To download the `.zip` version, please go to the alternate downloads (https://code.visualstudio.com/#alt-downloads) and select the `64 bit` `.zip` version. 
+## Building (Terminal > Run Task)
 
-When you run the portable vscode, it will look for extensions in your user profile location, `%userprofile%` 
+| Task group                                   | Tool              | Where it runs     | Output                                                        |
+| -------------------------------------------- | ----------------- | ----------------- | ------------------------------------------------------------- |
+| `Build gfortran Debug` ... `Rebuild ifx Release GMG` | GNU Make  | Linux, WSL, msys2 | `bin/mf-owhm-debug.nix`, `bin/mf-owhm-ifx.nix`, ... (objects under `obj/vscode_*`) |
+| `CMake: Build Debug (gfortran)` ... `CMake: Build Release (ifx)` | CMake + Ninja | Linux, WSL | `bin/mf-owhm-debug.nix` or `bin/mf-owhm.nix`; build trees under `build/vscode-cmake-*` |
+| `Meson: Build Debug (gfortran)` ... `Meson: Build Release (ifx)` | Meson + Ninja | Linux, WSL | same names, installed into `bin/`; build trees under `build/vscode-meson-*` |
+| `Windows ifx: CMake Build Debug` / `Release`  | CMake + Ninja     | Windows (cmd.exe) | `bin\mf-owhm-debug.exe` or `bin\mf-owhm.exe`                  |
+| `Windows ifx: Generate Visual Studio 2026 solution` | CMake       | Windows (cmd.exe) | `build\vs2026\mf-owhm.sln` and `.vfproj`, to open in Visual Studio |
+| `Windows ifx: Build Visual Studio solution Debug` / `Release` | devenv.com (Visual Studio 2026) | Windows | `bin\mf-owhm-debug.exe` or `bin\mf-owhm.exe`; `ProgramVS.DevEnv` points at devenv.com |
 
-For example, 
-C:\Users\\*username* 
-where username is your windows user name.
+`Build gfortran Debug` is the default build task (Ctrl+Shift+B). The ifx tasks
+load the oneAPI environment themselves, so VS Code does not need to be started
+from an Intel command prompt. The Windows tasks run through `cmd.exe` and
+require Visual Studio 2026 (for Ninja, CMake and the linker) and Intel oneAPI
+with the Visual Studio integration. ifx supports Visual Studio 18 2026; the
+classic ifort from oneAPI 2024.2 only supports Visual Studio 17 2022, so for
+ifort change the generate task to `vars.bat ... vs2022`,
+`-G "Visual Studio 17 2022"` and `-T fortran=ifort`.
 
-If you want to make  `vscodePortable` truly portable, then you have to add the empty directory `data` inside the folder. 
+With the CMake Tools extension installed, `CMakeLists.txt` can also be driven
+from the status bar: pick a kit (gfortran, or ifx after loading oneAPI in the
+shell that starts VS Code) and a variant (Debug or Release), then build with
+F7. The extension uses `build/vscode-cmake` as its build directory.
 
-That is you need to make sure the following folder exists: ` vscodePortable/data`. 
+&nbsp;
 
-When VSCode sees there is a data folder in its directory, it installs the extensions to that location.
+## Debugging (Run and Debug)
 
+Every launch configuration builds first through its `preLaunchTask`, then
+starts the chosen binary in the model directory with the name file as the
+argument.
 
+* `Launch gfortran Debug ...`, `Launch ifx Debug (Linux) ...`: the Make-built
+  binaries under `gdb`. Works on Linux and in WSL (install `gdb` with apt; for
+  ifx the oneAPI `gdb-oneapi` also works, set `miDebuggerPath` if you prefer it).
+* `CMake Debug (gfortran, gdb)`, `CMake Debug (ifx, gdb)`: the CMake-built
+  `bin/mf-owhm-debug.nix` under `gdb`.
+* `Launch ifx Debug (Windows) ...`, `Windows ifx: CMake Debug ...`: native
+  Windows executables under the Visual Studio debugger (`cppvsdbg`), which
+  understands the Intel Fortran debug information.
 
-## Windows Compilation
+The "(settings.json)" variants use `ProgramRun.CWD` and `ProgramRun.NAM`; the
+"(Specify)" variants ask for the directory and name file when started.
+Breakpoints work in both fixed-form `.f` and free-form `.f90` files.
 
-VSCode requires the GNU GCC compiler set, in particular `gfortran `. 
+&nbsp;
 
-On windows options for obtaining GNU GCC are [msys2](https://www.msys2.org/), [mingw](http://mingw-w64.org/doku.php), and [cygwin](https://www.cygwin.com/). 
+## WSL
 
-Note that the `bash` terminal that comes with `git` does NOT include `gfortran`. 
+Install the WSL extension, open the repository folder from the WSL side
+(`code .` inside the Ubuntu shell, or "WSL: Open Folder in WSL"), and VS Code
+runs the tasks and `gdb` inside Linux while the editor runs on Windows. The
+Linux tasks (Make, CMake, Meson, gfortran and ifx) are the ones to use there;
+the native Windows tasks need a VS Code window opened on the Windows side of
+the same folder (`\\wsl$\Ubuntu\home\...`), where `cmd.exe` is available.
 
-All tests are run using [msys2](https://www.msys2.org/) with the msys bash terminal.
+&nbsp;
 
-The windows terminal `cmd.exe` works, but `powershell` does not.
+## Windows notes
 
-Note that VSCode by default uses `powershell`, so you will have to change that.
-
-### Windows Terminal
-
-On windows VSCode and GNU Makefiles do not run well on `powershell`. 
-
-VSCode has been set up to automatically use the windows terminal `cmd.exe`, but it does not always work. 
-
-If it defaults to opening with powershell you may have to select a new default terminal as `cmd.exe`.
-
-### Windows BASH terminal
-
-If you want to change this to bash you have to edit `.vscode/settings.json` by changing the following `json` command:
-
-`"terminal.integrated.shell.windows": "C:\\Windows\\System32\\cmd.exe",`
-
-to
-
-`"terminal.integrated.shell.windows": "c:\\path\\to\\bash.exe",`
-
-If this does not work, then you will have to go and edit your user  `Settings`, and make sure it is set to `User` and not `Workspace`, then go to `Features`, then `Terminal`,  then `Integrated › Shell: Windows` and click `Edit in settings.json`, which will open up that file and add the following entry:
-
-`"terminal.integrated.shell.windows": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",`
-
-which will require editing the path to cmd.exe or bash.exe. Note that this `settings.json` is your user settings rather than workspace settings. 
-
-### make clean Errors
-
-Compiling with the GNU makefile will work using `cmd.exe` if there is `GNU Make` installed. However the commands in the `makefile` are Unix-based and may not work. In particular, windows has the same `find` command, but with different syntax.
-
-Either make sure that the msys `find.exe` is in the path ahead of the windows `find.exe`, or run the compilation from a bash terminal (which automatically makes the Unix `find.exe` ahead of the windows).
-
-Another work around is to just manually delete the files located in `obj/`, which is where the compiler places all object and module files. 
-
-You should not delete the `obj/.keep` file, which is used to ensure git carries forward the `obj` directory.
+* The Make tasks need GNU Make and a Unix-like shell on Windows; msys2 is the
+  tested option. The CMake and Meson tasks above do not need that: use the
+  `Windows ifx:` tasks, which only need Visual Studio and oneAPI.
+* VS Code's default terminal on Windows is PowerShell. The Windows tasks set
+  `cmd.exe` as their shell explicitly, so the default terminal does not matter
+  for them.
+* A portable VS Code (the `.zip` download with an empty `data` folder next to
+  `Code.exe`) keeps its extensions inside its own folder and needs no
+  administrator rights.

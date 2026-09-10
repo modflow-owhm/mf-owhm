@@ -6,100 +6,525 @@
 // ${fileExtname} the current opened file's extension
 // ${cwd} the task runner's current working directory on startup
 {
-    // See https://go.microsoft.com/fwlink/?LinkId=733558
-    // for the documentation about the tasks.json format
-    "version": "2.0.0",
-    "tasks": [
-        {
-            "label": "Debug gfortran",
-            "type": "shell",
-            "options": {
-                "cwd": "${workspaceFolder}"
-            },
-            "command": "make compile",
-            "args": [
-                "CONFIG=debug",
-                "F90=gfortran",
-                "CC=gcc",
-                "src_dir=${config:ProgramSRC.Dir}",
-                "int_dir=${config:ProgramOBJ.Dir}/vscode_gfortran_debug",
-                "bin_out=${config:ProgramName.Dir}/${config:ProgramName.Debug}${config:ProgramName.Ext}"
-            ],
-            "presentation": {
-                "reveal": "always",
-                "clear": true,
-                "focus": true,
-                "panel": "shared"
-            },
-            "problemMatcher": [],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            }
-        },
-        {
-            "label": "Clean OBJ Folder",
-            "type": "shell",
-            "options": {
-                "cwd": "${workspaceFolder}"
-            },
-            "command": "make cleanOBJ",
-            "args": [],
-            "presentation": {
-                "reveal": "always",
-                "clear": true,
-                "focus": true,
-                "panel": "shared"
-            },
-            "problemMatcher": []
-        },
-        {
-            "label": "Reset",
-            "type": "shell",
-            "options": {
-                "cwd": "${workspaceFolder}"
-            },
-            "command": "make reset",
-            "args": [],
-            "presentation": {
-                "reveal": "always",
-                "clear": true,
-                "focus": true,
-                "panel": "shared"
-            },
-            "problemMatcher": []
-        },
-        {
-            "label": "Debug Rebuild gfortran",
-            "dependsOrder": "sequence",
-            "dependsOn": [
-                "Clean OBJ Folder",
-                "Debug gfortran "
-            ]
-        },
-        {
-            "label": "Release gfortran",
-            "type": "shell",
-            "options": {
-                "cwd": "${workspaceFolder}"
-            },
-            "command": "make",
-            "args": [
-                "CONFIG=release",
-                "F90=gfortran",
-                "CC=gcc",
-                "src_dir=${config:ProgramSRC.Dir}",
-                "int_dir=${config:ProgramOBJ.Dir}/vscode_gfortran_release",
-                "bin_out=${config:ProgramName.Dir}/${config:ProgramName.Release}${config:ProgramName.Ext}"
-            ],
-            "presentation": {
-                "reveal": "always",
-                "clear": true,
-                "focus": true,
-                "panel": "shared"
-            },
-        },
-    ]
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Clean OBJ Folder",
+      "type": "shell",
+      "command": "make",
+      "args": ["cleanOBJ"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "clear": true,
+        "focus": true,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    // {
+    //   "label": "Reset",
+    //   "type": "shell",
+    //   "command": "make",
+    //   "args": ["reset"],
+    //   "options": {
+    //     "cwd": "${workspaceFolder}"
+    //   },
+    //   "presentation": {
+    //     "reveal": "always",
+    //     "clear": true,
+    //     "focus": true,
+    //     "panel": "shared"
+    //   },
+    //   "problemMatcher": []
+    // },
+
+    {
+      "label": "Build gfortran Debug",
+      "type": "shell",
+      "command": "make",
+      "args": [
+        "compile",
+        "CONFIG=debug",
+        "COMPILER=GCC",
+        "F90=gfortran",
+        "CC=gcc",
+        "USEGMG=NO",
+        "src_dir=${config:ProgramSRC.Dir}",
+        "int_dir=${config:ProgramOBJ.Dir}/vscode_gfortran_debug",
+        "bin_out=${config:ProgramName.Dir}/${config:ProgramName.Debug}"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "clear": true,
+        "focus": true,
+        "panel": "shared"
+      },
+      "problemMatcher": ["$gcc"],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "Rebuild gfortran Debug",
+      "dependsOrder": "sequence",
+      "dependsOn": ["Clean OBJ Folder", "Build gfortran Debug"]
+    },
+    {
+      "label": "Build gfortran Release",
+      "type": "shell",
+      "command": "make",
+      "args": [
+        "compile",
+        "CONFIG=release",
+        "COMPILER=GCC",
+        "F90=gfortran",
+        "CC=gcc",
+        "USEGMG=NO",
+        "src_dir=${config:ProgramSRC.Dir}",
+        "int_dir=${config:ProgramOBJ.Dir}/vscode_gfortran_release",
+        "bin_out=${config:ProgramName.Dir}/${config:ProgramName.Release}"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "clear": true,
+        "focus": true,
+        "panel": "shared"
+      },
+      "problemMatcher": ["$gcc"]
+    },
+    {
+      "label": "Rebuild gfortran Release",
+      "dependsOrder": "sequence",
+      "dependsOn": ["Clean OBJ Folder", "Build gfortran Release"]
+    },
+    {
+      "label": "Build gfortran Debug GMG",
+      "type": "shell",
+      "command": "make",
+      "args": [
+        "compile",
+        "CONFIG=debug",
+        "COMPILER=GCC",
+        "F90=gfortran",
+        "CC=gcc",
+        "USEGMG=YES",
+        "src_dir=${config:ProgramSRC.Dir}",
+        "int_dir=${config:ProgramOBJ.Dir}/vscode_gfortran_debug_gmg",
+        "bin_out=${config:ProgramName.Dir}/${config:ProgramName.Debug}-gmg"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "clear": true,
+        "focus": true,
+        "panel": "shared"
+      },
+      "problemMatcher": ["$gcc"]
+    },
+    {
+      "label": "Rebuild gfortran Debug GMG",
+      "dependsOrder": "sequence",
+      "dependsOn": ["Clean OBJ Folder", "Build gfortran Debug GMG"]
+    },
+    {
+      "label": "Build gfortran Release GMG",
+      "type": "shell",
+      "command": "make",
+      "args": [
+        "compile",
+        "CONFIG=release",
+        "COMPILER=GCC",
+        "F90=gfortran",
+        "CC=gcc",
+        "USEGMG=YES",
+        "src_dir=${config:ProgramSRC.Dir}",
+        "int_dir=${config:ProgramOBJ.Dir}/vscode_gfortran_release_gmg",
+        "bin_out=${config:ProgramName.Dir}/${config:ProgramName.Release}-gmg"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "clear": true,
+        "focus": true,
+        "panel": "shared"
+      },
+      "problemMatcher": ["$gcc"]
+    },
+    {
+      "label": "Rebuild gfortran Release GMG",
+      "dependsOrder": "sequence",
+      "dependsOn": ["Clean OBJ Folder", "Build gfortran Release GMG"]
+    },
+    {
+      "label": "Build ifx Debug",
+      "type": "shell",
+      "command": "make",
+      "args": [
+        "compile",
+        "CONFIG=debug",
+        "COMPILER=INTEL",
+        "F90=ifx",
+        "CC=icx",
+        "USEGMG=NO",
+        "src_dir=${config:ProgramSRC.Dir}",
+        "int_dir=${config:ProgramOBJ.Dir}/vscode_ifx_debug",
+        "bin_out=${config:ProgramName.Dir}/${config:ProgramName.Debug}-ifx"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "clear": true,
+        "focus": true,
+        "panel": "shared"
+      },
+      "problemMatcher": ["$msCompile", "$gcc"]
+    },
+    {
+      "label": "Rebuild ifx Debug",
+      "dependsOrder": "sequence",
+      "dependsOn": ["Clean OBJ Folder", "Build ifx Debug"]
+    },
+    {
+      "label": "Build ifx Release",
+      "type": "shell",
+      "command": "make",
+      "args": [
+        "compile",
+        "CONFIG=release",
+        "COMPILER=INTEL",
+        "F90=ifx",
+        "CC=icx",
+        "USEGMG=NO",
+        "src_dir=${config:ProgramSRC.Dir}",
+        "int_dir=${config:ProgramOBJ.Dir}/vscode_ifx_release",
+        "bin_out=${config:ProgramName.Dir}/${config:ProgramName.Release}-ifx"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "clear": true,
+        "focus": true,
+        "panel": "shared"
+      },
+      "problemMatcher": ["$msCompile", "$gcc"]
+    },
+    {
+      "label": "Rebuild ifx Release",
+      "dependsOrder": "sequence",
+      "dependsOn": ["Clean OBJ Folder", "Build ifx Release"]
+    },
+    {
+      "label": "Build ifx Debug GMG",
+      "type": "shell",
+      "command": "make",
+      "args": [
+        "compile",
+        "CONFIG=debug",
+        "COMPILER=INTEL",
+        "F90=ifx",
+        "CC=icx",
+        "USEGMG=YES",
+        "src_dir=${config:ProgramSRC.Dir}",
+        "int_dir=${config:ProgramOBJ.Dir}/vscode_ifx_debug_gmg",
+        "bin_out=${config:ProgramName.Dir}/${config:ProgramName.Debug}-ifx-gmg"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "clear": true,
+        "focus": true,
+        "panel": "shared"
+      },
+      "problemMatcher": ["$msCompile", "$gcc"]
+    },
+    {
+      "label": "Rebuild ifx Debug GMG",
+      "dependsOrder": "sequence",
+      "dependsOn": ["Clean OBJ Folder", "Build ifx Debug GMG"]
+    },
+    {
+      "label": "Build ifx Release GMG",
+      "type": "shell",
+      "command": "make",
+      "args": [
+        "compile",
+        "CONFIG=release",
+        "COMPILER=INTEL",
+        "F90=ifx",
+        "CC=icx",
+        "USEGMG=YES",
+        "src_dir=${config:ProgramSRC.Dir}",
+        "int_dir=${config:ProgramOBJ.Dir}/vscode_ifx_release_gmg",
+        "bin_out=${config:ProgramName.Dir}/${config:ProgramName.Release}-ifx-gmg"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "clear": true,
+        "focus": true,
+        "panel": "shared"
+      },
+      "problemMatcher": ["$msCompile", "$gcc"]
+    },
+    {
+      "label": "Rebuild ifx Release GMG",
+      "dependsOrder": "sequence",
+      "dependsOn": ["Clean OBJ Folder", "Build ifx Release GMG"]
+    },
+
+    // ------------------------------------------------------------------
+    // CMake and Meson builds (Linux and WSL). Build directories are kept
+    // under build/ (ignored by git); binaries go to bin/ like the makefile.
+    // The ifx tasks load the oneAPI environment from ProgramIntel.SetVars
+    // (set in .vscode/settings.json).
+    // ------------------------------------------------------------------
+    {
+      "label": "CMake: Build Debug (gfortran)",
+      "type": "shell",
+      "command": "bash",
+      "args": ["-c", "cmake -S \"${workspaceFolder}\" -B \"${workspaceFolder}/build/vscode-cmake-gfortran-debug\" -G Ninja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_Fortran_COMPILER=gfortran -DOWHM_BIN_DIR=\"${workspaceFolder}/${config:ProgramName.Dir}\" && cmake --build \"${workspaceFolder}/build/vscode-cmake-gfortran-debug\""],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "clear": true,
+        "focus": true,
+        "panel": "shared"
+      },
+      "problemMatcher": ["$gcc"]
+    },
+    {
+      "label": "CMake: Build Release (gfortran)",
+      "type": "shell",
+      "command": "bash",
+      "args": ["-c", "cmake -S \"${workspaceFolder}\" -B \"${workspaceFolder}/build/vscode-cmake-gfortran-release\" -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_Fortran_COMPILER=gfortran -DOWHM_BIN_DIR=\"${workspaceFolder}/${config:ProgramName.Dir}\" && cmake --build \"${workspaceFolder}/build/vscode-cmake-gfortran-release\""],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "clear": true,
+        "focus": true,
+        "panel": "shared"
+      },
+      "problemMatcher": ["$gcc"]
+    },
+    {
+      "label": "CMake: Build Debug (ifx)",
+      "type": "shell",
+      "command": "bash",
+      "args": ["-c", "source \"${config:ProgramIntel.SetVars}\" > /dev/null && cmake -S \"${workspaceFolder}\" -B \"${workspaceFolder}/build/vscode-cmake-ifx-debug\" -G Ninja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_Fortran_COMPILER=ifx -DOWHM_BIN_DIR=\"${workspaceFolder}/${config:ProgramName.Dir}\" && cmake --build \"${workspaceFolder}/build/vscode-cmake-ifx-debug\""],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "clear": true,
+        "focus": true,
+        "panel": "shared"
+      },
+      "problemMatcher": ["$gcc"]
+    },
+    {
+      "label": "CMake: Build Release (ifx)",
+      "type": "shell",
+      "command": "bash",
+      "args": ["-c", "source \"${config:ProgramIntel.SetVars}\" > /dev/null && cmake -S \"${workspaceFolder}\" -B \"${workspaceFolder}/build/vscode-cmake-ifx-release\" -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_Fortran_COMPILER=ifx -DOWHM_BIN_DIR=\"${workspaceFolder}/${config:ProgramName.Dir}\" && cmake --build \"${workspaceFolder}/build/vscode-cmake-ifx-release\""],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "clear": true,
+        "focus": true,
+        "panel": "shared"
+      },
+      "problemMatcher": ["$gcc"]
+    },
+    {
+      "label": "Meson: Build Debug (gfortran)",
+      "type": "shell",
+      "command": "bash",
+      "args": ["-c", "( [ -f \"${workspaceFolder}/build/vscode-meson-gfortran-debug/build.ninja\" ] || FC=gfortran meson setup \"${workspaceFolder}/build/vscode-meson-gfortran-debug\" -Dconfig=debug ) && meson compile -C \"${workspaceFolder}/build/vscode-meson-gfortran-debug\" && meson install -C \"${workspaceFolder}/build/vscode-meson-gfortran-debug\""],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "clear": true,
+        "focus": true,
+        "panel": "shared"
+      },
+      "problemMatcher": ["$gcc"]
+    },
+    {
+      "label": "Meson: Build Release (gfortran)",
+      "type": "shell",
+      "command": "bash",
+      "args": ["-c", "( [ -f \"${workspaceFolder}/build/vscode-meson-gfortran-release/build.ninja\" ] || FC=gfortran meson setup \"${workspaceFolder}/build/vscode-meson-gfortran-release\" -Dconfig=release ) && meson compile -C \"${workspaceFolder}/build/vscode-meson-gfortran-release\" && meson install -C \"${workspaceFolder}/build/vscode-meson-gfortran-release\""],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "clear": true,
+        "focus": true,
+        "panel": "shared"
+      },
+      "problemMatcher": ["$gcc"]
+    },
+    {
+      "label": "Meson: Build Debug (ifx)",
+      "type": "shell",
+      "command": "bash",
+      "args": ["-c", "source \"${config:ProgramIntel.SetVars}\" > /dev/null && ( [ -f \"${workspaceFolder}/build/vscode-meson-ifx-debug/build.ninja\" ] || FC=ifx meson setup \"${workspaceFolder}/build/vscode-meson-ifx-debug\" -Dconfig=debug ) && meson compile -C \"${workspaceFolder}/build/vscode-meson-ifx-debug\" && meson install -C \"${workspaceFolder}/build/vscode-meson-ifx-debug\""],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "clear": true,
+        "focus": true,
+        "panel": "shared"
+      },
+      "problemMatcher": ["$gcc"]
+    },
+    {
+      "label": "Meson: Build Release (ifx)",
+      "type": "shell",
+      "command": "bash",
+      "args": ["-c", "source \"${config:ProgramIntel.SetVars}\" > /dev/null && ( [ -f \"${workspaceFolder}/build/vscode-meson-ifx-release/build.ninja\" ] || FC=ifx meson setup \"${workspaceFolder}/build/vscode-meson-ifx-release\" -Dconfig=release ) && meson compile -C \"${workspaceFolder}/build/vscode-meson-ifx-release\" && meson install -C \"${workspaceFolder}/build/vscode-meson-ifx-release\""],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "clear": true,
+        "focus": true,
+        "panel": "shared"
+      },
+      "problemMatcher": ["$gcc"]
+    },
+
+    // ------------------------------------------------------------------
+    // Native Windows builds with Intel ifx: cmd.exe loads oneAPI from
+    // ProgramIntel.VarsBat, then CMake builds with Ninja, or generates the
+    // Visual Studio 2026 solution in build/vs2026 (open it in Visual Studio
+    // for editing and debugging). The .slnx solution is built with devenv.com
+    // (ProgramVS.DevEnv) because cmake --build cannot yet pass it to devenv.
+    // ifx supports Visual Studio 18 2026; the
+    // classic ifort (oneAPI 2024.2) only supports Visual Studio 17 2022, so
+    // for ifort use vars.bat ... vs2022 with -G "Visual Studio 17 2022" -T fortran=ifort.
+    // ------------------------------------------------------------------
+    {
+      "label": "Windows ifx: CMake Build Debug",
+      "type": "shell",
+      "command": "call \"${config:ProgramIntel.VarsBat}\" intel64 vs2026 > nul && cmake -S \"${workspaceFolder}\" -B \"${workspaceFolder}\\build\\vscode-win-ifx-debug\" -G Ninja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_Fortran_COMPILER=ifx -DOWHM_BIN_DIR=\"${workspaceFolder}\\${config:ProgramName.Dir}\" && cmake --build \"${workspaceFolder}\\build\\vscode-win-ifx-debug\"",
+      "args": [],
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "shell": { "executable": "cmd.exe", "args": ["/d", "/c"] }
+      },
+      "presentation": {
+        "reveal": "always",
+        "clear": true,
+        "focus": true,
+        "panel": "shared"
+      },
+      "problemMatcher": ["$msCompile"]
+    },
+    {
+      "label": "Windows ifx: CMake Build Release",
+      "type": "shell",
+      "command": "call \"${config:ProgramIntel.VarsBat}\" intel64 vs2026 > nul && cmake -S \"${workspaceFolder}\" -B \"${workspaceFolder}\\build\\vscode-win-ifx-release\" -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_Fortran_COMPILER=ifx -DOWHM_BIN_DIR=\"${workspaceFolder}\\${config:ProgramName.Dir}\" && cmake --build \"${workspaceFolder}\\build\\vscode-win-ifx-release\"",
+      "args": [],
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "shell": { "executable": "cmd.exe", "args": ["/d", "/c"] }
+      },
+      "presentation": {
+        "reveal": "always",
+        "clear": true,
+        "focus": true,
+        "panel": "shared"
+      },
+      "problemMatcher": ["$msCompile"]
+    },
+    {
+      "label": "Windows ifx: Generate Visual Studio 2026 solution (build/vs2026)",
+      "type": "shell",
+      "command": "call \"${config:ProgramIntel.VarsBat}\" intel64 vs2026 > nul && cmake -S \"${workspaceFolder}\" -B \"${workspaceFolder}\\build\\vs2026\" -G \"Visual Studio 18 2026\" -A x64 -T fortran=ifx",
+      "args": [],
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "shell": { "executable": "cmd.exe", "args": ["/d", "/c"] }
+      },
+      "presentation": {
+        "reveal": "always",
+        "clear": true,
+        "focus": true,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Windows ifx: Build Visual Studio solution Debug",
+      "type": "shell",
+      "command": "call \"${config:ProgramIntel.VarsBat}\" intel64 vs2026 > nul && \"${config:ProgramVS.DevEnv}\" \"${workspaceFolder}\\build\\vs2026\\mf-owhm.slnx\" /Build \"Debug|x64\"",
+      "args": [],
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "shell": { "executable": "cmd.exe", "args": ["/d", "/c"] }
+      },
+      "presentation": {
+        "reveal": "always",
+        "clear": true,
+        "focus": true,
+        "panel": "shared"
+      },
+      "problemMatcher": ["$msCompile"]
+    },
+    {
+      "label": "Windows ifx: Build Visual Studio solution Release",
+      "type": "shell",
+      "command": "call \"${config:ProgramIntel.VarsBat}\" intel64 vs2026 > nul && \"${config:ProgramVS.DevEnv}\" \"${workspaceFolder}\\build\\vs2026\\mf-owhm.slnx\" /Build \"Release|x64\"",
+      "args": [],
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "shell": { "executable": "cmd.exe", "args": ["/d", "/c"] }
+      },
+      "presentation": {
+        "reveal": "always",
+        "clear": true,
+        "focus": true,
+        "panel": "shared"
+      },
+      "problemMatcher": ["$msCompile"]
+    }
+  ]
 }
 
 // "command": "(cd ${workspaceFolder} && make)",
