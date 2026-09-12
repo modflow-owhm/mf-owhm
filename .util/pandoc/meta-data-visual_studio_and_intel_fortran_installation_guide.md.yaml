@@ -1,7 +1,7 @@
 ---
 title: MF-OWHM - Visual\_Studio\_and\_Intel\_Fortran\_Installation\_Guide.md
 subtitle: from https://code.usgs.gov/modflow/mf-owhm
-author: Scott E. Boyce <seboye@usgs.gov>
+author: Scott E. Boyce <seboyce@ucdavis.edu>
 abstract: |
      
   `Visual_Studio_and_Intel_Fortran_Installation_Guide.md` file from the [MODFLOW-OWHM code repository](https://code.usgs.gov/modflow/mf-owhm)
