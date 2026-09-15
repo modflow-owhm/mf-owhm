@@ -1,0 +1,32 @@
+// Zed tasks for MF-OWHM (task: spawn, or the terminal panel's task list).
+// Each entry runs from the repository root. Pick the one build system you use;
+// the others are offered for convenience. See doc/BUILD.md.
+[
+  // ---- GNU Make -------------------------------------------------------------
+  { "label": "make: gfortran debug",   "command": "make", "args": ["compile", "CONFIG=debug",   "COMPILER=GCC",   "F90=gfortran", "CC=gcc", "int_dir=obj/zed_gfortran_debug"] },
+  { "label": "make: gfortran release", "command": "make", "args": ["compile", "CONFIG=release", "COMPILER=GCC",   "F90=gfortran", "CC=gcc", "int_dir=obj/zed_gfortran_release"] },
+  { "label": "make: ifx debug",        "command": "make", "args": ["compile", "CONFIG=debug",   "COMPILER=INTEL", "F90=ifx",      "CC=icx", "int_dir=obj/zed_ifx_debug",   "bin_out=bin/mf-owhm-debug-ifx"] },
+  { "label": "make: ifx release",      "command": "make", "args": ["compile", "CONFIG=release", "COMPILER=INTEL", "F90=ifx",      "CC=icx", "int_dir=obj/zed_ifx_release", "bin_out=bin/mf-owhm-ifx"] },
+  { "label": "make: clean obj",        "command": "make", "args": ["cleanOBJ"] },
+
+  // ---- CMake (Ninja) --------------------------------------------------------
+  { "label": "cmake: configure gfortran debug",   "command": "cmake", "args": ["-S", ".", "-B", "build/zed-gfortran-debug",   "-G", "Ninja", "-DCMAKE_BUILD_TYPE=Debug",   "-DCMAKE_Fortran_COMPILER=gfortran"] },
+  { "label": "cmake: configure gfortran release", "command": "cmake", "args": ["-S", ".", "-B", "build/zed-gfortran-release", "-G", "Ninja", "-DCMAKE_BUILD_TYPE=Release", "-DCMAKE_Fortran_COMPILER=gfortran"] },
+  { "label": "cmake: configure ifx debug",        "command": "cmake", "args": ["-S", ".", "-B", "build/zed-ifx-debug",        "-G", "Ninja", "-DCMAKE_BUILD_TYPE=Debug",   "-DCMAKE_Fortran_COMPILER=ifx"] },
+  { "label": "cmake: configure ifx release",      "command": "cmake", "args": ["-S", ".", "-B", "build/zed-ifx-release",      "-G", "Ninja", "-DCMAKE_BUILD_TYPE=Release", "-DCMAKE_Fortran_COMPILER=ifx"] },
+  { "label": "cmake: build gfortran debug",       "command": "cmake", "args": ["--build", "build/zed-gfortran-debug"] },
+  { "label": "cmake: build gfortran release",     "command": "cmake", "args": ["--build", "build/zed-gfortran-release"] },
+  { "label": "cmake: build ifx debug",            "command": "cmake", "args": ["--build", "build/zed-ifx-debug"] },
+  { "label": "cmake: build ifx release",          "command": "cmake", "args": ["--build", "build/zed-ifx-release"] },
+
+  // ---- Meson ----------------------------------------------------------------
+  { "label": "meson: setup gfortran debug",   "command": "meson", "args": ["setup", "build/zed-meson-debug",   "-Dconfig=debug"],   "env": { "FC": "gfortran" } },
+  { "label": "meson: setup gfortran release", "command": "meson", "args": ["setup", "build/zed-meson-release", "-Dconfig=release"], "env": { "FC": "gfortran" } },
+  { "label": "meson: setup ifx release",      "command": "meson", "args": ["setup", "build/zed-meson-ifx",     "-Dconfig=release"], "env": { "FC": "ifx" } },
+  { "label": "meson: compile + install debug",   "command": "sh", "args": ["-c", "meson compile -C build/zed-meson-debug && meson install -C build/zed-meson-debug"] },
+  { "label": "meson: compile + install release", "command": "sh", "args": ["-c", "meson compile -C build/zed-meson-release && meson install -C build/zed-meson-release"] },
+  { "label": "meson: compile + install ifx",     "command": "sh", "args": ["-c", "meson compile -C build/zed-meson-ifx && meson install -C build/zed-meson-ifx"] },
+
+  // ---- Run an example model with the debug binary ----------------------------
+  { "label": "run: debug binary in examples/mf-owhm/1_GHB", "command": "../../../bin/mf-owhm-debug.nix", "args": ["OWHM_Examples.nam"], "cwd": "examples/mf-owhm/1_GHB" }
+]

@@ -1,0 +1,15 @@
+// Zed project settings for MF-OWHM. fortls (uv tool install fortls) is
+// configured by the .fortls file in the repository root.
+{
+  "languages": {
+    "Fortran": {
+      "tab_size": 2,
+      "hard_tabs": false,
+      "preferred_line_length": 132
+    }
+  },
+  "file_types": {
+    "Fortran": ["f", "f90", "fpp", "for"],
+    "JSON": ["fortls"]
+  }
+}
