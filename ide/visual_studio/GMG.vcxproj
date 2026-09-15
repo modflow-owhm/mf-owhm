@@ -34,23 +34,39 @@
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <!-- Select the newest Intel C++ Compiler (icx) toolset installed for this Visual Studio.
+       The Windows SDK version 10.0 above means the newest installed SDK.
+       If no Intel toolset is found the Visual Studio C compiler (cl) builds GMG instead.
+       The environment variable OWHM_GMG_TOOLSET overrides the choice, for example
+       OWHM_GMG_TOOLSET=v145 (Visual Studio 2026 cl) or v143 (Visual Studio 2022 cl); use it
+       when an Intel toolset is present but its integration is broken
+       ("Could not expand ICInstallDir variable"). -->
+  <PropertyGroup Label="IntelToolset">
+    <OwhmIntelToolset Condition="'$(OWHM_GMG_TOOLSET)'!=''">$(OWHM_GMG_TOOLSET)</OwhmIntelToolset>
+    <OwhmIntelToolset Condition="'$(OwhmIntelToolset)'=='' And Exists('$(VCTargetsPath)\Platforms\x64\PlatformToolsets\Intel C++ Compiler 2028')">Intel C++ Compiler 2028</OwhmIntelToolset>
+    <OwhmIntelToolset Condition="'$(OwhmIntelToolset)'=='' And Exists('$(VCTargetsPath)\Platforms\x64\PlatformToolsets\Intel C++ Compiler 2027')">Intel C++ Compiler 2027</OwhmIntelToolset>
+    <OwhmIntelToolset Condition="'$(OwhmIntelToolset)'=='' And Exists('$(VCTargetsPath)\Platforms\x64\PlatformToolsets\Intel C++ Compiler 2026')">Intel C++ Compiler 2026</OwhmIntelToolset>
+    <OwhmIntelToolset Condition="'$(OwhmIntelToolset)'=='' And Exists('$(VCTargetsPath)\Platforms\x64\PlatformToolsets\Intel C++ Compiler 2025')">Intel C++ Compiler 2025</OwhmIntelToolset>
+    <OwhmIntelToolset Condition="'$(OwhmIntelToolset)'=='' And Exists('$(VCTargetsPath)\Platforms\x64\PlatformToolsets\Intel C++ Compiler 2024')">Intel C++ Compiler 2024</OwhmIntelToolset>
+    <OwhmIntelToolset Condition="'$(OwhmIntelToolset)'==''">$(DefaultPlatformToolset)</OwhmIntelToolset>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>Intel C++ Compiler 2024</PlatformToolset>
+    <PlatformToolset>$(OwhmIntelToolset)</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <InterproceduralOptimization>false</InterproceduralOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Fast_Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>Intel C++ Compiler 2024</PlatformToolset>
+    <PlatformToolset>$(OwhmIntelToolset)</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>Intel C++ Compiler 2024</PlatformToolset>
+    <PlatformToolset>$(OwhmIntelToolset)</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <InterproceduralOptimization>false</InterproceduralOptimization>
