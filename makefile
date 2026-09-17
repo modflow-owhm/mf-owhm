@@ -19,21 +19,22 @@
 #   There are a set of known compiler bugs in older versions of Intel and GCC that prevent compilation.
 #   If you receive "internal compiler error" when running this makefile, it is because the compiler version does not work.
 #
-#   The Intel Fortran compiler is now part of Intel oneAPI and has two different versions:
-#     Intel Fortran Compiler Classic (ifort) and Intel Fortran (ifx).
-#     Historically MODFLOW is compiled using ifort, but Intel support for ifort ends in December, 2024.
+#   The Intel Fortran compiler is part of Intel oneAPI and has two different versions:
+#     Intel Fortran (ifx) and Intel Fortran Compiler Classic (ifort).
+#     Historically MODFLOW was compiled using ifort, but Intel discontinued ifort with oneAPI 2024.2
+#     and it can no longer be downloaded without a paid support plan.
 #
 #     The two compilers have similar runtimes, but due to different floating point models and optimizations
 #     may yield slightly different results with the same input.
 #
-#     New projects should use ifx and existing projects should test both ifort and ifx compilations.
-#       The default is still ifort, but may change in a future release.
+#     The default compiler is now ifx (F90 := ifx). ifort is still supported for those who have it
+#       installed (make F90=ifort), but it is no longer the default.
 #
 #     oneAPI versioning is based on YYYY.m.p, where YYYY is year, m is major version, p and patch version.
 #     oneAPI versions may not match its subcomponents,
 #        for example, oneAPI version 2023.0.0, has ifx version 2023.0.0, and ifort version 2021.8.0
 #
-#   Gfortran many versions that are identified by their major versioning. The current versions in use are 10.x.y, 11.x.y, and 12.x.y
+#   Gfortran has many versions that are identified by their major version. This project is tested with gfortran 15.x.y
 #     The gfortran version can be determined by "gfortran --version" and
 #     specific major versions of gfortran can be invoked as gfortran-XX where XX is the major version, such as gfortran-12
 #
@@ -44,7 +45,7 @@
 #   ifort 2021.7.0 and earlier WILL compile this project     (oneAPI 2022.2.1)
 #   ifort 2021.8.0             WILL NOT compile this project (oneAPI 2023.0.0)
 #   ifort 2021.9.0             WILL NOT compile this project (oneAPI 2023.1.0)
-#   gfortran 11.3.0 and 12.1.0 WILL compile this project (but raises runtime errors do to compiler bugs)
+#   gfortran 15.2.0 and newer  WILL compile this project (older versions raised internal compiler errors or runtime faults)
 #
 #   The Intel C Compiler Classic (icc) has been discontinued and replaced by Intel C++ compiler (icx) in OneAPI w024.0.0 and newer.
 #     Both icc and icx versions can compile GMG.
@@ -68,8 +69,8 @@
 # Accepted keywords are (Note that all have defaults within this script):
 #     CONFIG    => debug or release
 #     COMPILER  => GCC or INTEL or LLVM  --> Indicates the compiler collection used for auto setting compiler flags
-#     F90       => gfortran or ifort
-#     CC        => gcc or icc
+#     F90       => ifx, ifort or gfortran (default ifx)
+#     CC        => icx, icc or gcc   (default icx)
 #
 #     bin_out   => Location and Name (plus extension) of the final program. If not specified, then bin_out = $(bin_dir)/$(PROGRAM)$(ext)
 #     src_dir   => Location of the source files                      -- Do not include a trailing / (that is, ./out1/out2)
@@ -88,7 +89,7 @@
 # If you want to use Intel Fortran on Windows 10/11
 #    then run the makefile in the Intel Command Prompt (for example, run from the start menu: Compiler 19.1 Update 1 for Intel 64 Visual Studio 2019 environment)
 #    or you will get path or license errors from Intel.
-#    -- Linux Intel Fortran works fine with this makefile if ifort is in the PATH variable.
+#    -- Linux Intel Fortran works fine with this makefile if ifx (or ifort) is in the PATH variable.
 #
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
@@ -141,12 +142,12 @@ COMPILER := INTEL
 #
 #
 # Define the Fortran Compiler
-#                    ===> For example: gfortran, gfortran-9, gfortran-10, ifort
+#                    ===> For example: ifx, ifort, gfortran, gfortran-15
 #                         ****Note that the version of your Fortran compiler may not support all of the Fortran Standards (viz 2003, 2008, 2015)
-F90 := ifort
+F90 := ifx
 #
 # Define the C Compiler
-#   ===> Accepted Answers: gcc, icc
+#   ===> Accepted Answers: icx, icc, gcc
 CC  := icx
 #
 # Program Name - Do not include extension (eg .exe). Also _debug will automatically be added if CONFIG = debug. Use bin_out= to specify exact location and name for binary.

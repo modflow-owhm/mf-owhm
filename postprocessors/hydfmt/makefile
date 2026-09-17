@@ -33,7 +33,7 @@
 # Accepted keywords are (Note that all have defaults within this script):
 #     CONFIG    => debug or release
 #     COMPILER  => GCC or INTEL or LLVM  --> Indicates the compiler collection used for auto setting compiler flags
-#     F90       => gfortran or ifort
+#     F90       => ifx, ifort or gfortran (default ifx)
 #
 #     bin_out   => Location and Name (plus extension) of the final program. If not specified, then bin_out = $(bin_dir)/$(PROGRAM)$(ext)
 #     src_dir   => Location of the source files                      -- Do not include a trailing / (that is, ./out1/out2)
@@ -68,9 +68,9 @@ CONFIG := RELEASE
 COMPILER := INTEL
 #
 # Define the Fortran Compiler
-#                    ===> For example: gfortran, gfortran-9, gfortran-10, ifort
+#                    ===> For example: ifx, ifort, gfortran, gfortran-15
 #                         ****Note that the version of your Fortran compiler may not support all of the Fortran Standards (viz 2003, 2008, 2015)
-F90 := ifort
+F90 := ifx
 #
 # Program Name - Do not include extension (eg .exe). Also _debug will automatically be added if CONFIG = debug. Use bin_out= to specify exact location and name for binary.
 #
