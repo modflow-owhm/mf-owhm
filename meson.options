@@ -1,0 +1,12 @@
+option('config', type : 'combo', choices : ['release', 'debug'], value : 'release',
+  description : 'Release or debug compiler flags (the makefile CONFIG)')
+option('use_gmg', type : 'boolean', value : false,
+  description : 'Compile the GMG solver (C code); otherwise a stub stops the model if GMG is requested')
+option('double', type : 'boolean', value : true,
+  description : 'Promote default REAL to 8 bytes (the makefile DBLE)')
+option('static', type : 'boolean', value : true,
+  description : 'Link the executables statically')
+option('build_zonebudget', type : 'boolean', value : true,
+  description : 'Build the ZoneBudget postprocessor')
+option('build_hydfmt', type : 'boolean', value : true,
+  description : 'Build the HydFMT postprocessor')

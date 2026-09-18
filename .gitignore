@@ -66,6 +66,7 @@ examples/**/output/**
 obj/**
 lib/**
 **/obj/**
+**/build/**
 #
 # Visual Studio files
 

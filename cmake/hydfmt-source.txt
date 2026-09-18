@@ -1,0 +1,10 @@
+# HydFMT postprocessor sources
+#
+# One source file per line, relative to the repository root. Blank lines and
+# lines starting with # are ignored. The order is the compilation order used
+# by the makefile (CMake and Meson work out the module dependencies on their
+# own, the order is kept for readability). This list is read by
+# cmake/mf-source-list.cmake and by meson.build, so a source file added to
+# the makefile only needs to be added here once for both.
+#
+postprocessors/hydfmt/src/hydfmt.f

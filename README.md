@@ -30,6 +30,14 @@ Pronounced as Mod-Flow-Ohm (mäd flō ōm) or colloquially called OneWater.
 
 &nbsp; 
 
+**Compiling the Source**
+
+- [doc/BUILD.md](doc/BUILD.md) &emsp; describes how to compile MF-OWHM, ZoneBudget and HydFMT with GNU Make, CMake or Meson,  
+  how to set up Linux, WSL and Windows for it, the options they share and the resulting binary names.  
+  Only one build system is needed; several are offered so developers can pick the one that fits their tools.
+
+&nbsp; 
+
 **Important Repository Branches**
 
 If new to git branching and tagging, please review the **[Git Branches Section](#git-branches-and-organization)**,  
@@ -173,7 +181,7 @@ To provide an executable that is written only in Fortran, the default executable
 
 For new models, it is recommended to use either the `PCGN` solver or `NWT` solver rather than `GMG`.
 
-If your project does use the `GMG` solver, then use the executable binary named `mf-owhm-gmg.exe` instead. If you want to compile the binary yourself, then it is required to have both a Fortran and C compiler (e.g., `ifort` and `icc` or `gfortran` and `gcc`). To compile GMG use the provided `makefile` with the option `USEGMG = YES` or the Visual Studio Solution `OneWater_GMG_Project.sln`.
+If your project does use the `GMG` solver, then use the executable binary named `mf-owhm-gmg.exe` instead. If you want to compile the binary yourself, then it is required to have both a Fortran and C compiler (e.g., `ifx` and `icx` or `gfortran` and `gcc`). To compile GMG use the provided `makefile` with the option `USEGMG = YES` or the Visual Studio Solution `OneWater_GMG_Project.sln`.
 
 > :warning: ​Note that the [Downloads](#downloads) links include in the `bin` directory `mf-owhm.exe` and `mf-owhm-gmg.exe`. 
 
@@ -359,7 +367,7 @@ The "Other" under Assets, highlighted in green, contain additional download link
 
 ## Visual Studio IDE and Intel Fortran Setup
 
-The windows executable binary is compiled using Microsoft Visual Studio 2019 (vs2019) integrated development environment (IDE) and Intel OneAPI's Fortran 2018 standard (`ifort`) and ANSI C (`icc`). The vs2019 solution is located in the `ide/visual_studio` directory. Please review the [Visual Studio and Intel Fortran Installation Guide](doc/Visual_Studio_and_Intel_Fortran_Installation_Guide.md) for information on how to install and use both programs. The visual studio solution (input file) for mf-owhm is located in the ide/visual_studio directory.
+The windows executable binary, `mf-owhm.exe`, is compiled using the Microsoft Visual Studio integrated development environment (IDE) and Intel oneAPI's Fortran compiler `ifx` (Fortran 2018 standard) and C compiler `icx` (ANSI C). `ifx` is the default compiler; the classic `ifort`, which Intel discontinued with oneAPI 2024.2 and which only works with Visual Studio 2022 and earlier, is still supported through the `ReleaseIFORT` configuration that produces `mf-owhm.ifort.exe`. The Visual Studio solution is located in the `ide/visual_studio` directory. Please review the [Visual Studio and Intel Fortran Installation Guide](doc/Visual_Studio_and_Intel_Fortran_Installation_Guide.md) for information on how to install and use both programs, and [doc/BUILD.md](doc/BUILD.md) for the other build systems (GNU Make, CMake, Meson).
 
 To assist in compilation and development of source code; however, a set of input files for different IDEs are provided. 
 
@@ -422,20 +430,22 @@ The source code, makefile, and Visual Studio Project has been provided for compi
 
 ## Key Root Directory Files
 
-| Directory             | Description                                                  |
-| --------------------- | ------------------------------------------------------------ |
-| .fortls               | Input file for a [Fortran Language Server](https://github.com/hansec/fortran-language-server) used by vscode [FORTRAN IntelliSense Extension](https://marketplace.visualstudio.com/items?itemName=hansec.fortran-ls) |
-| .gitattributes        | File that specifies the check-in/check-out behavior of git. <br />Specifies that the majority of files should keep Unix text formatting (`LF`) and only preservers windows text formatting (`CR` `LF`) for Visual Studio solution files.<br />Defines what files are managed by *Git LFS*. |
-| .gitignore            | Specifies files that should be ignored and not tracked by git. |
-| CHANGELOG.md          | Version log of changes to this code repository, this includes corrected code errors (bug fixes). |
-| CHANGELOG_Features.md | Version log of new features added to the code repository.  <br />These are also included in the regular changelog, but this file contains a detailed explanation. |
-| cleanRepo.sh          | Bash script that deletes files in `obj` and `lib` folders and the `examples/**/output` folders. |
-| code.json             | Metadata file required by the USGS for code.usgs.gov         |
-| DISCLAIMER.md         | Is either the USGS's *Production Release* or *Preliminary Release* disclaimer. |
-| LICENSE.md            | License and copyright information regarding the repository.  |
-| `makefile`            | Makefile for comping MF-OWHM with GNU Make. <br />Used by `CodeBlocks` and `VScode` for compiling and running debug sessions. |
-| README.md             | The file you are currently reading.                          |
-| readme.txt            | Basic explanation of markdown (`.md`) syntax and software with markdown rendering. |
+| Directory                      | Description                                                  |
+| ------------------------------ | ------------------------------------------------------------ |
+| .fortls                        | Input file for a [Fortran Language Server](https://github.com/hansec/fortran-language-server) used by vscode [FORTRAN IntelliSense Extension](https://marketplace.visualstudio.com/items?itemName=hansec.fortran-ls) |
+| .gitattributes                 | File that specifies the check-in/check-out behavior of git. <br />Specifies that the majority of files should keep Unix text formatting (`LF`) and only preservers windows text formatting (`CR` `LF`) for Visual Studio solution files.<br />Defines what files are managed by *Git LFS*. |
+| .gitignore                     | Specifies files that should be ignored and not tracked by git. |
+| CHANGELOG.md                   | Version log of changes to this code repository, this includes corrected code errors (bug fixes). |
+| CHANGELOG_Features.md          | Version log of new features added to the code repository.  <br />These are also included in the regular changelog, but this file contains a detailed explanation. |
+| CMakeLists.txt                 | CMake build (`cmake -S . -B build`); flag sets and source lists are in the `cmake` directory. See [doc/BUILD.md](doc/BUILD.md). |
+| cleanRepo.sh                   | Bash script that deletes files in `obj` and `lib` folders, the `examples/**/output` folders, and the CMake and Meson `build` folders. |
+| code.json                      | Metadata file required by the USGS for code.usgs.gov         |
+| DISCLAIMER.md                  | Is either the USGS's *Production Release* or *Preliminary Release* disclaimer. |
+| LICENSE.md                     | License and copyright information regarding the repository.  |
+| `makefile`                     | Makefile for comping MF-OWHM with GNU Make. <br />Used by `CodeBlocks` and `VScode` for compiling and running debug sessions. |
+| meson.build<br />meson.options | Meson build (`meson setup build`) and its options.           |
+| README.md                      | The file you are currently reading.                          |
+| readme.txt                     | Basic explanation of markdown (`.md`) syntax and software with markdown rendering. |
 
 &nbsp;
 
@@ -444,9 +454,10 @@ The source code, makefile, and Visual Studio Project has been provided for compi
 | Directory         | Description                                                  |
 | ----------------- | ------------------------------------------------------------ |
 | bin               | Location for 64-bit executable binaries for Windows (`mf-owhm.exe`) and Ubuntu Linux (`mf-owhm.nix`) |
+| cmake             | CMake modules (`CompilerFlagInput.cmake`, `mf-source-list.cmake`) and the plain text source lists (`*-source.txt`) shared by CMake and Meson. |
 | .util             | Bash scripts for cleaning the repository (`clean`) and running pandoc to convert markdown files to pdf. |
 | .vscode           | Workspace `.json` files necessary for using the [vscode](https://code.visualstudio.com/) integrated develop environment <br />for comping MF-OWHM with `gfortran`.<br />The vscode workspace is in `ide/vscode/mf-owhm.code-workspace` |
-| doc               | General text documents that may assist in model building. <br />Contains `FMP_Template`, `Notepad++ Syntax Highlighting`, and `Option Block Cheatsheets` |
+| doc               | General text documents that may assist in model building, and [BUILD.md](doc/BUILD.md) on compiling the code. <br />Contains `FMP_Template`, `Notepad++ Syntax Highlighting`, and `Option Block Cheatsheets` |
 | examples          | Example problems to illustrate model input and for unit testing for validating code changes.<br /><br />`examples/bash_example_run` contains Bash scripts for running the example problems.<br />It also contains the unit testing script `1_RunValidation.sh`, <br />which runs all the example problems and then compiles with<br />`gfortran` the file `validate_example_results.f90` to check the results of the example problems with the output-true directories. |
 | icon              | MF-OWHM icon in a different image formats (`png`, `svg`, `ai`, and `ico`).<br />Also, contains Windows Resource (`rc`) file for comping the ico with the executable binary. |
 | ide               | Integrated development environment (ide) files to assist with compiling. <br />The windows compiled executable uses Visual Studio 2019 Community Edition with Intel OneAPI-Fortran Compiler Classic. <br />Other IDEs are provided as is, but have not been tested. |
@@ -922,7 +933,7 @@ The following is the Apache license boilerplate notice:
 &nbsp;
 
 ```
-  Copyright 2020 U.S. Geological Survey
+  Copyright 2026 U.S. Geological Survey
   
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.

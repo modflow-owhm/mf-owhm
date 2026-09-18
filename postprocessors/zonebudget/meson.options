@@ -1,0 +1,6 @@
+option('config', type : 'combo', choices : ['release', 'debug'], value : 'release',
+  description : 'Release or debug compiler flags (the makefile CONFIG)')
+option('double', type : 'boolean', value : false,
+  description : 'Promote default REAL to 8 bytes (the makefile DBLE)')
+option('static', type : 'boolean', value : true,
+  description : 'Link the executable statically')

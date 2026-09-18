@@ -3,7 +3,8 @@
 # Set command arg to 
 #  "example" to only do example/outputs
 #  "lib" to only do lib folder
-#  "object" to only do the obj folder
+#  "object"  to only do the obj folder
+#  "build"   to only do the CMake and Meson build folders
 # Nothing to do both
 #
 #shopt -s nocasematch
@@ -37,6 +38,7 @@ ALL=$T
 OBJ=$F
 LIB=$F
 EX=$F
+BUILD=$F
 Pause=$T
 
 for ARG in "$@" 
@@ -54,6 +56,10 @@ do
           OBJ=$T
           ALL=$F
            ;;
+   b | B )
+          BUILD=$T
+          ALL=$F
+           ;;
    n | N )
           Pause=$F
            ;;
@@ -67,6 +73,7 @@ if [ $ALL = $T ]; then
                  EX=$T
                  OBJ=$T
                  LIB=$T
+                 BUILD=$T
 fi
 
 #Clean out the object file output
@@ -82,6 +89,11 @@ fi
 #Clean out the example problem output
 if [ $EX = $T ]; then
              bash ./cleanExampleOutput.sh "nopause"
+fi
+
+#Clean out the CMake and Meson build directories
+if [ $BUILD = $T ]; then
+             bash ./cleanBuild.sh "nopause"
 fi
 #
 #---- Return to calling folder  ----------------------------------------------------------

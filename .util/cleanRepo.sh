@@ -4,11 +4,12 @@
 #  "example" to only do example/outputs
 #  "lib"     to only do lib folder
 #  "object"  to only do the obj folder
+#  "build"   to only do the CMake and Meson build folders
 #  "nopause" disables stopping script at completion.
 # 
 #    Not including one or more of 
-#       "example", "lib", or "object" args
-#       will automatically select all three.
+#       "example", "lib", "object", or "build" args
+#       will automatically select all four.
 #
 #
 #---- Get Shell Scripts path  ------------------------------------------------------------

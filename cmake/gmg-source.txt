@@ -1,0 +1,16 @@
+# GMG solver sources, used when the build enables GMG (C compiler needed)
+#
+# One source file per line, relative to the repository root. Blank lines and
+# lines starting with # are ignored. The order is the compilation order used
+# by the makefile (CMake and Meson work out the module dependencies on their
+# own, the order is kept for readability). This list is read by
+# cmake/mf-source-list.cmake and by meson.build, so a source file added to
+# the makefile only needs to be added here once for both.
+#
+# The header files live next to the C sources in src/gmg_c.
+#
+src/gmg_c/gmg_dble.f
+src/gmg_c/r_vector.c
+src/gmg_c/solvers.c
+src/gmg_c/ccfd.c
+src/gmg_c/mf2kgmg_OWHM.c
