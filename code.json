@@ -1,10 +1,10 @@
 [
   {
-    "version": "2.3.1",
+    "version": "2.3.2-b1",
     "status": "Preliminary",
 
     "date": {
-      "metadataLastUpdated": "2025-12-12"
+      "metadataLastUpdated": "2026-10-01"
     },
 
     "downloadURL":   "https://code.usgs.gov/modflow/mf-owhm/-/archive/main/mf-owhm-main.zip",
@@ -30,12 +30,12 @@
     },
 
     "name": "MODFLOW One-Water Hydrologic Flow Model (MF-OWHM) Conjunctive Use and Integrated Hydrologic Flow Modeling Software",
-    
+
     "description":  "MODFLOW based Conjunctive Use and Integrated Hydrologic Modeling Software. Simulates groundwater flow, surface water flow, and land use in a supply and demand framework.",
-    
+
     "organization": "U.S. Geological Survey",
     "homepageURL":  "https://www.usgs.gov/software/modflow-one-water-hydrologic-flow-model-conjunctive-use-simulation-software-mf-owhm",
-    
+
     "laborHours": 99999,
 
     "tags": [
