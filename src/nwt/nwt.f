@@ -918,7 +918,7 @@ C Allocage PCG if requested
       DOUBLE PRECISION EPSQD, z    
 !     -----------------------------------------------------------------
       DHORIZ = DZ
-      IF ( LAYTYPUPW(il) .LE. 0 .OR. Hup .GE. bbot) RETURN
+      IF ( LAYTYPUPW(il) .LE. 0 .OR. Hup .GE. Ttop) RETURN
 C-------STRAIGHT LINE WITH PARABOLIC SMOOTHING
       EPS = Thickfact
       ACOF = UNO / (UNO - EPS)
