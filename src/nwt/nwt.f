@@ -1707,8 +1707,8 @@ C-----SET HNEW TO HDRY IF IPHRY>0
               IF( il < NLAY ) H_2_BOT = IBOUND(ic,ir,il+1) == 0
               !
               IF(H_2_BOT) THEN
-                 IF( Hiter(ic, ir, il) < bot ) 
-     +               Hiter(ic, ir, il) = bot + bot*1.0e-6 !1.0e-6 !
+                 IF( Hiter(ic, ir, il) < bot )
+     +               Hiter(ic, ir, il) = bot + 1.0D-6
                  !
                  Hnew(ic, ir, il) = ( Hiter(ic, ir, il) + bot ) * 0.5D0
                  Hchange(jj) = Hnew(ic, ir, il) - Hiter(ic, ir, il)
