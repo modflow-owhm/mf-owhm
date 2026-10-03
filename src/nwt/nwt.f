@@ -60,7 +60,7 @@
       ALLOCATE (Tol, Ftol, RMS2, RMS1, Iierr,IFDPARAM,ICNVGFLG)
       ALLOCATE (ITER1,THETA,THICKFACT,BTOL,Numtrack)
       ALLOCATE (RMSAVE,ADAMP,Breduc_Reset,HED_LIM,GSE_LIM(1,1))
-      ALLOCATE (Numnonzero, Numactive, Numcell, II, iBtrak)
+      ALLOCATE (Numnonzero, Numactive, Numcell, II)
       ALLOCATE (Akappa,Gamma,Amomentum,Btrack,Breduc)
       ALLOCATE (Nonmeth, Linmeth, IPRNWT, Ibt)
       ALLOCATE (IBOTAV, ITREAL)
@@ -422,7 +422,6 @@ C3B-----GET OPTIONS.
       ALLOCATE (Diag(3,Ncol*Nrow*Nlay), Hiter(Ncol, Nrow, Nlay))
       Numnonzero = Z
       II     = Z
-      iBtrak = Z
       ICELL  = Z
       DIAG   = Z
  ! Check heads and set to be above bottom.
@@ -1217,7 +1216,7 @@ C
 ! Builds and Solves Jacobian
 ! Calls various unstructured linear solvers to solve Jacobian
       !USE GWFBASMODULE, ONLY:TOTIM, HNOFLO
-      USE CONSTANTS, ONLY: Z, ONE, NEG, DZ, UNO, TRUE, FALSE
+      USE CONSTANTS, ONLY: Z, ONE, DZ, UNO, TRUE, FALSE
       USE GLOBAL, ONLY:Ncol, Nrow, Nlay, Ibound, Hcof, Rhs, Iout,botm,
      +                 LBOTM, HOLD, HNEW, DELR, DELC, ISSFLG, 
      +                 BACKTRACKING
@@ -1280,7 +1279,6 @@ C
       IF ( Kkiter == ONE ) THEN
         itertot = Z
         II      = Z
-        iBtrak  = Z
         RMS1    = DZ
         RMS2    = DZ
         IF ( kkiter+kper.EQ.2) Fheadsave = 2.0*Tol
@@ -1297,8 +1295,6 @@ C
       CALL NWT_RMS_Calc(icfld, irfld, ilfld, Fflux, RMS1)
       !
       !IF ( II == Z  ) RMSAVE = RMS1
-      !
-      IF (iBtrak == 10) II = NEG    ! Backtracking is not helping disbale for time step
       !
 !     IF ( RMS1.GT.FTOL .OR. ABS(Fheadsave).GT.Tol .OR. 
 !    +                           kkiter.LT.2 ) THEN

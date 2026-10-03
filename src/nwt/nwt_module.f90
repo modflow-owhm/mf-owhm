@@ -20,7 +20,7 @@ MODULE GWFNWTMODULE
   DOUBLE PRECISION, SAVE, POINTER :: Ccc, Crr, Cvv, H               
   DOUBLE PRECISION, SAVE, POINTER :: Hcoff, Rhss, Fflux, Fhead
   DOUBLE PRECISION, SAVE, POINTER :: Fheadsave
-  INTEGER, SAVE, POINTER :: Numnonzero, II, iBtrak, Itreal, Ibt, NJA
+  INTEGER, SAVE, POINTER :: Numnonzero, II, Itreal, Ibt, NJA
   INTEGER, SAVE, POINTER :: IFDPARAM, ICNVGFLG
   INTEGER, SAVE, POINTER :: Btrack, Iierr
   DOUBLE PRECISION, SAVE, POINTER :: Tol, Ftol,  RMS2, RMS1, ADAMP, Breduc_Reset
@@ -53,7 +53,7 @@ MODULE GWFNWTMODULE
   DOUBLE PRECISION, POINTER :: Ccc, Crr, Cvv, H               
   DOUBLE PRECISION, POINTER :: Hcoff, Rhss, Fflux, Fhead
   DOUBLE PRECISION, POINTER :: Fheadsave
-  INTEGER, POINTER :: Numnonzero, II, iBtrak, Itreal, Ibt, NJA
+  INTEGER, POINTER :: Numnonzero, II, Itreal, Ibt, NJA
   INTEGER, POINTER :: IFDPARAM, ICNVGFLG
   INTEGER, POINTER :: Btrack, Iierr
   DOUBLE PRECISION, POINTER :: Tol, Ftol,  RMS2, RMS1, ADAMP, Breduc_Reset
@@ -118,7 +118,6 @@ END MODULE GWFNWTMODULE
       DEALLOCATE (GWFNWTDAT(IGRID)%Fheadsave )
       DEALLOCATE (GWFNWTDAT(IGRID)%Numnonzero)
       DEALLOCATE (GWFNWTDAT(IGRID)%II        )
-      DEALLOCATE (GWFNWTDAT(IGRID)%iBtrak    )
       DEALLOCATE (GWFNWTDAT(IGRID)%Itreal    )
       DEALLOCATE (GWFNWTDAT(IGRID)%Ibt       )
       DEALLOCATE (GWFNWTDAT(IGRID)%NJA       )
@@ -186,7 +185,6 @@ END MODULE GWFNWTMODULE
          Fheadsave  =>NULL()
          Numnonzero =>NULL()
          II         =>NULL()
-         iBtrak     =>NULL()
          Itreal     =>NULL()
          Ibt        =>NULL()
          NJA        =>NULL()
@@ -267,7 +265,6 @@ END MODULE GWFNWTMODULE
       Fheadsave  => GWFNWTDAT(IGRID)%Fheadsave
       Numnonzero => GWFNWTDAT(IGRID)%Numnonzero
       II         => GWFNWTDAT(IGRID)%II
-      iBtrak     => GWFNWTDAT(IGRID)%iBtrak
       Itreal     => GWFNWTDAT(IGRID)%Itreal
       Ibt        => GWFNWTDAT(IGRID)%Ibt
       NJA        => GWFNWTDAT(IGRID)%NJA
@@ -346,7 +343,6 @@ END MODULE GWFNWTMODULE
       GWFNWTDAT(IGRID)%Fheadsave  => Fheadsave
       GWFNWTDAT(IGRID)%Numnonzero => Numnonzero
       GWFNWTDAT(IGRID)%II         => II
-      GWFNWTDAT(IGRID)%iBtrak     => iBtrak
       GWFNWTDAT(IGRID)%Itreal     => Itreal
       GWFNWTDAT(IGRID)%Ibt        => Ibt
       GWFNWTDAT(IGRID)%NJA        => NJA
