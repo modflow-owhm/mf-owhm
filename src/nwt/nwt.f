@@ -1770,30 +1770,23 @@ C-----SET HNEW TO HDRY IF IPHRY>0
 !
 !     -----------------------------------------------------------------
       SUBROUTINE APPLY_GSE_LIM(ichld,irhld,ilhld)
-!  Scale heads if they exceed the land surface
-      USE GLOBAL, ONLY: Hnew, Iout, NCOL,NROW,NLAY,GSE
-      USE GWFUPWMODULE, ONLY:LAYTYPUPW
+!  Scale the head change of every cell by the smallest factor that keeps
+!  all cells within MAX_HEAD_CHANGE and HEAD_DISTANCE_ABOVE_GSE_LIMIT
+      USE GLOBAL, ONLY: Hnew
       USE GWFNWTMODULE
       IMPLICIT NONE
       !
       INTEGER, INTENT(INOUT):: ichld,irhld,ilhld
       !
-      INTEGER ic, ir, il, jj, i, iworst
-      DOUBLE PRECISION:: DMP, CHNG, HCHNG, worst
+      INTEGER ic, ir, il, jj
+      DOUBLE PRECISION:: DMP, CHNG, HCHNG
       !
-      worst = 0.0D0
-      iworst = 0
+      DMP = 1.0D0
       IF(HED_LIM == HED_LIM) THEN
         DO jj = 1, Numactive
           !
           HCHNG = ABS(Hchange(jj))
-          IF(HCHNG > HED_LIM) THEN
-              IF(HCHNG - HED_LIM > worst) THEN
-                 DMP = HED_LIM / HCHNG
-                 worst = HCHNG - HED_LIM
-                 iworst = jj 
-              END IF
-          END IF
+          IF(HCHNG > HED_LIM) DMP = MIN(DMP, HED_LIM / HCHNG)
         END DO
       END IF
       !
@@ -1804,26 +1797,20 @@ C-----SET HNEW TO HDRY IF IPHRY>0
           ic = Diag(3, jj)
           !
           IF(Hnew(ic, ir, il) > GSE_LIM(ic, ir)) THEN
-              IF(Hnew(ic, ir, il) - GSE_LIM(ic, ir) > worst) THEN
-                 HCHNG = GSE_LIM(ic, ir) - Hnew(ic,ir,il) + Hchange(jj)
-                 IF(HCHNG > 0D0) THEN
-                    DMP = HCHNG / ABS(Hchange(jj))
-                    worst = HCHNG
-                    iworst = jj 
-                 END IF
-              END IF
+              HCHNG = GSE_LIM(ic, ir) - Hnew(ic,ir,il) + Hchange(jj)    ! Distance from previous head to the limit, Hchange > 0 when HCHNG > 0
+              IF(HCHNG > 0.0D0) DMP = MIN(DMP, HCHNG / Hchange(jj))
           END IF
         END DO
       END IF
       !
-      IF(iworst > 0) THEN
+      IF(DMP < 1.0D0) THEN
          Fhead = 0.0D0
-         DMP = 1D0 - DMP
+         DMP = 1.0D0 - DMP
          DO jj = 1, Numactive
            il = Diag(1, jj)
            ir = Diag(2, jj)
            ic = Diag(3, jj)
-           !CHNG = Hchange(jj) * (1D0 - DMP)
+           !CHNG = Hchange(jj) * (1.0D0 - DMP)
            CHNG = Hchange(jj) * DMP
            !
            Hnew(ic, ir, il) = Hnew(ic, ir, il) - CHNG
