@@ -124,9 +124,11 @@
         CASE('MAX_HEAD_CHANGE')
             CALL GET_NUMBER(line, lloc, istart, istop,IOUT,IN,HED_LIM,
      1      MSG='"MAX_HEAD_CHANGE" failed to read the HED_LIM value.')
-            IF(HED_LIM <=   0D0 ) HED_LIM=IEEE_VALUE(THK,IEEE_QUIET_NAN)
-            IF(HED_LIM >= 0.9D30) HED_LIM=IEEE_VALUE(THK,IEEE_QUIET_NAN)
-            IF(HED_LIM <  0.5D0 ) HED_LIM=0.5D0
+            IF(HED_LIM <= 0.0D0 .OR. HED_LIM >= 0.9D30) THEN
+                HED_LIM=IEEE_VALUE(THK,IEEE_QUIET_NAN)
+            ELSEIF(HED_LIM < 0.5D0) THEN
+                HED_LIM=0.5D0
+            END IF
             WRITE(IOUT,'(A)')' MAX_HEAD_CHANGE '//NUM2STR(HED_LIM)
         CASE('HEAD_DISTANCE_ABOVE_GSE_LIMIT')
             WRITE(IOUT,'(A)')' HEAD_DISTANCE_ABOVE_GSE_LIMIT'
@@ -253,9 +255,11 @@ C3B-----GET OPTIONS.
         CASE('MAX_HEAD_CHANGE')
            CALL GET_NUMBER(line, lloc, istart, istop,IOUT,IN,HED_LIM,
      1     MSG='"MAX_HEAD_CHANGE" failed to read the HED_LIM value.')
-           IF(HED_LIM <=   0D0 ) HED_LIM=IEEE_VALUE(THK,IEEE_QUIET_NAN)
-           IF(HED_LIM >= 0.9D30) HED_LIM=IEEE_VALUE(THK,IEEE_QUIET_NAN)
-           IF(HED_LIM <  0.5D0 ) HED_LIM=0.5D0
+           IF(HED_LIM <= 0.0D0 .OR. HED_LIM >= 0.9D30) THEN
+               HED_LIM=IEEE_VALUE(THK,IEEE_QUIET_NAN)
+           ELSEIF(HED_LIM < 0.5D0) THEN
+               HED_LIM=0.5D0
+           END IF
            WRITE(IOUT,'(A)')' MAX_HEAD_CHANGE '//NUM2STR(HED_LIM)
            !
         CASE('HEAD_DISTANCE_ABOVE_GSE_LIMIT')
