@@ -121,7 +121,7 @@ C     ******************************************************************
       USE GWFLPFMODULE, ONLY: SCLPF=>SC2,SC1LPF=>SC1, LAYTYP
       USE GWFBCFMODULE, ONLY: SC1, SC2, LAYCON
       USE GWFHUFMODULE, ONLY: SC2HUF
-      USE GWFUPWMODULE, ONLY: SC1UPW=>SC1,SC2UPW,LAYTYPUPW
+      USE GWFUPWMODULE, ONLY: SC1UPW=>SC1,SC2UPW,LAYTYPUPW,ISFAC
       USE ERROR_INTERFACE,  ONLY: STOP_ERROR, WARNING_MESSAGE
       USE FILE_IO_INTERFACE,ONLY: READ_TO_DATA
       USE STRINGS,          ONLY: UPPER
@@ -881,7 +881,13 @@ C use LPF SC2, Iunitlpf>0
                       FOUND = .TRUE.
                       THICK = BOTM(ncth, nrth, LBOTM(nlth)-1)-
      +                      BOTM(ncth, nrth, LBOTM(nlth))
-                      sy = 0.0D0                                !Confined layer has no specific yield in SC2UPW
+                      IF ( ISFAC.EQ.0 ) THEN                    !UPW SC1 is Ss*AREA, not Ss*THICK*AREA as in LPF
+                        sy = SC1UPW(ncth, nrth, nlth)/
+     +                       (DELR(ncth)*DELC(nrth))
+                      ELSE                                      !STORAGECOEFFICIENT, SC1 is S*AREA
+                        sy = SC1UPW(ncth, nrth, nlth)/
+     +                       (THICK*DELR(ncth)*DELC(nrth))
+                      END IF
                     ELSE
                       sy = SC2UPW(ncth, nrth, LAYTYPUPW(nlth))/
      +                     (DELR(ncth)*DELC(nrth))
