@@ -397,7 +397,7 @@ C     ------------------------------------------------------------------
       USE GLOBAL,       ONLY: IBOUND, BOTM, DELR, DELC,LBOTM,
      +                        ITRSS,NLAY,NCOL,NROW,LAYHDT,IUNIT ! CJM added ncol and nrow
       USE GWFBASMODULE, ONLY: HAS_STARTDATE
-      USE GWFLPFMODULE, ONLY: SC2LPF=>SC2
+      USE GWFLPFMODULE, ONLY: SC2LPF=>SC2, LAYTYP
       USE GWFBCFMODULE, ONLY: SC1, SC2, LAYCON
       USE GWFHUFMODULE, ONLY: SC2HUF
       USE GWFUPWMODULE, ONLY: SC2UPW,HKUPW,VKAUPW,LAYTYPUPW
@@ -1402,8 +1402,13 @@ C        AND SPECIFIC YIELD WHEN UNSATURATED FLOW IS ACTIVE.
         IF ( ABS(ITRSS) == 1 ) THEN
           IF ( ISFROPT == 2 .OR. ISFROPT == 3 ) THEN
             IF ( Iunitlpf /= Z ) THEN
-              THTR(ii) = THTS(ii) - SC2LPF(jrch, irch, krch)
+              IF ( LAYTYP(krch) > Z ) THEN
+                THTR(ii) = THTS(ii) -
+     +                     SC2LPF(jrch, irch, LAYTYP(krch))
      +                   /(DELR(jrch)*DELC(irch))
+              ELSE
+                THTR(ii) = THTS(ii)
+              END IF
             ELSEIF ( Iunitupw /= Z ) THEN
               IF ( LAYTYPUPW(krch) > Z ) THEN
                 THTR(ii) = THTS(ii) -
@@ -1692,15 +1697,20 @@ C         AND SPECIFIC YIELD WHEN UNSATURATED FLOW IS ACTIVE.
               IF ( ITRSS == 1 ) THEN
                 IF ( ISFROPT == 4 .OR. ISFROPT == 5 ) THEN
                   IF ( Iunitlpf /= Z ) THEN
-                    THTR(irch) = THTS(irch) - SC2LPF(jrck, irck, krck)
-     +                         /(DELR(jrck)*DELC(irck))
+                    IF ( LAYTYP(krck) > Z ) THEN
+                      THTR(irch) = THTS(irch) -
+     +                           SC2LPF(jrck, irck, LAYTYP(krck))
+     +                           /(DELR(jrck)*DELC(irck))
+                    ELSE
+                      THTR(irch) = THTS(irch)
+                    END IF
                   ELSE IF ( Iunitbcf /= Z ) THEN
-                    IF( LAYCON(krck) == Z ) THEN
+                    IF( LAYCON(krck) < 2 ) THEN
                       THTR(irch) = THTS(irch) - SC1(jrck, irck, krck)
      +                         /(DELR(jrck)*DELC(irck))
                     ELSE
                       kkrch = 0
-                      DO k = 1, krch
+                      DO k = 1, krck
                         IF(LAYCON(K) == 3 .OR. LAYCON(K) == 2)
      +                   kkrch = kkrch + 1
                       END DO
