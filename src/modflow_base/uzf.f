@@ -121,7 +121,7 @@ C     ******************************************************************
       USE GWFLPFMODULE, ONLY: SCLPF=>SC2,SC1LPF=>SC1, LAYTYP
       USE GWFBCFMODULE, ONLY: SC1, SC2, LAYCON
       USE GWFHUFMODULE, ONLY: SC2HUF
-      USE GWFUPWMODULE, ONLY: SC1UPW=>SC1,SC2UPW
+      USE GWFUPWMODULE, ONLY: SC1UPW=>SC1,SC2UPW,LAYTYPUPW
       USE ERROR_INTERFACE,  ONLY: STOP_ERROR, WARNING_MESSAGE
       USE FILE_IO_INTERFACE,ONLY: READ_TO_DATA
       USE STRINGS,          ONLY: UPPER
@@ -881,12 +881,11 @@ C use LPF SC2, Iunitlpf>0
                       FOUND = .TRUE.
                       THICK = BOTM(ncth, nrth, LBOTM(nlth)-1)-
      +                      BOTM(ncth, nrth, LBOTM(nlth))
-                      sy = SC2UPW(ncth, nrth, nlth)/       !seb, note UPW dims SC2UPW by NLAY
-     +                     (THICK*DELR(ncth)*DELC(nrth)) 
+                      sy = 0.0D0                                !Confined layer has no specific yield in SC2UPW
                     ELSE
-                      sy = SC2UPW(ncth, nrth, nlth)/
-     +                     (DELR(ncth)*DELC(nrth)) 
-                    END IF 
+                      sy = SC2UPW(ncth, nrth, LAYTYPUPW(nlth))/
+     +                     (DELR(ncth)*DELC(nrth))
+                    END IF
                   ELSE IF ( Iunitbcf.NE.0 ) THEN                
                     IF ( LAYCON(nlth).LT.2 ) THEN
                       sy = SC1(ncth, nrth, nlth)/

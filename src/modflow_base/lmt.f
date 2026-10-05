@@ -1796,7 +1796,6 @@ C--CALCULATE FLOW FROM STORAGE (VARIABLE HEAD CELLS ONLY)
                 TP=BOTM(J,I,LBOTM(K)-1)
                 BT=BOTM(J,I,LBOTM(K))
                 THICK = (TP-BT)
-                RHO2 = SC2UPW(J,I,K)*TLED 
                 ij = Icell(J,I,K)
                 RHO1 = SC1(J,I,K)*TLED
                 STRG= - THICK*RHO2*(Sn(ij)-So(ij)) - 

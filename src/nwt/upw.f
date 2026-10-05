@@ -405,10 +405,8 @@ C5------ALLOCATE MEMORY FOR ARRAYS.
          ALLOCATE(SC1(1,1,1))
       END IF
       SC1 = DZ
-! RGN 6/25/09      IF(ITRSS /= Z .AND. NCNVRT > Z) THEN
-      IF(ITRSS /= Z) THEN
-! RGN 6/25/09        ALLOCATE(SC2UPW(NCOL,NROW,NCNVRT))
-         ALLOCATE(SC2UPW(NCOL,NROW,NLAY))
+      IF(ITRSS /= Z .AND. NCNVRT > Z) THEN                              !SC2UPW is stored by convertible layer count, LAYTYPUPW(K), same as LPF
+         ALLOCATE(SC2UPW(NCOL,NROW,NCNVRT))
       ELSE
          ALLOCATE(SC2UPW(1,1,1))
       END IF
@@ -908,7 +906,8 @@ C4A-----IF THE CELL IS EXTERNAL THEN SKIP IT.
             THICK = (TP-BT)
             HTMP = HNEW(J,I,K)
             HLD = DBLE(HOLD(J,I,K))
-            RHO2 = SC2UPW(J,I,K)*TLED 
+            RHO2 = 0.0D0
+            IF(LAYTYPUPW(K) > 0) RHO2 = SC2UPW(J,I,LAYTYPUPW(K))*TLED
 !            IF ( HTMP.GT.TP ) RHO2 = SC1(J,I,K)*TLED
             RHO1 = SC1(J,I,K)*TLED  
 !            IF ( HLD.GT.TP ) RHO1 = SC1(J,I,K)*TLED
@@ -1449,7 +1448,8 @@ C7A----TWO STORAGE CAPACITIES.
       TP=dble(BOTM(J,I,LBOTM(K)-1))
       BT=dble(BOTM(J,I,LBOTM(K)))
       THICK = (TP-BT)
-      RHO2 = dble(SC2UPW(J,I,K))*TLED 
+      RHO2 = 0.0D0
+      IF(LAYTYPUPW(K) > 0) RHO2 = dble(SC2UPW(J,I,LAYTYPUPW(K)))*TLED
       ij = Icell(J,I,K)
       RHO1 = dble(SC1(J,I,K))*TLED
       STRG= - THICK*RHO2*(Sn(ij)-So(ij)) - Sn(ij)*THICK*RHO1*(HSING-HLD)

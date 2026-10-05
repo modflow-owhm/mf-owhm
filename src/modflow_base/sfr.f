@@ -400,7 +400,7 @@ C     ------------------------------------------------------------------
       USE GWFLPFMODULE, ONLY: SC2LPF=>SC2
       USE GWFBCFMODULE, ONLY: SC1, SC2, LAYCON
       USE GWFHUFMODULE, ONLY: SC2HUF
-      USE GWFUPWMODULE, ONLY: SC2UPW,HKUPW,VKAUPW
+      USE GWFUPWMODULE, ONLY: SC2UPW,HKUPW,VKAUPW,LAYTYPUPW
       USE ICHKSTRBOT_MODULE
       USE TABLEFILE_INTERFACE,ONLY: TABFILEPARSE,TABFILELINKS,
      +                              TABFILEPACKINDEX
@@ -1405,8 +1405,13 @@ C        AND SPECIFIC YIELD WHEN UNSATURATED FLOW IS ACTIVE.
               THTR(ii) = THTS(ii) - SC2LPF(jrch, irch, krch)
      +                   /(DELR(jrch)*DELC(irch))
             ELSEIF ( Iunitupw /= Z ) THEN
-              THTR(ii) = THTS(ii) - SC2UPW(jrch, irch, krch)
+              IF ( LAYTYPUPW(krch) > Z ) THEN
+                THTR(ii) = THTS(ii) -
+     +                     SC2UPW(jrch, irch, LAYTYPUPW(krch))
      +                   /(DELR(jrch)*DELC(irch))
+              ELSE
+                THTR(ii) = THTS(ii)
+              END IF
             ELSE IF ( Iunitbcf /= Z ) THEN
               IF ( LAYCON(krch).LT.2 ) THEN
                 THTR(ii) = THTS(ii) - SC1(jrch, irch, krch)
@@ -1705,8 +1710,13 @@ C         AND SPECIFIC YIELD WHEN UNSATURATED FLOW IS ACTIVE.
                   ELSE IF( Iunithuf /= Z ) THEN
                     THTR(irch) = THTS(irch) - SC2HUF(jrck, irck)
                   ELSEIF ( Iunitupw /= Z ) THEN
-                    THTR(irch) = THTS(irch) - SC2UPW(jrck, irck, krck)
+                    IF ( LAYTYPUPW(krck) > Z ) THEN
+                      THTR(irch) = THTS(irch) -
+     +                           SC2UPW(jrck, irck, LAYTYPUPW(krck))
      +                           /(DELR(jrck)*DELC(irck))
+                    ELSE
+                      THTR(irch) = THTS(irch)
+                    END IF
                   END IF
                 END IF
               ELSEIF ( ISFROPT == 4 .OR. ISFROPT == 5 ) THEN
