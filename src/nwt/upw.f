@@ -137,13 +137,14 @@ C3B-----GET OPTIONS.
         !
         SELECT CASE(LINE(ISTART:ISTOP))
         CASE('STORAGECOEFFICIENT')
-           ISFAC  = ONE
-           STOTXT = ANAME(9)
-           WRITE(IOUT,21)
-   21      FORMAT(1X,'STORAGECOEFFICIENT OPTION:',/,
-     1       1X,'Read storage coefficient rather than specific storage',
-     2       1X,'Option not supported when using ',
-     3          'UPW Flow Package and NWT Solver')
+           CALL STOP_ERROR(LINE,IN,IOUT,MSG=
+     +     'UPW DOES NOT SUPPORT THE STORAGECOEFFICIENT OPTION.'//NL//
+     +     'UPW multiplies the storage input by the cell thickness, '//
+     +     'so a storage coefficient would be applied as '//
+     +     'storage coefficient times thickness.'//BLN//
+     +     'Please remove STORAGECOEFFICIENT and specify specific '//
+     +     'storage (storage coefficient divided by cell thickness) '//
+     +     'or use the LPF package.')
         CASE('CONSTANTCV')
            ICONCV = ONE
            WRITE(IOUT,23)
