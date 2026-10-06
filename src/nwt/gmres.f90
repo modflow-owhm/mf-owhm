@@ -284,7 +284,6 @@
         r_norm = 1._kdp
         n_iter = itno
         eps1 = stop_tol*ro     ! ... for later convergence test
-        eps1 = 1e-3
      END IF
      ! ... Drop this test. At steady state, null solution vector is expected.
 !!$     IF(ro <= stop_tol + eps_a) THEN     ! ... residual less than tolerance, sol is sufficient
