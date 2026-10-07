@@ -2351,7 +2351,9 @@ C3A-----BRANCH CONDUCTANCE IN THE ROW DIRECTION (CR) TO THE RIGHT.
 C3A1----LOGARITHMIC MEAN HYDRAULIC CONDUCTIVITY
                HYC2=HKUPW(J+1,I,K)
                RATIO=HYC2/HYC1
-               IF(RATIO.GT.FRAC1 .OR. RATIO.LT.FRAC2) THEN
+               IF(RATIO == ZERO) THEN  !seb
+                  HYC=ZERO
+               ELSEIF(RATIO.GT.FRAC1 .OR. RATIO.LT.FRAC2) THEN
                   HYC=(HYC2-HYC1)/LOG(RATIO)
                ELSE
                   HYC=HALF*(HYC1+HYC2)
@@ -2381,7 +2383,9 @@ C3B1----LOGARITHMIC MEAN HYDRAULIC CONDUCTIVITY
                   HYC2=HYC2*CHANI(K)
                END IF
                RATIO=HYC2/HYC1
-               IF(RATIO.GT.FRAC1 .OR. RATIO.LT.FRAC2) THEN
+               IF(RATIO == ZERO) THEN  !seb
+                  HYC=ZERO
+               ELSEIF(RATIO.GT.FRAC1 .OR. RATIO.LT.FRAC2) THEN
                   HYC=(HYC2-HYC1)/LOG(RATIO)
                ELSE
                   HYC=HALF*(HYC1+HYC2)
