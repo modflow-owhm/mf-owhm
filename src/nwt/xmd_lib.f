@@ -680,7 +680,7 @@ c     locall variables
 c
       integer :: ibf, nred, ii, i, iHalf, iBlack,iRed, ierror, k
       integer, allocatable, dimension(:) :: ilist
-      allocate( ilist(neq) , stat = ierror )
+      allocate( ilist(2*neq) , stat = ierror )   !seb 2*neq so a row of black or red neighbours cannot overflow a half
       if(ierror/= 0) CALL USTOP("== not enough memory (xmdRedBlack) ==")
 
       ierr = 0
@@ -765,7 +765,7 @@ c    count red node
 c
 c     rearrange column numbers
 c
-      iHalf = neq/2
+      iHalf = neq
       do i = 1, neq
 
         iBlack = 0
