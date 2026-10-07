@@ -1113,6 +1113,9 @@ c      total      5*nblack
      [          v(nblack), stat = ierror )
       if (ierror /= 0) CALL USTOP( "== not enough memory (xmdcnjgd) ==")
 
+      q  = 0.0d0                   ! iter 0 uses q and aq with aconj = 0
+      aq = 0.0d0
+
 
 c     get [a]{x} and calculate {res} -- note: use {soln} as tmp
 
