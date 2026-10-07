@@ -290,6 +290,11 @@
 !!$        iierr = -1
 !!$        RETURN
 !!$     END IF
+     IF(ro == 0.0_kdp) THEN     ! ... zero residual, sol is exact and the correction is zero; avoids 1/0 below
+        r_norm = 0.0_kdp
+        rhs = 0.0_kdp
+        EXIT
+     END IF
      t = 1.0_kdp/ro
      DO  j=1,n
         vv(j,1) = vv(j,1)*t       ! ...  v-1 vector; initial vector of Krylov space

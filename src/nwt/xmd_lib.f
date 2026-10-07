@@ -1096,6 +1096,7 @@ c     local variables
 c
       integer :: i, iter, irpnt, ierror
       double precision :: temp, res0, rvkm, rvk, aconj, omega, resmax
+      double precision, parameter :: verysmall = 1.0d-300
       logical conv
 c
 c     work arrays
@@ -1165,7 +1166,7 @@ c
 c       {q} <- {v} and {aq} <- {avk}
 
         aconj = 0.0d0
-        if (iter > 0) aconj = rvk/rvkm
+        if (iter > 0) aconj = rvk/(rvkm+sign(verysmall, rvkm))
 
         do i = 1, nblack
           q(i) = v(i) + aconj * q(i)
@@ -1177,7 +1178,7 @@ c       {q} <- {v} and {aq} <- {avk}
           omega = omega + q(i)*aq(i)
         enddo
 
-        omega = rvk/omega
+        omega = rvk/(omega+sign(verysmall, omega))  ! zero residual gives omega = 0, not 0/0
         rvkm = rvk
 
         resmax = 0.0d+0
@@ -1570,6 +1571,7 @@ c       total    2*nblack + 2*(north+1)*nblack + north
 
       integer :: i, k, iter, j, i2, irpnt, ipnt, ierror
       double precision :: temp, res0, aqr, alpha, omega, resmax, avkaq
+      double precision, parameter :: verysmall = 1.0d-300
       logical :: conv
 
       double precision, dimension(:), allocatable :: avk, aqaq, q,
@@ -1662,7 +1664,7 @@ c         q(ipnt+i) = v(i)
           do i = 1, nblack
             avkaq = avkaq + avk(i)*aq(i2+i)
           enddo
-          alpha = -avkaq/aqaq(j)
+          alpha = -avkaq/(aqaq(j)+verysmall)
           do i = 1, nblack
             q(ipnt+i) = q(ipnt+i) + alpha*q(i2+i)
             aq(ipnt+i) = aq(ipnt+i) + alpha*aq(i2+i)
@@ -1677,7 +1679,7 @@ c         q(ipnt+i) = v(i)
         enddo
         aqaq(k) = temp
 
-        omega = aqr/aqaq(k)
+        omega = aqr/(aqaq(k)+verysmall)  ! aqaq >= 0, zero residual gives omega = 0, not 0/0
 
         resmax = 0.0d+0
         temp = 0.0d+0
