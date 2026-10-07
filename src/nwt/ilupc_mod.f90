@@ -507,6 +507,10 @@ CONTAINS
        ! ... update U-matrix
        DO  k=ii+1,ii+lenu-1
           IF (jw(n2+k) <= lfil) THEN
+             IF (ju0 > SIZE(jlu)) THEN   ! ... insufficient storage in U.
+                ierr = -3
+                RETURN
+             END IF
              jlu(ju0) = jw(k)
              alu(ju0) = w(k)
              levs(ju0) = jw(n2+k)
