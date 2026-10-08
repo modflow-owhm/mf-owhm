@@ -25,15 +25,10 @@
         integer :: n, nold, ierr
         nold = size(a)
         if (nold > n) return
-C seb
-        IF(ALLOCATED(tmp)) DEALLOCATE(tmp)
-        allocate (tmp(nold+200000), stat=ierr)
+        allocate (tmp(max(n+200000, nold+nold/2)), stat=ierr)  !seb grow by at least 50% and copy once
         if (ierr /= 0) CALL USTOP("allocate error")
         tmp(1:nold) = a(1:nold)
-        deallocate (a)
-        allocate (a(n+200000), stat=ierr)
-        if (ierr /= 0) CALL USTOP("allocate error")
-        a(1:nold) = tmp(1:nold)
+        call move_alloc(tmp, a)
       end subroutine realloc
 
       subroutine ialloc(a, n)
@@ -44,15 +39,10 @@ C seb
         integer :: n, nold, ierr
         nold = size(a)
         if (nold > n) return
-C seb
-        IF(ALLOCATED(tmp)) DEALLOCATE(tmp)
-        allocate (tmp(nold+200000), stat=ierr)
+        allocate (tmp(max(n+200000, nold+nold/2)), stat=ierr)  !seb grow by at least 50% and copy once
         if (ierr /= 0) CALL USTOP("allocate error")
         tmp(1:nold) = a(1:nold)
-        deallocate (a)
-        allocate (a(n+200000), stat=ierr)
-        if (ierr /= 0) CALL USTOP("allocate error")
-        a(1:nold) = tmp(1:nold)
+        call move_alloc(tmp, a)
       end subroutine ialloc
 
       end module xmdalloc
