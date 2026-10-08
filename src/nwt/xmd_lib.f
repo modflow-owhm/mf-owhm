@@ -497,13 +497,9 @@ c      new fill-in caused by red node elimination -> level = 1
           return
         endif
 
-c     inverse of diagonal to avoid small pivots
+c     pivot of diagonal
 
         temp = row(iblck)
-        ii = idiagf(iblck)
-
-        call realloc(afwk, ii)
-        afwk(ii) = 1.0d0/(temp + epsmin)
 
 c
 c     gathering full length array
@@ -516,6 +512,11 @@ c
           row(jafwk(ii)) = 0.0d0
           list(jafwk(ii)) = 0
         enddo
+c
+c     offset pivot to avoid division by zero, set after the gather
+c     because the gather overwrites the diagonal
+c
+        afwk(idiagf(iblck)) = temp + sign(epsmin, temp)
 
     4 continue
 
@@ -1520,10 +1521,9 @@ c
 
         enddo
 
-c     inverse of diagonal to avoid small pivots
+c     pivot of diagonal
 
         temp = row(iblck)
-        af(idiagf(iblck)) = 1.0d0/(temp + epsmin)
 c
 c     gathering full length array
 c
@@ -1533,6 +1533,11 @@ c
           row(id) = 0.0d0
           list(id) = 0
         enddo
+c
+c     offset pivot to avoid division by zero, set after the gather
+c     because the gather overwrites the diagonal
+c
+        af(idiagf(iblck)) = temp + sign(epsmin, temp)
 
       enddo blacknodes
 
