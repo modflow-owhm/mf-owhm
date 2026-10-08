@@ -2303,10 +2303,10 @@ MODULE BAS_OPTIONS_AND_STARTDATE!, ONLY: GET_BAS_OPTIONS(LINE, INBAS, IOUT, ICHF
               !
               CALL PRNT_CUM_HEAD_CHNG%OPEN(BL%LINE,LLOC,IOUT,INBAS,NO_BINARY=TRUE, SPLITMAXCOUNT=Z, NO_INTERNAL=TRUE)
               !
-              WRITE(PRNT_CUM_HEAD_CHNG%IU, "(3A)", ADVANCE="NO")                                                 &
+              WRITE(PRNT_CUM_HEAD_CHNG%IU, "(2A)")                                                               &
                   '# CUMULATIVE_HEAD_CHANGE file for comparing code versions with the same model input. ',       &
-                  'The sum of the first number with second number multiplied by 1e10 represents the sum of all the absolute value of active cell head changes. For example, " 3.92    7 " represents 3.92 + 7e10).', NL
-              FLUSH(PRNT_CUM_HEAD_CHNG%IU)  ! For some reason the record is lost unless it is flushed to the hard drive.
+                  'The sum of the first number with second number multiplied by 1e10 represents the sum of all the absolute value of active cell head changes. For example, " 3.92    7 " represents 3.92 + 7e10).'
+              FLUSH(PRNT_CUM_HEAD_CHNG%IU)
               !
           CASE('CUMULATIVE_RESIDUAL_ERROR_ARRAY')
               CALL PRNT_RES_CUM%OPEN(BL%LINE,LLOC,IOUT,INBAS)

@@ -2759,16 +2759,14 @@ C4------PRINT TOTAL BUDGET IF REQUESTED
         END IF
         !
         IF(LAST_TS) THEN
-                  I = PRNT_CUM_HEAD_CHNG%IU
-            WRITE(I, "(F16.3, 3x, A)", ADVANCE="NO")
-     +                 CUM_HEAD_CHNG, NUM2STR(CUM_HEAD_CHNG_E10)
-            FLUSH(I)                                                     !Some reason intel does not write to a file when using ADVANCE='NO' -- compiler bug to be fixed
-            !
+            I = PRNT_CUM_HEAD_CHNG%IU
             IF(CUM_HEAD_CHNG_E10 > 0) THEN
-                                      WRITE(I,"(A)", ADVANCE="NO") "E10"
-                                      FLUSH(I)
+               WRITE(I,"(F16.3, 3A)") CUM_HEAD_CHNG, '   ',
+     +                                NUM2STR(CUM_HEAD_CHNG_E10), 'E10'
+            ELSE
+               WRITE(I,"(F16.3, 2A)") CUM_HEAD_CHNG, '   ',
+     +                                NUM2STR(CUM_HEAD_CHNG_E10)
             END IF
-            WRITE(I,"(A)", ADVANCE="NO") NL
             FLUSH(I)
         END IF
       END IF
