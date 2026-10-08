@@ -287,11 +287,6 @@ C3B-----GET OPTIONS.
 !
 ! Don't need to read these when using default Options.
       IF ( IFDPARAM.EQ.4 ) THEN
-        IF(Mxiter < 500 .AND. ADJUST_MXIter)  THEN
-           Mxiter = 500
-           CALL ITER_WARN(LINE, IN, IOUT, 'SPECIFIED', '500', NJAF)
-        END IF
-        !
         !CALL URWORD(line,lloc,istart,istop, 3, i, thetadum,  Iout,In)  -- Replaced by "CALL READ_SPECIFIED_PROPERTIES(LINE,LLOC,IN,IOUT)"
         !CALL URWORD(line,lloc,istart,istop, 3, i, akappadum, Iout,In)
         !CALL URWORD(line,lloc,istart,istop, 3, i, gammadum,  Iout,In)
@@ -303,9 +298,9 @@ C3B-----GET OPTIONS.
         !   CALL URWORD(line,lloc,istart,istop, 3, i, Breducdum,Iout,In)
         !END IF
       ELSEIF ( IFDPARAM.EQ.1 ) THEN  ! SIMPLE
-        IF(Mxiter < 200 .AND. ADJUST_MXIter) THEN
-           Mxiter = 200
-           CALL ITER_WARN(LINE, IN, IOUT, 'SIMPLE', '200', NJAF)
+        IF(Mxiter < 25 .AND. ADJUST_MXIter) THEN
+           Mxiter = 25
+           CALL NWT_ITER_WARN(LINE, IN, IOUT, 'SIMPLE', '25', NJAF)
         END IF
         !
         thetadum   = 0.97
@@ -317,9 +312,9 @@ C3B-----GET OPTIONS.
         Btoldum    = 1.5
         Breducdum  = 0.97
       ELSEIF ( IFDPARAM.EQ.2 ) THEN  ! MODERATE
-        IF(Mxiter < 300 .AND. ADJUST_MXIter)  THEN
-           Mxiter = 300
-           CALL ITER_WARN(LINE, IN, IOUT, 'MODERATE', '300', NJAF)
+        IF(Mxiter < 100 .AND. ADJUST_MXIter)  THEN
+           Mxiter = 100
+           CALL NWT_ITER_WARN(LINE, IN, IOUT, 'MODERATE', '100', NJAF)
         END IF
         !
         thetadum   = 0.90
@@ -331,9 +326,9 @@ C3B-----GET OPTIONS.
         Btoldum    = 1.1
         Breducdum  = 0.9
       ELSEIF ( IFDPARAM.EQ.3 ) THEN  ! COMPLEX
-        IF(Mxiter < 500 .AND. ADJUST_MXIter)  THEN
-           Mxiter = 500
-           CALL ITER_WARN(LINE, IN, IOUT, 'COMPLEX', '500', NJAF)
+        IF(Mxiter < 200 .AND. ADJUST_MXIter)  THEN
+           Mxiter = 200
+           CALL NWT_ITER_WARN(LINE, IN, IOUT, 'COMPLEX', '200', NJAF)
         END IF
         !
         thetadum   = 0.85
@@ -609,23 +604,6 @@ C Allocage PCG if requested
       CALL XMDPSV(IGRID)
       !
       CONTAINS
-         SUBROUTINE ITER_WARN(LINE, IN, IOUT, OPT, ITER, IOPT)
-           IMPLICIT NONE
-           CHARACTER(*), INTENT(IN):: LINE, OPT, ITER
-           INTEGER,      INTENT(IN):: IN, IOUT, IOPT
-           !
-           CALL WARNING_MESSAGE(LINE=LINE, INFILE=In, OUTPUT=IOUT, MSG=
-     +      'NWT solver with '//OPT//
-     +      ' option requires MXITER >= '//ITER//NL//NL//
-     +      'Setting: MXITER = '//ITER//NL//NL//
-     +      'If you want to override this warning and use your '//
-     +      'specified MXITER'//NL//'add the option KEEP_MXITER '//
-     +      'before specifying '//OPT//NL//NL//
-     +      'For example: '//NL//NL//
-     +      LINE(:IOPT-1)//" KEEP_MXITER "//ADJUSTL(LINE(IOPT:)) )
-           !
-         END SUBROUTINE
-         !
          SUBROUTINE READ_SPECIFIED_PROPERTIES(LINE,LOC,IN,IOUT,ICNVGFLG)
            IMPLICIT NONE
            CHARACTER(*), INTENT(IN   ):: LINE

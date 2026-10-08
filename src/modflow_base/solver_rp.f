@@ -36,7 +36,7 @@
       LOGICAL,INTENT(INOUT):: NORPINPUT
       !
       CHARACTER(768):: LINE
-      INTEGER::LLOC, LLOCSAVE, ISTART, ISTOP, I
+      INTEGER::LLOC, LLOCSAVE, ISTART, ISTOP, I, IOPT
       INTEGER::MXITERDUM,LINMETHDUM,IPRNWTDUM,IBOTAVDUM
       REAL::R, TOLDUM, FTOLDUM, THETADUM, AMOMENTDUM,THICKDUM
       REAL::AKAPPADUM, GAMMADUM, BREDUCDUM, BTOLDUM
@@ -125,6 +125,7 @@ C
 C3B-----GET OPTIONS.
       ADJUST_MXIter = .TRUE.
       IFDPARAM=0
+      IOPT = LLOC  ! Start of the options for the KEEP_MXITER example
       DO
         LLOCSAVE = LLOC
         CALL PARSE_WORD_UP(LINE,LLOC,ISTART,ISTOP)
@@ -172,14 +173,16 @@ C3B-----GET OPTIONS.
 !
 ! Don't need to read these when using default Options.
       IF ( IFDPARAM.EQ.4 ) THEN
-         IF(Mxiter < 500 .AND. ADJUST_MXIter) Mxiter = 500
          IF ( BTRACK < 1 ) THEN
             Numtrack  = 0
             Btoldum   = 1.0D0
             Breducdum = 1.0D0
          END IF
       ELSEIF ( IFDPARAM.EQ.1 ) THEN  ! SIMPLE
-        IF(Mxiter < 200 .AND. ADJUST_MXIter) Mxiter = 200
+        IF(MXITERDUM < 25 .AND. ADJUST_MXIter) THEN
+           MXITERDUM = 25
+           CALL NWT_ITER_WARN(LINE,INNWT,IOUT,'SIMPLE','25',IOPT)
+        END IF
         thetadum   = 0.97
         akappadum  = 0.0001
         gammadum   = 0.0
@@ -189,7 +192,10 @@ C3B-----GET OPTIONS.
         Btoldum    = 1.5
         Breducdum  = 0.97
       ELSEIF ( IFDPARAM.EQ.2 ) THEN  ! MODERATE
-        IF(Mxiter < 300 .AND. ADJUST_MXIter) Mxiter = 300
+        IF(MXITERDUM < 100 .AND. ADJUST_MXIter) THEN
+           MXITERDUM = 100
+           CALL NWT_ITER_WARN(LINE,INNWT,IOUT,'MODERATE','100',IOPT)
+        END IF
         thetadum   = 0.90
         akappadum  = 0.0005 !0.00001
         gammadum   = 0.00
@@ -199,7 +205,10 @@ C3B-----GET OPTIONS.
         Btoldum    = 1.1
         Breducdum  = 0.9
       ELSEIF ( IFDPARAM.EQ.3 ) THEN  ! COMPLEX
-        IF(Mxiter < 500 .AND. ADJUST_MXIter) Mxiter = 500
+        IF(MXITERDUM < 200 .AND. ADJUST_MXIter) THEN
+           MXITERDUM = 200
+           CALL NWT_ITER_WARN(LINE,INNWT,IOUT,'COMPLEX','200',IOPT)
+        END IF
         thetadum   = 0.85
         akappadum  = 0.005 !0.00001  0.0005
         gammadum   = 0.0

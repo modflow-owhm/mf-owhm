@@ -69,8 +69,31 @@ MODULE GWFNWTMODULE
   INTEGER, DIMENSION(:, :, :), POINTER,CONTIGUOUS:: Icell
   INTEGER, POINTER:: itertot
   END TYPE GWFNWTTYPE                                               
-  TYPE (GWFNWTTYPE) , SAVE::Gwfnwtdat(10)                           
-END MODULE GWFNWTMODULE 
+  TYPE (GWFNWTTYPE) , SAVE::Gwfnwtdat(10)
+  !
+  CONTAINS
+  !
+  SUBROUTINE NWT_ITER_WARN(LINE, IN, IOUT, OPT, ITER, IOPT)  ! Warn that MXITER was raised to the minimum for OPT, IOPT is where the options start in LINE
+    USE CONSTANTS,       ONLY: NL
+    USE ERROR_INTERFACE, ONLY: WARNING_MESSAGE
+    CHARACTER(*), INTENT(IN):: LINE, OPT, ITER
+    INTEGER,      INTENT(IN):: IN, IOUT, IOPT
+    !
+    CALL WARNING_MESSAGE(LINE=LINE, INFILE=IN, OUTPUT=IOUT, MSG=                                 &
+        'NWT solver with '//OPT//' option requires MXITER >= '//ITER//NL//NL//                   &
+        'Setting: MXITER = '//ITER//NL//NL//                                                     &
+        'MF-OWHM counts every outer iteration as part of MXITER, including'//NL//              &
+        'the backtracking and residual control iterations, while MF-NWT'//NL//                 &
+        'only counts the formation of the Jacobian as an iteration.'//NL//                     &
+        'This is why MF-OWHM needs a higher MXITER than MF-NWT for the same model.'//NL//NL//  &
+        'If you want to override this warning and use your specified MXITER'//NL//            &
+        'add the option KEEP_MXITER before specifying '//OPT//NL//NL//                         &
+        'For example: '//NL//NL//                                                              &
+        LINE(:IOPT-1)//' KEEP_MXITER '//ADJUSTL(LINE(IOPT:)) )
+    !
+  END SUBROUTINE
+  !
+END MODULE GWFNWTMODULE
 !
 !
       SUBROUTINE GWF2NWT1DA(Igrid)
