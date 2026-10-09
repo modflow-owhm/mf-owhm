@@ -2155,13 +2155,13 @@ C     ------------------------------------------------------------------
 C     LOCAL VARIABLES
 C     ------------------------------------------------------------------
       DOUBLE PRECISION h, sbot, DTMP
-      REAL avdpth, avhc, avthk, bottom, dist, dpslpe, dpth1, dpth2,
-     +     dpthlw, dndiff, eldn, elslpe, etsw, flw1, flw2, flwlw,
+      REAL avdpth, avhc, avthk, bottom, dist, dpslpe,
+     +     dndiff, eldn, elslpe, etsw,
      +     hcslpe, pptsw,rchlen, rough, roughbnk, roughch, runoff,
-     +     seglen, strlen, sumlen, thkslpe, top, wdslpe, wdth1, wdth2, 
-     +     wdthlw, width, updiff, zero, DDIFF
+     +     seglen, strlen, sumlen, thkslpe, top, wdslpe,
+     +     width, updiff, zero, DDIFF
       INTEGER i, ic, icalc, ichk, icp, iflginit, ii, ik, il, ip,
-     +        ipt, ir, irch, irp, isoptflg, iss, istep, istsg, iwvcnt,
+     +        ir, irch, irp, isoptflg, iss, istep, istsg, iwvcnt,
      +        jj, jk, k5, k6, k7, kk, ksfropt, kss, ktot, l, lstbeg,
      +        nseg, nstrpts,krck,irck,jrck,ireachck, j, numval,iunitnum,
      +        ILP,ierr,IFLG,LLOC,ISTART,ISTOP !WSCHMID/RTH
@@ -2793,108 +2793,7 @@ C23-----CHECK ROUGHNESS COEFFICIENTS WHEN ICALC = 1 OR 2.
  9019   FORMAT ('*** ERROR *** ROUGHNESS COEFFICIENT FOR BANK ', 
      +          'WHEN ICALC =2 IS LESS THAN OR EQUAL TO ZERO', //,
      +          ' VALUE IS', 1PE11.3, //, ' PROGRAM STOPPING')
-C
-C24-----CHECK VALUES IN TABLE OF FLOW VERSUS DEPTH AND WIDTH
-C         WHEN ICALC = 4.
-        DO nseg = 1, NSS
-          icalc = ISEG(1, nseg)
-          IF ( icalc.EQ.4 ) nstrpts = ISEG(2, nseg)
-          IF ( icalc.EQ.4 ) THEN
-            flwlw = QSTAGE(1, nseg)
-            IF ( flwlw.LE.0.0 ) THEN
-                CALL WRN%ADD(NUM2STR(nseg,6)//
-     +               '  FIRST FLOW VALUE <0.1, RESET TO 0.1'//NL)
-                !WRITE (IOUT, 9020) nseg
-              QSTAGE(1, nseg) = 0.1
-            END IF
-            dpthlw = QSTAGE(1+nstrpts, nseg)
-            IF ( dpthlw.LE.0.0 ) THEN
-                CALL WRN%ADD(NUM2STR(nseg,6)//
-     +               '  FIRST DEPTH VALUE <0.01, RESET TO 0.01'//NL)
-                !WRITE (IOUT, 9021) nseg
-              QSTAGE(1+nstrpts, nseg) = 0.01
-            END IF
-            wdthlw = QSTAGE(1+2*nstrpts, nseg)
-            IF ( wdthlw.LE.0.0 ) THEN
-                CALL WRN%ADD(NUM2STR(nseg,6)//
-     +       '  FIRST WITH VALUE <=0.0, RESET TO 1.0 - CHECK INPUT'//NL)
-                !WRITE (IOUT, 9022) nseg
-              QSTAGE(1+2*nstrpts, nseg) = 1.0
-            END IF
-            DO ipt = 2, nstrpts
-              flw1 = QSTAGE(ipt-1, nseg)
-              flw2 = QSTAGE(ipt, nseg)
-              dpth1 = QSTAGE((ipt-1)+nstrpts, nseg)
-              dpth2 = QSTAGE(ipt+nstrpts, nseg)
-              wdth1 = QSTAGE((ipt-1)+(2*nstrpts), nseg)
-              wdth2 = QSTAGE(ipt+(2*nstrpts), nseg)
-              IF ( flw2.LE.flw1 ) THEN
-                CALL ERR%ADD(NUM2STR(nseg,6)//BLNK//NUM2STR(ipt,6)//
-     +               BLNK//NUM2STR(flw2,10)//'  BAD FLOWTAB'//NL)
-                 !WRITE (IOUT, 9023) nseg, flw2, ipt
-                 !CALL USTOP(' ')
-              END IF
-              IF ( dpth2.LE.dpth1 ) THEN
-                CALL ERR%ADD(NUM2STR(nseg,6)//BLNK//NUM2STR(ipt,6)//
-     +               BLNK//NUM2STR(dpth2,10)//'  BAD DPTHTAB'//NL)
-                  !WRITE (IOUT, 9024) nseg, dpth2, ipt
-                  !CALL USTOP(' ')
-              END IF
-                !IF (wdth2.LT.wdth1) WRITE (IOUT, 9025) nseg, wdth2, ipt
-                IF (wdth2.LT.wdth1) CALL WRN%ADD(NUM2STR(nseg,6)//
-     +              '  WIDTH AT TABLE POINT '//NUM2STR(ipt)//
-     +              ' IS SMALLER THAN PREVIOUS TABLE POINT; '//
-     +              'TYPICALLY, STREAM WIDTH INCREASES WITH FLOW'//NL)
-            END DO
-          END IF
-        END DO
-C
-          !!WRITE (IOUT, 9026)
       END IF
-      CALL WRN%CHECK(HED='SFR SEGMENTS WITH ICALC = 4'//BLN//
-     +     'HAVE WARNINGS ASSOCAITED WITH THEIR "TABLE OF '//
-     +     'FLOW VERSUS DEPTH AND WIDTH".'//BLN//
-     +     ' -- THAT IS WITH INPUT VAIRABLES: FLOWTAB, DPTHTAB, WDTHTAB'
-     +     //BLN//'   SEG  COMMENT',
-     +     INFILE=IN,OUTPUT=IOUT,TAIL=NL,INIT=TRUE, NO_NL=TRUE)
-      !
-      CALL ERR%CHECK(HED='SFR SEGMENTS WITH ICALC = 4'//BLN//
-     +     'HAVE FATAL ERRORS ASSOCAITED WITH THEIR "TABLE OF '//
-     +     'FLOW VERSUS DEPTH AND WIDTH".'//BLN//
-     +     ' -- THAT IS WITH INPUT VAIRABLES: FLOWTAB, DPTHTAB, WDTHTAB'
-     +     //BLN//'   SEG POINT      VALUE  COMMENT',
-     +     INFILE=IN,OUTPUT=IOUT,TAIL=NL,KILL=TRUE, NO_NL=TRUE)
-      !
- 9020 FORMAT (/, ' *** WARNING *** FIRST FLOW VALUE IN ', 
-     +        'TABLE OF FLOW VERSUS DEPTH AND WIDTH IS ', 
-     +        'LESS THAN OR EQUAL TO ZERO FOR SEGMENT NUMBER', I7, /,
-     +        ' VALUE SHOULD BE GREATER THAN ZERO-- IT HAS BEEN RESET ',
-     +        'TO 0.1 BUT MAY CAUSE INSTABILITY')
- 9021 FORMAT (/, ' *** WARNING *** FIRST DEPTH VALUE IN TABLE ',
-     +        'OF FLOW VERSUS DEPTH AND WIDTH IS LESS THAN ', 
-     +        'OR EQUAL TO ZERO FOR SEGMENT NUMBER', I7, /, 
-     +        ' VALUE SHOULD BE GREATER THAN ZERO-- ', 
-     +        'IT HAS BEEN RESET TO 0.01 BUT MAY CAUSE INSTABILITY')
- 9022 FORMAT (/, ' *** WARNING *** FIRST WIDTH VALUE IN TABLE OF ', 
-     +        'FLOW VERSUS DEPTH AND WIDTH IS LESS THAN OR EQUAL',
-     +        ' TO ZERO FOR SEGMENT NUMBER', I7, /, 
-     +        ' VALUE SHOULD BE GREATER THAN ZERO-- IT HAS BEEN ', 
-     +        'RESET TO 1.0 BUT MAY CAUSE INSTABILITY')
- 9023 FORMAT (/, ' *** ERROR *** SEGMENT NUMBER', I7, 
-     +        'HAS SPECIFIED FLOW VALUE OF', 1PE11.2, ' IN LOCATION',
-     +        I6, ' THAT IS LESS THAN OR EQUAL TO PRECEDING VALUE', /,
-     +        ' FLOW VALUES MUST BE GREATER THAN PRECEDING VALUE',
-     +        ' IN TABLE-- PROGRAM STOPPING')
- 9024 FORMAT (/, ' *** ERROR *** SEGMENT NUMBER', I7, 
-     +        'HAS SPECIFIED DEPTH VALUE OF', 1PE11.2, ' IN LOCATION',
-     +        I6, ' THAT IS LESS THAN OR EQUAL TO PRECEDING VALUE', /,
-     +        ' DEPTH VALUES MUST BE GREATER THAN PRECEDING VALUE',
-     +        ' IN TABLE-- PROGRAM STOPPING')
- 9025 FORMAT (/, ' *** WARNING *** SEGMENT NUMBER', I7, 
-     +        ' HAS SPECIFIED WIDTH VALUE OF', 1PE11.2, ' IN LOCATION',
-     +        I6, ' THAT IS LESS THAN PRECEDING VALUE', /, 
-     +        ' FOR MOST CHANNELS, WIDTH NORMALLY INCREASES WITH FLOW')
- 9026 FORMAT (//)
 C
 C25-----COMPUTE STREAMBED ELEVATIONS AND STREAMBED SLOPE BY INTERPOLATING DEPTHS BETWEEN 
 C       THE ELEVATIONS OF THE LAND SURFACE AND THE TOP OF THE STREAMBED SPECIFIED
@@ -7090,12 +6989,9 @@ C-------SUBROUTINE GWF2SFR7TBD
       SUBROUTINE GWF2SFR7TBD(Flow, Depth, Width, Nstrpts, Istsg, MX_STG)
 C     *******************************************************************
 C     COMPUTE DEPTH AND WIDTH IN STREAM GIVEN FLOW USING RATING TABLES.
-!--------REVISED FOR MODFLOW-2005 RELEASE 1.9, FEBRUARY 6, 2012
 C     *******************************************************************
-      USE CONSTANTS,    ONLY: DZ,HUND,DIEZ,D100,NEARZERO_30
-      USE GWFSFRMODULE, ONLY: QSTAGE
+      USE CONSTANTS, ONLY: DZ, NEARZERO_30
       IMPLICIT NONE
-      INTRINSIC DLOG10
 C     -------------------------------------------------------------------
 C     SPECIFICATIONS:
 C     -------------------------------------------------------------------
@@ -7104,142 +7000,26 @@ C     -------------------------------------------------------------------
       INTEGER Istsg, Nstrpts
       DOUBLE PRECISION Flow, Depth, Width, MX_STG
 C     -------------------------------------------------------------------
-C     LOCAL VARIABLES
-C     -------------------------------------------------------------------
-      INTEGER iflwlw, istghi, istglw, istp, iwthhi, iwthlw
-      DOUBLE PRECISION flwlw, flwhi, stglw, stghi, wthlw, wthhi, dflwlw,
-     +                 dflwhi, dstglw, dstghi, dwthlw, dwthhi, dlgflw, 
-     +                 dlgsls, dlgslw, dlgstg, dlgwth
-      Logical:: first_value_zero
-C     -------------------------------------------------------------------
-      IF(Flow  < NEARZERO_30) THEN
-                              Flow  = DZ
-                              Width = DZ
-                              Depth = DZ
-                              RETURN
+C
+C1------NO FLOW MEANS NO DEPTH AND NO WIDTH.
+      IF ( Flow.LT.NEARZERO_30 ) THEN
+        Flow  = DZ
+        Depth = DZ
+        Width = DZ
+        RETURN
       END IF
 C
-C1------DEFINE RANGE OF FLOW, DEPTH, AND WIDTH FROM RATING TABLE.
-      flwlw = QSTAGE(1, Istsg)             ! Only collect first two points, 
-      flwhi = QSTAGE(2, Istsg)             !   otherwise it will be overwritten by "DO WHILE ( Flow.GT.flwhi .AND. istp.LT.Nstrpts )" loop
-      stglw = QSTAGE(1+Nstrpts, Istsg)     ! Ditto
-      stghi = QSTAGE(2+Nstrpts, Istsg)     ! 
-      wthlw = QSTAGE(1+(2*Nstrpts), Istsg) ! Ditto
-      wthhi = QSTAGE(2+(2*Nstrpts), Istsg) ! 
-      !
-      first_value_zero = flwlw < NEARZERO_30 .or. 
-     +                   stglw < NEARZERO_30 .or. 
-     +                   wthlw < NEARZERO_30
-      !
-      !flwhi = QSTAGE(Nstrpts, Istsg)
-      !stglw = QSTAGE(1+Nstrpts, Istsg)
-      !stghi = QSTAGE(2*Nstrpts, Istsg)
-      !wthlw = QSTAGE(1+(2*Nstrpts), Istsg)
-      !wthhi = QSTAGE(3*Nstrpts, Istsg)
+C2------INTERPOLATE DEPTH AND WIDTH FROM THE FLOW COLUMN OF THE TABLE.
+      CALL SGWF2SFR7TBINT(Flow, 0, Nstrpts, 2*Nstrpts, Nstrpts, Istsg,
+     +                    Depth, Width)
 C
-C2------USE A LINEAR INTERPOLATION TO ESTIMATE DEPTH AND WIDTH WHEN
-C         FLOW IS LESS THAN LOWEST VALUE IN TABLE.
-      IF ( Flow.LE.flwlw ) THEN
-        !
-        IF (flwlw < NEARZERO_30) THEN
-            Flow  = DZ
-            Width = DZ
-            Depth = DZ
-        ELSE
-            Depth = (stglw/flwlw)*Flow
-            Width = (wthlw/flwlw)*Flow
-            !
-            IF( Depth < DZ .OR. Width < DZ) THEN
-                                            Flow  = DZ
-                                            Width = DZ
-                                            Depth = DZ
-            END IF
-        END IF
-C
-C FLow interpolation includes a zero value which will fail for log interp
-      ELSE IF ( Flow.LE.flwhi .AND. first_value_zero) THEN
-            !
-            dflwlw = Flow  - flwlw
-            !
-            Depth = stglw + dflwlw * (stghi - stglw) / (flwhi - flwlw)
-            Width = wthlw + dflwlw * (wthhi - wthlw) / (flwhi - flwlw)
-            !
-            IF( Depth < DZ .OR. Width < DZ) THEN
-                                            Flow  = DZ
-                                            Width = DZ
-                                            Depth = DZ
-            END IF
-C
-C3------OTHERWISE USE A LOG INTERPOLATION TO ESTIMATE DEPTH AND WIDTH.
-      ELSE! IF ( Flow.GT.flwlw ) THEN
-C
-C4------FIND NEAREST VALUES OF FLOW, DEPTH, AND WIDTH IN TABLE.
-        istp = 2
-        flwhi = QSTAGE(istp, Istsg)
-        DO WHILE ( Flow.GT.flwhi .AND. istp.LT.Nstrpts )
-          istp = istp + 1
-          flwhi = QSTAGE(istp, Istsg)
-        END DO
-        IF ( Flow.LE.flwhi ) THEN
-          istghi = istp + Nstrpts
-          istglw = istghi - 1
-          iwthhi = istp + (2*Nstrpts)
-          iwthlw = iwthhi - 1
-          iflwlw = istp - 1
-          flwlw = QSTAGE(iflwlw, Istsg)
-          stglw = QSTAGE(istglw, Istsg)
-          stghi = QSTAGE(istghi, Istsg)
-          wthlw = QSTAGE(iwthlw, Istsg)
-          wthhi = QSTAGE(iwthhi, Istsg)
-        ELSE! IF ( Flow.GT.flwhi ) THEN
-C
-C5------COMPUTED FLOW EXCEEDS HIGHEST FLOW IN TABLE.
-          flwlw = QSTAGE(Nstrpts-1, Istsg)
-          stglw = QSTAGE((2*Nstrpts)-1, Istsg)
-          stghi = QSTAGE(2*Nstrpts, Istsg)
-          wthlw = QSTAGE((3*Nstrpts)-1, Istsg)
-          wthhi = QSTAGE((3*Nstrpts), Istsg)
-        END IF
-C
-C6------COMPUTE DEPTH AND WIDTH FROM LOG INTERPOLATION.
-        dstglw = DLOG10(stglw)
-        dstghi = DLOG10(stghi)
-        dwthlw = DLOG10(wthlw)
-        dwthhi = DLOG10(wthhi)
-        dflwlw = DLOG10(flwlw)
-        dflwhi = DLOG10(flwhi)
-        dlgflw = DLOG10(Flow) - dflwlw
-        !
-        IF(ABS(dflwhi-dflwlw) > NEARZERO_30) THEN
-                                dlgsls = (dstghi-dstglw)/(dflwhi-dflwlw)
-                                dlgslw = (dwthhi-dwthlw)/(dflwhi-dflwlw)
-        ELSE
-                                dlgsls = DZ
-                                dlgslw = DZ
-        END IF
-        !
-        dlgstg = dstglw + (dlgsls*dlgflw)
-        dlgwth = dwthlw + (dlgslw*dlgflw)
-        !
-        IF    ( dlgstg > HUND ) THEN               ! seb overflow protection
-                dlgwth = dlgwth * (HUND / dlgstg)
-                dlgstg = HUND
-        ELSEIF( dlgwth  > HUND ) THEN
-                dlgstg = dlgstg * (HUND / dlgwth)
-                dlgwth = HUND
-        END IF
-        !
-        Depth = DIEZ**dlgstg
-        Width = DIEZ**dlgwth
-        !
-        IF( Depth > MX_STG ) THEN
-            Width = Width * (MX_STG / Depth)
-            Depth = MX_STG
-        END IF
-        !
+C3------LIMIT DEPTH TO THE MAXIMUM STAGE AND SCALE WIDTH WITH IT.
+      IF ( Depth.GT.MX_STG ) THEN
+        Width = Width * (MX_STG / Depth)
+        Depth = MX_STG
       END IF
 C
-C7------RETURN.
+C4------RETURN.
       RETURN
       END SUBROUTINE GWF2SFR7TBD
 C
@@ -7247,164 +7027,231 @@ C-------SUBROUTINE GWF2SFR7TBF
       SUBROUTINE GWF2SFR7TBF(Flow, Depth, Width, Nstrpts, Nreach, Istsg)
 C     *******************************************************************
 C     COMPUTE FLOW AND WIDTH IN STREAM GIVEN DEPTH USING RATING TABLES.
-!--------REVISED FOR MODFLOW-2005 RELEASE 1.9, FEBRUARY 6, 2012
 C     *******************************************************************
-      USE GWFSFRMODULE, ONLY: QSTAGE
-      USE CONSTANTS,    ONLY: DZ,HUND,DIEZ,D100,NEARZERO_30
+      USE CONSTANTS, ONLY: DZ, NEARZERO_30
       IMPLICIT NONE
-      INTRINSIC DLOG10
 C     -------------------------------------------------------------------
 C     SPECIFICATIONS:
 C     -------------------------------------------------------------------
 C     ARGUMENTS
 C     -------------------------------------------------------------------
-      INTEGER Istsg, Kkiter, Nreach, Nstrpts
+      INTEGER Istsg, Nreach, Nstrpts
       DOUBLE PRECISION Flow, Depth, Width
+C     -------------------------------------------------------------------
+C
+C1------NO DEPTH MEANS NO FLOW AND NO WIDTH.
+      IF ( Depth.LT.NEARZERO_30 ) THEN
+        Flow  = DZ
+        Width = DZ
+        Depth = DZ
+        RETURN
+      END IF
+C
+C2------INTERPOLATE FLOW AND WIDTH FROM THE DEPTH COLUMN OF THE TABLE.
+      CALL SGWF2SFR7TBINT(Depth, Nstrpts, 0, 2*Nstrpts, Nstrpts, Istsg,
+     +                    Flow, Width)
+C
+C3------RETURN.
+      RETURN
+      END SUBROUTINE GWF2SFR7TBF
+C
+C-------SUBROUTINE SGWF2SFR7TBINT
+      SUBROUTINE SGWF2SFR7TBINT(X, Ix, Iy, Iz, Nstrpts, Istsg, Y, Z)
+C     *******************************************************************
+C     INTERPOLATE THE RATING TABLE (QSTAGE) OF SEGMENT ISTSG.
+C     THE TABLE HOLDS NSTRPTS ROWS OF FLOW, DEPTH, AND WIDTH IN THREE
+C     COLUMN BLOCKS THAT START AT OFFSETS 0, NSTRPTS, AND 2*NSTRPTS.
+C     A ROW OF ZERO FLOW, DEPTH, AND WIDTH IS IMPLIED BEFORE ROW 1, AND
+C     ROW 1 MAY HAVE ZERO FLOW AND DEPTH WITH THE BOTTOM WIDTH OF A
+C     FLAT-BOTTOMED CHANNEL; ALL OTHER VALUES ARE POSITIVE (SEE
+C     SGWF2SFR7TBCHK). X IS THE KNOWN VALUE IN THE COLUMN AT OFFSET IX;
+C     Y AND Z ARE RETURNED FROM THE COLUMNS AT OFFSETS IY AND IZ.
+C     INTERPOLATION IS LINEAR FROM THE IMPLIED ORIGIN OR A BOTTOM-WIDTH
+C     ROW TO THE NEXT ROW AND LOG-LOG BETWEEN ROWS WITH FLOW. VALUES
+C     BEYOND THE LAST ROW ARE EXTRAPOLATED FROM THE LAST TWO ROWS.
+C     *******************************************************************
+      USE CONSTANTS,    ONLY: DZ, HUND, DIEZ, NEARZERO_30
+      USE GWFSFRMODULE, ONLY: QSTAGE
+      IMPLICIT NONE
+C     -------------------------------------------------------------------
+C     SPECIFICATIONS:
+C     -------------------------------------------------------------------
+C     ARGUMENTS
+C     -------------------------------------------------------------------
+      INTEGER,          INTENT(IN   ):: Ix, Iy, Iz, Nstrpts, Istsg
+      DOUBLE PRECISION, INTENT(IN   ):: X
+      DOUBLE PRECISION, INTENT(  OUT):: Y, Z
 C     -------------------------------------------------------------------
 C     LOCAL VARIABLES
 C     -------------------------------------------------------------------
-      INTEGER iflwhi, iflwlw, istglw, istp, iwthhi, iwthlw
-      DOUBLE PRECISION flwlw, flwhi, stglw, stghi, wthlw, wthhi, dflwlw,
-     +                 dflwhi, dstglw, dstghi, dwthlw, dwthhi, dlgflw, 
-     +                 dlgslf, dlgslw, dlgstg, dlgwth
-      Logical:: first_value_zero
-!!      REAL dum, totdum
+      INTEGER lo, hi
+      DOUBLE PRECISION xlo, xhi, ylo, yhi, zlo, zhi, frac
 C     -------------------------------------------------------------------
-      IF(Depth < NEARZERO_30) THEN
-                              Flow  = DZ
-                              Width = DZ
-                              Depth = DZ
-                              RETURN
+C
+C1------FIND THE ROWS THAT BRACKET X. ROW 0 IS THE IMPLIED ORIGIN AND
+C         THE LAST TWO ROWS ARE USED WHEN X IS BEYOND THE TABLE.
+      hi = 1
+      DO WHILE ( hi.LT.Nstrpts .AND. X.GT.QSTAGE(Ix+hi, Istsg) )
+        hi = hi + 1
+      END DO
+      lo = hi - 1
+C
+      IF ( lo.EQ.0 ) THEN
+        xlo = DZ
+        ylo = DZ
+        zlo = DZ
+      ELSE
+        xlo = QSTAGE(Ix+lo, Istsg)
+        ylo = QSTAGE(Iy+lo, Istsg)
+        zlo = QSTAGE(Iz+lo, Istsg)
+      END IF
+      xhi = QSTAGE(Ix+hi, Istsg)
+      yhi = QSTAGE(Iy+hi, Istsg)
+      zhi = QSTAGE(Iz+hi, Istsg)
+C
+C2------LINEAR INTERPOLATION FROM THE IMPLIED ORIGIN OR FROM A
+C         BOTTOM-WIDTH ROW (ZERO FLOW) TO THE NEXT ROW.
+      IF ( lo.EQ.0 .OR. QSTAGE(lo, Istsg).LT.NEARZERO_30 ) THEN
+        frac = (X - xlo) / (xhi - xlo)
+        Y = ylo + frac*(yhi - ylo)
+        Z = zlo + frac*(zhi - zlo)
+C
+C3------OTHERWISE LOG-LOG INTERPOLATION BETWEEN ROWS WITH FLOW.
+      ELSE
+        frac = (LOG10(X) - LOG10(xlo)) / (LOG10(xhi) - LOG10(xlo))
+        Y = LOG10(ylo) + frac*(LOG10(yhi) - LOG10(ylo))
+        Z = LOG10(zlo) + frac*(LOG10(zhi) - LOG10(zlo))
+        IF ( Y.GT.HUND ) Y = HUND            ! overflow protection
+        IF ( Z.GT.HUND ) Z = HUND
+        Y = DIEZ**Y
+        Z = DIEZ**Z
       END IF
 C
-C1------DEFINE RANGE OF FLOW, DEPTH, AND WIDTH FROM RATING TABLE.
-      flwlw = QSTAGE(1, Istsg)             ! Only collect first two points, 
-      flwhi = QSTAGE(2, Istsg)             !   otherwise it will be overwritten by "DO WHILE ( Flow.GT.flwhi .AND. istp.LT.Nstrpts )" loop
-      stglw = QSTAGE(1+Nstrpts, Istsg)     ! Ditto
-      stghi = QSTAGE(2+Nstrpts, Istsg)     ! 
-      wthlw = QSTAGE(1+(2*Nstrpts), Istsg) ! Ditto
-      wthhi = QSTAGE(2+(2*Nstrpts), Istsg) ! 
-      !
-      first_value_zero = flwlw < NEARZERO_30 .or. 
-     +                   stglw < NEARZERO_30 .or. 
-     +                   wthlw < NEARZERO_30
-      !
-      !flwlw = QSTAGE(1, Istsg)                  - seb redundant to being set bu 
-      !stglw = QSTAGE(1+Nstrpts, Istsg)
-      !wthlw = QSTAGE(1+(2*Nstrpts), Istsg)
-      !flwhi = QSTAGE(Nstrpts, Istsg)
-      !stghi = QSTAGE(2*Nstrpts, Istsg)
-      !wthhi = QSTAGE(3*Nstrpts, Istsg)
-C
-C2------USE A LINEAR INTERPOLATION TO ESTIMATE FLOW AND WIDTH WHEN
-C         DEPTH IS LESS THAN LOWEST VALUE IN TABLE.
-      IF ( Depth.LE.stglw ) THEN
-        !
-        IF (stglw < NEARZERO_30 .OR. flwlw < NEARZERO_30) THEN
-            Flow  = DZ
-            Width = DZ
-            Depth = DZ
-        ELSE
-            Flow = (flwlw/stglw)*Depth
-            Width = (wthlw/flwlw)*Flow
-            !
-            IF( Flow < DZ .OR. Width < DZ) THEN
-                                            Flow  = DZ
-                                            Width = DZ
-                                            Depth = DZ
-            END IF
-        END IF
-C
-C FLow interpolation includes a zero value which will fail for log interp
-      ELSE IF ( Depth.LE.stghi .AND. first_value_zero) THEN
-            !
-            dstglw = Depth  - stglw
-            !
-            Flow  = flwlw + dstglw * (flwhi - flwlw) / (stghi - stglw)
-            Width = wthlw + dstglw * (wthhi - wthlw) / (stghi - stglw)
-            !
-            IF( Flow < DZ .OR. Width < DZ) THEN
-                                            Flow  = DZ
-                                            Width = DZ
-                                            Depth = DZ
-            END IF
-C
-C3------OTHERWISE USE A LOG INTERPOLATION TO ESTIMATE FLOW AND WIDTH.
-      ELSE! IF ( Depth.GT.stglw ) THEN
-        istp = 2
-        stghi = QSTAGE(istp+Nstrpts, Istsg)
-C
-C4------FIND NEAREST VALUES OF FLOW, DEPTH, AND WIDTH IN TABLE.
-        DO WHILE ( Depth.GT.stghi .AND. istp.LT.Nstrpts )
-          istp = istp + 1
-          stghi = QSTAGE(istp+Nstrpts, Istsg)
-        END DO
-        IF ( Depth.LE.stghi ) THEN
-          istglw = (istp-1) + Nstrpts
-          iflwhi = istp
-          iflwlw = istp - 1
-          iwthhi = istp + (2*Nstrpts)
-          iwthlw = iwthhi - 1
-          flwlw = QSTAGE(iflwlw, Istsg)
-          flwhi = QSTAGE(iflwhi, Istsg)
-          stglw = QSTAGE(istglw, Istsg)
-          wthlw = QSTAGE(iwthlw, Istsg)
-          wthhi = QSTAGE(iwthhi, Istsg)
-        ELSE !IF ( Depth.GT.stghi .AND. Itb.EQ.1 ) THEN   ! Depth.GT.stghi is implied by the previous if and 
-                                                          ! Itb does not anything, it is always set to 0 in MODFLOW - 
-                                                          !    Maybe originally for: "WRITE (IOUT, 9001)" and later someone added setting the values (despite them being set earliar--which was then later commented by seb)
-C
-C5------PRINT WARNING IF COMPUTED DEPTH EXCEEDS HIGHEST DEPTH IN TABLE.
-!!!            WRITE (IOUT, 9001) Kkiter, Istsg, Nreach, Depth, stghi
-!!! 9001     FORMAT (1X/, 'FOR MODFLOW ITERATION ', I5, 
-!!!     +            ' DEPTH IN SEGMENT ', I5, ' REACH ', I5, ' IS ', 
-!!!     +            1PE10.3, ' AND IS GREATER THAN ', 
-!!!     +            'HIGHEST DEPTH LISTED IN RATING TABLE OF ', 1PE10.3, 
-!!!     +            //1X, 'ASSUMING SAME RELATION AS ', 
-!!!     +            'BETWEEN TWO HIGHEST DEPTHS IN TABLE'//)
-          flwlw = QSTAGE(Nstrpts-1, Istsg)
-          flwhi = QSTAGE(Nstrpts, Istsg)
-          stglw = QSTAGE((2*Nstrpts)-1, Istsg)
-          stghi = QSTAGE((2*Nstrpts), Istsg)
-          wthlw = QSTAGE((3*Nstrpts)-1, Istsg)
-          wthhi = QSTAGE((3*Nstrpts), Istsg)
-        END IF
-C
-C6------COMPUTE DEPTH AND WIDTH FROM LOG INTERPOLATION.
-        dstglw = DLOG10(stglw)
-        dstghi = DLOG10(stghi)
-        dwthlw = DLOG10(wthlw)
-        dwthhi = DLOG10(wthhi)
-        dflwlw = DLOG10(flwlw)
-        dflwhi = DLOG10(flwhi)
-        dlgstg = DLOG10(Depth) - dstglw
-        !
-        IF(ABS(dstghi-dstglw) > NEARZERO_30) THEN
-                                dlgslf = (dflwhi-dflwlw)/(dstghi-dstglw)
-                                dlgslw = (dwthhi-dwthlw)/(dstghi-dstglw)
-        ELSE
-                                dlgslf = DZ
-                                dlgslw = DZ
-        END IF
-        !
-        dlgflw = dflwlw + (dlgslf*dlgstg)
-        dlgwth = dwthlw + (dlgslw*dlgstg)
-        !
-        IF( dlgflw > HUND ) THEN
-            Flow = D100
-        ELSE
-            Flow = DIEZ**dlgflw
-        END IF
-        IF( dlgwth > HUND ) THEN
-            Width = D100
-        ELSE
-            Width = DIEZ**dlgwth
-        END IF
-      END IF
-C
-C7------RETURN.
+C4------RETURN.
       RETURN
-      END SUBROUTINE GWF2SFR7TBF
+      END SUBROUTINE SGWF2SFR7TBINT
+C
+C-------SUBROUTINE SGWF2SFR7TBCHK
+      SUBROUTINE SGWF2SFR7TBCHK(In, Iout, N, Nseg)
+C     *******************************************************************
+C     CHECK THE TABLE OF FLOW VERSUS DEPTH AND WIDTH JUST READ FOR
+C     SEGMENT N (STORED IN QSTAGE COLUMN NSEG).
+C     A FIRST ROW OF ZERO FLOW, DEPTH, AND WIDTH IS DROPPED BECAUSE IT
+C     IS ALWAYS IMPLIED. SFR HOLDS NO WATER IN A REACH WITHOUT FLOW,
+C     SO A ROW OF ZERO FLOW WITH A DEPTH IS AN ERROR; A FIRST ROW OF
+C     ZERO FLOW AND DEPTH WITH A WIDTH GIVES THE BOTTOM WIDTH OF A
+C     FLAT-BOTTOMED CHANNEL. ALL OTHER VALUES MUST BE POSITIVE, FLOW
+C     AND DEPTH MUST INCREASE FROM ROW TO ROW, AND WIDTH MUST NOT
+C     DECREASE.
+C     *******************************************************************
+      USE CONSTANTS,         ONLY: DZ, NL, BLNK, NEARZERO_30
+      USE GWFSFRMODULE,      ONLY: ISEG, QSTAGE
+      USE NUM2STR_INTERFACE, ONLY: NUM2STR
+      IMPLICIT NONE
+C     -------------------------------------------------------------------
+C     SPECIFICATIONS:
+C     -------------------------------------------------------------------
+C     ARGUMENTS
+C     -------------------------------------------------------------------
+      INTEGER, INTENT(IN):: In, Iout, N, Nseg
+C     -------------------------------------------------------------------
+C     LOCAL VARIABLES
+C     -------------------------------------------------------------------
+      INTEGER i, j, nstrpts
+C     -------------------------------------------------------------------
+C
+      nstrpts = ISEG(2, Nseg)
+C
+C1------NEGATIVE VALUES ARE NOT ALLOWED.
+      DO j = 1, 3*nstrpts
+        IF ( QSTAGE(j, Nseg).LT.DZ ) CALL TABLE_ERROR(
+     +                       'THE TABLE CONTAINS A NEGATIVE VALUE.')
+      END DO
+C
+C2------DROP A FIRST ROW OF ZERO FLOW, DEPTH, AND WIDTH; IT IS IMPLIED.
+      IF ( QSTAGE(1, Nseg).LT.NEARZERO_30 .AND.
+     +     QSTAGE(1+nstrpts, Nseg).LT.NEARZERO_30 .AND.
+     +     QSTAGE(1+2*nstrpts, Nseg).LT.NEARZERO_30 ) THEN
+        DO j = 1, nstrpts-1
+          QSTAGE(j, Nseg) = QSTAGE(j+1, Nseg)
+        END DO
+        DO j = 1, nstrpts-1
+          QSTAGE(nstrpts-1+j, Nseg) = QSTAGE(nstrpts+1+j, Nseg)
+        END DO
+        DO j = 1, nstrpts-1
+          QSTAGE(2*nstrpts-2+j, Nseg) = QSTAGE(2*nstrpts+1+j, Nseg)
+        END DO
+        DO j = 3*nstrpts-2, 3*nstrpts
+          QSTAGE(j, Nseg) = DZ
+        END DO
+        nstrpts = nstrpts - 1
+        ISEG(2, Nseg) = nstrpts
+      END IF
+C
+C3------A FIRST ROW OF ZERO FLOW MAY ONLY GIVE THE BOTTOM WIDTH OF A
+C         FLAT-BOTTOMED CHANNEL; SFR HOLDS NO WATER WITHOUT FLOW.
+      IF ( QSTAGE(1, Nseg).LT.NEARZERO_30 ) THEN
+        IF ( QSTAGE(1+nstrpts, Nseg).GE.NEARZERO_30 ) CALL TABLE_ERROR(
+     +    'A ROW WITH ZERO FLOW (FLOWTAB) MUST HAVE ZERO DEPTH '//
+     +    '(DPTHTAB); SFR DOES NOT HOLD WATER IN A REACH WITHOUT '//
+     +    'FLOW. ITS WIDTH (WDTHTAB) MAY BE THE CHANNEL BOTTOM WIDTH.')
+        IF ( nstrpts.LT.2 ) CALL TABLE_ERROR(
+     +    'A ROW WITH ZERO FLOW (FLOWTAB) GIVES ONLY THE BOTTOM '//
+     +    'WIDTH; AT LEAST ONE ROW WITH FLOW MUST FOLLOW IT.')
+      END IF
+C
+C4------FLOW AND DEPTH MUST INCREASE AND WIDTH MUST NOT DECREASE,
+C         A LARGER FLOW CANNOT HAVE A SMALLER DEPTH OR WIDTH.
+      DO i = 2, nstrpts
+        IF ( QSTAGE(i, Nseg).LE.QSTAGE(i-1, Nseg) )
+     +    CALL TABLE_ERROR('FLOW (FLOWTAB) MUST INCREASE FROM ONE '//
+     +                     'ROW TO THE NEXT.')
+        IF ( QSTAGE(i+nstrpts, Nseg).LE.QSTAGE(i-1+nstrpts, Nseg) )
+     +    CALL TABLE_ERROR('DEPTH (DPTHTAB) MUST INCREASE FROM ONE '//
+     +                     'ROW TO THE NEXT.')
+        IF ( QSTAGE(i+2*nstrpts, Nseg).LT.QSTAGE(i-1+2*nstrpts, Nseg) )
+     +    CALL TABLE_ERROR('WIDTH (WDTHTAB) MUST NOT DECREASE FROM '//
+     +                     'ONE ROW TO THE NEXT.')
+      END DO
+C
+C5------EVERY ROW MUST HAVE A WIDTH, AND EVERY ROW WITH FLOW A DEPTH.
+      DO i = 1, nstrpts
+        IF ( QSTAGE(i+2*nstrpts, Nseg).LT.NEARZERO_30 )
+     +    CALL TABLE_ERROR('EVERY ROW MUST HAVE A WIDTH (WDTHTAB) '//
+     +                     'GREATER THAN ZERO.')
+        IF ( QSTAGE(i, Nseg).GE.NEARZERO_30 .AND.
+     +       QSTAGE(i+nstrpts, Nseg).LT.NEARZERO_30 )
+     +    CALL TABLE_ERROR('A ROW WITH FLOW (FLOWTAB) MUST HAVE A '//
+     +                     'DEPTH (DPTHTAB) GREATER THAN ZERO.')
+      END DO
+C
+C6------RETURN.
+      RETURN
+C
+      CONTAINS
+C
+      SUBROUTINE TABLE_ERROR(WHY)
+      CHARACTER(*), INTENT(IN):: WHY
+      CHARACTER(:), ALLOCATABLE:: MSG
+      INTEGER:: K
+      !
+      MSG = 'SEGMENT '//NUM2STR(N)//' HAS ICALC = 4 WITH A BAD '//
+     +      'TABLE OF FLOW VERSUS DEPTH AND WIDTH '//
+     +      '(FLOWTAB, DPTHTAB, WDTHTAB).'//NL//WHY//NL//
+     +      'THE TABLE IS (A FIRST ROW OF ZEROS IS DROPPED BECAUSE '//
+     +      'IT IS ALWAYS IMPLIED):'//NL//
+     +      '     FLOWTAB      DPTHTAB      WDTHTAB'//NL
+      DO K = 1, nstrpts
+        MSG = MSG//NUM2STR(QSTAGE(K, Nseg), 12)//BLNK//
+     +            NUM2STR(QSTAGE(K+nstrpts, Nseg), 12)//BLNK//
+     +            NUM2STR(QSTAGE(K+2*nstrpts, Nseg), 12)//NL
+      END DO
+      !
+      CALL SFR_STOP_MSG(In, Iout, MSG)
+      !
+      END SUBROUTINE TABLE_ERROR
+C
+      END SUBROUTINE SGWF2SFR7TBCHK
       !
       FUNCTION SFR_PREV_LINE(IN) RESULT(LINE)
       INTEGER,      INTENT(IN):: IN
@@ -7764,6 +7611,8 @@ C9------READ DATA SET 4F FOR SEGMENT WHEN ICALC IS 4.
        READ(In,*,IOSTAT=I) (QSTAGE(jj, nseg), jj=2*nstrpts+1, 3*nstrpts)
             !
             IF(I.NE.0) CALL SFR_STOP(IN, IOUT)
+            !
+            CALL SGWF2SFR7TBCHK(In, IOUT, n, nseg)
           END IF
         END IF
 C
