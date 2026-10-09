@@ -4855,8 +4855,8 @@ crgn used width in calculations.
               ELSE IF ( icalc.EQ.3 ) THEN
                 width = 10.0D0
               ELSE IF ( icalc.EQ.4 ) THEN
-                width = QSTAGE((1+2*nstrpts), istsg)
-     +                  + QSTAGE(3*nstrpts, istsg)/2.0D0
+                width = 0.5D0 * ( QSTAGE(1+2*nstrpts, istsg)
+     +                          + QSTAGE(3*nstrpts, istsg) )
               END IF
               flowc = flowin + runoff  + runof + (precip-etstr)*width
 !dep  August 26, 2009 fixed flwmpt calculation  not half of flowc
