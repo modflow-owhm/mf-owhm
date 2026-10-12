@@ -934,6 +934,11 @@ BEGIN CLIMATE
    # Precipitation that falls on model domain (L/T)
    #   ***Only the precip that falls land defined with a nonzero WBS (FARM) ID is simulated,
    #      any zero WBS ID cells have precip set to zero
+   #   ***Within a WBS, only the precip that falls on a crop or on simulated bare soil is counted.
+   #      Precip on any remaining part of a model cell (no crop and bare soil disabled, or
+   #      the undefined fraction from LAND_USE_AREA_FRACTION values that sum <1 with a bare fraction disabled)
+   #      is ignored: it does not evaporate, run off, or deep percolate, and it is not
+   #      included in the WBS budget output. See MIN_BARE_FRACTION in the LAND_USE block for more details.
    #
    PRECIPITATION  LAI[S,T,A]
    #
@@ -1781,6 +1786,11 @@ BEGIN LAND_USE
    #     If the Bare Fraction is less then MIN_BARE_FRACTION, it is set to Zero.
    #     If MIN_BARE_FRACTION is set to 1 or greater, then Bare Soil Calculations are disabled (Even for Crop ID < 1 and Fallowed Crops).
    #     If not specified it defaults to 0.000001
+   #
+   #     Precipitation that falls on the part of a model cell that is neither a crop nor simulated bare soil is not simulated.
+   #        It does not evaporate, run off, or deep percolate, and it is not included in the WBS budget output (Q-p-in).
+   #        For example, if a cell has crop fractions that sum to 0.75 and the bare fraction is set to zero,
+   #        then the precipitation on the remaining 0.25 of the cell is removed from the model.
    #
    MIN_BARE_FRACTION FLOAT
    #

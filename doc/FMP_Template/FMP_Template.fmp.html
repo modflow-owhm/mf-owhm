@@ -990,6 +990,11 @@ span {
 </span><span class="sc24">   </span><span class="sc2"># Precipitation that falls on model domain (L/T)
 </span><span class="sc24">   </span><span class="sc2">#   ***Only the precip that falls land defined with a nonzero WBS (FARM) ID is simulated,
 </span><span class="sc24">   </span><span class="sc2">#      any zero WBS ID cells have precip set to zero
+</span><span class="sc24">   </span><span class="sc2">#   ***Within a WBS, only the precip that falls on a crop or on simulated bare soil is counted.
+</span><span class="sc24">   </span><span class="sc2">#      Precip on any remaining part of a model cell (no crop and bare soil disabled, or
+</span><span class="sc24">   </span><span class="sc2">#      the undefined fraction from LAND_USE_AREA_FRACTION values that sum &lt;1 with a bare fraction disabled)
+</span><span class="sc24">   </span><span class="sc2">#      is ignored: it does not evaporate, run off, or deep percolate, and it is not
+</span><span class="sc24">   </span><span class="sc2">#      included in the WBS budget output. See MIN_BARE_FRACTION in the LAND_USE block for more details.
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc6">PRECIPITATION</span><span class="sc24">  </span><span class="sc7">LAI</span><span class="sc12">[</span><span class="sc0">S</span><span class="sc12">,</span><span class="sc0">T</span><span class="sc12">,</span><span class="sc0">A</span><span class="sc12">]</span><span class="sc24">
    </span><span class="sc2">#
@@ -1837,6 +1842,11 @@ span {
 </span><span class="sc24">   </span><span class="sc2">#     If the Bare Fraction is less then MIN_BARE_FRACTION, it is set to Zero.
 </span><span class="sc24">   </span><span class="sc2">#     If MIN_BARE_FRACTION is set to 1 or greater, then Bare Soil Calculations are disabled (Even for Crop ID &lt; 1 and Fallowed Crops).
 </span><span class="sc24">   </span><span class="sc2">#     If not specified it defaults to 0.000001
+</span><span class="sc24">   </span><span class="sc2">#
+</span><span class="sc24">   </span><span class="sc2">#     Precipitation that falls on the part of a model cell that is neither a crop nor simulated bare soil is not simulated.
+</span><span class="sc24">   </span><span class="sc2">#        It does not evaporate, run off, or deep percolate, and it is not included in the WBS budget output (Q-p-in).
+</span><span class="sc24">   </span><span class="sc2">#        For example, if a cell has crop fractions that sum to 0.75 and the bare fraction is set to zero,
+</span><span class="sc24">   </span><span class="sc2">#        then the precipitation on the remaining 0.25 of the cell is removed from the model.
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc6">MIN_BARE_FRACTION</span><span class="sc24"> </span><span class="sc7">FLOAT</span><span class="sc24">
    </span><span class="sc2">#

@@ -33,7 +33,9 @@ STP                     is the time step
 TIMEUNIT                is elapsed simulation time. Note that the word TIMEUNIT is set to the model time unit T: “SECONDS”, “MINUTES”, “HOURS”, “DAYS”, or “YEARS”
 FID                     is the WBS (Farm) ID number
 
-Q-p-in         [L3/T]   is precipitation that enters the WBS
+Q-p-in         [L3/T]   is precipitation that enters the WBS landscape; that is, precipitation on the area of the WBS
+                          that has a crop or simulated bare soil. Precipitation on any remaining area of a model cell
+                          (crop fractions that sum to less than 1 with the bare fraction set to zero) is not simulated and is not included.
 Q-nrd-in       [L3/T]   is the rate that non-routed delivery flow enters the WBS
 Q-srd-in       [L3/T]   is the rate that semi-routed delivery flow enters the WBS
 Q-drt-in       [L3/T]   is the rate of Drain Return Flow (DRT) package flow that enters the WBS
