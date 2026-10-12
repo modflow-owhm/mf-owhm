@@ -874,7 +874,7 @@ MODULE CROP_DATA_FMP_MODULE
     !
     ! Set up minimum bare fraction of area
     !
-    IF( .NOT. CDAT%FRAC%INUSE .AND. CDAT%MIN_BARE > NEAR_inf ) CDAT%MIN_BARE=UNO         !NEVER IS NEEDED, EXCEPT FOR CROP=0 CELLS
+    IF( .NOT. CDAT%FRAC%INUSE .AND. CDAT%MIN_BARE > NEAR_inf ) CDAT%MIN_BARE=NEARZERO_12 !NEVER IS NEEDED, EXCEPT FOR CROP=0 CELLS (BARE_FRAC IS 0 OR 1); MIN_BARE >= 1 WOULD DISABLE BARE SOIL
     IF(       CDAT%Kc%INUSE   .AND. CDAT%MIN_BARE > NEAR_inf ) CDAT%MIN_BARE=NEARZERO_12 !KNOWN THAT ETR IS DEFINED
     !
     IF(CDAT%MIN_BARE<NEARZERO_30 ) CDAT%MIN_BARE=NEARZERO_30
@@ -1100,8 +1100,6 @@ MODULE CROP_DATA_FMP_MODULE
             CDAT%TFR_READ = TRUE
             UPDATE        = TRUE
             LOAD_NEXT     = TRUE
-            !
-            IF(CDAT%MIN_BARE .GE. UNO) CDAT%BARE_FRAC  = DZ  !NEVER SIMULATE BARE SOIL
             !
             IF(CLIM%HAS_PRECIP)  CDAT%HAS_Pe = CLIM%HAS_Pe
             !
@@ -2010,7 +2008,9 @@ MODULE CROP_DATA_FMP_MODULE
         END IF
         !
         ! SET BARE LAND (FALLOW) FRACTIONS --REQUIRES FRAC TO BE POPULATED
-        IF (UPDATE .AND. CDAT%MIN_BARE < UNO) THEN
+        !   MIN_BARE >= 1 DISABLES BARE SOIL EVERYWHERE (EVEN CELLS WITHOUT A CROP)
+        !   CRPID IS ONLY ALLOCATED FOR SINGLE_LAND_USE_PER_CELL (FRAC NOT IN USE)
+        IF (UPDATE) THEN
               !
               CDAT%BARE_FRAC = UNO
               IF(CDAT%FRAC%INUSE) THEN
@@ -2033,10 +2033,12 @@ MODULE CROP_DATA_FMP_MODULE
                                                                   'THE FALLOW/BARE PORTION IS ASSUMED TO BE ZERO AND THE FOLLOWING ARE THE PROBLEM MODEL CELLS:'//BLN// &
                                                                   'ROW   COL   SUMMED_FRACTION',                   &
                                                                    OUTPUT=CDAT%LOUT, TAIL=NL, NO_NL=TRUE, INIT=TRUE)
-              ELSE             
+              ELSE
                                DO CONCURRENT ( R=ONE:CDAT%NROW, C=ONE:CDAT%NCOL, CDAT%CRPID(C,R) > Z .OR. WBS%FID_ARRAY(C,R) < ONE );   CDAT%BARE_FRAC(C,R) = DZ
                                END DO
               END IF
+              !
+              IF(CDAT%MIN_BARE >= UNO) CDAT%BARE_FRAC = DZ   !NEVER SIMULATE BARE SOIL
               !
               IF(CLIM%HAS_BARE_PET) THEN
                                            CDAT%CHECK_BARE = ANY(CDAT%BARE_FRAC > DZ)
@@ -2044,17 +2046,6 @@ MODULE CROP_DATA_FMP_MODULE
                                            CDAT%CHECK_BARE = FALSE
               END IF
               !
-        ELSEIF(UPDATE .AND. CLIM%HAS_BARE_PET) THEN
-              DO CONCURRENT ( R=ONE:CDAT%NROW, C=ONE:CDAT%NCOL)   
-                  IF(WBS%FID_ARRAY(C,R) < ONE) THEN             ! No WBS no Sim
-                      CDAT%BARE_FRAC(C,R) = DZ
-                  ELSEIF(CDAT%CRPID(C,R) > Z) THEN              ! Has Crop Defined, so No Bare
-                      CDAT%BARE_FRAC(C,R) = DZ
-                  ELSE
-                      CDAT%BARE_FRAC(C,R) = UNO
-                  END IF
-              END DO
-              CDAT%CHECK_BARE = ANY(CDAT%BARE_FRAC > DZ)
         END IF
         !
         !
