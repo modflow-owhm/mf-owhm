@@ -62,6 +62,9 @@ examples/**/output/**
 # Local scratch files that are never committed
 /untracked/
 
+# Local test suite that is never committed
+/tests/
+
 # Intermediate Directories
 obj/**
 lib/**
