@@ -22,6 +22,9 @@ bin/**
 # WinMerge bak file
 *.bak
 
+# Windows Mark of the Web stream written as a file when copying into WSL
+*:Zone.Identifier
+
 # Prerequisites
 *.d
 
