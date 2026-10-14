@@ -1153,6 +1153,7 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
     CLASS(SURFACE_WATER_DATA),           INTENT(INOUT):: SWF
     LOGICAL, DIMENSION(:),   CONTIGUOUS, INTENT(IN   ):: SW_SOURCE
     INTEGER, DIMENSION(:),   CONTIGUOUS, INTENT(IN   ):: SEG_NSTRM
+    INTEGER, DIMENSION(:), ALLOCATABLE:: PNT
     INTEGER:: F, K, DIM
     DOUBLE PRECISION:: WT_SUM
     !
@@ -1220,7 +1221,11 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
                     !
                     IF(WT_SUM.NE.UNO) SWF%SRDLOC(F)%WT = SWF%SRDLOC(F)%WT / WT_SUM  !RESCALE TO SUM TO ONE
                     !
-                    CALL SORT(SWF%SRDLOC(F)%WT,SWF%SRDLOC(F)%ISTRM, SORT_B=FALSE, DESCEND=TRUE, STABLE=TRUE) !Sort in order of largest weight to smallest. Same weights are processed in the order they are specified (from SORT_B=FALSE, STABLE=TRUE)
+                    CALL ALLOC(PNT, DIM, EXACT=FALSE)  ! Permutation vector, grows as needed (so pass PNT(1:DIM)) and is released at the end of the routine
+                    CALL SORT(SWF%SRDLOC(F)%WT,SWF%SRDLOC(F)%ISTRM, SORT_B=FALSE, DESCEND=TRUE, STABLE=TRUE, P=PNT(1:DIM)) !Sort in order of largest weight to smallest. Same weights are processed in the order they are specified (from SORT_B=FALSE, STABLE=TRUE)
+                    !
+                    CALL PERMUTATION_SORT(SWF%SRDLOC(F)%ISRD, PNT(1:DIM))                  ! Keep ISRD and SEG/RCH in the same order as the sorted ISTRM; ISRD assigns LLIM/ULIM and SR labels the output
+                    CALL PERMUTATION_SORT(SWF%SRDLOC(F)%SR,   PNT(1:DIM), BY_COLUMN=FALSE)
                     !
                     !
                     !!!ASSOCIATE(IDX=>SWF%SRDLOC(F)%ISTRM)
@@ -1234,6 +1239,8 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
          END IF !(DIM > Z) THEN
       END IF !(SW_SOURCE(F)) THEN
     END DO
+    !
+    IF(ALLOCATED(PNT)) DEALLOCATE(PNT)
     !
   END SUBROUTINE
   !
