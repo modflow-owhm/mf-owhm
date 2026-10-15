@@ -604,11 +604,15 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
     !------------------------------------------------------------------------
     !
     IF(UPDATE .OR. SWF%DELIV_L_LIM%TRANSIENT) THEN
+           IF(SWF%DELIV_L_LIM%SFAC%HAS_ALL) SWF%DELIV_L_LIM%LIST = SWF%DELIV_L_LIM%LIST * SWF%DELIV_L_LIM%SFAC%ALL  ! ULOAD returns the scale factor (SFAC keyword or the number after the file name) but does not apply it
+           !
            DO CONCURRENT(K=ONE:SWF%NSFR_DELIV, SWF%DELIV_L_LIM%LIST(K) < DZ );   SWF%DELIV_L_LIM%LIST(K) = DZ
            END DO
     END IF
     !
     IF(UPDATE .OR. SWF%DELIV_U_LIM%TRANSIENT) THEN
+           IF(SWF%DELIV_U_LIM%SFAC%HAS_ALL) SWF%DELIV_U_LIM%LIST = SWF%DELIV_U_LIM%LIST * SWF%DELIV_U_LIM%SFAC%ALL
+           !
            DO CONCURRENT(K=ONE:SWF%NSFR_DELIV, SWF%DELIV_U_LIM%LIST(K) < DZ );   SWF%DELIV_U_LIM%LIST(K) = D100
            END DO
     END IF
