@@ -5764,8 +5764,8 @@ C31-----NO PRECIPITATION OR ET FROM CHANNEL WHEN WIDTH IS ZERO.
                 IF ( flowin+runoff+precip.LT.NEARZERO ) THEN
                   runof = 0.0D0
                   etstr = 0.0D0
-                ELSE IF (runof.GE.flowin+runoff+precip-etstr) THEN
-                  runof = flowin + runoff + precip - etstr
+                ELSE IF ( flowin+runoff+precip-etstr <= -runof ) THEN
+                  runof = -(flowin+runoff+precip-etstr)
                 ELSE IF ( etstr.GE.flowin+runoff+precip+runof ) THEN
                   etstr = flowin + runoff + precip + runof
                 END IF
@@ -5778,7 +5778,7 @@ C31-----NO PRECIPITATION OR ET FROM CHANNEL WHEN WIDTH IS ZERO.
               IF ( flowin+runoff+precip-flobot.LT.NEARZERO ) THEN
                 runof = 0.0D0
                 etstr = 0.0D0
-              ELSE IF (runof.GE.flowin+runoff+precip-flobot-etstr)
+              ELSE IF ( flowin+runoff+precip-flobot-etstr <= -runof )
      +                 THEN
                 runof = -(flowin+runoff+precip-flobot-etstr)
               ELSE IF (etstr.GE.flowin+runoff+precip-flobot+runof) THEN
