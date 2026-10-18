@@ -1980,13 +1980,14 @@ MODULE FMP_MAIN_DRIVER
   END SUBROUTINE
   !
   SUBROUTINE FMP_CNVG(IGRID, KPER, KSTP, KITER, ICNVG)
-    USE FMP_GLOBAL,    ONLY: SWFL, WBS, FCROP, ISTARTFL, FMP_LGR_PNT, SWODAT
+    USE FMP_GLOBAL,    ONLY: SWFL, WBS, FCROP, ISTARTFL, FMP_LGR_PNT, SWODAT, SFR_DELIV
     USE GWFSFRMODULE, ONLY: STRM
     USE CONSTANTS,    ONLY: BLN, NL, ONE, Z, DZ, HALF, UNO, MILLI,NEARZERO_5
     !
     INTEGER, INTENT(IN   ):: IGRID, KPER, KSTP, KITER
     INTEGER, INTENT(INOUT):: ICNVG
-    INTEGER::F,K
+    INTEGER::F,K,I
+    DOUBLE PRECISION:: DEL, SHORT
     !
     CALL FMP_LGR_PNT(IGRID)
     CALL SGWF2LGR2PNT(IGRID)  
@@ -2077,6 +2078,48 @@ MODULE FMP_MAIN_DRIVER
                                                SWFL%SRDLOC(F)%FLOW_OLD(K) = SWFL%SRDLOC(F)%FLOW(K)
             END DO
           END DO
+          !
+          ! The deliveries were sized from the reach inflow of the previous iteration; require that
+          ! they do not exceed the inflow that SFR FM just computed by more than SRD_MISMATCH_TOL (fraction
+          ! of the delivery) nor, when it is set, by more than SRD_MISMATCH_ABS (rate). Either failing forces another iteration.
+          !
+          IF(KITER == 7) SWFL%SRD_MISMATCH_CNT = Z
+          !
+          IF(ICNVG==1 .AND. (SWFL%SRD_MISMATCH_TOL >= DZ .OR. SWFL%SRD_MISMATCH_ABS >= DZ)) THEN
+             DO I=ONE, SFR_DELIV%N
+                DEL = SFR_DELIV%REMOVE_INFLOW(I)
+                IF(DEL > MILLI) THEN
+                   SHORT = DEL - DBLE(STRM(10,SFR_DELIV%ISTRM(I)))
+                   IF( SWFL%SRD_MISMATCH_TOL >= DZ .AND. SHORT > SWFL%SRD_MISMATCH_TOL*DEL ) ICNVG = Z
+                   IF( SWFL%SRD_MISMATCH_ABS >= DZ .AND. SHORT > SWFL%SRD_MISMATCH_ABS     ) ICNVG = Z
+                   IF( ICNVG == Z ) THEN
+                       SWFL%SRD_MISMATCH_CNT = SWFL%SRD_MISMATCH_CNT + ONE
+                       EXIT
+                   END IF
+                END IF
+             END DO
+          END IF
+          !
+          IF( SWFL%SRD_MISMATCH_CNT == 3) THEN             !Only write warning once
+              SWFL%SRD_MISMATCH_CNT = SWFL%SRD_MISMATCH_CNT + ONE
+              !
+           CALL WARNING_MESSAGE(OUTPUT=WBS%IOUT,MSG=                                                                                &
+                                 'The number of solver iterations was increased because a semi-routed delivery'//NL//                   &
+                                 'removed more water from an SFR reach than the reach inflow of the latest SFR solution.'//BLN//        &
+                                 'FMP sizes the delivery from the reach inflow of the previous solver iteration,'//NL//                 &
+                                 'so it requires that the delivery exceed the current inflow by less than'//NL//                        &
+                                 NUM2STR(SWFL%SRD_MISMATCH_TOL)//' of the delivery (SEMI_ROUTED_DELIVERY_MISMATCH_TOLERANCE) and,'//NL//  &
+                                 'if set, less than SEMI_ROUTED_DELIVERY_MISMATCH_ABSOLUTE_TOLERANCE = '//NUM2STR(SWFL%SRD_MISMATCH_ABS)//NL//  &
+                                 '(a negative value means it is not set), even if the solver criteria is met.'//BLN//                   &
+                                 'This warning was triggered because the solver was required to solve'//NL//                            &
+                                 'at least 2 additional iterations before the deliveries were within the tolerance.'//BLN//            &
+                                 'The remaining difference is the part of the delivery that SFR cannot remove from the reach;'//NL//    &
+                                 'it is written with the SURFACE_WATER block option PRINT SFR_DELIVERY_MISMATCH.'//BLN//               &
+                                 'If it is desired to change this tolerance, add to the FMP SURFACE_WATER block'//NL//                  &
+                                 'the keyword SEMI_ROUTED_DELIVERY_MISMATCH_TOLERANCE followed by the new tolerance'//NL//             &
+                                 '(a negative tolerance disables the check).'//BLN//                                                    &
+                                 '(Note the default is 0.01)')
+          ENDIF
       END IF !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       !
       IF(WBS%HAS_SWO) THEN
@@ -2096,8 +2139,8 @@ MODULE FMP_MAIN_DRIVER
   SUBROUTINE FMP_BD(KITER,KPER,KSTP,IGRID,NGRIDS,ILGR,LGRITER)
     USE GLOBAL,       ONLY: SPTIM, INPUT_CHECK,NCOL,NROW,NLAY,SPSTART
     USE GWFBASMODULE, ONLY: HAS_STARTDATE, DATE_SP, TOTIM
-    USE FMP_GLOBAL,   ONLY: FDIM, WBS, CLIMATE, FCROP, FMPOUT,SALT,SOIL,SWFL,FMPOPT,FMP_LGR_PNT,DRTFLOW, SWODAT
-    USE GWFSFRMODULE, ONLY: SEG, STRM
+    USE FMP_GLOBAL,   ONLY: FDIM, WBS, CLIMATE, FCROP, FMPOUT,SALT,SOIL,SWFL,FMPOPT,FMP_LGR_PNT,DRTFLOW, SWODAT, SFR_DELIV
+    USE GWFSFRMODULE, ONLY: SEG, STRM, ISTRM, DELIV_MISMATCH
     USE GWFMNW2MODULE,ONLY: SGWF2MNW2PNT
     USE GENERIC_OUTPUT_FILE_INSTRUCTION, ONLY: GENERIC_OUTPUT_FILE
     !
@@ -2228,6 +2271,7 @@ MODULE FMP_MAIN_DRIVER
              IF(SWFL%OUT_SFR_SRD_BYWBS%IS_OPEN ) CALL SWFL%PRINT_OUT_SFR_SRD_BYWBS(STRM, KPER, KSTP, DELT, TIM, DATETIME, SET_HEADER)
              IF(SWFL%OUT_SFR_SRR      %IS_OPEN ) CALL SWFL%PRINT_OUT_SFR_SRR      (STRM, KPER, KSTP, DELT, TIM, DATETIME, SET_HEADER)
              IF(SWFL%OUT_SFR_RET      %IS_OPEN ) CALL SWFL%PRINT_OUT_SFR_RET      (STRM, KPER, KSTP, DELT, TIM, DATETIME, SET_HEADER)
+             IF(SWFL%OUT_SFR_MISMATCH %IS_OPEN ) CALL SWFL%PRINT_OUT_SFR_MISMATCH(SFR_DELIV, ISTRM, STRM, DELIV_MISMATCH, KPER, KSTP, DELT, TIM, DATETIME, SET_HEADER)
     END IF
     !
     !  NON-ROUTED DELIVERY OUTPUT----------------------------------------------------------------

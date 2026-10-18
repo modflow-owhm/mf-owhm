@@ -26,6 +26,7 @@
         REAL,             SAVE,  DIMENSION(:,:),   POINTER, CONTIGUOUS:: DVRPERC  !(Percentage of diversion applied to each cell)
         REAL,             SAVE,  DIMENSION(:),     POINTER, CONTIGUOUS:: DVEFF  !(store efficiency factor)
         INTEGER,          SAVE,                    POINTER:: NSS, NSTRM, NSFRPAR, ISTCB1, ISTCB2
+        LOGICAL,          SAVE,                    POINTER:: HAS_FMP            ! FMP is active (IUNIT(61) /= 0); only then can a negative runoff (FMP delivery) exceed the water in a reach
         INTEGER,          SAVE,                    POINTER:: IUZT, MAXPTS, IRTFLG, NUMTIM, NSEGDIM
         INTEGER,          SAVE,                    POINTER:: ISFROPT, NSTRAIL, ISUZN, NSFRSETS
         INTEGER,          SAVE,                    POINTER:: NUZST, NSTOTRL, NUMAVE, NSFRAUX
@@ -57,6 +58,7 @@
         INTEGER,          SAVE,                    POINTER:: NINTOT,ITRFLG      !for LMT, total # of possible inflows edm 7/30/13
         DOUBLE PRECISION, SAVE, DIMENSION(:),      POINTER, CONTIGUOUS:: THTS, THTR, EPS
         DOUBLE PRECISION, SAVE, DIMENSION(:),      POINTER, CONTIGUOUS:: FOLDFLBT, THTI
+        DOUBLE PRECISION, SAVE, DIMENSION(:),      POINTER, CONTIGUOUS:: DELIV_MISMATCH     ! (NSTRM when HAS_FMP, else 1) Part of a negative runoff (FMP delivery) that BD could not remove from the reach: runoff applied - STRM(12,:) >= 0. Read by FMP for PRINT SFR_DELIVERY_MISMATCH
         DOUBLE PRECISION, SAVE, DIMENSION(:),      POINTER, CONTIGUOUS:: SUMLEAK, SUMRCH
         DOUBLE PRECISION, SAVE, DIMENSION(:),      POINTER, CONTIGUOUS:: HLDSFR
         DOUBLE PRECISION, SAVE, DIMENSION(:,:),    POINTER, CONTIGUOUS:: UZFLWT, UZSTOR
@@ -110,6 +112,7 @@
         REAL,              DIMENSION(:,:),   POINTER, CONTIGUOUS:: DVRPERC  !Diversions to recharge
         REAL,              DIMENSION(:),     POINTER, CONTIGUOUS:: DVEFF  !Diversions to recharge
         INTEGER,                             POINTER:: NSS, NSTRM, NSFRPAR, ISTCB1, ISTCB2
+        LOGICAL,                             POINTER:: HAS_FMP
         INTEGER,                             POINTER:: IUZT, MAXPTS, IRTFLG, NUMTIM, NSEGDIM
         INTEGER,                             POINTER:: ISFROPT, NSTRAIL, ISUZN, NSFRSETS
         INTEGER,                             POINTER:: NUZST, NSTOTRL, NUMAVE, NSFRAUX
@@ -141,6 +144,7 @@
         INTEGER,                             POINTER:: NINTOT,ITRFLG      !for LMT, total # of possible inflows edm 7/30/13
         DOUBLE PRECISION,  DIMENSION(:),     POINTER, CONTIGUOUS:: THTS, THTR, EPS
         DOUBLE PRECISION,  DIMENSION(:),     POINTER, CONTIGUOUS:: FOLDFLBT, THTI
+        DOUBLE PRECISION,  DIMENSION(:),     POINTER, CONTIGUOUS:: DELIV_MISMATCH
         DOUBLE PRECISION,  DIMENSION(:),     POINTER, CONTIGUOUS:: SUMLEAK, SUMRCH
         DOUBLE PRECISION,  DIMENSION(:),     POINTER, CONTIGUOUS:: HLDSFR
         DOUBLE PRECISION,  DIMENSION(:,:),   POINTER, CONTIGUOUS:: UZFLWT, UZSTOR

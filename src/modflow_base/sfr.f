@@ -472,6 +472,8 @@ C     ------------------------------------------------------------------
       iterp   = ONE
       idum(1) = Z
       ALLOCATE (NSS, NSTRM,TOTSPFLOW)
+      ALLOCATE (HAS_FMP)
+      HAS_FMP = IUNIT(61) /= Z
       ALLOCATE (NSFRPAR, ISTCB1, ISTCB2, IUZT, MAXPTS)
       ALLOCATE (ISFROPT, NSTRAIL, ISUZN, NSFRSETS)
       ALLOCATE (NUZST, NSTOTRL, NUMAVE, OUTSEGFLAG, UNITSEGOUT)
@@ -1935,6 +1937,15 @@ C         NWAVS INITIALLY SET TO 1.
       ALLOCATE (FOLDFLBT(mstrmar))
       Nfoldflbt = mstrmar
       FOLDFLBT = 0.0D0
+C
+C22B----DELIVERY MISMATCH IS ONLY TRACKED WHEN FMP CAN REMOVE WATER FROM
+C         A REACH (NEGATIVE RUNOFF); OTHERWISE A ONE-ELEMENT PLACEHOLDER.
+      IF ( HAS_FMP ) THEN
+        ALLOCATE (DELIV_MISMATCH(NSTRM))
+      ELSE
+        ALLOCATE (DELIV_MISMATCH(1))
+      END IF
+      DELIV_MISMATCH = 0.0D0
       ALLOCATE (UZFLWT(ISUZN,NUZST), UZSTOR(ISUZN,NUZST))
       UZFLWT = 0.0D0
       UZSTOR = 0.0D0
@@ -2165,7 +2176,7 @@ C     ------------------------------------------------------------------
      +        jj, jk, k5, k6, k7, kk, ksfropt, kss, ktot, l, lstbeg,
      +        nseg, nstrpts,krck,irck,jrck,ireachck, j, numval,iunitnum,
      +        ILP,ierr,IFLG,LLOC,ISTART,ISTOP !WSCHMID/RTH
-      LOGICAL:: HAS_ERROR, HAS_LMT, HAS_FMP
+      LOGICAL:: HAS_ERROR, HAS_LMT
       CHARACTER(LEN=200)::LINE
       REAL TTIME,TRATE
       TYPE(WARNING_TYPE):: ERR, WRN
@@ -2190,7 +2201,6 @@ C         AND NUMBER OF PARAMETERS BEING USED IN CURRENT STRESS PERIOD.
       iss = ISSFLG(Kkper)
       zero = 1.0E-7
       HAS_LMT = IUNIT(49).NE.0
-      HAS_FMP = IUNIT(61).NE.0
       ! 
 Cdep added NSFRPAR to IF statement
       !IF ( Kkper.GT.1 ) THEN
@@ -5791,6 +5801,13 @@ C31-----NO PRECIPITATION OR ET FROM CHANNEL WHEN WIDTH IS ZERO.
               etstr = 0.0D0
             END IF
             flow = flowin + runof + runoff + precip - etstr
+          END IF
+C
+C30B----PART OF A NEGATIVE RUNOFF (FMP DELIVERY) THAT COULD NOT BE REMOVED
+C         FROM THE REACH; FMP REPORTS IT WITH PRINT SFR_DELIVERY_MISMATCH.
+          IF ( HAS_FMP ) THEN
+            DELIV_MISMATCH(l) = runof - STRM(12, l)
+            IF ( DELIV_MISMATCH(l) < NEARZERO ) DELIV_MISMATCH(l) = DZ
           END IF
           IF ( flobot.GE.flow ) THEN
             flobot = flow
@@ -10613,6 +10630,8 @@ C     ------------------------------------------------------------------
 C     ------------------------------------------------------------------
       DEALLOCATE (GWFSFRDAT(IGRID)%NSS)
       DEALLOCATE (GWFSFRDAT(IGRID)%NSTRM)
+      DEALLOCATE (GWFSFRDAT(IGRID)%HAS_FMP)
+      DEALLOCATE (GWFSFRDAT(IGRID)%DELIV_MISMATCH)
       DEALLOCATE (GWFSFRDAT(IGRID)%NSFRPAR)
       DEALLOCATE (GWFSFRDAT(IGRID)%ISTCB1)
       DEALLOCATE (GWFSFRDAT(IGRID)%ISTCB2)
@@ -10794,6 +10813,8 @@ C NULLIFY THE LOCAL POINTERS
         SFR_IN_USE = .FALSE.
         NSS             =>NULL()
         NSTRM           =>NULL()
+        HAS_FMP         =>NULL()
+        DELIV_MISMATCH  =>NULL()
         NSFRPAR         =>NULL()
         ISTCB1          =>NULL()
         ISTCB2          =>NULL()
@@ -10949,6 +10970,8 @@ C     ------------------------------------------------------------------
       FLOWTYPE=>GWFSFRDAT(IGRID)%FLOWTYPE
       NSS=>GWFSFRDAT(IGRID)%NSS
       NSTRM=>GWFSFRDAT(IGRID)%NSTRM
+      HAS_FMP=>GWFSFRDAT(IGRID)%HAS_FMP
+      DELIV_MISMATCH=>GWFSFRDAT(IGRID)%DELIV_MISMATCH
       NSFRPAR=>GWFSFRDAT(IGRID)%NSFRPAR
       ISTCB1=>GWFSFRDAT(IGRID)%ISTCB1
       ISTCB2=>GWFSFRDAT(IGRID)%ISTCB2
@@ -11108,6 +11131,8 @@ C     ------------------------------------------------------------------
       GWFSFRDAT(IGRID)%FLOWTYPE=>FLOWTYPE
       GWFSFRDAT(IGRID)%NSS=>NSS
       GWFSFRDAT(IGRID)%NSTRM=>NSTRM
+      GWFSFRDAT(IGRID)%HAS_FMP=>HAS_FMP
+      GWFSFRDAT(IGRID)%DELIV_MISMATCH=>DELIV_MISMATCH
       GWFSFRDAT(IGRID)%NSFRPAR=>NSFRPAR
       GWFSFRDAT(IGRID)%ISTCB1=>ISTCB1
       GWFSFRDAT(IGRID)%ISTCB2=>ISTCB2
