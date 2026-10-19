@@ -1125,6 +1125,13 @@ span {
 </span><span class="sc24">   </span><span class="sc6">PRINT SFR_RETURN</span><span class="sc24">            </span><span class="sc8">GENERIC_OUTPUT_OptKey</span><span class="sc24">  </span><span class="sc2"># Runoff budget for all SFR segment/reaches that receive FMP runoff
 </span><span class="sc24">   </span><span class="sc6">PRINT SFR_SRR_ONLY</span><span class="sc24">          </span><span class="sc8">GENERIC_OUTPUT_OptKey</span><span class="sc24">  </span><span class="sc2"># Runoff budget for the NSFR_RETURN SFR segment/reaches that receive FMP runoff
 </span><span class="sc24">   </span><span class="sc2">#
+</span><span class="sc24">   </span><span class="sc6">PRINT SFR_DELIVERY_MISMATCH</span><span class="sc24"> </span><span class="sc8">GENERIC_OUTPUT_OptKey</span><span class="sc24">  </span><span class="sc2"># Mass error between FMP and SFR for the semi-routed deliveries. For every SFR reach that FMP
+</span><span class="sc24">   </span><span class="sc2">#                                                  #   removes water from, lists the delivery FMP applied (FMP_DELIVERY), the part SFR could
+</span><span class="sc24">   </span><span class="sc2">#                                                  #   actually remove (SFR_REMOVED), their difference (MISMATCH) and MISMATCH as a percent of
+</span><span class="sc24">   </span><span class="sc2">#                                                  #   FMP_DELIVERY, plus the reach inflow. The first row of each time step (SEG = RCH = 0) is the
+</span><span class="sc24">   </span><span class="sc2">#                                                  #   total over all delivery reaches. A mismatch occurs because FMP sizes a delivery from the reach
+</span><span class="sc24">   </span><span class="sc2">#                                                  #   inflow of the previous solver iteration, see SEMI_ROUTED_DELIVERY_MISMATCH_TOLERANCE.
+</span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc6">PRINT NRD</span><span class="sc24">                   </span><span class="sc8">GENERIC_OUTPUT_OptKey</span><span class="sc24">  </span><span class="sc2"># NON_ROUTED_DELIVERY water demanded and delivered for each NRD, for each WBS.
 </span><span class="sc24">   </span><span class="sc6">PRINT NRD_BY_WBS</span><span class="sc24">            </span><span class="sc8">GENERIC_OUTPUT_OptKey</span><span class="sc24">   </span><span class="sc2"># NON_ROUTED_DELIVERY water demanded and delivered for each WBS.
@@ -1204,6 +1211,23 @@ span {
 </span><span class="sc24">   </span><span class="sc2">#   if the the change in SEMI_ROUTED_DELIVERY from the previous iteration is less then 0.02 L^3/T
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc6">SEMI_ROUTED_DELIVERY_CLOSURE_TOLERANCE</span><span class="sc24">  </span><span class="sc7">FLOAT</span><span class="sc24">
+   </span><span class="sc2">#
+</span><span class="sc24">   </span><span class="sc2"># A SEMI_ROUTED_DELIVERY is sized from the SFR reach inflow of the previous solver iteration, so when the
+</span><span class="sc24">   </span><span class="sc2"># model has converged the delivery can be slightly larger than the inflow of the final SFR solution.
+</span><span class="sc24">   </span><span class="sc2"># SFR then only removes the water that is in the reach and the difference (the mismatch) is a mass error
+</span><span class="sc24">   </span><span class="sc2"># between FMP, which counts the full delivery as supply, and SFR.
+</span><span class="sc24">   </span><span class="sc2"># The keyword SEMI_ROUTED_DELIVERY_MISMATCH_TOLERANCE defines the fraction of a delivery that may exceed
+</span><span class="sc24">   </span><span class="sc2"># the current reach inflow before convergence is allowed; if any delivery exceeds it, another solver iteration is forced.
+</span><span class="sc24">   </span><span class="sc2"># If not specified, then the default tolerance is 0.01 (1% of the delivery).
+</span><span class="sc24">   </span><span class="sc2">#   A negative value disables the check. The mismatch that remains is written with PRINT SFR_DELIVERY_MISMATCH.
+</span><span class="sc24">   </span><span class="sc2">#
+</span><span class="sc24">   </span><span class="sc6">SEMI_ROUTED_DELIVERY_MISMATCH_TOLERANCE</span><span class="sc24">  </span><span class="sc7">FLOAT</span><span class="sc24">
+   </span><span class="sc2">#
+</span><span class="sc24">   </span><span class="sc2"># The same check as an absolute rate (L^3/T): another solver iteration is forced if any delivery exceeds
+</span><span class="sc24">   </span><span class="sc2"># the current reach inflow by more than this rate. Disabled by default (not applied unless specified); the relative
+</span><span class="sc24">   </span><span class="sc2"># tolerance stays in effect, so convergence requires both checks to pass. A negative value disables it again.
+</span><span class="sc24">   </span><span class="sc2">#
+</span><span class="sc24">   </span><span class="sc6">SEMI_ROUTED_DELIVERY_MISMATCH_ABSOLUTE_TOLERANCE</span><span class="sc24">  </span><span class="sc7">FLOAT</span><span class="sc24">
    </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># ------------------------------------------------------------------------------------------------------------------
 </span><span class="sc24">   </span><span class="sc2">#
