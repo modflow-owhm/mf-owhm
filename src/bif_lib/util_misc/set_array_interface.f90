@@ -5,7 +5,7 @@
 !
 MODULE SET_ARRAY_INTERFACE
   !
-  USE, INTRINSIC:: IEEE_ARITHMETIC, ONLY: IEEE_VALUE, IEEE_QUIET_NAN!, IEEE_IS_NAN
+  USE, INTRINSIC:: IEEE_ARITHMETIC, ONLY: IEEE_VALUE, IEEE_QUIET_NAN, IEEE_IS_NAN
   USE, INTRINSIC:: ISO_FORTRAN_ENV, ONLY: REAL32, REAL64, REAL128, INT8, INT16, INT32, INT64
   !
   IMPLICIT NONE
@@ -237,7 +237,7 @@ MODULE SET_ARRAY_INTERFACE
     NaN = IEEE_VALUE(NaN, IEEE_QUIET_NAN)
     !
     DO CONCURRENT(K=1:DIM3, J=1:DIM2, I=1:DIM1)
-        IF(ARR1(I,J,K) /= ARR1(I,J,K)) THEN                ! Set to NaN
+        IF(IEEE_IS_NAN(ARR1(I,J,K))) THEN                ! Set to NaN
                                   ARR2(I,J,K) = NaN
         ELSE
                                   ARR2(I,J,K) = REAL(ARR1(I,J,K), REAL64)
@@ -255,7 +255,7 @@ MODULE SET_ARRAY_INTERFACE
     NaN = IEEE_VALUE(NaN, IEEE_QUIET_NAN)
     !
     DO CONCURRENT(K=1:DIM3, J=1:DIM2, I=1:DIM1)
-        IF    (ARR1(I,J,K) /= ARR1(I,J,K)  ) THEN                ! Set to NaN
+        IF    (IEEE_IS_NAN(ARR1(I,J,K))  ) THEN                ! Set to NaN
                                   ARR2(I,J,K) = NaN
         ELSEIF(ARR1(I,J,K) < -3.40282e38_real64) THEN                ! Lower limit of Single Precision
                                   ARR2(I,J,K) = -3.40282e38_real32
@@ -279,7 +279,7 @@ MODULE SET_ARRAY_INTERFACE
     NaN = IEEE_VALUE(NaN, IEEE_QUIET_NAN)
     !
     DO CONCURRENT(J=1:DIM2, I=1:DIM1)
-        IF    (ARR1(I,J) /= ARR1(I,J)  ) THEN                 ! Set to NaN
+        IF    (IEEE_IS_NAN(ARR1(I,J))  ) THEN                 ! Set to NaN
                                   ARR2(I,J) = NaN
         ELSE
                                   ARR2(I,J) = REAL(ARR1(I,J), REAL64)
@@ -297,7 +297,7 @@ MODULE SET_ARRAY_INTERFACE
     NaN = IEEE_VALUE(NaN, IEEE_QUIET_NAN)
     !
     DO CONCURRENT(J=1:DIM2, I=1:DIM1)
-        IF    (ARR1(I,J) /= ARR1(I,J)  ) THEN                 ! Set to NaN
+        IF    (IEEE_IS_NAN(ARR1(I,J))  ) THEN                 ! Set to NaN
                                   ARR2(I,J) = NaN
         ELSEIF(ARR1(I,J) < -3.40282e38_real64) THEN               ! Lower limit of Single Precision
                                   ARR2(I,J) = -3.40282e38_real32

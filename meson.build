@@ -34,7 +34,7 @@ fid = fc.get_id()
 fflags  = []   # all configurations
 ldflags = []
 if fid == 'intel' or fid == 'intel-llvm'
-  fflags += ['-nologo', '-assume', 'nocc_omp,ieee_compares', '-fpe0', '-fp-model', 'source', '-warn', 'nousage']
+  fflags += ['-nologo', '-assume', 'nocc_omp', '-fpe0', '-fp-model', 'source', '-warn', 'nousage']
   if fid == 'intel'
     fflags += ['-diag-disable=10448']
   endif
@@ -55,7 +55,7 @@ if fid == 'intel' or fid == 'intel-llvm'
     ldflags += ['-static', '-static-intel', '-qopenmp-link=static', '-static-libstdc++', '-static-libgcc']
   endif
 elif fid == 'intel-cl' or fid == 'intel-llvm-cl'
-  fflags += ['/nologo', '/assume:nocc_omp,ieee_compares', '/fpe:0', '/fp:source', '/warn:nousage']
+  fflags += ['/nologo', '/assume:nocc_omp', '/fpe:0', '/fp:source', '/warn:nousage']
   if fid == 'intel-cl'
     fflags += ['/Qdiag-disable:10448']
   endif

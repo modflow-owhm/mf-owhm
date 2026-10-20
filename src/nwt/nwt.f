@@ -669,13 +669,14 @@ C Allocage PCG if requested
       END SUBROUTINE GWF2NWT1AR
       !
       SUBROUTINE SETUP_NWT_GSE_LIM()
+      USE, INTRINSIC:: IEEE_ARITHMETIC, ONLY: IEEE_IS_NAN
       USE CONSTANTS,  ONLY:inf,D100
       USE GLOBAL,     ONLY:NCOL,NROW, GSE
       USE GWFNWTMODULE, ONLY: GSE_LIM
       IMPLICIT NONE
       INTEGER:: I,J
       !
-      IF(GSE_LIM(1,1) == GSE_LIM(1,1)) THEN
+      IF(.NOT. IEEE_IS_NAN(GSE_LIM(1,1))) THEN
             DO CONCURRENT(I=1:NCOL, J=1:NROW)
                 IF(GSE_LIM(i,j) < 0.D0 .OR. GSE_LIM(i,j) >= 1D30) THEN
                     GSE_LIM(i,j) = inf
@@ -1194,6 +1195,7 @@ C
 ! Builds and Solves Jacobian
 ! Calls various unstructured linear solvers to solve Jacobian
       !USE GWFBASMODULE, ONLY:TOTIM, HNOFLO
+      USE, INTRINSIC:: IEEE_ARITHMETIC, ONLY: IEEE_IS_NAN
       USE CONSTANTS, ONLY: Z, ONE, DZ, UNO, TRUE, FALSE
       USE GLOBAL, ONLY:Ncol, Nrow, Nlay, Ibound, Hcof, Rhs, Iout,botm,
      +                 LBOTM, HOLD, HNEW, DELR, DELC, ISSFLG, 
@@ -1385,7 +1387,8 @@ C
 C--Update heads.
           CALL GWF2NWT1UPH2(ichld,irhld,ilhld,ISS,Kkiter)
           !
-          IF(HED_LIM == HED_LIM .OR. GSE_LIM(1,1) == GSE_LIM(1,1)) THEN
+          IF(.NOT. IEEE_IS_NAN(HED_LIM) .OR.
+     +       .NOT. IEEE_IS_NAN(GSE_LIM(1,1))) THEN
              CALL APPLY_GSE_LIM(ichld,irhld,ilhld)
           END IF
           Fheadsave = Fhead
@@ -1752,6 +1755,7 @@ C-----SET HNEW TO HDRY IF IPHRY>0
       SUBROUTINE APPLY_GSE_LIM(ichld,irhld,ilhld)
 !  Scale the head change of every cell by the smallest factor that keeps
 !  all cells within MAX_HEAD_CHANGE and HEAD_DISTANCE_ABOVE_GSE_LIMIT
+      USE, INTRINSIC:: IEEE_ARITHMETIC, ONLY: IEEE_IS_NAN
       USE GLOBAL, ONLY: Hnew
       USE GWFNWTMODULE
       IMPLICIT NONE
@@ -1762,7 +1766,7 @@ C-----SET HNEW TO HDRY IF IPHRY>0
       DOUBLE PRECISION:: DMP, CHNG, HCHNG
       !
       DMP = 1.0D0
-      IF(HED_LIM == HED_LIM) THEN
+      IF(.NOT. IEEE_IS_NAN(HED_LIM)) THEN
         DO jj = 1, Numactive
           !
           HCHNG = ABS(Hchange(jj))
@@ -1770,7 +1774,7 @@ C-----SET HNEW TO HDRY IF IPHRY>0
         END DO
       END IF
       !
-      IF(GSE_LIM(1,1) == GSE_LIM(1,1)) THEN
+      IF(.NOT. IEEE_IS_NAN(GSE_LIM(1,1))) THEN
         DO jj = 1, Numactive
           il = Diag(1, jj)
           ir = Diag(2, jj)

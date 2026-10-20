@@ -67,7 +67,7 @@ the model with a message if a model asks for GMG.
 
 | Compiler              | Minimum version         | Notes                                                        |
 | --------------------- | ----------------------- | ------------------------------------------------------------ |
-| Intel Fortran `ifx`   | 2024.2                  | The default compiler for every build system here. Part of Intel oneAPI, Windows and Linux. Version 2026 and later need `-assume ieee_compares`, which every flag set includes. |
+| Intel Fortran `ifx`   | 2024.2                  | The default compiler for every build system here. Part of Intel oneAPI, Windows and Linux. |
 | Intel Fortran `ifort` | 2021.13 (oneAPI 2024.2) | The classic compiler, discontinued after oneAPI 2024.2 and no longer downloadable. Still supported by all build files (`F90=ifort`, `-DCMAKE_Fortran_COMPILER=ifort`, `FC=ifort`) for those who have it installed, but no longer the default. |
 | GNU `gfortran`        | 15.2                    | Older 13/14 releases compile the code but have shown internal compiler errors or runtime faults with it. |
 | C compiler (GMG only) | any                     | `icx` (oneAPI), `gcc`, or Visual Studio's `cl` through the Visual Studio projects. |
@@ -563,9 +563,12 @@ in the terminal or from VS Code.
 
 ## Compiler notes
 
-* **ifx** needs `-assume ieee_compares` (included in every flag set) so that
-  the `X /= X` tests the code uses to detect NaN work under `-fpe0`. Without it
-  ifx 2026 traps on the first NaN comparison. ifort and gfortran do not need it.
+* **NaN comparisons.** The code uses NaN to flag unset values and tests for
+  it only with `IEEE_IS_NAN`, before any other comparison of a value that may
+  be NaN. Under `-fpe0`, ifx 2026 traps on every comparison involving a NaN
+  (including `==`, `/=` and `MAX`), and ifort on ordered ones such as `<`.
+  `-assume ieee_compares` would avoid that, but it makes ifx run
+  about 40 percent slower, so no flag set uses it. ifort and gfortran do not need it.
 * **ifx debug builds** cannot combine `-check uninit` with static linking; the
   build systems drop `uninit` from the check list in that case.
 * **gfortran debug builds** initialize reals to a signaling NaN and trap invalid

@@ -181,7 +181,7 @@ MODULE IS_ROUTINES
     REAL(DBL):: CHK, DIFF
     !ABS(VAR1-VAR2) <= (ATOL + RTOL * ABS(VAR2))
     !
-    IF(VAR1 /= VAR1 .OR. VAR2 /= VAR2) THEN
+    IF(IEEE_IS_NAN(VAR1) .OR. IEEE_IS_NAN(VAR2)) THEN
         IS_CLOSE = FALSE
     ELSE
         IF(VAR1 > VAR2) THEN
@@ -246,7 +246,7 @@ MODULE IS_ROUTINES
                          RTOL = TENTH**(DIGIT-ONE)  !Check against DIGIT digits
     END IF
     !
-    IF(VAR1 /= VAR1 .OR. VAR2 /= VAR2) THEN
+    IF(IEEE_IS_NAN(VAR1) .OR. IEEE_IS_NAN(VAR2)) THEN
         IS_CLOSE = FALSE
     ELSE
         IF(VAR1 > VAR2) THEN

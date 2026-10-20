@@ -8,7 +8,7 @@ MODULE CROP_DATA_FMP_MODULE
   USE    SOIL_DATA_FMP_MODULE, ONLY:    SOIL_DATA
   USE CLIMATE_DATA_FMP_MODULE, ONLY: CLIMATE_DATA
   !
-  USE, INTRINSIC:: IEEE_ARITHMETIC, ONLY: IEEE_VALUE, IEEE_QUIET_NAN 
+  USE, INTRINSIC:: IEEE_ARITHMETIC, ONLY: IEEE_VALUE, IEEE_QUIET_NAN, IEEE_IS_NAN
   USE GLOBAL,       ONLY: HNEW_OLD, UPLAY, UPLAY_IDX, LENUNI, WTABLE, WTABLE_OLD !, HNEW
   USE GWFBASMODULE, ONLY: HDRY
   !
@@ -1684,7 +1684,7 @@ MODULE CROP_DATA_FMP_MODULE
                           IF (CDAT%CROP(I)%IRR(K)>Z) THEN !                                           FID                 COL                    ROW             IRRIGATION TYPE
                                                           CDAT%CROP(I)%ADRF(K) = WBS%ADRF_TFR%GET( CDAT%CROP(I)%FID(K),CDAT%CROP(I)%RC(TWO,K),CDAT%CROP(I)%RC(ONE,K),CDAT%CROP(I)%IRR(K) )
                                                           !
-                                                          IF(CDAT%CROP(I)%ADRF(K) .NE. CDAT%CROP(I)%ADRF(K)) CDAT%CROP(I)%ADRF(K) = DZ
+                                                          IF(IEEE_IS_NAN(CDAT%CROP(I)%ADRF(K))) CDAT%CROP(I)%ADRF(K) = DZ
                           ELSE
                                                           CDAT%CROP(I)%ADRF(K) = DZ
                           END IF
@@ -2611,7 +2611,7 @@ MODULE CROP_DATA_FMP_MODULE
           IF (CDAT%CROP(I)%IRR(K)>Z) THEN !                                           FID                 COL                    ROW             IRRIGATION TYPE
                                           CDAT%CROP(I)%EFF(K) = WBS%EFF_TFR%GET( CDAT%CROP(I)%FID(K),CDAT%CROP(I)%RC(TWO,K),CDAT%CROP(I)%RC(ONE,K),CDAT%CROP(I)%IRR(K) )
                                           !
-                                          IF(CDAT%CROP(I)%EFF(K) .NE. CDAT%CROP(I)%EFF(K)) CDAT%CROP(I)%EFF(K) = DZ
+                                          IF(IEEE_IS_NAN(CDAT%CROP(I)%EFF(K))) CDAT%CROP(I)%EFF(K) = DZ
           ELSE
                                           CDAT%CROP(I)%EFF(K) = DZ
           END IF
@@ -3975,7 +3975,7 @@ MODULE CROP_DATA_FMP_MODULE
                          !                                         FOR DEPTH(PSIWET) AND FOR DEPTH(PSIDRY)
                          XWET = RTFUNC(DRZ,PSI3_CM,NEXP,PSIWET_CM) / MLT
                          !
-                         IF(XWET.NE.XWET) THEN
+                         IF(IEEE_IS_NAN(XWET)) THEN
                              !CALL WARNING_MESSAGE(OUTPUT=LOUT,MSG='FMP CROP: SOLVING ANALYITICAL WATER STRESS RESPONSE FUNCTION, XWET = PSI(DEPTH) = FUNCTION (DRZ,NEXP,PSI3,DEPTH), WITH BISECTION METHOD FAILED TO IDENTIFY INITIAL GUESS (d1 and d2) THAT ARE ON BOTH SIDES OF THE ROOT. (viz. PSI(d1)*PSI(d2)>0).'//NL// &
                              !                                          'TO KEEP PROGRAM FROM STOPPING THE SOLUTION THE HEAD ELEVATION OF UPPER EXTINCTION OF TRANSPIRATION DUE TO ANOXIA IS ASSUMED TO BE THE GROUND SURFACE.'//NL// &
                              !                                          'THIS PROBLEM OCCURED FOR CROP '//NUM2STR(I)//NL//' LOCATED IN ROW, COL: '//NUM2STR(R)//', '//NUM2STR(C), INLINE=TRUE)
@@ -4000,7 +4000,7 @@ MODULE CROP_DATA_FMP_MODULE
                      XDRY = RTFUNC(DRZ,PSI3_CM,NEXP,PSIDRY_CM) / MLT
                      !
                      !
-                     IF(XDRY.NE.XDRY) THEN
+                     IF(IEEE_IS_NAN(XDRY)) THEN
                          !WRITE(CDAT%LOUT,'(/A/,A/,6A)') 'FMP CROP WARNING. SOLVING ANALYITICAL WATER STRESS RESPONSE FUNCTION, XDRY = PSI(DEPTH) = FUNCTION (DRZ,NEXP,PSI3,DEPTH), WITH BISECTION METHOD FAILED TO IDENTIFY INITIAL GUESS (d1 and d2) THAT ARE ON BOTH SIDES OF THE ROOT. (viz. PSI(d1)*PSI(d2)>0).', &
                          !                               'TO KEEP PROGRAM FROM STOPPING THE SOLUTION THE HEAD ELEVATION OF ELIMINATION OF CROP-UNPRODUCTIVE WILTING ZONE IS ASSUMED TO BE THE AT THE BOTTOM OF THE ROOT ZONE.', &
                          !                               'THIS PROBLEM OCCURED FOR CROP ',NUM2STR(I),' LOCATED IN ROW, COL: ', NUM2STR(R), ', ', NUM2STR(C)

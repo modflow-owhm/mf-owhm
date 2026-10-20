@@ -184,7 +184,7 @@ END SUBROUTINE
 SUBROUTINE MODFLOW_OWHM_RUN(NAME)
   !
   USE, INTRINSIC:: ISO_FORTRAN_ENV, ONLY: STDIN=>INPUT_UNIT, STDOUT=>OUTPUT_UNIT
-  USE, INTRINSIC:: IEEE_ARITHMETIC, ONLY: IEEE_VALUE, IEEE_QUIET_NAN
+  USE, INTRINSIC:: IEEE_ARITHMETIC, ONLY: IEEE_VALUE, IEEE_QUIET_NAN, IEEE_IS_NAN
   !
   ! Utility Modules
   !
@@ -1022,7 +1022,7 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
                                      !
                                      IF(ITER_PRINT) THEN
                                          CALL CMD_PRINT_ITER(KITER, ITER_SIZE)
-                                         ITER_PRINT = CMD_ITER_INFO > Z .AND. KKITER < MXITER .AND. RCloseL2BAS==RCloseL2BAS .AND. KKITER > FIVE
+                                         ITER_PRINT = CMD_ITER_INFO > Z .AND. KKITER < MXITER .AND. .NOT. IEEE_IS_NAN(RCloseL2BAS) .AND. KKITER > FIVE
                                      END IF
                                      !
                                      IF(ITER_PRINT) CALL CMD_PRINT_ERROR(ITER_SIZE)

@@ -253,13 +253,13 @@ ifeq ($(CFG), DEBUG)
    #
    PROGRAM:=$(PROGRAM)_debug
    #
-   F90FlagsIntel :=-O0 -g -debug -traceback -assume nocc_omp,ieee_compares -fpe0 -fp-model source -nologo -warn nousage -check bounds,pointers,stack,format,output_conversion,uninit
+   F90FlagsIntel :=-O0 -g -debug -traceback -assume nocc_omp -fpe0 -fp-model source -nologo -warn nousage -check bounds,pointers,stack,format,output_conversion,uninit
    F90FlagsGCC   :=-O0 -g -w -fbacktrace -fdefault-double-8  -ffree-line-length-2048 -fmax-errors=10 -ffpe-trap=zero,overflow,invalid -finit-real=snan #-fstack-usage  #<= THIS PROVIDES LOTS OF INFO   -std=f2008
    F90FlagsLLVM  :=
 else
    # NOTE "-ip" can sometimes cause catastrophic error: **Internal compiler error:
    #
-   F90FlagsIntel :=-O2 -assume nocc_omp,ieee_compares -fpe0 -fp-model source -threads -warn nousage -nologo
+   F90FlagsIntel :=-O2 -assume nocc_omp -fpe0 -fp-model source -threads -warn nousage -nologo
    F90FlagsGCC   :=-O2 -w -fno-backtrace -fdefault-double-8 -ffree-line-length-2048
    F90FlagsLLVM  :=
 endif

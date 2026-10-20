@@ -2,6 +2,7 @@
 !#########################################################################################################
 !
 MODULE CLIMATE_DATA_FMP_MODULE
+  USE, INTRINSIC:: IEEE_ARITHMETIC, ONLY: IEEE_IS_NAN
   !
   USE FMP_DIMENSION_MODULE, ONLY: FMP_DIMENSION
   USE SOIL_DATA_FMP_MODULE, ONLY: SOIL_DATA
@@ -423,7 +424,7 @@ MODULE CLIMATE_DATA_FMP_MODULE
                             !
                             IF(SOIL%HAS_Pe_TABLE == TWO) Peff(C,R) = Peff(C,R) * PRECIP(C,R) !INPUT IS AS A FRACTION
                             !
-                            IF    (Peff(C,R) .NE. Peff(C,R)) THEN
+                            IF    (IEEE_IS_NAN(Peff(C,R))) THEN
                                                                  Peff(C,R) = PRECIP(C,R)
                             ELSEIF(Peff(C,R) < NEARZERO_30 ) THEN
                                                                  Peff(C,R) = DZ

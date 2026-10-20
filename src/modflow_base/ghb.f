@@ -511,6 +511,7 @@ C     ******************************************************************
 C
 C     SPECIFICATIONS:
 C     ------------------------------------------------------------------
+      USE, INTRINSIC:: IEEE_ARITHMETIC, ONLY: IEEE_IS_NAN
       USE GLOBAL,            ONLY: IOUT,IFREFM,BOTM,LBOTM,IBOUND
       USE ERROR_INTERFACE,   ONLY: STOP_ERROR
       USE FILE_IO_INTERFACE, ONLY: READ_TO_DATA
@@ -672,7 +673,7 @@ C7------SINCE THE CELL IS INTERNAL GET THE BOUNDARY DATA.
       HB=GHBDATA(I)%VAL(1)
       BOT=BOTM(IC,IR,LBOTM(IL))
 ccrth modified to only stop for NWT solver because ghb heads below model cell bottom is generally OK ADDED NTAB CHECK
-      IF(HB==HB) THEN
+      IF(.NOT. IEEE_IS_NAN(HB)) THEN
           CONTINUE
                                                   !!!    IF(HB.LT.BOT) CALL WARN%ADD(NUM2STR([IL,IR,IC],4,', ')//', '//
                                                   !!!+                               NUM2STR(HB,10)//', '//
@@ -714,6 +715,7 @@ C     ******************************************************************
 C
 C        SPECIFICATIONS:
 C     ------------------------------------------------------------------
+      USE, INTRINSIC:: IEEE_ARITHMETIC, ONLY: IEEE_IS_NAN
       USE WARNING_TYPE_INSTRUCTION, ONLY: WARNING_TYPE
       USE GLOBAL,                   ONLY: IOUT, BOTM, LBOTM, IBOUND
       USE TABLEFILE_INTERFACE,      ONLY: PAK_PROP_TABINTERP
@@ -744,7 +746,7 @@ C     ------------------------------------------------------------------
           !
           IF(IBOUND(IC,IR,IL) > 0) THEN
             !
-            IF(HB==HB) THEN
+            IF(.NOT. IEEE_IS_NAN(HB)) THEN
                        BOT = BOTM(IC,IR,LBOTM(IL))
                IF(HB < BOT) CALL WARN%ADD(
      +                          NUM2STR([IL,IR,IC],4,', ')//', '//

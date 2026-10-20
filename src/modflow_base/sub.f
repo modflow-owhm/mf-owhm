@@ -1151,6 +1151,7 @@ C     ******************************************************************
 C
 C        SPECIFICATIONS:
 C     ------------------------------------------------------------------
+      USE, INTRINSIC:: IEEE_ARITHMETIC, ONLY: IEEE_IS_NAN
       USE GLOBAL, ONLY:NCOL,NROW,NLAY,IBOUND,BOTM,IUNIT,GSE,
      1                      LBOTM,LAYCBD,HNEW,SUBLNK,LAYHDT             !added for detecting confining beds - WSCHMID seb MOVED SUBLNK TO GLOBAL
       USE GWFUPWMODULE, ONLY: LAYAVG                                    !Required to update UPW conductances
@@ -1165,7 +1166,7 @@ cc--ADJUST BOTM WHENEVER Subsidence is active and Sub-Linkage is used (SUBLNK)
 cc--Added to universally adjust layer elevations --rth,wschmid,sal
       IF(SUBLNK)THEN                                                    !ADDED IUNITSUB and SUBLNK rth,WSCHMID
       !
-      IF( GSE(1,1)==GSE(1,1) ) THEN
+      IF( .NOT. IEEE_IS_NAN(GSE(1,1)) ) THEN
          DO CONCURRENT (J=1:NCOL,I=1:NROW); GSE(J,I)=GSE(J,I)-DVZ(J,I,1)
          END DO
       END IF

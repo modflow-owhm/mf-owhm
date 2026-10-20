@@ -10,6 +10,7 @@
 !    END TYPE
 !END MODULE
 MODULE WELL_DATA_FMP_MODULE
+  USE, INTRINSIC:: IEEE_ARITHMETIC, ONLY: IEEE_IS_NAN
   ! DEFINES A DATA TYPE THAT HOLDS ALL THE FMP WELLS.
   ! MODULE IS DESIGNED SUCH THAT ONLY 1 INSTANCE OF TYPE(FARM_WELL_DATA), OF ANY DIMENSION SHOULD BE USED 
   ! EG TYPE(FARM_WELL_DATA), DIMENSION(:),ALLOCATABLE:: A  !ONE INSTANCE
@@ -583,7 +584,10 @@ MODULE WELL_DATA_FMP_MODULE
             READ(FWEL%FEED%IU,*,IOSTAT=IERR) FWEL%Qini
                                             IF(IERR.NE.Z) CALL FILE_IO_ERROR( IERR, FWEL%FEED%IU, LINE=LINE, OUTPUT=FWEL%IOUT, MSG= "FMP SUPPLY_WELL LINEFEED ERROR WHILE READING CURRENT STRESS PERIOD'S FEED")
             !IF (LFID) THEN
-                          FWEL%ACT = FWEL%Qini == FWEL%Qini;     CALL APPLY_SFAC_TO_QINI(FWEL)
+                          DO I=ONE, FWEL%DIM
+                              FWEL%ACT(I) = .NOT. IEEE_IS_NAN(FWEL%Qini(I))
+                          END DO
+                          CALL APPLY_SFAC_TO_QINI(FWEL)
             !ELSE
             !              FWEL%ACT = FALSE
             !END IF
@@ -2026,7 +2030,7 @@ MODULE WELL_DATA_FMP_MODULE
                                 IF(IERR.NE.Z) CALL FILE_IO_ERROR( IERR, FWEL%FEED%IU, LINE=LINE, OUTPUT=FWEL%IOUT, MSG= "FMP SUPPLY_WELL LINEFEED ERROR WHILE READING CURRENT STRESS PERIOD'S FEED")
                                 !
                                 DO CONCURRENT(I=ONE:SIZE(FWEL%FID_FEED(FD)%FID))
-                                    IF(FWEL%FID_FEED(FD)%RVAL(I).NE.FWEL%FID_FEED(FD)%RVAL(I))THEN
+                                    IF(IEEE_IS_NAN(FWEL%FID_FEED(FD)%RVAL(I)))THEN
                                         FWEL%FID_FEED(FD)%FID(I) = Z
                                     ELSE
                                         FWEL%FID_FEED(FD)%FID(I) = INT(FWEL%FID_FEED(FD)%RVAL(I))

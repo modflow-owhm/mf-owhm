@@ -11,6 +11,7 @@
 !  VERSION 1.0 [4/23/2015] ORIGINAL VERSION THAT RETURNS A LINE_FEED DATATYPE
 !
 MODULE LINE_FEEDER
+  USE, INTRINSIC:: IEEE_ARITHMETIC,       ONLY: IEEE_IS_NAN
   USE CONSTANTS
   USE GLOBAL,                           ONLY: IUNIT, CUNIT, XYGRID, BOTM, LBOTM, NLAY
   USE ERROR_INTERFACE,                  ONLY: STOP_ERROR, FILE_IO_ERROR
@@ -711,11 +712,11 @@ CONTAINS
         IF(IERR /= Z) EXIT
         !
         IF(FEED%FD(I)%FL%SCALE /= UNO) THEN
-              DO CONCURRENT(J=ONE:FEED%FD(I)%NDAT, FEED%FD(I)%DAT(J) == FEED%FD(I)%DAT(J));  FEED%FD(I)%DAT(J) = FEED%FD(I)%DAT(J) * FEED%FD(I)%FL%SCALE
+              DO CONCURRENT(J=ONE:FEED%FD(I)%NDAT, .NOT. IEEE_IS_NAN(FEED%FD(I)%DAT(J)));  FEED%FD(I)%DAT(J) = FEED%FD(I)%DAT(J) * FEED%FD(I)%FL%SCALE
               END DO
         END IF
         !
-        NACT = NACT + COUNT(FEED%FD(I)%DAT == FEED%FD(I)%DAT)            !NaN CAN NOT EQUAL ITSELF
+        NACT = NACT + COUNT(.NOT. IEEE_IS_NAN(FEED%FD(I)%DAT))            !NaN IS INACTIVE
       END DO
   ELSEIF(   FEED%INT_DAT .AND. .NOT. FEED%BINARY ) THEN  !INT AND ASCII
       DO I=1, FEED%NFEED
@@ -739,11 +740,11 @@ CONTAINS
         IF(IERR /= Z) EXIT
         !
         IF(FEED%FD(I)%FL%SCALE /= UNO) THEN
-              DO CONCURRENT(J=ONE:FEED%FD(I)%NDAT, FEED%FD(I)%DAT(J) == FEED%FD(I)%DAT(J));  FEED%FD(I)%DAT = FEED%FD(I)%DAT * FEED%FD(I)%FL%SCALE
+              DO CONCURRENT(J=ONE:FEED%FD(I)%NDAT, .NOT. IEEE_IS_NAN(FEED%FD(I)%DAT(J)));  FEED%FD(I)%DAT = FEED%FD(I)%DAT * FEED%FD(I)%FL%SCALE
               END DO
         END IF
         !
-        NACT = NACT + COUNT(FEED%FD(I)%DAT == FEED%FD(I)%DAT)            !NaN CAN NOT EQUAL ITSELF
+        NACT = NACT + COUNT(.NOT. IEEE_IS_NAN(FEED%FD(I)%DAT))            !NaN IS INACTIVE
       END DO
   ELSE!IF(     FEED%INT_DAT .AND. FEED%BINARY ) THEN  !INT AND BIN
       DO I=1, FEED%NFEED
@@ -819,7 +820,7 @@ CONTAINS
     IF(FEED%IPRT == 1) WRITE(IOUT,'(A,I2)')'FEED NUMBER ',I
     !
     DO J=1, FEED%FD(I)%NDAT
-      IF( FEED%FD(I)%DAT(J) /= FEED%FD(I)%DAT(J) ) CYCLE          !SKIP PROCESSING NaN VALUES
+      IF( IEEE_IS_NAN(FEED%FD(I)%DAT(J)) ) CYCLE          !SKIP PROCESSING NaN VALUES
       NTOT=NTOT+1
       IPROP=1
       PAK(NTOT)%LAY=FEED%FD(I)%NUMIDX(1,J)
@@ -898,7 +899,7 @@ CONTAINS
     IF(FEED%IPRT == 1) WRITE(IOUT,'(A,I2)')'FEED NUMBER ',I
     !
     DO J=1, FEED%FD(I)%NDAT
-      IF( FEED%FD(I)%DAT(J) /= FEED%FD(I)%DAT(J) ) CYCLE          !SKIP PROCESSING NaN VALUES
+      IF( IEEE_IS_NAN(FEED%FD(I)%DAT(J)) ) CYCLE          !SKIP PROCESSING NaN VALUES
       NTOT=NTOT+1
       IPROP=1
       PAK(NTOT)%LAY=FEED%FD(I)%NUMIDX(1,J)
@@ -973,7 +974,7 @@ CONTAINS
     !
     DO J=1, FEED%FD(I)%NDAT
       !
-      IF( FEED%FD(I)%DAT(J) == FEED%FD(I)%DAT(J) .AND. FEED%FD(I)%CHARIDX(J) > Z) THEN            ! If set to NaN then it will never equal itself. Also if it is not found then skip
+      IF( .NOT. IEEE_IS_NAN(FEED%FD(I)%DAT(J)) .AND. FEED%FD(I)%CHARIDX(J) > Z) THEN            ! If set to NaN then it will never equal itself. Also if it is not found then skip
           !
           MNWID = FEED%FD(I)%CHARIDX(J)
           !
@@ -1059,7 +1060,7 @@ CONTAINS
   !
   DO I=1, FEED%NFEED
     DO J=1, FEED%FD(I)%NDAT
-      IF( FEED%FD(I)%DAT(J) /= FEED%FD(I)%DAT(J) ) FEED%FD(I)%DAT(J)=0.0D0          !NaN VALUES ARE SET TO ZERO
+      IF( IEEE_IS_NAN(FEED%FD(I)%DAT(J)) ) FEED%FD(I)%DAT(J)=0.0D0          !NaN VALUES ARE SET TO ZERO
       !
       ISEG = FEED%FD(I)%NUMIDX(1,J)
       IF(0 < ISEG .AND. ISEG < NSEG) PAK(IPVL,ISEG) = 0.0

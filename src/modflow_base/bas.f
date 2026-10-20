@@ -9,7 +9,8 @@ C
 C        SPECIFICATIONS:
 C     ------------------------------------------------------------------
       USE, INTRINSIC:: ISO_FORTRAN_ENV, ONLY: REAL32, REAL64
-      USE, INTRINSIC:: IEEE_ARITHMETIC, ONLY: IEEE_VALUE, IEEE_QUIET_NAN
+      USE, INTRINSIC:: IEEE_ARITHMETIC, ONLY: IEEE_VALUE,IEEE_QUIET_NAN,
+     +                                        IEEE_IS_NAN
       USE CONSTANTS,  ONLY:NEG,Z,ONE,NL,BLN,TRUE,FALSE,BLNK,
      1                     inf,inf_I,DZ,DNEG
       USE GLOBAL,     ONLY:NCOL,NROW,NLAY,NPER,NBOTM,NCNFBD,ITMUNI,
@@ -412,14 +413,15 @@ C9------COPY INITIAL HEADS FROM STRT TO HNEW.
 !      DO 400 I=1,NROW
 !      DO 400 J=1,NCOL
       IF(ALLOCATED(HSHIFT)) THEN
-      DO CONCURRENT(K=1:NLAY,I=1:NROW,J=1:NCOL,STRT(J,I,K)==STRT(J,I,K))
+      DO CONCURRENT(K=1:NLAY,I=1:NROW,J=1:NCOL,
+     +              .NOT. IEEE_IS_NAN(STRT(J,I,K)))
           !
           STRT(J,I,K) = STRT(J,I,K) + HSHIFT(K)
       END DO
       END IF
       !
       DO CONCURRENT(K=1:NLAY,I=1:NROW,J=1:NCOL)
-      IF(STRT(J,I,K) /= STRT(J,I,K)) THEN
+      IF(IEEE_IS_NAN(STRT(J,I,K))) THEN
             STRT(J,I,K) = HNF
             HNEW(J,I,K) = HNF
             IF(IBOUND(J,I,K) /= Z) IBOUND(J,I,K) = Z
@@ -478,6 +480,7 @@ C14-----SAVE POINTERS TO DATA AND RETURN.
       END SUBROUTINE
       !
       SUBROUTINE GWF2BAS7AR2(IGRID)
+      USE, INTRINSIC:: IEEE_ARITHMETIC, ONLY: IEEE_IS_NAN
       USE CONSTANTS,   ONLY:Z, ONE, TWO, NL, BLN
       USE ERROR_INTERFACE,ONLY: WARNING_MESSAGE
       USE GLOBAL,      ONLY:NCOL,NROW,NLAY,IOUT, GSE,BOTM,LBOTM,
@@ -486,7 +489,7 @@ C14-----SAVE POINTERS TO DATA AND RETURN.
       INTEGER, INTENT(IN):: IGRID
       INTEGER:: I,J,K
       !
-      IF( GSE(1,1) /= GSE(1,1) ) THEN
+      IF( IEEE_IS_NAN(GSE(1,1)) ) THEN
           CALL WARNING_MESSAGE(OUTPUT=IOUT,
      +   MSG='DIS PACKAGE: THE GROUND SURFACE ELEVATION WAS NOT '//
      +   'SPECIFIED WITH THE KEYWORD "SURFACE_ELEVATION"'//BLN//
@@ -2042,7 +2045,8 @@ C     ------------------------------------------------------------------
       USE, INTRINSIC:: IEEE_ARITHMETIC, ONLY: IEEE_VALUE,
      +                                        IEEE_QUIET_NAN,
      +                                        IEEE_POSITIVE_INF,
-     +                                        IEEE_NEGATIVE_INF
+     +                                        IEEE_NEGATIVE_INF,
+     +                                        IEEE_IS_NAN
       USE, INTRINSIC:: ISO_FORTRAN_ENV, ONLY: INT32, REAL32
       USE CONSTANTS,   ONLY: BLNK, BLN, NL, TRUE, FALSE, DZ, D10, Z, ONE
       USE GLOBAL,      ONLY:ITMUNI,IOUT,NCOL,NROW,NLAY,HNEW,STRT,DDREF,
@@ -2509,12 +2513,13 @@ C4------PRINT TOTAL BUDGET IF REQUESTED
                 !
                 HD(1:NCOL) = HNEW(1:NCOL,I,K)
                 DO J=1, NCOL
-                   IF    (HD(J) >=  1.D100) THEN
+                   IF    (IEEE_IS_NAN(HD(J))) THEN
+                                             HD(J) = NaN
+                   ELSEIF(HD(J) >=  1.D100) THEN
                                              HD(J) = inf
                    ELSEIF(HD(J) <= -1.D100) THEN
                                              HD(J) = ninf
-                   ELSEIF(HD(J) == HDRY  .OR.
-     +                    HD(J) /= HD(J) .OR. IBOUND(J,I,K) == Z) THEN
+                   ELSEIF(HD(J) == HDRY  .OR. IBOUND(J,I,K) == Z) THEN
                                                           HD(J) = NaN
                    END IF
                 END DO
@@ -2578,12 +2583,13 @@ C4------PRINT TOTAL BUDGET IF REQUESTED
              !
              HD(1:NCOL) = WTABLE(1:NCOL, I)
              DO J=1, NCOL
-                IF    (HD(J) == HDRY  .OR.
-     +                 HD(J) /= HD(J) .OR. HD(J) == -HUGE(HD)) THEN
+                IF    (IEEE_IS_NAN(HD(J))) THEN
                                           HD(J) = NaN
-                ELSEIF(HD(J) >=  1D100) THEN
+                ELSEIF(HD(J) == HDRY  .OR. HD(J) == -HUGE(HD)) THEN
+                                          HD(J) = NaN
+                ELSEIF(HD(J) >=  1.0D100) THEN
                                           HD(J) = inf
-                ELSEIF(HD(J) <= -1D100) THEN
+                ELSEIF(HD(J) <= -1.0D100) THEN
                                           HD(J) = ninf
                 END IF
              END DO
@@ -2646,12 +2652,13 @@ C4------PRINT TOTAL BUDGET IF REQUESTED
              !
              HD(1:NCOL) = WTABLE(1:NCOL, I)
              DO J=1, NCOL
-                IF    (HD(J) == HDRY  .OR.
-     +                 HD(J) /= HD(J) .OR. HD(J) == -HUGE(HD)) THEN
+                IF    (IEEE_IS_NAN(HD(J))) THEN
                                           HD(J) = NaN
-                ELSEIF(HD(J) >=  1D100) THEN
+                ELSEIF(HD(J) == HDRY  .OR. HD(J) == -HUGE(HD)) THEN
+                                          HD(J) = NaN
+                ELSEIF(HD(J) >=  1.0D100) THEN
                                           HD(J) = inf
-                ELSEIF(HD(J) <= -1D100) THEN
+                ELSEIF(HD(J) <= -1.0D100) THEN
                                           HD(J) = ninf
                 ELSE
                     HD(J) = GSE(J,I) - HD(J)

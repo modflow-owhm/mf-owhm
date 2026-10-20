@@ -1481,7 +1481,7 @@ END MODULE
 !######################################################################################################################
 !
 MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLIT, ACAP_STOR2AREA, ACAP_STOR2ELEV
-  USE, INTRINSIC:: IEEE_ARITHMETIC,      ONLY: IEEE_VALUE, IEEE_QUIET_NAN
+  USE, INTRINSIC:: IEEE_ARITHMETIC,      ONLY: IEEE_VALUE, IEEE_QUIET_NAN, IEEE_IS_NAN
   !
   USE CONSTANTS
   USE GLOBAL,                            ONLY: SPTIM, NPER, NSTP
@@ -3991,7 +3991,7 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
     !
     ! CHECK FOR SKIPPED MINIMUMS
     DO CONCURRENT (I=ONE:SWO%NDIST)
-        IF(SWO%DIST_DELTOL(I) .NE. SWO%DIST_DELTOL(I)) THEN
+        IF(IEEE_IS_NAN(SWO%DIST_DELTOL(I))) THEN
                                                             SWO%DIST_DELTOL(I) = DZ
         ELSEIF(SWO%DIST_DELTOL(I) < DZ) THEN
                                                             SWO%DIST_DELTOL(I) = DZ
@@ -3999,7 +3999,7 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
     END DO
     !
     DO CONCURRENT (I=ONE:SWO%NPROJ)
-        IF(SWO%MIN_PROJ_ORDER_RAT(I) .NE. SWO%MIN_PROJ_ORDER_RAT(I)) THEN
+        IF(IEEE_IS_NAN(SWO%MIN_PROJ_ORDER_RAT(I))) THEN
                                                             SWO%MIN_PROJ_ORDER_RAT(I) = DZ
         ELSEIF(SWO%MIN_PROJ_ORDER_RAT(I) < NEARZERO_12) THEN
                                                             SWO%MIN_PROJ_ORDER_RAT(I) = NEARZERO_12
@@ -4008,7 +4008,7 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
     !
     N = SWO%NFARM+SWO%NAUXDEM
     DO CONCURRENT (I=ONE:N)
-        IF(SWO%MIN_DELORDER_RAT(I) .NE. SWO%MIN_DELORDER_RAT(I)) THEN
+        IF(IEEE_IS_NAN(SWO%MIN_DELORDER_RAT(I))) THEN
                                                             SWO%MIN_DELORDER_RAT(I) = DZ
         ELSEIF(SWO%MIN_DELORDER_RAT(I) < NEARZERO_12) THEN
                                                             SWO%MIN_DELORDER_RAT(I) = NEARZERO_12
@@ -4057,7 +4057,7 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
               !
               RESBAL(J)%STORAGE_TRAN_FRAC = HALF
               !
-              IF(MAX_RELEASE(K) .NE. MAX_RELEASE(K)) THEN
+              IF(IEEE_IS_NAN(MAX_RELEASE(K))) THEN
                                                          MAX_RELEASE(K) = inf !1D200  !NEAR inf BECAUSE MULTIPLIED BY DELT WOULD CAUSE FLOATING OVERFLOW
               ELSEIF(MAX_RELEASE(K) < DZ) THEN
                                                          MAX_RELEASE(K) = inf
@@ -4067,7 +4067,7 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
               RESBAL(J)%ELEV_CHNG    = ELEV_CHNG(K)
               RESBAL(J)%ELEV_CHNG_S  = ninf
               !
-              IF(STORAGE_CAPACITY(K) .NE. STORAGE_CAPACITY(K)) STORAGE_CAPACITY(K) = DNEG
+              IF(IEEE_IS_NAN(STORAGE_CAPACITY(K))) STORAGE_CAPACITY(K) = DNEG
               IF(STORAGE_CAPACITY(K) .LE. DZ) THEN
                   IF (SWO%NRES_SPT(I) > Z) THEN
                       STORAGE_CAPACITY(K)     = DZ
@@ -4084,7 +4084,7 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
               !
               HAS_SPILLWAY = TRUE
               !
-              IF(STORAGE_SPILL(K) .NE. STORAGE_SPILL(K)) THEN
+              IF(IEEE_IS_NAN(STORAGE_SPILL(K))) THEN
                                        STORAGE_SPILL(K) = STORAGE_CAPACITY(K)
                                        HAS_SPILLWAY = FALSE
               END IF
@@ -4125,7 +4125,7 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
               !
               RESBAL(J)%SPILLWAY_PREF = SPILL_PREF(K).NE.Z
               !
-              IF(MAX_AREA(K) .NE. MAX_AREA(K)) MAX_AREA(K) = DNEG
+              IF(IEEE_IS_NAN(MAX_AREA(K))) MAX_AREA(K) = DNEG
               IF(MAX_AREA(K) .LE. DZ) THEN
                     IF (SWO%NRES_SPT(I) > Z) THEN
                         MAX_AREA(K)     = DZ
@@ -9579,7 +9579,7 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
     IF(SWO%HAS_MAX_RELEASE_S) THEN
        DO I=1, SWO%NPROJ
        DO J=1, SWO%NRES_BAL(I)
-       IF ( SWO%RESDAT(I)%RESBAL(J)%INUSE .AND. SWO%RESDAT(I)%RESBAL(J)%MAX_RELEASE_S == SWO%RESDAT(I)%RESBAL(J)%MAX_RELEASE_S ) THEN
+       IF ( SWO%RESDAT(I)%RESBAL(J)%INUSE .AND. .NOT. IEEE_IS_NAN(SWO%RESDAT(I)%RESBAL(J)%MAX_RELEASE_S) ) THEN
          ASSOCIATE(RESBAL => SWO%RESDAT(I)%RESBAL(J))
                      !
                      IF( RESBAL%MAX_RELEASE_S < D100 ) THEN

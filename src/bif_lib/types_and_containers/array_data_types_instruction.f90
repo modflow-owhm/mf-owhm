@@ -26,7 +26,7 @@
 !       ID1_ID2_RAT_VOL_TYPE
 !
 MODULE ARRAY_DATA_TYPES!, ONLY: INTEGER_VECTOR, DOUBLE_VECTOR, INTEGER_MATRIX, DOUBLE_MATRIX, LOGICAL_VECTOR, CHARACTER_TYPE, CHARACTER_TYPE_ARRAY, CHARACTER_ARRAY, COMPRESSED_VALUE_STORAGE
-  USE, INTRINSIC:: IEEE_ARITHMETIC, ONLY: IEEE_VALUE, IEEE_QUIET_NAN
+  USE, INTRINSIC:: IEEE_ARITHMETIC, ONLY: IEEE_VALUE, IEEE_QUIET_NAN, IEEE_IS_NAN
   USE, INTRINSIC:: ISO_FORTRAN_ENV, ONLY: INT32, INT64, SNG => REAL32, DBL => REAL64
   !USE CONSTANTS
   IMPLICIT NONE(TYPE, EXTERNAL)
@@ -1168,7 +1168,7 @@ MODULE ARRAY_DATA_TYPES!, ONLY: INTEGER_VECTOR, DOUBLE_VECTOR, INTEGER_MATRIX, D
      NUM=''
      DVAL10 = 10_dbl*VAL;   DVAL1C = 100_dbl*VAL;   DVAL1K = 1000_dbl*VAL
      !
-     IF(VAL /= VAL) THEN
+     IF(IEEE_IS_NAN(VAL)) THEN
                                          NUM = 'NaN'
      ELSEIF(VAL >=  0.999999*HUGE(VAL))  THEN
                                          NUM = 'inf'
@@ -2765,7 +2765,9 @@ MODULE ARRAY_DATA_TYPES!, ONLY: INTEGER_VECTOR, DOUBLE_VECTOR, INTEGER_MATRIX, D
     N = Z
     DO J=ONE, DIM2
     DO I=ONE, DIM1
-        IF (ARR(I,J) == ARR(I,J) .AND. ABS(ARR(I,J)) > TOL) N = N + ONE  ! Not NaN and Non-Zero
+        IF (.NOT. IEEE_IS_NAN(ARR(I,J))) THEN
+                      IF (ABS(ARR(I,J)) > TOL) N = N + ONE
+        END IF
     END DO
     END DO
     !
@@ -2791,7 +2793,8 @@ MODULE ARRAY_DATA_TYPES!, ONLY: INTEGER_VECTOR, DOUBLE_VECTOR, INTEGER_MATRIX, D
                      K=Z
                      DO J=ONE, DIM2
                      DO I=ONE, DIM1
-                           IF( ABS(ARR(I,J)) > TOL .AND. ARR(I,J) == ARR(I,J) ) THEN
+                           IF( IEEE_IS_NAN(ARR(I,J)) ) CYCLE
+                           IF( ABS(ARR(I,J)) > TOL ) THEN
                                  K = K + ONE
                                  CVS%DIM(ONE,K) = I
                                  CVS%DIM(TWO,K) = J

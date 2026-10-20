@@ -15266,9 +15266,7 @@ C---------RETURN
       END SUBROUTINE SSWR_MFQAQ
       
       DOUBLEPRECISION FUNCTION SSWR_KELLEY_PERTB(V) RESULT(value)
-!#ifdef __INTEL_COMPILER
-!        USE, INTRINSIC :: IEEE_ARITHMETIC
-!#endif
+        USE, INTRINSIC:: IEEE_ARITHMETIC, ONLY: IEEE_IS_NAN
         USE GWFSWRMODULE, ONLY: DZERO, DONE
         IMPLICIT NONE
 C       + + + DUMMY ARGUMENTS + + +
@@ -15284,7 +15282,7 @@ C       + + + CODE + + +
         value = DZERO
         e     = SQRT( EPSILON(DZERO) )
         av    = ABS( V )
-        IF ( av .NE. av ) av = DONE   !TEST FOR NaN
+        IF ( IEEE_IS_NAN(av) ) av = DONE   !TEST FOR NaN
 !#if    defined( __INTEL_COMPILER)
 !        IF ( IEEE_IS_NAN(av) ) av = DONE
 !#elif  defined( __GFORTRAN__ ) 
