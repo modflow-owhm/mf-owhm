@@ -511,7 +511,6 @@ C     ******************************************************************
 C
 C     SPECIFICATIONS:
 C     ------------------------------------------------------------------
-      USE, INTRINSIC:: IEEE_ARITHMETIC, ONLY: IEEE_IS_NAN
       USE GLOBAL,            ONLY: IOUT,IFREFM,BOTM,LBOTM,IBOUND
       USE ERROR_INTERFACE,   ONLY: STOP_ERROR
       USE FILE_IO_INTERFACE, ONLY: READ_TO_DATA
@@ -673,18 +672,18 @@ C7------SINCE THE CELL IS INTERNAL GET THE BOUNDARY DATA.
       HB=GHBDATA(I)%VAL(1)
       BOT=BOTM(IC,IR,LBOTM(IL))
 ccrth modified to only stop for NWT solver because ghb heads below model cell bottom is generally OK ADDED NTAB CHECK
-      IF(.NOT. IEEE_IS_NAN(HB)) THEN
-          CONTINUE
-                                                  !!!    IF(HB.LT.BOT) CALL WARN%ADD(NUM2STR([IL,IR,IC],4,', ')//', '//
-                                                  !!!+                               NUM2STR(HB,10)//', '//
-                                                  !!!+                               NUM2STR(BOT)//NL)
-       !IF ( HB.LT.BOT.and. IUNITNWT.NE.0)THEN
-       !    WRITE(IOUT,103)IC,IR,IL
-       !  !CALL USTOP(' ')
-       !END IF
-      ELSE
-          GHBDATA(I)%VAL(1) = UNO
-      END IF
+      !IF(HB==HB) THEN
+      !    CONTINUE
+      !                                            !!!    IF(HB.LT.BOT) CALL WARN%ADD(NUM2STR([IL,IR,IC],4,', ')//', '//
+      !                                            !!!+                               NUM2STR(HB,10)//', '//
+      !                                            !!!+                               NUM2STR(BOT)//NL)
+      ! !IF ( HB.LT.BOT.and. IUNITNWT.NE.0)THEN
+      ! !    WRITE(IOUT,103)IC,IR,IL
+      ! !  !CALL USTOP(' ')
+      ! !END IF
+      !ELSE
+      !    GHBDATA(I)%VAL(1) = UNO
+      !END IF
       !
 !  103 FORMAT(/,'GHB HEAD SET TO BELOW CELL BOTTOM. MODEL WARNING. ',
 !     +                'CELL WITH ERROR (IC,IR,IL): ',3I5,/)
@@ -716,15 +715,11 @@ C
 C        SPECIFICATIONS:
 C     ------------------------------------------------------------------
       USE, INTRINSIC:: IEEE_ARITHMETIC, ONLY: IEEE_IS_NAN
-      USE WARNING_TYPE_INSTRUCTION, ONLY: WARNING_TYPE
       USE GLOBAL,                   ONLY: IOUT, BOTM, LBOTM, IBOUND
       USE TABLEFILE_INTERFACE,      ONLY: PAK_PROP_TABINTERP
       INTEGER,INTENT(IN)::KSTP,IGRID
 C     ------------------------------------------------------------------
-      INTEGER:: IPRT, I
-      INTEGER:: VLOC
-      REAL:: BOT
-      TYPE(WARNING_TYPE):: WARN
+      INTEGER:: IPRT, VLOC
       !
       VLOC=1
       !
@@ -736,32 +731,46 @@ C     ------------------------------------------------------------------
       CALL PAK_PROP_TABINTERP(GHBDATA,GHBTABFILE,NBOUND,VLOC,'GHB',
      +                                                        KSTP,IPRT)
       !
-      IF(KSTP==1) THEN !Note that tabfiles that are on KSTP>1 will not be checked.
-        !
-        CALL WARN%INIT()
-        !
-        DO I=1, NBOUND
-          ASSOCIATE( IL=>GHBDATA(I)%LAY, IR=>GHBDATA(I)%ROW,
-     +               IC=>GHBDATA(I)%COL, HB=>GHBDATA(I)%VAL(1) )
+      IF(KSTP==1) call ghb_ad_error_check() !Note that tabfiles that are on KSTP>1 will not be checked.
+      !
+      contains
+        subroutine ghb_ad_error_check()
+           use warning_type_instruction, only: warning_type
+           type(warning_type):: wrn, err
+           real:: bot
+           integer :: i
+           call wrn%init()
+           call err%init()
+           !
+           do i=1, nbound
+              associate( il=>ghbdata(i)%lay, ir=>ghbdata(i)%row,
+     +                   ic=>ghbdata(i)%col, hb=>ghbdata(i)%val(1) )
+                !
+                if(ibound(ic,ir,il) <= 0) CYCLE
+                !
+                if(.not. ieee_is_nan(hb)) then
+                           bot = botm(ic,ir,lbotm(il))
+                   if(hb < bot) call wrn%add(
+     +                              num2str([il,ir,ic],4,', ')//', '//
+     +                              num2str(hb,10)//', '//
+     +                              num2str(bot)//NL)
+                else if(ghbdata(i)%tabidx < ONE) then  ! no tabfile overwriting this BHEAD
+                    call err%add(num2str([il,ir,ic],4,', ')//NL)
+                end if
+              end associate
+          end do
           !
-          IF(IBOUND(IC,IR,IL) > 0) THEN
-            !
-            IF(.NOT. IEEE_IS_NAN(HB)) THEN
-                       BOT = BOTM(IC,IR,LBOTM(IL))
-               IF(HB < BOT) CALL WARN%ADD(
-     +                          NUM2STR([IL,IR,IC],4,', ')//', '//
-     +                          NUM2STR(HB,10)//', '//
-     +                          NUM2STR(BOT)//NL)
-            END IF
-          END IF
-          END ASSOCIATE
-        END DO
-        !
-        IF(WARN%RAISED) CALL WARN%CHECK(
-     +   HED='GHB HAD BHEAD VALUES BELOW THE BOTTOM OF CELLS.'//NL//
-     +  'THE FOLLOWING GHB CELLS MAY CAUSE CONVERGENCE PROBLEMS'//NL//
-     +  ' LAY   ROW   COL       BHEAD,  CELL_BOT', OUTPUT=IOUT, TAIL=NL)
-      END IF
+          if(wrn%raised) call wrn%check(
+     +     HED='GHB HAD BHEAD VALUES BELOW THE BOTTOM OF CELLS.'//NL//
+     +    'THE FOLLOWING GHB CELLS MAY CAUSE CONVERGENCE PROBLEMS'//NL//
+     +    ' LAY   ROW   COL       BHEAD,  CELL_BOT',OUTPUT=IOUT,TAIL=NL)
+          !
+          if(err%raised) call err%check(
+     +     HED='GHB HAS BHEAD VALUES SET TO NaN.'//NL//
+     +    'This is only allowed if BHEAD is over written (eg,TABFILE)'//
+     +    NL//'The following ghb cells are bad'//NL//
+     +    ' LAY   ROW   COL', OUTPUT=IOUT, KILL=TRUE)
+        end subroutine
       !
       END SUBROUTINE
       !
