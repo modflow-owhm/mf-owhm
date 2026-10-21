@@ -740,7 +740,7 @@ CONTAINS
         IF(IERR /= Z) EXIT
         !
         IF(FEED%FD(I)%FL%SCALE /= UNO) THEN
-              DO CONCURRENT(J=ONE:FEED%FD(I)%NDAT, .NOT. IEEE_IS_NAN(FEED%FD(I)%DAT(J)));  FEED%FD(I)%DAT = FEED%FD(I)%DAT * FEED%FD(I)%FL%SCALE
+              DO CONCURRENT(J=ONE:FEED%FD(I)%NDAT, .NOT. IEEE_IS_NAN(FEED%FD(I)%DAT(J)));  FEED%FD(I)%DAT(J) = FEED%FD(I)%DAT(J) * FEED%FD(I)%FL%SCALE
               END DO
         END IF
         !
