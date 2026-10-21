@@ -12,6 +12,47 @@
 
 &nbsp;
 
+## 2.X.Y
+
+TBA
+
+### [Intel Fortran Compiler (ifx)](https://www.intel.com/content/www/us/en/developer/tools/oneapi/fortran-compiler.html) is now the default Fortran compiler for every build system
+
+*  `mf-owhm.exe` is now compiled with `ifx` and `mf-owhm.ifort.exe` uses the `ifort` compiler. 
+*  Intel discontinued `ifort` after `oneAPI 2024.2`. It is only available to those who pay for access to a past download or kept an offline installer of its last release. Because it is no longer updated, it only supports Visual Studio 2022 on Windows. Future releases of mf-owhm will slowly include improvements focused on speed for `ifx` (it was originally highly optimized for `ifort`). There are several speed issues with the `ifx` compiler, in particular how it handles `NaN`, that previously precluded its use in past releases. These problems have been fixed and now the speed is relatively close to `ifort`. More info here: https://www.intel.com/content/www/us/en/developer/articles/release-notes/fortran-compiler/2024.html
+*  `ifort` is still supported with the option to compile with it in all the build systems.
+
+### `FMP` Improvements
+
+* `SURFACE_WATER` block `SEMI_ROUTED_DELIVERY` (`SRD`) Tolerance and New Output File
+     * An `SRD` (diversion to meet demand) is either equal to the demand, bounded by a lower and/or upper limit, or limited to the inflow into the SFR reach (ie, can't remove more water than flowing into the diversion).  A limitation of MODFLOW is that each package is solved sequentially within a single 'outer iteration' and the order solves FMP first, using the SFR inflow from the previous iteration, and then solves SFR with the assigned FMP diversions. When an `SRD` removes 100% of the SFR reach inflow and SFR then updates to an inflow slightly less than the diversion, the difference can be small enough to pass the outer iteration convergence. SFR then only removes the water that is in the reach, and the difference (the mismatch) is a mass error between FMP, which counts the full delivery as supply, and SFR. A set of features was added to reduce this error and to report its size in an output file.
+     * `SEMI_ROUTED_DELIVERY_MISMATCH_TOLERANCE  FLOAT` 
+          * Fraction of a delivery that may exceed the current reach inflow before convergence is allowed. If any delivery exceeds it, then convergence is disabled and another solver iteration is forced.
+          * If not specified, then the default tolerance is `0.01` (1% of the delivery). A negative value disables the check.
+     * `SEMI_ROUTED_DELIVERY_MISMATCH_ABSOLUTE_TOLERANCE  FLOAT`
+          * The same delivery check but as an absolute rate (`L^3/T`). A negative value disables it again. Disabled by default. 
+     * `PRINT SFR_DELIVERY_MISMATCH  Generic_Output` output option.
+          * Writes the mass error between FMP and SFR for the semi-routed deliveries. The first row of each time step (`SEG = RCH = 0`) is the total over all delivery reaches.
+
+### Build Systems
+
+* `gfortran` v15 and 16 are now fully supported and can compile mf-owhm.
+* **`CMake`** and **`Meson`** added as alternative build systems next to the `makefile` and the Visual Studio projects.
+     * Only one is needed; several are offered so developers can use the tool that fits their environment.
+     * All read the same source lists, kept once as plain text files in `cmake/` (`bif-source.txt`, `owhm-source.txt`, `gmg-source.txt`, `nogmg-source.txt`, `zonebudget-source.txt`, `hydfmt-source.txt`), apply the same compiler flags, and write the same binaries: `bin/mf-owhm.nix` or `bin/mf-owhm.exe`, with the `-debug` and `-gmg` suffixes, and the postprocessor binaries in their own `bin` directories.
+     * The shared options are the build type (debug or release), the `GMG` solver, 8 byte `REAL`, and static linking.
+     * `CMake` generates `Ninja`, Unix makefiles, and Visual Studio 2022 (ifort) or 2026 (ifx) solutions.
+     * The postprocessors (`ZoneBudget` and `HYDFMT`) build inside the root project or standalone.
+* [doc/BUILD.md](doc/BUILD.md) build guide (also as `BUILD.pdf`).
+     * Describes the build systems and how they differ, the compiler requirements, the Linux, WSL, Windows, and container setup (including Intel oneAPI), and how to use the builds from Visual Studio, VS Code, and Zed.
+* VS Code and Zed tasks and debug configurations for the `makefile`, `CMake`, and `Meson` builds with `gfortran` and `ifx`.
+
+&nbsp;
+
+------
+
+&nbsp;
+
 ## 2.3.1
 
 2025-12-10
@@ -93,6 +134,7 @@ END LINEFEED
 * `examples/mf-owhm-gmg` added.
   * The standard `mf-owhm` examples using the `GMG` solver (not part of standard OWHM because it is written in C).
 
+&nbsp;
 
 ------
 
@@ -459,6 +501,8 @@ Observation point `XYZ_7` is always set to the `NO_OBS_VALUE` because it is beyo
 
 ------
 
+&nbsp; 
+
 ## 2.2.0
 
 2022-01-20
@@ -680,6 +724,8 @@ MONTHLY  -4   SS        # MONTHLY input with 4 time steps, and first stress peri
 
 ------
 
+&nbsp; 
+
 ## 2.1.0
 
 2021-05-25
@@ -729,6 +775,8 @@ and can be used when `CNSTNT`, `FMTIN`, and `IPRN` are not specified.
 
 ------
 
+&nbsp; 
+
 ## 2.0.3
 
 2021-05-25
@@ -742,6 +790,8 @@ and can be used when `CNSTNT`, `FMTIN`, and `IPRN` are not specified.
 &nbsp; 
 
 ------
+
+&nbsp; 
 
 ## 2.0.2
 
@@ -765,6 +815,8 @@ and can be used when `CNSTNT`, `FMTIN`, and `IPRN` are not specified.
 &nbsp; 
 
 ------
+
+&nbsp; 
 
 ## 2.0.1
 
@@ -878,6 +930,8 @@ and can be used when `CNSTNT`, `FMTIN`, and `IPRN` are not specified.
 &nbsp; 
 
 ------
+
+&nbsp; 
 
 ## 2.0.0
 

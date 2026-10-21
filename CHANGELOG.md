@@ -18,6 +18,101 @@ Boyce, S.E., Hanson, R.T., Ferguson, I., Schmid, W., Henson, W., Reimann, T., Me
 
 &nbsp;
 
+## 2.X.Y
+
+2026-10-21  *-date is when file was last edited*
+
+git commit log: `git log --reverse b6e95e5fe295c59427fe3b38ad575a7384666dec^..`
+
+### Fixed
+* `FMP` Farm Process
+  * `PRINT SFR_RETURN` listed the runoff of each return reach under another reach's segment/reach label whenever a WBS defined its return points out of SFR reach order (or had a `SEG=0` point). The runoff applied to SFR and the totals by WBS were correct.
+  * `SEMI_ROUTED_DELIVERY` points with `FRAC` weights applied `SEMI_ROUTED_DELIVERY_LOWER_LIMIT` and `SEMI_ROUTED_DELIVERY_UPPER_LIMIT` to the wrong diversion reach, and the `PRINT SFR_DELIVERY` output was mislabeled.
+  * `SEMI_ROUTED_DELIVERY_LOWER_LIMIT` and `SEMI_ROUTED_DELIVERY_UPPER_LIMIT` ignored the scale factor given after the file name or with `SFAC`, so limits given in other units were used unscaled.
+  * The binary `PRINT SFR_RETURN` wrote an extra integer per fully routed return record, and the per-WBS lost runoff record wrote two uninitialized values. Text output was not affected.
+  * `MIN_BARE_FRACTION >= 1` crashed when using `MULTIPLE_LAND_USE_PER_CELL` model with an access violation. It performs as expected by disabling bare soil everywhere, as the FMP template documents.
+    * The default `MIN_BARE_FRACTION` for `SINGLE_LAND_USE_PER_CELL` changed from `1` to `1E-12`, so cells with crop ID 0 inside a WBS remain bare soil as before.
+  * WBS budget output (`FB_DETAILS`, `FB_COMPACT`, and `LAND_USE PRINT BYWBS`) reported the precipitation over the full WBS area. When a cell's crop fractions sum to <1 and bare soil is disabled, the remainder appeared as a budget discrepancy. The precipitation column now reports only the precipitation over the simulated crop and bare soil area.
+  * The cumulative pumping header for MNW2-linked farm wells used an undefined farm index.
+  * `CLIMATE` block `DIRECT_RECHARGE` set an array before it was allocated, and the crop area array size was checked before allocation. 
+* `SFR` Streamflow Routing Package
+  * The SFR reach net flow (runoff, stream ET, etc) calculation is different in the FM and BD routines; the BD was changed to match the FM. 
+  * Negative runoff (an FMP delivery) larger than the water in a reach was booked as negative stream ET in the budget instead of being clipped as the FM routine does.
+    * This effect was exacerbated due to the difference between FM and BD routines (see the previous bullet).
+  * `ICALC=4` rating tables:
+    * A first flow, depth, or width that is zero or less was silently reset to 0.1, 0.01, and 1.0, which distorted small flows and could make a valid table fail. The table is now checked once when it is read: a first row of zeros is dropped (it is always implied), and a first row with zero flow and depth but a width gives the bottom width of a flat-bottomed channel. A zero-flow row with a depth, a value that is zero or less, a flow or depth that does not increase, or a width that decreases stops the simulation with the table printed. Interpolation is linear from the origin (or bottom-width row) to the next row and log-log above it, and a table may have a single row.
+    * The width for precipitation and evaporation on a reach with no flow was the first table width plus half the last width instead of their average.
+  * 8-point cross sections (`ICALC=2`): the secant search for the stream depth divided by a near-zero difference when the first depth guess gave near-zero flow, which crashed with a floating-point divide by zero.
+  * The residual water content used the specific yield of the wrong layer, or read out of bounds, when a confined layer was above the reach layer (LPF and BCF).
+* `NWT` Newton Solver and `UPW` Upstream Weighting Package
+  * `DHORIZ` returned zero for a partially saturated cell, which removed the Newton terms for convertible layers and made NWT behave close to a Picard solver. 
+    * Effectively, past models operated similar to the Picard solution used by LPF. 
+    * This fix should result in models converging in fewer outer iterations now.
+  * `UPW` specific yield was indexed by layer instead of by convertible layer, so cells got the specific yield of another layer when a confined layer is above a convertible layer.
+  * The `UPW` option `STORAGECOEFFICIENT` printed that it is not supported but was still applied incorrectly (storage coefficient times thickness). It now stops with an error that explains how to give specific storage instead.
+  * `UPW` `LAYAVG=2` (confined logarithmic mean) raised a divide-by-zero exception when a neighboring cell had zero hydraulic conductivity.
+  * `UPW` allocated the wetting flag twice and used it uninitialized.
+  * The minimum `MXITER` for the `SIMPLE`, `MODERATE`, and `COMPLEX` options is lowered to 25, 100, and 200, and `SPECIFIED` has no minimum. The minimum is now also applied to the `MXITER` of later stress periods (before, it was overwritten), and the warning explains that MF-OWHM counts every outer iteration, including backtracking and residual control.
+  * `MAX_HEAD_CHANGE` and `HEAD_DISTANCE_ABOVE_GSE_LIMIT` now scale the head change by the smallest damping factor over all cells and both limits, so a cell cannot stay above the limit after scaling. A disabled `MAX_HEAD_CHANGE` no longer compares a `NaN`.
+  * With `IBOTAV`, a dry cell's previous head was raised to `BOT*1.0E-6` above the bottom, which is below the bottom for a negative bottom elevation. The offset is now `1.0E-6`.
+  * `GMRES` ignored the stop tolerance from the input and used a fixed absolute residual of `1E-3`. Heads match to print precision; outer iterations decrease, sometimes greatly, and inner iterations increase.
+  * `GMRES` ILU(k) wrote past the end of its factor arrays with a high fill level.
+  * `XMD`: red-black ordering failed on models with few active cells; the conjugate gradient search direction was not initialized; the small-pivot guard was overwritten and never took effect.
+  * `GMRES` and `XMD` produced `NaN` heads when the linear system started with a zero residual.
+  * Corrected the single-cell model error and the thin cell warning messages.
+* `UZF` Unsaturated Zone Flow Package
+  * With the `BAS` global `CBC` unit, `IUZFCB2` always received the unit; `IUZFCB1` and `IUZFCB2` are now tested as intended.
+  * With `UPW`, a confined uppermost active cell now uses the specific storage for the residual water content, as with `LPF`.
+* `GHB` General-Head Boundary Package
+  * `BHEAD` set to `NaN` for a cell that is not linked to a TabFile was silently set to `1.0`, a boundary at an elevation of one model unit. This now stops the simulation with an error that lists the cells.
+    * When the cell is linked to a TabFile, `BHEAD` is a placeholder that is replaced by the TabFile value every time step, so a `NaN` there is allowed and ignored.
+* `WEL` Well Package
+  * `SPECIFY PHIRAMP` without the optional `IUNITRAMP` stopped with the error "Failed to successfully parse the line". The check for the optional unit was always true, so an output file was opened from an empty word. `IUNITRAMP` is now optional, as documented.
+* `LineFeed`
+  * Binary feed files with a scale factor other than `1.0` multiplied every value by the scale factor once per active (non-`NaN`) feature, that is `SCALE^N`. Each value is now scaled once. Text feed files were not affected.
+  * gfortran release builds crashed with a segmentation fault on packages without auxiliary variables (for example the GHB and SFR examples). Related option flags are now initialized before the `LINEFEED` keyword test.
+* `MNW2` Multi-Node Well Package
+  * The pump capacity table (`PUMPCAP`) always interpolated with a zero slope.
+* `HFB` Horizontal Flow Barrier Package
+  * Layer-routed barriers that change between stress periods could deallocate an unallocated array or leave it too small, and when all routes were removed NWT kept the old routed connections and did not converge.
+* `DRN` Drain Package
+  * Fixed format input started the `AUXILIARY` and `NOPRINT` option scan at an undefined position.
+* `SUB` Subsidence Package
+  * Saving delay bed compaction without printing it used a stale array bound.
+* `SWI2` Seawater Intrusion Package
+  * The last column and row of the boundary solver conductances were used uninitialized.
+* `PCGN` Solver
+  * The maximum head change node was undefined when every head change was zero.
+* `CHD`, `DRT`, and `HFB` wrote messages to an undefined output unit.
+* `BAS` and `DIS`
+  * The `CUMULATIVE_HEAD_CHANGE` file could mix parts of its header into the value line (ifx debug runtime).
+  * The `DIS` end-of-file error handler read from an undefined unit and could raise a second runtime error.
+  * Time unit conversion returned an undefined value for an unknown time unit.
+* `ZoneBudget` and `HYDFMT` postprocessors
+  * `HYDFMT` can now be built with gfortran (Fortran 2018 `IMPORT` statements removed).
+  * `ZoneBudget` used an undeclared constant in its file error routine, and its test inputs did not match the file name case on case-sensitive file systems.
+
+### Added
+* `FMP` keywords `SEMI_ROUTED_DELIVERY_MISMATCH_TOLERANCE` and `SEMI_ROUTED_DELIVERY_MISMATCH_ABSOLUTE_TOLERANCE`, and the output `PRINT SFR_DELIVERY_MISMATCH`. FMP diversions use the SFR reach inflow of the previous iteration, so at convergence a delivery could exceed the final reach inflow; the check now forces further outer iterations until the mismatch is within the tolerance. See [CHANGELOG_Features.md](CHANGELOG_Features.md) and the FMP template.
+* CMake and Meson build systems next to the makefile and the Visual Studio projects, sharing one set of source lists (`cmake/*-source.txt`) and compiler flags. [doc/BUILD.md](doc/BUILD.md) describes all build systems, compiler requirements, and setup on Linux, WSL, Windows, and containers.
+
+### Refactoring
+* Removed the compiler flag `-assume ieee_compares` from every build (makefile, CMake, Meson, and the Visual Studio projects).
+  * MF-OWHM uses `NaN` as a flag for unset or disabled input and tested for it with `X /= X` (true only when `X` is `NaN`).
+    * ifort allows `==` and `/=` with a `NaN`.
+    * ifx 2026 with `-fpe0` raises a floating-point exception, stopping the program, for any comparison involving a `NaN` (including `MAX` and `MIN`).
+  * `-assume ieee_compares` makes ifx behave like ifort, but models ran about 40 percent slower.
+  * All `NaN` checks now use the Fortran 2003 standard function `IEEE_IS_NAN`, and the `NaN` test comes before any other comparison of a value that may be `NaN`.
+  * Without the flag, an ifx build stops with a "floating invalid" error if a `NaN` reaches a comparison. A `NaN` can also come from an operation such as `inf - inf` or `0 * inf`. Please report any such error with the input that caused it.
+* ifx is the default Fortran compiler (Intel discontinued ifort after oneAPI 2024.2). ifort is still supported with `make F90=ifort` and the Visual Studio `ReleaseIFORT` configuration (`mf-owhm.ifort.exe`). The Visual Studio `Debug`, `Fast_Debug`, and `Release` configurations use ifx and build with Visual Studio 2022 or 2026.
+* Code cleanup: removed an unreachable `UZF` budget branch and the unused NWT backtracking counter, declared `HFBROUTECELL` with its `PURE` interface in NWT, removed a redundant `BiF` time series assignment, and reordered parts of `LMT`, `SFR`, and `SUB`.
+
+&nbsp;
+
+------
+
+&nbsp;
+
 ## 2.3.1
 
 2025-12-10
@@ -129,6 +224,7 @@ git commit log: `git log --reverse 455800a6bf6138e1b00c5ee17b6eb2108614e2e3^..e9
 * `Slang` added to `TYPE(VARIABLE_NAME_MEANING)` the routine `SUBROUTINE EQUALITY_VARIABLE_NAME_MEANING`, which is assigned as the `GENERIC :: OPERATOR(==)` to allow variable equality checks.
 * Bash scripts now start with `#!/bin/env bash` instead of `#!/bin/bash`
 
+&nbsp;
 
 ------
 
@@ -382,11 +478,11 @@ Only MODE 1 is allowed until this issue is fixed.
         &nbsp; &nbsp; &nbsp; `b = a`  
         &nbsp; &nbsp; &nbsp; `c = a`
 
-
-
 &nbsp; 
 
 ------
+
+&nbsp;
 
 ## 2.2.0
 
@@ -536,6 +632,8 @@ See [CHANGELOG_Features.md](CHANGELOG_Features.md#2.1.1) for a listing of new Zo
 
 ------
 
+&nbsp;
+
 ## 2.1.0 ⯬ MODFLOW Surface Water Operations (`SWO`)
 
 2021-05-25
@@ -579,6 +677,8 @@ git commit log: `git log --reverse d8ec82ae504a2aaec594ccd576f8674961f59404^..4b
 
 ------
 
+&nbsp;
+
 ## 2.0.3
 
 2021-05-25
@@ -592,6 +692,8 @@ git commit log: `git log --reverse 3adf1e3b8e634d83b8296fd673b3e3360a5cae06^..d8
 &nbsp; 
 
 ------
+
+&nbsp;
 
 ## 2.0.2
 
@@ -622,6 +724,8 @@ or web view at: https://code.usgs.gov/modflow/mf-owhm/-/compare/2.0.1..2.0.2
 &nbsp; 
 
 ------
+
+&nbsp;
 
 ## 2.0.1
 
@@ -669,6 +773,8 @@ git commit log: `git log 12b331ce38c47a7e88f7da234c189ffa585d637a`
 &nbsp; 
 
 ------
+
+&nbsp;
 
 ## 2.0.0
 
