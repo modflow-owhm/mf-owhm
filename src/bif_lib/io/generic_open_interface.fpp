@@ -557,16 +557,25 @@
         CHARACTER(9):: FNAM
         CHARACTER(:),ALLOCATABLE:: ERRMSG
         INTEGER:: BUFFER, BC
-        LOGICAL:: ERR
+        LOGICAL:: ERR, HAS_DEV_NULL
         !
         BUFFER = 1048576  !1MB Buffer
         BC     = 1
         !
+        ! gfortran does not define __unix__ or _WIN64, so check at run time for /dev/null.
+        ! Otherwise opening 'nul' on Linux creates a regular file named nul.
 #ifdef  __unix__
         FNAM = '/dev/null'
-#else     
+#elif defined(_WIN64)
         FNAM = 'nul'
-#endif 
+#else
+        INQUIRE(FILE='/dev/null', EXIST=HAS_DEV_NULL)
+        IF(HAS_DEV_NULL) THEN
+            FNAM = '/dev/null'
+        ELSE
+            FNAM = 'nul'
+        END IF
+#endif
         !
         CALL  GENERIC_OPEN(FNAM, IU, IOUT, ACTION='WRITE',
      +           FORM=FORM,ACCESS=ACCESS, STATUS='UNKNOWN', 
