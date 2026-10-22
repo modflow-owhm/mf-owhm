@@ -377,7 +377,9 @@ A debug build appends `-debug` before the extension, for example
 `examples/bash_example_run` look for. Intermediate files go to `obj/` (Make)
 or to the build directory you choose (CMake, Meson); `build/` is ignored by git.
 `.util/cleanRepo.sh` removes the object, library, example output and build
-directories (`.util/cleanRepo.sh build nopause` for the build directories only).
+directories and keeps the compiled binaries (`.util/cleanRepo.sh build nopause`
+for the build directories only, `.util/cleanRepo.sh all nopause` to also delete
+the binaries in `bin/` and `postprocessors/*/bin`).
 
 &nbsp;
 

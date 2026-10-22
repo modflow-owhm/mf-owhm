@@ -5,11 +5,13 @@
 #  "lib"     to only do lib folder
 #  "object"  to only do the obj folder
 #  "build"   to only do the CMake and Meson build folders
+#  "bin"     to only do the compiled binaries (bin folders)
+#  "all"     to do all of the above, including "bin"
 #  "nopause" disables stopping script at completion.
-# 
-#    Not including one or more of 
-#       "example", "lib", "object", or "build" args
-#       will automatically select all four.
+#
+#    Not including one or more of
+#       "example", "lib", "object", "build", "bin", or "all" args
+#       will automatically select the first four (binaries are kept).
 #
 #shopt -s nocasematch
 #
@@ -40,28 +42,37 @@ OBJ=$F
 LIB=$F
 EX=$F
 BUILD=$F
+BIN=$F
 Pause=$T
 
-for ARG in "$@" 
+for ARG in "$@"
 do
-  case "${ARG:0:1}" in
-   e | E )
+  case "${ARG,,}" in
+   a* )
+          ALL=$T
+          BIN=$T
+           ;;
+   bi* )
+          BIN=$T
+          ALL=$F
+           ;;
+   e* )
           EX=$T
           ALL=$F
            ;;
-   l | L )
+   l* )
           LIB=$T
           ALL=$F
            ;;
-   o | O )
+   o* )
           OBJ=$T
           ALL=$F
            ;;
-   b | B )
+   b* )
           BUILD=$T
           ALL=$F
            ;;
-   n | N )
+   n* )
           Pause=$F
            ;;
    *) ALL=$T;;
@@ -95,6 +106,11 @@ fi
 #Clean out the CMake and Meson build directories
 if [ $BUILD = $T ]; then
              bash ./cleanBuild.sh "nopause"
+fi
+
+#Clean out the compiled binaries
+if [ $BIN = $T ]; then
+             bash ./cleanBin.sh "nopause"
 fi
 #
 #---- Return to calling folder  ----------------------------------------------------------

@@ -468,7 +468,7 @@ The source code, makefile, and Visual Studio Project has been provided for compi
 | CHANGELOG.md                   | Version log of changes to this code repository, this includes corrected code errors (bug fixes). |
 | CHANGELOG_Features.md          | Version log of new features added to the code repository.  <br />These are also included in the regular changelog, but this file contains a detailed explanation. |
 | CMakeLists.txt                 | CMake build (`cmake -S . -B build`); flag sets and source lists are in the `cmake` directory. See [doc/BUILD.md](doc/BUILD.md). |
-| cleanRepo.sh                   | Bash script that deletes files in `obj` and `lib` folders, the `examples/**/output` folders, and the CMake and Meson `build` folders. |
+| cleanRepo.sh                   | Bash script that deletes files in `obj` and `lib` folders, the `examples/**/output` folders, and the CMake and Meson `build` folders. Compiled binaries are kept unless the `all` (or `bin`) option is given. |
 | code.json                      | Metadata file required by the USGS for code.usgs.gov         |
 | DISCLAIMER.md                  | Is either the USGS's *Production Release* or *Preliminary Release* disclaimer. |
 | LICENSE.md                     | License and copyright information regarding the repository.  |

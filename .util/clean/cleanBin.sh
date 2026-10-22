@@ -21,12 +21,22 @@ then
 else
   touch ../../bin/mf-owhm.nix
 fi
+touch ../../postprocessors/zonebudget/bin/tmp.del.me
+touch ../../postprocessors/hydfmt/bin/tmp.del.me
 #
 #---- Run Script  ------------------------------------------------------------------------
 #
 echo 
 echo "BIN Clean: ${FND} ./bin -not -name 'bin' -not -name '.keep' -not -name 'readme.txt' -delete"
 ${FND} ../../bin -not -name 'bin' -not -name '.keep' -not -name 'readme.txt' -delete
+
+echo
+echo "BIN Clean: ${FND} ./postprocessors/zonebudget/bin -not -name 'bin' -not -name '.keep' -delete"
+${FND} ../../postprocessors/zonebudget/bin -not -name 'bin' -not -name '.keep' -delete
+
+echo
+echo "BIN Clean: ${FND} ./postprocessors/hydfmt/bin -not -name 'bin' -not -name '.keep' -delete"
+${FND} ../../postprocessors/hydfmt/bin -not -name 'bin' -not -name '.keep' -delete
 #
 #
 #---- Return to calling folder  ----------------------------------------------------------
