@@ -1,0 +1,146 @@
+
+PRINT SFR_DELIVERY_MISMATCH Output file from FMP SURFACE_WATER Block
+
+Writes for each time step the mass error (mismatch) between FMP and SFR for the
+semi-routed deliveries (SRD), that is the water that FMP removed from an SFR reach
+as a delivery (diversion) that SFR could not actually remove from that reach.
+
+SRD is defined by the SEMI_ROUTED_DELIVERY keyword
+and have identification numbers (ISRD) from 1 to NSFR_DELIV.
+
+The first row of each time step has SEG = 0 and RCH = 0 and is the total over all
+SFR reaches that have a delivery. It is followed by one row for each SFR reach
+that FMP removes water from as a delivery.
+
+The output may be text or binary format.
+
+If the output file is text format, then it will contain a single header line
+followed by the output written for each time step. If the output file is binary format,
+then each times step writes a binary record containing only the output data.
+
+
+/-------------------------------------\
+|                                     |
+|    Text File Header Definition      |
+|                                     |
+\-------------------------------------/
+
+PER                        is the stress period number
+STP                        is the time step number
+SEG                        is the SFR Segment number that water is removed from as a delivery (diversion), set to zero for the total of all delivery reaches
+RCH                        is the SFR Reach   number that water is removed from as a delivery (diversion), set to zero for the total of all delivery reaches
+FMP_DELIVERY      [L3/T]   is the delivery that FMP applied to the SFR reach (water removed to meet WBS demand). FMP counts all of it as surface water supply.
+SFR_REMOVED       [L3/T]   is the part of FMP_DELIVERY that SFR actually removed from the reach (FMP_DELIVERY - MISMATCH)
+MISMATCH          [L3/T]   is the part of FMP_DELIVERY that SFR could not remove because the reach did not have the water when SFR was solved.
+                              This is a mass error between FMP and SFR; see note at bottom for more information.
+                              Values less than 1E-12 are written as zero, and MISMATCH is never greater than FMP_DELIVERY.
+PERCENT           [%]      is the MISMATCH as a percent of FMP_DELIVERY (100 * MISMATCH / FMP_DELIVERY), set to zero if FMP_DELIVERY is zero
+SFR_INFLOW        [L3/T]   is the upstream flow into the SEG, RCH from the final SFR solution of the time step
+DELT              [T]      is the time step length
+DYEAR                      is the date at the end of the time step as a decimal year
+DATE_START                 is the starting calendar date of the time step in the form: yyyy-mm-ddThh:mm:ss
+
+
+/-------------------------------------\
+|                                     |
+|    Binary File Record Formatting    |
+|                                     |
+\-------------------------------------/
+
+
+DATE_START          CHARACTER(19), starting date formatted as ‘yyyy-mm-ddThh:mm:ss’
+DYEAR               DOUBLE
+DELT                DOUBLE
+PER                 INTEGER
+STP                 INTEGER
+SEG                 INTEGER
+RCH                 INTEGER
+FMP_DELIVERY        DOUBLE
+SFR_REMOVED         DOUBLE
+MISMATCH            DOUBLE
+PERCENT             DOUBLE
+SFR_INFLOW          DOUBLE
+
+
+/----------------------------\
+|                            |
+|   Additional Information   |
+|                            |
+\----------------------------/
+
+
+Date output is formatted using ISO 8601-1:2019 standard without a time zone designation:
+https://en.wikipedia.org/wiki/ISO_8601#Combined_date_and_time_representations
+
+The general format is:
+yyyy-mm-ddThh:mm:ss
+                   where:
+                         yyyy is the four digit Gregorian year
+                         mm   before the T is the two digit month number       (01 to 12)
+                         dd   is the two digit day of the month                (01 to {28, 29, 30, 31}, depending on the month)
+                         T    calendar date and 24-hour clock time separator
+                         hh   is the hour within the day                       (00 to 23 hour)
+                         mm   after the T is the two digit minutes in the hour (00 to 59 minute)
+                         ss   is the two digit seconds of the minute           (00 to 59 second)
+
+Output is in model units that uses an
+   L as a place holder for Length, L2 is for area, L3 is for volume and
+   T as a place holder for Time
+
+which are defined in the DIS package as being:
+   L: Feet, Meters, Centimeters, and Undefined
+   T: Seconds, Minutes, Hours, Days, Years, and Undefined
+
+------------------------------------------------------------------------------------------
+
+The MODFLOW-OWHM standard binary formatting is set to
+Fortran Unformatted Stream (C style binary).
+
+The description of each header indicates the Fortran variable
+that is used to write the binary recorded.
+
+The following explain their storage use:
+
+Keyword       Storage      Default Fortran Type  Python Numpy Type       Fortran 2003 Standard
+DOUBLE        8 bytes      Double Precision      numpy.dtype('float64')  REAL(kind=real64)
+INTEGER       4 bytes      Integer               numpy.dtype('int32')    INTEGER(kind=int32)
+CHARACTER(X)  X × 1 bytes  Character(X)          numpy.dtype('SX')       CHARACTER(len=X)
+SNGL          4 bytes      Real                  numpy.dtype('float32')  REAL(kind=real32)
+
+------------------------------------------------------------------------------------------------------------------------
+
+Why a Mismatch Occurs
+
+Within each solver (outer) iteration FMP is solved before SFR. FMP sizes each semi-routed delivery
+from the SFR reach inflow of the previous solver iteration, then SFR is solved with the FMP deliveries
+applied as a negative runoff (water removed from the reach).
+
+If a delivery removes most or all of the reach inflow, and the SFR solution then has a reach inflow
+that is slightly less than the delivery, SFR can only remove the water that is in the reach.
+The difference is the MISMATCH. FMP still counts the full FMP_DELIVERY as surface water supply,
+so the MISMATCH is a mass error between the FMP and SFR budgets for that time step.
+
+For Example, note all numbers have units L^3/T,
+
+   The previous iteration had an SFR_INFLOW of 100 and FMP delivers all of it, so FMP_DELIVERY = 100.
+   The final SFR solution has an SFR_INFLOW of 99.5, so SFR only removes 99.5.
+
+     FMP_DELIVERY = 100.0
+     SFR_REMOVED  =  99.5
+     MISMATCH     =   0.5
+     PERCENT      =   0.5
+
+The size of the mismatch is controlled by the following SURFACE_WATER block keywords:
+
+   SEMI_ROUTED_DELIVERY_MISMATCH_TOLERANCE           is the fraction of a delivery that may exceed the current reach inflow
+                                                     before convergence is allowed. If any delivery exceeds it, then another
+                                                     solver iteration is forced. The default is 0.01 (1% of the delivery).
+                                                     A negative value disables the check.
+
+   SEMI_ROUTED_DELIVERY_MISMATCH_ABSOLUTE_TOLERANCE  is the same check as an absolute rate (L^3/T). It is disabled by default.
+                                                     When specified, convergence requires both checks to pass.
+                                                     A negative value disables it.
+
+   *** A small MISMATCH (less than the tolerance) may remain at convergence. This file reports it so that
+       the mass error can be evaluated. A large PERCENT indicates that the solver could not converge the
+       deliveries within the tolerance, for example if NO_FAILED_CONVERGENCE_STOP allowed the model to continue.
