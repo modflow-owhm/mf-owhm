@@ -5547,7 +5547,7 @@ C6E7-----Done defining the array.  Get the print code and print the array.
 C seb IF EXPRESSION IS READ IN, CALCULATE EXPRESSION
           ELSE  !LINE(ISTART:ISTOP) == 'EXPRESSION'
               READ (INMULT,'(A)') LINE
-              RMLT(:,:,M)=ExpEVAL(LINE,MLTNAM(:M-1),RMLT(:,:,:M-1),     !MODULE ExpressionParser WHICH CALCULATES EXPRESSION FROM STRING
+              CALL ExpEVAL(LINE,MLTNAM(:M-1),RMLT(:,:,:M-1),RMLT(:,:,M),!MODULE ExpressionParser WHICH CALCULATES EXPRESSION FROM STRING AND STORES IT IN RMLT(:,:,M)
      +                                                    .TRUE.,.TRUE.)
               IF(MULTPRINT>0) THEN
                 WRITE(IOUTM,1201) MLTNAM(M)
