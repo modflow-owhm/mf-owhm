@@ -54,7 +54,7 @@ MODULE ExpressionParser                                             !MODULE THAT
     MODULE PROCEDURE ExpEval3D
   END INTERFACE
   !
-  CHARACTER(5),PARAMETER,DIMENSION(10)::  KEYWORDLIST = ['ABS  ','EXP  ','LOG  ','L10  ','NEG  ','SQRT ','ROUND', 'TRUNC','FLOOR', 'CEIL ']   !CHECK SEARCH LOOPS AT "DO WHILE (I <= LINELEN-4)"
+  CHARACTER(5),PARAMETER,DIMENSION(10)::  KEYWORDLIST = ['ABS  ','EXP  ','LOG  ','L10  ','NEG  ','SQRT ','ROUND', 'TRUNC','FLOOR', 'CEIL ']   !KEYWORDS ARE 3 TO 5 CHARACTERS; SplitFunc COUNTS ALL LENGTHS FROM 3 TO LEN(KEYWORDLIST)
   !
   !CHARACTER(3),PARAMETER, DIMENSION(3):: SPECIALWORDLIST = ['IF ', 'MIN', 'MAX']
   !
@@ -766,7 +766,7 @@ PURE SUBROUTINE SplitFunc(LN,Eqn,LN_SETUP)                           !SPLITS LIN
   CHARACTER(1),PARAMETER::RB=']'
   CHARACTER(1),PARAMETER::CM=','
   CHARACTER(1),PARAMETER::NG='-'
-  INTEGER::I,J,G,R,B,SymCnt,LINELEN,ISTART
+  INTEGER::I,J,K,G,R,B,SymCnt,LINELEN,ISTART
   LOGICAL:: LN_CHECK
   !
   LN_CHECK=.TRUE.
@@ -821,13 +821,16 @@ PURE SUBROUTINE SplitFunc(LN,Eqn,LN_SETUP)                           !SPLITS LIN
        END DO
      END IF
      !
-     IF     ( KEYWORD(LN(I:I+2))  .AND. LN(I+3:I+3)==LP ) THEN
-        R=R+1
-        I=I+3
-     ELSEIF ( KEYWORD(LN(I:I+3))  .AND. LN(I+4:I+4)==LP ) THEN
-        R=R+1
-        I=I+4
-     END IF
+     DO K=3, LEN(KEYWORDLIST)             !KEYWORDS ARE 3 TO LEN(KEYWORDLIST) CHARACTERS LONG (eg ABS, CEIL, ROUND) AND ALWAYS FOLLOWED BY "("
+        IF( I+K > LINELEN ) EXIT
+        IF( LN(I+K:I+K)==LP ) THEN
+            IF( KEYWORD(LN(I:I+K-1)) ) THEN
+                R=R+1
+                I=I+K
+                EXIT
+            END IF
+        END IF
+     END DO
      I=I+1
   END DO
   !
