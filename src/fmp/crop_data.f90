@@ -1998,9 +1998,9 @@ MODULE CROP_DATA_FMP_MODULE
             !!!    !
             !!!END DO; END DO
         ELSE
-            DO CONCURRENT ( I=ONE:CDAT%NCROP)
+            DO CONCURRENT ( I=ONE:CDAT%NCROP, CDAT%CROP(I)%N>Z )
                 !
-                CDAT%CROP(I)%TPPOT  = DZ 
+                CDAT%CROP(I)%TPPOT  = DZ
                 CDAT%CROP(I)%EPPOT  = DZ
                 CDAT%CROP(I)%PRECIP = DZ
                 ! 
