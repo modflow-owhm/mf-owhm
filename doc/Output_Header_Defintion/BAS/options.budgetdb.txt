@@ -12,10 +12,24 @@ except that:
    (2) Each row represents a time step and each column is the 
           budget name (MODFLOW package) with _IN and _OUT appended to the end.
    (3) IN_OUT represents the rate version of "TOTAL IN" minus "TOTAL OUT"
-   (4) PERCENT_ERROR represents the "PERCENT DISCREPANCY"
           Defined as:
-                     AVE_ERROR     = abs("TOTAL IN" - "TOTAL OUT") / 2
-                     PERCENT_ERROR = AVE_ERROR / IN_OUT
+                     IN_OUT = "TOTAL IN" - "TOTAL OUT"
+          It is positive when more water enters than leaves the model and negative otherwise.
+   (4) PERCENT_ERROR represents the absolute value of the "PERCENT DISCREPANCY" (always positive)
+          Defined as:
+                     AVE_FLOW      = ("TOTAL IN" + "TOTAL OUT") / 2
+                     PERCENT_ERROR = 100 * abs(IN_OUT) / AVE_FLOW
+          If AVE_FLOW is zero (less than 1E-30), then PERCENT_ERROR is set to zero.
+          If both abs(IN_OUT) and AVE_FLOW are less than 0.001, then PERCENT_ERROR is limited to 0.001.
+   (5) ITER is the number of outer iterations required to solve the time step.
+   (6) HCLOSE    [L]    is the maximum absolute head change of the last outer iteration, ITER.
+                          That is, HCLOSE = max( abs( HNEW(ITER) - HNEW(ITER-1) ) )
+                          This is the "HClose" value in the LIST file's "Solver Convergence Information".
+   (7) L2_RCLOSE [L3/T] is the L2 norm (square root of the sum of the squares) of the
+                          flow residual error of each active model cell for the last outer iteration, ITER.
+                          This is the "L2-RClose" value in the LIST file's "Solver Convergence Information".
+   (8) ITER, HCLOSE, and L2_RCLOSE are zero for stress periods that are
+          not simulated (BAS options INPUT_CHECK or FASTFORWARD).
 
 For example, the following is printed to the LIST file:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -28,21 +42,21 @@ For example, the following is printed to the LIST file:
 
            IN:                                      IN:
            ---                                      ---
-             STORAGE =      123400.0000               STORAGE =        1234.0000
+             STORAGE =       18510.0000               STORAGE =        1234.0000
        CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
 
-            TOTAL IN =      123400.0000              TOTAL IN =        1234.0000
+            TOTAL IN =       18510.0000              TOTAL IN =        1234.0000
 
           OUT:                                     OUT:
           ----                                     ----
-             STORAGE =        5100.0000               STORAGE =          51.0000
-       CONSTANT HEAD =           0.0000         CONSTANT HEAD =           0.0000
+             STORAGE =         765.0000               STORAGE =          51.0000
+       CONSTANT HEAD =        7500.0000         CONSTANT HEAD =         500.0000
 
-           TOTAL OUT =        5100.0782             TOTAL OUT =          51.0000
+           TOTAL OUT =        8265.0000             TOTAL OUT =         551.0000
 
-            IN - OUT =      118300.0000              IN - OUT =        1183.0000
+            IN - OUT =       10245.0000              IN - OUT =         683.0000
 
- PERCENT DISCREPANCY =          54.31     PERCENT DISCREPANCY =          54.31
+ PERCENT DISCREPANCY =          76.53     PERCENT DISCREPANCY =          76.53
  
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -50,9 +64,9 @@ would have the equivalent BUDGETDB file as
 (assume the same results occurred for the second time step):
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-         DATE_START   PER   STP    DELT  SIMTIME     STORAGE_IN    STORAGE_OUT    CHD_IN    CHD_OUT          IN_OUT  PERCENT_ERROR
-1961-04-01T00:00:00     1     1    15.0     15.0      1234.0000        51.0000       0.0       51.0       1183.0000      54.31
-1961-04-16T00:00:00     1     2    15.0     30.0      1234.0000        51.0000       0.0       51.0       1183.0000      54.31
+         DATE_START   PER   STP    DELT  SIMTIME     STORAGE_IN    STORAGE_OUT    CHD_IN    CHD_OUT          IN_OUT  PERCENT_ERROR   ITER         HCLOSE      L2_RCLOSE
+1961-04-01T00:00:00     1     1    15.0     15.0      1234.0000        51.0000       0.0      500.0        683.0000          76.53      7        0.08125      12.354000
+1961-04-16T00:00:00     1     2    15.0     30.0      1234.0000        51.0000       0.0      500.0        683.0000          76.53      5        0.06210       9.871000
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
