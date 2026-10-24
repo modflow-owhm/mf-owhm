@@ -85,6 +85,8 @@
         TYPE(LINE_FEED),           SAVE,           POINTER:: SFR_FEED_FLOW
         TYPE(LINE_FEED),           SAVE,           POINTER:: SFR_FEED_RUNOFF
         TYPE(GENERIC_OUTPUT_FILE), SAVE,           POINTER:: DBFILE
+        TYPE(GENERIC_OUTPUT_FILE), SAVE,           POINTER:: TRANSROUTE_PRT   !PRINT_TRANSROUTE output file
+        DOUBLE PRECISION,          SAVE,           POINTER:: TRANSROUTE_WT    !TRANSROUTE_WEIGHT of the channel storage change, <0 = AUTO
         TYPE(TIME_SERIES_FILE_GROUP),SAVE,         POINTER:: TIME_SERIES
         INTEGER,    DIMENSION(:),  SAVE,           POINTER, CONTIGUOUS:: SEG_NSTRM
         LOGICAL,                   SAVE,           POINTER:: SFR_PRNT
@@ -171,6 +173,8 @@
         TYPE(LINE_FEED),                     POINTER:: SFR_FEED_FLOW
         TYPE(LINE_FEED),                     POINTER:: SFR_FEED_RUNOFF
         TYPE(GENERIC_OUTPUT_FILE),           POINTER:: DBFILE
+        TYPE(GENERIC_OUTPUT_FILE),           POINTER:: TRANSROUTE_PRT
+        DOUBLE PRECISION,                    POINTER:: TRANSROUTE_WT
         TYPE(TIME_SERIES_FILE_GROUP),        POINTER:: TIME_SERIES
         INTEGER,    DIMENSION(:),            POINTER, CONTIGUOUS:: SEG_NSTRM
         LOGICAL,                             POINTER:: SFR_PRNT

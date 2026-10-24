@@ -374,6 +374,55 @@ C-------SUBROUTINE GWF2SFR7AR
      +   'ELEV_UP_STREAM (double), FLOW_WT (double),  '//
      +   'CHNG_UNSAT_STOR (double)'
             END IF
+        CASE('TRANSROUTE_WEIGHT')
+          CALL PARSE_WORD_UP(LINE,LLOC,ISTART,ISTOP)
+          IF(LINE(ISTART:ISTOP) == 'AUTO') THEN
+              TRANSROUTE_WT = -UNO
+          ELSE
+              LLOC = ISTART
+              CALL GET_NUMBER(LINE,LLOC,ISTART,ISTOP,IOUT,IN,
+     +                        TRANSROUTE_WT,MSG=
+     +         'FOUND SFR OPTION "TRANSROUTE_WEIGHT"'//NL//
+     +         'BUT FAILED TO LOAD "AUTO" OR THE WEIGHT (0 TO 1)')
+              IF(TRANSROUTE_WT > UNO) CALL STOP_ERROR(INFILE=IN,
+     +          OUTPUT=IOUT, MSG='SFR OPTION "TRANSROUTE_WEIGHT" '//
+     +          'MUST BE "AUTO", A NEGATIVE NUMBER (AUTO), '//
+     +          'OR A WEIGHT LESS THAN OR EQUAL TO 1.')
+          END IF
+          IF(TRANSROUTE_WT < 0.0D0) THEN
+              TRANSROUTE_WT = -UNO
+              WRITE(IOUT,'(/2A/)') 'TRANSROUTE_WEIGHT OPTION '//
+     +                'FOUND. KINEMATIC-WAVE ROUTING USES THE WEIGHT: ',
+     +                "'AUTO'"
+          ELSE
+              WRITE(IOUT,'(/A,F8.5/)') 'TRANSROUTE_WEIGHT OPTION '//
+     +                'FOUND. KINEMATIC-WAVE ROUTING USES THE WEIGHT: ',
+     +                TRANSROUTE_WT
+          END IF
+        CASE('PRINT_TRANSROUTE')
+          WRITE(IOUT,'(/A/)') 'PRINT_TRANSROUTE OPTION FOUND. '//
+     +       'KINEMATIC-WAVE ROUTING INFORMATION WRITTEN BY REACH'
+          CALL TRANSROUTE_PRT%OPEN(LINE,LLOC,IOUT,IN,SPLITMAXCOUNT=11,
+     +                             NO_INTERNAL=TRUE)
+          IF(TRANSROUTE_PRT%BINARY) THEN
+              WRITE(IOUT,'(A/)') 'PRINT_TRANSROUTE WRITTEN TO BINARY '//
+     +   'FILE USING STREAM UNFORMATTED STRUCTURE. EACH RECORD IS:'//
+     +   NL//'DATE_START (19char), PER (int), STP (int), '//
+     +   'DELT (double), SIMTIME (double), SEG (int), RCH (int), '//
+     +   'DELT_ROUTE (double), LENGTH (double), '//
+     +   'FLOW_IN_PREV (double), FLOW_OUT_PREV (double), '//
+     +   'FLOW_IN (double), FLOW_OUT (double), '//
+     +   'CELERITY (double), COURANT (double), WEIGHT (double), '//
+     +   'STORAGE_CHANGE (double), ROUTING_ERROR (double)'
+          ELSE
+              CALL TRANSROUTE_PRT%SET_HEADER(
+     +   ' DATE_START               PER     STP             DELT'//
+     +   '          SIMTIME    SEG    RCH'//
+     +   '       DELT_ROUTE           LENGTH     FLOW_IN_PREV'//
+     +   '    FLOW_OUT_PREV          FLOW_IN         FLOW_OUT'//
+     +   '         CELERITY          COURANT           WEIGHT'//
+     +   '   STORAGE_CHANGE    ROUTING_ERROR')
+          END IF
         CASE('HEAD_RELAX','HEAD_RELAXATION')
             WRITE(IOUT,'(2A)') 'HEAD_RELAXATION OPTION FOUND. ',
      +       'NOW READING 0 to 1 HNEW1 TO HNEW2 RELAXATION FACTOR'
@@ -398,7 +447,7 @@ C-------SUBROUTINE GWF2SFR7AR
       END DO
       !
       IF(HAS_OPT) CALL READ_TO_DATA(LINE,IN,IOUT)
-      
+
       END SUBROUTINE
 C
 C-------SUBROUTINE GWF2SFR7AR
@@ -511,6 +560,8 @@ C     ------------------------------------------------------------------
       ALLOCATE (NINTOT)                             !EDM - FOR LMT
       ALLOCATE(FACTOR,FACTORKH,FACTORKV)
       ALLOCATE(DBFILE)
+      ALLOCATE(TRANSROUTE_PRT)
+      ALLOCATE(TRANSROUTE_WT, SOURCE=-UNO)    ! AUTO
       ALLOCATE(IOUT)
       ALLOCATE(THETAB, FLUXB, FLUXHLD2)
       ALLOCATE(Nfoldflbt, NUMTAB, ROWTAB)
@@ -671,6 +722,56 @@ C         DLEAK, ISTCB1, ISTCB2.
             ALLOCATE( MX_STG, SOURCE = BL%LINE(LLOC:) )
         CASE('MAX_FLOW')
             ALLOCATE( MX_FLO, SOURCE = BL%LINE(LLOC:) )
+        CASE('TRANSROUTE_WEIGHT')
+          CALL PARSE_WORD_UP(BL%LINE,LLOC,ISTART,ISTOP)
+          IF(BL%LINE(ISTART:ISTOP) == 'AUTO') THEN
+              TRANSROUTE_WT = -UNO
+          ELSE
+              LLOC = ISTART
+              CALL GET_NUMBER(BL%LINE,LLOC,ISTART,ISTOP,IOUT,IN,
+     +                        TRANSROUTE_WT,MSG=
+     +         'FOUND SFR OPTION "TRANSROUTE_WEIGHT"'//NL//
+     +         'BUT FAILED TO LOAD "AUTO" OR THE WEIGHT (0 TO 1)')
+              IF(TRANSROUTE_WT > UNO) CALL STOP_ERROR(INFILE=IN,
+     +          OUTPUT=IOUT, MSG='SFR OPTION "TRANSROUTE_WEIGHT" '//
+     +          'MUST BE "AUTO", A NEGATIVE NUMBER (AUTO), '//
+     +          'OR A WEIGHT LESS THAN OR EQUAL TO 1.')
+          END IF
+          IF(TRANSROUTE_WT < 0.0D0) THEN
+              TRANSROUTE_WT = -UNO
+              WRITE(IOUT,'(/2A/)') 'TRANSROUTE_WEIGHT OPTION '//
+     +                'FOUND. KINEMATIC-WAVE ROUTING USES THE WEIGHT: ',
+     +                "'AUTO'"
+          ELSE
+              WRITE(IOUT,'(/A,F8.5/)') 'TRANSROUTE_WEIGHT OPTION '//
+     +                'FOUND. KINEMATIC-WAVE ROUTING USES THE WEIGHT: ',
+     +                TRANSROUTE_WT
+          END IF
+        CASE('PRINT_TRANSROUTE')
+          WRITE(IOUT,'(/A/)') 'PRINT_TRANSROUTE OPTION FOUND. '//
+     +       'KINEMATIC-WAVE ROUTING INFORMATION WRITTEN BY REACH'
+          CALL TRANSROUTE_PRT%OPEN(BL%LINE,LLOC,IOUT,IN,
+     +                             SPLITMAXCOUNT=11,
+     +                             NO_INTERNAL=TRUE)
+          IF(TRANSROUTE_PRT%BINARY) THEN
+              WRITE(IOUT,'(A/)') 'PRINT_TRANSROUTE WRITTEN TO BINARY '//
+     +   'FILE USING STREAM UNFORMATTED STRUCTURE. EACH RECORD IS:'//
+     +   NL//'DATE_START (19char), PER (int), STP (int), '//
+     +   'DELT (double), SIMTIME (double), SEG (int), RCH (int), '//
+     +   'DELT_ROUTE (double), LENGTH (double), '//
+     +   'FLOW_IN_PREV (double), FLOW_OUT_PREV (double), '//
+     +   'FLOW_IN (double), FLOW_OUT (double), '//
+     +   'CELERITY (double), COURANT (double), WEIGHT (double), '//
+     +   'STORAGE_CHANGE (double), ROUTING_ERROR (double)'
+          ELSE
+              CALL TRANSROUTE_PRT%SET_HEADER(
+     +   ' DATE_START               PER     STP             DELT'//
+     +   '          SIMTIME    SEG    RCH'//
+     +   '       DELT_ROUTE           LENGTH     FLOW_IN_PREV'//
+     +   '    FLOW_OUT_PREV          FLOW_IN         FLOW_OUT'//
+     +   '         CELERITY          COURANT           WEIGHT'//
+     +   '   STORAGE_CHANGE    ROUTING_ERROR')
+          END IF
             !
         CASE('NO_BUDGET_RECALCULATE_FLOW')
             DO_FM_BD = FALSE
@@ -1091,6 +1192,13 @@ Cdep  changed DSTROT to FXLKOT
       ALLOCATE (RECHSAVE(NCOL,NROW))   !cjm
       ALLOCATE (FNETSEEP(NCOL,NROW)) !rgn printing net recharge in UZF
       ALLOCATE (SEGINFLOWSAVE(NSS))
+      !
+      IF(IRTFLG > Z) THEN
+        IF(TRANSROUTE_WT >= DZ .AND. TRANSROUTE_WT < 0.5D0)
+     +    CALL WRN%ADD('TRANSROUTE_WEIGHT IS LESS THAN 0.5;'
+     +    //' THE KINEMATIC-WAVE ROUTING MAY OSCILLATE AND CLIP '
+     +    //'NEGATIVE OUTFLOW TO ZERO.'//NL)
+      END IF
       STRM = 0.0  
       HSTRM = 0.0
       QSTRM = 0.0
@@ -3620,7 +3728,7 @@ C     -----------------------------------------------------------------
      +        maxwav, icalccheck, iskip, iss, lsub, numdelt, irt, 
      +        lfold, illake, lakid,lgrgrid,lgrgridprv,lgrseg
       INTEGER UP  !cjm
-      DOUBLE PRECISION:: MX_FLO, MX_STG, qrain
+      DOUBLE PRECISION:: MX_FLO, MX_STG, qrain, rtcel, rtpsi, rterr
       DOUBLE PRECISION:: FIVE_THIRDS, PRED, CORR
       LOGICAL:: NO_GW, FIXED_HEAD_CELL
       PARAMETER (FIVE_THIRDS=5.0D0/3.0D0)
@@ -5054,7 +5162,8 @@ C67-----ROUTE FLOW DOWN CHANNEL WHEN ACTIVE.
               CALL ROUTE_CHAN(qa, qb, qc, qd, qcnst, cdpth, awdth, 
      +               fdpth, bwdth, deltinc, icalc, strlen, slope, 
      +               istsg, nreach, itstr, qlat, flobot, width, l,
-     +               Transient_bd, depthtr, MX_STG)
+     +               Transient_bd, depthtr, MX_STG, rtcel, rtpsi,
+     +               rterr)
             ELSE 
               qd = 0.0
             END IF
@@ -5298,7 +5407,7 @@ C     *****************************************************************
      +                        VBVL, VBNM, HDRY, IAUXSV, 
      +                        DATE_SP, HAS_STARTDATE
       USE CONSTANTS, ONLY: NL, BLN, TRUE, FALSE, ninf, DZ, UNO, Z,
-     +                     NEARZERO_15, NEGNEARZERO_15
+     +                     NEARZERO_15, NEGNEARZERO_15, NaN
       IMPLICIT NONE
       INTRINSIC REAL, ABS, IABS, DSQRT, DLOG10, SQRT, SNGL
 C     ------------------------------------------------------------------
@@ -5321,7 +5430,8 @@ C     LOCAL VARIABLES
 C     ------------------------------------------------------------------
       REAL areamax, avhc, fks, ha, rin, rout, strlen,
      +     zero, sfrbudg_in, sfrbudg_out, qlat, deltinc, qcnst, rtime,
-     +     fltest, Transient_bd, Transient_bd_tot, strm9
+     +     fltest, Transient_bd, Transient_bd_tot, strm9, qroute
+      DOUBLE PRECISION wroute, rtcel, rtpsi, rterr, RT_OUT(11)
 !IFACE
       REAL xface(1)
       INTEGER naux
@@ -5341,8 +5451,8 @@ C     ------------------------------------------------------------------
      +                 fact, WT0, WT1, PRED, CORR
       CHARACTER(19):: DATE
       DOUBLE PRECISION, DIMENSION(16):: DB_OUT
-      EXTERNAL CALC_XSA
-      DOUBLE PRECISION CALC_XSA
+      EXTERNAL CALC_XSA, SFR_CELERITY
+      DOUBLE PRECISION CALC_XSA, SFR_CELERITY
       LOGICAL:: NO_GW, FIXED_HEAD_CELL, HAS_LMT
       DOUBLE PRECISION:: MX_FLO, MX_STG 
 C     ------------------------------------------------------------------
@@ -5940,14 +6050,26 @@ C         SIMULATION IS TRANSIENT.
             END IF
             IF ( fltest.GT.NEARZERO ) THEN
               Transient_bd = 0.0
-              CALL ROUTE_CHAN(qa, qb, qc, qd, qcnst, cdpth, awdth, 
+              !seb route with the channel width as FM does; width and qcnst
+              !    are scaled by smooth(depth) for the leakage of ICALC 1
+              wroute = HWDTH(l,irt)
+              qroute = qcnst
+              IF ( icalc.EQ.1 )
+     +          qroute = CONST*wroute*SQRT(slope)/SEG(16, istsg)
+              CALL ROUTE_CHAN(qa, qb, qc, qd, qroute, cdpth, awdth, 
      +                fdpth, bwdth, deltinc, icalc, strlen, slope,
-     +                istsg, nreach, itstr, qlat, flobot, width, l,
-     +                Transient_bd, depthtr, MX_STG)
+     +                istsg, nreach, itstr, qlat, flobot, wroute, l,
+     +                Transient_bd, depthtr, MX_STG, rtcel, rtpsi,
+     +                rterr)
               STRM(30,l) = Transient_bd
               Transient_bd_tot = Transient_bd_tot + Transient_bd
             ELSE
               qd = 0.0
+              rtcel = 0.0D0
+              rtpsi = TRANSROUTE_WT
+              IF ( rtpsi < 0.0D0 ) rtpsi = 1.0D0  ! AUTO WITH NO FLOW
+              rterr = 0.0D0
+              Transient_bd = 0.0
             END IF
             IF ( Qd.LT.FLWTOL ) THEN
               Qd = 0.0
@@ -5956,6 +6078,15 @@ C         SIMULATION IS TRANSIENT.
             flowot = qd
             STRM(25,l) = qd
             STRM(26,l) = qc
+            !
+            RT_OUT(3)  = qa
+            RT_OUT(4)  = qb
+            RT_OUT(5)  = qc
+            RT_OUT(6)  = qd
+            RT_OUT(7)  = rtcel
+            RT_OUT(9)  = rtpsi
+            RT_OUT(10) = Transient_bd           !STORAGE_CHANGE
+            RT_OUT(11) = rterr
           ELSE
 C
 ! EDM calc x-sectional area of channel for LMT w/ SFR mass routine
@@ -5982,6 +6113,52 @@ C
             flowot = flow - flobot
             qc = flowin
             qd = flowot
+            !
+            !seb PRINT_TRANSROUTE without routing (IRTFLG = 0 or steady
+            !    state): celerity of the steady flow, no storage change
+            IF ( TRANSROUTE_PRT%IS_OPEN ) THEN
+              wroute = HWDTH(l,irt)
+              qroute = qcnst
+              IF ( icalc.EQ.1 )
+     +          qroute = CONST*wroute*SQRT(slope)/SEG(16, istsg)
+              RT_OUT(3)  = NaN
+              RT_OUT(4)  = NaN
+              RT_OUT(5)  = qc
+              RT_OUT(6)  = qd
+              RT_OUT(7)  = SFR_CELERITY(MIN(qc, qd), qroute, cdpth,
+     +                     awdth, fdpth, bwdth, icalc, slope, istsg,
+     +                     nreach, itstr, wroute, MX_STG)
+              RT_OUT(9)  = NaN
+              RT_OUT(10) = DZ
+              RT_OUT(11) = DZ
+            END IF
+          END IF
+C
+C32B----WRITE PRINT_TRANSROUTE (LAST ROUTING SUB-STEP OF THE TIME STEP).
+C         COURANT HAS NO MEANING IN A STEADY-STATE STRESS PERIOD.
+          IF ( TRANSROUTE_PRT%IS_OPEN .AND. irt==numdelt ) THEN
+            IF(HAS_STARTDATE) THEN
+              DATE = DATE_SP(KKPER)%TS(KKSTP-1)%STR('T')
+            ELSE
+              DATE = '   NaN'
+            END IF
+            RT_OUT(1) = deltinc
+            RT_OUT(2) = strlen
+            IF ( iss.EQ.0 ) THEN
+              RT_OUT(8) = RT_OUT(7)*deltinc/strlen   !COURANT
+            ELSE
+              RT_OUT(8) = NaN
+            END IF
+            IF(TRANSROUTE_PRT%BINARY) THEN
+              WRITE(TRANSROUTE_PRT%IU) DATE, Kkper, Kkstp,
+     +          SPTIM(KKPER)%DT(KKSTP), DBLE(TOTIM),
+     +          ISTRM(4, l), ISTRM(5, l), RT_OUT
+            ELSE
+              WRITE(TRANSROUTE_PRT%IU,'(1x,A, 1x,2I8, 2(1x,ES16.9),
+     +                          2(1x,I6), 11(1x,ES16.9))')
+     +          DATE, Kkper, Kkstp, SPTIM(KKPER)%DT(KKSTP),
+     +          TOTIM, ISTRM(4, l), ISTRM(5, l), RT_OUT
+            END IF
           END IF
           IF ( ISS.EQ.0 ) THEN
             SUMLEAK(l) = SUMLEAK(l) + (flobot*deltinc)
@@ -10209,12 +10386,16 @@ C-------SUBROUTINE ROUTE_CHAN
       SUBROUTINE ROUTE_CHAN(Qa, Qb, Qc, Qd, Qcnst, Cdpth, Awdth, Fdpth,
      +                      Bwdth, Deltinc, Icalc, Strlen, Slope, Istsg,
      +                      Nreach, Itstr, Qlat, Flobot, Width, L, 
-     +                      Chanstor,depth, MX_STG)
+     +                      Chanstor,depth, MX_STG, Cel, Psi, Rerr)
 C***********************************************************************
 C     IMPLICIT FINITE-DIFFERENCE SCHEME TO ROUTE FLOW DOWN CHANNELS 
 !--------REVISED FOR MODFLOW-2005 RELEASE 1.9, FEBRUARY 6, 2012
+C     RETURNS THE CELERITY (CEL, ONLY WITH AUTO OR PRINT_TRANSROUTE),
+C     THE STORAGE WEIGHT USED (PSI), AND THE ROUTING ERROR (RERR, L3/T,
+C     POSITIVE WHEN WATER IS CREATED BY CLIPPING NEGATIVE OUTFLOW).
 C***********************************************************************
-      USE GWFSFRMODULE, ONLY: ISEG, WEIGHT, SEG, FLWTOL, NEARZERO, IOUT
+      USE GWFSFRMODULE, ONLY: ISEG, WEIGHT, SEG, FLWTOL, NEARZERO, IOUT,
+     +                        TRANSROUTE_WT, TRANSROUTE_PRT
       IMPLICIT NONE
 C     ------------------------------------------------------------------
 C     SPECIFICATIONS:
@@ -10233,7 +10414,10 @@ C     ------------------------------------------------------------------
       REAL w_1, stor
       DOUBLE PRECISION qderiv, dq, delq, flobot2, tol, ab, ac, aa, ad1
       DOUBLE PRECISION wetperm, depth, qd2, qd3, f11, f12, f1, f2, ad2
-      DOUBLE PRECISION MX_STG
+      DOUBLE PRECISION MX_STG, Cel, Psi, Rerr
+      DOUBLE PRECISION w1psi
+      DOUBLE PRECISION SFR_CELERITY
+      EXTERNAL SFR_CELERITY
 C     ------------------------------------------------------------------
       iprndpth = 0
       maxiter = 200
@@ -10299,6 +10483,22 @@ C3------INITIALIZE CONSTANTS.
         ac = depth*Width
       END IF
 C
+C3B-----SPATIAL WEIGHT OF THE STORAGE CHANGE (PSI): 0.5 CENTERS THE
+C         STORAGE ON THE REACH MIDPOINT (MF-2005 SCHEME), 1 PUTS IT AT
+C         THE DOWNSTREAM END. THE SCHEME IS MONOTONE (NO NEGATIVE
+C         OUTFLOW TO CLIP) WHEN THE COURANT NUMBER CEL*DT/L >= 1-PSI, SO
+C         AUTO (TRANSROUTE_WT < 0) USES PSI = MAX(0.5, 1 - COURANT) WITH
+C         THE CELERITY DQ/DA AT THE SMALLEST OF THE KNOWN FLOWS.
+      Psi = TRANSROUTE_WT
+      Cel = 0.0D0
+      IF ( Psi < 0.0D0 .OR. TRANSROUTE_PRT%IS_OPEN ) THEN
+        Cel = SFR_CELERITY(MIN(Qa, Qb, Qc), Qcnst, Cdpth, Awdth, Fdpth,
+     +                     Bwdth, Icalc, Slope, Istsg, Nreach, Itstr,
+     +                     Width, MX_STG)
+        IF ( TRANSROUTE_WT < 0.0D0 )
+     +    Psi = MAX(0.5D0, 1.0D0 - Cel*Deltinc/Strlen)
+      END IF
+      w1psi = 1.0D0 - Psi
 C4------CALCULATE FLOW IN CHANNELS--MAXIMUM ITERATIONS IS 50.
       CONVERGE: DO WHILE( i.LT.maxiter )
 C
@@ -10351,14 +10551,14 @@ C7------CALCULATE FLOW.
           ELSE
             f11 = (WEIGHT*((Qd)-Qc)+(w_1)*(Qb-Qa))/Strlen
           END IF
-          f12 = ((ad1-ab)+(ac-aa))/(2.0D0*Deltinc)
+          f12 = (psi*(ad1-ab)+w1psi*(ac-aa))/Deltinc
           f1 = f11+f12-Qlat-flobot2
           IF ( (Qb+Qa).LT.NEARZERO ) THEN
             f11 = (Qd+dq-Qc)/Strlen
           ELSE
             f11 = (WEIGHT*((Qd+dq)-Qc)+(w_1)*(Qb-Qa))/Strlen
           END IF
-          f12 = ((ad2-ab)+(ac-aa))/(2.0D0*Deltinc)
+          f12 = (psi*(ad2-ab)+w1psi*(ac-aa))/Deltinc
           f2 = f11+f12-Qlat-flobot2
           qderiv = (f2-f1)/dq
           IF ( qderiv.GT.0.0 ) THEN
@@ -10379,10 +10579,10 @@ C8------EXIT LOOP IF delq LESS THAN TOLERANCE.
         END IF
           i = i + 1
       END DO CONVERGE
-      stor = Strlen*(ad2+ac)/(2.0D0*Deltinc) - 
-     +       Strlen*(ab+aa)/(2.0D0*Deltinc)
+      stor = Strlen*(psi*(ad2-ab)+w1psi*(ac-aa))/Deltinc
 !      Chanstor = Qc - Qd - stor - FLOBOT
       Chanstor = stor
+      Rerr = f1*Strlen          ! f1 IS THE RESIDUAL AT THE FINAL Qd WHEN CLIPPED
       IF ( i.GE.maxiter ) WRITE(IOUT,*) 'Non-convergence in ROUTE_CHAN',
      +                                  L, delq
       IF ( Qd.LT.tol ) tol = 0.0D0
@@ -10446,6 +10646,41 @@ C3------INITIALIZE CONSTANTS.
 C
       RETURN
       END FUNCTION CALC_XSA
+C
+C-------FUNCTION SFR_CELERITY
+      DOUBLE PRECISION FUNCTION SFR_CELERITY(Q, Qcnst, Cdpth, Awdth,
+     +                Fdpth, Bwdth, Icalc, Slope, Istsg, Nreach, Itstr,
+     +                Width, MX_STG)
+C     ******************************************************************
+C     KINEMATIC-WAVE CELERITY DQ/DA OF THE CHANNEL AT FLOW Q (SECANT
+C     OVER A SMALL FLOW INCREMENT). ZERO WHEN THE AREA DOES NOT CHANGE
+C     WITH FLOW (ICALC 0).
+C     ******************************************************************
+      USE GWFSFRMODULE, ONLY: NEARZERO
+      IMPLICIT NONE
+      DOUBLE PRECISION, INTENT(IN):: Q, Cdpth, Awdth, Fdpth, Bwdth,
+     +                               Slope, Width, MX_STG
+      REAL,             INTENT(IN):: Qcnst
+      INTEGER,          INTENT(IN):: Icalc, Istsg, Nreach, Itstr
+      DOUBLE PRECISION qmin, qdel, wtmp, dtmp, da
+      DOUBLE PRECISION CALC_XSA
+      EXTERNAL CALC_XSA
+C     ------------------------------------------------------------------
+      qmin = Q
+      IF ( qmin < NEARZERO ) qmin = 0.0D0
+      qdel = MAX(1.0D-4*qmin, 1.0D-6)
+      wtmp = Width                       ! CALC_XSA CHANGES THE WIDTH
+      da = CALC_XSA(qmin+qdel, Qcnst, Cdpth, Awdth, Fdpth, Bwdth, Icalc,
+     +              Slope, Istsg, Nreach, Itstr, wtmp, dtmp, MX_STG)
+      wtmp = Width
+      da = da - CALC_XSA(qmin, Qcnst, Cdpth, Awdth, Fdpth, Bwdth, Icalc,
+     +              Slope, Istsg, Nreach, Itstr, wtmp, dtmp, MX_STG)
+      IF ( da > NEARZERO ) THEN
+        SFR_CELERITY = qdel/da
+      ELSE
+        SFR_CELERITY = 0.0D0
+      END IF
+      END FUNCTION SFR_CELERITY
 C
 C     ------------------------------------------------------------------
 C
@@ -10875,6 +11110,11 @@ C     ------------------------------------------------------------------
       DEALLOCATE(DBFILE )
       DBFILE =>NULL()
       !
+      TRANSROUTE_PRT=>GWFSFRDAT(IGRID)%TRANSROUTE_PRT
+      GWFSFRDAT(IGRID)%TRANSROUTE_PRT=>NULL()
+      DEALLOCATE(TRANSROUTE_PRT)
+      TRANSROUTE_PRT=>NULL()
+      !
       SFR_FRES=>GWFSFRDAT(IGRID)%SFR_FRES
       GWFSFRDAT(IGRID)%SFR_FRES=>NULL()
       DEALLOCATE(SFR_FRES)
@@ -10906,6 +11146,7 @@ C     ------------------------------------------------------------------
       DEALLOCATE(GWFSFRDAT(IGRID)%UNITSEGOUT   ,STAT=I)
       DEALLOCATE(GWFSFRDAT(IGRID)%SEGFLOWS     ,STAT=I)
       DEALLOCATE(GWFSFRDAT(IGRID)%SEGINFLOWSAVE,STAT=I)
+      DEALLOCATE(GWFSFRDAT(IGRID)%TRANSROUTE_WT)
 C
 C NULLIFY THE LOCAL POINTERS
       IF(IGRID.EQ.1) THEN
@@ -11052,6 +11293,8 @@ C NULLIFY THE LOCAL POINTERS
       UNITSEGOUT      => NULL()
       SEGFLOWS        => NULL()
       SEGINFLOWSAVE   => NULL()
+      TRANSROUTE_WT   => NULL()
+      TRANSROUTE_PRT  => NULL()
         
       END IF
       END SUBROUTINE GWF2SFR7DA
@@ -11213,6 +11456,8 @@ C     ------------------------------------------------------------------
       UNITSEGOUT      => GWFSFRDAT(IGRID)%UNITSEGOUT
       SEGFLOWS        => GWFSFRDAT(IGRID)%SEGFLOWS
       SEGINFLOWSAVE   => GWFSFRDAT(IGRID)%SEGINFLOWSAVE
+      TRANSROUTE_WT   => GWFSFRDAT(IGRID)%TRANSROUTE_WT
+      TRANSROUTE_PRT  => GWFSFRDAT(IGRID)%TRANSROUTE_PRT
       
 C
       END SUBROUTINE SGWF2SFR7PNT
@@ -11375,5 +11620,7 @@ C     ------------------------------------------------------------------
       GWFSFRDAT(IGRID)%UNITSEGOUT      => UNITSEGOUT
       GWFSFRDAT(IGRID)%SEGFLOWS        => SEGFLOWS
       GWFSFRDAT(IGRID)%SEGINFLOWSAVE   => SEGINFLOWSAVE
+      GWFSFRDAT(IGRID)%TRANSROUTE_WT   => TRANSROUTE_WT
+      GWFSFRDAT(IGRID)%TRANSROUTE_PRT  => TRANSROUTE_PRT
 C
       END SUBROUTINE SGWF2SFR7PSV
