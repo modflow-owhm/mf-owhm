@@ -263,6 +263,26 @@ C-------SUBROUTINE GWF2SFR7AR
      +            'Option to output flows by segments is active. ',
      +            'But an invalid value for UNITSEGOUT was specified.'
             END IF
+        CASE('STRHC1KH', 'STRHC1KV')
+            IF(LINE(ISTART:ISTOP) == 'STRHC1KH') THEN
+              STRHC1KHFLAG = ONE
+              CALL URWORD(LINE, lloc, istart, istop, 3, i,
+     +                    FACTORKH, IOUT, In)
+              WRITE(IOUT,'(2A,ES16.9)') 'STRHC1KH KEYWORD FOUND: ',
+     +        'Streambed K is the aquifer horizontal K (HK) times ',
+     +        FACTORKH
+            ELSE
+              STRHC1KVFLAG = ONE
+              CALL URWORD(LINE, lloc, istart, istop, 3, i,
+     +                    FACTORKV, IOUT, In)
+              WRITE(IOUT,'(2A,ES16.9)') 'STRHC1KV KEYWORD FOUND: ',
+     +        'Streambed K is the aquifer vertical K (VKA) times ',
+     +        FACTORKV
+            END IF
+            IF(STRHC1KHFLAG == ONE .AND. STRHC1KVFLAG == ONE)
+     +        CALL STOP_ERROR(INFILE=IN, OUTPUT=IOUT,
+     +        MSG='SFR OPTIONS "STRHC1KH" AND "STRHC1KV" '//
+     +            'CANNOT BOTH BE SPECIFIED.')
         CASE('LOSSFACTOR')
             CALL URWORD(LINE, lloc, istart, istop,3,i,FACTOR,IOUT,In)
             WRITE(IOUT,'(4A,ES16.9)') 
@@ -704,6 +724,26 @@ C         DLEAK, ISTCB1, ISTCB2.
      +               'TABFILES (WITH AN S) KEYWORD FOUND', 
      +       'SFR Original TABFILES will be loaded and will be read ',
      +       NUMTAB,'with a maximum of ',ROWTAB,' row entries per file'
+        CASE('STRHC1KH', 'STRHC1KV')
+            IF(BL%LINE(ISTART:ISTOP) == 'STRHC1KH') THEN
+              STRHC1KHFLAG = ONE
+              CALL URWORD(BL%LINE, lloc, istart, istop, 3, i,
+     +                    FACTORKH, IOUT, In)
+              WRITE(IOUT,'(2A,ES16.9)') 'STRHC1KH KEYWORD FOUND: ',
+     +        'Streambed K is the aquifer horizontal K (HK) times ',
+     +        FACTORKH
+            ELSE
+              STRHC1KVFLAG = ONE
+              CALL URWORD(BL%LINE, lloc, istart, istop, 3, i,
+     +                    FACTORKV, IOUT, In)
+              WRITE(IOUT,'(2A,ES16.9)') 'STRHC1KV KEYWORD FOUND: ',
+     +        'Streambed K is the aquifer vertical K (VKA) times ',
+     +        FACTORKV
+            END IF
+            IF(STRHC1KHFLAG == ONE .AND. STRHC1KVFLAG == ONE)
+     +        CALL STOP_ERROR(INFILE=IN, OUTPUT=IOUT,
+     +        MSG='SFR OPTIONS "STRHC1KH" AND "STRHC1KV" '//
+     +            'CANNOT BOTH BE SPECIFIED.')
         CASE('LOSSFACTOR')
             CALL URWORD(BL%LINE, lloc, istart, istop,3,i,FACTOR,IOUT,In)
             WRITE(IOUT,'(4A,ES16.9)') 
@@ -1998,23 +2038,16 @@ C
       IF ( Iunitlpf /= Z .OR. Iunithuf /= Z .OR. Iunitupw /= Z ) THEN 
         IF ( ISFROPT == 2.OR.ISFROPT == 4 )
      +    CALL SGWF2SFR7UHC(Iunitlpf, Iunithuf, Iunitupw)
-! set streambed K when option to use KV or KH are defined
-      if ( Iunitupw .NE. 0 .AND.
-     +     ( STRHC1KHFLAG == 1 .OR.  STRHC1KVFLAG == 1) ) then
-        DO ichk = 1, NSTRM
-          krck = ISTRM(1, ichk)
-          irck = ISTRM(2, ichk)
-          jrck = ISTRM(3, ichk)
-          IF ( IBOUND(jrck, irck, krck) == Z ) THEN
-              IF ( STRHC1KHFLAG == 1 ) THEN
-                  STRM(6,ichk) = FACTORKH*HKUPW(jrck,irck,krck)
-              ELSE IF ( STRHC1KVFLAG == 1 ) THEN   
-                  STRM(6,ichk) = FACTORKV*VKAUPW(jrck,irck,krck)
-              END IF
-          END IF
-        END DO
       END IF
       !
+      ! STRHC1KH and STRHC1KV set the streambed K from the aquifer K of the
+      ! reach cell (applied in GWF2SFR7FM with the current reach layer)
+      IF ( STRHC1KHFLAG == ONE .OR. STRHC1KVFLAG == ONE ) THEN
+        IF ( Iunitlpf == Z .AND. Iunitupw == Z )
+     +    CALL STOP_ERROR(INFILE=IN, OUTPUT=IOUT, MSG='SFR OPTIONS '//
+     +    '"STRHC1KH" AND "STRHC1KV" SET THE STREAMBED HYDRAULIC '//
+     +    'CONDUCTIVITY FROM THE AQUIFER HYDRAULIC CONDUCTIVITY, '//
+     +    'WHICH REQUIRES THE LPF OR UPW PACKAGE.')
       END IF
       !
       IF(SFRTABFILE%NTAB > 0) THEN
@@ -2071,63 +2104,90 @@ C     HYDRAULIC CONDUCTIVITY IN THE LAYER-PROPERTY FLOW PACKAGE.
 C     ******************************************************************
       USE GWFSFRMODULE, ONLY: NSTRM, ISTRM, UHC
       USE GLOBAL,       ONLY: IOUT, IBOUND, LAYHDT
-      USE GWFLPFMODULE, ONLY: LAYVKA, VKA, HK
       USE GWFHUFMODULE, ONLY: HGUVANI, NHUF, HKHUF=>HK, VKAH
-      USE GWFUPWMODULE, ONLY: LAYVKAUPW, VKAUPW, HKUPW
       USE ERROR_INTERFACE,ONLY: STOP_ERROR
       IMPLICIT NONE
 C     ------------------------------------------------------------------
 C     SPECIFICATIONS:
       INTEGER Iunitlpf, Iunithuf, Iunitupw
 C     ------------------------------------------------------------------
+C     FUNCTIONS
+C     ------------------------------------------------------------------
+      DOUBLE PRECISION SFR_AQUIFER_K
+      EXTERNAL SFR_AQUIFER_K
+C     ------------------------------------------------------------------
 C     LOCAL VARIABLES
 C     ------------------------------------------------------------------
       INTEGER ichk, irck, jrck, krck
 C     ------------------------------------------------------------------
-C
-C1------SET UHC EQUAL TO VKA IF STREAM IS IN ACTIVE CELL.
+C1------SET UHC EQUAL TO THE VERTICAL HYDRAULIC CONDUCTIVITY OF THE CELL
+C         IF STREAM IS IN ACTIVE CELL (LPF AND UPW: VKA, OR HK/VKA WHEN
+C         LAYVKA IS NOT ZERO; MF-2005 USED HK*VKA FOR THE RATIO).
       DO ichk = 1, NSTRM
         krck = ISTRM(1, ichk)
         irck = ISTRM(2, ichk)
         jrck = ISTRM(3, ichk)
-        IF ( Iunitlpf.NE.0 ) THEN
-          IF ( IBOUND(jrck, irck, krck).GT.0 ) THEN
-            IF ( LAYVKA(krck).EQ.0 ) THEN
-              UHC(ichk) = VKA(jrck, irck, krck)
-            ELSE
-              UHC(ichk) = VKA(jrck, irck, krck)*
-     +                    HK(jrck, irck, krck)
-            END IF
-            IF ( LAYHDT(krck).LE.0 ) THEN
-              WRITE(IOUT, *)'PROGRAM TERMINATED-LAYTYP MUST BE GREATER',
-     +                      ' THAN ZERO WHEN ISFROPT IS 2 OR 4.'
+        IF ( IBOUND(jrck, irck, krck) <= 0 ) CYCLE
+        IF ( Iunitlpf /= 0 .OR. Iunitupw /= 0 ) THEN
+          UHC(ichk) = SFR_AQUIFER_K(jrck, irck, krck, .TRUE.)
+          IF ( Iunitlpf /= 0 .AND. LAYHDT(krck) <= 0 ) THEN
+            WRITE(IOUT, *)'PROGRAM TERMINATED-LAYTYP MUST BE GREATER',
+     +                    ' THAN ZERO WHEN ISFROPT IS 2 OR 4.'
             CALL USTOP(' ')
-            END IF
-          END IF
-        ELSEIF ( Iunitupw.NE.0 ) THEN
-          IF ( IBOUND(jrck, irck, krck).GT.0 ) THEN
-            IF ( LAYVKAUPW(krck).EQ.0 ) THEN
-              UHC(ichk) = VKAUPW(jrck, irck, krck)
-            ELSE
-              UHC(ichk) = VKAUPW(jrck, irck, krck)*
-     +                    HKUPW(jrck, irck, krck)
-            END IF
           END IF
         ELSE
-          IF ( IBOUND(jrck, irck, krck).GT.0 ) THEN
-            IF ( HGUVANI(NHUF).LE.0.0 ) THEN
-              UHC(ichk) = VKAH(jrck, irck, krck)
-            ELSE
-              UHC(ichk) = HGUVANI(NHUF)*
-     +                              HKHUF(jrck, irck, krck)
-            END IF
+          IF ( HGUVANI(NHUF).LE.0.0 ) THEN
+            UHC(ichk) = VKAH(jrck, irck, krck)
+          ELSE
+            UHC(ichk) = HGUVANI(NHUF)*HKHUF(jrck, irck, krck)
           END IF
-        END IF 
+        END IF
       END DO
-C
 C2------RETURN.
       RETURN
       END SUBROUTINE SGWF2SFR7UHC
+C
+C-------FUNCTION SFR_AQUIFER_K
+      DOUBLE PRECISION FUNCTION SFR_AQUIFER_K(Ic, Ir, Il, Vertical)
+C     ******************************************************************
+C     HORIZONTAL (HK) OR VERTICAL HYDRAULIC CONDUCTIVITY OF A MODEL CELL
+C     FROM LPF OR UPW. WHEN LAYVKA IS NOT ZERO, VKA HOLDS THE RATIO OF
+C     HORIZONTAL TO VERTICAL HYDRAULIC CONDUCTIVITY, SO KV = HK/VKA.
+C     RETURNS ZERO WHEN NEITHER LPF NOR UPW IS ACTIVE.
+C     ******************************************************************
+      USE GLOBAL,       ONLY: IUNIT
+      USE GWFLPFMODULE, ONLY: LAYVKA, VKA, HK
+      USE GWFUPWMODULE, ONLY: LAYVKAUPW, VKAUPW, HKUPW
+      USE CONSTANTS,    ONLY: Z, DZ
+      IMPLICIT NONE
+      INTEGER, INTENT(IN):: Ic, Ir, Il
+      LOGICAL, INTENT(IN):: Vertical
+C     ------------------------------------------------------------------
+      SFR_AQUIFER_K = DZ
+      IF ( IUNIT(23) /= Z ) THEN                                        ! LPF
+        SFR_AQUIFER_K = HK(Ic, Ir, Il)
+        IF ( Vertical ) THEN
+          IF ( LAYVKA(Il) == Z ) THEN
+            SFR_AQUIFER_K = VKA(Ic, Ir, Il)
+          ELSEIF ( VKA(Ic, Ir, Il) > 0.0 ) THEN
+            SFR_AQUIFER_K = HK(Ic, Ir, Il)/VKA(Ic, Ir, Il)
+          ELSE
+            SFR_AQUIFER_K = DZ
+          END IF
+        END IF
+      ELSEIF ( IUNIT(62) /= Z ) THEN                                    ! UPW
+        SFR_AQUIFER_K = HKUPW(Ic, Ir, Il)
+        IF ( Vertical ) THEN
+          IF ( LAYVKAUPW(Il) == Z ) THEN
+            SFR_AQUIFER_K = VKAUPW(Ic, Ir, Il)
+          ELSEIF ( VKAUPW(Ic, Ir, Il) > 0.0 ) THEN
+            SFR_AQUIFER_K = HKUPW(Ic, Ir, Il)/VKAUPW(Ic, Ir, Il)
+          ELSE
+            SFR_AQUIFER_K = DZ
+          END IF
+        END IF
+      END IF
+      END FUNCTION SFR_AQUIFER_K
 C
 C-------SUBROUTINE GWF2SFR7RP
       SUBROUTINE GWF2SFR7RP(In, Iunitgwt, Iunitlak, Iunitsub, Kkper, 
@@ -3520,6 +3580,8 @@ C     -----------------------------------------------------------------
       EXTERNAL CALCUNSATFLOBOT
       DOUBLE PRECISION SMOOTH
       EXTERNAL SMOOTH
+      DOUBLE PRECISION SFR_AQUIFER_K
+      EXTERNAL SFR_AQUIFER_K
 C     -----------------------------------------------------------------
 C     ARGUMENTS
 C     -----------------------------------------------------------------
@@ -3900,6 +3962,14 @@ C23-----PARENT SECTION.  CHILD WILL REPRESENT THIS LEAKAGE
           ! h = HNEW_OLD(ic,ir,il) + HD_RELAX*(h - HNEW_OLD(ic,ir,il)) !OLD + RELAX*(NEW-OLD)
           ! !
           !END IF
+C
+C23B----STREAMBED HYDRAULIC CONDUCTIVITY FROM THE AQUIFER (OPTIONS
+C         STRHC1KH AND STRHC1KV) USING THE CURRENT REACH LAYER.
+          IF ( STRHC1KHFLAG == 1 ) THEN
+            STRM(6, l) = FACTORKH*SFR_AQUIFER_K(ic, ir, il, FALSE)
+          ELSEIF ( STRHC1KVFLAG == 1 ) THEN
+            STRM(6, l) = FACTORKV*SFR_AQUIFER_K(ic, ir, il, TRUE)
+          END IF
 C
 C24-----INITIALIZE VARIABLES.
           iprndpth = 0
