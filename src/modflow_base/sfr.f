@@ -3620,7 +3620,7 @@ C     -----------------------------------------------------------------
      +        maxwav, icalccheck, iskip, iss, lsub, numdelt, irt, 
      +        lfold, illake, lakid,lgrgrid,lgrgridprv,lgrseg
       INTEGER UP  !cjm
-      DOUBLE PRECISION:: MX_FLO, MX_STG 
+      DOUBLE PRECISION:: MX_FLO, MX_STG, qrain
       DOUBLE PRECISION:: FIVE_THIRDS, PRED, CORR
       LOGICAL:: NO_GW, FIXED_HEAD_CELL
       PARAMETER (FIVE_THIRDS=5.0D0/3.0D0)
@@ -4933,18 +4933,41 @@ crgn used width in calculations.
               IF ( icalc.EQ.2 ) THEN
                 width = XSEC(6, istsg) - XSEC(3, istsg)
               ELSE IF ( icalc.EQ.3 ) THEN
-                width = 10.0D0
+                !seb width from the power law AWDTH*Q**BWDTH (was hard-coded 10). With no
+                !    inflow the only water is the rain/ET on the channel itself, so the
+                !    midpoint flow solves Q = 0.5*(PPTSW-ETSW)*RCHLEN*AWDTH*Q**BWDTH
+                !    (precip and etstr are per unit width here); else no water, no width.
+                width = DZ
+                IF ( precip > etstr .AND. bwdth < UNO .AND.
+     +               awdth > DZ ) THEN
+                  qrain = ( 0.5D0*(precip-etstr)*awdth )
+     +                    **(UNO/(UNO-bwdth))
+                  width = awdth*qrain**bwdth
+                  depth = cdpth*qrain**fdpth
+                  IF ( depth > MX_STG ) THEN
+                    width = width*MX_STG/depth
+                    depth = MX_STG
+                  END IF
+                END IF
               ELSE IF ( icalc.EQ.4 ) THEN
                 width = 0.5D0 * ( QSTAGE(1+2*nstrpts, istsg)
      +                          + QSTAGE(3*nstrpts, istsg) )
               END IF
+              !seb stage of the empty (or rain-fed ICALC 3) channel, used by
+              !    the leakage below; was left at the stage of the previous
+              !    iteration (initially the reach depth of 1)
+              hstr = STRM(3, l) + depth
               flowc = flowin + runoff  + runof + (precip-etstr)*width
 !dep  August 26, 2009 fixed flwmpt calculation  not half of flowc
-              flwmpt = flowin + 
+              flwmpt = flowin +
      +                 0.5D0* (runoff+runof+(precip-etstr)*width)
               IF ( flowc.LT.NEARZERO ) THEN
                 flowc = 0.0D0
-                etstr = (flowin + runoff + runof)/width + precip
+                IF ( width > NEARZERO ) THEN
+                  etstr = (flowin + runoff + runof)/width + precip
+                ELSE
+                  etstr = DZ
+                END IF
                 flwmpt = 0.0D0
               END IF
             END IF
