@@ -29,7 +29,7 @@ BEGIN OPTIONS
     #   This can also be initiated by the option "AUXILIARY IFACE"
     IFACE
     #
-    # NSTRM<0 is the same as including REACHINPUT and TRANSROUTE ------------------------------------------------------------------------------------
+    # NSTRM<0 is the same as including REACHINPUT (TRANSROUTE must still be specified) --------------------------------------------------------------
     #
     # Indicates that input reads ISFROPT,
     #   which controls the format for entering reach and segment data and if unsaturated flow beneath streams is simulated.
@@ -39,6 +39,34 @@ BEGIN OPTIONS
     #   If IRTFLG > 0 then streamflow will be routed using the kinematic-wave equation.
     TRANSROUTE
     #
+    # Spatial weight of the channel storage change for kinematic-wave routing (only used when IRTFLG > 0 and only in transient stress periods).
+    #   For each reach and routing time step (DELT/NUMTIM), the routing solves the outflow from
+    #       inflow - outflow + lateral inflow - seepage = change in channel storage,
+    #   where the storage change is the reach length times the change in flow area
+    #   blended between the two ends of the reach:  WEIGHT * (outflow end)  +  (1 - WEIGHT) * (inflow end).
+    #     0.5 centers the storage on the reach midpoint. This is the MODFLOW-2005/MODFLOW-NWT scheme (also used by MF-OWHM up to version 2.3.1).
+    #         It is the most accurate when the flood wave crosses at least half a reach per routing time step,
+    #         but for slower waves (long reaches, short time steps, or low flows) it oscillates.
+    #         The outflow can then become negative; it is reset to zero, which creates water.
+    #     1.0 puts the storage at the outflow end of the reach. It never oscillates or creates water,
+    #         but it smears out (diffuses) the flood wave more than 0.5 does.
+    #   AUTO (the default) chooses the weight for each reach and routing time step as
+    #       WEIGHT = max(0.5, 1 - COURANT),   COURANT = CELERITY * DELT_ROUTE / LENGTH
+    #   where CELERITY is the speed of the flood wave, dQ/dA (change in flow over change in flow area),
+    #   evaluated at the smallest of the reach inflow and outflow of the previous routing time step and the current inflow.
+    #   The COURANT number is the fraction of the reach the wave crosses in one routing time step.
+    #   AUTO is the smallest weight that cannot oscillate, so it is 0.5 (the MODFLOW-2005 scheme)
+    #   whenever COURANT >= 0.5, and moves toward 1.0 as the wave slows down (for example, entering a dry channel).
+    #   Note that with AUTO the weight changes over time, so the channel storage is a moving blend of the
+    #   inflow- and outflow-end areas; each time step still balances, but the stored volume can differ by a few percent
+    #   from the reach length times the flow area at the outflow end while a channel fills or drains.
+    #   
+    #   WEIGHT is a number from 0 to 1;     Note 0 <= WEIGHT < 0.5 results in solver oscillation (not recommended).
+    #   WEIGHT < 0 is equivalent to setting it to AUTO.
+    #   Examples: TRANSROUTE_WEIGHT  AUTO
+    #             TRANSROUTE_WEIGHT  0.75
+    TRANSROUTE_WEIGHT  WEIGHT
+    #
     # Output Files ----------------------------------------------------------------------------------------------------------------------------------
     #   Generic_Output is a place holder for the output file location.
     #   The file name that is commented to the right is the recommended name.
@@ -46,7 +74,11 @@ BEGIN OPTIONS
     #               DBFILE   ./output/SFR_Streamflow.txt
     #
     # Print for each SFR reach, for all time steps, in a column based format, reach inflow, seepage, reach outflow, and base properties.
+    #   The columns are described in doc/Output_Header_Defintion/SFR/options.dbfile.txt
     DBFILE                  Generic_Output                  # SFR_Streamflow.txt Segment/Reach -> inflow/outflow/seepage
+    #
+    # Print for each SFR reach, for all time steps, the kinematic-wave routing information (TRANSROUTE with IRTFLG > 0).
+    PRINT_TRANSROUTE        Generic_Output                  # SFR_Routing.txt Segment/Reach -> celerity/courant/weight
     #
     #
     # Print SFR head, flows, and convergence information by iteration for every time step to a file.
@@ -131,6 +163,15 @@ BEGIN OPTIONS
     #   for calculating stream loss for all SFR stream reaches.
     LOSSFACTOR    FACTOR
     #
+    # Set the streambed hydraulic conductivity of every reach (replacing STRHC1, HCOND1, and HCOND2)
+    #   to FACTOR times the hydraulic conductivity of the model cell the reach is in.
+    #   The cell is the reach's current layer (see NO_REACH_LAYER_CHANGE). Requires LPF or UPW.
+    #   STRHC1KH uses the horizontal hydraulic conductivity (HK).
+    #   STRHC1KV uses the vertical   hydraulic conductivity (VKA, or HK/VKA when LAYVKA is not zero).
+    #   Only one of the two may be specified.
+    STRHC1KH      FACTOR
+    STRHC1KV      FACTOR
+    #
     # Apply a relaxation factor (RELAX) to aquifer head when making seepage calculation.
     #   This might help for unstable stream networks, but may be better to use HEAD_PREDICTOR_FACTOR instead.
     HEAD_RELAXATION  RELAX
@@ -157,10 +198,11 @@ BEGIN TIME SERIES INPUT
   #
   #   Option is:
   #             CONSTANT  FLOAT     -> Set ISEG FLOW to FLOAT for all time
-  #             INTERPOLATE         -> Use time step starting date to interpolate FLOW
-  #             STEP_FUNCTION       -> Use FLOW with date closest, but  does not exceed, the time step starting date (looks like a step function)
-  #             NEXT_VALUE          -> Use FLOW with date closest, that does     exceed, the time step starting date
-  #             NEAREST             -> Use FLOW with date closest to the time step starting date
+  #             INTERPOLATE         -> Use time step ending date to interpolate FLOW
+  #             STEP_FUNCTION       -> Use FLOW with date closest, but  does not exceed, the time step ending date (looks like a step function)
+  #             NEXT_VALUE          -> Use FLOW with date closest, that does     exceed, the time step ending date
+  #             NEAREST             -> Use FLOW with date closest to the time step ending date
+  #                                    (for these four, a date within 5 seconds of the time step ending date is used directly)
   #             TIME_MEAN           -> Elapsed time average flow within the time step
   #             MAX                 -> Maximum flow value  within the time step
   #             MIN                 -> Minimum flow value  within the time step
