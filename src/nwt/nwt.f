@@ -996,10 +996,10 @@ C-------STRAIGHT LINE WITH PARABOLIC SMOOTHING
         ENDIF
         isum = 0
         IF ( Ibound(ic, ir, il).NE.0 ) THEN
-          IF ( NCOL+NROW.LT.7 ) THEN  !RICH ADDED THIS seb
-          IF ( IL.GT.1 ) isum = isum + abs(Ibound(ic, ir, il-1))
-            IF ( IL.LT.NLAY ) isum = isum + abs(Ibound(ic, ir, il+1))
-          END IF
+          ! seb vertical neighbours count for every grid size (MF-NWT only counted them when NCOL+NROW < 7,
+          !     which made a cell connected only to the cell above or below inactive)
+          IF ( IL > 1 ) isum = isum + abs(Ibound(ic, ir, il-1))
+          IF ( IL < NLAY ) isum = isum + abs(Ibound(ic, ir, il+1))
           IF ( IR.GT.1 ) isum = isum + abs(Ibound(ic, ir-1, il))
           IF ( IC.GT.1 ) isum = isum + abs(Ibound(ic-1, ir, il))
           IF ( IR.LT.NROW ) isum = isum + abs(Ibound(ic, ir+1, il))
