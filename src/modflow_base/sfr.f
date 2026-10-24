@@ -7103,6 +7103,7 @@ C     LOCAL VARIABLES
 C     -------------------------------------------------------------------
       INTEGER lo, hi
       DOUBLE PRECISION xlo, xhi, ylo, yhi, zlo, zhi, frac
+      LOGICAL linear
 C     -------------------------------------------------------------------
 C
 C1------FIND THE ROWS THAT BRACKET X. ROW 0 IS THE IMPLIED ORIGIN AND
@@ -7113,14 +7114,19 @@ C         THE LAST TWO ROWS ARE USED WHEN X IS BEYOND THE TABLE.
       END DO
       lo = hi - 1
 C
-      IF ( lo.EQ.0 ) THEN
+C         LINEAR INTERPOLATION STARTS FROM ROW 0 OR A ZERO-FLOW ROW
+C         (FLOW IS THE COLUMN AT OFFSET 0). ROW 0 IS NOT STORED, SO IT
+C         IS TESTED SEPARATELY (FORTRAN DOES NOT SHORT-CIRCUIT .OR.).
+      IF ( lo == 0 ) THEN
         xlo = DZ
         ylo = DZ
         zlo = DZ
+        linear = .TRUE.
       ELSE
         xlo = QSTAGE(Ix+lo, Istsg)
         ylo = QSTAGE(Iy+lo, Istsg)
         zlo = QSTAGE(Iz+lo, Istsg)
+        linear = QSTAGE(lo, Istsg) < NEARZERO_30
       END IF
       xhi = QSTAGE(Ix+hi, Istsg)
       yhi = QSTAGE(Iy+hi, Istsg)
@@ -7128,7 +7134,7 @@ C
 C
 C2------LINEAR INTERPOLATION FROM THE IMPLIED ORIGIN OR FROM A
 C         BOTTOM-WIDTH ROW (ZERO FLOW) TO THE NEXT ROW.
-      IF ( lo.EQ.0 .OR. QSTAGE(lo, Istsg).LT.NEARZERO_30 ) THEN
+      IF ( linear ) THEN
         frac = (X - xlo) / (xhi - xlo)
         Y = ylo + frac*(yhi - ylo)
         Z = zlo + frac*(zhi - zlo)
