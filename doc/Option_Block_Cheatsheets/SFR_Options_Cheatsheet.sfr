@@ -178,6 +178,9 @@ BEGIN OPTIONS
     #
     # MF-NWT style TABFILE. NUMTAB is the number of file unit numbers that are read.
     # MAXROW is the size of the largest tabfile (most rows/lines in the file).
+    # Each table row (TIME FLOW) holds from its time to the next row's time; the flow applied to a
+    #   time step is the time-weighted average over the step. The first value holds before the first
+    #   time and the last value holds to the end of the simulation.
     # Recommended to use either Time Series Input Block (see below)
     #   Or MF-OWHM style TABFILE with keyword specified as TABFILE outside of options block.
     TABFILES  NUMTAB MAXROW
