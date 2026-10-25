@@ -3704,7 +3704,8 @@ C     -----------------------------------------------------------------
      +                 depth2, dlkstr, deps, et1, et2, fhstr1, fhstr2,
      +                 flobot, flobot1, flobot2, flowc, flowin, flowot,
      +                 flwmdpta, flwmdptb, flwmdptc, flwmdptd, flwmdpt1,
-     +                 flwmdpt2, flwmpt, h, hstr, pp1, pp2, sbot, slope,
+     +                 flwmdpt2, flwmpt, flowc0, h, hstr, pp1, pp2,
+     +                 sbot, slope,
      +                 strleak, strtop, trbflw, upflw, wetperm,
      +                 wetperma, wetpermb, wetpermc, wetpermd, wetperm1,
      +                 wetperm2, wetpermp, wetpermx, width, widtha, 
@@ -3730,7 +3731,7 @@ C     -----------------------------------------------------------------
       INTEGER UP  !cjm
       DOUBLE PRECISION:: MX_FLO, MX_STG, qrain, rtcel, rtpsi, rterr
       DOUBLE PRECISION:: FIVE_THIRDS, PRED, CORR
-      LOGICAL:: NO_GW, FIXED_HEAD_CELL
+      LOGICAL:: NO_GW, FIXED_HEAD_CELL, upbnd
       PARAMETER (FIVE_THIRDS=5.0D0/3.0D0)
 C     -----------------------------------------------------------------
 C
@@ -4203,10 +4204,17 @@ Crgn 10/23/06 initialize flowc
             END IF
             cstr = (avhc*width*strlen)/sbdthk
           ELSE IF ( icalc.GE.2 ) THEN
-            flwmpt = flowin + 0.5*(runof+runoff)
+            flwmpt = flowin + 0.5D0*(runof+runoff)
             flowc = flowin + runof + runoff
             IF ( flwmpt.LT.NEARZERO ) flwmpt = 0.0D0
             IF (  flowc.LT.NEARZERO ) flowc = 0.0D0
+            !seb the Newton loop below keeps flwmpt as this midpoint
+            !    flow before rain, ET and leakage, and flowc0 as the
+            !    water in the channel before rain and ET; both depend on
+            !    the width, so they are added where the width is known.
+            !    (flwmpt used to accumulate half the rain/ET term on
+            !    every iteration.)
+            flowc0 = flowc
 C
 C29-----CALCULATE AN INITIAL ESTIMATE OF FLOW IN CHANNEL.
             IF ( flwmpt.LT.NEARZERO ) THEN
@@ -4352,11 +4360,12 @@ C         EQUAL TO 2.
                 flobot2 = ((avhc*wetperm2*strlen/sbdthk)
      +                    *(strtop+enpt2-sbot))
               END IF
-              flwmpt2 = flwmpt
-              IF ( flobot2.GE.flowc+flwpet2 ) THEN
-                flobot2 = flowc + flwpet2
-                flwmpt2 = 0.5D0*(flowc+flwpet2)
+              flwmpt2 = flwmpt + 0.5D0*flwpet2
+              IF ( flobot2 >= flowc0+flwpet2 ) THEN
+                flobot2 = flowc0 + flwpet2
+                flwmpt2 = flwmpt2 - 0.5D0*flobot2
               END IF
+              IF ( flwmpt2 < NEARZERO ) flwmpt2 = 0.0D0
               flwen2 = flwmpt2
               IF ( icalc.EQ.2 ) THEN
                 CALL GWF2SFR7DPTH(flwen1, slope, istsg, nreach, 
@@ -4427,6 +4436,7 @@ C         AND STREAMBED LEAKAGE WHEN ICALC IS GREATER THAN 0.
             fhstr1 = 0.0D0
             fhstr2 = 0.0D0
             flobotp = 0.0D0
+            upbnd = .FALSE.
             DO WHILE ( iflg.EQ.1 )
               itot = itot + 1
               ibflg = 0
@@ -4532,7 +4542,7 @@ C44-----CALCULATE NEWTON VARIABLES FOR ICALC EQUAL TO 3.
                     width1 = 0.0D0
                     wetperm1 = 1.0D0
                   END IF
-                  IF ( flwmpt2.GT.NEARZERO ) THEN
+                  IF ( flwmdpt2 > NEARZERO ) THEN
                     width2 = awdth*(flwmdpt2**bwdth)
                     wetperm2 = width2
                   ELSE
@@ -4631,22 +4641,20 @@ C47-----CALCULATE FLOBOT1 AND FLOBOT2 WHEN ICALC GREATER THAN 1.
 C
 C48-----DETERMINE IF LEAKAGE LIMITED BY FLOW IN CHANNEL.
                 IF ( width1.GT.NEARZERO ) THEN
-Cdep revised flwpet1, wrong placement of parenthesis.
-                  flwpet1 = precip*width1+(dlpp1*dlh)
-     +                      - etstr*width1+(dlet1*dlh)
+                  flwpet1 = pp1 - et1
                 ELSE
                   flwpet1 = (precip-etstr)
                   IF ( flwpet1.LT.NEARZERO ) flwpet1 = 0.0D0
                 END IF
 C
 C49-----USE BISECTION WHEN LEAKAGE IS LIMITED BY FLOW IN CHANNEL.
-                IF ( flobot1.GT.flowc+flwpet1 ) THEN
+                IF ( flobot1 > flowc0+flwpet1 ) THEN
                   depthp = (enpt1+enpt2)*0.5D0
                   ibflg = 1
                   IF ( icalc.EQ.2 ) THEN
                     CALL GWF2SFR7FLW(depthp, istsg, roughch,
      +                               roughbnk, slope, wetpermp, 
-     +                               flwx, widtha)
+     +                               flwx, widthp)
                   ELSE IF ( icalc.EQ.3 ) THEN
                     flwx = (depthp/cdpth)**(1.0/fdpth)
                     IF ( flwx.GT.NEARZERO ) THEN
@@ -4672,10 +4680,15 @@ C49-----USE BISECTION WHEN LEAKAGE IS LIMITED BY FLOW IN CHANNEL.
                   ELSE
                     flobotp = cstr1*((depthp+strtop)-sbot)
                   END IF
-                  IF ( flobotp.GT.flowc+flwpet1 ) flobotp = flowc
-     +                                                      + flwpet1
-                  flwmpt = flwmpt + 0.5D0*flwpet1
-                  flwx = flwmpt - 0.5D0*flobotp
+                  IF ( widthp > NEARZERO ) THEN
+                    flwpetp = (precip-etstr)*widthp
+                  ELSE
+                    flwpetp = (precip-etstr)
+                    IF ( flwpetp < NEARZERO ) flwpetp = 0.0D0
+                  END IF
+                  IF ( flobotp > flowc0+flwpetp ) flobotp = flowc0
+     +                                                      + flwpetp
+                  flwx = flwmpt + 0.5D0*(flwpetp-flobotp)
                   IF ( flwx.LT.NEARZERO ) THEN
                     depthx = 0.0D0
                     widthx = 0.0D0
@@ -4698,8 +4711,8 @@ Crgn changed widthp to widthx 12/5/06
 C
 C50-----CALCULATE LEAKAGE FROM NEWTON METHOD WHEN NOT LIMITED BY FLOW.
                 ELSE
-                  fhstr1 = (flwmpt-0.5D0*(pp1-et1+flobot1)) - (flwmdpt1)
-                  fhstr2 = (flwmpt-0.5D0*(pp2-et2+flobot2)) - (flwmdpt2)
+                  fhstr1 = (flwmpt+0.5D0*(pp1-et1-flobot1)) - (flwmdpt1)
+                  fhstr2 = (flwmpt+0.5D0*(pp2-et2-flobot2)) - (flwmdpt2)
                 END IF
                 IF ( depthp.LE.dbleak*0.000001D0 ) THEN
                   depthx = depthp
@@ -4816,12 +4829,11 @@ C         FLOBOTP.
                       flobotp = ((avhc*wetpermp*strlen/sbdthk)
      +                          *(strtop+depthp-sbot))
                     END IF
-                    flwmpt = flwmpt + 0.5D0*flwpetp
-                    flwx = flwmpt - 0.5D0*flobotp
+                    flwx = flwmpt + 0.5D0*(flwpetp-flobotp)
 C
 C54-----USE BISECTION WHEN LEAKAGE LIMITED BY FLOW FOR ICALC GREATER 
 C         OR EQUAL TO 2.
-                    IF ( flobotp.GT.flowc+flwpetp ) THEN
+                    IF ( flobotp > flowc0+flwpetp ) THEN
                       depthp = (enpt1+enpt2)*0.5D0
                       ibflg = 1
                       IF ( icalc.EQ.2 ) THEN
@@ -4860,10 +4872,9 @@ C         OR EQUAL TO 2.
                         flobotp = ((avhc*wetpermp*strlen/sbdthk)
      +                            *(strtop+depthp-sbot))
                       END IF
-                      flwmpt = flwmpt + 0.5D0*flwpetp
-                      flwx = flwmpt - 0.5D0*flobotp
-                      IF ( flobotp.GE.flowc+flwpetp ) flobotp = flowc + 
-     +                                                          flwpetp
+                      IF ( flobotp >= flowc0+flwpetp ) flobotp = flowc0
+     +                                                        + flwpetp
+                      flwx = flwmpt + 0.5D0*(flwpetp-flobotp)
                     END IF
 C
 C55-----ESTIMATE DEPTHX WHEN ICALC IS GREATER THAN OR EQUAL TO 2.
@@ -4893,18 +4904,25 @@ C56-----COMPUTE DIFFERENCE BETWEEN DEPTHP AND DEPTHX.
               fp = depthp - depthx
               IF ( ibflg.EQ.1 ) dlh = fp
 C
-C57-----CHANGE ENDPOINTS IF BISECTION HAS BEEN USED.
+C57-----CHANGE ENDPOINTS IF BISECTION HAS BEEN USED. FP IS NEGATIVE
+C         BELOW THE ROOT AND POSITIVE ABOVE IT, SO A POSITIVE FP
+C         CONFIRMS THE UPPER END OF THE BRACKET; UNTIL ONE IS FOUND THE
+C         UPPER END IS ONLY THE ESTIMATE OF C31-C39, WHICH CAN LIE BELOW
+C         THE ROOT (RAIN OR GROUND-WATER INFLOW ADD TO THE MIDPOINT
+C         FLOW), AND IS WIDENED INSTEAD OF COLLAPSED ONTO.
               IF ( ibflg.EQ.1 ) THEN
-                IF ( f1*fp.LT.0.0D0 ) THEN
+                IF ( fp > 0.0D0 ) THEN
 C
-C58-----ROOT IS BETWEEN F1 AND FP.
+C58-----ROOT IS BELOW DEPTHP.
                   enpt2 = depthp
                   f2 = fp
+                  upbnd = .TRUE.
                 ELSE
 C
-C59-----ROOT IS BETWEEN FP AND F2.
+C59-----ROOT IS ABOVE DEPTHP.
                   enpt1 = depthp
                   f1 = fp
+                  IF ( .NOT. upbnd ) enpt2 = enpt2 + (enpt2 - depthp)
 C
 C60-----CALCULATE ERROR.
                 END IF
