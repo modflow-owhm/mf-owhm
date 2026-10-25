@@ -3698,24 +3698,19 @@ C     -----------------------------------------------------------------
 C     -----------------------------------------------------------------
 C     LOCAL VARIABLES
 C     -----------------------------------------------------------------
-      DOUBLE PRECISION cstr, cstr1, cstr2, dbleak, dlet1, dlet2, dlfh, 
-     +                 dlh, dlpp1, dlpp2, dlwp1, dlwp2, depth, depthx, 
-     +                 depthp, deptha, depthb, depthc, depthd, depth1, 
-     +                 depth2, dlkstr, deps, et1, et2, fhstr1, fhstr2,
-     +                 flobot, flobot1, flobot2, flowc, flowin, flowot,
-     +                 flwmdpta, flwmdptb, flwmdptc, flwmdptd, flwmdpt1,
+      DOUBLE PRECISION cstr, cstr1, cstr2, dbleak, dlfh, dlh, depth,
+     +                 depthx, depthp, depth1, depth2, dlkstr, deps,
+     +                 et1, et2, fhstr1, fhstr2, flobot, flobot1,
+     +                 flobot2, flowc, flowin, flowot, flwmdpt1,
      +                 flwmdpt2, flwmpt, flowc0, h, hstr, pp1, pp2,
-     +                 sbot, slope,
-     +                 strleak, strtop, trbflw, upflw, wetperm,
-     +                 wetperma, wetpermb, wetpermc, wetpermd, wetperm1,
-     +                 wetperm2, wetpermp, wetpermx, width, widtha, 
-     +                 widthb, widthc, widthd, width1, width2, widthp, 
-     +                 widthx, bwdth, cdpth, fdpth, awdth, f1, f2, fp, 
-     +                 enpt1, enpt2, flwen1, flwen2, flwp, flobotp, 
-     +                 flobotold, flwpetp, flwx, flwmpt2, flwest, 
-     +                 flwpet1, flwpet2, err, dlhold, precip, etstr, 
-     +                 runof, runoff, qa, qb, qc, qd, hstrave, fbot,
-     +                 depthave, WT0, WT1
+     +                 sbot, slope, strleak, strtop, trbflw, upflw,
+     +                 wetperm, wetperm1, wetperm2, wetpermp, wetpermx,
+     +                 width, width1, width2, widthp, widthx, bwdth,
+     +                 cdpth, fdpth, awdth, f1, f2, fp, enpt1, enpt2,
+     +                 flwen1, flwen2, flwp, flobotp, flobotold,
+     +                 flwpetp, flwx, flwmpt2, flwest, flwpet1, flwpet2,
+     +                 err, dlhold, precip, etstr, runof, runoff, qa,
+     +                 qb, qc, qd, hstrave, fbot, depthave, WT0, WT1
       DOUBLE PRECISION fbcheck, hld, totflwt, sbdthk, thetas, epsilon, 
      +                 thr, thet1, dvrsn, fact,  
      +                 depthtr, dwdh, wetpermsmooth,cstrsmooth
@@ -4500,27 +4495,7 @@ C42-----USE BISECTION WHEN FLOBOT1 IS LIMITED BY FLOW IN CHANNEL.
 C
 C43-----CALCULATE NEWTON VARIABLES FOR ICALC EQUAL TO 2.
                 IF ( icalc.EQ.2 ) THEN
-                  deptha = depth1 - (deps*depth1)
-                  IF ( deptha.LT.NEARZERO ) deptha = depth1
-                  depthb = depth1 + (deps*depth1)
-                  IF ( depthb.LT.NEARZERO ) depthb = deps
                   depth2 = depth1 + (2.D0*deps)
-                  depthc = depth2 - (deps*depth2)
-                  IF ( depthc.LT.NEARZERO ) depthc = depth2
-                  depthd = depth2 + (deps*depth2)
-                  IF ( depthd.LT.NEARZERO ) depthd = deps
-                  CALL GWF2SFR7FLW(deptha, istsg, roughch, 
-     +                             roughbnk, slope, wetperma, 
-     +                             flwmdpta, widtha)
-                  CALL GWF2SFR7FLW(depthb, istsg, roughch, 
-     +                             roughbnk, slope, wetpermb, 
-     +                             flwmdptb, widthb)
-                  CALL GWF2SFR7FLW(depthc, istsg, roughch, 
-     +                             roughbnk, slope, wetpermc, 
-     +                             flwmdptc, widthc)
-                  CALL GWF2SFR7FLW(depthd, istsg, roughch, 
-     +                             roughbnk, slope, wetpermd, 
-     +                             flwmdptd, widthd)
                   CALL GWF2SFR7FLW(depth1, istsg, roughch, 
      +                             roughbnk, slope, wetperm1, 
      +                             flwmdpt1, width1)
@@ -4546,79 +4521,29 @@ C44-----CALCULATE NEWTON VARIABLES FOR ICALC EQUAL TO 3.
                     width2 = 0.0D0
                     wetperm2 = 1.0D0
                   END IF
-                  deptha = depth1 - (deps*depth1)
-                  IF ( deptha.LT.NEARZERO ) deptha = depth1
-                  depthb = depth1 + (deps*depth1)
-                  IF ( depthb.LT.NEARZERO ) depthb = deps
                   depth2 = depth1 + (2*deps)
-                  depthc = depth2 - (deps*depth2)
-                  IF ( depthc.LT.NEARZERO ) depthc = depth2
-                  depthd = depth2 + (deps*depth2)
-                  IF ( depthd.LT.NEARZERO ) depthd = deps
-                  flwmdpta = (deptha/cdpth)**(1.0/fdpth)
-                  flwmdptb = (depthb/cdpth)**(1.0/fdpth)
-                  flwmdptc = (depthc/cdpth)**(1.0/fdpth)
-                  flwmdptd = (depthd/cdpth)**(1.0/fdpth)
-                  widtha = awdth*(flwmdpta**bwdth)
-                  widthb = awdth*(flwmdptb**bwdth)
-                  widthc = awdth*(flwmdptc**bwdth)
-                  widthd = awdth*(flwmdptd**bwdth)
-                  wetperma = widtha
-                  wetpermb = widthb
-                  wetpermc = widthc
-                  wetpermd = widthd
 C
 C45-----CALCULATE NEWTON VARIABLES FOR ICALC EQUAL TO 4.
                 ELSE IF ( icalc.EQ.4 ) THEN
-                  deptha = depth1 - (deps*depth1)
-                  IF ( deptha.LT.NEARZERO ) deptha = depth1
-                  depthb = depth1 + (deps*depth1)
-                  IF ( depthb.LT.NEARZERO ) depthb = deps
-                  depthc = depth2 - (deps*depth2)
-                  IF ( depthc.LT.NEARZERO ) depthc = depth2
-                  depthd = depth2 + (deps*depth2)
-                  IF ( depthd.LT.NEARZERO ) depthd = deps
-                  CALL GWF2SFR7TBF(flwmdpta, deptha, widtha, 
-     +                         nstrpts, nreach, istsg)
-                  CALL GWF2SFR7TBF(flwmdptb, depthb, widthb, 
-     +                         nstrpts, nreach, istsg)
-                  CALL GWF2SFR7TBF(flwmdptc, depthc, widthc, 
-     +                         nstrpts, nreach, istsg)
-                  CALL GWF2SFR7TBF(flwmdptd, depthd, widthd, 
-     +                         nstrpts, nreach, istsg)
                   CALL GWF2SFR7TBF(flwmdpt1, depth1, width1, 
      +                         nstrpts, nreach, istsg)
                   CALL GWF2SFR7TBF(flwmdpt2, depth2, width2, 
      +                         nstrpts, nreach, istsg)
-                  wetperma = widtha
-                  wetpermb = widthb
-                  wetpermc = widthc
-                  wetpermd = widthd
                   wetperm1 = width1
                   wetperm2 = width2
                 END IF
 C
-C46-----CALCULATE DERIVATIVES FOR DEPTH DEPENDENT VARIABLES FOR ICALC
-C         GREATER THAN 1.
-                dlpp1 = DIV(precip*(widtha-widthb), deptha-depthb)
-                dlpp2 = DIV(precip*(widthc-widthd), depthc-depthd)
-                dlet1 = DIV(etstr*(widtha-widthb) , deptha-depthb)
-                dlet2 = DIV(etstr*(widthc-widthd) , depthc-depthd)
-                dlwp1 = DIV(wetperma-wetpermb     , deptha-depthb)
-                dlwp2 = DIV(wetpermc-wetpermd     , depthc-depthd)
-                !dlpp1 = (precip*(widtha-widthb))/(deptha-depthb)
-                !dlpp2 = (precip*(widthc-widthd))/(depthc-depthd)
-                !dlet1 = (etstr*(widtha-widthb))/(deptha-depthb)
-                !dlet2 = (etstr*(widthc-widthd))/(depthc-depthd)
-                !dlwp1 = (wetperma-wetpermb)/(deptha-depthb)
-                !dlwp2 = (wetpermc-wetpermd)/(depthc-depthd)
-Cdep revised pp1,pp2,et1,and et2, wrong placement of parenthesis.
-                pp1 = precip*(width1)+dlpp1*dlh
-                pp2 = precip*(width2)+dlpp2*dlh
-                et1 = etstr*(width1)+dlet1*dlh
-                et2 = etstr*(width2)+dlet2*dlh
-                cstr1 = ((wetperm1+dlwp1*dlh)*strleak)/sbdthk
-                cstr2 = ((wetperm2+dlwp2*dlh)*strleak)/sbdthk
+C46-----RAIN, ET AND STREAMBED CONDUCTANCE AT THE TWO DEPTHS; THE
+C         SECANT BETWEEN THEM IS THE NEWTON DERIVATIVE. (THEY USED TO
+C         BE EXTRAPOLATED BY THE PREVIOUS NEWTON STEP WITH DERIVATIVES
+C         FROM FOUR MORE DEPTHS, WHICH MADE THE RESIDUAL INCONSISTENT
+C         BEFORE CONVERGENCE AND COST FOUR EXTRA CHANNEL EVALUATIONS.)
+                pp1 = precip*width1
+                pp2 = precip*width2
+                et1 = etstr*width1
+                et2 = etstr*width2
+                cstr1 = (wetperm1*strleak)/sbdthk
+                cstr2 = (wetperm2*strleak)/sbdthk
 C
 C47-----CALCULATE FLOBOT1 AND FLOBOT2 WHEN ICALC GREATER THAN 1.
                 IF ( h.GE.sbot ) THEN
