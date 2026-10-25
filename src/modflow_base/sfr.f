@@ -10451,8 +10451,8 @@ C     ------------------------------------------------------------------
       DOUBLE PRECISION wetperm, depth, qd2, qd3, f11, f12, f1, f2, ad2
       DOUBLE PRECISION MX_STG, Cel, Psi, Rerr
       DOUBLE PRECISION w1psi
-      DOUBLE PRECISION SFR_CELERITY
-      EXTERNAL SFR_CELERITY
+      DOUBLE PRECISION SFR_CELERITY, CALC_XSA
+      EXTERNAL SFR_CELERITY, CALC_XSA
 C     ------------------------------------------------------------------
       iprndpth = 0
       maxiter = 200
@@ -10614,7 +10614,9 @@ C8------EXIT LOOP IF delq LESS THAN TOLERANCE.
         END IF
           i = i + 1
       END DO CONVERGE
-      stor = Strlen*(psi*(ad2-ab)+w1psi*(ac-aa))/Deltinc
+      ad1 = CALC_XSA(Qd, Qcnst, Cdpth, Awdth, Fdpth, Bwdth, Icalc,
+     +               Slope, Istsg, Nreach, Itstr, Width, depth, MX_STG)
+      stor = Strlen*(psi*(ad1-ab)+w1psi*(ac-aa))/Deltinc
 !      Chanstor = Qc - Qd - stor - FLOBOT
       Chanstor = stor
       Rerr = f1*Strlen          ! f1 IS THE RESIDUAL AT THE FINAL Qd WHEN CLIPPED
