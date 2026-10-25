@@ -3726,7 +3726,7 @@ C     -----------------------------------------------------------------
       INTEGER i, ibflg, ic, icalc, idivseg, iflg, iic, iic2, iic3, iic4,
      +        il, iprior, iprndpth, iprvsg, ir, istsg, itot,itrib,
      +        itstr, iwidthcheck, kerp, kss, l, lk, ll, nstrpts, nreach,
-     +        maxwav, icalccheck, iskip, iss, lsub, numdelt, irt, 
+     +        icalccheck, iskip, iss, lsub, numdelt, irt, 
      +        lfold, illake, lakid,lgrgrid,lgrgridprv,lgrseg
       INTEGER UP  !cjm
       DOUBLE PRECISION:: MX_FLO, MX_STG, qrain, rtcel, rtpsi, rterr
@@ -3750,7 +3750,6 @@ C
 C
 C1------RETURN IF NO STREAMS (NSTRM<=0).
       IF ( NSTRM.LE.0 ) RETURN
-      maxwav = NSFRSETS*NSTRAIL
 C
 C2------THERE ARE STREAMS.  INITIALIZE SEGMENT INFLOWS AND OUTFLOWS
 C         TO ZERO FOR LAKE PACKAGE.
@@ -4302,8 +4301,7 @@ C33-----ESTIMATE DEPTH FOR ENDPOINTS WHEN ICALC IS 1.
               ELSE IF ( icalccheck.EQ.1 ) THEN
                 flobot2 = CALCUNSATFLOBOT(enpt2, avhc, fks, width,
      +                                    sbdthk, areamax, strlen,
-     +                                    fbcheck, NWAVST(:,l), maxwav,
-     +                                    FOLDFLBT(lfold))
+     +                                    fbcheck, FOLDFLBT(lfold))
               ELSE
                 flobot2 = (cstr*(strtop+enpt2-sbot))
               END IF
@@ -4352,10 +4350,9 @@ C         EQUAL TO 2.
               IF ( h.GT.sbot ) THEN
                 flobot2 = ((avhc*wetperm2*strlen/sbdthk)*(strtop-h))
               ELSE IF ( icalccheck.EQ.1 ) THEN
-                flobot2 = CALCUNSATFLOBOT(enpt2, avhc, fks, wetperm2, 
-     +                                    sbdthk, areamax, strlen, 
-     +                                    fbcheck, NWAVST(:,l), maxwav,
-     +                                    FOLDFLBT(lfold))
+                flobot2 = CALCUNSATFLOBOT(enpt2, avhc, fks, wetperm2,
+     +                                    sbdthk, areamax, strlen,
+     +                                    fbcheck, FOLDFLBT(lfold))
               ELSE
                 flobot2 = ((avhc*wetperm2*strlen/sbdthk)
      +                    *(strtop+enpt2-sbot))
@@ -4462,12 +4459,12 @@ Cdep  Corrected depth1+dlh and depth2+dlh to be depth1 and depth2.
                    flobot2 = smooth(depth2,dwdh)*
      +                       cstr*((depth2+strtop)-h)
                 ELSE IF ( icalccheck.EQ.1 ) THEN
-                  flobot1 = CALCUNSATFLOBOT(depth1, avhc, fks,
-     +                        width1, sbdthk, areamax, strlen, fbcheck,
-     +                        NWAVST(:,l), maxwav, FOLDFLBT(lfold))
-                  flobot2 = CALCUNSATFLOBOT(depth2, avhc, fks,
-     +                        width2, sbdthk, areamax, strlen, fbcheck,
-     +                        NWAVST(:,l), maxwav, FOLDFLBT(lfold))
+                  flobot1 = CALCUNSATFLOBOT(depth1, avhc, fks, width1,
+     +                                      sbdthk, areamax, strlen,
+     +                                      fbcheck, FOLDFLBT(lfold))
+                  flobot2 = CALCUNSATFLOBOT(depth2, avhc, fks, width2,
+     +                                      sbdthk, areamax, strlen,
+     +                                      fbcheck, FOLDFLBT(lfold))
                 ELSE
                   flobot1 = smooth(depth1,dwdh)*
      +                      cstr*((depth1+strtop)-sbot)
@@ -4628,12 +4625,12 @@ C47-----CALCULATE FLOBOT1 AND FLOBOT2 WHEN ICALC GREATER THAN 1.
                   flobot1 = cstr1*((depth1+strtop)-h)
                   flobot2 = cstr2*((depth2+strtop)-h)
                 ELSE IF ( icalccheck.EQ.1 ) THEN
-                  flobot1 = CALCUNSATFLOBOT(depth1, avhc, fks,
-     +                        wetperm1, sbdthk, areamax, strlen,
-     +               fbcheck, NWAVST(:,l), maxwav, FOLDFLBT(lfold))
-                  flobot2 = CALCUNSATFLOBOT(depth2, avhc, fks,
-     +                        wetperm2, sbdthk, areamax, strlen,
-     +                fbcheck, NWAVST(:,l), maxwav, FOLDFLBT(lfold))
+                  flobot1 = CALCUNSATFLOBOT(depth1, avhc, fks, wetperm1,
+     +                                      sbdthk, areamax, strlen,
+     +                                      fbcheck, FOLDFLBT(lfold))
+                  flobot2 = CALCUNSATFLOBOT(depth2, avhc, fks, wetperm2,
+     +                                      sbdthk, areamax, strlen,
+     +                                      fbcheck, FOLDFLBT(lfold))
                 ELSE
                   flobot1 = cstr1*((depth1+strtop)-sbot)
                   flobot2 = cstr2*((depth2+strtop)-sbot)
@@ -4674,9 +4671,9 @@ C49-----USE BISECTION WHEN LEAKAGE IS LIMITED BY FLOW IN CHANNEL.
                     flobotp = cstr1*((depthp+strtop)-h)
                   ELSE IF ( icalccheck.EQ.1 ) THEN
                     flobotp = CALCUNSATFLOBOT(depthp, avhc, fks,
-     +                          wetpermp, sbdthk, areamax, strlen, 
-     +                          fbcheck, NWAVST(:,l), maxwav,
-     +                          FOLDFLBT(lfold))
+     +                                        wetpermp, sbdthk, areamax,
+     +                                        strlen, fbcheck,
+     +                                        FOLDFLBT(lfold))
                   ELSE
                     flobotp = cstr1*((depthp+strtop)-sbot)
                   END IF
@@ -4776,10 +4773,10 @@ C         FLOBOTP.
                     ELSE IF ( icalccheck.EQ.1 ) THEN
 ! RGN smooth width 10/4/11
                       widthp = smooth(depthp,dwdh)*width
-                      flobotp = CALCUNSATFLOBOT(depthp, avhc, fks, 
-     +                            widthp, sbdthk, areamax, strlen,
-     +                            fbcheck, NWAVST(:,l), maxwav, 
-     +                            FOLDFLBT(lfold))
+                      flobotp = CALCUNSATFLOBOT(depthp, avhc, fks,
+     +                                          widthp, sbdthk, areamax,
+     +                                          strlen, fbcheck,
+     +                                          FOLDFLBT(lfold))
                     ELSE
                       flobotp = (smooth(depthp,dwdh)*cstr*
      +                          (strtop+depthp-sbot))
@@ -4822,9 +4819,10 @@ C         FLOBOTP.
      +                          *(strtop+depthp-h))
                     ELSE IF ( icalccheck.EQ.1 ) THEN
                       flobotp = CALCUNSATFLOBOT(depthp, avhc, fks,
-     +                            wetpermp, sbdthk, areamax, strlen,
-     +                            fbcheck, NWAVST(:,l), maxwav,
-     +                            FOLDFLBT(lfold))
+     +                                          wetpermp, sbdthk,
+     +                                          areamax, strlen,
+     +                                          fbcheck,
+     +                                          FOLDFLBT(lfold))
                     ELSE
                       flobotp = ((avhc*wetpermp*strlen/sbdthk)
      +                          *(strtop+depthp-sbot))
@@ -4864,10 +4862,11 @@ C         OR EQUAL TO 2.
                         flobotp = ((avhc*wetpermp*strlen/sbdthk)
      +                            *(strtop+depthp-h))
                       ELSE IF ( icalccheck.EQ.1 ) THEN
-                        flobotp = CALCUNSATFLOBOT(depthp, avhc, fks, 
-     +                              wetpermp, sbdthk, areamax, strlen, 
-     +                              fbcheck, NWAVST(:,l), maxwav,
-     +                              FOLDFLBT(lfold))
+                        flobotp = CALCUNSATFLOBOT(depthp, avhc, fks,
+     +                                            wetpermp, sbdthk,
+     +                                            areamax, strlen,
+     +                                            fbcheck,
+     +                                            FOLDFLBT(lfold))
                       ELSE
                         flobotp = ((avhc*wetpermp*strlen/sbdthk)
      +                            *(strtop+depthp-sbot))
@@ -5148,8 +5147,8 @@ crgn added next 4 lines.
             IF ( h.LT.sbot ) THEN
               wetpermsmooth = wetperm*smooth(depth,dwdh)
               flobot = CALCUNSATFLOBOT(depth, avhc, fks, wetpermsmooth,
-     +                 sbdthk, areamax, strlen, fbcheck, NWAVST(:,l),
-     +                 maxwav, FOLDFLBT(lfold))
+     +                                 sbdthk, areamax, strlen, fbcheck,
+     +                                 FOLDFLBT(lfold))
             ELSE
               DO i = 1, ISUZN
                 UZSEEP(i, l) = 0.0D0
@@ -5455,7 +5454,7 @@ C     ------------------------------------------------------------------
       INTEGER naux
       INTEGER i, ibd, iblst, ibdlbl, ibdst, ibstlb, ic, icalc, idivseg, 
      +        il, iout1, iout2, iprior, iprvsg, ir, istsg, itrib,
-     +        iwidthcheck, kss, l, lk, ll, nreach, numdelt, maxwav,
+     +        iwidthcheck, kss, l, lk, ll, nreach, numdelt,
      +        icalccheck, iss, lsub, irt, itstr, imassroute, lfold,
      +        lgrgrid, lgrgridprv, lgrseg 
       INTEGER illake, LAKID, UP
@@ -5534,7 +5533,6 @@ C         ACCUMULATORS (RATIN AND RATOUT).
       SFRUZDELSTOR = 0.0
       SFRUZRECH = 0.0
       FNETSEEP = 0.0
-      maxwav = NSFRSETS*NSTRAIL
       HAS_LMT = IUNIT(49).NE.0
       NINTOT = 0  !IF(IUNIT(49).NE.0) -> LMT
       IF ( IUZT.EQ.1) THEN
@@ -6038,8 +6036,8 @@ C         FROM THE REACH; FMP REPORTS IT WITH PRINT SFR_DELIVERY_MISMATCH.
           IF ( icalccheck.EQ.1 ) THEN                            
             IF ( h.LT.sbot .AND. .NOT. NO_GW) THEN        !seb ADDED  .AND. IBOUND(ic, ir, ilay).NE.0 to ensure that only active cells get UZ flow or set flobot=0
               flobot = CALCUNSATFLOBOT(depth, avhc, fks, wetperm,
-     +                     sbdthk, areamax, strlen, fbcheck,
-     +                     NWAVST(:,l), maxwav, FOLDFLBT(lfold))
+     +                                 sbdthk, areamax, strlen, fbcheck,
+     +                                 FOLDFLBT(lfold))
             END IF
           END IF
           IF ( flobot.GE.flow ) flobot = flow
@@ -8494,9 +8492,15 @@ C
 C
 C-------FUNCTION CALCUNSATFLOBOT written by RGN, MAY 24, 2004
       REAL FUNCTION CALCUNSATFLOBOT(Depth, Avhc, Fks, Wetperm, Sbdthk, 
-     +                              Areamax, Strlen, Fbcheck, Nwavst, 
-     +                              Maxwav, Foldflbt)
-      USE GWFSFRMODULE, ONLY: NSTRAIL, ISUZN, NEARZERO
+     +                              Areamax, Strlen, Fbcheck, Foldflbt)
+C     STREAMBED SEEPAGE INTO AN UNSATURATED ZONE: UNIT GRADIENT PLUS
+C     THE STREAM DEPTH OVER THE STREAMBED THICKNESS, LIMITED BY THE
+C     SATURATED CONDUCTIVITY OF THE UNSATURATED ZONE, AND HELD AT THE
+C     PREVIOUS VALUE WHEN THE CHANGE IS BELOW FBCHECK. THE NUMBER OF
+C     WAVES IS CHECKED WHERE WAVES ARE CREATED (UZFLOW, TRAILWAVE),
+C     WHICH STOP WITH A MESSAGE WHEN NSFRSETS IS TOO SMALL; THE SEEPAGE
+C     IS NO LONGER SET TO ZERO SILENTLY WHEN THE COUNT NEARS THE LIMIT.
+      USE GWFSFRMODULE, ONLY: NEARZERO
       IMPLICIT NONE
 C     ------------------------------------------------------------------
 C     SPECIFICATIONS:
@@ -8504,16 +8508,13 @@ C     ------------------------------------------------------------------
 C     ARGUMENTS
 C     ------------------------------------------------------------------
       REAL Areamax, Avhc, Fks, Strlen
-      INTEGER  Nwavst(ISUZN), Maxwav
       DOUBLE PRECISION Wetperm, Depth, Sbdthk, Fbcheck, Foldflbt
 C     ------------------------------------------------------------------
 C     LOCAL VARIABLES
 C     ------------------------------------------------------------------
       REAL flobotcheck, seep
-      INTEGER nstrailpls1, ii
       DOUBLE PRECISION flobot, area
 C     ------------------------------------------------------------------
-      nstrailpls1 = 2*NSTRAIL + 1
       seep = Avhc*(1.0D0+(Depth)/(Sbdthk))
       area = Wetperm*Strlen
       flobot = seep*area
@@ -8522,9 +8523,6 @@ C     ------------------------------------------------------------------
         flobotcheck = ABS(flobot/(Wetperm*Strlen)-Foldflbt
      +                /(Wetperm*Strlen))
         IF ( flobotcheck.LE.Fbcheck ) flobot = Foldflbt
-        DO ii = 1, ISUZN
-          IF ( Nwavst(ii).GT.Maxwav-nstrailpls1 ) flobot = 0.0D0
-        END DO
       END IF
       IF ( flobot-Fbcheck.LT.NEARZERO ) flobot = 0.0D0
       CALCUNSATFLOBOT = flobot
@@ -10190,7 +10188,7 @@ C1------INITIALIZE TRAIL WAVES WHEN SURFACE FLUX DECREASES.
         jj = NSTRAIL
         ftrail = NSTRAIL + 1
         DO j = Numwaves, Numwaves + numtrail2 - 1
-          IF ( j.GT.NSTOTRL ) THEN
+          IF ( j > NSFRSETS*NSTRAIL ) THEN
                CALL STOP_ERROR(OUTPUT=IOUT,
      +         MSG='SFR SEGMENT '//NUM2STR(ISTRM(4, I))//
      +         ' AND REACH '//NUM2STR(ISTRM(5, I))//BLN//
