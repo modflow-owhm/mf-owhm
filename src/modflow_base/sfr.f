@@ -5075,8 +5075,12 @@ crgn used width in calculations.
                   END IF
                 END IF
               ELSE IF ( icalc.EQ.4 ) THEN
-                width = 0.5D0 * ( QSTAGE(1+2*nstrpts, istsg)
-     +                          + QSTAGE(3*nstrpts, istsg) )
+                !seb width and depth from the rating table at the flow
+                !    the rain on the channel itself makes (as ICALC 3);
+                !    without rain the zero-flow width of the table
+                !    (was the mean of the first and last table widths)
+                CALL GWF2SFR7TBRAIN(0.5D0*(precip-etstr), nstrpts,
+     +                              istsg, MX_STG, qrain, depth, width)
               END IF
               !seb stage of the empty (or rain-fed ICALC 3) channel, used by
               !    the leakage below; was left at the stage of the previous
@@ -7326,6 +7330,95 @@ C4------RETURN.
       RETURN
       END SUBROUTINE GWF2SFR7TBD
 C
+C-------SUBROUTINE GWF2SFR7TBRAIN
+      SUBROUTINE GWF2SFR7TBRAIN(Rate, Nstrpts, Istsg, MX_STG,
+     +                          Flow, Depth, Width)
+C     *******************************************************************
+C     FLOW, DEPTH AND WIDTH OF AN EMPTY RATING-TABLE CHANNEL THAT ONLY
+C     RECEIVES RAIN: THE MIDPOINT FLOW SOLVES Q = RATE*W(Q), WITH RATE
+C     HALF THE NET RAIN PER UNIT WIDTH OVER THE REACH LENGTH AND W(Q)
+C     THE TABLE WIDTH. THE LARGEST ROOT IS TAKEN (THE STABLE ONE, ABOVE
+C     WHICH THE WIDTH GROWS SLOWER THAN THE FLOW). WITHOUT NET RAIN, OR
+C     WHEN THE RAIN CANNOT SUSTAIN A FLOW, THE WIDTH IS THE ZERO-FLOW
+C     WIDTH OF THE TABLE (A BOTTOM-WIDTH ROW) OR ZERO.
+C     *******************************************************************
+      USE CONSTANTS,    ONLY: DZ, NEARZERO_30
+      USE GWFSFRMODULE, ONLY: QSTAGE
+      IMPLICIT NONE
+C     -------------------------------------------------------------------
+C     SPECIFICATIONS:
+C     -------------------------------------------------------------------
+C     ARGUMENTS
+C     -------------------------------------------------------------------
+      INTEGER,          INTENT(IN   ):: Nstrpts, Istsg
+      DOUBLE PRECISION, INTENT(IN   ):: Rate, MX_STG
+      DOUBLE PRECISION, INTENT(  OUT):: Flow, Depth, Width
+C     -------------------------------------------------------------------
+C     LOCAL VARIABLES
+C     -------------------------------------------------------------------
+      INTEGER i, it
+      DOUBLE PRECISION qlo, qhi, qm, gm, d, w
+C     -------------------------------------------------------------------
+C
+C1------NO FLOW AND NO DEPTH; THE WIDTH IS THAT OF THE ZERO-FLOW ROW.
+      Flow  = DZ
+      Depth = DZ
+      Width = DZ
+      IF ( QSTAGE(1, Istsg) < NEARZERO_30 )
+     +  Width = QSTAGE(1+2*Nstrpts, Istsg)
+      IF ( Rate <= DZ ) RETURN
+C
+C2------BRACKET THE LARGEST ROOT OF G(Q) = RATE*W(Q) - Q: THE LAST ROW
+C         WITH G > 0 (OR THE ORIGIN) AND THE ROW ABOVE IT, OR BEYOND
+C         THE TABLE A FLOW DOUBLED UNTIL G < 0.
+      qlo = DZ
+      i = 0
+      DO it = Nstrpts, 1, -1
+        IF ( Rate*QSTAGE(2*Nstrpts+it, Istsg)
+     +       - QSTAGE(it, Istsg) > DZ ) THEN
+          i = it
+          EXIT
+        END IF
+      END DO
+      IF ( i == 0 ) THEN
+        IF ( Width <= DZ ) RETURN      ! G(0) = 0: THE RAIN SUSTAINS NO FLOW
+        qhi = QSTAGE(1, Istsg)
+      ELSE
+        qlo = QSTAGE(i, Istsg)
+        IF ( i < Nstrpts ) THEN
+          qhi = QSTAGE(i+1, Istsg)
+        ELSE
+          qhi = 2.0D0*MAX(qlo, 1.0D0)
+          DO it = 1, 64
+            CALL SGWF2SFR7TBINT(qhi, 0, Nstrpts, 2*Nstrpts, Nstrpts,
+     +                          Istsg, d, w)
+            IF ( Rate*w - qhi <= DZ ) EXIT
+            qlo = qhi
+            qhi = 2.0D0*qhi
+          END DO
+        END IF
+      END IF
+C
+C3------BISECTION TO MACHINE PRECISION.
+      DO it = 1, 200
+        qm = 0.5D0*(qlo+qhi)
+        CALL SGWF2SFR7TBINT(qm, 0, Nstrpts, 2*Nstrpts, Nstrpts, Istsg,
+     +                      d, w)
+        gm = Rate*w - qm
+        IF ( gm > DZ ) THEN
+          qlo = qm
+        ELSE
+          qhi = qm
+        END IF
+        IF ( qhi-qlo <= 1.0D-14*qhi ) EXIT
+      END DO
+      Flow = 0.5D0*(qlo+qhi)
+      CALL GWF2SFR7TBD(Flow, Depth, Width, Nstrpts, Istsg, MX_STG)
+C
+C4------RETURN.
+      RETURN
+      END SUBROUTINE GWF2SFR7TBRAIN
+C
 C-------SUBROUTINE GWF2SFR7TBF
       SUBROUTINE GWF2SFR7TBF(Flow, Depth, Width, Nstrpts, Nreach, Istsg)
 C     *******************************************************************
@@ -7641,8 +7734,9 @@ C2------ONLY READ FIRST 4 VARIABLES TO DETERMINE VALUE OF IUPSEG.
         !
         IF(I.NE.0) CALL SFR_STOP(IN, IOUT) !, IOSTAT=I
         !
-!       IF ( n.GT.NSS .OR. n.LT.1 ) THEN  !cjm (commented this line out)
-        IF ( n.GT.NSS .OR. n.EQ.0 ) THEN              !cjm
+        !seb a negative segment number indexed SEG and ISCHK out of
+        !    bounds (the check had been relaxed to n == 0)
+        IF ( n > NSS .OR. n < 1 ) THEN
             CALL SFR_STOP_MSG(IN, IOUT, 
      +                  'SEGMENT NUMBER (NSEG) IS OUT OF RANGE ON LINE')
 !            WRITE (IOUT, 9001) n
