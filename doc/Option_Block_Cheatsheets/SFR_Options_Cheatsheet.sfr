@@ -33,6 +33,12 @@ BEGIN OPTIONS
     #
     # Indicates that input reads ISFROPT,
     #   which controls the format for entering reach and segment data and if unsaturated flow beneath streams is simulated.
+    #   With unsaturated flow (ISFROPT 2 to 5) item 1c also reads NSTRAIL, ISUZN and NSFRSETS. NSTRAIL is the number of
+    #   trailing waves that represent the drying front when the seepage of a reach decreases; the unsaturated-zone
+    #   budget of the time step in which the seepage drops closes only to the accuracy of that representation
+    #   (about 0.3 percent of the water-table flux with NSTRAIL 10, 0.05 percent with 20; every later step closes
+    #   exactly), so use 20 or more when the unsaturated-zone budget matters. NSFRSETS (30 is usually enough) sizes the
+    #   wave storage; the simulation stops with a message that names NSFRSETS when it is too small.
     REACHINPUT
     #
     # Indicates that input reads IRTFLG, which defines if transient streamflow routing is active.
