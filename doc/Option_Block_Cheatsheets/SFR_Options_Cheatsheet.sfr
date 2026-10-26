@@ -178,10 +178,6 @@ BEGIN OPTIONS
     STRHC1KH      FACTOR
     STRHC1KV      FACTOR
     #
-    # Apply a relaxation factor (RELAX) to aquifer head when making seepage calculation.
-    #   This might help for unstable stream networks, but may be better to use HEAD_PREDICTOR_FACTOR instead.
-    HEAD_RELAXATION  RELAX
-    #
     # MF-NWT style TABFILE. NUMTAB is the number of file unit numbers that are read.
     # MAXROW is the size of the largest tabfile (most rows/lines in the file).
     # Each table row (TIME FLOW) holds from its time to the next row's time; the flow applied to a

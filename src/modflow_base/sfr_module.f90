@@ -12,7 +12,6 @@
         !
         DOUBLE PRECISION, PARAMETER:: NEARZERO=1.0D-30
         REAL,             PARAMETER:: CLOSEZERO=1.0E-15
-        DOUBLE PRECISION, SAVE,                    POINTER:: HD_RELAX
         DOUBLE PRECISION, SAVE,                    POINTER:: HNEW_FACTOR
         INTEGER,          SAVE,                    POINTER:: UPLAY_ADJUST
         INTEGER,          SAVE,                    POINTER :: STRHC1KHFLAG, STRHC1KVFLAG
@@ -100,7 +99,6 @@
         DOUBLE PRECISION,DIMENSION(:),  POINTER,SAVE, CONTIGUOUS:: SFR_FRES_DIF
          
       TYPE GWFSFRTYPE
-        DOUBLE PRECISION,                    POINTER:: HD_RELAX
         DOUBLE PRECISION,                    POINTER:: HNEW_FACTOR
         INTEGER,                             POINTER:: UPLAY_ADJUST
         INTEGER,                             POINTER :: STRHC1KHFLAG, STRHC1KVFLAG

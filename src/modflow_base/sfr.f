@@ -423,13 +423,6 @@ C-------SUBROUTINE GWF2SFR7AR
      +   '         CELERITY          COURANT           WEIGHT'//
      +   '   STORAGE_CHANGE    ROUTING_ERROR')
           END IF
-        CASE('HEAD_RELAX','HEAD_RELAXATION')
-            WRITE(IOUT,'(2A)') 'HEAD_RELAXATION OPTION FOUND. ',
-     +       'NOW READING 0 to 1 HNEW1 TO HNEW2 RELAXATION FACTOR'
-            CALL GET_NUMBER(LINE,LLOC,ISTART,ISTOP,IOUT,IN,
-     +                       HD_RELAX,MSG=
-     +  'FOUND SFR OPTION "HEAD_RELAXATION" OR "HEAD_RELAX"'//NL//
-     +  'BUT FAILED TO THE RELAXATION FACTOR (HD_RELAX)')
         CASE('HEAD_PREDICTOR_FACTOR', "HNEW_FACTOR")
             WRITE(IOUT,'(2A)') 'HEAD_PREDICTOR_FACTOR OPTION FOUND. ',
      +       'NOW READING 0 to 1 HNEW TO HOLD FACTOR'
@@ -566,7 +559,6 @@ C     ------------------------------------------------------------------
       ALLOCATE(THETAB, FLUXB, FLUXHLD2)
       ALLOCATE(Nfoldflbt, NUMTAB, ROWTAB)
       !
-      ALLOCATE(HD_RELAX,    SOURCE=UNO)
       ALLOCATE(HNEW_FACTOR, SOURCE=UNO)
       ALLOCATE(UPLAY_ADJUST, SOURCE=TWO)  ! 0 do not adjust layers, 1 adjust layer if deeper, 2 use current upper most active layer
       
@@ -933,13 +925,6 @@ C         DLEAK, ISTCB1, ISTCB2.
      +   'ELEV_UP_STREAM (double), FLOW_WT (double),  '//
      +   'CHNG_UNSAT_STOR (double)'
             END IF
-        CASE('HEAD_RELAX','HEAD_RELAXATION')
-            WRITE(IOUT,'(2A)') 'HEAD_RELAXATION OPTION FOUND. ',
-     +       'NOW READING 0 to 1 HNEW1 TO HNEW2 RELAXATION FACTOR'
-            CALL GET_NUMBER(BL%LINE,LLOC,ISTART,ISTOP,IOUT,IN,
-     +                       HD_RELAX,MSG=
-     +  'FOUND SFR OPTION "HEAD_RELAXATION" OR "HEAD_RELAX"'//NL//
-     +  'BUT FAILED TO THE RELAXATION FACTOR (HD_RELAX)')
         CASE('HEAD_PREDICTOR_FACTOR', "HNEW_FACTOR")
             WRITE(IOUT,'(2A)') 'HEAD_PREDICTOR_FACTOR OPTION FOUND. ',
      +       'NOW READING 0 to 1 HNEW TO HOLD FACTOR'
@@ -3667,7 +3652,7 @@ C     ADD STREAM TERMS TO RHS AND HCOF IF FLOW OCCURS IN MODEL CELL
 !--------REVISED FOR MODFLOW-2005 RELEASE 1.9, FEBRUARY 6, 2012
 !rgn------REVISION NUMBER CHANGED TO BE CONSISTENT WITH NWT RELEASE
 C     *****************************************************************
-      USE GWFSFRMODULE !HD_RELAX
+      USE GWFSFRMODULE
       USE GLOBAL,       ONLY: ISSFLG, IBOUND, HCOF, 
      +                        RHS, BOTM, LBOTM, HOLD, HNEW, UPLAY
       USE GWFBASMODULE, ONLY: DELT, TOTIM, HDRY
@@ -4057,15 +4042,6 @@ C23-----PARENT SECTION.  CHILD WILL REPRESENT THIS LEAKAGE
 !!!          IF ( ilay.LE.NLAY ) il = ilay
           SUMLEAK(l) = DZ
           SUMRCH(l)  = DZ
-          !
-          !
-          !h = WTABLE(ic, ir)
-          !
-          !IF(HD_RELAX < 1D0 .AND. .NOT. NO_GW) THEN
-          ! !
-          ! h = HNEW_OLD(ic,ir,il) + HD_RELAX*(h - HNEW_OLD(ic,ir,il)) !OLD + RELAX*(NEW-OLD)
-          ! !
-          !END IF
 C
 C23B----STREAMBED HYDRAULIC CONDUCTIVITY FROM THE AQUIFER (OPTIONS
 C         STRHC1KH AND STRHC1KV) USING THE CURRENT REACH LAYER.
@@ -11120,7 +11096,6 @@ C     ------------------------------------------------------------------
       DEALLOCATE(GWFSFRDAT(IGRID)%SFR_FRES_OUTER)
       DEALLOCATE(GWFSFRDAT(IGRID)%SFR_FRES_NTERM)
       !
-      DEALLOCATE(GWFSFRDAT(IGRID)%HD_RELAX)
       DEALLOCATE(GWFSFRDAT(IGRID)%HNEW_FACTOR)
       DEALLOCATE(GWFSFRDAT(IGRID)%UPLAY_ADJUST)
       ! GFORTRAN compiler error work-around for pointer data type FINAL statement
@@ -11314,7 +11289,6 @@ C NULLIFY THE LOCAL POINTERS
         SFR_FRES_LRC   => NULL() 
         SFR_FRES_DIF   => NULL() 
         !
-        HD_RELAX       => NULL() 
         HNEW_FACTOR    => NULL() 
         UPLAY_ADJUST   => NULL()
       !
@@ -11477,7 +11451,6 @@ C     ------------------------------------------------------------------
       SFR_FRES_LRC   => GWFSFRDAT(IGRID)%SFR_FRES_LRC
       SFR_FRES_DIF   => GWFSFRDAT(IGRID)%SFR_FRES_DIF
       !
-      HD_RELAX       => GWFSFRDAT(IGRID)%HD_RELAX
       HNEW_FACTOR    => GWFSFRDAT(IGRID)%HNEW_FACTOR
       UPLAY_ADJUST   => GWFSFRDAT(IGRID)%UPLAY_ADJUST
       !
@@ -11641,7 +11614,6 @@ C     ------------------------------------------------------------------
       GWFSFRDAT(IGRID)%SFR_FRES_LRC   => SFR_FRES_LRC
       GWFSFRDAT(IGRID)%SFR_FRES_DIF   => SFR_FRES_DIF
       !
-      GWFSFRDAT(IGRID)%HD_RELAX       => HD_RELAX
       GWFSFRDAT(IGRID)%HNEW_FACTOR    => HNEW_FACTOR
       GWFSFRDAT(IGRID)%UPLAY_ADJUST   => UPLAY_ADJUST
       !
