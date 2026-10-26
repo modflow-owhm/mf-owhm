@@ -37,6 +37,7 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
       DOUBLE PRECISION,DIMENSION(:),  ALLOCATABLE:: FLOW_OLD   !Delivery Flow Rate From Preivous Iter
       DOUBLE PRECISION,DIMENSION(:),  ALLOCATABLE:: LLIM, ULIM !Delivery limits
       DOUBLE PRECISION,DIMENSION(:),  ALLOCATABLE:: MAXDEL     !Delivery limit - Used for output
+      DOUBLE PRECISION,DIMENSION(:),  ALLOCATABLE:: SURPLUS    !Non-routed delivery surplus discharged to SFR at the point (NRD use flag 1) - Used for output
       DOUBLE PRECISION:: TOT_DMD_INI, TOT_DMD_MET
   END TYPE
   !
@@ -1162,6 +1163,7 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
             !
       SWF%SRDLOC(F)%FLOW(I)   = DZ
       SWF%SRDLOC(F)%MAXDEL(I) = DZ
+      SWF%SRDLOC(F)%SURPLUS(I)= DZ
       END DO
     END DO
     !
@@ -1219,6 +1221,7 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
              CALL ALLOC(SWF%SRDLOC(F)%LLIM,  DIM)       !(ARR, N)
              CALL ALLOC(SWF%SRDLOC(F)%ULIM,  DIM)       !(ARR, N)
              CALL ALLOC(SWF%SRDLOC(F)%MAXDEL,DIM)       !(ARR, N)
+             CALL ALLOC(SWF%SRDLOC(F)%SURPLUS,DIM, SRC=DZ) !(ARR, N)
              CALL ALLOC(SWF%SRDLOC(F)%SR,TWO,DIM,Z) !(ARR, N, M, DIMCHK)
              !
              DIM = Z
@@ -1300,6 +1303,10 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
     TYPE(FMP_FLOW_REMOVE_SFR), INTENT(INOUT):: SFR_DELIV
     INTEGER:: K, I
     DOUBLE PRECISION:: DMD,SUP,DTMP,TOT_FLOW
+    !
+    DO K=ONE, SWF%SRDLOC(F)%N
+              SWF%SRDLOC(F)%SURPLUS(K) = DZ   ! No non-routed surplus when there is a surface-water demand
+    END DO
     !
     IF(DEMAND < NEARZERO_29 .OR. SWF%SRDLOC(F)%N < ONE) THEN     ! Demand too small to account for or no SRD to supply demand
                        DO K=ONE, SWF%SRDLOC(F)%N
@@ -1416,6 +1423,7 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
           LOWER_LIM => SWF%SRDLOC(F)%LLIM,    &
           UPPER_LIM => SWF%SRDLOC(F)%ULIM,    &
              MAXDEL => SWF%SRDLOC(F)%MAXDEL,  &
+              SRPLS => SWF%SRDLOC(F)%SURPLUS, &
               ISTRM => SWF%SRDLOC(F)%ISTRM    )
               !
       DO K=ONE, DIM 
@@ -1434,47 +1442,32 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
           !
           IF(MAXDEL(K) < DZ) MAXDEL(K) = DZ
       END DO
-      ! 
-      IF(DIM == ONE) THEN
-          !
-          I = ISTRM(ONE)
-          !
-          STRM(12,I) = STRM(12,I) + SURPLUS
-          !
-          IF(SURPLUS < FLOW(ONE)) THEN
-              FLOW(ONE) = FLOW(ONE) - SURPLUS  ! does this need to be adjusted by the extra NRD water?
-          ELSE
-              FLOW(ONE) = DZ
-          END IF
-          !
-      ELSEIF(DIM  > ONE) THEN
-          !
-          IF    (DIM == ONE  ) THEN; DTMP = UNO
-          ELSEIF(DIM == TWO  ) THEN; DTMP = HALF
-          ELSEIF(DIM == THREE) THEN; DTMP = THIRD
-          ELSEIF(DIM == FOUR ) THEN; DTMP = FOURTH
-          ELSEIF(DIM == FIVE ) THEN; DTMP = FIFTH
-          ELSE;                      DTMP = UNO / DBLE(DIM)
-          END IF
-          !
-          DTMP = DTMP * SURPLUS
-          !
-          DO CONCURRENT (K=ONE:DIM)
-             IF    (DTMP < FLOW(K)) THEN
-                 FLOW(K) = FLOW(K) - DTMP
-             ELSE
-                 FLOW(K) = DZ
-             END IF
-          END DO
-          !
-          DO K=ONE, DIM 
-              !
-              I = ISTRM(K)
-              !
-              STRM(12,I) = STRM(12,I) + DTMP
-              !
-          END DO
+      !
+      ! A surplus means the non-routed deliveries exceeded the demand, so there is no delivery
+      ! from SFR; the surplus is discharged evenly over the delivery points and reported
+      ! separately (NRD_SURPLUS) rather than netted against the delivery.
+      DO CONCURRENT (K=ONE:DIM)
+          FLOW(K) = DZ
+      END DO
+      !
+      IF    (DIM == ONE  ) THEN; DTMP = UNO
+      ELSEIF(DIM == TWO  ) THEN; DTMP = HALF
+      ELSEIF(DIM == THREE) THEN; DTMP = THIRD
+      ELSEIF(DIM == FOUR ) THEN; DTMP = FOURTH
+      ELSEIF(DIM == FIVE ) THEN; DTMP = FIFTH
+      ELSE;                      DTMP = UNO / DBLE(DIM)
       END IF
+      !
+      DTMP = DTMP * SURPLUS
+      !
+      DO K=ONE, DIM
+          !
+          I = ISTRM(K)
+          !
+          SRPLS(K)   = DTMP
+          STRM(12,I) = STRM(12,I) + DTMP
+          !
+      END DO
     END ASSOCIATE
     !
   END SUBROUTINE
@@ -2403,12 +2396,12 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
     !
     IF( SET_HEADER .OR. SWF%IOUT==IU )  THEN
         IF(SWF%OUT_SFR_SRD%BINARY) THEN 
-            WRITE(SWF%IOUT,'(A,/A)')'SURFACE_WATER SFR_DELIVERY (SEMI_ROUTED_DELIVERY) INFORMATION OUTPUT WRITTEN TO BINARY FILE USING STREAM UNFORMATTED STRUCTURE. EACH THE RECORD IN BINARY HAS THE FOLLOWING STRUCTURE:',"DATE_START (19char), DECIMAL YEAR (double), TIME STEP LENGTH (double), STRESS PERIOD (int), TIME STEP (int), WBS ID (INT), SEGMENT (INT), REACH (INT), DELIVERY (double), SFR_INFLOW (double), LOWER_LIMIT (double), UPPER_LIMIT (double), WBS_SFR_DMD (double), SRD ID (int)"
+            WRITE(SWF%IOUT,'(A,/A)')'SURFACE_WATER SFR_DELIVERY (SEMI_ROUTED_DELIVERY) INFORMATION OUTPUT WRITTEN TO BINARY FILE USING STREAM UNFORMATTED STRUCTURE. EACH THE RECORD IN BINARY HAS THE FOLLOWING STRUCTURE:',"DATE_START (19char), DECIMAL YEAR (double), TIME STEP LENGTH (double), STRESS PERIOD (int), TIME STEP (int), WBS ID (INT), SEGMENT (INT), REACH (INT), DELIVERY (double), NRD_SURPLUS (double), SFR_INFLOW (double), LOWER_LIMIT (double), UPPER_LIMIT (double), WBS_SFR_DMD (double), SRD ID (int)"
         ELSE
             !
             IF (SWF%IOUT==IU) WRITE(IU,*)
             !                                                                                                                                                        x
-            CALL SWF%OUT_SFR_SRD%SET_HEADER( '    PER    STP    WBS    SEG    RCH      WBS_SFR_DMD         DELIVERY       SFR_INFLOW      LOWER_LIMIT      UPPER_LIMIT  DEFICIT_REASON        DELT   DYEAR         DATE_START           ISRD' )
+            CALL SWF%OUT_SFR_SRD%SET_HEADER( '    PER    STP    WBS    SEG    RCH      WBS_SFR_DMD         DELIVERY      NRD_SURPLUS       SFR_INFLOW      LOWER_LIMIT      UPPER_LIMIT  DEFICIT_REASON        DELT   DYEAR         DATE_START           ISRD' )
         END IF
     END IF
     !
@@ -2418,7 +2411,7 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
           CONTINUE        
       ELSEIF(ALL(SWF%SRDLOC(F)%ISTRM < ONE)) THEN
           REASON = '  NO_DELIV'
-          WRITE(IU, '(5I7, 5A17, A, A17, 2x,F13.7, 2x,A, 2x,A)') KPER, KSTP, F, Z, Z, ZER, ZER, ZER, ZER, ZER, REASON, DT, DYEAR, DATE, '0'
+          WRITE(IU, '(5I7, 6A17, A, A17, 2x,F13.7, 2x,A, 2x,A)') KPER, KSTP, F, Z, Z, ZER, ZER, ZER, ZER, ZER, ZER, REASON, DT, DYEAR, DATE, '0'
       ELSE
           IF( SWF%SRDLOC(F)%TOT_DMD_INI - SWF%SRDLOC(F)%TOT_DMD_MET <= NEARZERO_12 ) REASON = '  NONE'
           !
@@ -2481,9 +2474,9 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
              END IF
              !
              IF(SWF%OUT_SFR_SRD%BINARY) THEN
-                     WRITE(IU) DATE, DYEAR, DELT, KPER, KSTP, F, SWF%SRDLOC(F)%SR(ONE,I), SWF%SRDLOC(F)%SR(TWO,I), SWF%SRDLOC(F)%FLOW(I), INFLOW, SWF%SRDLOC(F)%LLIM(I), SWF%SRDLOC(F)%ULIM(I), DMD, SWF%SRDLOC(F)%ISRD(I)
+                     WRITE(IU) DATE, DYEAR, DELT, KPER, KSTP, F, SWF%SRDLOC(F)%SR(ONE,I), SWF%SRDLOC(F)%SR(TWO,I), SWF%SRDLOC(F)%FLOW(I), SWF%SRDLOC(F)%SURPLUS(I), INFLOW, SWF%SRDLOC(F)%LLIM(I), SWF%SRDLOC(F)%ULIM(I), DMD, SWF%SRDLOC(F)%ISRD(I)
              ELSE
-                     WRITE(IU, '(5I7, 5A17, A, A17, 2x,F13.7, 2x,A, 2x,A)') KPER, KSTP, F, SWF%SRDLOC(F)%SR(ONE,I), SWF%SRDLOC(F)%SR(TWO,I), NUM2STR(DMD), NUM2STR(SWF%SRDLOC(F)%FLOW(I)), NUM2STR(INFLOW), NUM2STR(SWF%SRDLOC(F)%LLIM(I)), NUM2STR(SWF%SRDLOC(F)%ULIM(I)), REASON, DT, DYEAR, DATE, NUM2STR(SWF%SRDLOC(F)%ISRD(I))
+                     WRITE(IU, '(5I7, 6A17, A, A17, 2x,F13.7, 2x,A, 2x,A)') KPER, KSTP, F, SWF%SRDLOC(F)%SR(ONE,I), SWF%SRDLOC(F)%SR(TWO,I), NUM2STR(DMD), NUM2STR(SWF%SRDLOC(F)%FLOW(I)), NUM2STR(SWF%SRDLOC(F)%SURPLUS(I)), NUM2STR(INFLOW), NUM2STR(SWF%SRDLOC(F)%LLIM(I)), NUM2STR(SWF%SRDLOC(F)%ULIM(I)), REASON, DT, DYEAR, DATE, NUM2STR(SWF%SRDLOC(F)%ISRD(I))
              END IF
            END IF
           END DO
@@ -2501,7 +2494,7 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
     CHARACTER(*),                              INTENT(IN   ):: DATE
     LOGICAL,                                   INTENT(IN   ):: SET_HEADER
     INTEGER:: IU, F, I
-    DOUBLE PRECISION:: INFLOW, DELIV, MAX_DELIV, DEFICIT, TOT_ULIM, TOT_LLIM, DMD, SHORT
+    DOUBLE PRECISION:: INFLOW, DELIV, SURP, MAX_DELIV, DEFICIT, TOT_ULIM, TOT_LLIM, DMD, SHORT
     CHARACTER(17):: ZER, DT
     !
     IF(SWF%OUT_SFR_SRD_BYWBS%IU == Z) RETURN  !NOTHING TO PRINT OUT
@@ -2516,12 +2509,12 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
     !
     IF( SET_HEADER .OR. SWF%IOUT==IU )  THEN
         IF(SWF%OUT_SFR_SRD_BYWBS%BINARY) THEN 
-            WRITE(SWF%IOUT,'(A,/A)')'SURFACE_WATER SFR_DELIVERY BY WBS (SEMI_ROUTED_DELIVERY) INFORMATION OUTPUT WRITTEN TO BINARY FILE USING STREAM UNFORMATTED STRUCTURE. EACH THE RECORD IN BINARY HAS THE FOLLOWING STRUCTURE:',"DATE_START (19char), DECIMAL YEAR (double), TIME STEP LENGTH (double), STRESS PERIOD (int), TIME STEP (int), WBS ID (INT), SEGMENT (INT), REACH (INT), DELIVERY (double), SFR_INFLOW (double), LOWER_LIMIT (double), UPPER_LIMIT (double), WBS_TOT_SFR_DMD (double), SRD ID (int)"
+            WRITE(SWF%IOUT,'(A,/A)')'SURFACE_WATER SFR_DELIVERY BY WBS (SEMI_ROUTED_DELIVERY) INFORMATION OUTPUT WRITTEN TO BINARY FILE USING STREAM UNFORMATTED STRUCTURE. EACH THE RECORD IN BINARY HAS THE FOLLOWING STRUCTURE:',"DATE_START (19char), DECIMAL YEAR (double), TIME STEP LENGTH (double), STRESS PERIOD (int), TIME STEP (int), WBS ID (INT), SEGMENT (INT), REACH (INT), DELIVERY (double), NRD_SURPLUS (double), SFR_INFLOW (double), LOWER_LIMIT (double), UPPER_LIMIT (double), WBS_TOT_SFR_DMD (double), SRD ID (int)"
         ELSE
             !
             IF (SWF%IOUT==IU) WRITE(IU,*)
             !                                                                                                                      X
-            CALL SWF%OUT_SFR_SRD_BYWBS%SET_HEADER( '    PER    STP    WBS      WBS_SFR_DMD         DELIVERY       SFR_INFLOW     MAX_DELIVERY   INFLOW_DEFICIT  TOTAL_LOWER_LIM  TOTAL_UPPER_LIM             DELT   DYEAR         DATE_START' )
+            CALL SWF%OUT_SFR_SRD_BYWBS%SET_HEADER( '    PER    STP    WBS      WBS_SFR_DMD         DELIVERY      NRD_SURPLUS       SFR_INFLOW     MAX_DELIVERY   INFLOW_DEFICIT  TOTAL_LOWER_LIM  TOTAL_UPPER_LIM             DELT   DYEAR         DATE_START' )
         END IF
     END IF
     !
@@ -2529,19 +2522,20 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
       !
       IF(SWF%SRDLOC(F)%N == Z) THEN
           IF(SWF%OUT_SFR_SRD_BYWBS%BINARY) THEN
-                  WRITE(IU) DATE,DYEAR,DELT,KPER,KSTP,F,DZ, DZ, DZ, DZ, DZ, SWF%SRDLOC(F)%TOT_DMD_INI, DZ
+                  WRITE(IU) DATE,DYEAR,DELT,KPER,KSTP,F,DZ, DZ, DZ, DZ, DZ, DZ, SWF%SRDLOC(F)%TOT_DMD_INI, DZ
           ELSE
-                  WRITE(IU, '(3I7, 8A17, 2x,F13.7, 2x,A)') KPER, KSTP, F, NUM2STR(SWF%SRDLOC(F)%TOT_DMD_INI),ZER,ZER,ZER,ZER,ZER,ZER, DT, DYEAR, DATE
+                  WRITE(IU, '(3I7, 9A17, 2x,F13.7, 2x,A)') KPER, KSTP, F, NUM2STR(SWF%SRDLOC(F)%TOT_DMD_INI),ZER,ZER,ZER,ZER,ZER,ZER,ZER, DT, DYEAR, DATE
           END IF
       ELSEIF(ALL(SWF%SRDLOC(F)%ISTRM < ONE)) THEN
           IF(SWF%OUT_SFR_SRD_BYWBS%BINARY) THEN
-                  WRITE(IU) DATE,DYEAR,DELT,KPER,KSTP,F,DZ, DZ, DZ, DZ, DZ, SWF%SRDLOC(F)%TOT_DMD_INI, DZ
+                  WRITE(IU) DATE,DYEAR,DELT,KPER,KSTP,F,DZ, DZ, DZ, DZ, DZ, DZ, SWF%SRDLOC(F)%TOT_DMD_INI, DZ
           ELSE
-                  WRITE(IU, '(3I7, 8A17, 2x,F13.7, 2x,A)') KPER, KSTP, F, NUM2STR(SWF%SRDLOC(F)%TOT_DMD_INI),ZER,ZER,ZER,ZER,ZER,ZER, DT, DYEAR, DATE
+                  WRITE(IU, '(3I7, 9A17, 2x,F13.7, 2x,A)') KPER, KSTP, F, NUM2STR(SWF%SRDLOC(F)%TOT_DMD_INI),ZER,ZER,ZER,ZER,ZER,ZER,ZER, DT, DYEAR, DATE
           END IF
       ELSE
           INFLOW    = DZ
           DELIV     = DZ
+          SURP      = DZ
           MAX_DELIV = DZ
           TOT_ULIM  = DZ
           TOT_LLIM  = DZ
@@ -2565,6 +2559,7 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
                   !
                   INFLOW    = INFLOW    + STRM(10,SWF%SRDLOC(F)%ISTRM(I))
                   DELIV     = DELIV     + SWF%SRDLOC(F)%FLOW(I)
+                  SURP      = SURP      + SWF%SRDLOC(F)%SURPLUS(I)
                   MAX_DELIV = MAX_DELIV + SWF%SRDLOC(F)%MAXDEL(I)
                   TOT_ULIM  = TOT_ULIM  + SWF%SRDLOC(F)%ULIM(I)
                   TOT_LLIM  = TOT_LLIM  + SWF%SRDLOC(F)%LLIM(I)
@@ -2579,9 +2574,9 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
           IF( DEFICIT <= NEARZERO_12 ) DEFICIT = DZ
           !
           IF(SWF%OUT_SFR_SRD_BYWBS%BINARY) THEN
-                  WRITE(IU) DATE,DYEAR,DELT,KPER,KSTP,F,DELIV, INFLOW, MAX_DELIV, SWF%SRDLOC(F)%TOT_DMD_INI, DEFICIT
+                  WRITE(IU) DATE,DYEAR,DELT,KPER,KSTP,F,DELIV, SURP, INFLOW, MAX_DELIV, SWF%SRDLOC(F)%TOT_DMD_INI, DEFICIT
           ELSE
-                  WRITE(IU, '(3I7, 8A17, 2x,F13.7, 2x,A)') KPER, KSTP, F, NUM2STR(SWF%SRDLOC(F)%TOT_DMD_INI), NUM2STR(DELIV), NUM2STR(INFLOW), NUM2STR(MAX_DELIV), NUM2STR(DEFICIT), NUM2STR(TOT_LLIM), NUM2STR(TOT_ULIM), DT, DYEAR, DATE
+                  WRITE(IU, '(3I7, 9A17, 2x,F13.7, 2x,A)') KPER, KSTP, F, NUM2STR(SWF%SRDLOC(F)%TOT_DMD_INI), NUM2STR(DELIV), NUM2STR(SURP), NUM2STR(INFLOW), NUM2STR(MAX_DELIV), NUM2STR(DEFICIT), NUM2STR(TOT_LLIM), NUM2STR(TOT_ULIM), DT, DYEAR, DATE
           END IF
       END IF
     END DO

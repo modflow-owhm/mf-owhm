@@ -28,6 +28,7 @@ STP                        is the time step number
 WBS                        is the Water Balance Subregion (Farm) ID number that is getting water delivered to
 WBS_SFR_DMD       [L3/T]   is the total surface water demanded by the WBS
 DELIVERY          [L3/T]   is the amount water water delivered to meet the WBS demand
+NRD_SURPLUS       [L3/T]   is the non-routed delivery surplus (NRD use flag 1) discharged into SFR over all the WBS delivery points (never netted against DELIVERY)
 SFR_INFLOW        [L3/T]   is the total upstream flow from all the WBS associated SRDs (total water that can be delivered without constraint)
 MAX_DELIVERY      [L3/T]   is the largest amount of water that could be delivered from all SRDs given their inflow, lower and upper limits
 INFLOW_DEFICIT    [L3/T]   is the amount of additional inflow needed to meet demand assuming lower and upper limits and inflow is infinite (shortfall from inflow given constraints).
@@ -52,6 +53,7 @@ PER                 INTEGER
 STP                 INTEGER
 WBS                 INTEGER
 DELIVERY            DOUBLE
+NRD_SURPLUS         DOUBLE
 SFR_INFLOW          DOUBLE
 MAX_DELIVERY        DOUBLE
 WBS_SFR_DMD         DOUBLE

@@ -30,6 +30,7 @@ SEG                        is the SFR Segment number that removes water from as 
 RCH                        is the SFR Reach   number that removes water from as a delivery (diversion), if set to zero then WBS did not have a delivery location defined
 WBS_SFR_DMD       [L3/T]   is the surface water demanded by the WBS at the specific SEG, RCH (Note this will decrease within the same WBS if there are multiple SRDs, see note below.)
 DELIVERY          [L3/T]   is the amount water water delivered to meet the WBS demand from the specific SEG, RCH
+NRD_SURPLUS       [L3/T]   is the non-routed delivery surplus (NRD use flag 1, water beyond the WBS demand) discharged into SFR at the specific SEG, RCH; it is added to the SFR runoff of the reach and is never netted against DELIVERY (the two are exclusive: a surplus means the WBS had no surface-water demand)
 SFR_INFLOW        [L3/T]   is the upstream flow into the SEG, RCH (total water that can be delivered)
 LOWER_LIMIT       [L3/T]   is the flood-control type of diversion limit specified with the SEMI_ROUTED_DELIVERY_LOWER_LIMIT keyword. Only flow that is greater then the lower limit is available to the WBS. See note at bottom for more information.
 UPPER_LIMIT       [L3/T]   is the maximum flow that a WBS can remove,   specified with the SEMI_ROUTED_DELIVERY_UPPER_LIMIT keyword. Only flow that is beneath this limit is available to the WBS. See note at bottom for more information.
@@ -63,6 +64,7 @@ WBS                 INTEGER
 SEG                 INTEGER
 RCH                 INTEGER
 DELIVERY            DOUBLE
+NRD_SURPLUS         DOUBLE
 SFR_INFLOW          DOUBLE
 LOWER_LIMIT         DOUBLE
 UPPER_LIMIT         DOUBLE
