@@ -1130,21 +1130,12 @@ C     ------------------------------------------------------------------
         !
         IF(CHECK) THEN
           !
-          CHECK = FALSE
           DTMP  = ABS(DIF)
-          ADIF  = ABS(DIF-OSCIL_DMP_DIF)
-          !
-          IF    ( DIEZ > DOS   .AND. ADIF < UNO) THEN
-                                                   CHECK = TRUE
-          ELSEIF( DTMP > UNO   .AND. ADIF < HALF) THEN
-                                                   CHECK = TRUE
-          ELSEIF( DTMP > TENTH .AND. ADIF < CENTI) THEN
-                                                   CHECK = TRUE
-          ELSEIF( DTMP > CENTI .AND. ADIF < MILLI) THEN
-                                                   CHECK = TRUE
-          ELSEIF( DTMP <= CENTI) THEN
-                                                   CHECK = TRUE
-          END IF
+          ! The largest head change flipped sign at the same cell.
+          ! Dampen only an oscillation that is not decaying on its own:
+          ! the new change must be at least half the previous one
+          ! (a shrinking alternation is the solver converging).
+          CHECK = DTMP >= HALF*ABS(OSCIL_DMP_DIF)
           !
           IF(CHECK) THEN
            !
