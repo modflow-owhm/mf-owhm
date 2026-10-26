@@ -1298,7 +1298,7 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
     INTEGER,                   INTENT(IN   ):: F
     DOUBLE PRECISION,          INTENT(IN   ):: DEMAND
     TYPE(FMP_FLOW_REMOVE_SFR), INTENT(INOUT):: SFR_DELIV
-    INTEGER:: K
+    INTEGER:: K, I
     DOUBLE PRECISION:: DMD,SUP,DTMP,TOT_FLOW
     !
     IF(DEMAND < NEARZERO_29 .OR. SWF%SRDLOC(F)%N < ONE) THEN     ! Demand too small to account for or no SRD to supply demand
@@ -1326,6 +1326,7 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
           DO CONCURRENT(K=ONE:DIM); FLOW(K) = DZ
           END DO
           !
+          ! Water available to each record: the reach inflow minus the lower limit, capped by the upper limit
           TOT_FLOW = DZ
           DO K=ONE, DIM
              !
@@ -1334,7 +1335,7 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
              TOT_FLOW = TOT_FLOW + DTMP
           END DO
           !
-          IF(DEMAND > TOT_FLOW) THEN  !SRD WILL NEVER MEET DEMAND
+          IF(DEMAND > TOT_FLOW .OR. NO_WT) THEN  ! SRD cannot meet the demand, or no FRAC weights: remove in the order specified
               !
               DO K=ONE, DIM
                   !
@@ -1346,20 +1347,8 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
                   DMD = DMD - SUP
               END DO
               !
-          ELSEIF(NO_WT) THEN !REMOVE DEMAND IN ORDER
-              !
-              DO K=ONE, DIM
-                  !
-                  CALL SFR_DELIV%APPLY_DMD(ISTRM(K), DMD, SUP, LLIM(K), ULIM(K), MAXDEL(K))
-                  !
-                  FLOW(K)     = FLOW(K)     + SUP
-                  TOT_DMD_MET = TOT_DMD_MET + SUP
-                  !
-                  DMD = DMD - SUP
-                  !
-              END DO
           ELSE
-              DO K=ONE, DIM !FIRST PASS
+              DO K=ONE, DIM !FIRST PASS: each record supplies its FRAC share of the demand
                   !
                   DTMP = DEMAND * WT(K)
                   !
@@ -1371,34 +1360,42 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
                   DMD = DMD - SUP
               END DO
               !
-              IF(DEMAND - TOT_DMD_MET > NEARZERO_29) THEN  !NOT FULL MET, UPDATE AVAILIBLE FLOW
+              ! Records that fell short of their share shift the deficit to the others, in proportion to the
+              ! water each can still deliver (its remaining inflow above the lower limit and below what is
+              ! left of its upper limit). Repeated until the demand is met or nothing is left; each pass
+              ! exhausts at least one record, so DIM passes suffice.
+              DO I=ONE, DIM
+                  IF(DMD < NEARZERO_29) EXIT
                   !
                   TOT_FLOW = DZ
                   DO K=ONE, DIM
-                     TOT_FLOW = TOT_FLOW + SFR_DELIV%GET_INFLOW(ISTRM(K))
+                     CALL SFR_DELIV%SET_TO_INFLOW(ISTRM(K), DTMP, LLIM(K), ULIM(K), FLOW(K))
+                     TOT_FLOW = TOT_FLOW + DTMP
                   END DO
                   !
-                  IF(TOT_FLOW > NEARZERO_29) THEN
+                  IF(TOT_FLOW < NEARZERO_29) EXIT
+                  !
+                  TOT_FLOW = DMD / TOT_FLOW   ! fraction of each record's available water that meets the deficit
+                  IF(TOT_FLOW > UNO) TOT_FLOW = UNO
+                  !
+                  DO K=ONE, DIM
                       !
-                      TOT_FLOW = DMD / TOT_FLOW !FRACTION OF DEMAND == USED FOR DMD * (SFR_DELIV%GET_INFLOW(ISTRM(K))/TOT_FLOW) -- BUT INSTEAD HOLDING DMD/TOT_INFLOW
+                      CALL SFR_DELIV%SET_TO_INFLOW(ISTRM(K), DTMP, LLIM(K), ULIM(K), FLOW(K))
                       !
-                      DO K=ONE, DIM !SECOND PASS
+                      DTMP = DTMP * TOT_FLOW
+                      !
+                      IF(DTMP > NEARZERO_29) THEN
+                          CALL SFR_DELIV%APPLY_DMD(ISTRM(K), DTMP, SUP, LLIM(K), ULIM(K), REMOVED=FLOW(K))
                           !
-                          DTMP = SFR_DELIV%GET_INFLOW(ISTRM(K)) * TOT_FLOW  ! TOT_FLOW = DMD / TOT_FLOW
+                          FLOW(K)     = FLOW(K)     + SUP
+                          TOT_DMD_MET = TOT_DMD_MET + SUP
                           !
-                          IF(DTMP > NEARZERO_29) THEN
-                              CALL SFR_DELIV%APPLY_DMD(ISTRM(K), DTMP, SUP, LLIM(K), ULIM(K))
-                              !
-                              FLOW(K)     = FLOW(K)     + SUP
-                              TOT_DMD_MET = TOT_DMD_MET + SUP
-                              !
-                              DMD = DMD - SUP
-                              IF(DMD < NEARZERO_29) EXIT
-                          END IF
-                          !
-                      END DO
-                  END IF
-              END IF
+                          DMD = DMD - SUP
+                          IF(DMD < NEARZERO_29) EXIT
+                      END IF
+                      !
+                  END DO
+              END DO
           END IF
       END IF
     END ASSOCIATE
