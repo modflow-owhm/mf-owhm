@@ -33,6 +33,52 @@ TBA
           * The same delivery check but as an absolute rate (`L^3/T`). A negative value disables it again. Disabled by default. 
      * `PRINT SFR_DELIVERY_MISMATCH  Generic_Output` output option.
           * Writes the mass error between FMP and SFR for the semi-routed deliveries. The first row of each time step (`SEG = RCH = 0`) is the total over all delivery reaches.
+     * `SEMI_ROUTED_DELIVERY_INFLOW_FRACTION  FLOAT`
+          * Fraction of the SFR reach inflow (of the previous solver iteration) that a semi-routed delivery may remove; default `1.0`, must be greater than `0` and not greater than `1`. The lower and upper delivery limits still apply.
+          * The inflow of a delivery reach can include return flow that FMP itself routed into the stream upstream of the delivery point (for example a WBS whose return point lies above its own head gate), so a delivery sized to the whole inflow partly consumes its own return flow, which the next iteration then changes. A fraction below `1` leaves that margin to the stream and reduces the mismatch that the tolerance keywords above have to resolve by extra iterations.
+
+### `FMP` `NRD_SURPLUS` Column in the SFR Delivery Output
+
+- `PRINT SFR_DELIVERY` and `PRINT SFR_DELIVERY_BY_WBS` (`SURFACE_WATER` block) have a new column `NRD_SURPLUS` after `DELIVERY`:
+  the non-routed delivery surplus (`NON_ROUTED_DELIVERY` use flag `1`, water beyond the WBS demand) that FMP discharges into SFR at the delivery point.
+  It is added to the SFR runoff of the reach, so for a reach the SFR `RUNOFF` is the FMP return flow minus `DELIVERY` plus `NRD_SURPLUS`.
+  The binary records gain the same `DOUBLE` after `DELIVERY`; see `doc/Output_Header_Defintion/FMP/surface_water.sfr_delivery.txt` and `surface_water.sfr_delivery_by_wbs.txt`.
+
+### `BAS` `BUDGETDB` Convergence Columns
+
+* The `BUDGETDB` output file (`BAS` option `BUDGETDB  Generic_Output`) has three new columns after `PERCENT_ERROR`:
+     * `ITER` is the number of outer iterations the solver needed for the time step.
+     * `HCLOSE` is the final maximum absolute head change of the time step.
+     * `L2_RCLOSE` is the final L2 norm of the cell flow residuals.
+     * They are the `HClose` and `L2-RClose` values of the LIST file's "Solver Convergence Information", so a model's convergence history can be read from one file together with its budget.
+* The `IN_OUT` column keeps its sign (`TOTAL IN` minus `TOTAL OUT`) instead of being an absolute value; `PERCENT_ERROR` stays positive.
+* The binary form writes the three values as an extra record per time step, and its header column count now includes both the `_IN` and `_OUT` columns. The header definition is `doc/Output_Header_Defintion/BAS/options.budgetdb.txt`.
+
+### `SFR` Kinematic-Wave Routing Storage Weight
+
+* `TRANSROUTE_WEIGHT  AUTO|WEIGHT` option (`OPTIONS` block), used only with transient routing (`TRANSROUTE` and `IRTFLG > 0`) in transient stress periods.
+     * The kinematic-wave equation of a reach is solved with a 4-point (box) scheme. The storage change of the reach is a weighted average of the flow-area change at the upstream end (weight `1 - WEIGHT`) and the downstream end (weight `WEIGHT`) of the reach. MODFLOW-2005, MODFLOW-NWT, GSFLOW, and earlier MF-OWHM versions use `WEIGHT = 0.5`, which centers the storage on the reach midpoint.
+     * With `WEIGHT = 0.5` the scheme is second order accurate but is only monotone when the Courant number, `COURANT = CELERITY * DELT_ROUTE / RCHLEN`, is at least 0.5, where `CELERITY` is the flood-wave speed `dQ/dA` and `DELT_ROUTE = DELT/NUMTIM`. Below that (short time steps, long reaches, low flows where the celerity is small, or a larger `NUMTIM`), a rise in inflow lowers the outflow, the solution oscillates along the channel, and a negative outflow was set to zero, which creates water. With `WEIGHT >= 1 - COURANT` the scheme is monotone.
+     * One value for all reaches:
+          * `AUTO` (the default), or any negative number: `WEIGHT = max(0.5, 1 - COURANT)` for each reach and routing time step, with the celerity at the smallest of the reach's known flows. It equals the previous scheme whenever `COURANT >= 0.5`, so most models with daily or longer time steps give the same results, and it removes the oscillation and the water created by clipping elsewhere. Because the weight changes over time, the stored volume while a channel fills or drains can differ by a few percent from the reach length times the outflow-end area; each time step still balances.
+          * `0.5` the previous midpoint scheme.
+          * `1.0` storage at the downstream end of the reach: always monotone, but adds numerical diffusion of about `CELERITY * RCHLEN / 2`, which is large for long reaches.
+          * Between `0.5` and `1.0` a fixed blend. Values below `0.5` are allowed with a warning because they may oscillate.
+
+* `PRINT_TRANSROUTE  Generic_Output` option (`OPTIONS` block)
+     * Writes for every reach and time step the routing time step length, reach length, previous and current reach inflow and outflow, `CELERITY`, `COURANT`, the `WEIGHT` used, the channel `STORAGE_CHANGE`, and the `ROUTING_ERROR` (water created or lost where a negative outflow was reset to zero).
+     * Shows where a fixed weight is below `1 - COURANT` (and so may oscillate) and how much water that created, and lets the routing time step (`NUMTIM`) or reach lengths be chosen from the Courant numbers.
+     * Also works without routing (`IRTFLG = 0` or no `TRANSROUTE`) to get the `CELERITY` and `COURANT` numbers of the steady streamflow, for example to decide if routing is needed. Reaches that are not routed (also in steady state stress periods) write `NaN` for the previous flows and `WEIGHT`, and zero `STORAGE_CHANGE` and `ROUTING_ERROR`.
+     * Supports the `BINARY` keyword. Column definitions are in `doc/Output_Header_Defintion/SFR/options.print_transroute.txt`.
+
+### `SFR` Streambed Conductivity from the Aquifer
+
+* `STRHC1KH  FACTOR` and `STRHC1KV  FACTOR` options (`OPTIONS` block)
+     * Set the streambed vertical hydraulic conductivity of every reach to `FACTOR` times the hydraulic conductivity of the model cell the reach is in, replacing the input `STRHC1` (or `HCOND1` and `HCOND2`).
+     * `STRHC1KH` uses the horizontal hydraulic conductivity (`HK`); `STRHC1KV` uses the vertical hydraulic conductivity (`VKA`, or `HK/VKA` when `LAYVKA` is not zero). Only one may be specified.
+     * The cell is in the reach's current layer, so it follows the reach when SFR moves it to a lower layer (see `NO_REACH_LAYER_CHANGE`). Requires the `LPF` or `UPW` package.
+     * This lets the streambed conductivity follow a calibrated or zoned aquifer conductivity instead of a separate set of streambed values.
+     * The options were introduced in MODFLOW-2005, MODFLOW-NWT, and GSFLOW, but were not documented and had no effect there (MODFLOW-2005 never applied the factor, and MODFLOW-NWT and GSFLOW applied it only to reaches in inactive cells).
 
 ### Build Systems
 

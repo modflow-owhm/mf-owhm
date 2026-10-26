@@ -1097,7 +1097,10 @@ BEGIN SURFACE_WATER
    #   FRAC is optional and if specified indicates an initial fraction
    #     of the irrigation demand that is supplied by the SRD.
    #     If the SRD can not supply that amount of water, then the
-   #     deficit demand is shifted to other defined SRD's.
+   #     deficit demand is shifted to other defined SRD's, in proportion
+   #     to the water each can still deliver (its reach inflow above the
+   #     lower limit and below the upper limit), until the demand is met
+   #     or no deliverable water is left.
    #
    #        ***If FRAC is NOT specified (or specified as -1),
    #           then water is removed from the SRD in the order they are specified.
@@ -1150,9 +1153,10 @@ BEGIN SURFACE_WATER
    # SEMI_ROUTED_DELIVERY's are updated every solver iteration based on the available water in SFR.
    # The keyword SEMI_ROUTED_DELIVERY_CLOSURE_TOLERANCE defines a tolerance for how much a delivery rate
    # can change between solver iterations before convergence is allowed.
-   # If not specified, then the default tolerance is 0.02 L^3/T change in delivery.
+   # The tolerance is a relative change: |DELIVERY - DELIVERY_PREVIOUS| / max(DELIVERY, DELIVERY_PREVIOUS)
+   # If not specified, then the default tolerance is 0.02 (2 percent).
    #   This indicates that--in addition to the solver criteria--convergence is only allowed
-   #   if the the change in SEMI_ROUTED_DELIVERY from the previous iteration is less then 0.02 L^3/T
+   #   if every SEMI_ROUTED_DELIVERY changed by less than 2 percent from the previous iteration.
    #
    SEMI_ROUTED_DELIVERY_CLOSURE_TOLERANCE  FLOAT
    #
@@ -1172,6 +1176,15 @@ BEGIN SURFACE_WATER
    # tolerance stays in effect, so convergence requires both checks to pass. A negative value disables it again.
    #
    SEMI_ROUTED_DELIVERY_MISMATCH_ABSOLUTE_TOLERANCE  FLOAT
+   #
+   # Fraction of the SFR reach inflow that semi-routed deliveries may remove.
+   # A fraction below 1 (for example 0.99, imposes a limit of 0.99*INFLOW)
+   # may help with convergence by allowing some water to still pass through SFR,
+   # and minimize the chance that FMP takes more water then the next SFR iteration has
+   # Default is 1.0, and can be any value greater than 0 and less then or equal to 1. 
+   # Note that, any other limits still apply (allotments, lower and upper flow).
+   #
+   SEMI_ROUTED_DELIVERY_INFLOW_FRACTION  FLOAT
    #
    # ------------------------------------------------------------------------------------------------------------------
    #
