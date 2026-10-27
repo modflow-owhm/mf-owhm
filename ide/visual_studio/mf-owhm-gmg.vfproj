@@ -16,7 +16,7 @@
 			<Tool Name="VFManifestTool" SuppressStartupBanner="true"/>
 		</Configuration>
 		<Configuration Name="Release|x64" UseCompiler="ifxCompiler" OutputDirectory="$(SolutionDir)..\..\bin" IntermediateDirectory="$(SolutionDir)..\..\obj\vs_$(ProjectName)_$(Configuration)_$(Platform)">
-			<Tool Name="VFFortranCompilerTool" AdditionalOptions="/assume:contiguous_pointer" SuppressStartupBanner="true" DebugInformationFormat="debugLineInfoOnly" OpenMPConditionalCompilation="false" OmpOffloadConstructs="ompOffloadNo" DisableSpecificDiagnostics="6717" RealKIND="realKIND8" FloatingPointExceptionHandling="fpe0" Traceback="true"/>
+			<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugLineInfoOnly" OpenMPConditionalCompilation="false" OmpOffloadConstructs="ompOffloadNo" DisableSpecificDiagnostics="6717" RealKIND="realKIND8" FloatingPointExceptionHandling="fpe0" FloatingPointModel="source" Traceback="true"/>
 			<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" ProgramDatabaseFile="$(IntDir)\$(TargetName).pdb" SubSystem="subSystemConsole" StackReserveSize="10485760" StackCommitSize="10485760" AdditionalDependencies="$(SolutionDir)..\..\lib\GMG_$(Platform)_$(Configuration).lib"/>
 			<Tool Name="VFResourceCompilerTool"/>
 			<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
