@@ -542,11 +542,11 @@ endef
 #
 CFG     :=$(strip $(shell echo $(CONFIG) | tr [:lower:] [:upper:]))
 CMPLR   :=$(strip $(shell echo $(COMPILER) | tr a-z A-Z))
-STATIC  :=$(strip $(shell echo $(STATIC) | tr a-z A-Z))
 DBLE    :=$(strip $(shell echo $(DBLE)   | tr a-z A-Z))
 F90     :=$(strip $(F90))
 CC      :=$(strip $(CC))
-PROGRAM :=$(strip $(PROGRAM))
+override STATIC  :=$(strip $(shell echo $(STATIC) | tr a-z A-Z))
+override PROGRAM :=$(strip $(PROGRAM))
 #
 ########################################################################
 #
@@ -554,7 +554,7 @@ PROGRAM :=$(strip $(PROGRAM))
 #
 ifeq ($(CFG), DEBUG)
    #
-   PROGRAM:=$(PROGRAM)-debug
+   override PROGRAM:=$(PROGRAM)-debug
    #
    F90FlagsIntel :=-O0 -g -debug -traceback -assume nocc_omp -fpe0 -fp-model source -nologo -warn nousage -check bounds,pointers,stack,format,output_conversion,uninit -diag-disable=10448
    F90FlagsGCC   :=-O0 -g -w -fbacktrace -fdefault-double-8  -ffree-line-length-2048 -fmax-errors=10 -ffpe-trap=zero,overflow,invalid -finit-real=snan -fcheck=all # -fstack-usage #<= THIS PROVIDES LOTS OF INFO   -std=f2008
@@ -590,9 +590,12 @@ endif
 #
 # Establish Proper Optimization Flags and Static Flags
 #
-# Ensure that variables are set if STATIC not in use
+# Ensure that variables are set if STATIC not in use.
+# "override" is required: STATIC and PROGRAM may be given on the make command line
+# (make STATIC=NO), and a command-line variable ignores a plain reassignment, so the
+# literal word NO would otherwise be passed to the compiler.
 ifneq ($(strip $(STATIC)), YES)
-  STATIC:=
+  override STATIC:=
   STATICLNK:=
 endif
 #
@@ -606,7 +609,7 @@ ifeq ($(CMPLR), GCC)
   endif
   #
   ifeq ($(strip $(STATIC)), YES)
-    STATIC   :=-static -static-libgfortran -static-libgcc  -static-libstdc++
+    override STATIC   :=-static -static-libgfortran -static-libgcc  -static-libstdc++
     STATICLNK:=-static -static-libgfortran -static-libgcc  -static-libstdc++
   endif
   #
@@ -624,7 +627,7 @@ ifeq ($(CMPLR), INTEL)
     endif
   endif
   ifeq ($(strip $(STATIC)), YES)
-    STATIC   :=-static -static-intel -qopenmp-link=static -static-libstdc++ -static-libgcc
+    override STATIC   :=-static -static-intel -qopenmp-link=static -static-libstdc++ -static-libgcc
     STATICLNK:=-static -static-intel -qopenmp-link=static -static-libstdc++ -static-libgcc
   endif
   #
@@ -640,7 +643,7 @@ ifeq ($(CMPLR), LLVM)
   endif
   #
   ifeq ($(strip $(STATIC)), YES)
-    STATIC   :=-static-flang-libs 
+    override STATIC   :=-static-flang-libs 
     STATICLNK:=-static-flang-libs 
   endif
   #
@@ -654,8 +657,8 @@ endif
 #
 F90FLAGS :=$(strip $(F90FLAGS))
 CFLAGS   :=$(strip $(CFLAGS))
-STATIC   :=$(strip $(STATIC))
 STATICLNK:=$(strip $(STATICLNK))
+override STATIC   :=$(strip $(STATIC))
 #
 ########################################################################
 #
