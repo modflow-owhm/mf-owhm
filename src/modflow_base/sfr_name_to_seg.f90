@@ -864,17 +864,14 @@ MODULE SFR_INPUT_DATA_TYPES!, ONLY: SFR_NAMED_LOCATION, SFR_SEGRCH_TFR, SFR_SEG_
     CLASS(FMP_FLOW_REMOVE_SFR),  INTENT(INOUT):: SFR
     INTEGER,                     INTENT(IN   ):: ISTRM
     INTEGER:: I
-    LOGICAL:: NOT_FOUND
     !
     IF(ISTRM > Z) THEN
-        NOT_FOUND = TRUE
-        DO CONCURRENT(I=ONE:SFR%N, ISTRM == SFR%ISTRM(I)); NOT_FOUND = FALSE
+        DO I=ONE, SFR%N
+          IF(ISTRM == SFR%ISTRM(I)) RETURN
         END DO
         !
-        IF(NOT_FOUND) THEN
-            SFR%N = SFR%N + ONE
-            SFR%ISTRM(SFR%N) = ISTRM
-        END IF
+        SFR%N = SFR%N + ONE
+        SFR%ISTRM(SFR%N) = ISTRM
     END IF
     !
   END SUBROUTINE

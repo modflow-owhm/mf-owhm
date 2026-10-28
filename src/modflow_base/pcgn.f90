@@ -1339,13 +1339,15 @@ CONTAINS
     MXHCH=ZERO; HTH=ZERO; NODE_SAVE=Z
     IB0_COUNT=COUNT(IBND==Z)
     !
-    DO CONCURRENT(N=1:DIM, IBND(N)>Z)
+    DO N=1, DIM
+      IF(IBND(N)>Z) THEN
           HTH=HTH+HCH(N)**TWO
           !
           IF (ABS(HCH(N))>ABS(MXHCH)) THEN
              NODE_SAVE=N
              MXHCH=HCH(N)
           ENDIF
+      END IF
     END DO
     MHC_NODE=NODE_SAVE
     !

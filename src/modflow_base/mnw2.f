@@ -2220,7 +2220,7 @@ C
       END DO
       !
       ! CHECK TO SEE IF ENTIRE WELL IS SCREENED IN IBOUND=0
-      DO CONCURRENT (I=1:MNWMAX)
+      DO I=1, MNWMAX
          IF(MNW2(1,I) > -0.5D0) THEN
             FIRSTNODE=NINT( MNW2(4,I) )
             LASTNODE =NINT( MNW2(4,I) + ABS(MNW2(2,I)) - UNO )

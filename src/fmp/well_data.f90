@@ -630,7 +630,8 @@ MODULE WELL_DATA_FMP_MODULE
     IF(FWEL%DIM == Z) RETURN
     !
     IBOUND_CHANGE = FALSE
-    DO CONCURRENT (I=1:FWEL%DIM, (FWEL%ACT(I) .OR. FWEL%EXT(I)) .AND. FWEL%LRC(1,I)>0)
+    DO I=1, FWEL%DIM
+      IF((FWEL%ACT(I) .OR. FWEL%EXT(I)) .AND. FWEL%LRC(1,I)>0) THEN
         !
         IF ( IBOUND(FWEL%LRC(3,I),FWEL%LRC(2,I),FWEL%LRC(1,I)) == 0 ) THEN
             IBOUND_CHANGE = TRUE
@@ -652,7 +653,8 @@ MODULE WELL_DATA_FMP_MODULE
                   WRITE(FWEL%IOUT,'(3A)') 'FMP WELL "',FWEL%WELLID(I),'" IS PUMPAGE IS REMOVED FROM THE REMAINDER OF THE CURRENT STRESS PERIOD BECAUSE IT IS LOCATED IN AN IBOUND=0 CELL.'
             END IF
         END IF
-    END DO  
+      END IF
+    END DO
     !
     IF (IBOUND_CHANGE) THEN
                            FWEL%N = COUNT(FWEL%ACT)
@@ -1172,7 +1174,8 @@ MODULE WELL_DATA_FMP_MODULE
     CASE(  ONE)
                CALL FWEL_LOAD_LIST(INWEL,FWEL,INSTYLE)
                CALL APPLY_SFAC_TO_QINI(FWEL) !--ALL FARMS SHOULD HAVE THE SAME LOAD TYPE --ONLY APPLY SFAC FOR LIST LOAD...LINEFEED READS NEW DATA EVERY SP SO IT WILL BE APPLIED THEN
-               DO CONCURRENT (I=ONE:NFARM); MXDIM = MXDIM + FWEL(I)%DIM
+               DO I=ONE, NFARM
+                 MXDIM = MXDIM + FWEL(I)%DIM
                END DO
     CASE(  TWO)
                CALL FWEL_LOAD_FID_LINEFEED(INWEL,FWEL,INSTYLE)
@@ -1180,7 +1183,8 @@ MODULE WELL_DATA_FMP_MODULE
                MXDIM=ABS(FWEL(ONE)%DIM)
     CASE(THREE)
                CALL FWEL_LOAD_CAPACITY_LINEFEED(INWEL,FWEL,INSTYLE)
-               DO CONCURRENT (I=ONE:NFARM); MXDIM = MXDIM + FWEL(I)%DIM
+               DO I=ONE, NFARM
+                 MXDIM = MXDIM + FWEL(I)%DIM
                END DO
     CASE DEFAULT
                CALL STOP_ERROR(BLNK,BL%IU,BL%IOUT,'FMP SUPPLY_WELL BLOCK FAILED TO LOCATE ONE OF THE FOLLOWING KEYWORDS:'//NL//'TIME  FRAME'//NL//'LINEFEED WBS'//NL//'LINEFEED CAPACITY'//NL//'ONE OF THESE THREE KEYWORDS MUST BE PRESENT TO CONTINUE A SIMULATION WITH FARM WELLS')
@@ -1223,8 +1227,8 @@ MODULE WELL_DATA_FMP_MODULE
             END DO
           END DO
         ELSE
-            DO CONCURRENT(I=ONE:NFARM      )
-            DO CONCURRENT(K=ONE:FWEL(I)%DIM)
+            DO I=ONE, NFARM
+            DO K=ONE, FWEL(I)%DIM
                 FWEL(I)%MASTER_LOC(K) = Z
                 DO N=ONE, J
                     IF(FWEL(I)%WELLID(K)==MASTER_WID(N))THEN
@@ -1239,7 +1243,8 @@ MODULE WELL_DATA_FMP_MODULE
                       J = J + ONE
                       IF(J>MXDIM)J=MXDIM
                 END IF
-            END DO; END DO
+            END DO
+            END DO
         END IF
         DEALLOCATE(MASTER_WID)
         !FORALL(I=TWO:NFARM) FWEL(I)%MASTER_WID => FWEL(ONE)%MASTER_WID
@@ -1899,10 +1904,13 @@ MODULE WELL_DATA_FMP_MODULE
     END DO
     !
     ERR = BLNK
-    DO CONCURRENT (NF=ONE:SIZE(FWEL))
-    DO CONCURRENT (I=ONE:FWEL(NF)%DIM, FWEL(NF)%SP_END(I) < FWEL(NF)%SP_START(I) )  !DIM=0 MEANS NOTHING GETS LOADED  < 
+    DO NF=ONE, SIZE(FWEL)
+    DO I=ONE, FWEL(NF)%DIM  !DIM=0 MEANS NOTHING GETS LOADED  <
+      IF(FWEL(NF)%SP_END(I) < FWEL(NF)%SP_START(I)) THEN
                                                         ERR = ERR//FWEL(NF)%WELLID(I)//'    '//NUM2STR(FWEL(NF)%SP_START(I))//'    '//NUM2STR(FWEL(NF)%SP_END(I))//NL
-    END DO; END DO
+      END IF
+    END DO
+    END DO
     IF (ERR .NE. '') CALL STOP_ERROR(OUTPUT=BL%IOUT, MSG='FMP SUPPLY_WELL CONTAINED WELLS WITH ENDING DATES/STRESS PERIODS THAT ARE BEFORE THE STARTING DATE/STRESS PERIOD. THE FOLLOWING WELL NAMES ARE THE WELLS THAT HAD THIS PROBLEM WITH THEIR STARTING AND ENDING STRESS PERIODS.'//NL//ERR//NL)
     !
     CALL BL%LIST%DESTROY()
@@ -2041,8 +2049,10 @@ MODULE WELL_DATA_FMP_MODULE
                          !
                          IF( SP > ONE) THEN
                             FWEL%FID_FEED(ONE)%NEW_FID = FALSE
-                            DO CONCURRENT (FD=ONE:NFEED, .NOT. ALL(FWEL%FID_FEED(FD)%FID == FWEL%FID_FEED(FD)%OLD_FID) )
+                            DO FD=ONE, NFEED
+                              IF(.NOT. ALL(FWEL%FID_FEED(FD)%FID == FWEL%FID_FEED(FD)%OLD_FID)) THEN
                                   FWEL%FID_FEED(ONE)%NEW_FID = TRUE
+                              END IF
                             END DO
                          ELSE
                              FWEL%FID_FEED(ONE)%NEW_FID = TRUE
@@ -2057,7 +2067,7 @@ MODULE WELL_DATA_FMP_MODULE
     !
     IF( FWEL%FID_FEED(ONE)%NEW_FID ) THEN
        DIM=Z
-       DO CONCURRENT (FD=ONE:NFEED)
+       DO FD=ONE, NFEED
             DIM = DIM + COUNT(FWEL%FID_FEED(FD)%FID == FWEL%NF)
        END DO
        !
@@ -2156,9 +2166,11 @@ MODULE WELL_DATA_FMP_MODULE
              END DO
              !
              IF(HAS_MNW2) THEN
-                DO CONCURRENT ( FD=ONE:SIZE(FWEL%FID_FEED), FWEL%FID_FEED(FD)%MNWLINK )
+                DO FD=ONE, SIZE(FWEL%FID_FEED)
+                  IF(FWEL%FID_FEED(FD)%MNWLINK) THEN
                     !
-                    DO CONCURRENT ( I=ONE:SIZE(FWEL%FID_FEED(FD)%FID), FWEL%FID_FEED(FD)%MNWLOC(I) .NE. Z )
+                    DO I=ONE, SIZE(FWEL%FID_FEED(FD)%FID)
+                      IF(FWEL%FID_FEED(FD)%MNWLOC(I) .NE. Z) THEN
                           !
                           DO J=1, MNWMAX
                               IF( WELLID(J) == FWEL%FID_FEED(FD)%WELLID(I) ) THEN
@@ -2166,7 +2178,9 @@ MODULE WELL_DATA_FMP_MODULE
                                   EXIT
                               END IF
                           END DO
+                      END IF
                     END DO
+                  END IF
                 END DO
              END IF
     ELSEIF( FWEL%MNWLINK .AND. FWEL%LOAD_TYPE.NE.TWO .AND. FWEL%DIM > Z) THEN
@@ -2755,9 +2769,11 @@ MODULE WELL_DATA_FMP_MODULE
         !
         IF(RESETQ) CALL COPY_QINI_TO_QCAP(FWEL)
         !
-        DO CONCURRENT (I=1:FWEL%DIM, TDR( FWEL%LRC(3,I), FWEL%LRC(2,I) ) < FPS .AND. .NOT. FWEL%EXT(I))
+        DO I=1, FWEL%DIM
+          IF(TDR( FWEL%LRC(3,I), FWEL%LRC(2,I) ) < FPS .AND. .NOT. FWEL%EXT(I)) THEN
             FWEL%Qcap(I)  = DZ
             ZERO_Q = TRUE
+          END IF
         END DO
         !
         IF (ZERO_Q) THEN
@@ -2808,12 +2824,14 @@ MODULE WELL_DATA_FMP_MODULE
                 QDEF = DZ
                 QEXC = DZ
                 FRAC = DZ
-                DO CONCURRENT ( I=1:FWEL%DIM, FWEL%ACT(I) )
+                DO I=1, FWEL%DIM
+                  IF(FWEL%ACT(I)) THEN
                     IF ( FWEL%Q(I) > QAVF ) THEN
                                                  QEXC = QEXC + FWEL%Q(I) - QAVF
                     ELSE
                                                  QDEF = QDEF + QAVF - FWEL%Q(I)
                     END IF
+                  END IF
                 END DO
                 !
                 IF(QEXC .NE. DZ) FRAC = QDEF/QEXC
@@ -2875,7 +2893,8 @@ MODULE WELL_DATA_FMP_MODULE
     !
     IF(FWEL%DIM == 0) RETURN
     !
-    DO CONCURRENT ( I=1:FWEL%DIM, (FWEL%ACT(I) .OR. FWEL%EXT(I)) .AND. FWEL%MNWLOC(I) == Z ) 
+    DO I=1, FWEL%DIM
+      IF((FWEL%ACT(I) .OR. FWEL%EXT(I)) .AND. FWEL%MNWLOC(I) == Z) THEN
               ! FOR WELLS SIMULATED WITH THE FARM PROCESS:
               ! SEND FLOW RATE TO RHS OF FINITE DIFFERENCE EQUATION
               IL = FWEL%LRC(1,I)
@@ -2883,11 +2902,13 @@ MODULE WELL_DATA_FMP_MODULE
               IC = FWEL%LRC(3,I)
               !
               RHS(IC,IR,IL) = RHS(IC,IR,IL) - FWEL%Q(I)
+      END IF
     END DO
     !
     IF (FWEL%MNWLINK) THEN  !ONLY LOOK FOR MNW-LINK WELLS WHEN THERE ARE ONES WITHIN FARM
        !
-       DO CONCURRENT ( I=1:FWEL%DIM, (FWEL%ACT(I) .OR. FWEL%EXT(I)) .AND. FWEL%MNWLOC(I) > Z )
+       DO I=1, FWEL%DIM
+         IF((FWEL%ACT(I) .OR. FWEL%EXT(I)) .AND. FWEL%MNWLOC(I) > Z) THEN
               !
               J=FWEL%MNWLOC(I)
               FIRSTNODE=NINT( MNW2(4,J) )
@@ -2899,7 +2920,7 @@ MODULE WELL_DATA_FMP_MODULE
               SELECT CASE (FWEL%MNW_SPREAD)
               CASE(Z)
                     TMP = DZ
-                    DO CONCURRENT (IR=FIRSTNODE:LASTNODE)
+                    DO IR=FIRSTNODE, LASTNODE
                         TMP = TMP + MNWNOD(14,IR)
                     END DO
                     IF(TMP>DZ) THEN
@@ -2915,6 +2936,7 @@ MODULE WELL_DATA_FMP_MODULE
               CASE(TWO)
                        MNWNOD(4,FIRSTNODE:LASTNODE) = FWEL%Q(I)/DBLE(LASTNODE-FIRSTNODE+ONE)    !SPREAD PUMPAGE EVENTLY ACROSS THE NODES
               END SELECT
+         END IF
        END DO
     END IF
     !

@@ -84,7 +84,8 @@ MODULE VARIABLE_POINTER_LIST_INTERFACE!, ONLY: VAR_POINTER_LIST
     INTEGER::I
     !
     SM = DZ
-    DO CONCURRENT (I=ONE:VAR%P); SM = SM + VAR%LST(I)%D
+    DO I=ONE, VAR%P
+      SM = SM + VAR%LST(I)%D
     END DO
     !
   END FUNCTION
@@ -100,16 +101,19 @@ MODULE VARIABLE_POINTER_LIST_INTERFACE!, ONLY: VAR_POINTER_LIST
     !
     IF(PRESENT(ISTOP)) THEN
           IF (ISTOP > VAR%P) THEN 
-              DO CONCURRENT (I=ISTART:VAR%P); SM = SM + VAR%LST(I)%D
+              DO I=ISTART, VAR%P
+                SM = SM + VAR%LST(I)%D
               END DO
           ELSE
-              DO CONCURRENT (I=ISTART:ISTOP); SM = SM + VAR%LST(I)%D
+              DO I=ISTART, ISTOP
+                SM = SM + VAR%LST(I)%D
               END DO
           END IF
     ELSEIF(ISTART == VAR%P) THEN
                                               SM = VAR%LST(VAR%P)%D
     ELSEIF(ISTART <  VAR%P) THEN
-              DO CONCURRENT (I=ISTART:VAR%P); SM = SM + VAR%LST(I)%D
+              DO I=ISTART, VAR%P
+                SM = SM + VAR%LST(I)%D
               END DO
     END IF
     !

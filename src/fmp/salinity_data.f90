@@ -379,14 +379,17 @@ MODULE SALINITY_DATA_FMP_MODULE!, ONLY: SALINITY_DATA, INITIALIZE_SALINITY_DATA
         !
         IF( CDAT%IRR%LISTLOAD) THEN
             PRNT = TRUE
-            DO CONCURRENT (I=ONE:CDAT%NCROP)
-            DO CONCURRENT (K=ONE:CDAT%CROP(I)%N, SALT%INUSE(I)%VEC(K) .AND. CDAT%CROP(I)%IRR(K) == Z )
+            DO I=ONE, CDAT%NCROP
+            DO K=ONE, CDAT%CROP(I)%N
+              IF(SALT%INUSE(I)%VEC(K) .AND. CDAT%CROP(I)%IRR(K) == Z) THEN
                                                                     SALT%INUSE(I)%VEC(K) = FALSE
                                                                     IF(PRNT(I)) THEN
                                                                                     ERROR = ERROR//BLNK//NUM2STR(I,-8)//NL
                                                                                     PRNT(I) = FALSE
                                                                     END IF
-            END DO; END DO
+              END IF
+            END DO
+            END DO
 
             IF (ERROR.NE.NL) ERROR='FMP SALINTY BLOCK -- FOUND A CROP THAT HAS SALINITY DEMAND,'//NL//                                  &
                                    'BUT IT HAS AN IRRIGATION FLAG EQUAL TO ZERO,'//NL//                                                 &
@@ -395,13 +398,16 @@ MODULE SALINITY_DATA_FMP_MODULE!, ONLY: SALINITY_DATA, INITIALIZE_SALINITY_DATA
                                    '"HAS_CROP_SALINITY_DEMAND" FLAG SET FROM TRUE TO FALSE (i.e. 1 BECOMES 0).'//BLN//                  &
                                    ' CROP_ID'//ERROR
         ELSE
-            DO CONCURRENT (I=ONE:CDAT%NCROP)
-            DO CONCURRENT (K=ONE:CDAT%CROP(I)%N, SALT%INUSE(I)%VEC(K) .AND. CDAT%CROP(I)%IRR(K) == Z )
+            DO I=ONE, CDAT%NCROP
+            DO K=ONE, CDAT%CROP(I)%N
+              IF(SALT%INUSE(I)%VEC(K) .AND. CDAT%CROP(I)%IRR(K) == Z) THEN
                                                                     SALT%INUSE(I)%VEC(K) = FALSE
                                                                     R = CDAT%CROP(I)%RC(ONE,K)
                                                                     C = CDAT%CROP(I)%RC(TWO,K)
                                                                     ERROR = ERROR//BLNK//NUM2STR(I,-8)//NUM2STR(R,-10)//' '//NUM2STR(C,-10)//NL
-            END DO; END DO
+              END IF
+            END DO
+            END DO
             IF (ERROR.NE.NL) ERROR='FMP SALINTY BLOCK -- FOUND A CROP THAT HAS SALINITY DEMAND,'//NL//                                   &
                                    'BUT IT HAS AN IRRIGATION FLAG EQUAL TO ZERO,'//NL//                                                 &
                                    'SO THERE IS NO WAY TO IRRIGATE CROP TO MEET ADDITINAL SALINITY IRRIGATION DEMAND.'//NL//            &
@@ -541,7 +547,9 @@ MODULE SALINITY_DATA_FMP_MODULE!, ONLY: SALINITY_DATA, INITIALIZE_SALINITY_DATA
             END IF
         END ASSOCIATE
         !
-        DO CONCURRENT ( I=ONE:SALT%NFARM,J=ONE:FOUR, SALT%SUP_PPM(J,I) < DZ) 
+        DO I=ONE, SALT%NFARM
+        DO J=ONE, FOUR
+          IF(SALT%SUP_PPM(J,I) < DZ) THEN
                        SALT%SUP_PPM(J,I) = DZ
                        SELECT CASE(J)
                        CASE(ONE);   ERROR = ERROR//BLNK//NUM2STR(I,-8)//' NRD      SOURCE WATER'//NL
@@ -550,6 +558,8 @@ MODULE SALINITY_DATA_FMP_MODULE!, ONLY: SALINITY_DATA, INITIALIZE_SALINITY_DATA
                        CASE(FOUR);  ERROR = ERROR//BLNK//NUM2STR(I,-8)//' EXTERNAL SOURCE WATER'//NL
                        END SELECT
                        
+          END IF
+        END DO
         END DO
         IF (ERROR.NE.NL) THEN
             ERROR='FMP SALINTY BLOCK -- "WBS_SUPPLY_SALT_CONCENTRATION" IS LESS THAN 0,'//NL// &
@@ -572,9 +582,11 @@ MODULE SALINITY_DATA_FMP_MODULE!, ONLY: SALINITY_DATA, INITIALIZE_SALINITY_DATA
               !
             END ASSOCIATE
             !
-            DO CONCURRENT ( I=ONE:CDAT%NCROP, SALT%MAX_LR(I) > 0.9999D0) 
+            DO I=ONE, CDAT%NCROP
+              IF(SALT%MAX_LR(I) > 0.9999D0) THEN
                            IF(SALT%MAX_LR(I) > 0.99991D0) ERROR = ERROR//BLNK//NUM2STR(I,-8)//NL
                            SALT%MAX_LR(I) = 0.9999D0
+              END IF
             END DO
             IF (ERROR.NE.NL) THEN
                 ERROR='FMP SALINTY BLOCK -- "MAX_LEACHING_REQUIREMENT" IS GREATER THAN 0.9999,'//NL//          &
@@ -595,9 +607,11 @@ MODULE SALINITY_DATA_FMP_MODULE!, ONLY: SALINITY_DATA, INITIALIZE_SALINITY_DATA
         IF(SALT%STOL%SFAC%HAS_ALL) SALT%ECe = SALT%ECe * SALT%STOL%SFAC%ALL
         IF(SALT%STOL%SFAC%HAS_EX1) SALT%ECe = SALT%ECe * SALT%STOL%SFAC%EX1
         !
-        DO CONCURRENT ( I=ONE:CDAT%NCROP, SALT%ECe(I) < NEARZERO_12) 
+        DO I=ONE, CDAT%NCROP
+          IF(SALT%ECe(I) < NEARZERO_12) THEN
                        SALT%ECe(I) = NEARZERO_12
                        ERROR = ERROR//BLNK//NUM2STR(I,-8)//NL
+          END IF
         END DO
         IF (ERROR.NE.NL) THEN
             ERROR='FMP SALINTY BLOCK -- "CROP_SALINITY_TOLERANCE" IS LESS THAN 1E-12,'//NL//                                  &
@@ -682,14 +696,17 @@ MODULE SALINITY_DATA_FMP_MODULE!, ONLY: SALINITY_DATA, INITIALIZE_SALINITY_DATA
     !
     IF( CDAT%IRR%LISTLOAD) THEN
         PRNT = TRUE
-        DO CONCURRENT (I=ONE:CDAT%NCROP)
-        DO CONCURRENT (K=ONE:CDAT%CROP(I)%N, SALT%INUSE(I)%VEC(K) .AND. CDAT%CROP(I)%IRR(K) == Z )
+        DO I=ONE, CDAT%NCROP
+        DO K=ONE, CDAT%CROP(I)%N
+          IF(SALT%INUSE(I)%VEC(K) .AND. CDAT%CROP(I)%IRR(K) == Z) THEN
                                                                 SALT%INUSE(I)%VEC(K) = FALSE
                                                                 IF(PRNT(I)) THEN
                                                                                 ERROR = ERROR//BLNK//NUM2STR(I,-8)//NL
                                                                                 PRNT(I) = FALSE
                                                                 END IF
-        END DO; END DO
+          END IF
+        END DO
+        END DO
 
         IF (ERROR.NE.NL) ERROR='FMP SALINTY BLOCK -- FOUND A CROP THAT HAS SALINITY DEMAND,'//NL//                                  &
                                'BUT IT HAS AN IRRIGATION FLAG EQUAL TO ZERO,'//NL//                                                 &
@@ -698,13 +715,16 @@ MODULE SALINITY_DATA_FMP_MODULE!, ONLY: SALINITY_DATA, INITIALIZE_SALINITY_DATA
                                '"HAS_CROP_SALINITY_DEMAND" FLAG SET FROM TRUE TO FALSE (i.e. 1 BECOMES 0).'//BLN//                  &
                                ' CROP_ID'//ERROR
     ELSE
-        DO CONCURRENT (I=ONE:CDAT%NCROP)
-        DO CONCURRENT (K=ONE:CDAT%CROP(I)%N, SALT%INUSE(I)%VEC(K) .AND. CDAT%CROP(I)%IRR(K) == Z )
+        DO I=ONE, CDAT%NCROP
+        DO K=ONE, CDAT%CROP(I)%N
+          IF(SALT%INUSE(I)%VEC(K) .AND. CDAT%CROP(I)%IRR(K) == Z) THEN
                                                                 SALT%INUSE(I)%VEC(K) = FALSE
                                                                 R = CDAT%CROP(I)%RC(ONE,K)
                                                                 C = CDAT%CROP(I)%RC(TWO,K)
                                                                 ERROR = ERROR//BLNK//NUM2STR(I,-8)//NUM2STR(R,-10)//' '//NUM2STR(C,-10)//NL
-        END DO; END DO
+          END IF
+        END DO
+        END DO
         IF (ERROR.NE.NL) ERROR='FMP SALINTY BLOCK -- FOUND A CROP THAT HAS SALINITY DEMAND,'//NL//                                   &
                                'BUT IT HAS AN IRRIGATION FLAG EQUAL TO ZERO,'//NL//                                                 &
                                'SO THERE IS NO WAY TO IRRIGATE CROP TO MEET ADDITINAL SALINITY IRRIGATION DEMAND.'//NL//            &
@@ -1105,7 +1125,7 @@ MODULE SALINITY_DATA_FMP_MODULE!, ONLY: SALINITY_DATA, INITIALIZE_SALINITY_DATA
        DMD_FRAC = UNO
        DU = DZ
        CDMD=DZ
-       DO CONCURRENT(J=ONE:WBS%CROP(F)%N) 
+       DO J=ONE, WBS%CROP(F)%N
            I=WBS%CROP(F)%PNT(ONE,J)
            K=WBS%CROP(F)%PNT(TWO,J)
            IRR = CDAT%CROP(I)%IRR(K)
@@ -1271,7 +1291,8 @@ MODULE SALINITY_DATA_FMP_MODULE!, ONLY: SALINITY_DATA, INITIALIZE_SALINITY_DATA
        DU = DZ
        CDMD=DZ
        FOUND = FALSE
-       DO CONCURRENT(J=ONE:WBS%CROP(F)%N, WBS%CROP(F)%PNT(ONE,J) == I)
+       DO J=ONE, WBS%CROP(F)%N
+         IF(WBS%CROP(F)%PNT(ONE,J) == I) THEN
            K=WBS%CROP(F)%PNT(TWO,J)
            FOUND = TRUE
            IRR = CDAT%CROP(I)%IRR(K)
@@ -1330,6 +1351,7 @@ MODULE SALINITY_DATA_FMP_MODULE!, ONLY: SALINITY_DATA, INITIALIZE_SALINITY_DATA
            IF(DP < NEARZERO_12) DP = DZ                         ! 'DP_I'
            DP_TOT = DP_TOT + DP
            !
+         END IF
        END DO
        !
        IF(FOUND) THEN

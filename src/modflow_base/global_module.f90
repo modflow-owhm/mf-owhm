@@ -318,7 +318,10 @@ MODULE GLOBAL
     ERR   = 0.D0
     L2ERR = 0.D0
     !
-    DO CONCURRENT(K=1:NLAY, I=1:NROW, J=1:NCOL, IBOUND(J,I,K)>0)
+    DO K=1, NLAY
+    DO I=1, NROW
+    DO J=1, NCOL
+      IF(IBOUND(J,I,K)>0) THEN
           !
           DTMP = CELL_MASS_BALANCE(I,J,K)
           DTMP = ABS(DTMP)
@@ -326,6 +329,9 @@ MODULE GLOBAL
           L2ERR = L2ERR + DTMP*DTMP
           !
           IF(DTMP > ERR) ERR = DTMP
+      END IF
+    END DO
+    END DO
     END DO
     L2ERR = SQRT(L2ERR)
     !
@@ -369,7 +375,10 @@ MODULE GLOBAL
     RATIN = DZ
     RATOUT= DZ
     RATERR= DZ
-    DO CONCURRENT(K=1:NLAY, I=1:NROW, J=1:NCOL, IBOUND(J,I,K)>0)
+    DO K=1, NLAY
+    DO I=1, NROW
+    DO J=1, NCOL
+      IF(IBOUND(J,I,K)>0) THEN
         !
         HD = HNEW(J,I,K)
         ERR= DZ
@@ -485,6 +494,9 @@ MODULE GLOBAL
         ELSE
             RATERR = RATERR + ERR
         END IF
+      END IF
+    END DO
+    END DO
     END DO
     !
   END SUBROUTINE

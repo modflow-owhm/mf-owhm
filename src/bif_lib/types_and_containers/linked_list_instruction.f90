@@ -1628,7 +1628,8 @@ MODULE LINKED_LIST_INSTRUCTION!, ONLY: INTEGER_LINKED_LIST, CHARACTER_LINKED_LIS
                      END DO
                      !
                      IF(SEP_LEN > 0) THEN
-                           DO CONCURRENT (IDX=1:LST%N-1);  SIZ = SIZ + SEP_LEN
+                           DO IDX=1, LST%N-1
+                             SIZ = SIZ + SEP_LEN
                            END DO
                      END IF
                      !
@@ -1743,14 +1744,16 @@ MODULE LINKED_LIST_INSTRUCTION!, ONLY: INTEGER_LINKED_LIST, CHARACTER_LINKED_LIS
                      END DO
                      !
                      IF(SEP_LEN > 0) THEN
-                           DO CONCURRENT (IDX=1:LST%N-1);  SIZ = SIZ + SEP_LEN
+                           DO IDX=1, LST%N-1
+                             SIZ = SIZ + SEP_LEN
                            END DO
                      END IF
                      !
                      IF(PRESENT(EXT)) THEN
                            IF(PRESENT(SEP2)) THEN
                               SEP2_LEN = LEN(SEP2)
-                              DO CONCURRENT (IDX=1:EXT%N-1);  SIZ = SIZ + SEP2_LEN
+                              DO IDX=1, EXT%N-1
+                                SIZ = SIZ + SEP2_LEN
                               END DO
                            END IF
                            !
@@ -1850,7 +1853,8 @@ MODULE LINKED_LIST_INSTRUCTION!, ONLY: INTEGER_LINKED_LIST, CHARACTER_LINKED_LIS
                      END DO
                      !
                      IF(SEP_LEN > 0) THEN
-                           DO CONCURRENT (IDX=1:NLINE-1);  SIZ = SIZ + SEP_LEN
+                           DO IDX=1, NLINE-1
+                             SIZ = SIZ + SEP_LEN
                            END DO
                      END IF
                      !

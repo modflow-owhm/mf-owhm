@@ -11685,7 +11685,7 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
           ! -- DSEEP
           IRCH    = SEGRCH_IN(ISEG)                                     ! reach index @ rch 1 of DIVSEG
           JRCH    = SEGRCH_OUT(ISEG)                                    ! reach index @ last reach of DIVSEG
-          DO CONCURRENT (ISTR = IRCH:JRCH)
+          DO ISTR=IRCH, JRCH
             DIVSEG(IDVS)%DSEEP     = DIVSEG(IDVS)%DSEEP - STRM(11,ISTR) * SWO%DELT             ! NOTE: SFR specifies seepage LOSS as POSITIVE ... reverse here so GAIN is POSITIVE
           END DO !(ISTR)
           !
@@ -11730,7 +11730,7 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
             ! -- DSEEP
             IRCH     = SEGRCH_IN(JSEG)                                  ! reach index @ rch 1 of DIVSEG
             JRCH     = SEGRCH_OUT(JSEG)                                 ! reach index @ last reach of DIVSEG
-            DO CONCURRENT (JSTR  = IRCH:JRCH)
+            DO JSTR=IRCH, JRCH
               DIVSEG(IDVS)%DSEEP    = DIVSEG(IDVS)%DSEEP - STRM(11,JSTR) * SWO%DELT            ! NOTE: SFR specifies seepage LOSS as POSITIVE ... reverse here so GAIN is POSITIVE
             END DO !(JSTR)
             !
@@ -11826,7 +11826,7 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
           ! -- DSEEP
           IRCH    = SEGRCH_IN(ISEG)                                     ! reach index @ rch 1 of SPTSEG
           JRCH    = SEGRCH_OUT(ISEG)                                    ! reach index @ last reach of SPTSEG
-          DO CONCURRENT (ISTR = IRCH:JRCH)
+          DO ISTR=IRCH, JRCH
             SPTSEG(ISPT)%DSEEP    = SPTSEG(ISPT)%DSEEP - STRM(11,ISTR) * SWO%DELT              ! NOTE: SFR specifies seepage LOSS as POSITIVE ... reverse here so GAIN is POSITIVE
           END DO !(ISTR)
           !

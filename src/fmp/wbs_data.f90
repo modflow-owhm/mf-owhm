@@ -1012,7 +1012,7 @@ MODULE WBS_DATA_FMP_MODULE
             !
             !CHECK THAT PROJ, DIST, AND UNIT ARE UNIQUE
             P=Z;U=Z;D=Z
-            DO CONCURRENT (U=ONE:WBS%NUNIT)
+            DO U=ONE, WBS%NUNIT
                D=Z
                DO CONCURRENT (I=ONE:TOT, WBS%HIERARCHY_ARRAY(ONE,I) == U)
                    IF(D==Z) THEN
@@ -1024,7 +1024,7 @@ MODULE WBS_DATA_FMP_MODULE
             END DO
             P=Z;U=Z;D=Z
             !
-            DO CONCURRENT (D=ONE:WBS%NDIST)
+            DO D=ONE, WBS%NDIST
                P=Z
                DO CONCURRENT (I=ONE:TOT, WBS%HIERARCHY_ARRAY(TWO,I) == D)
                    IF(P==Z) THEN

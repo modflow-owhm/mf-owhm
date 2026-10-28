@@ -1417,8 +1417,8 @@ MODULE CROP_DATA_FMP_MODULE
             END IF
             !
             IF     (CDAT%Kc%INUSE .AND. CDAT%ZERO_CU_TO_BARE%INUSE) THEN
-                  DO CONCURRENT ( I=ONE:CDAT%NCROP ) 
-                  DO CONCURRENT ( K=ONE:CDAT%CROP(I)%N ) !  CU + Kc * Area* ETR
+                  DO I=ONE, CDAT%NCROP
+                  DO K=ONE, CDAT%CROP(I)%N  !  CU + Kc * Area* ETR
                                                     IF( (CDAT%CROP(I)%Kc(K) < NEARZERO_30 .AND. CDAT%CROP(I)%CU(K) < NEARZERO_30) ) THEN  ! CROP HAS BEEN FALLOWED -- .OR. CDAT%CROP(I)%FTR(K) < NEARZERO_30
                                                         IF(CDAT%ZERO_CU_TO_BARE%LIST(I) == ONE) THEN
                                                             CDAT%CROP(I)%CU(K) = CDAT%CROP(I)%AREA(K) * CLIM%BARE_POT_EVAP(CDAT%CROP(I)%RC(TWO,K),CDAT%CROP(I)%RC(ONE,K))  !CLIM%REF_ET(CDAT%CROP(I)%RC(TWO,K),CDAT%CROP(I)%RC(ONE,K))
@@ -1430,10 +1430,11 @@ MODULE CROP_DATA_FMP_MODULE
                                                     ELSE
                                                         CDAT%CROP(I)%CU(K) = CDAT%CROP(I)%CU(K) + ( CDAT%CROP(I)%Kc(K) * CDAT%CROP(I)%AREA(K) * CLIM%REF_ET(CDAT%CROP(I)%RC(TWO,K),CDAT%CROP(I)%RC(ONE,K)) )
                                                     END IF   
-                  END DO; END DO
+                  END DO
+                  END DO
             ELSEIF (CDAT%Kc%INUSE) THEN
-                  DO CONCURRENT ( I=ONE:CDAT%NCROP ) 
-                  DO CONCURRENT ( K=ONE:CDAT%CROP(I)%N ) !  CU + Kc * Area* ETR
+                  DO I=ONE, CDAT%NCROP
+                  DO K=ONE, CDAT%CROP(I)%N  !  CU + Kc * Area* ETR
                                                     IF( (CDAT%CROP(I)%Kc(K) < NEARZERO_30 .AND. CDAT%CROP(I)%CU(K) < NEARZERO_30) ) THEN  ! CROP HAS BEEN FALLOWED -- .OR. CDAT%CROP(I)%FTR(K) < NEARZERO_30
                                                         CDAT%CROP(I)%CU(K)  = DZ
                                                         CDAT%CROP(I)%NOT_FALLOW_SP(K) = FALSE
@@ -1441,10 +1442,12 @@ MODULE CROP_DATA_FMP_MODULE
                                                     ELSE
                                                         CDAT%CROP(I)%CU(K) = CDAT%CROP(I)%CU(K) + ( CDAT%CROP(I)%Kc(K) * CDAT%CROP(I)%AREA(K) * CLIM%REF_ET(CDAT%CROP(I)%RC(TWO,K),CDAT%CROP(I)%RC(ONE,K)) )
                                                     END IF   
-                  END DO; END DO
+                  END DO
+                  END DO
             ELSEIF(CLIM%HAS_BARE_PET .AND. CDAT%ZERO_CU_TO_BARE%INUSE) THEN
-                  DO CONCURRENT (I=ONE:CDAT%NCROP)
-                  DO CONCURRENT (K=ONE:CDAT%CROP(I)%N, CDAT%CROP(I)%CU(K) < NEARZERO_30 ) ! CROP HAS BEEN FALLOWED  -- .OR. CDAT%CROP(I)%FTR(K) < NEARZERO_30
+                  DO I=ONE, CDAT%NCROP
+                  DO K=ONE, CDAT%CROP(I)%N  ! CROP HAS BEEN FALLOWED  -- .OR. CDAT%CROP(I)%FTR(K) < NEARZERO_30
+                    IF(CDAT%CROP(I)%CU(K) < NEARZERO_30) THEN
                                                        IF(CDAT%ZERO_CU_TO_BARE%LIST(I) == ONE) THEN
                                                             CDAT%CROP(I)%CU(K) = CDAT%CROP(I)%AREA(K) * CLIM%BARE_POT_EVAP(CDAT%CROP(I)%RC(TWO,K),CDAT%CROP(I)%RC(ONE,K))       !CLIM%REF_ET(CDAT%CROP(I)%RC(TWO,K),CDAT%CROP(I)%RC(ONE,K))
                                                         ELSE
@@ -1452,16 +1455,21 @@ MODULE CROP_DATA_FMP_MODULE
                                                             WRN%RAISED = TRUE
                                                         END IF
                                                         CDAT%CROP(I)%NOT_FALLOW_SP(K) = FALSE
-                  END DO; END DO
+                    END IF
+                  END DO
+                  END DO
             ELSE
-                  DO CONCURRENT (I=ONE:CDAT%NCROP)
-                  DO CONCURRENT (K=ONE:CDAT%CROP(I)%N, CDAT%CROP(I)%CU(K) < NEARZERO_30 ) ! .OR. CDAT%CROP(I)%FTR(K) < NEARZERO_30
+                  DO I=ONE, CDAT%NCROP
+                  DO K=ONE, CDAT%CROP(I)%N  ! .OR. CDAT%CROP(I)%FTR(K) < NEARZERO_30
+                    IF(CDAT%CROP(I)%CU(K) < NEARZERO_30) THEN
                       !CALL WRN%ADD(NUM2STR(I,-8)//' '//NUM2STR(CDAT%CROP(I)%RC(ONE,K),-10)//' '//NUM2STR(CDAT%CROP(I)%RC(TWO,K),-10)//NL)
                       CDAT%CROP(I)%CU(K)  = DZ
                       !CDAT%CROP(I)%FTR(K) = DZ
                       CDAT%CROP(I)%NOT_FALLOW_SP(K) = FALSE
                       WRN%RAISED = TRUE
-                  END DO; END DO
+                    END IF
+                  END DO
+                  END DO
                   !CALL WRN%CHECK(HED='FMP CROP WARNING. FOUND EITHER A CONSUMPTIVE USE (CU) LESS THAN OR EQUAL TO ZERO.'//NL// &
                   !                       'THIS INDICATES THAT THE CROP IS FALLOWED OR BAREN LAND.'//NL//                                          &
                   !                       'HOWEVER, NEITHER A BARE SOIL POTENTIAL EVAPORATION (PAN EVAPORATION) OR REFERENCE ET WAS SPECIFIED.'//NL// &
@@ -1531,22 +1539,28 @@ MODULE CROP_DATA_FMP_MODULE
         !
         IF(UPDATE .OR. (CDAT%FTR%TRANSIENT .AND. LOAD_NEXT) .OR. (NEW_IRR .AND. CDAT%FTR%SFAC%HAS_EX3)) THEN
                   PRNT = TRUE
-                  DO CONCURRENT (I=ONE:CDAT%NCROP)
-                  DO CONCURRENT (K=ONE:CDAT%CROP(I)%N, CDAT%CROP(I)%FTR(K) > UNO )
+                  DO I=ONE, CDAT%NCROP
+                  DO K=ONE, CDAT%CROP(I)%N
+                    IF(CDAT%CROP(I)%FTR(K) > UNO) THEN
                                                                           CDAT%CROP(I)%FTR(K) = UNO
                                                                        IF(CDAT%CROP(I)%FTR(K) > NEAR_ONE) THEN
                                                                               IF(PRNT(I)) ERROR = ERROR//BLNK//NUM2STR(I,-8)//'  FRACTION OF TRANPIRATION (FTR) > 1.0, RESET TO 1.0'//NL
                                                                               PRNT(I) = FALSE
                                                                        END IF
-                  END DO; END DO
+                    END IF
+                  END DO
+                  END DO
                   !
                   PRNT = TRUE
-                  DO CONCURRENT (I=ONE:CDAT%NCROP)
-                  DO CONCURRENT (K=ONE:CDAT%CROP(I)%N, CDAT%CROP(I)%FTR(K) < DZ )
+                  DO I=ONE, CDAT%NCROP
+                  DO K=ONE, CDAT%CROP(I)%N
+                    IF(CDAT%CROP(I)%FTR(K) < DZ) THEN
                                                               CDAT%CROP(I)%FTR(K)  = DZ
                                                               IF(PRNT(I)) ERROR = ERROR//BLNK//NUM2STR(I,-8)//'  FRACTION OF TRANPIRATION (FTR) < 0.0, RESET TO 0.0'//NL
                                                               PRNT(I) = FALSE
-                  END DO; END DO
+                    END IF
+                  END DO
+                  END DO
         END IF
         !
         IF(UPDATE .OR. ((CDAT%FTR%TRANSIENT.OR.CDAT%FEI%TRANSIENT) .AND. LOAD_NEXT) .OR. (NEW_IRR .AND. CDAT%FTR%SFAC%HAS_EX3) .OR. (NEW_IRR .AND. CDAT%FEI%SFAC%HAS_EX3) .OR. (NEW_IRR .AND. 'FEI_BYIRR' == CDAT%FEI%TYP) ) THEN !CORRECTION FOR NEGATIVE FEI
@@ -1577,50 +1591,59 @@ MODULE CROP_DATA_FMP_MODULE
         !
         IF(UPDATE .OR. (CDAT%FIESWP%TRANSIENT .AND. LOAD_NEXT)) THEN
                   PRNT = TRUE
-                  DO CONCURRENT (I=ONE:CDAT%NCROP)
-                  DO CONCURRENT (K=ONE:CDAT%CROP(I)%N, CDAT%CROP(I)%FIESWP(K) < DZ )
+                  DO I=ONE, CDAT%NCROP
+                  DO K=ONE, CDAT%CROP(I)%N
+                    IF(CDAT%CROP(I)%FIESWP(K) < DZ) THEN
                                                                           CDAT%CROP(I)%FIESWP(K) = DZ
                                                                           IF(PRNT(I)) ERROR = ERROR//BLNK//NUM2STR(I,-8)//'  FRACTION OF INEFFICIENT LOSSES FROM PRECIP (FIESWP) < 0.0, RESET TO 0.0'//NL
                                                                           PRNT(I) = FALSE
-                  END DO; END DO
+                    END IF
+                  END DO
+                  END DO
                   !
                   PRNT = TRUE
-                  DO CONCURRENT (I=ONE:CDAT%NCROP)
-                  DO CONCURRENT (K=ONE:CDAT%CROP(I)%N, CDAT%CROP(I)%FIESWP(K) > UNO )
+                  DO I=ONE, CDAT%NCROP
+                  DO K=ONE, CDAT%CROP(I)%N
+                    IF(CDAT%CROP(I)%FIESWP(K) > UNO) THEN
                                                                           CDAT%CROP(I)%FIESWP(K) = UNO
                                                                        IF(CDAT%CROP(I)%FIESWP(K) > NEAR_ONE) THEN
                                                                               IF(PRNT(I)) ERROR = ERROR//BLNK//NUM2STR(I,-8)//'  FRACTION OF INEFFICIENT LOSSES FROM PRECIP (FIESWP) < 1.0, RESET TO 1.0'//NL
                                                                               PRNT(I) = FALSE
                                                                        END IF
+                    END IF
                   END DO
                   END DO
         END IF
         !
         IF(UPDATE .OR. (CDAT%FIESWI%TRANSIENT .AND. LOAD_NEXT) .OR. (NEW_IRR .AND. CDAT%FIESWI%SFAC%HAS_EX3)) THEN
                   PRNT = TRUE
-                  DO CONCURRENT (I=ONE:CDAT%NCROP)
-                  DO CONCURRENT (K=ONE:CDAT%CROP(I)%N, CDAT%CROP(I)%FIESWI(K) < DZ )
+                  DO I=ONE, CDAT%NCROP
+                  DO K=ONE, CDAT%CROP(I)%N
+                    IF(CDAT%CROP(I)%FIESWI(K) < DZ) THEN
                                                                           CDAT%CROP(I)%FIESWI(K)  = DZ
                                                                           IF(PRNT(I)) ERROR = ERROR//BLNK//NUM2STR(I,-8)//'  FRACTION OF INEFFICIENT LOSSES FROM IRRIGATION (FIESWI) < 0.0, RESET TO 0.0'//NL
                                                                           PRNT(I) = FALSE
+                    END IF
                   END DO
                   END DO
                   !
                   PRNT = TRUE
-                  DO CONCURRENT (I=ONE:CDAT%NCROP)
-                  DO CONCURRENT (K=ONE:CDAT%CROP(I)%N, CDAT%CROP(I)%FIESWI(K) > UNO )
+                  DO I=ONE, CDAT%NCROP
+                  DO K=ONE, CDAT%CROP(I)%N
+                    IF(CDAT%CROP(I)%FIESWI(K) > UNO) THEN
                                                                           CDAT%CROP(I)%FIESWI(K) = UNO
                                                                        IF(CDAT%CROP(I)%FIESWI(K) > NEAR_ONE) THEN
                                                                               IF(PRNT(I)) ERROR = ERROR//BLNK//NUM2STR(I,-8)//'  FRACTION OF INEFFICIENT LOSSES FROM IRRIGATION (FIESWI) < 1.0, RESET TO 1.0'//NL
                                                                               PRNT(I) = FALSE
                                                                        END IF
+                    END IF
                   END DO
                   END DO
         END IF
         !
         IF (UPDATE .OR. (CDAT%GW_INTER%TRANSIENT .AND. LOAD_NEXT)) THEN
-                  DO CONCURRENT ( I=ONE:CDAT%NCROP ) 
-                  DO CONCURRENT ( K=ONE:CDAT%CROP(I)%N )
+                  DO I=ONE, CDAT%NCROP
+                  DO K=ONE, CDAT%CROP(I)%N
                                                               SELECT CASE (CDAT%CROP(I)%GW_INTER(K))
                                                               !
                                                               CASE( Z, ONE, TWO, THREE, FOUR, FIVE );  CONTINUE
@@ -1642,8 +1665,9 @@ MODULE CROP_DATA_FMP_MODULE
         IF(UPDATE .OR. WBS%EFF_TFR%TRANSIENT .OR. NEW_IRR) THEN
                   CALL SETUP_CROP_EFFICIENCY(CDAT, WBS, FALSE)  !ONLY CALLED FOR CHECKING PURPOSES (FALSE)
                   !
-                  DO CONCURRENT ( I=ONE:CDAT%NCROP )
-                  DO CONCURRENT ( K=ONE:CDAT%CROP(I)%N, CDAT%CROP(I)%EFF(K) <= DZ .AND. CDAT%CROP(I)%IRR(K) > Z )
+                  DO I=ONE, CDAT%NCROP
+                  DO K=ONE, CDAT%CROP(I)%N
+                    IF(CDAT%CROP(I)%EFF(K) <= DZ .AND. CDAT%CROP(I)%IRR(K) > Z) THEN
                                                         F   = CDAT%CROP(I)%FID(K)
                                                         IRR = CDAT%CROP(I)%IRR(K)
                                                         R = CDAT%CROP(I)%RC(ONE,K)
@@ -1651,14 +1675,16 @@ MODULE CROP_DATA_FMP_MODULE
                                                         CALL WRN%ADD(BLNK//NUM2STR(I,-8)//BLNK//NUM2STR(F,-8)//BLNK//NUM2STR(IRR,-8)//BLNK//NUM2STR(R,-8)//BLNK//NUM2STR(C,-8)//NL)
                                                         !CDAT%CROP(I)%EFF(K) = DZ
                                                         CDAT%CROP(I)%IRR(K) = Z
+                    END IF
                   END DO
                   END DO
                   IF (WRN%RAISED) CALL WRN%CHECK(HED='FMP CROP WARNING EFFICIENCY <= 0.0 WITH IRRIGATION > 0'//NL//'*** IRRIGATION FOR CROP TURNED OFF DUE TO ZERO EFFECIENCY! ***'//BLN// &
                                                      ' CROP_ID  WBS      IRR      ROW      COLUMN',                   &
                                                       OUTPUT=CDAT%LOUT, TAIL=NL, NO_NL=TRUE, INIT=TRUE)
                   !
-                  DO CONCURRENT ( I=ONE:CDAT%NCROP )
-                  DO CONCURRENT ( K=ONE:CDAT%CROP(I)%N, CDAT%CROP(I)%EFF(K) > UNO .AND. CDAT%CROP(I)%IRR(K) > Z )
+                  DO I=ONE, CDAT%NCROP
+                  DO K=ONE, CDAT%CROP(I)%N
+                    IF(CDAT%CROP(I)%EFF(K) > UNO .AND. CDAT%CROP(I)%IRR(K) > Z) THEN
                                                      IF(CDAT%CROP(I)%EFF(K) > NEAR_ONE) THEN
                                                             F   = CDAT%CROP(I)%FID(K)
                                                             IRR = CDAT%CROP(I)%IRR(K)
@@ -1667,6 +1693,7 @@ MODULE CROP_DATA_FMP_MODULE
                                                             CALL WRN%ADD(BLNK//NUM2STR(I,-8)//BLNK//NUM2STR(F,-8)//BLNK//NUM2STR(IRR,-8)//BLNK//NUM2STR(R,-8)//BLNK//NUM2STR(C,-8)//NL)
                                                      END IF
                                                      CDAT%CROP(I)%EFF(K) = UNO
+                    END IF
                   END DO
                   END DO
                   IF (WRN%RAISED) CALL WRN%CHECK(HED='FMP CROP WARNING EFFICIENCY > 1.0, '//NL//'EFFICIENCY RESET TO 1.0'//BLN// &
@@ -1695,8 +1722,9 @@ MODULE CROP_DATA_FMP_MODULE
                     END DO
                     !
                     !CHECK FOR BAD ADRF VALUES
-                    DO CONCURRENT ( I=ONE:CDAT%NCROP )
-                    DO CONCURRENT ( K=ONE:CDAT%CROP(I)%N, CDAT%CROP(I)%ADRF(K) < DZ .AND. CDAT%CROP(I)%IRR(K) > Z )
+                    DO I=ONE, CDAT%NCROP
+                    DO K=ONE, CDAT%CROP(I)%N
+                      IF(CDAT%CROP(I)%ADRF(K) < DZ .AND. CDAT%CROP(I)%IRR(K) > Z) THEN
                                                           CDAT%CROP(I)%ADRF(K) = DZ
                                                           IF(CDAT%CROP(I)%ADRF(K) < NEGNEARZERO_10) THEN
                                                              F   = CDAT%CROP(I)%FID(K)
@@ -1705,14 +1733,16 @@ MODULE CROP_DATA_FMP_MODULE
                                                              C = CDAT%CROP(I)%RC(TWO,K)
                                                              CALL WRN%ADD(BLNK//NUM2STR(I,-8)//BLNK//NUM2STR(F,-8)//BLNK//NUM2STR(IRR,-8)//BLNK//NUM2STR(R,-8)//BLNK//NUM2STR(C,-8)//NL)
                                                           END IF
+                      END IF
                     END DO
                     END DO
                     IF (WRN%RAISED) CALL WRN%CHECK(HED='FMP CROP WARNING ADDITIONAL_IRRIGATION_RUNOFF_FRACTION < 0.0, '//NL//'ADDITIONAL_IRRIGATION_RUNOFF_FRACTION RESET TO 0.0'//BLN// &
                                                        ' CROP_ID  WBS      IRR      ROW      COLUMN',                   &
                                                         OUTPUT=CDAT%LOUT, TAIL=NL, NO_NL=TRUE, INIT=TRUE)
                     !
-                    DO CONCURRENT ( I=ONE:CDAT%NCROP )
-                    DO CONCURRENT ( K=ONE:CDAT%CROP(I)%N, CDAT%CROP(I)%ADRF(K) > UNO .AND. CDAT%CROP(I)%IRR(K) > Z )
+                    DO I=ONE, CDAT%NCROP
+                    DO K=ONE, CDAT%CROP(I)%N
+                      IF(CDAT%CROP(I)%ADRF(K) > UNO .AND. CDAT%CROP(I)%IRR(K) > Z) THEN
                                                           CDAT%CROP(I)%ADRF(K) = UNO
                                                           IF(CDAT%CROP(I)%ADRF(K) > NEAR_ONE) THEN 
                                                               F   = CDAT%CROP(I)%FID(K)
@@ -1721,6 +1751,7 @@ MODULE CROP_DATA_FMP_MODULE
                                                               C = CDAT%CROP(I)%RC(TWO,K)
                                                               CALL WRN%ADD(BLNK//NUM2STR(I,-8)//BLNK//NUM2STR(F,-8)//BLNK//NUM2STR(IRR,-8)//BLNK//NUM2STR(R,-8)//BLNK//NUM2STR(C,-8)//NL)
                                                           END IF
+                      END IF
                     END DO
                     END DO
                     IF (WRN%RAISED) CALL WRN%CHECK(HED='FMP CROP WARNING ADDITIONAL_IRRIGATION_RUNOFF_FRACTION > 1.0, '//NL//'ADDITIONAL_IRRIGATION_RUNOFF_FRACTION RESET TO 1.0'//BLN// &
@@ -1733,15 +1764,19 @@ MODULE CROP_DATA_FMP_MODULE
         END IF
         !
         IF (UPDATE .OR. (CDAT%ADMD%TRANSIENT .AND. LOAD_NEXT) .OR. (NEW_IRR .AND. CDAT%ADMD%SFAC%HAS_EX3)) THEN
-              DO CONCURRENT ( I=ONE:CDAT%NCROP, CDAT%CROP(I)%N > Z )
-              DO CONCURRENT ( K=ONE:CDAT%CROP(I)%N, CDAT%CROP(I)%ADMD(K) .NE. DZ .AND. CDAT%CROP(I)%IRR(K) == Z )
+              DO I=ONE, CDAT%NCROP
+                IF(CDAT%CROP(I)%N > Z) THEN
+              DO K=ONE, CDAT%CROP(I)%N
+                IF(CDAT%CROP(I)%ADMD(K) .NE. DZ .AND. CDAT%CROP(I)%IRR(K) == Z) THEN
                                                 F   = CDAT%CROP(I)%FID(K)
                                                 IRR = CDAT%CROP(I)%IRR(K)
                                                 R = CDAT%CROP(I)%RC(ONE,K)
                                                 C = CDAT%CROP(I)%RC(TWO,K)
                                                 CALL WRN%ADD(BLNK//NUM2STR(I,-8)//BLNK//NUM2STR(F,-8)//BLNK//NUM2STR(R,-8)//BLNK//NUM2STR(C,-8)//BLNK//NUM2STR(CDAT%CROP(I)%ADMD(K))//NL)
                                                 CDAT%CROP(I)%ADMD(K) = DZ
+                END IF
               END DO
+                END IF
               END DO
               IF (WRN%RAISED) CALL WRN%CHECK(HED='FMP CROP -- CHECK FOR VALID "ADDED_DEMAND" HAD CROPS WITH DEMANDS THAT DO NOT HAVE AN IRRIGATION TYPE'//NL// &
                                                  'SPECIFICALLY IT HAD "IRRIGATION=0" SO NO WAY TO SATISFY THE ADDITIONAL DEMAND.'//NL// &
@@ -2014,14 +2049,15 @@ MODULE CROP_DATA_FMP_MODULE
               !
               CDAT%BARE_FRAC = UNO
               IF(CDAT%FRAC%INUSE) THEN
-                               DO CONCURRENT (I=ONE:CDAT%NCROP    )
-                               DO CONCURRENT (K=ONE:CDAT%CROP(I)%N)
+                               DO I=ONE, CDAT%NCROP
+                               DO K=ONE, CDAT%CROP(I)%N
                                      !
                                      R = CDAT%CROP(I)%RC(ONE,K)
                                      C = CDAT%CROP(I)%RC(TWO,K)
                                      !
                                      CDAT%BARE_FRAC(C,R) = CDAT%BARE_FRAC(C,R) - CDAT%CROP(I)%FRAC(K)
-                               END DO; END DO
+                               END DO
+                               END DO
                                !0.000001
                                DO CONCURRENT ( R=ONE:CDAT%NROW, C=ONE:CDAT%NCOL, CDAT%BARE_FRAC(C,R) < CDAT%MIN_BARE .OR. WBS%FID_ARRAY(C,R) < ONE )
                                      !
@@ -2131,7 +2167,8 @@ MODULE CROP_DATA_FMP_MODULE
                CDAT%BARE_POT_EVAP = DZ
          END WHERE
          !
-         DO CONCURRENT ( R=ONE:CDAT%NROW, C=ONE:CDAT%NCOL)
+         DO R=ONE, CDAT%NROW
+         DO C=ONE, CDAT%NCOL
             !
             IF(CDAT%BARE_FRAC(C,R) > DZ) THEN
                   !
@@ -2156,6 +2193,7 @@ MODULE CROP_DATA_FMP_MODULE
                       CDAT%BARE_EVAP_PRECIP(C,R)   = DZ
                       CDAT%BARE_POT_EVAP(C,R)      = DZ
             END IF
+         END DO
          END DO
     !ELSE
     !    CDAT%BARE_PRECEP_EXCESS    = DZ
@@ -2421,7 +2459,7 @@ MODULE CROP_DATA_FMP_MODULE
                  END IF
            END DO
            !
-           DO CONCURRENT (ID=ONE:CDAT%NCROP)  ! FRAC_LOOP
+           DO ID=ONE, CDAT%NCROP  ! FRAC_LOOP
               !
               LD = CDAT%CROP(ID)%LD - ONE 
               !CDAT%CROP(ID)%ID = ID
@@ -2446,7 +2484,9 @@ MODULE CROP_DATA_FMP_MODULE
                              END IF
                              !
                              K = 0
-                             DO CONCURRENT(I=ONE:NR, J=ONE:NC, CDAT%FRAC%ARRAY(J,LD+I) > NEARZERO_30)
+                             DO I=ONE, NR
+                             DO J=ONE, NC
+                               IF(CDAT%FRAC%ARRAY(J,LD+I) > NEARZERO_30) THEN
                                  IF(FID(J,I) > Z) THEN
                                                       K=K+ONE
                                                       CDAT%CROP(ID)%RC(ONE,K) = I
@@ -2457,6 +2497,8 @@ MODULE CROP_DATA_FMP_MODULE
                                                       CALL WRN%ADD(NUM2STR(ID,-5)//' '//NUM2STR(I,-10)//' '//NUM2STR(J,-10)//NL)
                                                       
                                  END IF
+                               END IF
+                             END DO
                              END DO
               ELSE   ! NO CROPS FOUND, SO NO ALLOCATION!
                              CALL DEALLOCATE_CROP_PROP(CDAT%CROP(ID))
@@ -2500,7 +2542,7 @@ MODULE CROP_DATA_FMP_MODULE
                CDAT%CRPID(J,I) = Z
         END DO
         !
-        CID_LOOP: DO CONCURRENT (ID=ONE:CDAT%NCROP)
+        CID_LOOP: DO ID=ONE, CDAT%NCROP
            !
            !CDAT%CROP(ID)%ID = ID
            N  = COUNT(ID == CDAT%CRPID)
@@ -2517,10 +2559,14 @@ MODULE CROP_DATA_FMP_MODULE
                            END IF
                            !
                            K = 0
-                           DO CONCURRENT(I=ONE:NR, J=ONE:NC, ID == CDAT%CRPID(J,I))
+                           DO I=ONE, NR
+                           DO J=ONE, NC
+                             IF(ID == CDAT%CRPID(J,I)) THEN
                                K=K+ONE
                                CDAT%CROP(ID)%RC(ONE,K) = I
                                CDAT%CROP(ID)%RC(TWO,K) = J
+                             END IF
+                           END DO
                            END DO
            ELSE   ! NO CROPS FOUND, SO NO ALLOCATION!
                           CALL DEALLOCATE_CROP_PROP(CDAT%CROP(ID))
@@ -2660,7 +2706,7 @@ MODULE CROP_DATA_FMP_MODULE
     !
     !
     IF(CDAT%SPEC_GSE%INUSE) THEN
-          DO CONCURRENT (I=Z:CDAT%NCROP)
+          DO I=Z, CDAT%NCROP
               LD = Z
               DO K=ONE, CDAT%NCROP_ELEV
                   IF(CDAT%GSE_CID%LIST(K)==I) THEN
@@ -2692,7 +2738,7 @@ MODULE CROP_DATA_FMP_MODULE
     END IF
     !
     IF(CDAT%GSE_OFFSET%INUSE) THEN
-          DO CONCURRENT (I=Z:CDAT%NCROP)
+          DO I=Z, CDAT%NCROP
               LD = Z
               DO K=ONE, CDAT%NCROP_ELEV
                   IF(CDAT%GSE_CID%LIST(K)==I) THEN
@@ -3474,8 +3520,8 @@ MODULE CROP_DATA_FMP_MODULE
     END IF
     !
     IF(CDAT%NCROP > Z) THEN
-          DO CONCURRENT (I=ONE:CDAT%NCROP)
-          DO CONCURRENT (K=ONE:CDAT%CROP(I)%N) 
+          DO I=ONE, CDAT%NCROP
+          DO K=ONE, CDAT%CROP(I)%N
               !
               R = CDAT%CROP(I)%RC(ONE,K)
               C = CDAT%CROP(I)%RC(TWO,K)
@@ -3507,7 +3553,8 @@ MODULE CROP_DATA_FMP_MODULE
               WBS%TIRR(F)    = WBS%TIRR(F)    + CDAT%CROP(I)%TI(K) 
               WBS%TPRECIP(F) = WBS%TPRECIP(F) + CDAT%CROP(I)%TP(K)
               WBS%EPRECIP(F) = WBS%EPRECIP(F) + CDAT%CROP(I)%EP(K)
-          END DO; END DO
+          END DO
+          END DO
     END IF
     !
     IF(CDAT%CHECK_BARE) THEN
@@ -5835,20 +5882,27 @@ MODULE CROP_DATA_FMP_MODULE
     IF(F>Z) THEN !SEARCH BY FARM
         !
         IF(I<ONE .AND. K<ONE) THEN  !ALL CROP IN FARM F
-            DO CONCURRENT (J=ONE:CDAT%NCROP)
-            DO CONCURRENT (KK=ONE:CDAT%CROP(J)%N, CDAT%CROP(J)%FID(KK) == F .AND. CDAT%CROP(J)%IRR(KK) > Z )
+            DO J=ONE, CDAT%NCROP
+            DO KK=ONE, CDAT%CROP(J)%N
+              IF(CDAT%CROP(J)%FID(KK) == F .AND. CDAT%CROP(J)%IRR(KK) > Z) THEN
                                               IF(USE_AREA) AREA = CDAT%CROP(J)%AREA(KK)
                                               CDAT%CROP(J)%DEMAND_EXT(KK) = CDAT%CROP(J)%DEMAND_EXT(KK) + DMD*AREA/CDAT%CROP(J)%EFF(KK)
-            END DO; END DO
+              END IF
+            END DO
+            END DO
         ELSEIF(I>Z .AND. K<ONE) THEN !ALL CROP I IN FARM F
-            DO CONCURRENT ( KK=ONE:CDAT%CROP(I)%N, CDAT%CROP(I)%FID(KK) == F .AND. CDAT%CROP(I)%IRR(KK) > Z )
+            DO KK=ONE, CDAT%CROP(I)%N
+              IF(CDAT%CROP(I)%FID(KK) == F .AND. CDAT%CROP(I)%IRR(KK) > Z) THEN
                                               IF(USE_AREA) AREA = CDAT%CROP(I)%AREA(KK)
                                               CDAT%CROP(I)%DEMAND_EXT(KK) = CDAT%CROP(I)%DEMAND_EXT(KK) + DMD*AREA/CDAT%CROP(I)%EFF(KK)
+              END IF
             END DO
         ELSEIF(I<ONE .AND. K>Z) THEN !ALL CROP IN FARM F AT Kth POSITION
-            DO CONCURRENT ( J=ONE:CDAT%NCROP, CDAT%CROP(J)%FID(KK) == F .AND. CDAT%CROP(J)%IRR(KK) > Z )
+            DO J=ONE, CDAT%NCROP
+              IF(CDAT%CROP(J)%FID(KK) == F .AND. CDAT%CROP(J)%IRR(KK) > Z) THEN
                                               IF(USE_AREA) AREA = CDAT%CROP(J)%AREA(KK)
                                               CDAT%CROP(J)%DEMAND_EXT(KK) = CDAT%CROP(J)%DEMAND_EXT(KK) + DMD*AREA/CDAT%CROP(J)%EFF(KK)
+              END IF
             END DO
         ELSEIF(CDAT%CROP(I)%FID(K) == F .AND. CDAT%CROP(I)%IRR(K) > Z) THEN
             IF(USE_AREA) AREA = CDAT%CROP(I)%AREA(K)
@@ -5861,23 +5915,30 @@ MODULE CROP_DATA_FMP_MODULE
             IF(USE_AREA) AREA = CDAT%CROP(I)%AREA(K)
             IF(CDAT%CROP(I)%IRR(K) > Z) CDAT%CROP(I)%DEMAND_EXT(K) = CDAT%CROP(I)%DEMAND_EXT(K) + DMD*AREA/CDAT%CROP(I)%EFF(K)
         ELSE          !SPECIFY K ONLY
-            DO CONCURRENT ( J=ONE:CDAT%NCROP, CDAT%CROP(J)%IRR(K) > Z)
+            DO J=ONE, CDAT%NCROP
+              IF(CDAT%CROP(J)%IRR(K) > Z) THEN
                                               IF(USE_AREA) AREA = CDAT%CROP(J)%AREA(K)
                                               CDAT%CROP(J)%DEMAND_EXT(K) = CDAT%CROP(J)%DEMAND_EXT(K) + DMD*AREA/CDAT%CROP(J)%EFF(K)
+              END IF
             END DO
         END IF
         !
     ELSEIF(I>Z) THEN !SEARCH BY CROP
-            DO CONCURRENT ( KK=ONE:CDAT%CROP(I)%N, CDAT%CROP(I)%IRR(KK) > Z)
+            DO KK=ONE, CDAT%CROP(I)%N
+              IF(CDAT%CROP(I)%IRR(KK) > Z) THEN
                                               IF(USE_AREA) AREA = CDAT%CROP(I)%AREA(KK)
                                               CDAT%CROP(I)%DEMAND_EXT(KK) = CDAT%CROP(I)%DEMAND_EXT(KK) + DMD*AREA/CDAT%CROP(I)%EFF(KK)
+              END IF
             END DO
     ELSE !ALL ZERO
-            DO CONCURRENT (J=ONE:CDAT%NCROP)
-            DO CONCURRENT (KK=ONE:CDAT%CROP(J)%N, CDAT%CROP(J)%IRR(KK) > Z)
+            DO J=ONE, CDAT%NCROP
+            DO KK=ONE, CDAT%CROP(J)%N
+              IF(CDAT%CROP(J)%IRR(KK) > Z) THEN
                                               IF(USE_AREA) AREA = CDAT%CROP(J)%AREA(KK)
                                               CDAT%CROP(J)%DEMAND_EXT(KK) = CDAT%CROP(J)%DEMAND_EXT(KK) + DMD*AREA/CDAT%CROP(J)%EFF(KK)
-            END DO; END DO
+              END IF
+            END DO
+            END DO
     END IF
     !
   END SUBROUTINE
@@ -5920,8 +5981,9 @@ MODULE CROP_DATA_FMP_MODULE
     WARN=NL
     !
     IF(WBS%HAS_CROP_FLUX) THEN
-        DO CONCURRENT (F=ONE:WBS%NFARM, WBS%WBS_HAS_ADMD(F) )
-        DO CONCURRENT (J=ONE:WBS%CROP(F)%N)
+        DO F=ONE, WBS%NFARM
+          IF(WBS%WBS_HAS_ADMD(F)) THEN
+        DO J=ONE, WBS%CROP(F)%N
                                                 I=WBS%CROP(F)%PNT(ONE,J)
                                                 K=WBS%CROP(F)%PNT(TWO,J)
                                                 IF(WBS%CROP_FLUX(F,I) .NE. DZ .AND. CDAT%CROP(I)%IRR(K) == Z) THEN
@@ -5931,7 +5993,9 @@ MODULE CROP_DATA_FMP_MODULE
                                                        WARN=WARN//BLNK//NUM2STR(F,-8)//BLNK//NUM2STR(I,-8)//BLNK//NUM2STR(R,-8)//BLNK//NUM2STR(C,-8)//BLNK//NUM2STR(WBS%CROP_FLUX(F,I))//NL
                                                 END IF
                                                 END IF
-        END DO; END DO
+        END DO
+          END IF
+        END DO
           IF (WARN.NE.NL) THEN
                    WARN='FMP WBS AND CROP -- CHECK FOR VALID "ADDED_CROP_DEMAND LENGTH" HAD CROPS WITH DEMANDS THAT DO NOT HAVE AN IRRIGATION TYPE'//NL//'SPECIFICALLY IT HAD "IRRIGATION=0" SO NO WAY TO SATISFY THE ADDITIONAL CROP DEMAND.'//NL// &
                          'THE FOLLOWING FARMS/CROPS WILL NEVER MEET THEIR ADDIONTIONAL DEMANDS BECAUSE IT HAS IRRIGATION=0'//BLN// &
@@ -5946,8 +6010,9 @@ MODULE CROP_DATA_FMP_MODULE
     END IF
     !
     IF(WBS%HAS_CROP_VOLR) THEN
-        DO CONCURRENT (F=ONE:WBS%NFARM, WBS%WBS_HAS_ADMD(F) )
-        DO CONCURRENT (J=ONE:WBS%CROP(F)%N)
+        DO F=ONE, WBS%NFARM
+          IF(WBS%WBS_HAS_ADMD(F)) THEN
+        DO J=ONE, WBS%CROP(F)%N
                                                 I=WBS%CROP(F)%PNT(ONE,J)
                                                 K=WBS%CROP(F)%PNT(TWO,J)
                                                 IF(WBS%CROP_VOLR(F,I) .NE. DZ .AND. CDAT%CROP(I)%IRR(K) == Z) THEN
@@ -5957,7 +6022,9 @@ MODULE CROP_DATA_FMP_MODULE
                                                        WARN=WARN//BLNK//NUM2STR(F,-8)//BLNK//NUM2STR(I,-8)//BLNK//NUM2STR(R,-8)//BLNK//NUM2STR(C,-8)//BLNK//NUM2STR(WBS%CROP_FLUX(F,I))//NL
                                                 END IF
                                                 END IF
-        END DO; END DO
+        END DO
+          END IF
+        END DO
         IF (WARN.NE.NL) THEN
                  WARN='FMP WBS AND CROP -- CHECK FOR VALID "ADDED_CROP_DEMAND RATE" HAD CROPS WITH DEMANDS THAT DO NOT HAVE AN IRRIGATION TYPE'//NL//'SPECIFICALLY IT HAD "IRRIGATION=0" SO NO WAY TO SATISFY THE ADDITIONAL CROP DEMAND.'//NL// &
                        'THE FOLLOWING FARMS/CROPS WILL NEVER MEET THEIR ADDIONTIONAL DEMANDS BECAUSE IT HAS IRRIGATION=0'//BLN// &
@@ -6050,7 +6117,7 @@ MODULE CROP_DATA_FMP_MODULE
     !
     IF(WBS%IRR_AREA(F) < NEARZERO_30 .OR. WBS%SUPPLY(F)%CROP < NEARZERO_30) THEN  !NO IRRIGATED AREA OR SIMPLY NO SUPPLY --ZERO OUT DEMAND
         !
-        DO CONCURRENT(J=ONE:WBS%CROP(F)%N) 
+        DO J=ONE, WBS%CROP(F)%N
             I=WBS%CROP(F)%PNT(ONE,J)
             K=WBS%CROP(F)%PNT(TWO,J)
             !
@@ -6060,7 +6127,7 @@ MODULE CROP_DATA_FMP_MODULE
             CDAT%CROP(I)%CIR(K)    = DZ
             CDAT%CROP(I)%DEMAND(K) = DZ
             CDAT%CROP(I)%DEMAND_EXT(K) = DZ
-        END DO    
+        END DO
     ELSE
         SELECT CASE(WBS%PRORATE_DEFICIENCY)
         CASE(Z)
@@ -6093,7 +6160,7 @@ MODULE CROP_DATA_FMP_MODULE
                  END IF
                  !
                  IF( FRAC2 < UNO) THEN
-                   DO CONCURRENT(J=ONE:WBS%CROP(F)%N) 
+                   DO J=ONE, WBS%CROP(F)%N
                        I=WBS%CROP(F)%PNT(ONE,J)
                        K=WBS%CROP(F)%PNT(TWO,J)
                        !
@@ -6118,7 +6185,7 @@ MODULE CROP_DATA_FMP_MODULE
                     !
                     QAVF = WBS%SUPPLY(F)%CROP / WBS%IRR_AREA(F)  !AVERAGE FLOW PER IRRIGATED CROP AREA    / CROP_DEMAND(F)
                     !
-                    DO CONCURRENT(J=ONE:WBS%CROP(F)%N) 
+                    DO J=ONE, WBS%CROP(F)%N
                         I=WBS%CROP(F)%PNT(ONE,J)
                         K=WBS%CROP(F)%PNT(TWO,J)
                         !
@@ -6137,7 +6204,7 @@ MODULE CROP_DATA_FMP_MODULE
                     !
                     IF(QEXC > DZ) FRAC1 = QDEF/QEXC
                     !
-                    DO CONCURRENT(J=ONE:WBS%CROP(F)%N) 
+                    DO J=ONE, WBS%CROP(F)%N
                         I=WBS%CROP(F)%PNT(ONE,J)
                         K=WBS%CROP(F)%PNT(TWO,J)
                         !
@@ -6227,7 +6294,7 @@ MODULE CROP_DATA_FMP_MODULE
                      FRAC1 = WBS%SUPPLY(F)%CROP / DMD
                  END IF
                  !
-                 DO CONCURRENT(J=ONE:WBS%CROP(F)%N)
+                 DO J=ONE, WBS%CROP(F)%N
                      I=WBS%CROP(F)%PNT(ONE,J)
                      K=WBS%CROP(F)%PNT(TWO,J)
                      !
@@ -6490,7 +6557,7 @@ MODULE CROP_DATA_FMP_MODULE
                     !
                     RANK = RANK + ONE
                     !
-                    DO CONCURRENT(J=ONE:WBS%CROP(F)%N)
+                    DO J=ONE, WBS%CROP(F)%N
                           I=WBS%CROP(F)%PNT(ONE,J)
                           K=WBS%CROP(F)%PNT(TWO,J)
                           !
@@ -6527,7 +6594,7 @@ MODULE CROP_DATA_FMP_MODULE
            !
            WBS%CROP_DEMAND(F) = DZ
            WBS%CROP_DEMAND_ADDED(F) = DZ
-           DO CONCURRENT(J=ONE:WBS%CROP(F)%N)   !CROP POSITION IN WBS
+           DO J=ONE, WBS%CROP(F)%N  !CROP POSITION IN WBS
                I=WBS%CROP(F)%PNT(ONE,  J)  !CROP ID
                K=WBS%CROP(F)%PNT(TWO,  J)  !CROP POSITION IN CROP
                R=WBS%CROP(F)%PNT(THREE,J)  !CROP Row
@@ -6573,8 +6640,9 @@ MODULE CROP_DATA_FMP_MODULE
     ! END INITIALIZE VECTORS ----------------------------------
     !
     ! IRRIGATION EXCESS
-    DO CONCURRENT (I=ONE:CDAT%NCROP)
-    DO CONCURRENT (K=ONE:CDAT%CROP(I)%N, CDAT%CROP(I)%DEMAND(K) > NEARZERO_30 ) ! .AND. CDAT%CROP(I)%NOT_FALLOW(K) .AND. DZ < CDAT%CROP(I)%EFF(K) .AND. CDAT%CROP(I)%EFF(K) < UNO 
+    DO I=ONE, CDAT%NCROP
+    DO K=ONE, CDAT%CROP(I)%N  ! .AND. CDAT%CROP(I)%NOT_FALLOW(K) .AND. DZ < CDAT%CROP(I)%EFF(K) .AND. CDAT%CROP(I)%EFF(K) < UNO
+      IF(CDAT%CROP(I)%DEMAND(K) > NEARZERO_30) THEN
           !
           R = CDAT%CROP(I)%RC(ONE,K)
           C = CDAT%CROP(I)%RC(TWO,K)
@@ -6604,12 +6672,15 @@ MODULE CROP_DATA_FMP_MODULE
                      END IF
                 END IF
           END IF
-    END DO; END DO
+      END IF
+    END DO
+    END DO
     !
     ! EXTRA IRRIGATION EXCESS
     IF(CDAT%HAS_DEMAND_EXT) THEN
-      DO CONCURRENT (I=ONE:CDAT%NCROP)
-      DO CONCURRENT (K=ONE:CDAT%CROP(I)%N, CDAT%CROP(I)%DEMAND_EXT(K) > NEARZERO_30)
+      DO I=ONE, CDAT%NCROP
+      DO K=ONE, CDAT%CROP(I)%N
+        IF(CDAT%CROP(I)%DEMAND_EXT(K) > NEARZERO_30) THEN
             !
             R = CDAT%CROP(I)%RC(ONE,K)
             C = CDAT%CROP(I)%RC(TWO,K)
@@ -6667,7 +6738,9 @@ MODULE CROP_DATA_FMP_MODULE
             !
             CDAT%CROP(I)%RNOFF(K) = CDAT%CROP(I)%RNOFF(K) + CDAT%CROP(I)%RNOFF_EXT(K)
             CDAT%CROP(I)%DPERC(K) = CDAT%CROP(I)%DPERC(K) + CDAT%CROP(I)%DPERC_EXT(K)
-      END DO; END DO
+        END IF
+      END DO
+      END DO
     END IF
     !
     !PRECIPITATION EXCESS THAT RESULTS FROM EFFECTIVE PRECIPITATION TABLE
@@ -6678,19 +6751,22 @@ MODULE CROP_DATA_FMP_MODULE
                   CDAT%CROP(I)%RNOFF(K) = CDAT%CROP(I)%RNOFF(K) + CDAT%CROP(I)%RNOFF_Peff(K)
             END DO; END DO
             !
-            DO CONCURRENT (I=ONE:CDAT%NCROP)
-            DO CONCURRENT (K=ONE:CDAT%CROP(I)%N, CDAT%CROP(I)%RNOFF_Peff(K) > DZ)
+            DO I=ONE, CDAT%NCROP
+            DO K=ONE, CDAT%CROP(I)%N
+              IF(CDAT%CROP(I)%RNOFF_Peff(K) > DZ) THEN
                   !
                   R = CDAT%CROP(I)%RC(ONE,K)
                   C = CDAT%CROP(I)%RC(TWO,K)
                   !
                   WBS%RUNOFF(C,R) = WBS%RUNOFF(C,R) + CDAT%CROP(I)%RNOFF_Peff(K)
-            END DO; END DO
+              END IF
+            END DO
+            END DO
     END IF
     !
     !PRECIPITATION EXCESS
-    DO CONCURRENT (I=ONE:CDAT%NCROP    )
-    DO CONCURRENT (K=ONE:CDAT%CROP(I)%N)
+    DO I=ONE, CDAT%NCROP
+    DO K=ONE, CDAT%CROP(I)%N
           !
           R = CDAT%CROP(I)%RC(ONE,K)
           C = CDAT%CROP(I)%RC(TWO,K)
@@ -6720,13 +6796,14 @@ MODULE CROP_DATA_FMP_MODULE
                     END IF
                 END IF
           END IF
-    END DO; END DO
+    END DO
+    END DO
     !
     !CHECK IF ANY DEEP PERCOLATION EXCEDES SURFACE LEAKAGE LIMIT (SURF_VK).
     !  IF IT DOES, THEN SHIFT TO RUNOFF AS REJECTED INFILTRATION
     !
-    DO CONCURRENT (I=ONE:CDAT%NCROP)
-    DO CONCURRENT (K=ONE:CDAT%CROP(I)%N)
+    DO I=ONE, CDAT%NCROP
+    DO K=ONE, CDAT%CROP(I)%N
           !
           R = CDAT%CROP(I)%RC(ONE,K)
           C = CDAT%CROP(I)%RC(TWO,K)
@@ -6747,11 +6824,14 @@ MODULE CROP_DATA_FMP_MODULE
                                       !
                                   END IF
           END IF
-    END DO; END DO
+    END DO
+    END DO
     !
     !PRECIPITATION OVER FALLOW/BARE LAND
     IF(CDAT%CHECK_BARE) THEN
-          DO CONCURRENT ( R=ONE:CDAT%NROW, C=ONE:CDAT%NCOL, CDAT%BARE_PRECEP_EXCESS(C,R) > DZ )
+          DO R=ONE, CDAT%NROW
+          DO C=ONE, CDAT%NCOL
+            IF(CDAT%BARE_PRECEP_EXCESS(C,R) > DZ) THEN
                 !
                 IF(UPLAY(C,R) == Z) THEN  ! ALL LAYERS ARE IBOUND=Z SO NO PERMIABLE MATERIAL TO PERCOLATE INTO
                                WBS%RUNOFF(C,R) = WBS%RUNOFF(C,R) + CDAT%BARE_PRECEP_EXCESS(C,R)
@@ -6772,6 +6852,8 @@ MODULE CROP_DATA_FMP_MODULE
                                !
                                IF(EXCESS > NEARZERO_15) WBS%DPERC(C,R)  = WBS%DPERC(C,R)  + EXCESS
                 END IF
+            END IF
+          END DO
           END DO
           !
           !PRECIPITATION EXCESS THAT RESULTS FROM EFFECTIVE PRECIPITATION TABLE
@@ -6855,7 +6937,7 @@ MODULE CROP_DATA_FMP_MODULE
        RO        = DZ
        DP_E      = DZ
        RO_E      = DZ
-       DO CONCURRENT(J=ONE:WBS%CROP(F)%N) 
+       DO J=ONE, WBS%CROP(F)%N
            I=WBS%CROP(F)%PNT(ONE,J)
            K=WBS%CROP(F)%PNT(TWO,J)
            !
@@ -6902,7 +6984,7 @@ MODULE CROP_DATA_FMP_MODULE
        BARE_EVAP_P=DZ
        !
        IF(CDAT%CHECK_BARE) THEN
-          DO CONCURRENT (K=ONE:WBS%FID(F)%Count)
+          DO K=ONE, WBS%FID(F)%Count
               R = WBS%FID(F)%RC(ONE,K)
               C = WBS%FID(F)%RC(TWO,K)
               !
@@ -6980,7 +7062,9 @@ MODULE CROP_DATA_FMP_MODULE
     CU_I       = DZ
     CU         = DZ
     IF(CDAT%CHECK_BARE) THEN
-          DO CONCURRENT ( R=ONE:CDAT%NROW, C=ONE:CDAT%NCOL, CDAT%BARE_FRAC(C,R) > DZ  )
+          DO R=ONE, CDAT%NROW
+          DO C=ONE, CDAT%NCOL
+            IF(CDAT%BARE_FRAC(C,R) > DZ) THEN
                 AREA       = AREA        + CDAT%BARE_FRAC(C,R) * WBS%AREA(C,R)
                 BARE_EVAP  = BARE_EVAP   + CDAT%BARE_EVAP(C,R)
                 BARE_EVAP_P= BARE_EVAP_P + CDAT%BARE_EVAP_PRECIP(C,R)
@@ -7000,6 +7084,8 @@ MODULE CROP_DATA_FMP_MODULE
                                   DP = DP + CDAT%BARE_PRECEP_EXCESS(C,R) * (UNO - CDAT%BARE_FRAC_RUNOFF(C,R))
                    END IF
                 END IF
+            END IF
+          END DO
           END DO
     END IF
     !
@@ -7038,7 +7124,7 @@ MODULE CROP_DATA_FMP_MODULE
        DP_E   = DZ
        RO_E   = DZ
        EFF    = DZ
-       DO CONCURRENT(K=ONE:CDAT%CROP(I)%N)
+       DO K=ONE, CDAT%CROP(I)%N
            !
            !EGW = EGW  + CDAT%CROP(I)%EGW (K)
            !TGW = TGW  + CDAT%CROP(I)%TGW(K)
@@ -7227,7 +7313,8 @@ MODULE CROP_DATA_FMP_MODULE
              RO_E = DZ
              EFF  = DZ
              FOUND = FALSE
-             DO CONCURRENT(J=ONE:WBS%CROP(F)%N, WBS%CROP(F)%PNT(ONE,J) == I)
+             DO J=ONE, WBS%CROP(F)%N
+               IF(WBS%CROP(F)%PNT(ONE,J) == I) THEN
                  K=WBS%CROP(F)%PNT(TWO,J)
                  FOUND = TRUE
                  !
@@ -7273,6 +7360,7 @@ MODULE CROP_DATA_FMP_MODULE
                     IF(CDAT%CROP(I)%EFF(K)>DZ) DMDI= DMDI + CDAT%CROP(I)%CIR_INI(K)/CDAT%CROP(I)%EFF(K)
                  !END IF
                  !
+               END IF
              END DO
              !
              IF(EFF > NEARZERO_30) THEN  !EFF = Sum of CIR

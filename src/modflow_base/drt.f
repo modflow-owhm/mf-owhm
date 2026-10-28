@@ -589,8 +589,10 @@ Cseb CHECK TO SEE IF LINKED PACKAGES ARE ACTIVE OR FLAG AS ERROR
              CALL DRTBUD%ADD( I )  !Neg value indicates only one group and it is the size of NDRTCL
              !
              IF (IDRTFL > Z) THEN
-                 DO CONCURRENT (I=1:NDRTCL, DRTF(6,I) > 0.1) !>0 indicates drain return flow to groundwater
+                 DO I=1, NDRTCL  !>0 indicates drain return flow to groundwater
+                   IF(DRTF(6,I) > 0.1) THEN
                       GRP_RTN(1) = GRP_RTN(1) + ONE
+                   END IF
                  END DO
              END IF
          END IF
