@@ -232,6 +232,37 @@
       "dependsOn": ["Clean OBJ Folder", "Build ifx Release"]
     },
     {
+      "label": "Build ifx Fast",
+      "type": "shell",
+      "command": "make",
+      "args": [
+        "compile",
+        "CONFIG=fast",
+        "COMPILER=INTEL",
+        "F90=ifx",
+        "CC=icx",
+        "USEGMG=NO",
+        "src_dir=${config:ProgramSRC.Dir}",
+        "int_dir=${config:ProgramOBJ.Dir}/vscode_ifx_fast",
+        "bin_out=${config:ProgramName.Dir}/${config:ProgramName.Release}-ifx-fast"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "clear": true,
+        "focus": true,
+        "panel": "shared"
+      },
+      "problemMatcher": ["$msCompile", "$gcc"]
+    },
+    {
+      "label": "Rebuild ifx Fast",
+      "dependsOrder": "sequence",
+      "dependsOn": ["Clean OBJ Folder", "Build ifx Fast"]
+    },
+    {
       "label": "Build ifx Debug GMG",
       "type": "shell",
       "command": "make",

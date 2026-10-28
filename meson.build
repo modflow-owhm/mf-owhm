@@ -2,6 +2,9 @@
 #
 #   meson setup build                          # gfortran or ifort/ifx found on PATH, release
 #   meson setup build -Dconfig=debug
+#   meson setup build -Dconfig=fast               # no floating-point traps, AVX2 code (see doc/BUILD.md)
+#   meson setup build -Dconfig=fast-pgo-gen       # then run a model with the -pgo-gen binary, then
+#   meson setup build -Dconfig=fast-pgo           # profile-guided fast build (ifx only; -Dprofdir=<dir>)
 #   FC=ifx meson setup build
 #   meson setup build -Duse_gmg=true           # include the C GMG solver, needs a C compiler
 #   meson compile -C build
@@ -20,6 +23,7 @@ project('mf-owhm', 'fortran',
   default_options : ['buildtype=plain', 'warning_level=0'])
 
 config     = get_option('config')
+is_fast    = config.startswith('fast')       # fast, fast-pgo-gen, fast-pgo
 use_gmg    = get_option('use_gmg')
 use_double = get_option('double')
 static     = get_option('static')
@@ -30,11 +34,14 @@ root_dir   = meson.project_source_root()
 # ---------------------------------------------------------------------------
 fc  = meson.get_compiler('fortran')
 fid = fc.get_id()
+if is_fast and (fid == 'intel' or fid == 'intel-cl')
+  error('config=' + config + ' is only available with ifx or gfortran, not with the classic ifort')
+endif
 
 fflags  = []   # all configurations
 ldflags = []
 if fid == 'intel' or fid == 'intel-llvm'
-  fflags += ['-nologo', '-assume', 'nocc_omp', '-fpe0', '-fp-model', 'source', '-warn', 'nousage']
+  fflags += ['-nologo', '-assume', 'nocc_omp', '-fp-model', 'source', '-warn', 'nousage']
   if fid == 'intel'
     fflags += ['-diag-disable=10448']
   endif
@@ -44,9 +51,12 @@ if fid == 'intel' or fid == 'intel-llvm'
     if not (fid == 'intel-llvm' and static)
       checks += ',uninit'
     endif
-    fflags += ['-O0', '-g', '-debug', '-traceback', '-check', checks]
+    fflags += ['-O0', '-fpe0', '-g', '-debug', '-traceback', '-check', checks]
+  elif is_fast
+    # no floating-point traps, AVX2 code (the binary needs a CPU with AVX2)
+    fflags += ['-O2', '-fpe1', '-march=x86-64-v3', '-threads']
   else
-    fflags += ['-O2', '-threads']
+    fflags += ['-O2', '-fpe0', '-threads']
   endif
   if use_double
     fflags += ['-real-size', '64']
@@ -55,14 +65,16 @@ if fid == 'intel' or fid == 'intel-llvm'
     ldflags += ['-static', '-static-intel', '-qopenmp-link=static', '-static-libstdc++', '-static-libgcc']
   endif
 elif fid == 'intel-cl' or fid == 'intel-llvm-cl'
-  fflags += ['/nologo', '/assume:nocc_omp', '/fpe:0', '/fp:source', '/warn:nousage']
+  fflags += ['/nologo', '/assume:nocc_omp', '/fp:source', '/warn:nousage']
   if fid == 'intel-cl'
     fflags += ['/Qdiag-disable:10448']
   endif
   if config == 'debug'
-    fflags += ['/Od', '/debug:full', '/traceback', '/check:bounds,pointers,stack,format,output_conversion']   # no uninit check on Windows
+    fflags += ['/Od', '/fpe:0', '/debug:full', '/traceback', '/check:bounds,pointers,stack,format,output_conversion']   # no uninit check on Windows
+  elif is_fast
+    fflags += ['/O2', '/fpe:1', '/arch:CORE-AVX2']
   else
-    fflags += ['/O2']
+    fflags += ['/O2', '/fpe:0']
   endif
   if use_double
     fflags += ['/real-size:64']
@@ -74,7 +86,7 @@ elif fid == 'gcc'
   fflags += ['-fdefault-double-8', '-ffree-line-length-2048']
   if config == 'debug'
     fflags += ['-O0', '-g', '-w', '-fbacktrace', '-fmax-errors=10', '-ffpe-trap=zero,overflow,invalid', '-finit-real=snan', '-fcheck=all']
-  else
+  else   # release and fast: for gfortran AVX2 changes the results (fused multiply-add) and gains nothing
     fflags += ['-O2', '-w', '-fno-backtrace']
   endif
   if use_double
@@ -141,11 +153,48 @@ else
   owhm_name = 'mf-owhm'
 endif
 
-executable(owhm_name + dbg_suffix,
+# ---------------------------------------------------------------------------
+# Profile-guided fast build (ifx only): fast-pgo-gen instruments the program
+# so that every run writes <profdir>/<name>-<id>.profraw; fast-pgo merges
+# those files with llvm-profdata (at setup time) and compiles with the
+# merged <name>.profdata.
+# ---------------------------------------------------------------------------
+pgo_fargs = []
+pgo_largs = []
+owhm_suffix = dbg_suffix
+if config.startswith('fast-pgo')
+  if fid != 'intel-llvm' and fid != 'intel-llvm-cl'
+    error('config=' + config + ' needs the Intel ifx compiler; use config=fast')
+  endif
+  profdir = get_option('profdir')
+  if profdir == ''
+    profdir = meson.project_build_root() / 'pgo'
+  endif
+  dash = fid == 'intel-llvm-cl' ? '/' : '-'
+  if config == 'fast-pgo-gen'
+    owhm_suffix = '-pgo-gen'
+    pgo_fargs = [dash + 'fprofile-generate=' + profdir / (owhm_name + '-%m.profraw')]
+    pgo_largs = pgo_fargs
+  else
+    profdata = profdir / (owhm_name + '.profdata')
+    fc_dir = fs.parent(find_program(fc.cmd_array()[0]).full_path())
+    llvm_profdata = find_program('llvm-profdata', dirs : [fc_dir / 'compiler', fc_dir])
+    py = import('python').find_installation()
+    run_command(py, '-c',
+      'import glob, subprocess, sys; raw = glob.glob(sys.argv[2] + "/*.profraw"); sys.exit(0 if not raw else subprocess.call([sys.argv[1], "merge", "-output=" + sys.argv[3]] + raw))',
+      llvm_profdata.full_path(), profdir, profdata, check : true)
+    if not fs.exists(profdata)
+      error('no profile in ' + profdir + ': set up with -Dconfig=fast-pgo-gen first, run one or more models with the ' + owhm_name + '-pgo-gen binary, then set up fast-pgo again (-Dprofdir=<dir> selects another directory)')
+    endif
+    pgo_fargs = [dash + 'fprofile-use=' + profdata]
+  endif
+endif
+
+executable(owhm_name + owhm_suffix,
   bif_sources, main_sources, gmg_sources,
-  fortran_args : fflags,
+  fortran_args : fflags + pgo_fargs,
   c_args : gmg_c_args,
-  link_args : ldflags,
+  link_args : ldflags + pgo_largs,
   include_directories : gmg_inc,
   name_suffix : exe_suffix,
   install : true,

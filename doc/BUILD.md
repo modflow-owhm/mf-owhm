@@ -23,12 +23,13 @@ one in the table below that is installed on your machine and skip the rest.
 5. [Installing Meson (and other Python tools)](#installing-meson-and-other-python-tools)
 6. [Options shared by every build system](#options-shared-by-every-build-system)
 7. [Output names](#output-names)
-8. [GNU Make](#gnu-make)
-9. [CMake](#cmake)
-10. [Meson](#meson)
-11. [Editors and IDEs](#editors-and-ides)
-12. [Compiler notes](#compiler-notes)
-13. [Building MF-OWHM on Fedora, RHEL and derivatives](#building-mf-owhm-on-fedora-rhel-and-derivatives)
+8. [Fast and profile-guided builds](#fast-and-profile-guided-builds)
+9. [GNU Make](#gnu-make)
+10. [CMake](#cmake)
+11. [Meson](#meson)
+12. [Editors and IDEs](#editors-and-ides)
+13. [Compiler notes](#compiler-notes)
+14. [Building MF-OWHM on Fedora, RHEL and derivatives](#building-mf-owhm-on-fedora-rhel-and-derivatives)
 
 &nbsp;
 
@@ -349,7 +350,8 @@ Notes:
 
 | Choice                      | Make                                             | CMake                                                        | Meson                                                   |
 | --------------------------- | ------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------- |
-| Release or debug flags      | `CONFIG=RELEASE|DEBUG`                           | `-DCMAKE_BUILD_TYPE=Release|Debug`                           | `-Dconfig=release|debug`                                |
+| Release, debug or fast flags | `CONFIG=RELEASE|DEBUG|FAST`                     | `-DCMAKE_BUILD_TYPE=Release|Debug|Fast`                      | `-Dconfig=release|debug|fast`                           |
+| Profile-guided fast build (ifx) | `CONFIG=FAST-PGO-GEN`, then `CONFIG=FAST-PGO`, profile in `PROFDIR=<dir>` | `-DCMAKE_BUILD_TYPE=FastPGOGen`, then `FastPGO`, profile in `-DOWHM_PROFDIR=<dir>` | `-Dconfig=fast-pgo-gen`, then `fast-pgo`, profile in `-Dprofdir=<dir>` |
 | Include the GMG solver      | `USEGMG=YES`                                     | `-DOWHM_USE_GMG=ON`                                          | `-Duse_gmg=true`                                        |
 | Promote `REAL` to 8 bytes   | `DBLE=YES` (default)                             | `-DOWHM_DOUBLE=ON` (default)                                 | `-Ddouble=true` (default)                               |
 | Static linking              | `STATIC=YES` (default)                           | `-DOWHM_STATIC=ON` (default)                                 | `-Dstatic=true` (default)                               |
@@ -373,13 +375,102 @@ The flag sets themselves are in `makefile`, `cmake/CompilerFlagInput.cmake` and
 | HydFMT           | `postprocessors/hydfmt/bin/hydfmt.nix`         | `postprocessors/hydfmt/bin/hydfmt.exe`         |
 
 A debug build appends `-debug` before the extension, for example
-`bin/mf-owhm-debug.nix`. These are the names the example scripts in
+`bin/mf-owhm-debug.nix`, and the instrumented stage of a profile-guided build
+appends `-pgo-gen` (`bin/mf-owhm-pgo-gen.nix`); the fast builds use the plain
+name. These are the names the example scripts in
 `examples/bash_example_run` look for. Intermediate files go to `obj/` (Make)
 or to the build directory you choose (CMake, Meson); `build/` is ignored by git.
 `.util/cleanRepo.sh` removes the object, library, example output and build
 directories and keeps the compiled binaries (`.util/cleanRepo.sh build nopause`
 for the build directories only, `.util/cleanRepo.sh all nopause` to also delete
 the binaries in `bin/` and `postprocessors/*/bin`).
+
+&nbsp;
+
+## Fast and profile-guided builds
+
+The `fast` configuration is the release configuration with two changes, chosen
+after timing the flag sets on several large models (an MNW2-heavy NWT model,
+a large LPF model and a large FMP model):
+
+* **No floating-point traps** (`-fpe1` instead of `-fpe0`; `/fpe:1` on
+  Windows). The release build traps invalid operations, division by zero and
+  overflow, which also forces the compiler to execute a floating-point
+  operation only after the program's own control flow has reached it, so it
+  cannot merge the branches of code that divides, takes square roots or calls
+  `EXP`/`LOG`. Without the traps those routines (the MNW2 partial-penetration
+  Bessel functions, for example) get shorter, and NaN or Inf values propagate
+  instead of stopping the run. Use the release or debug build to diagnose a
+  model that stops with a floating-point exception.
+* **AVX2 code** (`-march=x86-64-v3`; `/arch:CORE-AVX2` on Windows). The
+  binary needs a processor with AVX2 (Intel from 2013, AMD Zen and later) and
+  stops at startup with an illegal-instruction error on older ones.
+
+The value-safe floating-point model (`-fp-model source`) is kept, so a fast
+build rounds like the release build; it is not fast math. The different
+instruction sequence can still change the iteration path of a solver on some
+models (another outer-iteration count, head differences within the closure
+criteria), as any compiler change does. Measured on the test models, `fast`
+alone gains a few percent (up to 7 percent per outer iteration on the
+MNW2-heavy model). With gfortran, `fast` uses the release flags: AVX2 changes
+its results through fused multiply-add and gains nothing. The fast
+configurations are not available with the classic ifort (the build systems
+stop with an error); the profile-guided ones need ifx.
+
+**Profile-guided optimization** (ifx only) adds 10 to 15 percent on top of
+that with identical results to the fast build without a profile. It needs two
+builds and a training run in between:
+
+1. Build the instrumented binary (`fast-pgo-gen`); it is named
+   `mf-owhm-pgo-gen` and is slow.
+2. Run one or more representative models with it (a few stress periods are
+   enough; the repository examples work too). Every run writes a
+   `<name>-<id>.profraw` file into the profile directory, whose location is
+   compiled into the binary (default `obj/pgo` for Make, `<build dir>/pgo` for
+   CMake and Meson, `obj\pgo` for Visual Studio).
+3. Build `fast-pgo`: the `.profraw` files are merged into `<name>.profdata`
+   with `llvm-profdata` (Make, Meson and CMake with a single-configuration
+   generator do this; the tool ships with ifx in `bin/compiler/`) and the
+   compiler uses the merged profile.
+
+```bash
+make CONFIG=fast                                     # -> bin/mf-owhm.nix
+make CONFIG=fast-pgo-gen                             # -> bin/mf-owhm-pgo-gen.nix
+(cd examples/mf-owhm/3_SFR && ../../../bin/mf-owhm-pgo-gen.nix OWHM_Examples.nam)   # writes obj/pgo/mf-owhm-<id>.profraw
+make CONFIG=fast-pgo                                 # merges obj/pgo/*.profraw, -> bin/mf-owhm.nix
+make CONFIG=fast-pgo PROFDIR=/path/to/profiles       # another profile directory (also for fast-pgo-gen)
+
+cmake -S . -B build -DCMAKE_Fortran_COMPILER=ifx -DCMAKE_BUILD_TYPE=FastPGOGen && cmake --build build
+(cd examples/mf-owhm/3_SFR && ../../../bin/mf-owhm-pgo-gen.nix OWHM_Examples.nam)
+cmake -S . -B build -DCMAKE_BUILD_TYPE=FastPGO && cmake --build build        # -DOWHM_PROFDIR=<dir> for another directory
+
+FC=ifx meson setup build -Dconfig=fast-pgo-gen && meson compile -C build && meson install -C build
+(cd examples/mf-owhm/3_SFR && ../../../bin/mf-owhm-pgo-gen.nix OWHM_Examples.nam)
+meson configure build -Dconfig=fast-pgo && meson compile -C build && meson install -C build   # -Dprofdir=<dir>
+```
+
+In Visual Studio the configurations are `Fast`, `Fast_PGO_Gen` and
+`Fast_PGO`; the profile directory is `obj\pgo` under the repository, and the
+merge is done by hand before building `Fast_PGO`:
+
+```bat
+"C:\Program Files (x86)\Intel\oneAPI\compiler\latestin\compiler\llvm-profdata.exe" merge -output=obj\pgo\mf-owhm.profdata obj\pgo\*.profraw
+```
+
+(`mf-owhm-gmg` in place of `mf-owhm` for the GMG solution.) The `Fast_PGO_Gen`
+configuration links the profile runtime of the compiler explicitly
+(`$(IFX_COMPILER26)lib\clang\22\lib\windows\clang_rt.profile-x86_64.lib`,
+Linker > Input > Additional Dependencies), because when the library is named
+without a path Visual Studio can pick the copy of another installed oneAPI
+version, whose profile format does not match the objects, and the recorded
+profile is unreadable ("truncated profile data"). With another oneAPI version
+set the macro (`IFX_COMPILER27`, ...) and the clang folder number to the
+installed ones. A profile belongs
+to one compiler version and one state of the source: after a code change,
+rebuild the instrumented binary and record a new profile (with an outdated
+profile the compiler reports "function control flow change detected" and
+ignores the profile of that routine). Profiles are build products; do not
+commit them.
 
 &nbsp;
 
@@ -391,6 +482,7 @@ line; the defaults in the makefile need not be edited.
 ```bash
 make                                    # ifx release -> bin/mf-owhm.nix
 make CONFIG=debug                       # -> bin/mf-owhm-debug.nix
+make CONFIG=fast                        # no floating-point traps, AVX2 code (see above)
 make F90=ifort                          # classic ifort release (oneAPI 2024.2)
 make COMPILER=GCC F90=gfortran CC=gcc   # gfortran
 make USEGMG=YES CC=icx bin_out=bin/mf-owhm-gmg
@@ -414,6 +506,7 @@ is an alternative; the compiler is taken from the `PATH` unless given.
 ```bash
 cmake -S . -B build                                            # Release
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Fast                   # see "Fast and profile-guided builds"
 cmake -S . -B build -DCMAKE_Fortran_COMPILER=ifx
 cmake -S . -B build -DOWHM_USE_GMG=ON -DCMAKE_C_COMPILER=gcc
 cmake --build build                                            # or: cmake --build build --parallel
@@ -442,6 +535,7 @@ Generators: `-G Ninja` (fastest, used by the IDE tasks), `-G "Unix Makefiles"`
 ```bash
 meson setup build                       # release, compiler found on PATH
 meson setup build -Dconfig=debug
+meson setup build -Dconfig=fast         # see "Fast and profile-guided builds"
 FC=ifx meson setup build
 meson setup build -Duse_gmg=true
 meson compile -C build
@@ -467,9 +561,12 @@ The hand-maintained solution `ide/visual_studio/OneWater_Project.sln` (and
 the Intel Fortran integration; open it and run *Build Solution*. This is how
 the released Windows executables are produced. Its configurations `Debug`,
 `Fast_Debug` and `Release` use ifx and produce `mf-owhm-debug.exe`,
-`mf-owhm-fast-debug.exe` and `mf-owhm.exe`; `ReleaseIFORT` uses the classic
-ifort (only with Visual Studio 2022 and oneAPI 2024.2) and produces
-`mf-owhm.ifort.exe`.
+`mf-owhm-fast-debug.exe` and `mf-owhm.exe`; `Fast`, `Fast_PGO_Gen` and
+`Fast_PGO` are the fast and profile-guided builds described in
+[Fast and profile-guided builds](#fast-and-profile-guided-builds)
+(`mf-owhm.exe`, `mf-owhm-pgo-gen.exe` and `mf-owhm.exe`); `ReleaseIFORT`
+uses the classic ifort (only with Visual Studio 2022 and oneAPI 2024.2) and
+produces `mf-owhm.ifort.exe`.
 
 The GMG solution `OneWater_GMG_Project.sln` adds the C project `GMG.vcxproj`,
 which builds the solver into `lib\GMG_x64_<Configuration>.lib` and is linked
@@ -571,6 +668,10 @@ in the terminal or from VS Code.
   (including `==`, `/=` and `MAX`), and ifort on ordered ones such as `<`.
   `-assume ieee_compares` would avoid that, but it makes ifx run
   about 40 percent slower, so no flag set uses it. ifort and gfortran do not need it.
+* **Fast builds** drop the floating-point traps (`-fpe1`) and require AVX2;
+  see [Fast and profile-guided builds](#fast-and-profile-guided-builds). The
+  instrumented `fast-pgo-gen` link prints a harmless warning about `dlopen`
+  in statically linked applications (the profile runtime of the compiler).
 * **ifx debug builds** cannot combine `-check uninit` with static linking; the
   build systems drop `uninit` from the check list in that case.
 * **gfortran debug builds** initialize reals to a signaling NaN and trap invalid

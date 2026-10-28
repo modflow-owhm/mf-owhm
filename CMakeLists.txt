@@ -2,6 +2,9 @@
 #
 #   cmake -S . -B build                      # gfortran or ifort/ifx found on PATH, Release
 #   cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
+#   cmake -S . -B build -DCMAKE_BUILD_TYPE=Fast       # no floating-point traps, AVX2 code (see doc/BUILD.md)
+#   cmake -S . -B build -DCMAKE_BUILD_TYPE=FastPGOGen # then run a model with bin/mf-owhm-pgo-gen, then
+#   cmake -S . -B build -DCMAKE_BUILD_TYPE=FastPGO    # profile-guided Fast build (ifx only; -DOWHM_PROFDIR=<dir>)
 #   cmake -S . -B build -DCMAKE_Fortran_COMPILER=ifx
 #   cmake -S . -B build -DOWHM_USE_GMG=ON    # include the C GMG solver, needs a C compiler
 #   cmake --build build
@@ -24,8 +27,8 @@ cmake_minimum_required(VERSION 3.20)
 # Default a single configuration generator to Release, as the makefile does.
 # This must happen before project(), which on Windows would otherwise pick Debug.
 if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type: Release or Debug")
-  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS Release Debug)
+  set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type: Release, Debug, Fast, FastPGOGen or FastPGO")
+  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS Release Debug Fast FastPGOGen FastPGO)
 endif()
 
 project(mf-owhm
@@ -33,6 +36,11 @@ project(mf-owhm
   DESCRIPTION "MODFLOW One-Water Hydrologic Flow Model"
   HOMEPAGE_URL "https://code.usgs.gov/modflow/mf-owhm"
   LANGUAGES   Fortran)
+
+# Multi-configuration generators (Visual Studio): offer the Fast configurations too
+if(CMAKE_CONFIGURATION_TYPES)
+  set(CMAKE_CONFIGURATION_TYPES "Debug;Release;Fast;FastPGOGen;FastPGO" CACHE STRING "" FORCE)
+endif()
 
 option(OWHM_USE_GMG          "Compile the GMG solver (C code); otherwise a stub stops the model if GMG is requested" OFF)
 option(OWHM_DOUBLE           "Promote default REAL to 8 bytes" ON)
@@ -61,6 +69,7 @@ set_source_files_properties(src/bif_lib/io/generic_open_interface.fpp
   PROPERTIES Fortran_PREPROCESS ON)
 
 owhm_fortran_flags(mf-owhm ${OWHM_DOUBLE})
+owhm_pgo_flags(mf-owhm ${_base})
 if(OWHM_USE_GMG)
   owhm_c_flags(mf-owhm)
   target_include_directories(mf-owhm PRIVATE src/gmg_c)

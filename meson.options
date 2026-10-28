@@ -1,5 +1,7 @@
-option('config', type : 'combo', choices : ['release', 'debug'], value : 'release',
-  description : 'Release or debug compiler flags (the makefile CONFIG)')
+option('config', type : 'combo', choices : ['release', 'debug', 'fast', 'fast-pgo-gen', 'fast-pgo'], value : 'release',
+  description : 'Compiler flags (the makefile CONFIG): release, debug, fast (no floating-point traps, AVX2 code), fast-pgo-gen and fast-pgo (profile-guided fast build, ifx only)')
+option('profdir', type : 'string', value : '',
+  description : 'Profile directory written by the fast-pgo-gen binary and read by fast-pgo (default: <build dir>/pgo)')
 option('use_gmg', type : 'boolean', value : false,
   description : 'Compile the GMG solver (C code); otherwise a stub stops the model if GMG is requested')
 option('double', type : 'boolean', value : true,

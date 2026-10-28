@@ -37,6 +37,39 @@
 			<Tool Name="VFPostBuildEventTool"/>
 			<Tool Name="VFManifestTool" SuppressStartupBanner="true"/>
 		</Configuration>
+		<Configuration Name="Fast|x64" UseCompiler="ifxCompiler" OutputDirectory="$(SolutionDir)..\..\bin" IntermediateDirectory="$(SolutionDir)..\..\obj\vs_$(ProjectName)_$(Configuration)_$(Platform)">
+			<Tool Name="VFFortranCompilerTool" AdditionalOptions="/arch:CORE-AVX2" SuppressStartupBanner="true" DebugInformationFormat="debugLineInfoOnly" OpenMPConditionalCompilation="false" OmpOffloadConstructs="ompOffloadNo" DisableSpecificDiagnostics="6717" RealKIND="realKIND8" FloatingPointExceptionHandling="fpe1" FloatingPointModel="source" Traceback="true"/>
+			<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" ProgramDatabaseFile="$(IntDir)\$(TargetName).pdb" SubSystem="subSystemConsole" StackReserveSize="10485760" StackCommitSize="10485760"/>
+			<Tool Name="VFResourceCompilerTool"/>
+			<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
+			<Tool Name="VFCustomBuildTool"/>
+			<Tool Name="VFPreLinkEventTool"/>
+			<Tool Name="VFPreBuildEventTool"/>
+			<Tool Name="VFPostBuildEventTool"/>
+			<Tool Name="VFManifestTool" SuppressStartupBanner="true"/>
+		</Configuration>
+		<Configuration Name="Fast_PGO_Gen|x64" UseCompiler="ifxCompiler" OutputDirectory="$(SolutionDir)..\..\bin" IntermediateDirectory="$(SolutionDir)..\..\obj\vs_$(ProjectName)_$(Configuration)_$(Platform)" TargetName="$(ProjectName)-pgo-gen">
+			<Tool Name="VFFortranCompilerTool" AdditionalOptions="/arch:CORE-AVX2 /fprofile-generate=$(SolutionDir)..\..\obj\pgo\$(ProjectName)-%m.profraw" SuppressStartupBanner="true" DebugInformationFormat="debugLineInfoOnly" OpenMPConditionalCompilation="false" OmpOffloadConstructs="ompOffloadNo" DisableSpecificDiagnostics="6717" RealKIND="realKIND8" FloatingPointExceptionHandling="fpe1" FloatingPointModel="source" Traceback="true"/>
+			<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" ProgramDatabaseFile="$(IntDir)\$(TargetName).pdb" SubSystem="subSystemConsole" StackReserveSize="10485760" StackCommitSize="10485760" AdditionalDependencies="&quot;$(IFX_COMPILER26)lib\clang\22\lib\windows\clang_rt.profile-x86_64.lib&quot;"/>
+			<Tool Name="VFResourceCompilerTool"/>
+			<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
+			<Tool Name="VFCustomBuildTool"/>
+			<Tool Name="VFPreLinkEventTool"/>
+			<Tool Name="VFPreBuildEventTool"/>
+			<Tool Name="VFPostBuildEventTool"/>
+			<Tool Name="VFManifestTool" SuppressStartupBanner="true"/>
+		</Configuration>
+		<Configuration Name="Fast_PGO|x64" UseCompiler="ifxCompiler" OutputDirectory="$(SolutionDir)..\..\bin" IntermediateDirectory="$(SolutionDir)..\..\obj\vs_$(ProjectName)_$(Configuration)_$(Platform)">
+			<Tool Name="VFFortranCompilerTool" AdditionalOptions="/arch:CORE-AVX2 /fprofile-use=$(SolutionDir)..\..\obj\pgo\$(ProjectName).profdata" SuppressStartupBanner="true" DebugInformationFormat="debugLineInfoOnly" OpenMPConditionalCompilation="false" OmpOffloadConstructs="ompOffloadNo" DisableSpecificDiagnostics="6717" RealKIND="realKIND8" FloatingPointExceptionHandling="fpe1" FloatingPointModel="source" Traceback="true"/>
+			<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" ProgramDatabaseFile="$(IntDir)\$(TargetName).pdb" SubSystem="subSystemConsole" StackReserveSize="10485760" StackCommitSize="10485760"/>
+			<Tool Name="VFResourceCompilerTool"/>
+			<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
+			<Tool Name="VFCustomBuildTool"/>
+			<Tool Name="VFPreLinkEventTool"/>
+			<Tool Name="VFPreBuildEventTool"/>
+			<Tool Name="VFPostBuildEventTool"/>
+			<Tool Name="VFManifestTool" SuppressStartupBanner="true"/>
+		</Configuration>
 		<Configuration Name="ReleaseIFORT|x64" UseCompiler="ifortCompiler" OutputDirectory="$(SolutionDir)..\..\bin" IntermediateDirectory="$(SolutionDir)..\..\obj\vs_$(ProjectName)_$(Configuration)_$(Platform)" TargetName="$(ProjectName).ifort">
 			<Tool Name="VFFortranCompilerTool" AdditionalOptions="/Qinline-factor:200 /Qdiag-disable:10448" SuppressStartupBanner="true" DebugInformationFormat="debugLineInfoOnly" OpenMPConditionalCompilation="false" OmpOffloadConstructs="ompOffloadNo" DisableSpecificDiagnostics="6717" RealKIND="realKIND8" FloatingPointExceptionHandling="fpe0" FloatingPointModel="source" Traceback="true"/>
 			<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" ProgramDatabaseFile="$(IntDir)\$(TargetName).pdb" SubSystem="subSystemConsole" StackReserveSize="10485760" StackCommitSize="10485760"/>
