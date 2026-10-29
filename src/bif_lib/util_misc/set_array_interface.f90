@@ -5,7 +5,6 @@
 !
 MODULE SET_ARRAY_INTERFACE
   !
-  USE, INTRINSIC:: IEEE_ARITHMETIC, ONLY: IEEE_VALUE, IEEE_QUIET_NAN, IEEE_IS_NAN
   USE, INTRINSIC:: ISO_FORTRAN_ENV, ONLY: REAL32, REAL64, REAL128, INT8, INT16, INT32, INT64
   !
   IMPLICIT NONE
@@ -229,6 +228,7 @@ MODULE SET_ARRAY_INTERFACE
   !#############################################################################################################################################################
   !
   PURE SUBROUTINE SET_ARRAY_3D3D_SNG_DBL(DIM1, DIM2, DIM3, ARR1, ARR2)
+    USE, INTRINSIC:: IEEE_ARITHMETIC, ONLY: IEEE_VALUE, IEEE_QUIET_NAN, IEEE_IS_NAN
     INTEGER,                                 INTENT(IN   ):: DIM1, DIM2, DIM3
     REAL(REAL32), DIMENSION(DIM1,DIM2,DIM3), INTENT(IN   ):: ARR1
     REAL(REAL64), DIMENSION(DIM1,DIM2,DIM3), INTENT(  OUT):: ARR2
@@ -247,6 +247,7 @@ MODULE SET_ARRAY_INTERFACE
   END SUBROUTINE
   !
   PURE SUBROUTINE SET_ARRAY_3D3D_DBL_SNG(DIM1, DIM2, DIM3, ARR1, ARR2)
+    USE, INTRINSIC:: IEEE_ARITHMETIC, ONLY: IEEE_VALUE, IEEE_QUIET_NAN, IEEE_IS_NAN
     INTEGER,                                 INTENT(IN   ):: DIM1, DIM2, DIM3
     REAL(REAL64), DIMENSION(DIM1,DIM2,DIM3), INTENT(IN   ):: ARR1
     REAL(REAL32), DIMENSION(DIM1,DIM2,DIM3), INTENT(  OUT):: ARR2
@@ -271,6 +272,7 @@ MODULE SET_ARRAY_INTERFACE
   !#############################################################################################################################################################
   !
   PURE SUBROUTINE SET_ARRAY_2D2D_SNG_DBL(DIM1, DIM2, ARR1, ARR2)
+    USE, INTRINSIC:: IEEE_ARITHMETIC, ONLY: IEEE_VALUE, IEEE_QUIET_NAN, IEEE_IS_NAN
     INTEGER,                            INTENT(IN   ):: DIM1, DIM2
     REAL(REAL32), DIMENSION(DIM1,DIM2), INTENT(IN   ):: ARR1
     REAL(REAL64), DIMENSION(DIM1,DIM2), INTENT(  OUT):: ARR2
@@ -289,6 +291,7 @@ MODULE SET_ARRAY_INTERFACE
   END SUBROUTINE
   !
   PURE SUBROUTINE SET_ARRAY_2D2D_DBL_SNG(DIM1, DIM2, ARR1, ARR2)
+    USE, INTRINSIC:: IEEE_ARITHMETIC, ONLY: IEEE_VALUE, IEEE_QUIET_NAN, IEEE_IS_NAN
     INTEGER,                            INTENT(IN   ):: DIM1, DIM2
     REAL(REAL64), DIMENSION(DIM1,DIM2), INTENT(IN   ):: ARR1
     REAL(REAL32), DIMENSION(DIM1,DIM2), INTENT(  OUT):: ARR2
@@ -578,6 +581,7 @@ MODULE SET_ARRAY_INTERFACE
   ! Set to NaN Routines
   !
   PURE SUBROUTINE SET_NAN_3D_DBL(DIM1, DIM2, DIM3, ARR)
+    USE, INTRINSIC:: IEEE_ARITHMETIC, ONLY: IEEE_VALUE, IEEE_QUIET_NAN
     INTEGER,                                 INTENT(IN   ):: DIM1, DIM2, DIM3
     REAL(REAL64), DIMENSION(DIM1,DIM2,DIM3), INTENT(  OUT):: ARR
     INTEGER:: I,J,K
@@ -593,6 +597,7 @@ MODULE SET_ARRAY_INTERFACE
   !#############################################################################################################################################################
   !
   PURE SUBROUTINE SET_NAN_3D_SNG(DIM1, DIM2, DIM3, ARR)
+    USE, INTRINSIC:: IEEE_ARITHMETIC, ONLY: IEEE_VALUE, IEEE_QUIET_NAN
     INTEGER,                                 INTENT(IN   ):: DIM1, DIM2, DIM3
     REAL(REAL32), DIMENSION(DIM1,DIM2,DIM3), INTENT(  OUT):: ARR
     INTEGER:: I,J,K
@@ -608,6 +613,7 @@ MODULE SET_ARRAY_INTERFACE
   !#############################################################################################################################################################
   !
   PURE SUBROUTINE SET_NAN_2D_DBL(DIM1, DIM2, ARR)
+    USE, INTRINSIC:: IEEE_ARITHMETIC, ONLY: IEEE_VALUE, IEEE_QUIET_NAN
     INTEGER,                            INTENT(IN   ):: DIM1, DIM2
     REAL(REAL64), DIMENSION(DIM1,DIM2), INTENT(  OUT):: ARR
     INTEGER:: I,J
@@ -623,6 +629,7 @@ MODULE SET_ARRAY_INTERFACE
   !#############################################################################################################################################################
   !
   PURE SUBROUTINE SET_NAN_2D_SNG(DIM1, DIM2, ARR)
+    USE, INTRINSIC:: IEEE_ARITHMETIC, ONLY: IEEE_VALUE, IEEE_QUIET_NAN
     INTEGER,                            INTENT(IN   ):: DIM1, DIM2
     REAL(REAL32), DIMENSION(DIM1,DIM2), INTENT(  OUT):: ARR
     INTEGER:: I,J
@@ -638,6 +645,7 @@ MODULE SET_ARRAY_INTERFACE
   !#############################################################################################################################################################
   !
   PURE SUBROUTINE SET_NAN_1D_DBL(DIM1, ARR)
+    USE, INTRINSIC:: IEEE_ARITHMETIC, ONLY: IEEE_VALUE, IEEE_QUIET_NAN
     INTEGER,                       INTENT(IN   ):: DIM1
     REAL(REAL64), DIMENSION(DIM1), INTENT(  OUT):: ARR
     INTEGER:: I
@@ -653,6 +661,7 @@ MODULE SET_ARRAY_INTERFACE
   !#############################################################################################################################################################
   !
   PURE SUBROUTINE SET_NAN_1D_SNG(DIM1, ARR)
+    USE, INTRINSIC:: IEEE_ARITHMETIC, ONLY: IEEE_VALUE, IEEE_QUIET_NAN
     INTEGER,                       INTENT(IN   ):: DIM1
     REAL(REAL32), DIMENSION(DIM1), INTENT(  OUT):: ARR
     INTEGER:: I

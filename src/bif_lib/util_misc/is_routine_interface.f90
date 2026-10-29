@@ -7,7 +7,6 @@ MODULE IS_ROUTINES
   USE CONSTANTS,                 ONLY: DNEG, DZ, TENTH, NEG, Z, ONE, TWO, TRUE, FALSE, &
                                        NEARZERO_6, NEARZERO_10, NEARZERO_12, BLNK, NL, BLN, TAB, COM !TEN,UNO,DOS,DIEZ,TRUE,FALSE,ninf,inf,inf_I,inf_R,ninf_R,NEARZERO_29,NEARZERO_30,NEGNEARZERO_30,NEARZERO_5,HALF,TRES, QUIN, FOUR, SEV, EIGHT, HECTO, THOU, LF, CR, SNGL_inf, SNGL_ninf, SNGL_inf_R, SNGL_ninf_R, SNGL_inf_R, SNGL_ninf_R, SUB_ONE, NEAR_ONE, LOG_2, LOG_2_R, NO
   !
-  USE, INTRINSIC:: IEEE_ARITHMETIC, ONLY: IEEE_IS_NAN
   USE, INTRINSIC:: ISO_FORTRAN_ENV, ONLY: i8 => INT8,   i16 => INT16,  &
                                          i32 => INT32,  i64 => INT64,  &
                                          SNG => REAL32, DBL => REAL64
@@ -175,6 +174,7 @@ MODULE IS_ROUTINES
   !#############################################################################################################################################################
   !
   PURE ELEMENTAL FUNCTION IS_CLOSE_RTOL_ATOL(VAR1,VAR2,RTOL,ATOL) RESULT(IS_CLOSE) !Default RTOL=1E-6, ATOL=1E-10 - Match 7 digits or less than 1E-10
+    USE, INTRINSIC:: IEEE_ARITHMETIC, ONLY: IEEE_IS_NAN
     REAL(DBL),           INTENT(IN):: VAR1, VAR2
     REAL(DBL), OPTIONAL, INTENT(IN):: RTOL, ATOL
     LOGICAL:: IS_CLOSE
@@ -230,6 +230,7 @@ MODULE IS_ROUTINES
   !#############################################################################################################################################################
   !
   PURE ELEMENTAL FUNCTION IS_CLOSE_DIGIT(VAR1,VAR2,DIGIT) RESULT(IS_CLOSE) !Match within DIGIT precision (DIGIT numbers match).
+    USE, INTRINSIC:: IEEE_ARITHMETIC, ONLY: IEEE_IS_NAN
     REAL(DBL),           INTENT(IN):: VAR1, VAR2
     INTEGER,             INTENT(IN):: DIGIT
     LOGICAL:: IS_CLOSE
@@ -514,6 +515,7 @@ MODULE IS_ROUTINES
   !#############################################################################################################################################################
   !
   PURE ELEMENTAL FUNCTION IS_NAN_OR(VAR,OP,VAL)
+    USE, INTRINSIC:: IEEE_ARITHMETIC, ONLY: IEEE_IS_NAN
     REAL(DBL),             INTENT(IN):: VAR
     CHARACTER(2),     INTENT(IN), OPTIONAL:: OP
     REAL(DBL), INTENT(IN), OPTIONAL:: VAL
@@ -539,6 +541,7 @@ MODULE IS_ROUTINES
   !#############################################################################################################################################################
   !
   PURE ELEMENTAL FUNCTION IS_NOT_NAN_OR(VAR,OP,VAL)
+    USE, INTRINSIC:: IEEE_ARITHMETIC, ONLY: IEEE_IS_NAN
     REAL(DBL),             INTENT(IN):: VAR
     CHARACTER(2),     INTENT(IN), OPTIONAL:: OP
     REAL(DBL), INTENT(IN), OPTIONAL:: VAL

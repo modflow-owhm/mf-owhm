@@ -1,5 +1,4 @@
 MODULE PAK_PROP_INTERFACE
-  USE, INTRINSIC:: IEEE_ARITHMETIC,   ONLY: IEEE_IS_NAN
   USE CONSTANTS,              ONLY: Z, ONE, TRUE, FALSE, NL
   USE ERROR_INTERFACE,        ONLY: STOP_ERROR, FILE_IO_ERROR, GET_WARN
   USE FILE_IO_INTERFACE,      ONLY: READ_TO_DATA, COMMENT_INDEX
@@ -100,6 +99,7 @@ END SUBROUTINE
 !
 SUBROUTINE ULSTRDSTRUCT(NLST,RLST,LSTBEG,LDIM,MXDIM,INPACK,IOUT,           &
                         LABEL,CAUX,NCAUX,NAUX,IFREFM,ISCLOC1,ISCLOC2,IPRFLG)
+  USE, INTRINSIC:: IEEE_ARITHMETIC, ONLY: IEEE_IS_NAN
 !     ******************************************************************
 !     Read and print a list.  NAUX of the values in the list are
 !     optional -- auxiliary data. This assumes structure shape of array
