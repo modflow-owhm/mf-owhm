@@ -454,7 +454,7 @@ In Visual Studio the configurations are `Fast`, `Fast_PGO_Gen` and
 merge is done by hand before building `Fast_PGO`:
 
 ```bat
-"C:\Program Files (x86)\Intel\oneAPI\compiler\latestin\compiler\llvm-profdata.exe" merge -output=obj\pgo\mf-owhm.profdata obj\pgo\*.profraw
+"C:\Program Files (x86)\Intel\oneAPI\compiler\latest\bin\compiler\llvm-profdata.exe" merge -output=obj\pgo\mf-owhm.profdata obj\pgo\*.profraw
 ```
 
 (`mf-owhm-gmg` in place of `mf-owhm` for the GMG solution.) The `Fast_PGO_Gen`
@@ -471,6 +471,47 @@ rebuild the instrumented binary and record a new profile (with an outdated
 profile the compiler reports "function control flow change detected" and
 ignores the profile of that routine). Profiles are build products; do not
 commit them.
+
+### One-step script
+
+`.util/pgo/build_pgo.py` runs the whole sequence: the instrumented build,
+the training runs, the profile merge and the final build. It needs Python 3
+(standard library only) and ifx, and drives GNU make on Linux, macOS and
+msys2 (`make CONFIG=fast-pgo-gen`, then `CONFIG=fast-pgo`) and the Visual
+Studio solution on Windows (`devenv.com ... /Rebuild "Fast_PGO_Gen|x64"`,
+then `"Fast_PGO|x64"`; the repository must be on a local drive, Visual Studio
+cannot build from a `\\wsl.localhost` path). Both stages are clean builds.
+Everything is set in an ini file, by default `.util/pgo/pgo.ini`, which
+trains with the four `examples/mf-owhm` models; `pgo_examples_all.ini` lists
+the whole example suite and `pgo_examples_by_package.ini` one model per major
+package. Copy one of them and list your own models (name file, one per line,
+each run in the folder of its name file, or in the folder given on the
+matching line of `run_dir`) for a profile that matches the models the binary
+is built for.
+
+```bash
+python3 .util/pgo/build_pgo.py                                   # pgo.ini -> bin/mf-owhm.nix
+python3 .util/pgo/build_pgo.py my.ini --name mf-owhm-pgo         # bin/mf-owhm-pgo.nix
+python3 .util/pgo/build_pgo.py --gmg                             # GMG variant -> bin/mf-owhm-gmg.nix
+python3 .util/pgo/build_pgo.py --dry-run                         # show the commands only
+```
+
+```bat
+py .util\pgo\build_pgo.py                                        :: pgo.ini -> bin\mf-owhm.exe
+```
+
+The ini settings: `name` (final binary, `bin/<name>.exe|.nix`), `gmg`,
+`engine` (`make`, `vs` or `auto`), `profdir` (make only; the Visual Studio
+projects always use `obj\pgo`), `keep_gen` (keep the instrumented binary),
+`log` (the full build and run output, default `obj/pgo/build_pgo.log`); under
+`[make]` extra make variables (`args`) and the `setvars.sh` to source when
+ifx is not on `PATH` (`oneapi`); under `[vs]` the paths of `devenv.com`,
+`MSBuild.exe` (GMG only) and the oneAPI compiler folder, all found
+automatically when left at `auto`. On Windows the projects always write
+`bin\mf-owhm.exe`; when another name is asked for, an existing binary of
+that name is moved aside during the build and put back afterwards. The
+script stops at the first failed build or model run; the log file has the
+compiler and model output.
 
 &nbsp;
 
