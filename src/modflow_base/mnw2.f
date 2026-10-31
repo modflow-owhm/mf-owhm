@@ -3368,6 +3368,40 @@ c
       return
       end
 c
+      SUBROUTINE GWF2MNW27CNVG(KITER,ICNVG,IGRID)
+C     ******************************************************************
+C     Keep the outer iteration going until the pumping constraints have
+C     been evaluated: the QCUT shut-off and restart checks and the pump
+C     capacity lookup are applied from the third outer iteration on, so
+C     a time step that converged earlier would never apply them.
+C     ******************************************************************
+      USE GWFMNW2MODULE, ONLY: NMNW2, MNWMAX, MNW2
+      USE GWFMNW2MODULE, ONLY: SGWF2MNW2PNT
+      USE CONSTANTS,     ONLY: Z, ONE, TWO, HALF, DZ
+      IMPLICIT NONE
+      INTEGER, INTENT(IN   ):: KITER, IGRID
+      INTEGER, INTENT(INOUT):: ICNVG
+      INTEGER:: IW
+      LOGICAL:: QCUT_ON, CAP_ON
+C
+      IF(ICNVG == Z .OR. KITER > TWO) RETURN
+      CALL SGWF2MNW2PNT(IGRID)
+      IF(NMNW2 < ONE) RETURN
+C
+      DO IW=1, MNWMAX
+         IF(MNW2(1,IW) > HALF) THEN
+            QCUT_ON = NINT(MNW2(6,IW)) /= Z .AND. NINT(MNW2(8,IW)) /= Z
+            CAP_ON  = NINT(MNW2(22,IW)) > Z .AND. MNW2(24,IW) /= DZ
+     +                                      .AND. MNW2(5,IW) < DZ
+            IF(QCUT_ON .OR. CAP_ON) THEN
+                ICNVG = Z
+                RETURN
+            END IF
+         END IF
+      END DO
+C
+      END SUBROUTINE
+c
       SUBROUTINE GWF2MNW27BD(kstp,kper,IGRID)
 C     ******************************************************************
 c     calculate volumetric budget for multi-node wells

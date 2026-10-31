@@ -1000,6 +1000,8 @@ SUBROUTINE MODFLOW_OWHM_RUN(NAME)
                    !
                    IF(IUNIT(61) /= Z) CALL FMP_CNVG(IGRID, KPER, KSTP, KKITER, ICNVG)
                    !
+                   IF(IUNIT(50) /= Z) CALL GWF2MNW27CNVG(KKITER, ICNVG, IGRID)   ! MNW2 constraints need a third iteration
+                   !
                    CALL BAS_POST_SOLVER(KPER, KSTP, KITER, MXITER, ICNVG)  !APPLY ADDITIONAL DAMPENING, CONVERGENCE CHECK AND UPDATE UPLAY AND WTABLE
                    !
                    !slang IF(HAS_SLANG_ITER_END) CALL SLANG_IT_END_EVAL(KPER, KSTP, KITER, IOUT)
