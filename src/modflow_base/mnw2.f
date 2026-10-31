@@ -3144,9 +3144,11 @@ c             only perform % checks after second iteration (lets soln get going)
               if(kiter > TWO) then
 c              % check divides by lastQ, so avoid this if it is zero
                if(abs(lastQ) > small) then
-c               this is the percentage change, below which the Q will be locked in
-c               for the time step
-                temppct=0.01d0
+c               this is the relative change, below which the Q will be locked in
+c               for the time step (was 1 percent, which left the rate up to about
+c               2 percent from the self-consistent rate and made it depend on the
+c               iteration history)
+                temppct=1.0D-4
 c               calculated % change in Q looked up in capacity tables
                 qtemp=abs(qactCap-lastQ)/abs(lastQ)
 c
@@ -3181,7 +3183,7 @@ c                   Q has been constrained
                     mnw2(27,iw) = UNO
                   end if
                 else
-c  if Qcap not changing more than 1%, stop doing capacity constraint
+c  if Qcap not changing more than the tolerance, stop doing capacity constraint
                   mnw2(29,iw) = qactCap
 c  set CapFlag to false to discontinue doing capacity checks this TS
                   mnw2(25,iw) = DZ
@@ -3190,8 +3192,9 @@ c                 Q has been constrained
                   mnw2(27,iw) = UNO
 c  write message that Q was constrained
                   if(mnwprnt > ONE) then
-      write(iout,*) 'Capacity Q was changing less than 1%; capacity calc
-     +ulations stopped this TS for well ',WELLID(iw)
+      write(iout,'(3A)') 'Capacity Q was changing less than 0.01%; ',
+     &             'capacity calculations stopped this TS for well ',
+     &             WELLID(iw)
       write(iout,*)' with Pump-Capacity Q = ',qactCap,' iter.no. ',kiter
                   end if
                 end if
