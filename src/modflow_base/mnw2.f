@@ -453,7 +453,8 @@ C5------FOR Capacity Table,
 c  27 is the hard-wired number of entries allowed in the Capacity Table (CapTable)
 c  2 is the number of fields in the Capacity Table (CapTable): Lift (1) and Q (2)
       ALLOCATE (CapTable(mnwmax,27,2))
-C5------FOR WELLID array, add an extra spot 
+      CapTable = DZ   ! RP sets the last table rate only while it is <= 0, so the table must start at zero
+C5------FOR WELLID array, add an extra spot
       ALLOCATE (WELLID(mnwmax+1))
       ALLOCATE(MNW_FMP_LINK(mnwmax+1), SOURCE = FALSE)
       ALLOCATE(HAS_FMP_WELLS, SOURCE=FALSE)
@@ -3197,7 +3198,7 @@ c              else lastQ=0
 c                if lastQ is zero, but new Q is not, and at first time this
 c                happens in TS, only let it turn on at half the Q looked up
                  if(qactCap < DZ .and. kiter == 3) then
-                   mnw2(29,iw)=SQRT(qactCap)
+                   mnw2(29,iw)=0.5D0*qactCap
 c                  set CapFlag2 to true, this is used in AD routine to say that the
 c                  Q has been constrained
                    mnw2(27,iw) = UNO
