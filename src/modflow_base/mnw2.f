@@ -2579,17 +2579,9 @@ c-lfk:  Only read Cprime for recharge/injection well (Qdes.gt.0.0)
          endif
          IF(MNW2TABFILE%NTAB > Z .AND. EXIST)   !seb IF TABFILES THEN CHECK IF QDES IS RELATED TO 1 TABFILE. IF IT IS THEN UPDATE IT WITH TABIFORMATION
      +            CALL MNW2TABFILE2QDES(MNW2TABFILE,MNWID,QDES,TABFOUND)
-C-LFK (2/13) Check consistency of Qdes with CapTable values for Q
-         if (CapMult > DZ .and. Qdes < DZ .and. EXIST) then
-         index = pumpcap + ONE
-          if(abs(Qdes) < CapTable(MNWID,index,2)*CapMult) then
-            CALL STOP_ERROR(INFILE=IN,OUTPUT=IOUT,MSG=
-     +'MNW2 ERROR: Qdes (Qmax) value "'//NUM2STR(abs(Qdes))//'" < '//
-     +'CAPACITY TABLE VALUE "'//NUM2STR(CapTable(MNWID,index,2)*CapMult)
-     +     //'".'//NL//'VALUES MUST BE IN ASCENDING ORDER.'//NL//
-     +       'FOR WELLID: '//WELLID(MNWID))
-          end if
-         end if
+c        (the consistency check of Qdes against the capacity table is made
+c         below, where Qdes becomes the maximum operating discharge; it used
+c         to compare every period's Qdes with the table scaled by CapMult)
           end if
 C-LFK   write auxiliary variable info.
          if (naux > Z .and. mnwprnt > Z) then
@@ -2715,8 +2707,16 @@ c  if Qdes is not negative for this stress period, do not apply pump capacity re
               MNW2(27,MNWID)=DZ                                          !Initialize CapFlag2
              ELSE
               MNW2(25,MNWID)=UNO
-c  only set Qdes at upper end of CapTable if not set already
+c  only set Qdes at upper end of CapTable if not set already (the first
+c  negative Qdes is the maximum operating discharge; later values are ignored)
              if (CapTable(MNWID,PUMPCAP+2,2) <= DZ) then
+               if(abs(qdes) < CapTable(MNWID,PUMPCAP+1,2)) then
+                 CALL STOP_ERROR(INFILE=IN,OUTPUT=IOUT,MSG=
+     +'MNW2 ERROR: Qdes (Qmax) value "'//NUM2STR(abs(Qdes))//'" < '//
+     +'CAPACITY TABLE VALUE "'//NUM2STR(CapTable(MNWID,PUMPCAP+1,2))//
+     +'".'//NL//'VALUES MUST BE IN ASCENDING ORDER.'//NL//
+     +'FOR WELLID: '//WELLID(MNWID))
+               end if
                CapTable(MNWID,PUMPCAP+2,2)=abs(qdes)
              end if
              END IF
@@ -3127,8 +3127,10 @@ c           new Q is less than 1% or more than 25% from new Q
             lastQ = mnw2(26,iw)
 c           save last Q that was looked up in table for next iteration
             mnw2(26,iw) = qactCap
-c           only do following if capacity Q is less than Qdes
-            if (abs(qactCap) < abs(mnw2(5,iw))) then
+c           only do following if the capacity Q differs from Qdes (below it on
+c           the curve, or above it when CapMult > 1; a later stress period's
+c           different Qdes is ignored for a pump-capacity well, as documented)
+            if (abs(abs(qactCap) - abs(mnw2(5,iw))) > small) then
 c            if capacity Q from table is zero at beginning first time step, 
 c            (kiter=2 is first time here due to kiter>1 check above)
 c            set qpot to 0; "allow" to go to zero
@@ -6873,10 +6875,12 @@ c     interpolate by finding Q on the line segment for actual lift
 c     convert discharge to MODFLOW sign convention
       qactCap=qactCap*(-1.d0)
 c-LFK
-      IF (CapMult.GT.0.0.and.CapMult.LT.1.0) THEN
+c     any positive multiplier scales the whole curve, including its maximum
+c     operating discharge (a value above 1 raises the rate above Qdes)
+      IF (CapMult > DZ) THEN
          qactCap=qactCap*CapMult
       END IF
-c      
+c
       RETURN
       END
       SUBROUTINE PPC(DDPP,ISOLNFLAG,BB,HKR,HKZ,SS,QQ,RW,ZPD,ZPL)
