@@ -2874,14 +2874,20 @@ c   Loop over all wells
           !
           HasQ     = abs(qdes) > NEARZERO_20
 C  SET Q
-c  if qlimit was hit in a previous FM routine, set qnet to updated Q, then reset flags
-          if(QlimFlag /= Z .or. CapFlag2 > Z) then
+c  if the well was shut off (QlimFlag < 0) or capacity-limited in the
+c  previous time step, carry that rate over as the starting rate, then
+c  reset the flags.  A well that restarted (QlimFlag > 0) starts the new
+c  time step from Qdes, so that the Hlim test sets its rate from the new
+c  heads; carrying the restart rate over made it pump that rate for one
+c  more step although neither Qdes nor Hlim limited it.
+          if(QlimFlag < Z .or. CapFlag2 > Z) then
             qnet        = mnw2(18,iw)
             mnw2(20,iw) = DZ
             mnw2(27,iw) = DZ
 c  default Q used = Qdes (this may be changed if limits kick in below)
           else
             mnw2(18,iw) = qdes
+            mnw2(20,iw) = DZ
           end if
 c
 C-LFK Nov.2012
@@ -5450,7 +5456,11 @@ c    avoid oscillations
 c  Flag to perform this check is mnw2(20,iw).  If > 0, limit has been met
 c  Do not enforce q-limit oscillation-stopper until the 3rd iteration; hardwire=0
 c    for first two iterations
-             if( ratio .lt. Qoff . and. QlimFlag .ge. Z) then
+c  A well changes its QCUT state at most once per time step: the potential
+c  is evaluated with the heads of the other state (off heads overstate it,
+c  pumping heads understate it), so a well allowed to switch back within
+c  the step can alternate on and off every iteration and never converge.
+             if( ratio < Qoff . and. QlimFlag == Z) then
 c              mnw2(18,iw) = 0.D0
               mnw2(30,iw) = DZ
 c  Set flag to avoid rechecking q-limit
@@ -5460,16 +5470,26 @@ c  If so, set Qact = Qpot
 c  If q-limit condition is met, do not perform this check on subsequent iterations to
 c    avoid oscillations
 c  Flag to perform this check is mnw2(20,iw).  If > 0, limit has been met
-             elseif( ratio.gt.Qon .and. abs(qact).lt.Qsmall .and. 
-     &              mnw2(20,iw) .le. DZ ) then
+c  (mnw2(20) = -2 marks a well that is still off from an earlier time step
+c  and has not switched in this one, so it may still restart)
+             elseif( ratio.gt.Qon .and. abs(qact).lt.Qsmall .and.
+     &              (mnw2(20,iw) == DZ .or. mnw2(20,iw) == -DOS) ) then
 c              mnw2(18,iw) = Qpot
               mnw2(30,iw) = Qpot
 c  Set flag to avoid rechecking q-limit
               mnw2(20,iw) = UNO
-             elseif( ratio.lt.Qon .and. ratio.gt.Qoff ) then
-              mnw2(20,iw) = DOS
+             elseif( abs(qact) < Qsmall .and. QlimFlag == Z ) then
+c  Ratio between Qfrcmn and Qfrcmx and the well is off: keep it off
+c  (flag it with -2, so the zero rate carries over to the next time step
+c  while a restart later in this step, once the heads have converged
+c  further, is still allowed)
+              mnw2(30,iw) = DZ
+              mnw2(20,iw) = -DOS
              else
-c  Otherwise leave the flow rate alone
+c  Otherwise (ratio between Qfrcmn and Qfrcmx and the well is pumping)
+c  leave the flow rate alone.  A former branch set mnw2(20) = 2 here,
+c  which made the well pump the stale restart rate mnw2(30) (zero if it
+c  had never restarted) instead of keeping its rate.
              endif
             endif
 c  End if, QLimit>0
