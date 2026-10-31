@@ -5171,7 +5171,7 @@ c         this is from eqs 3 and 5 in orig MNW report
           C = 0.D0
 c       GENERAL option, calculate B and C
        else if (LOSSTYPE.EQ.3) then
-          if(ABS(Cf) < 1D-30) then   !if(Cf.NE.0.0) then  seb
+          if(ABS(Cf) > 1.0D-30) then   !if(Cf.NE.0.0) then  seb
             C = Cf * abs(Q)**(PLoss-1)
           else
             C = 0.D0
@@ -6728,7 +6728,7 @@ c      Assumes no directional dependence of "B"; use specified value for Bx, By,
           Bx=B
           By=B
           Bz=B
-          if(Cf /= DZ) then
+          if(ABS(Cf) > 1.0D-30) then
             C = Cf * abs(Q)**(PLoss-1)
           else
             C = DZ
