@@ -1578,7 +1578,7 @@ c     Set var for interval
                           Zbotm = TOP
                           CYCLE
                           !
-                      ELSEIF(SCRN/THCK < MIN_PERF .AND. I<J ) THEN  !Screen makes up less than 1% of layer, exclude
+                      ELSEIF(SCRN/THCK < MIN_PERF .AND. I>J ) THEN  !Screen makes up less than 1% of layer, exclude (I>J: not the top layer of the interval)
                         !
                         SCRN=TOP + MIN_PERF*(BOTM(IC,IR,LBOTM(I)-1)-TOP)!1% of next layers thickness
                         !
@@ -1587,7 +1587,7 @@ c     Set var for interval
      +   ' -- Zbotm was raised from '//NUM2STR(Zbotm)//' to '//
      +   NUM2STR(TOP)//' because it only was perfed '//
      +   'for less than 1% into layer '//NUM2STR(I)//'.'//NL )
-                           Ztop = BTM
+                           Zbotm = TOP
                            CYCLE
                         END IF
                       END IF
