@@ -4757,6 +4757,8 @@ c           only do partial penetration effect if PP>0 and alpha <1.0
             !PPFLAG=INT(MNW2(19,iw))
             IF(PPFLAG > Z .AND. alpha < UNO .AND. PPC_CHK) then    !seb PPC_CHK is used to keep PP on for entire simulation
 c
+c  dhp is the additional drawdown per unit extraction rate (the WTAQ result is
+c  linear in the rate), so it is independent of the current node flow.
 c  use saved partial penetration effect if steady state and past 1st iter
               if(ISS == 1 .and. kiter > 1) then
                 dhp = MNWNOD(18,INODE)
@@ -4769,7 +4771,7 @@ c      if transient, update dhp
                 T = (Txx*Tyy)**0.5D0
                 Kh = DZ
                 if ( thck > NEARZERO_20 ) Kh = T/thck
-                QQ=Qact*(-1.D0)
+                QQ=UNO
                 Kz=MNWNOD(33,INODE)
 c
                 SS = 1.0e-6
@@ -4867,7 +4869,7 @@ c
 c  LFK  end code change
 c          
 c  if analytical solution failed, report no partial penetration and set dhp=0.0
-                if(ISOLNFLAG == Z .AND. ITFLAG > Z .AND. QQ.ne.DZ) then
+                if(ISOLNFLAG == Z .AND. ITFLAG > Z) then
 c  if alpha <= 0.2, shut well off if PPC did not converge
                   if(alpha < 0.2) then
                    if (MNWPRNT > 1) then
@@ -4917,38 +4919,17 @@ c  correct partially penetrating node-defined cells by ratio of screenlength/sat
               end if
 c             
 c  re-calculate conductance to include partial penetration
-c    calculate dpp (partial penetration effect with specific Q) if Q and dhp "align" correctly 
-c    eg if removing water (Q<0), dhp should be positive
-c    (dhp>0 signifies drawdown).  Q is either <> 0 so no div 0 problem
-              if(ITFLAG == ONE
-cc     &          .AND.(Qact.lt.0.D0.AND.dhp.gt.0.D0)
-cc     &          .OR.(Qact.gt.0.D0.AND.dhp.lt.0.D0)) then
-c  LFK 6/2012  change check on dhp to include 0.0 to avoid unneeded warnings
-     &          .AND.(Qact < DZ .AND. dhp >= DZ)
-     &          .OR. (Qact > DZ .AND. dhp <= DZ) ) then
-                  dpp = DZ
-                  if (abs(Qact)>NEARZERO_20) dpp=dhp/(DNEG*Qact)
-                if(cond > NEARZERO_20 .AND. ABS(dpp) > NEARZERO_20 )then
+c    dhp is the drawdown per unit extraction rate, which is the resistance
+c    added in series to the cell-to-well conductance (eq. 25)
+              if(ITFLAG == ONE) then
+                dpp = dhp
+                if(cond > NEARZERO_20 .AND. dpp > NEARZERO_20 )then
                   ABC=UNO/cond
                   ABCD=ABC+dpp
                   cond=UNO/ABCD
                 end if
-              else if (ITFLAG==ONE .and. Qact.ne.DZ .and. dhp > DZ) then
-                dpp = DZ
-                CALL MNW2_WARN%ADD(WELLID(IW)//
-     +          'HAS PARTIAL PENETRATION '//
-     +          'TERM (dpp) SET TO 0.0 DUE TO MISALIGNMENT OF DHP= '//
-     +          NUM2STR(dhp)//' and Q='//NUM2STR(Qact)//NL)
-!            CALL WARNING_MESSAGE(OUTPUT=IOUT,
-!     +      MSG='MNW2 WELLID '//WELLID(IW)//': PARTIAL PENETRATION '//
-!     +      'TERM (dpp) SET TO 0.0 DUE TO MISALIGNMENT OF DHP= '//
-!     +      NUM2STR(dhp)//' and Q='//NUM2STR(Qact), INLINE=.TRUE.)
-!                  write(IOUT,*) '***WARNING***  Partial penetration term
-!     & (dpp) set to 0.0 due to misalignment of dhp= ',dhp,' and Q=',Qact
-c LFK 6/2012  add well name to output
-!     &, ' WELLNAME = ',wellid(iw)
-              end if     
-            END IF              
+              end if
+            END IF
 c           end if PP effect
 C--LFK
     5       continue
