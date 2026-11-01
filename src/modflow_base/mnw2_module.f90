@@ -9,6 +9,8 @@ MODULE GWFMNW2MODULE
   !
   PRIVATE:: TABFILETYPECHARIDX, LINE_FEED, BUDGET_GROUP, WARNING_TYPE
   !
+  DOUBLE PRECISION, PARAMETER:: MNW2_NULL = 1.0D30   ! null value of MNW2 arrays: set a value to it, then test "== MNW2_NULL" to see if it has been set
+  !
   LOGICAL, SAVE, POINTER:: HAS_NWT, SOLV_BY_HCOF
   INTEGER, SAVE, POINTER:: IOUT
   INTEGER, SAVE, POINTER:: NMNW2,MNWMAX,NMNWVL,IWL2CB,MNWPRNT
@@ -148,8 +150,8 @@ MODULE GWFMNW2MODULE
   !        17   = Tranissivity in the Y-direction
   !        18   = Drawdown correction due to partially penetrating well
   !        19   = Fraction of model cell for partial penetration flag when NOT using Ztop/Zbotm
-  !        20   = Ztop  of composite screen used for partial penetration - set to 1d30 initially
-  !        21   = Zbotm of composite screen used for partial penetration - set to 1d30 initially
+  !        20   = Ztop  of composite screen used for partial penetration - set to MNW2_NULL (1d30) until the screen position is computed
+  !        21   = Zbotm of composite screen used for partial penetration - set with 20
   !        22   = Unknown use??? - seb taking over for 0 and 1 Flag to indicate if node is active or deactivated for time step
   !        23   = 
   !        24   = 

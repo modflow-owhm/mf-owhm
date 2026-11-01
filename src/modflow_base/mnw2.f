@@ -60,8 +60,8 @@
 !        17   = Tranissivity in the Y-direction
 !        18   = Drawdown correction due to partially penetrating well
 !        19   = Fraction of model cell for partial penetration flag when NOT using Ztop/Zbotm
-!        20   = Ztop  of composite screen used for partial penetration - set to 1d30 initially
-!        21   = Zbotm of composite screen used for partial penetration - set to 1d30 initially
+!        20   = Ztop  of composite screen used for partial penetration - set to MNW2_NULL (1d30) until the screen position is computed
+!        21   = Zbotm of composite screen used for partial penetration - set with 20
 !        22   = Unknown use??? - seb taking over for 0 and 1 Flag to indicate if node is active or deactivated for time step
 !        23   = Horizontal well define verticle distance
 !        24   = Horizontal well define lengths with elevations
@@ -477,7 +477,7 @@ C7------SAVE POINTERS TO DATA AND RETURN.
      4                       MNW_FMP_LINK,HAS_FMP_WELLS,MIN_PERF,
      5                       PRNT_MNW2_Q_NODE,PRNT_MNW2,
      6                       PRNT_MNW2_Q_INOUT,MXNODE,LEN_WELLID,
-     7                       PRNT_MNW2_NODE
+     7                       PRNT_MNW2_NODE,MNW2_NULL
       USE GWFMNW2MODULE, ONLY: SGWF2MNW2PNT
       USE SIPMODULE,ONLY:HCLOSE
       USE DE4MODULE,ONLY:HCLOSEDE4
@@ -1186,9 +1186,9 @@ c       set HWflag to true
               END IF
             END IF
 
-c     if partial penetration ne 0, set ZPD to 1d30.  this will act as a flag
+c     if partial penetration ne 0, set ZPD to MNW2_NULL.  this will act as a flag
 c     until ZDP (and ZPL) are set for the well)
-            if(pp /= DZ) MNWNOD(20,NODNUM+INODE-1)=1d30         
+            if(pp /= DZ) MNWNOD(20,NODNUM+INODE-1)=MNW2_NULL
           END DO  !INODE=1,NNODES - loop over nodes 
 c
 c       end nnodes>0 read statements
@@ -1697,9 +1697,9 @@ c     INTNUM is location in int list of 1st interval for this well
 c     IINT is loop counter for intervals
                 MNWNOD(12,NODNUM)=INTNUM+IINT-1
                 MNWNOD(13,NODNUM)=INTNUM+IINT-1
-c     if partial penetration ne 0, set ZPD to 1d30.  this will act as a flag
+c     if partial penetration ne 0, set ZPD to MNW2_NULL.  this will act as a flag
 c     until ZDP (and ZPL) are set for the well)
-                MNWNOD(20,NODNUM)=1d30     
+                MNWNOD(20,NODNUM)=MNW2_NULL
 c     if a node has been created (nodecount>0), then check to see if this interval
 c     is still in that node (still NODNUM)
             ELSE
@@ -1733,9 +1733,9 @@ c     INTNUM is location in int list of 1st interval for this well
 c     IINT is loop counter for intervals
                   MNWNOD(12,NODNUM)=INTNUM+IINT-1
                   MNWNOD(13,NODNUM)=INTNUM+IINT-1
-c     if partial penetration ne 0, set ZPD to 1d30.  this will act as a flag
+c     if partial penetration ne 0, set ZPD to MNW2_NULL.  this will act as a flag
 c     until ZDP (and ZPL) are set for the well)
-                  MNWNOD(20,NODNUM)=1d30         
+                  MNWNOD(20,NODNUM)=MNW2_NULL
 !                ELSE
 !                 IF(IBOUND(IC,IR,IL)==0 .AND. CHECK) THEN
 !                      CALL WRN%ADD(WELLID(MNWID)//
@@ -1784,9 +1784,9 @@ c     increase count of nodes in this well
 c     set first and last intervals in this node= interval number
                 MNWNOD(12,NODNUM)=INTNUM+IINT-1
                 MNWNOD(13,NODNUM)=INTNUM+IINT-1
-c     if partial penetration ne 0, set ZPD (MNWNOD(20) to 1d30.  this will act as a flag
+c     if partial penetration ne 0, set ZPD (MNWNOD(20) to MNW2_NULL.  this will act as a flag
 c     until ZDP (and ZPL) are set for the well
-                MNWNOD(20,NODNUM)=1d30   
+                MNWNOD(20,NODNUM)=MNW2_NULL
                 END IF
               END DO
             END IF
@@ -4395,7 +4395,7 @@ C     ------------------------------------------------------------------
       USE GWFMNW2MODULE, ONLY:NMNW2,MNWMAX,MNWPRNT,MNWINT,INTTOT,
      1                       NODTOT,MNW2,MNWNOD,SMALL,WELLID,IOUT,
      2                       HAS_NWT,PP_CON_ITER_LIM,
-     3                       MNW2_WARN,SMNW2COND_WARN
+     3                       MNW2_WARN,SMNW2COND_WARN,MNW2_NULL
       USE GWFMNW2MODULE, ONLY: SGWF2MNW2PNT
       USE ERROR_INTERFACE, ONLY: WARNING_MESSAGE
       USE NUM2STR_INTERFACE, ONLY: NUM2STR
@@ -4774,8 +4774,8 @@ c
 c    determine location of well screen in cell
 c
 c    only calculate this once for each well, then save topscreen and bottomscreen
-c    topscreen (MNWNOD(20) is flagged as 1d30 until it is set
-                if(MNWNOD(20,INODE).eq.1d30) then
+c    topscreen (MNWNOD(20) is flagged as MNW2_NULL until it is set
+                if(MNWNOD(20,INODE) == MNW2_NULL) then
 c             if a vertical well
                  if(NNODES < Z) then
 c    if firstint=lastint for this node, it is the only interval, so use exact
