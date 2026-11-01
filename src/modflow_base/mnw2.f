@@ -691,6 +691,15 @@ c-LFK (5/28/15) reset ppflag to 0; write note to output file
             MNW2(19,MNWID) = DZ
         end if
 c
+c     warning if LOSSTYPE=NONE and PPFLAG>0 (no well radius, so no PP correction possible)
+        if(LOSSTYPE == 'NONE' .and. PPFLAG > Z) then
+          CALL WRN%ADD(WELLID(MNWID)//
+     +      ' -- PARTIAL PENETRATION NOT CALCULATED FOR '//
+     +      'LOSSTYPE = "NONE", PPFLAG RESET TO 0'//NL)
+            PPFLAG = Z
+            MNW2(19,MNWID) = DZ
+        end if
+c
 c     read Data Set 2c, depending on LOSSTYPE (MNW2(3,MNWID)
         Rw=NEARZERO_20; Rskin = Rw; Kskin = Rw; B = Rw; C = Rw; P = UNO
         SELECT CASE (NINT(MNW2(3,MNWID)))
@@ -3344,7 +3353,10 @@ c
 c   Modify HCOF and RHS arrays
 cdebug replace below line with this if debugging with No Mo Iter
 cdebug              if(iqslv.ne.0.and.kiter.gt.1.and.kiter.lt.NoMoIter) then
-              if(iqslv /= 0 .AND. HasQ) then
+c   LOSSTYPE NONE (hwell = hcell through a very large conductance) always
+c   specifies the rate: a GHB-like term with that conductance would pin the
+c   cell head to the previous iteration.
+              if(iqslv /= 0 .AND. HasQ .AND. NINT(MNW2(3,iw)) /= Z) then
                  !qact  = ( hlim - Hcell) * cond
                  !
                  if (firstnode==lastnode) THEN
@@ -5136,9 +5148,9 @@ C-LFK
 C      
       if (thck < NEARZERO_20) THEN
           cel2wel2 = DZ
-      ELSEIF(LOSSTYPE.EQ.0) THEN   ! For the "NONE" option, multiply the Kh by 10000 to equivalate Hnew and hwell
+      ELSEIF(LOSSTYPE.EQ.0) THEN   ! For the "NONE" option, multiply the Kh by 1e8 to equivalate Hnew and hwell (the rate is always put on the RHS for this type)
           !
-          cel2wel2=1.0D4*((Txx*Tyy)**0.5D0)/thck
+          cel2wel2=1.0D8*((Txx*Tyy)**0.5D0)/thck
           !
       !ELSEIF(LOSSTYPE.EQ.4) THEN   ! Should never be true, but here for completeness (SecifyCWC)
       !
@@ -6716,7 +6728,7 @@ c    this makes conductance very small
         cel2wel2SEG = SQRT( Txx * Tyy )** 0.5D0
 c       For the "NONE" option, multiply the Kh by 10000 to equivalent Hnew and hwell
       else if(LOSSTYPE == Z) then
-        cel2wel2SEG=1.0D4*((Kx*Ky)**0.5D0)   
+        cel2wel2SEG=1.0D8*((Kx*Ky)**0.5D0)
       else 
 c
 c    define ro (effective radius) for each direction 
