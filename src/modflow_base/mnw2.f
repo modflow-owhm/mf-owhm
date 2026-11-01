@@ -4136,12 +4136,11 @@ c   set thickness / conductance to 0 if cell is dry
          endif
          MNWNOD(16,INODE) = Txx
          MNWNOD(17,INODE) = Tyy
-         if(nlay == ONE) then
-             Kz = DZ
-         else
-           IF(LAYVKA(iz) == Z) THEN
+c   Kz from VKA for any number of layers (a one-layer model used to pass
+c   Kz = 0, which the partial-penetration and nonvertical formulas divide by)
+         IF(LAYVKA(iz) == Z) THEN
              Kz = VKA(ix,iy,iz)
-           ELSE
+         ELSE
 c--LFK 10/4/12 modifications below to prevent zero-divide error if VKA.eq.0
             if (VKA(ix,iy,iz) > NEARZERO_20) then
                 Kz = HK(ix,iy,iz)/VKA(ix,iy,iz)
@@ -4151,8 +4150,7 @@ c--lfk
 c               write (iout,*) ' VKA = 0.0 for wellid,ix,iy,iz = ',
 c     1                      wellid(iw),ix,iy,iz
             end if
-           END IF
-         end if
+         END IF
 c-lfk
 c          if (thick.le.0) then
 c            if (LAYHDT(IZ).eq.0)then
@@ -4261,11 +4259,7 @@ c   set thickness / conductance to 0 if cell is dry
          endif
          MNWNOD(16,INODE) = Txx
          MNWNOD(17,INODE) = Tyy
-         if(nlay == ONE) then
-             Kz = DZ
-         else
-             Kz = VKAH(ix,iy,iz)
-         end if
+         Kz = VKAH(ix,iy,iz)
 C-LFK         IF(ISS.NE.0) THEN
          IF(ISS == Z .and. thick > NEARZERO_20) THEN
              SS = SC1(IX,IY,IZ)/(thick*dx*dy)
@@ -4359,15 +4353,11 @@ c   set thickness / conductance to 0 if cell is dry
          endif
          MNWNOD(16,INODE) = Txx
          MNWNOD(17,INODE) = Tyy
-         if(nlay == ONE) then
-             Kz = DZ
-         else
-           IF(LAYVKAUPW(iz) == Z) THEN
-               Kz = VKAUPW(ix,iy,iz)
-           ELSE
-               Kz = HKUPW(ix,iy,iz)/VKAUPW(ix,iy,iz)
-           END IF
-         end if
+         IF(LAYVKAUPW(iz) == Z) THEN
+             Kz = VKAUPW(ix,iy,iz)
+         ELSE
+             Kz = HKUPW(ix,iy,iz)/VKAUPW(ix,iy,iz)
+         END IF
          IF(ITRSS /= Z) THEN
            IF (thick > NEARZERO_20) THEN
                SS = SC1(IX,IY,IZ)/(dx*dy)
