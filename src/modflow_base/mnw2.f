@@ -4760,6 +4760,10 @@ c
 c  use saved partial penetration effect if steady state and past 1st iter
               if(ISS == 1 .and. kiter > 1) then
                 dhp = MNWNOD(18,INODE)
+                if(MNWNOD(20,INODE) /= MNW2_NULL) then ! screen position saved by the first iteration
+                  topscreen   =MNWNOD(20,INODE)
+                  bottomscreen=MNWNOD(21,INODE)
+                end if
               else
 c      if transient, update dhp
                 T = (Txx*Tyy)**0.5D0
