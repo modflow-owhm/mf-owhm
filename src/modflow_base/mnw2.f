@@ -105,7 +105,7 @@ C     ------------------------------------------------------------------
      2                    CapTable,SMALL,NTOTNOD,WELLID,LIMQ,
      3               MNW2TABFILE, MNW_FEED,MNW2BUD, GRPNODE,IOUT,
      4               MNW_FMP_LINK, HAS_FMP_WELLS,SOLV_FLG,SOLV_BY_HCOF,
-     5               HCOF_ONLY_ITER,HCOF_RHS_FLIP, QDES_OLD,
+     5               HCOF_ONLY_ITER,HCOF_RHS_FLIP, QDES_OLD, PPC_CACHE,
      6               HAS_NWT,MIN_PERF,PP_CON_ITER_LIM,MXNODE,LEN_WELLID,
      7               MNW2_WARN, SMNW2COND_WARN,
      8      PRNT_MNW2, PRNT_MNW2_Q_NODE,PRNT_MNW2_Q_INOUT,PRNT_MNW2_NODE
@@ -459,6 +459,7 @@ C5------FOR WELLID array, add an extra spot
       ALLOCATE(MNW_FMP_LINK(mnwmax+1), SOURCE = FALSE)
       ALLOCATE(HAS_FMP_WELLS, SOURCE=FALSE)
       ALLOCATE(QDES_OLD(MNWMAX), SOURCE=DZ)
+      ALLOCATE(PPC_CACHE(MNWMAX))      ! components allocated per well on first use
 C-LFK
       ALLOCATE(LIMQ(3,MNWMAX))
 C
@@ -4418,7 +4419,8 @@ C     ------------------------------------------------------------------
       USE GWFMNW2MODULE, ONLY:NMNW2,MNWMAX,MNWPRNT,MNWINT,INTTOT,
      1                       NODTOT,MNW2,MNWNOD,SMALL,WELLID,IOUT,
      2                       HAS_NWT,PP_CON_ITER_LIM,
-     3                       MNW2_WARN,SMNW2COND_WARN,MNW2_NULL
+     3                       MNW2_WARN,SMNW2COND_WARN,MNW2_NULL,
+     4                       PPC_CACHE
       USE GWFMNW2MODULE, ONLY: SGWF2MNW2PNT
       USE ERROR_INTERFACE, ONLY: WARNING_MESSAGE
       USE NUM2STR_INTERFACE, ONLY: NUM2STR
@@ -4437,6 +4439,8 @@ C     ------------------------------------------------------------------
       DOUBLE PRECISION:: CWC,ztop,zbotm,dhp,Skin
       DOUBLE PRECISION:: ZPD,ZPL,ABC,ABCD,lengthratio,T,Kh
       DOUBLE PRECISION:: dpp,topscreen,bottomscreen
+      DOUBLE PRECISION:: PPC_KEY(6)
+      LOGICAL:: PPC_FOUND, PPC_USE
       DOUBLE PRECISION:: hwell,alpha,alpha2,alpha3
       DOUBLE PRECISION:: t1, t2
       LOGICAL:: PPC_CHK, ConstT
@@ -4862,7 +4866,24 @@ c calculate dhp (Delta-H due to Penetration) using analytical solution
 C
               if(ippc == Z) then
 c
-                CALL PPC(dhp,ISOLNFLAG,thck,Kh,Kz,rw,ZPD,ZPL)
+c   the correction depends only on the node geometry, so it is kept per
+c   node and recomputed only when thickness, K, radius or screen change.
+c   A cell under water-table conditions (hnew below the cell top) changes
+c   its thickness every iteration, so its correction is computed directly.
+                PPC_USE = ConstT .OR.
+     +                    hnew(ix,iy,iz) >= BOTM(IX,IY,LBOTM(IZ)-1)
+                PPC_FOUND = .FALSE.
+                IF(PPC_USE) THEN
+                   PPC_KEY = [thck, Kh, Kz, rw, ZPD, ZPL]
+                   CALL PPC_CACHE_LOOKUP(PPC_CACHE(iw),
+     +                  INODE-firstnode+1, ABS(NNODES), PPC_KEY,
+     +                  PPC_FOUND, dhp, ISOLNFLAG)
+                END IF
+                IF(.NOT. PPC_FOUND) THEN
+                   CALL PPC(dhp,ISOLNFLAG,thck,Kh,Kz,rw,ZPD,ZPL)
+                   IF(PPC_USE) CALL PPC_CACHE_STORE(PPC_CACHE(iw),
+     +                       INODE-firstnode+1, PPC_KEY, dhp, ISOLNFLAG)
+                END IF
 c          
               else
                   if(zpd == DZ .and. zpl == DZ) then
@@ -6937,6 +6958,59 @@ c     operating discharge (a value above 1 raises the rate above Qdes)
 c
       RETURN
       END
+      SUBROUTINE PPC_CACHE_LOOKUP(C,ND,NNODES,KEY,FOUND,DHP,ISOLNFLAG)
+C     ******************************************************************
+C     Return the stored partial penetration correction of node ND of a
+C     well when it was computed for the same key (thickness, Kh, Kz,
+C     radius, screen top and bottom).  The well's table is allocated on
+C     the first lookup, so wells without PPFLAG never allocate one.
+C     ******************************************************************
+      USE GWFMNW2MODULE, ONLY: MNW_PPC_CACHE
+      USE CONSTANTS,     ONLY: Z, DZ, NEG
+      IMPLICIT NONE
+      TYPE(MNW_PPC_CACHE),            INTENT(INOUT):: C
+      INTEGER,                        INTENT(IN   ):: ND, NNODES
+      DOUBLE PRECISION, DIMENSION(6), INTENT(IN   ):: KEY
+      LOGICAL,                        INTENT(  OUT):: FOUND
+      DOUBLE PRECISION,               INTENT(  OUT):: DHP
+      INTEGER,                        INTENT(  OUT):: ISOLNFLAG
+C
+      IF(.NOT. ALLOCATED(C%FLAG)) THEN
+         ALLOCATE(C%FLAG(NNODES),  SOURCE = NEG)
+         ALLOCATE(C%KEY(6,NNODES), SOURCE = DZ)
+         ALLOCATE(C%DHP(NNODES),   SOURCE = DZ)
+      END IF
+C
+      FOUND = C%FLAG(ND) >= Z
+      IF(FOUND) FOUND = ALL(C%KEY(:,ND) == KEY)
+C
+      IF(FOUND) THEN
+         DHP       = C%DHP(ND)
+         ISOLNFLAG = C%FLAG(ND)
+      ELSE
+         DHP       = DZ
+         ISOLNFLAG = Z
+      END IF
+C
+      END SUBROUTINE
+C
+      SUBROUTINE PPC_CACHE_STORE(C,ND,KEY,DHP,ISOLNFLAG)
+C     ******************************************************************
+C     Keep the correction just computed for node ND with its key.
+C     ******************************************************************
+      USE GWFMNW2MODULE, ONLY: MNW_PPC_CACHE
+      IMPLICIT NONE
+      TYPE(MNW_PPC_CACHE),            INTENT(INOUT):: C
+      INTEGER,                        INTENT(IN   ):: ND, ISOLNFLAG
+      DOUBLE PRECISION, DIMENSION(6), INTENT(IN   ):: KEY
+      DOUBLE PRECISION,               INTENT(IN   ):: DHP
+C
+      C%KEY(:,ND) = KEY
+      C%DHP(ND)   = DHP
+      C%FLAG(ND)  = ISOLNFLAG
+C
+      END SUBROUTINE
+C
       SUBROUTINE PPC(DDPP,ISOLNFLAG,BB,HKR,HKZ,RW,ZPD,ZPL)
 
 C      ********************************************************
