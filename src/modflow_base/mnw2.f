@@ -2905,13 +2905,20 @@ c   Loop over all wells
           !
           HasQ     = abs(qdes) > NEARZERO_20
 C  SET Q
-c  if the well was shut off (QlimFlag < 0) or capacity-limited in the
-c  previous time step, carry that rate over as the starting rate, then
-c  reset the flags.  A well that restarted (QlimFlag > 0) starts the new
-c  time step from Qdes, so that the Hlim test sets its rate from the new
-c  heads; carrying the restart rate over made it pump that rate for one
-c  more step although neither Qdes nor Hlim limited it.
-          if(QlimFlag < Z .or. CapFlag2 > Z) then
+c  A well shut off by QCUT (QlimFlag < 0) stays off until the restart
+c  test turns it on, across time steps and stress periods: the state is
+c  carried by the flag, since the stress-period input, TabFile and
+c  LineFeed rewrite mnw2(18) with Qdes.  A capacity-limited well starts
+c  from the rate it ended with.  A well that restarted (QlimFlag > 0) starts
+c  the new time step from Qdes, so that the Hlim test sets its rate from
+c  the new heads; carrying the restart rate over made it pump that rate
+c  for one more step although neither Qdes nor Hlim limited it.
+          if(QlimFlag < Z) then
+            qnet        = DZ
+            mnw2(18,iw) = DZ
+            mnw2(20,iw) = DZ
+            mnw2(27,iw) = DZ
+          elseif(CapFlag2 > Z) then
             qnet        = mnw2(18,iw)
             mnw2(20,iw) = DZ
             mnw2(27,iw) = DZ
@@ -5594,6 +5601,14 @@ c  whether or not there is a seepage face in the cell
 c
 c  only allow seepage or flow into a cell if the head in the cell is greater than the bottom of the cell
 c
+c  This and the seepage face below apply to every layer type, as the
+c  MNW2 report prescribes (its seepage-face example applies both to
+c  non-convertible cells): the well sees the physical state of the cell,
+c  so a cell whose head is below its bottom has no water to give even if
+c  the flow package, with LAYTYP = 0, still treats it as saturated.
+c  An option that keeps nodes in non-convertible layers connected and
+c  without a seepage face (the flow-package view) is a possible future
+c  feature of low priority.
               IF(Hcell /= HDRY .AND. Hcell > bottom)  THEN
 c  Second time through loop, now that we have a guess for hwell, check to see if there is a seepage face
 c  If so, use the bottom (instead of the low hwell) as the gradient driver in the qact calc
