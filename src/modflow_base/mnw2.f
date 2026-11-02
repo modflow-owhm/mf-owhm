@@ -520,7 +520,7 @@ C7------SAVE POINTERS TO DATA AND RETURN.
       CHARACTER(20):: WELLNAME,LOSSTYPE
       CHARACTER(14):: cZtop, cZbot
       CHARACTER(768):: LINE
-      LOGICAL:: CHECK
+      LOGICAL:: CHECK, ALL_FULL
       !CHARACTER(:),ALLOCATABLE:: ERR
       TYPE(WARNING_TYPE):: WRN, WRN2,WRN3,ERR
 C
@@ -752,6 +752,7 @@ c     count nodes (will uses this to check vs. allocation)
      +       MSG='MNW2 ERROR: NODE ARRAY ALLOCATION INSUFFICIENT '//NL//
      +           'PLEASE INCREASE NODTOT BIGGER THAN '//NUM2STR(nodtot))
 c     loop over nodes 
+          ALL_FULL = PPFLAG > Z   ! stays true while every node has PP >= 0.99
           DO INODE=1,NNODES
            !
            RwNode=NEARZERO_20
@@ -1151,6 +1152,18 @@ c     save node location, set Qdes=0.0, set PP, flag ZPD
             MNWNOD(4,NODNUM+INODE-1) = DZ
             if(PPFLAG <= Z) then
               PP=DZ
+            elseif(PP <= DZ) then
+              CALL ERR%ADD(WELLID(MNWID)//
+     +         ' -- PP MUST BE A FRACTION 0 < PP <= 1, BUT FOUND: '//
+     +         NUM2STR(PP)//NL)
+            elseif(PP >= 0.99D0) then  ! full penetration: no correction
+              IF(PP /= UNO) CALL WRN%ADD(WELLID(MNWID)//
+     +         ' -- PP = '//NUM2STR(PP)//' for node '//NUM2STR(INODE)//
+     +         ' is >= 0.99, PARTIAL PENETRATION CORRECTION DISABLED '//
+     +         'FOR THE NODE (treated as fully penetrating)'//NL)
+              PP=UNO
+            else
+              ALL_FULL = .FALSE.
             end if
             MNWNOD(19,NODNUM+INODE-1)=PP 
             !
@@ -1190,6 +1203,14 @@ c     if partial penetration ne 0, set ZPD to MNW2_NULL.  this will act as a fla
 c     until ZDP (and ZPL) are set for the well)
             if(pp /= DZ) MNWNOD(20,NODNUM+INODE-1)=MNW2_NULL
           END DO  !INODE=1,NNODES - loop over nodes 
+c     every node is fully penetrating (PP >= 0.99): nothing to correct
+          if(PPFLAG > Z .and. ALL_FULL) then
+            CALL WRN%ADD(WELLID(MNWID)//
+     +         ' -- ALL NODES HAVE PP >= 0.99 (fully penetrating), '//
+     +         'PPFLAG RESET TO 0'//NL)
+            PPFLAG = Z
+            MNW2(19,MNWID) = DZ
+          end if
 c
 c       end nnodes>0 read statements
 c
@@ -4578,7 +4599,7 @@ c   check cond<0, reset to 0 and print warning
 c   check PPFLAG, if on, alpha defined for each node
               !PPFLAG=INT(MNW2(19,iw))
               if(PPFLAG > Z) then
-                alpha   = MNWNOD(19,INODE)
+                alpha   = MNWNOD(19,INODE)  ! PP > 0 checked and PP >= 0.99 set to 1 (no correction) when read (dataset 2d)
                 PPC_CHK = TRUE
               else
                 alpha   = UNO
@@ -4687,19 +4708,9 @@ c   calculate alpha for partial penetration effect if PPFLAG is on
               if(PPFLAG > Z) then
                   alpha = DZ
                 if ( thck>NEARZERO_20 ) alpha = totlength/thck
-                if(alpha > 0.99 .and. alpha < 1.0) then
-                  if (MNWPRNT.gt.1.and.kiter.eq.1) then
-                  CALL SMNW2COND_WARN%ADD(
-     +               'Penetration fraction > 0.99; '//
-     +               'Reset to 1.0 for node '//NUM2STR(nod,2)//
-     +               ' in well '//wellid(iw)//NL ) 
-!                    nd=INODE-firstnode+1
-!                    write(iout,*) 'Penetration fraction > 0.99 for',
-!     & ' node ',nd,' of well ',wellid(iw)
-!                    write(iout,*) 'Value reset to 1.0 for this well'
-                  end if
-                  alpha = UNO
-                end if
+c   a fraction of 0.99 or more is treated as fully penetrating (the
+c   correction is negligible there); no message, it may recur every step
+                if(alpha >= 0.99D0) alpha = UNO
               else
                 alpha = UNO
               endif
