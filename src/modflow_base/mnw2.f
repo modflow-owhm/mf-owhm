@@ -7110,9 +7110,15 @@ C      NTT=NTS-NT+1
 C      TD=TIMEDD/F1
 C
 C---CALCULATE DRAWDOWNS
-       DDPPOLD=0.0D0
+C    The convergence test uses the dimensionless difference between the
+C    partially and the fully penetrating solution, so it does not depend
+C    on the pumping rate or the length unit.  (The former test skipped
+C    times with a dimensional difference below 0.001 and, for small
+C    rates, ran into late times where the Stehfest inversion drifts.)
+       HDOLD=0.0D0
        EPSILON=0.00001D0
        ISOLNFLAG=0
+       DDPP=0.0D0
        TD=1.0D4
 C       TD=1.0D-2
        DO 30 NT=1,10
@@ -7121,41 +7127,36 @@ C---CALCULATE DIMENSIONLESS DRAWDOWN FOR PARTIALLY PENETRATING
 C     WELL, CALL LTST2
          CALL LTST2(TD,HD)
          IF(HD.LT.1.D-02)HD=0.0D0
-C
-         RTD=F1*TD
-         RHDPP=F2*HD
+         HDPP=HD
 C
 C---CALCULATE DIMENSIONLESS DRAWDOWN FOR FULLY PENETRATING
 C     WELL, CALL LTST1
          CALL LTST1(TD,HD)
          IF(HD.LT.1.D-02)HD=0.0D0
-C
-         RHDFP=F2*HD
+         HDFP=HD
 C
 C---CALCULATE DRAWDOWN DUE TO PARTIALLY PENETRATING WELL
-         DDPP=RHDPP-RHDFP
+         HDDIFF=HDPP-HDFP
+         DDPP=F2*HDDIFF
 C
-C---WRITE RESULTS
-C
-         IF(DABS(DDPP).LT.0.001D0)THEN
-          DDPPOLD=0.0D0
-          GO TO 30
+C---A NEGLIGIBLE DIMENSIONLESS DIFFERENCE COUNTS AS CONVERGED
+         IF(DABS(HDDIFF).LT.1.0D-6)THEN
+          ISOLNFLAG=1
+          GO TO 10
          ENDIF
 C
-         IF ( abs(DDPP).GT.1.0e-14 ) THEN
-           DDTEST=(DABS(DDPP-DDPPOLD))/DABS(DDPP)
-         ELSE
-           DDTEST=0.0
-         END IF
+         DDTEST=DABS(HDDIFF-HDOLD)/DABS(HDDIFF)
          IF(DDTEST.LT.EPSILON)THEN
           ISOLNFLAG=1
           GO TO 10
          ELSE
-          DDPPOLD=DDPP
+          HDOLD=HDDIFF
           ISOLNFLAG=-1
          ENDIF
 C---END TIME LOOP FOR DRAWDOWN CALCULATIONS
   30   CONTINUE
+C---NO CONVERGENCE WITHIN THE TEN DIMENSIONLESS TIMES: FAILED SOLUTION
+      IF(ISOLNFLAG.EQ.-1) ISOLNFLAG=0
 C
   10  CONTINUE
 C
