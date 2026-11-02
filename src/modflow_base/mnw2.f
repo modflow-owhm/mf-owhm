@@ -4422,7 +4422,7 @@ C
       ISS=ISSFLG(KPER)
 C
       PPC_CHK = TRUE
-      CALL SMNW2COND_WARN%INIT()
+      IF(KITER <= ONE) CALL SMNW2COND_WARN%INIT()   ! keep the warnings of the whole time step (checked in BD)
 c
 c1------if number of wells <= 0 then return.
       if(nmnw2 < ONE) return
@@ -4617,7 +4617,8 @@ c              If yes, well node is dry; set PPFLAG=0; deactivate node.
                   Cf    = MNWINT(9,iint)
                   Ploss = MNWINT(10,iint)
 C
-                  if (mnwprnt.gt.0) CALL SMNW2COND_WARN%ADD(
+                  if (mnwprnt.gt.0 .and. kiter <= ONE)
+     +                              CALL SMNW2COND_WARN%ADD(
      +                   'Open interval above water table; '//
      +                   'Deactivated node '//NUM2STR(nod,2)//
      +                   ' in well '//wellid(iw)//NL ) 
@@ -4872,7 +4873,7 @@ c  if analytical solution failed, report no partial penetration and set dhp=0.0
                 if(ISOLNFLAG == Z .AND. ITFLAG > Z) then
 c  if alpha <= 0.2, shut well off if PPC did not converge
                   if(alpha < 0.2) then
-                   if (MNWPRNT > 1) then
+                   if (MNWPRNT > 1 .and. kiter <= ONE) then
                        CALL SMNW2COND_WARN%ADD(
      +               'Partial penetration solution did not converge; '//
      +               'penetration fraction < 0.2; Resetting CWC= 0.0 '//
@@ -4888,7 +4889,7 @@ c  if alpha <= 0.2, shut well off if PPC did not converge
                    MNWNOD(22,INODE)= DZ 
                   else
 c  if alpha > 0.2, set PPC effect = 0 if did not converge
-                   if (MNWPRNT.gt.1) then
+                   if (MNWPRNT.gt.1 .and. kiter <= ONE) then
                        CALL SMNW2COND_WARN%ADD(
      +               'Partial penetration solution did not converge; '//
      +               'penetration fraction > 0.2; '//
