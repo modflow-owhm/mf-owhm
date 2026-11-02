@@ -282,12 +282,12 @@ _oneapi_load() {              # $1 = root directory of a oneAPI install
     . "$root/setvars.sh" "$@" > /dev/null && export INTEL_ONEAPI_ROOT=$root
 }
 
-# A specific version:  oneapi-2026.1
-oneapi-2026.1() { _oneapi_load "$HOME/.intel/oneapi-2026.1" "$@"; }
+# A specific version:  oneapi_2026.1
+oneapi_2026.1() { _oneapi_load "$HOME/.intel/oneapi-2026.1" "$@"; }
 
 # The classic compiler, only for those who still have oneAPI 2024.2 installed
 # (IFORTCFG silences the ifort deprecation remark 10448)
-oneapi-ifort()  { _oneapi_load "$HOME/.intel/oneapi-2024.2" "$@" && export IFORTCFG="$HOME/.intel/ifort.cfg"; }
+oneapi_ifort()  { _oneapi_load "$HOME/.intel/oneapi-2024.2" "$@" && export IFORTCFG="$HOME/.intel/ifort.cfg"; }
 
 # Whatever is newest:  oneapi
 oneapi() {
