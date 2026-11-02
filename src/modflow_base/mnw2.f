@@ -1920,8 +1920,8 @@ c     LOSSTYPE=SKIN, read IL,IR,IC,{Rw Rskin Kskin}
      &'Rskin     Kskin'
 c     LOSSTYPE=GENERAL, read IL,IR,IC,{Rw B C P}
               CASE (3)
-        write(iout,'(2A)') ' Node  Lay  Row  Col      Rw     B
-     &         C          P  '
+        write(iout,'(2A)') ' Node  Lay  Row  Col      Rw     B',
+     &                     '                   C          P  '
 c     LOSSTYPE=SPECIFYcwc, read IL,IR,IC,{CWC}
               CASE (4)
         write(iout,'(A)') ' Node  Lay  Row  Col    specCWC'
@@ -1982,8 +1982,8 @@ c     LOSSTYPE=SKIN, read IL,IR,IC,{Rw Rskin Kskin}
      &'Rskin     Kskin        PP'
 c     LOSSTYPE=GENERAL, read IL,IR,IC,{Rw B C P}
               CASE (3)
-        write(iout,'(2A)') ' Node  Lay  Row  Col      Rw     B
-     &         C          P        PP'
+        write(iout,'(2A)') ' Node  Lay  Row  Col      Rw     B',
+     &                     '                   C          P        PP'
 c     LOSSTYPE=SPECIFYcwc, read IL,IR,IC,{CWC}
               CASE (4)
         write(iout,'(A)')' Node  Lay  Row  Col    specCWC        PP'
@@ -2103,8 +2103,8 @@ C--lfk
             IC = NINT( MNW2(16,MNWID) )
             WRITE(IOUT,1108) zpump,IL,IR,IC
           END IF
- 1108 FORMAT(' ZPUMP (Elev.) = ',f9.3,', CONVERTED TO NODE LOCATION: LAY
-     1 = ',I3,', ROW = ',I3,', COL = ',I3)
+ 1108 FORMAT(' ZPUMP (Elev.) = ',f9.3,', CONVERTED TO NODE LOCATION: ',
+     &                         'LAY = ',I3,', ROW = ',I3,', COL = ',I3)
 C
         END IF
 c
@@ -2615,8 +2615,8 @@ c
 c     write info line
 c              write(iout,*) 
             IF(MNWPRNT>-1) THEN
-              write(iout,'(100A)') ' Qlimit < 0 : this well will
-     & be constrained'
+              write(iout,'(100A)') ' Qlimit < 0 : this well will ',
+     &                             'be constrained'
               write(iout,'(A,ES13.5)') '     Hlim = ',Hlim 
               write(iout,2111) QCUT
             ENDIF
@@ -3185,10 +3185,11 @@ c                   save last Q
                     mnw2(26,iw)=mnw2(29,iw)
 c  write message that Q was constrained
                     if(mnwprnt.gt.1) then
-       write(iout,*) 'Capacity Q was changing more than 25%, constrained
-     + to 25% increase/decrease for well ',WELLID(iw)
+       write(iout,'(3A)') 'Capacity Q was changing more than 25%, ',
+     &                'constrained to 25% increase/decrease for well ',
+     &                 WELLID(iw)
         write(iout,*) '   with Pump-Capacity Q = ',qactCap,' iter.no. ',
-     +kiter
+     +                kiter
                     end if
                   else
 c               if Q is changing less than 1%, set equal to Q just looked up
@@ -3224,8 +3225,9 @@ c                  Q has been constrained
                    mnw2(27,iw) = UNO
 c  write message that Q was constrained
                    if(mnwprnt.gt.1) then
-        write(iout,*) 'Capacity Q went from zero to nonzero, new Q  
-     + constrained to half of value looked up for well ',WELLID(iw)
+      write(iout,'(3A)') 'Capacity Q went from zero to nonzero, new Q ',
+     &               'constrained to half of value looked up for well ',
+     &               WELLID(iw)
         write(iout,*) '   with Pump-Capacity Q = ',qactCap
                    end if
                  end if
@@ -3255,8 +3257,8 @@ c  write message that Q was constrained
 c        write(iout,*) 'Capacity Q calculations stopped due to hwell
 c     & change less than HWtol for well   ',WELLID(iw)
         write(iout,200) kiter,WELLID(iw)
-  200 FORMAT (2X,'Capacity Q calculations stopped iter. no. ',I3,' due 
-     +to hwell change less than HWtol for well ',20A)
+  200 FORMAT (2X,'Capacity Q calculations stopped iter. no. ',I3,
+     &        ' due to hwell change less than HWtol for well ',20A)
         write(iout,*) ' with Pump-Capacity Q = ',qactCap
                 end if
               end if
@@ -3510,8 +3512,8 @@ c -----print the header for individual rates if requested(IWL2CB<0).
           write(iout,'(/,1x,a,9h PERIOD =,i5,8h  STEP =,i5)')
      +           'Nodal information for all MNW2 wells,',  kper,kstp
              write(iout,'(101A)') 'WELLID                NODE   Lay ',
-     +'  Row   Col        Totim        Q-node         Hnode         Hcel
-     +l    Seepage elev.'
+     +'  Row   Col        Totim        Q-node         Hnode         ',
+     &'Hcell    Seepage elev.'
         ioch = ONE
       endif
       !
@@ -3675,8 +3677,8 @@ c -----print the header for multi-node rates if requested(IWL2CB<0).
         if (ioch.eq.1) then
           IF(MNWPRNT>-1) THEN
             write(iout,'(/,5x,a )') 'Summary information for MNW2 wells'
-             write(iout,'(200A)') 'WELLID                    Totim    
-     +        Qin           Qout           Qnet          hwell'
+             write(iout,'(200A)') 'WELLID                    Totim    ',
+     &     '          Qin           Qout           Qnet          hwell'
            ENDIF
         endif
 c  if Q is constrained, print message
@@ -4447,9 +4449,9 @@ c   if transient, by kiter=1 , if not, by tstep=1
      +    '                              M O D E L    ',
      +    '   L A Y E R     W E L L  S C R E E N   Penetration    ',
      +    'SKIN           CALCULATED'
-        write(iout,'(120A)') 'WELLID        Node    CWC*    top_elev   
-     &bott.elev     top_elev   bott.elev    fraction     COEFF.
-     &          B'
+        write(iout,'(120A)') 'WELLID        Node    CWC*    top_elev  ',
+     &'  bott.elev     top_elev   bott.elev    fraction     COEFF.    ',
+     &'               B'
       end if
 c   Compute cell-to-well conductance for each well node
 C
@@ -5070,8 +5072,8 @@ c
 c     write note about CWC values
 c     if transient, by kiter=1 , if not, by tstep=1 
       if(ipr.eq.1) then
-      write(iout,'(120A)') '* Cell-to-well conductance values (CWC) may 
-     &change during the course of a stress period'
+      write(iout,'(120A)') '* Cell-to-well conductance values (CWC) ',
+     &'may change during the course of a stress period'
         write(iout,*) 
       end if
 c
@@ -6593,10 +6595,10 @@ c     end loop over "segments"
 c     print segment info
       if(ipr.eq.1) then
          write(iout,*)
-       write(iout,*) 'MNW2 Nonvertical Well:   Segment Information for W
-     &ell ',WELLID(IW)
-         write(iout,'(A)')  'Node   L   R   C   Segment   Length   
-     &   DEG.TILT   MAP-ANGLE    CWC-segment'            
+         write(iout,'(3A)') 'MNW2 Nonvertical Well:   ',
+     &                    'Segment Information for Well ',WELLID(IW)
+         write(iout,'(A)')  'Node   L   R   C   Segment   Length      ',
+     &                      '     DEG.TILT   MAP-ANGLE    CWC-segment'
        do INODE=firstnode,lastnode
          L=MNWNOD(1,INODE)              
          R=MNWNOD(2,INODE)              
@@ -6636,12 +6638,12 @@ C
 C-LFK   rewrite header for MNW well conductances if segment info was printed
 C        (if there are any more MNW wells)
        if (iw.lt.nmnw2 .AND. MNWPRNT>-1) then
-          write(iout,'(120A)') '                              M O D E L
-     &  L A Y E R     W E L L  S C R E E N   Penetration    SKIN     
-     &  CALCULATED'
-         write(iout,'(120A)') 'WELLID        Node    CWC*    top elev   
-     &bott.elev     top elev   bott.elev    fraction     COEFF.
-     &          B'
+        write(iout,'(120A)') '                              M O D E L',
+     &'   L A Y E R     W E L L  S C R E E N   Penetration    SKIN   ',
+     &'       CALCULATED'
+         write(iout,'(120A)') 'WELLID        Node    CWC*    top elev ',
+     &'  bott.elev     top elev   bott.elev    fraction     COEFF.    ',
+     &'               B'
        end if
       !
       end if
