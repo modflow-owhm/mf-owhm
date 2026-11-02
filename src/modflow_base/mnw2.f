@@ -7031,11 +7031,8 @@ C
 C      ********************************************************
 C      *                                                      *
 C      *                    **** PPC ****                     *
-C      *      COMPUTER PROGRAM FOR CALCULATING DRAWDOWN       *
-C      *      IN A CONFINED AQUIFER WITH AXIAL-SYMMETRIC      *
-C      *           FLOW TO A PARTIALLY PENETRATING,           *
-C      *         INFINITESIMAL-DIAMETER PUMPED WELL           *
-C      *          VERSION 3.0 CURRENT AS OF 01/25/08          *
+C      *      ADDITIONAL DRAWDOWN IN A CONFINED AQUIFER       *
+C      *        DUE TO A PARTIALLY PENETRATING WELL           *
 C      *From Barlow, P.M., and Moench, A.F., 1999, WTAQ--A    *
 C      *     computer program for calculating drawdowns and   *
 C      *     estimating hydraulic properties for confined and *
@@ -7045,11 +7042,29 @@ C      *                                                      *
 C      ********************************************************
 C
 C     DDPP = ADDITIONAL DRAWDOWN PER UNIT EXTRACTION RATE DUE TO
-C     PARTIAL PENETRATION: THE DIFFERENCE BETWEEN THE PARTIALLY
-C     (LTST2) AND THE FULLY (LTST1) PENETRATING SOLUTION AT LATE
-C     DIMENSIONLESS TIME, DIVIDED BY 4*PI*HKR*BB.  THE WTAQ SOLUTION
-C     IS LINEAR IN THE RATE, SO THE CALLER ADDS DDPP IN SERIES TO THE
-C     CELL-TO-WELL RESISTANCE (OR MULTIPLIES IT BY THE NODE RATE).
+C     PARTIAL PENETRATION: THE STEADY (LATE-TIME) LIMIT OF THE WTAQ
+C     SOLUTION FOR A UNIFORM-FLUX SCREEN BETWEEN THE DEPTHS ZPD AND
+C     ZPL BELOW THE TOP OF A CONFINED AQUIFER OF THICKNESS BB
+C     (DOUGHERTY AND BABU, 1984, AS IN WTAQ SUBROUTINE LTST2):
+C
+C       DDPP = 1/(2 PI HKR BB) * 2 BB**2/(PI**2 L**2)
+C              * SUM(n=1..) DS(n)**2 K0(X(n))/(X(n) K1(X(n)))/n**2
+C       DS(n) = SIN(n PI ZPL/BB) - SIN(n PI ZPD/BB)
+C       X(n)  = n PI SQRT(HKZ/HKR) RW/BB,   L = ZPL - ZPD
+C
+C     THE WTAQ SOLUTION IS LINEAR IN THE RATE, SO THE CALLER ADDS DDPP
+C     IN SERIES TO THE CELL-TO-WELL RESISTANCE.
+C
+C     THE SERIES IS SUMMED UNTIL X(n) > XCUT, WHERE K0/K1 IS WITHIN
+C     1/(2 X) OF 1 AND THE TERMS FALL OFF AS 1/n**3; THE REMAINING TAIL
+C     IS ADDED IN CLOSED FORM (THE MEAN OF DS**2 IS 1, ITS OSCILLATING
+C     PART AVERAGES OUT).  THE RESULT IS WITHIN ABOUT 1E-5 OF THE FULL
+C     SUM.  THE FORMER CODE EVALUATED THE TIME-DEPENDENT SOLUTION BY
+C     STEHFEST INVERSION AT TEN LATE TIMES AND TOOK THE CONVERGED
+C     DIFFERENCE BETWEEN THE PARTIALLY AND THE FULLY PENETRATING WELL;
+C     ITS SERIES EXIT TEST (ONE TERM BELOW 1E-7 OF THE SUM, IN A SERIES
+C     WHOSE TERMS PASS THROUGH ZERO) STOPPED THE SUM EARLY AND
+C     UNDERESTIMATED THE CORRECTION BY UP TO 6 PERCENT.
 C
 C      BB=AQUIFER THICKNESS
 C      HKR=HORIZONTAL K (L/T)
@@ -7059,13 +7074,7 @@ C      ZPD=DEPTH BELOW TOP OF AQUIFER TO THE TOP OF THE SCREENED
 C          INTERVAL OF THE PUMPED WELL (L)
 C      ZPL=DEPTH BELOW TOP OF AQUIFER TO THE BOTTOM OF THE SCREENED
 C          INTERVAL OF THE PUMPED WELL (L)
-C      ISOLNFLAG=1 WHEN THE TIME LOOP CONVERGED, 0 WHEN IT DID NOT
-C
-C   THE WTAQ SETTINGS ARE FIXED: CONFINED AQUIFER, INFINITESIMAL
-C   DIAMETER PUMPED WELL WITHOUT WELLBORE STORAGE OR SKIN, DRAWDOWN
-C   IN THE PUMPED WELL ITSELF (RD=1), STEHFEST INVERSION WITH NS=8
-C   TERMS.  THE WTAQ COMMON BLOCKS ARE REPLACED BY ARGUMENTS, SO THE
-C   ROUTINES KEEP NO STATE BETWEEN CALLS.
+C      ISOLNFLAG=1 (KEPT FOR THE CALLER; THE SERIES ALWAYS CONVERGES)
 C
 C   NOTE, PROGRAM ASSUMES THAT THE PUMPED WELL IS PARTIALLY PENETRATING.
 C    THEREFORE, NEED A TEST IN THE MAIN PROGRAM THAT ENSURES THAT THE
@@ -7079,310 +7088,38 @@ C
       INTEGER,          INTENT(  OUT):: ISOLNFLAG
       DOUBLE PRECISION, INTENT(IN   ):: BB,HKR,HKZ,RW,ZPD,ZPL
 C
-      INTEGER,          PARAMETER:: NS      = 8        ! STEHFEST TERMS
-      INTEGER,          PARAMETER:: NMAX    = 200      ! SERIES TERMS (LTST2)
-      DOUBLE PRECISION, PARAMETER:: RERRSUM = 1.0D-7   ! SERIES TOLERANCE
-      DOUBLE PRECISION, PARAMETER:: EXPMAX  = 708.0D0  ! MAX EXPONENT ARGUMENT
-      DOUBLE PRECISION, PARAMETER:: EPSILON = 1.0D-5   ! TIME LOOP CLOSURE
-      DOUBLE PRECISION, PARAMETER:: PI = 3.141592653589793D0
+      DOUBLE PRECISION, PARAMETER:: PI   = 3.141592653589793D0
+      DOUBLE PRECISION, PARAMETER:: XCUT = 20.0D0     ! END OF THE EXPLICIT SUM
+      INTEGER,          PARAMETER:: NMAX = 10000000   ! SAFETY LIMIT ON TERMS
 C
-      DOUBLE PRECISION:: V(20), XLN2
-      DOUBLE PRECISION:: XKD, RWD, BETAW, XDD, XLD, F2
-      DOUBLE PRECISION:: TD, HD, HDPP, HDFP, HDDIFF, HDOLD, DDTEST
-      INTEGER:: NT
+      DOUBLE PRECISION, EXTERNAL:: BESSK0, BESSK1
+      DOUBLE PRECISION:: L, C, S, DS, X, XN
+      INTEGER:: N
 C
-C1--AQUIFER AND PUMPED-WELL DIMENSIONLESS PARAMETERS
-       IF ( abs(HKR) > 1.0D-14 )THEN
-         XKD=HKZ/HKR
-       ELSE
-         XKD=0.0D0
-       END IF
-       IF ( abs(BB) > 1.0D-14 ) THEN
-         RWD=RW/BB
-         XDD=ZPD/BB
-         XLD=ZPL/BB
-       ELSE
-         RWD=0.0D0
-         XDD=0.0D0
-         XLD=0.0D0
-       END IF
-       BETAW=XKD*(RWD*RWD)
+      DDPP      = 0.0D0
+      ISOLNFLAG = 1
+      L = ZPL - ZPD
+      IF( BB <= 0.0D0 .OR. HKR <= 0.0D0 .OR. HKZ <= 0.0D0 .OR.
+     +    RW <= 0.0D0 .OR. L <= 0.0D0 ) RETURN
 C
-C3--DRAWDOWN PER UNIT RATE AND UNIT DIMENSIONLESS DRAWDOWN
-       IF ( abs(HKR*BB) > 1.0D-14 ) THEN
-         F2=1.0D0/(4.0D0*PI*HKR*BB)
-       ELSE
-         F2 = 0.0D0
-       END IF
+      C = PI*SQRT(HKZ/HKR)*RW/BB          ! X(n) = n*C
+      S = 0.0D0
+      N = 0
+      DO
+        N  = N + 1
+        XN = DBLE(N)
+        DS = SIN(XN*PI*ZPL/BB) - SIN(XN*PI*ZPD/BB)
+        X  = XN*C
+        IF(DS /= 0.0D0) S = S + DS*DS*BESSK0(X)/(X*BESSK1(X))/(XN*XN)
+        IF(X > XCUT .OR. N >= NMAX) EXIT
+      END DO
+C---CLOSED-FORM TAIL OF THE SERIES FOR n > N
+      S = S + 1.0D0/(2.0D0*C*XN*XN) - 1.0D0/(6.0D0*C*C*XN*XN*XN)
 C
-C4--CALL LINVST TO CALCULATE COEFFICIENTS USED FOR THE STEHFEST
-C     ALGORITHM
-       CALL LINVST(V,NS)
-       XLN2=DLOG(2.D0)
-C
-C---CALCULATE DRAWDOWNS
-C    The convergence test uses the dimensionless difference between the
-C    partially and the fully penetrating solution, so it does not depend
-C    on the pumping rate or the length unit.  (The former test skipped
-C    times with a dimensional difference below 0.001 and, for small
-C    rates, ran into late times where the Stehfest inversion drifts.)
-       HDOLD=0.0D0
-       ISOLNFLAG=0
-       DDPP=0.0D0
-       TD=1.0D4
-       DO NT=1,10
-        TD=TD*10.0D0
-C---CALCULATE DIMENSIONLESS DRAWDOWN FOR PARTIALLY PENETRATING
-C     WELL, CALL LTST2
-         CALL LTST2(TD,HD,BETAW,XDD,XLD,NS,NMAX,RERRSUM,V,XLN2,EXPMAX)
-         IF(HD < 1.0D-02) HD=0.0D0
-         HDPP=HD
-C
-C---CALCULATE DIMENSIONLESS DRAWDOWN FOR FULLY PENETRATING
-C     WELL, CALL LTST1
-         CALL LTST1(TD,HD,NS,V,XLN2,EXPMAX)
-         IF(HD < 1.0D-02) HD=0.0D0
-         HDFP=HD
-C
-C---CALCULATE DRAWDOWN DUE TO PARTIALLY PENETRATING WELL
-         HDDIFF=HDPP-HDFP
-         DDPP=F2*HDDIFF
-C
-C---A NEGLIGIBLE DIMENSIONLESS DIFFERENCE COUNTS AS CONVERGED
-         IF(DABS(HDDIFF) < 1.0D-6)THEN
-          ISOLNFLAG=1
-          EXIT
-         ENDIF
-C
-         DDTEST=DABS(HDDIFF-HDOLD)/DABS(HDDIFF)
-         IF(DDTEST < EPSILON)THEN
-          ISOLNFLAG=1
-          EXIT
-         ELSE
-          HDOLD=HDDIFF
-          ISOLNFLAG=-1
-         ENDIF
-C---END TIME LOOP FOR DRAWDOWN CALCULATIONS
-       END DO
-C---NO CONVERGENCE WITHIN THE TEN DIMENSIONLESS TIMES: FAILED SOLUTION
-      IF(ISOLNFLAG == -1) ISOLNFLAG=0
+      DDPP = (2.0D0*BB*BB/(PI*PI*L*L)) * S / (2.0D0*PI*HKR*BB)
 C
       RETURN
       END
-C
-C
-C       ******************************************************
-C      *                                                      *
-C      *                  SUBROUTINE LINVST                   *
-C      *                                                      *
-C      *          VERSION 1.0 CURRENT AS OF 10/01/99          *
-C      *                                                      *
-C       ******************************************************
-C
-C15-SUBROUTINE LINVST CALCULATES COEFFICIENTS USED FOR THE
-C   STEHFEST ALGORITHM
-C
-       SUBROUTINE LINVST(V,NS)
-C---SPECIFICATIONS
-       IMPLICIT DOUBLE PRECISION (A-H,O-Z)
-       DIMENSION G(20),V(20),HS(20)
-C
-       verysmall = 1.0d-25
-       G(1)=1.D0
-       NH=NS/2
-        DO 1 IS=2,NS
-1      G(IS)=G(IS-1)*IS
-       HS(1) = 0.0d0
-       if (abs(G(NH-1))>verysmall) HS(1)=2.D0/G(NH-1)
-        DO 3 IS=2,NH
-       FI=IS
-       IF(IS.EQ.NH) GO TO 2
-       if ( abs((G(NH-IS)*G(IS)*G(IS-1)))>verysmall )
-     +   HS(IS)=FI**(NH)*G(2*IS)/(G(NH-IS)*G(IS)*G(IS-1))
-       GO TO 3
-2      if (abs(G(IS)*G(IS-1))>verysmall )
-     +   HS(IS)=FI**(NH)*G(2*IS)/(G(IS)*G(IS-1))
-3       CONTINUE
-       SN=2*(NH-NH/2*2)-1
-        DO 4 IS=1,NS
-       V(IS)=0.D0
-       K1=(IS+1)/2
-       K2=IS
-       IF(K2.GT.NH)K2=NH
-        DO 5 KS=K1,K2
-       IF(2*KS-IS.EQ.0) GO TO 6
-       IF(IS.EQ.KS)GO TO 7
-       if ( abs(G(IS-KS)*G(2*KS-IS))>verysmall ) 
-     +      V(IS)=V(IS)+HS(KS)/(G(IS-KS)*G(2*KS-IS))
-       GO TO 5
-6      if ( abs(G(IS-KS))>verysmall ) V(IS)=V(IS)+HS(KS)/(G(IS-KS))
-       GO TO 5
-7      if ( abs(G(2*KS-IS))>verysmall) V(IS)=V(IS)+HS(KS)/G(2*KS-IS)
-5       CONTINUE
-       V(IS)=SN*V(IS)
-       SN=-SN
-4       CONTINUE
-       RETURN
-       END
-C
-C
-C       ******************************************************
-C      *                                                      *
-C      *                  SUBROUTINE LTST1                    *
-C      *                                                      *
-C      *          VERSION 1.0 CURRENT AS OF 10/01/99          *
-C      *                                                      *
-C       ******************************************************
-C
-C16-SUBROUTINE LTST1 CALCULATES THE LAPLACE TRANSFORM SOLUTION FOR
-C   DRAWDOWN FOR FLOW TO A FULLY PENETRATING WELL OF INFINITESIMAL
-C   DIAMETER IN A CONFINED AQUIFER (THEIS SOLUTION).
-C
-       SUBROUTINE LTST1(TD,HDT,NS,V,XLN2,EXPMAX)
-C---DIMENSIONLESS DRAWDOWN OF THE FULLY PENETRATING WELL (THEIS) AT
-C   THE WELL (RD=1), STEHFEST INVERSION WITH NS TERMS (COEFFICIENTS V)
-C---SPECIFICATIONS
-       IMPLICIT NONE
-       DOUBLE PRECISION, INTENT(IN   ):: TD, V(20), XLN2, EXPMAX
-       INTEGER,          INTENT(IN   ):: NS
-       DOUBLE PRECISION, INTENT(  OUT):: HDT
-       DOUBLE PRECISION, PARAMETER:: verysmall = 1.0D-25
-       DOUBLE PRECISION:: XP, PP, CA, RE0, PDL
-       DOUBLE PRECISION, EXTERNAL:: BESSK0
-       INTEGER:: I
-C
-       HDT=0.D0
-       XP=0.D0
-       PP=0.D0
-       PDL=0.D0
-       DO I=1,NS
-        if ( abs(TD)>verysmall ) PP=XLN2*I/TD
-C
-        CA=DSQRT(PP)
-        IF(CA > EXPMAX) CA=EXPMAX
-        RE0=BESSK0(CA)
-        if ( abs(PP)>verysmall ) PDL=RE0/PP
-        XP=XP+V(I)*PDL
-       END DO
-       if ( abs(TD)>verysmall ) HDT=2.D0*XP*XLN2/TD
-C
-C---RETURN TO MAIN PROGRAM
-       RETURN
-       END
-C
-C
-C       ******************************************************
-C      *                                                      *
-C      *                  SUBROUTINE LTST2                    *
-C      *                                                      *
-C      *          VERSION 1.0 CURRENT AS OF 10/01/99          *
-C      *                                                      *
-C       ******************************************************
-C
-C17-SUBROUTINE LTST2 CALCULATES THE LAPLACE TRANSFORM SOLUTION FOR
-C   DRAWDOWN FOR FLOW TO A FINITE DIAMETER, PARTIALLY PENETRATING
-C   WELL IN A CONFINED AQUIFER (MODIFIED SOLUTION OF DOUGHERTY AND
-C   BABU, 1984). DELAYED DRAWDOWN RESPONSE AT OBSERVATION WELLS
-C   IS INCLUDED.
-C
-       SUBROUTINE LTST2(TD,HD,BETAW,XDD,XLD,NS,NMAX,RERRSUM,V,XLN2,
-     +                  EXPMAX)
-C---DIMENSIONLESS DRAWDOWN OF THE PARTIALLY PENETRATING WELL AT THE
-C   WELL (RD=1): MODIFIED SOLUTION OF DOUGHERTY AND BABU (1984),
-C   INFINITESIMAL DIAMETER, NO WELLBORE STORAGE OR SKIN.
-C   BETAW = (HKZ/HKR)*(RW/BB)**2, XDD AND XLD = SCREEN TOP AND BOTTOM
-C   AS FRACTIONS OF THE THICKNESS, NMAX AND RERRSUM = LIMIT AND
-C   TOLERANCE OF THE SERIES, V = STEHFEST COEFFICIENTS (NS TERMS)
-C---SPECIFICATIONS
-       IMPLICIT NONE
-       DOUBLE PRECISION, INTENT(IN   ):: TD, BETAW, XDD, XLD, RERRSUM
-       DOUBLE PRECISION, INTENT(IN   ):: V(20), XLN2, EXPMAX
-       INTEGER,          INTENT(IN   ):: NS, NMAX
-       DOUBLE PRECISION, INTENT(  OUT):: HD
-       DOUBLE PRECISION, PARAMETER:: PI=3.141592653589793D0
-       DOUBLE PRECISION, PARAMETER:: verysmall = 1.0D-25
-       DOUBLE PRECISION:: XP, PP, Q0, RE0, RE1, A0, A, SUMA, SUMTA
-       DOUBLE PRECISION:: XNPI, QN, DB, DA, SINES, XNUM, XDEN, ERRA, PDL
-       DOUBLE PRECISION, EXTERNAL:: BESSK0, BESSK1
-       INTEGER:: I, NNN
-C
-       HD=0.D0
-       XP=0.0D0
-       PP=0.0D0
-C
-      DO I=1,NS
-       if ( abs(TD)>verysmall ) PP=XLN2*I/TD
-       IF ( pp > verysmall ) THEN   !RGN 9/2/2016 changed 1e-14 to verysmall
-         Q0=DSQRT(PP)
-       ELSE
-         Q0=0.0D0
-       END IF
-       IF(Q0 > EXPMAX) Q0=EXPMAX
-       RE0=BESSK0(Q0)
-       RE1=BESSK1(Q0)
-       IF ( abs(Q0*RE1) > verysmall ) THEN
-         A0=RE0*(XLD-XDD)/(Q0*RE1)
-       ELSE
-         A0= 0.0D0
-       END IF
-       A=0.D0
-       SUMA=0.D0
-C
-       NNN=0
-       DO
-        NNN=NNN+1
-        IF(NNN >= NMAX) EXIT
-        SUMTA=SUMA
-        XNPI=NNN*PI
-        IF ( BETAW*XNPI*XNPI+PP > 1.0D-14 ) THEN
-          QN=DSQRT(BETAW*XNPI*XNPI+PP)
-        ELSE
-          QN=0.0D0
-        END IF
-        IF(QN > EXPMAX) QN=EXPMAX
-        DB=DSIN(XNPI*(1.0D0-XDD))
-        DA=DSIN(XNPI*(1.0D0-XLD))
-        SINES=DB-DA
-        RE0=BESSK0(QN)
-        RE1=BESSK1(QN)
-        IF ( abs(XNPI*(XLD-XDD)) > 1.0D-14 ) THEN
-          XNUM=RE0*SINES*SINES/(XNPI*(XLD-XDD))
-        ELSE
-          XNUM=0.0D0
-        END IF
-        XDEN=0.5D0*QN*RE1*XNPI
-        IF ( abs(XDEN) > 1.0D-14 ) THEN
-          A=XNUM/XDEN
-        ELSE
-          A = 0.0D0
-        END IF
-        SUMA=SUMTA+A
-C
-        IF(NNN < 25) CYCLE
-        ERRA=DABS(SUMTA-SUMA)
-        IF(ERRA < RERRSUM*SUMA) EXIT
-       END DO
-C
-       A=SUMA
-       IF ( abs(PP) > 1.0D-14 ) THEN
-        PDL=(A0+A)/PP
-       ELSE
-        PDL = 0.0D0
-       ENDIF
-C
-       XP=XP+V(I)*PDL
-C
-      END DO
-C
-       IF ( abs(TD*(XLD-XDD)) > 1.0D-14 ) THEN
-         HD=2.D0*XP*XLN2/(TD*(XLD-XDD))
-       ELSE
-         HD = 0.0D0
-       END IF
-C
-C---RETURN TO MAIN PROGRAM
-       RETURN
-       END
 C
 C       ******************************************************
 C      *                                                      *
