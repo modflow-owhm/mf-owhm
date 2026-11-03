@@ -438,7 +438,7 @@ C5------FOR EACH WELL, THERE ARE 30 DATA VALUES PLUS THE AUXILIARY VARIABLES
       !
       IF (.NOT. MNW2BUD%BUDGET_GROUPS) CALL MNW2BUD%ADD( -MNWMAX )    !NO BUDGET GROUPS SO SET MNW2BUD TO THE SIZE OF THE MNW2WELLS
       !
-C5------FOR EACH NODE, THERE ARE 31 DATA VALUES
+C5------FOR EACH NODE, THERE ARE 33 DATA VALUES
 c approximate number of nodes= max mnw wells * number of layers, this works well
 c if all are mostly vertical wells.  add 10*nlay+25 for extra room.  ispmnwn is 
 c passed out to RP routine to check allocation while reading actual # nodes used
@@ -447,7 +447,7 @@ C--LFK  Dec. 2012
           NODTOT=(MNWMAX*NLAY)+(10*NLAY)+25
       END IF   
 C-LFK
-      ALLOCATE (MNWNOD(34,NODTOT))
+      ALLOCATE (MNWNOD(33,NODTOT))
 C5------FOR EACH INTERVAL, THERE ARE 11 DATA VALUES
       ALLOCATE (MNWINT(11,NODTOT))
 C5------FOR Capacity Table, 
@@ -3988,9 +3988,9 @@ C
 C     SPECIFICATIONS:
 C     ------------------------------------------------------------------
       USE GLOBAL,       ONLY:NCOL,NROW,NLAY,DELR,DELC,NBOTM,LBOTM,
-     1                       BOTM,HNEW,LAYHDT,LAYCBD,CR,CC,ISSFLG
+     1                       BOTM,HNEW,LAYHDT,LAYCBD,CR,CC
       USE GWFBASMODULE, ONLY:HDRY
-      USE GWFBCFMODULE, ONLY:HY,LAYCON,TRPY,SC1
+      USE GWFBCFMODULE, ONLY:HY,LAYCON,TRPY
       USE GWFMNW2MODULE, ONLY:NMNW2,MNWMAX,MNWPRNT,
      1                       NODTOT,MNW2,MNWNOD,IOUT,
      2                       SMALL,WELLID
@@ -4001,14 +4001,13 @@ C     ------------------------------------------------------------------
       !
       INTEGER, INTENT(IN):: KPER,IGRID
       INTEGER:: firstnode,lastnode
-      INTEGER:: ISS, ix, iy, iz, iw, INODE
+      INTEGER:: ix, iy, iz, iw, INODE
       DOUBLE PRECISION::top,bot, SS
       DOUBLE PRECISION:: dx,dy,ah,dxp,Txp,dxm,Txm
       DOUBLE PRECISION:: dyp,Typ,dym,Tym,Txx,div,Tyy
       DOUBLE PRECISION:: upper,TempKX,thick
       REAL:: Kz
 C
-      ISS = ISSFLG(KPER)
       CALL SGWF2MNW2PNT(IGRID)
 c
 c1------if number of wells <= 0 then return.
@@ -4119,14 +4118,7 @@ C  FOR BCF, must assume Kh=Kz as only input is VCONT
          else
            Kz=0.d0
          end if
-c-lfk         IF(ISS.NE.0) THEN
-         IF(ISS.EQ.0 .and. thick > NEARZERO_20) THEN
-           SS=SC1(IX,IY,IZ)/(thick*dx*dy)
-         ELSE
-           SS=1e-5
-         END IF
          MNWNOD(33,INODE)=Kz
-         MNWNOD(34,INODE)=SS
         end do 
        end if 
       end do 
@@ -4142,9 +4134,9 @@ C
 C     SPECIFICATIONS:
 C     ------------------------------------------------------------------
       USE GLOBAL,       ONLY:NCOL,NROW,NLAY,DELR,DELC,NBOTM,LBOTM,
-     1                       BOTM,HNEW,LAYHDT,LAYCBD,CR,CC,ISSFLG,ITRSS
+     1                       BOTM,HNEW,LAYHDT,LAYCBD,CR,CC
       USE GWFBASMODULE, ONLY:HDRY
-      USE GWFLPFMODULE, ONLY:CHANI,HANI,HK,LAYVKA,VKA,SC1
+      USE GWFLPFMODULE, ONLY:CHANI,HANI,HK,LAYVKA,VKA
       USE GWFMNW2MODULE, ONLY:NMNW2,MNWMAX,MNWPRNT,
      1                       NODTOT,MNW2,MNWNOD,IOUT,
      2                       WELLID
@@ -4153,14 +4145,13 @@ C     ------------------------------------------------------------------
 C     ------------------------------------------------------------------
       IMPLICIT NONE
       INTEGER, INTENT(IN):: KPER,IGRID
-      INTEGER:: firstnode, lastnode, iw, INODE, ISS
+      INTEGER:: firstnode, lastnode, iw, INODE
       INTEGER:: ix, iy, iz, KHANI
       DOUBLE PRECISION:: dx,dy,top,bot
       DOUBLE PRECISION:: AH, Txx, Tyy, upper, TempKX, thick
-      DOUBLE PRECISION:: Kz, SS
+      DOUBLE PRECISION:: Kz
 C
       CALL SGWF2MNW2PNT(IGRID)
-      ISS=ISSFLG(KPER)
 c
 c1------if number of wells <= 0 then return.
       if(nmnw2 < ONE) return
@@ -4240,18 +4231,7 @@ c           write (iout,*) 'upper,bottom = ', upper,bot
 c            end if
 c          end if
 c         continue
-c lfk  4/21/11 modifications below to prevent zero-divide error if thick.eq.0       
-         IF(thick > NEARZERO_20) THEN
-          IF(ITRSS /= Z) THEN
-              SS = SC1(IX,IY,IZ)/(thick*dx*dy)
-          ELSE
-              SS = 1e-5  
-          END IF
-         else
-              SS = DZ
-         end if
          MNWNOD(33,INODE) = Kz
-         MNWNOD(34,INODE) = SS
         end do
        end if
       end do 
@@ -4268,9 +4248,9 @@ C
 C     SPECIFICATIONS:
 C     ------------------------------------------------------------------
       USE GLOBAL,       ONLY:NCOL,NROW,NLAY,DELR,DELC,NBOTM,LBOTM,
-     1                       BOTM,HNEW,LAYHDT,LAYCBD,CR,CC,ISSFLG
+     1                       BOTM,HNEW,LAYHDT,LAYCBD,CR,CC
       USE GWFBASMODULE, ONLY:HDRY
-      USE GWFHUFMODULE, ONLY:HK,HKCC,VKAH,SC1
+      USE GWFHUFMODULE, ONLY:HK,HKCC,VKAH
       USE GWFMNW2MODULE, ONLY:NMNW2,MNWMAX,MNWPRNT,
      1                       NODTOT,MNW2,MNWNOD,IOUT,
      2                       WELLID
@@ -4279,14 +4259,13 @@ C     ------------------------------------------------------------------
 C     ------------------------------------------------------------------
       IMPLICIT NONE
       INTEGER, INTENT(IN):: KPER,IGRID
-      INTEGER:: firstnode, lastnode, iw, INODE, ISS
+      INTEGER:: firstnode, lastnode, iw, INODE
       INTEGER:: ix, iy, iz
       DOUBLE PRECISION:: dx,dy,top,bot,ah
       DOUBLE PRECISION:: Txx,Tyy,upper,TempKX,thick,KY
-      DOUBLE PRECISION:: Kz, SS
+      DOUBLE PRECISION:: Kz
 C
       CALL SGWF2MNW2PNT(IGRID)
-      ISS=ISSFLG(KPER)
 C
 c
 c1------if number of wells <= 0 then return.
@@ -4336,14 +4315,7 @@ c   set thickness / conductance to 0 if cell is dry
          MNWNOD(16,INODE) = Txx
          MNWNOD(17,INODE) = Tyy
          Kz = VKAH(ix,iy,iz)
-C-LFK         IF(ISS.NE.0) THEN
-         IF(ISS == Z .and. thick > NEARZERO_20) THEN
-             SS = SC1(IX,IY,IZ)/(thick*dx*dy)
-         ELSE
-             SS =1e-5
-         END IF
          MNWNOD(33,INODE) = Kz
-         MNWNOD(34,INODE) = SS
         end do 
        end if 
       end do 
@@ -4358,9 +4330,9 @@ C
 C     SPECIFICATIONS:
 C     ------------------------------------------------------------------
       USE GLOBAL,       ONLY:NCOL,NROW,NLAY,DELR,DELC,NBOTM,LBOTM,
-     1                       BOTM,HNEW,LAYHDT,LAYCBD,CR,CC,ISSFLG,ITRSS
+     1                       BOTM,HNEW,LAYHDT,LAYCBD,CR,CC
       USE GWFBASMODULE, ONLY:HDRY
-      USE GWFUPWMODULE, ONLY:CHANI,HANI,HKUPW,LAYVKAUPW,VKAUPW,SC1
+      USE GWFUPWMODULE, ONLY:CHANI,HANI,HKUPW,LAYVKAUPW,VKAUPW
       USE GWFMNW2MODULE, ONLY:NMNW2,MNWMAX,MNWPRNT,
      1                       NODTOT,MNW2,MNWNOD,IOUT,
      2                       WELLID
@@ -4369,14 +4341,13 @@ C     ------------------------------------------------------------------
 C     ------------------------------------------------------------------
       IMPLICIT NONE
       INTEGER, INTENT(IN):: KPER,IGRID
-      INTEGER:: firstnode,lastnode, iw, INODE, ISS, KHANI
+      INTEGER:: firstnode,lastnode, iw, INODE, KHANI
       INTEGER:: ix, iy, iz
       DOUBLE PRECISION:: dx,dy,top,bot,ah
       DOUBLE PRECISION:: Txx,Tyy,upper,TempKX,thick
-      DOUBLE PRECISION:: Kz, SS
+      DOUBLE PRECISION:: Kz
 C
       CALL SGWF2MNW2PNT(IGRID)
-      ISS = ISSFLG(KPER)
 c
 c1------if number of wells <= 0 then return.
       if(nmnw2 < ONE) return
@@ -4434,17 +4405,7 @@ c   set thickness / conductance to 0 if cell is dry
          ELSE
              Kz = HKUPW(ix,iy,iz)/VKAUPW(ix,iy,iz)
          END IF
-         IF(ITRSS /= Z) THEN
-           IF (thick > NEARZERO_20) THEN
-               SS = SC1(IX,IY,IZ)/(dx*dy)
-           ELSE
-               SS = DZ
-           END IF
-         ELSE
-               SS = 1e-5  
-         END IF
          MNWNOD(33,INODE) = Kz
-         MNWNOD(34,INODE) = SS
         end do
        end if
       end do 
@@ -4498,7 +4459,6 @@ C     ------------------------------------------------------------------
       LOGICAL:: PPC_CHK, ConstT
 C
       CALL SGWF2MNW2PNT(IGRID)
-      ISS=ISSFLG(KPER)
 C
       PPC_CHK = TRUE
       IF(KITER <= ONE) CALL SMNW2COND_WARN%INIT()   ! keep the warnings of the whole time step (checked in BD)
