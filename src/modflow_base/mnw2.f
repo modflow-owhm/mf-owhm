@@ -5498,7 +5498,7 @@ C-LFK     1                       NODTOT,MNW2,MNWNOD,SMALL,WELLID
      2                       HAS_NWT
       USE NUM2STR_INTERFACE, ONLY: NUM2STR
       USE CONSTANTS,         ONLY: NL, DZ, UNO, DOS, DNEG, inf, HALF,
-     +                             Z, ONE, TWO,
+     +                             Z, ONE, TWO, TRUE, FALSE,
      +                             NEARZERO_20, NEGNEARZERO_20
       IMPLICIT NONE
       INTEGER, INTENT(IN):: IGRID, KPER, KSTP, iw, kiter
@@ -5511,7 +5511,7 @@ C-LFK     1                       NODTOT,MNW2,MNWNOD,SMALL,WELLID
       INTEGER:: NNODES, INODE
       INTEGER:: QCUT, CapFlag2, QlimFlag
       INTEGER:: IL, IC, IR, kSeep
-      LOGICAL:: CHKER, SOLV_NODE, QLIMIT, HasQ
+      LOGICAL:: CHKER, SOLV_NODE, SEEP_NODE, QLIMIT, HasQ
 C
       !verysmall = 1.D-25
 C-LFK   initialize MNWNOD(15,IW) TO HIGH VALUE
@@ -5879,15 +5879,30 @@ c
         !
         csum = csum + cond
         if(MNWNOD(15,INODE) == inf )then
+          SEEP_NODE = FALSE
           IF(cond > NEARZERO_20)THEN                !seb Added check to set qact=0 when COND=0
-              qact = ( hwell - hnew(ic,ir,il) ) * cond
+c  The well head of the second pass leaves out the seepage faces that
+c  pass found, so it can drop below the bottom of a node the pass kept
+c  (a well that pumps more than its cells can give): that node is a
+c  seepage face as well, the water level in the borehole cannot be
+c  below the cell bottom there, so its flow is limited to the bottom.
+              Bottom = BOTM(ic,ir,LBOTM(il))
+              IF(hwell < Bottom) THEN
+                  SEEP_NODE = TRUE
+                  qact  = ( Bottom - hnew(ic,ir,il) ) * cond
+                  Qseep = Qseep + qact
+              ELSE
+                  qact  = ( hwell - hnew(ic,ir,il) ) * cond
+              END IF
           ELSE
               qact = DZ
           END IF
           !
           MNWNOD(4,INODE) = qact
           !
-          IF(SOLV_NODE) THEN
+          IF(SEEP_NODE) THEN
+                                        MNWNOD(15,INODE) = Bottom
+          ELSEIF(SOLV_NODE) THEN
                                         MNWNOD(15,INODE) = hwell
           ELSE
                                         MNWNOD(15,INODE) = hdry
