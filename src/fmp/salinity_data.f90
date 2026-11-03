@@ -750,14 +750,14 @@ MODULE SALINITY_DATA_FMP_MODULE!, ONLY: SALINITY_DATA, INITIALIZE_SALINITY_DATA
     DOUBLE PRECISION, DIMENSION(:), ALLOCATABLE:: VAL
     !
     ! CALCULATE SOURCE WATER SALINITY (ECw) --INCLUDES WATER FROM PREVIOUS SALINITY APPLICATION
-    ! SW (mg/L)   GW (mg/L)   NRD (mg/L)   MAGIC (mg/L)       (1dS/m = 640ppm = 640 mg/L)
+    ! SUP_PPM columns are in the input order: NRD (mg/L)   SW (mg/L)   GW (mg/L)   MAGIC/External (mg/L)       (1dS/m = 640ppm = 640 mg/L)
     !
     DO CONCURRENT (I=ONE:SALT%NFARM)
         IF(WBS%SUPPLY(I)%USED > DZ) THEN
             SALT%ECw(I) =                                             &
-                        ( WBS%SUPPLY(I)%SFR   *  SALT%SUP_PPM(1,I) +  &
-                          WBS%SUPPLY(I)%WEL   *  SALT%SUP_PPM(2,I) +  &
-                          WBS%SUPPLY(I)%NRD   *  SALT%SUP_PPM(3,I) +  &
+                        ( WBS%SUPPLY(I)%NRD   *  SALT%SUP_PPM(1,I) +  &
+                          WBS%SUPPLY(I)%SFR   *  SALT%SUP_PPM(2,I) +  &
+                          WBS%SUPPLY(I)%WEL   *  SALT%SUP_PPM(3,I) +  &
                           WBS%SUPPLY(I)%MAGIC *  SALT%SUP_PPM(4,I)   ) / WBS%SUPPLY(I)%USED
         ELSEIF(WBS%SUPPLY(I)%HAS_MAGIC) THEN
             SALT%ECw(I) = ( SALT%SUP_PPM(1,I) + SALT%SUP_PPM(2,I) + SALT%SUP_PPM(3,I) + SALT%SUP_PPM(4,I) ) / 4.D0
