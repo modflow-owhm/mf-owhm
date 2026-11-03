@@ -361,7 +361,7 @@ C       THE RHS ACCUMULATOR.
           RHS(IC,IR,IL)=RHS(IC,IR,IL)-Qp
 ! Derivative for RHS
           ij = Icell(IC,IR,IL)
-          A(IA(ij)) = A(IA(ij)) + WEL_DERIV(PSIRAMP,Hh,Ttop,Bbot)
+          A(IA(ij)) = A(IA(ij)) + WEL_DERIV(PSIRAMP,Hh,Ttop,Bbot)*Q
         ELSE
           RHS(IC,IR,IL)=RHS(IC,IR,IL)-Q
         END IF

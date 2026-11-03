@@ -593,7 +593,7 @@ SUBROUTINE GWF2WEL8FM(IGRID)   !SCOTT IDEA MAKE SUBTRACTING FROM RHS VECTORIZABL
   INTEGER, INTENT(IN):: IGRID
   !
   DOUBLE PRECISION Qp,Hh,Ttop,Bbot
-  REAL:: Q, ZERO
+  REAL:: Q, Qs, ZERO
   INTEGER:: IL, IR, IC, L, IJ
 ! ------------------------------------------------------------------
   CALL SGWF2WEL8PNT(IGRID)
@@ -624,12 +624,12 @@ SUBROUTINE GWF2WEL8FM(IGRID)   !SCOTT IDEA MAKE SUBTRACTING FROM RHS VECTORIZABL
        bbot = Botm(IC, IR, Lbotm(IL))
        ttop = Botm(IC, IR, Lbotm(IL)-1)
        !
-       Q = Q*WEL_SMOOTH(PHIRAMP,Hh,Ttop,Bbot)  
+       Qs = Q*WEL_SMOOTH(PHIRAMP,Hh,Ttop,Bbot)
        !
-       RHS(IC,IR,IL)=RHS(IC,IR,IL)-Q
+       RHS(IC,IR,IL)=RHS(IC,IR,IL)-Qs
        !
        IF(NWT_SOLVER) THEN
-          ! Derivative for RHS WHEN USING UPW/NWT
+          ! Derivative for RHS WHEN USING UPW/NWT: d(Q*S(h))/dh = Q*S'(h) with the rate before smoothing
           IJ = Icell(IC,IR,IL)
           A(IA(IJ)) = A(IA(IJ)) + WEL_DERIV(PHIRAMP,Hh,Ttop,Bbot)*Q
        END IF
@@ -1042,6 +1042,7 @@ PURE ELEMENTAL FUNCTION WEL_DERIV(PHIRAMP,H,T,B,SATTHK)  RESULT(dq)
 ! SATTHK is an optional thickness that when present over rides the thickness defined by PHIRAMP*(T-B)
 ! RETURNS dq which is the derivative of well conductance with respect to well head
 !
+  USE CONSTANTS, ONLY: DZ, DNEG
   DOUBLE PRECISION, INTENT(IN) :: PHIRAMP
   DOUBLE PRECISION, INTENT(IN) :: H
   DOUBLE PRECISION, INTENT(IN) :: T
@@ -1051,7 +1052,13 @@ PURE ELEMENTAL FUNCTION WEL_DERIV(PHIRAMP,H,T,B,SATTHK)  RESULT(dq)
   !
   DOUBLE PRECISION s, aa, bb, x
   !
-  s = PHIRAMP*(T-B)
+  x = (T-B)            !Temp storage of cell thickness
+  IF(PHIRAMP > DZ) THEN
+      s = PHIRAMP*x    ! a fraction of the cell thickness
+  ELSE
+      s = DNEG * PHIRAMP   ! a length (SMOOTHING BY_LENGTH), at most the cell thickness
+      IF(s > x) s = x
+  END IF
   !
   IF(PRESENT(SATTHK)) THEN
     IF(SATTHK.lt.s) s=SATTHK
