@@ -3498,4 +3498,3 @@ END MODULE
 !             LISTSPLIT%MAXSIZE = N
 !             WRITE(IOUT,'(1x,4A)')
 !     +         'LIST WILL BE SPLIT TO A NEW FILE WHEN FILE SIZE IS ',
-!     +           'APPROXIMATELY ',NUM2STR(N),' MB'

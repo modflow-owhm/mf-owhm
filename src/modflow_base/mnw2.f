@@ -107,7 +107,7 @@ C     ------------------------------------------------------------------
      4               MNW_FMP_LINK, HAS_FMP_WELLS,SOLV_FLG,SOLV_BY_HCOF,
      5               HCOF_ONLY_ITER,HCOF_RHS_FLIP, QDES_OLD, PPC_CACHE,
      6               HAS_NWT,MIN_PERF,PP_CON_ITER_LIM,MXNODE,LEN_WELLID,
-     7               MNW2_WARN, SMNW2COND_WARN,
+     7               MNW2_WARN, SMNW2COND_WARN,HAS_NONE_LOSSTYPE,
      8      PRNT_MNW2, PRNT_MNW2_Q_NODE,PRNT_MNW2_Q_INOUT,PRNT_MNW2_NODE
       
       USE GWFMNW2MODULE, ONLY: SGWF2MNW2PSV
@@ -141,7 +141,7 @@ C1------grids to be defined.
       ALLOCATE(MNW2BUD,IOUT,MNW2_WARN,SMNW2COND_WARN)
       ALLOCATE(SOLV_FLG,HCOF_ONLY_ITER,HCOF_RHS_FLIP,MIN_PERF)
       ALLOCATE(PRNT_MNW2, PRNT_MNW2_Q_NODE,PRNT_MNW2_Q_INOUT)
-      ALLOCATE(PRNT_MNW2_NODE, SOLV_BY_HCOF)
+      ALLOCATE(PRNT_MNW2_NODE, SOLV_BY_HCOF, HAS_NONE_LOSSTYPE)
       !
       ALLOCATE(HAS_NWT, PP_CON_ITER_LIM,MXNODE,LEN_WELLID)
       HAS_NWT = IUNWT.ne.Z
@@ -152,6 +152,7 @@ C1------grids to be defined.
       IOUT     = LIST_OUT
       MIN_PERF = 0.01D0  !Default is to not allow perf if less than 1% of cell thickness
       SOLV_BY_HCOF = FALSE
+      HAS_NONE_LOSSTYPE = FALSE
       !
 C
 C2------IDENTIFY PACKAGE AND INITIALIZE NMNW2.
@@ -478,7 +479,7 @@ C7------SAVE POINTERS TO DATA AND RETURN.
      4                       MNW_FMP_LINK,HAS_FMP_WELLS,MIN_PERF,
      5                       PRNT_MNW2_Q_NODE,PRNT_MNW2,
      6                       PRNT_MNW2_Q_INOUT,MXNODE,LEN_WELLID,
-     7                       PRNT_MNW2_NODE,MNW2_NULL
+     7                       PRNT_MNW2_NODE,MNW2_NULL,HAS_NONE_LOSSTYPE
       USE GWFMNW2MODULE, ONLY: SGWF2MNW2PNT
       USE SIPMODULE,ONLY:HCLOSE
       USE DE4MODULE,ONLY:HCLOSEDE4
@@ -643,9 +644,12 @@ c     define LOSSTYPE using integers in MNW2 array
 c     for none, NNODES must be 1
           if(NNODES /= ONE) then
                             CALL ERR%ADD(WELLID(MNWID)//
-     +         ' -- LOSSTYPE = "NONE" REQUIRES NNODES=1 AND NOT >1'//NL)
+     +         ' -- LOSSTYPE = "NONE" REQUIRES NNODES = 1 (one node; '//
+     +         'more nodes or the open-interval form are not allowed)'//
+     +         NL)
           end if
           MNW2(3,MNWID) = DZ
+          HAS_NONE_LOSSTYPE = TRUE
         elseif(LOSSTYPE == 'THIEM') then
                                         MNW2(3,MNWID) = UNO 
         elseif(LOSSTYPE == 'SKIN') then
@@ -2953,6 +2957,12 @@ c   Retrieve QCUT, Qfrcmn, Qfrcmx
             end if
           end if
 c
+c   LOSSTYPE NONE: the constraint state lives in SMNW2NONE; start the
+c   time step free (the shut-off state is carried by mnw2(18) and (20))
+          IF(NINT(MNW2(3,iw)) == Z) THEN
+              MNWNOD(32,firstnode) = DZ
+              CYCLE
+          END IF
 c   Compute hwell / Qpot for multi-node well (not single-cell wells)
           !
           csum  = DZ
@@ -3101,6 +3111,7 @@ C     ------------------------------------------------------------------
       DOUBLE PRECISION:: dhc2w, hmax, hsim, ratio, Hlift
       DOUBLE PRECISION:: temppct, lastH, htemp, HWtol
       LOGICAL:: EVEN_ITER, SKIP_NODE, QLIMIT, QEXTRACT, HasQ
+      LOGICAL:: NoneLossType
 C
       CALL SGWF2MNW2PNT(IGRID)
 c
@@ -3270,7 +3281,11 @@ c         if NNODES>1, that is, this is a multi-node well
           NNODES = abs(NINT(MNW2(2,iw)))
 C-LFK          if(NNODES.gt.1) then
           if(NNODES > Z) then
-            CALL SMNW2SEEP(IGRID,KPER,KSTP,iw,kiter)
+            IF(NINT(MNW2(3,iw)) > Z) THEN
+              CALL SMNW2SEEP(IGRID,KPER,KSTP,iw,kiter)
+            ELSE
+              CALL SMNW2NONE(IGRID,KPER,KSTP,iw,kiter)
+            END IF
 c  for PUMPCAP option, check hwell vs last H
             if(MNW2(25,iw) > Z .and. kiter > TWO) then
               hwell = mnw2(17,iw)
@@ -3318,6 +3333,7 @@ c   Loop over all wells
       do iw=1,MNWMAX
 c   Only operate on active wells (MNW2(1,iw)=1 and IBOUND>0
         if (MNW2(1,iw) > HALF) then
+          NoneLossType = NINT(MNW2(3,iw)) == Z
           qdes     = mnw2(5,iw)
           Qextract = qdes < DZ
 c   If Capacity restrictions are set, Qdes here is actually the retricted Qpot
@@ -3379,15 +3395,24 @@ c   Loop over nodes in well
             !
             IF(SKIP_NODE) THEN
                 MNWNOD(4,INODE) = DZ
+            ELSEIF(NoneLossType) THEN
+c   LOSSTYPE NONE (see SMNW2NONE): free, the rate goes on the RHS;
+c   pinned at Hlim, the head-dependent form holds the cell head at Hlim
+c   on every iteration and the rate is whatever the solution gives
+              IF(MOD(NINT(MNWNOD(32,INODE)),10) >= ONE) THEN
+                 hwell = MNW2(7,iw)
+                 hcof(ic,ir,il) = hcof(ic,ir,il) - cond
+                 rhs(ic,ir,il)  = rhs(ic,ir,il)  - cond * hwell
+                 MNWNOD(4,INODE) = cond*(hwell - Hcell)
+              ELSE
+                 rhs(ic,ir,il) = rhs(ic,ir,il) - MNWNOD(4,INODE)
+              END IF
             ELSE
 c
 c   Modify HCOF and RHS arrays
 cdebug replace below line with this if debugging with No Mo Iter
 cdebug              if(iqslv.ne.0.and.kiter.gt.1.and.kiter.lt.NoMoIter) then
-c   LOSSTYPE NONE (hwell = hcell through a very large conductance) always
-c   specifies the rate: a GHB-like term with that conductance would pin the
-c   cell head to the previous iteration.
-              if(iqslv /= 0 .AND. HasQ .AND. NINT(MNW2(3,iw)) /= Z) then
+              if(iqslv /= 0 .AND. HasQ) then
                  !qact  = ( hlim - Hcell) * cond
                  !
                  if (firstnode==lastnode) THEN
@@ -3424,7 +3449,8 @@ C     been evaluated: the QCUT shut-off and restart checks and the pump
 C     capacity lookup are applied from the third outer iteration on, so
 C     a time step that converged earlier would never apply them.
 C     ******************************************************************
-      USE GWFMNW2MODULE, ONLY: NMNW2, MNWMAX, MNW2
+      USE GWFMNW2MODULE, ONLY: NMNW2, MNWMAX, MNW2, MNWNOD,
+     +                         HAS_NONE_LOSSTYPE
       USE GWFMNW2MODULE, ONLY: SGWF2MNW2PNT
       USE CONSTANTS,     ONLY: Z, ONE, TWO, HALF, DZ
       IMPLICIT NONE
@@ -3433,9 +3459,25 @@ C     ******************************************************************
       INTEGER:: IW
       LOGICAL:: QCUT_ON, CAP_ON
 C
-      IF(ICNVG == Z .OR. KITER > TWO) RETURN
+      IF(ICNVG == Z) RETURN
       CALL SGWF2MNW2PNT(IGRID)
       IF(NMNW2 < ONE) RETURN
+C
+C     a NONE well that is probing a restart or changed its state in
+C     this iteration needs the next iteration to evaluate the result
+      IF(HAS_NONE_LOSSTYPE) THEN
+         DO IW=1, MNWMAX
+            IF(MNW2(1,IW) > HALF .AND. NINT(MNW2(3,IW)) == Z .AND.
+     +         NINT(MNW2(6,IW)) /= Z) THEN
+               IF(NINT(MNWNOD(32,NINT(MNW2(4,IW)))) >= TWO) THEN
+                   ICNVG = Z
+                   RETURN
+               END IF
+            END IF
+         END DO
+      END IF
+C
+      IF(KITER > TWO) RETURN
 C
       DO IW=1, MNWMAX
          IF(MNW2(1,IW) > HALF) THEN
@@ -3499,6 +3541,7 @@ c-lfk  10/10/2012
       CHARACTER(15) ctext5
       CHARACTER(24) ctext6,CTEXT7
       LOGICAL:: ALLDRY, DRY_NODE, QLIMIT, Qextract
+      LOGICAL:: NoneLossType
       REAL:: ZERO, realQ  ! Using default REAL for passing to routines
       ZERO = 0.0
 C
@@ -3572,6 +3615,7 @@ c  Loop over all wells
          IW = MNW2BUD%INDEX(IG,IDX)
 c  active well check
          if(MNW2(1,iw) > HALF) then
+          NoneLossType = NINT(MNW2(3,iw)) == Z
           firstnode = NINT( MNW2(4,iw) )
           lastnode  = NINT( MNW2(4,iw) + ABS(MNW2(2,iw)) - UNO )
           !
@@ -3647,7 +3691,8 @@ c   Loop over nodes in well
               end if
               MNWNOD(4,INODE) = DZ
               q = DZ
-            elseif(SOLV_BY_HCOF) THEN  !Solved using HCOF so need to update qact to current HNEW since its not dry
+            elseif(SOLV_BY_HCOF .OR. (NoneLossType .AND.
+     +             MOD(NINT(MNWNOD(32,INODE)),10) >= ONE)) THEN  !Solved using HCOF (or a NONE well pinned at Hlim) so need to update qact to current HNEW since its not dry
                 q = cond*(hwell-Hcell)
                 !if (ABS(MNWNOD(4,INODE) - Q) > 20.0) THEN
                 !    CONTINUE
@@ -5316,6 +5361,169 @@ c
 c
 c_________________________________________________________________________________
 c
+      SUBROUTINE SMNW2NONE(IGRID,KPER,KSTP,iw,kiter)
+C     ******************************************************************
+C     LOSSTYPE NONE: a single-node well whose head is the cell head.
+C     Free (no active limit): the rate goes on the right-hand side and
+C       the well head is the cell head, exactly.
+C     Limited by Hlim ("pinned"): the formulation holds the cell head at
+C       Hlim through the head-dependent form (FM), and the rate is what
+C       the solution gives.  The flow of the previous pinned solve,
+C       cond*(Hlim - hcell), is the potential rate used for the QCUT
+C       tests; it is exact once the pinned solve has converged, so a
+C       QCUT decision is made only in an iteration that follows a pinned
+C       one.  A shut-off well whose cell head allows pumping again is
+C       pinned for one iteration as a probe, and the restart test uses
+C       the flow of that probe.
+C     The state is kept in MNWNOD(32,node): 0 free, 1 pinned, 2 probe
+C       (nominally off); 10 is added when the state changed in this
+C       iteration, so that GWF2MNW27CNVG keeps the solver iterating.
+C     ******************************************************************
+      USE GLOBAL,        ONLY: HNEW, IBOUND
+      USE GWFBASMODULE,  ONLY: HDRY
+      USE GWFMNW2MODULE, ONLY: MNW2, MNWNOD, LIMQ, SMALL
+      USE GWFMNW2MODULE, ONLY: SGWF2MNW2PNT
+      USE CONSTANTS,     ONLY: DZ, UNO, DOS, DNEG, Z, ONE, TWO,
+     +                         NEARZERO_20, NEGNEARZERO_20
+      IMPLICIT NONE
+      INTEGER, INTENT(IN):: IGRID, KPER, KSTP, iw, kiter
+      INTEGER:: INODE, il, ir, ic, state, state0, QCUT, QlimFlag
+      DOUBLE PRECISION:: qdes, qact, Hcell, cond, hlim, SGN, qpot
+      DOUBLE PRECISION:: ratio, qoff, qon, Qsmall, hwell
+      LOGICAL:: QLIMIT, HasQ, OFF
+C
+      INODE = NINT( MNW2(4,iw) )
+      il    = NINT( MNWNOD(1,INODE) )
+      ir    = NINT( MNWNOD(2,INODE) )
+      ic    = NINT( MNWNOD(3,INODE) )
+      Hcell = HNEW(ic,ir,il)
+      cond  = MNWNOD(14,INODE)
+      !
+      qdes = mnw2(5,iw)
+      if(NINT(mnw2(27,iw)) /= Z) qdes = mnw2(29,iw)   ! capacity-limited desired rate
+      HasQ   = abs(qdes) > NEARZERO_20
+      Qsmall = small*abs(qdes)
+      qact   = mnw2(18,iw)                             ! rate carried from AD / the previous iteration
+      state0 = MOD(NINT(MNWNOD(32,INODE)), 10)
+      state  = state0
+      QLIMIT   = NINT(MNW2(6,iw)) /= Z
+      QlimFlag = NINT(mnw2(20,iw))
+      LIMQ(2,IW) = Z
+      !
+      IF(IBOUND(ic,ir,il) == Z .OR. Hcell == HDRY .OR.
+     +   cond < NEARZERO_20) THEN
+          qact  = DZ
+          state = Z
+          hwell = Hcell
+      ELSEIF(.NOT. QLIMIT .OR. kiter <= TWO) THEN
+          state = Z
+          hwell = Hcell
+          IF(kiter <= TWO .AND. QLIMIT) mnw2(20,iw) = DZ
+      ELSE
+          hlim = mnw2(7,iw)
+          IF    (qdes < NEGNEARZERO_20) THEN
+                                         SGN = DNEG
+          ELSEIF(qdes >    NEARZERO_20) THEN
+                                         SGN = UNO
+          ELSE
+                                         SGN = DZ
+          END IF
+          OFF  = abs(qact) < Qsmall
+          QCUT = NINT(MNW2(8,iw))
+          qoff = DZ
+          qon  = DZ
+          if(QCUT /= Z) then
+            qoff = mnw2(9,iw)
+            qon  = mnw2(10,iw)
+            if(QCUT > Z .AND. HasQ) then
+              qoff = abs(qoff/qdes)
+              qon  = abs(qon /qdes)
+            end if
+          end if
+          !
+          IF(state0 >= ONE) THEN
+c   the previous iteration was pinned: its flow is the potential at Hlim
+            qpot  = cond*(hlim - Hcell)
+            ratio = UNO
+            if(HasQ) ratio = qpot/qdes
+            if(ratio > 0.9999D0) then
+                                 ratio = UNO
+                                 qpot  = qdes
+            end if
+            IF(state0 == TWO) THEN
+c   probe of a shut-off well: restart above Qfrcmx, else stay off
+              IF(ratio > qon .AND.
+     +           (QlimFlag == Z .OR. QlimFlag == -TWO)) THEN
+                mnw2(30,iw) = qpot
+                mnw2(20,iw) = UNO
+                qact  = qpot
+                state = ONE
+                IF(ratio >= UNO) state = Z
+              ELSE
+                mnw2(30,iw) = DZ
+                mnw2(20,iw) = -DOS
+                qact  = DZ
+                state = Z
+              END IF
+            ELSEIF(QCUT /= Z .AND. ratio < qoff .AND. QlimFlag == Z)
+     +                                                             THEN
+c   shut off below Qfrcmn (at most one state change per time step)
+              mnw2(30,iw) = DZ
+              mnw2(20,iw) = DNEG
+              qact  = DZ
+              state = Z
+            ELSEIF(ratio < 1.0D-5) THEN
+c   no potential at Hlim (the cell head is below it without pumping)
+              qact  = DZ
+              state = Z
+            ELSEIF(ratio >= UNO) THEN
+c   Hlim no longer binds
+              qact  = qdes
+              state = Z
+            ELSE
+c   limited: keep the cell at Hlim, the rate is the pinned flow
+              qact  = qpot
+              state = ONE
+            END IF
+          ELSE
+c   free state: decide whether Hlim binds (the well head is the cell head)
+c   (for extraction SGN = -1: SGN*h > SGN*hlim means h below Hlim)
+            IF(OFF) THEN
+c   (one probe per time step: its flow is the exact potential, and a
+c    failed probe is marked -2 so it is not repeated in this step)
+              IF(QCUT /= Z .AND. SGN*Hcell < SGN*hlim .AND.
+     +           QlimFlag == Z) THEN
+                state = TWO                     ! head within the limit: probe a restart
+              ELSEIF(QCUT /= Z .AND. QlimFlag == Z) THEN
+                mnw2(20,iw) = -DOS              ! still off, may restart later
+              END IF
+            ELSEIF(SGN*Hcell > SGN*hlim) THEN
+              state = ONE                       ! cell head beyond Hlim: pin it
+            END IF
+          END IF
+          !
+          IF(state >= ONE) THEN
+            hwell = hlim
+            LIMQ(2,IW) = ONE
+          ELSE
+            hwell = Hcell
+          END IF
+      END IF
+      !
+c   store the node and well values
+      IF(state >= ONE) THEN
+          MNWNOD(4,INODE) = cond*(hlim - Hcell)     ! estimate; the solve decides
+      ELSE
+          MNWNOD(4,INODE) = qact
+      END IF
+      mnw2(18,iw)       = qact
+      MNWNOD(15,INODE)  = hwell
+      mnw2(17,iw)       = hwell
+      MNWNOD(32,INODE)  = DBLE(state)
+      IF(state /= state0) MNWNOD(32,INODE) = DBLE(state + 10)
+C
+      END SUBROUTINE
+C
       subroutine SMNW2SEEP(IGRID,KPER,KSTP,iw,kiter)
 c
 c     ******************************************************************
