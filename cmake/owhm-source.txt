@@ -60,11 +60,12 @@ src/modflow_base/huf.f
 src/modflow_base/huf_utl.f
 src/modflow_base/lpf.f
 src/modflow_base/lak.f
+src/modflow_base/wel8.f90
+src/modflow_base/wel7.f
 src/modflow_base/mnw1.f
 src/modflow_base/mnw2.f
 src/modflow_base/mnw2i.f
-src/modflow_base/wel8.f90
-src/modflow_base/wel7.f
+
 src/fmp/fmp_dimension_data.f90
 src/fmp/allotment_data.f90
 src/fmp/options_data.f90

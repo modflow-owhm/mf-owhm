@@ -43,6 +43,14 @@ BEGIN OPTIONS
     #     Typically after 15 iterations the correction factor no longer changes.
     PP_CON_ITER_LIM        MxIter
     #
+    # Fraction of the cell thickness over which the extraction of an unconstrained LOSSTYPE NONE well
+    #   is ramped down to zero as the cell head approaches the cell bottom (the WEL package smoothing),
+    #   or the screen bottom when the well is given by elevation (NNODES = -1) and that lies above the
+    #   cell bottom. A NONE well has no well head of its own, so it has no seepage face that limits its
+    #   rate; a well whose capacity should fall with the drawdown needs a loss type with a radius (THIEM).
+    #   If not specified, then PhiRamp = 0.1 (the WEL package default). PhiRamp = 0 disables the ramp.
+    NONE_PHIRAMP           PhiRamp
+    #
     # Defines auxiliary values that are read with input.
     #   AuxName is the specific auxiliary value that is read.
     AUXILIARY  AuxName

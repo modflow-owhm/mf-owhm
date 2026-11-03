@@ -384,11 +384,11 @@ main_src:= \
            $(mfb_src_dir)/huf_utl.f                         \
            $(mfb_src_dir)/lpf.f                             \
            $(mfb_src_dir)/lak.f                             \
+           $(mfb_src_dir)/wel8.f                            \
+           $(mfb_src_dir)/wel7.f                            \
            $(mfb_src_dir)/mnw1.f                            \
            $(mfb_src_dir)/mnw2.f                            \
            $(mfb_src_dir)/mnw2i.f                           \
-           $(mfb_src_dir)/wel8.f                            \
-           $(mfb_src_dir)/wel7.f                            \
            $(fmp_src_dir)/fmp_dimension_data.f90            \
            $(fmp_src_dir)/allotment_data.f90                \
            $(fmp_src_dir)/options_data.f90                  \

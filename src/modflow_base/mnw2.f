@@ -104,6 +104,7 @@ C     ------------------------------------------------------------------
      5               HCOF_ONLY_ITER,HCOF_RHS_FLIP, QDES_OLD, PPC_CACHE,
      6               HAS_NWT,MIN_PERF,PP_CON_ITER_LIM,MXNODE,LEN_WELLID,
      7               MNW2_WARN, SMNW2COND_WARN,HAS_NONE_LOSSTYPE,
+     8               NONE_PHIRAMP,
      8      PRNT_MNW2, PRNT_MNW2_Q_NODE,PRNT_MNW2_Q_INOUT,PRNT_MNW2_NODE
       
       USE GWFMNW2MODULE, ONLY: SGWF2MNW2PSV
@@ -117,7 +118,7 @@ C     ------------------------------------------------------------------
       USE NUM2STR_INTERFACE,    ONLY: NUM2STR
       USE GENERIC_BLOCK_READER_INSTRUCTION, ONLY: GENERIC_BLOCK_READER
       USE CONSTANTS,            ONLY: NL, TRUE, FALSE, BLNK, inf_I, 
-     +                                NEG, Z, ONE, TWO, DZ
+     +                                NEG, Z, ONE, TWO, DZ, UNO
       IMPLICIT NONE
 C
       INTEGER, INTENT(IN):: IN, IUNWT, IGRID
@@ -138,6 +139,7 @@ C1------grids to be defined.
       ALLOCATE(SOLV_FLG,HCOF_ONLY_ITER,HCOF_RHS_FLIP,MIN_PERF)
       ALLOCATE(PRNT_MNW2, PRNT_MNW2_Q_NODE,PRNT_MNW2_Q_INOUT)
       ALLOCATE(PRNT_MNW2_NODE, SOLV_BY_HCOF, HAS_NONE_LOSSTYPE)
+      ALLOCATE(NONE_PHIRAMP)
       !
       ALLOCATE(HAS_NWT, PP_CON_ITER_LIM,MXNODE,LEN_WELLID)
       HAS_NWT = IUNWT.ne.Z
@@ -149,6 +151,12 @@ C1------grids to be defined.
       MIN_PERF = 0.01D0  !Default is to not allow perf if less than 1% of cell thickness
       SOLV_BY_HCOF = FALSE
       HAS_NONE_LOSSTYPE = FALSE
+      !
+      ! LOSSTYPE NONE extraction is ramped down to zero over the lowest
+      ! NONE_PHIRAMP of the cell thickness above the cell bottom or the
+      ! screen bottom (the WEL package smoothing, with the WEL default);
+      ! option NONE_PHIRAMP changes the fraction, 0 disables the ramp
+      NONE_PHIRAMP = 0.1D0
       !
 C
 C2------IDENTIFY PACKAGE AND INITIALIZE NMNW2.
@@ -227,6 +235,15 @@ C3------CELL-BY-CELL FLOW TERMS, AND PRINT FLAG
      +                            PP_CON_ITER_LIM,
      +   MSG='PP_CON_ITER_LIM FAILED TO LOAD THE ITER_LIM')
                  IF(PP_CON_ITER_LIM < 5) PP_CON_ITER_LIM = 5
+        CASE('NONE_PHIRAMP')
+                 CALL GET_NUMBER(BL%LINE,LLOC,ISTART,ISTOP,IOUT,IN,
+     +                            NONE_PHIRAMP,
+     +           MSG='NONE_PHIRAMP FAILED TO LOAD THE FRACTION')
+                 IF(NONE_PHIRAMP < DZ ) NONE_PHIRAMP = DZ
+                 IF(NONE_PHIRAMP > UNO) NONE_PHIRAMP = UNO
+                 WRITE(IOUT,'(/3A/)') 'NONE_PHIRAMP: LOSSTYPE NONE ',
+     +          'EXTRACTION IS RAMPED DOWN TO ZERO OVER THE LOWEST ',
+     +          'FRACTION '//NUM2STR(NONE_PHIRAMP)//' OF THE CELL'
         CASE('RHS_ONLY','RHSONLY')
                  WRITE(IOUT,'(/A/)') 
      +         'RHS_ONLY: MNW2 PACKAGE WILL ONLY SOLVE USING RHS'
@@ -397,6 +414,15 @@ c--LFK
          ELSE
            WRITE(IOUT,*)'MNW2 WARNING: TOO MANY AUX VARIABLES, MAX OF 5'
          END IF
+        CASE('NONE_PHIRAMP')
+                 CALL GET_NUMBER(BL%LN,LLOC,ISTART,ISTOP,IOUT,IN,
+     +                            NONE_PHIRAMP,
+     +           MSG='NONE_PHIRAMP FAILED TO LOAD THE FRACTION')
+                 IF(NONE_PHIRAMP < DZ ) NONE_PHIRAMP = DZ
+                 IF(NONE_PHIRAMP > UNO) NONE_PHIRAMP = UNO
+                 WRITE(IOUT,'(/3A/)') 'NONE_PHIRAMP: LOSSTYPE NONE ',
+     +          'EXTRACTION IS RAMPED DOWN TO ZERO OVER THE LOWEST ',
+     +          'FRACTION '//NUM2STR(NONE_PHIRAMP)//' OF THE CELL'
         CASE('RHS_ONLY','RHSONLY')
                  WRITE(IOUT,'(/A/)') 
      +         'RHS_ONLY: MNW2 PACKAGE WILL ONLY SOLVE USING RHS'
@@ -3088,8 +3114,11 @@ C     ------------------------------------------------------------------
 C-LFK     2                       CapTable,SMALL,WELLID
      2                       CapTable,SMALL,WELLID,LIMQ,
      3                       IOUT,MNW2_WARN,SOLV_FLG,SOLV_BY_HCOF,
-     4                       HCOF_ONLY_ITER,HCOF_RHS_FLIP,HAS_NWT
+     4                       HCOF_ONLY_ITER,HCOF_RHS_FLIP,HAS_NWT,
+     5                       NONE_PHIRAMP,MNW2_NULL
       USE GWFMNW2MODULE, ONLY: SGWF2MNW2PNT
+      USE GWFNWTMODULE,  ONLY: A, IA, Icell
+      USE WEL_SUBROUTINES, ONLY: WEL_SMOOTH, WEL_DERIV
       USE CONSTANTS,     ONLY: HALF, DZ, UNO, Z, ONE, TWO, NEARZERO_20
 C     ------------------------------------------------------------------
       IMPLICIT NONE
@@ -3098,11 +3127,11 @@ C     ------------------------------------------------------------------
       !
       INTEGER:: NNODES, INODE
       INTEGER:: IQSLV
-      INTEGER:: firstnode, lastnode, IW, IL, IR, IC
+      INTEGER:: firstnode, lastnode, IW, IL, IR, IC, IJ
       INTEGER:: PUMPCAP, CapFlag 
       INTEGER:: ITFLAG                                  !=1, this means calculate partial penetration effects
       DOUBLE PRECISION:: qdes, qact, cond
-      DOUBLE PRECISION:: hwell, Hcell, hlim
+      DOUBLE PRECISION:: hwell, Hcell, hlim, Top, Bottom
       DOUBLE PRECISION:: CapMult, lastQ, qtemp, qactCap
       DOUBLE PRECISION:: dhc2w, hmax, hsim, ratio, Hlift
       DOUBLE PRECISION:: temppct, lastH, htemp, HWtol
@@ -3405,7 +3434,31 @@ c   on every iteration and the rate is whatever the solution gives
                  rhs(ic,ir,il)  = rhs(ic,ir,il)  - cond * hwell
                  MNWNOD(4,INODE) = cond*(hwell - Hcell)
               ELSE
-                 rhs(ic,ir,il) = rhs(ic,ir,il) - MNWNOD(4,INODE)
+                 qact = MNWNOD(4,INODE)
+                 IF(NONE_PHIRAMP > NEARZERO_20 .AND. qact < DZ .AND.
+     +              LAYHDT(IL) > Z) THEN
+c   extraction from a nearly dry cell is ramped down to zero over the
+c   lowest NONE_PHIRAMP of the cell (the WEL package smoothing): a NONE
+c   well has no well head of its own that a seepage face could limit;
+c   a node given by elevation ramps down to its screen bottom when that
+c   lies above the cell bottom (the node is switched off below it)
+                    Bottom = BOTM(ic,ir,LBOTM(il))
+                    Top    = BOTM(ic,ir,LBOTM(il)-1)
+                    IF(MNW2(2,iw) < DZ) THEN
+                       IF(MNWNOD(21,INODE) < MNW2_NULL .AND.
+     +                    MNWNOD(21,INODE) > Bottom)
+     +                                      Bottom = MNWNOD(21,INODE)
+                    END IF
+                    IF(HAS_NWT) THEN
+                       IJ = Icell(ic,ir,il)
+                       A(IA(IJ)) = A(IA(IJ)) +
+     +                     WEL_DERIV(NONE_PHIRAMP,Hcell,Top,Bottom)*qact
+                    END IF
+                    qact = qact *
+     +                     WEL_SMOOTH(NONE_PHIRAMP,Hcell,Top,Bottom)
+                    MNWNOD(4,INODE) = qact
+                 END IF
+                 rhs(ic,ir,il) = rhs(ic,ir,il) - qact
               END IF
             ELSE
 c
@@ -3509,8 +3562,10 @@ C-LFK     2                       SMALL,WELLID,NTOTNOD
      3                       IOUT,MNW2_WARN,SMNW2COND_WARN,HAS_NWT,
      4                       SOLV_FLG,HCOF_ONLY_ITER,MXNODE,LEN_WELLID,
      7                       PRNT_MNW2, PRNT_MNW2_Q_NODE,SOLV_BY_HCOF,
-     +                       PRNT_MNW2_Q_INOUT,PRNT_MNW2_NODE
+     +                       PRNT_MNW2_Q_INOUT,PRNT_MNW2_NODE,
+     +                       NONE_PHIRAMP,MNW2_NULL
       USE GWFMNW2MODULE, ONLY: SGWF2MNW2PNT
+      USE WEL_SUBROUTINES, ONLY: WEL_SMOOTH
       USE ERROR_INTERFACE,    ONLY: WARNING_MESSAGE
       USE CONSTANTS,         ONLY: NL, TRUE, FALSE, DZ, UNO, HALF,
      +                             Z, ONE, 
@@ -3529,7 +3584,7 @@ C     ------------------------------------------------------------------
       DOUBLE PRECISION:: q, qdes, qnet, qin, qout
       DOUBLE PRECISION:: hlim, hwell, Hcell
       DOUBLE PRECISION:: s, sNL, sL
-      DOUBLE PRECISION:: cond, Bottom
+      DOUBLE PRECISION:: cond, Bottom, Top
       CHARACTER(19):: DATE
       CHARACTER(16) text
 c-lfk  10/10/2012
@@ -3701,6 +3756,18 @@ c   Loop over nodes in well
                 !    CONTINUE
                 !end if
                 !end if
+                MNWNOD(4, INODE) = q
+            elseif(NoneLossType .AND. NONE_PHIRAMP > NEARZERO_20 .AND.
+     +             mnw2(18,iw) < DZ .AND. LAYHDT(IL) > Z) THEN  !free NONE well: the ramped rate at the solved head (mnw2(18) is the rate before the ramp)
+                Bottom = BOTM(ic,ir,LBOTM(il))
+                Top    = BOTM(ic,ir,LBOTM(il)-1)
+                IF(MNW2(2,iw) < DZ) THEN
+                   IF(MNWNOD(21,INODE) < MNW2_NULL .AND.
+     +                MNWNOD(21,INODE) > Bottom)
+     +                                   Bottom = MNWNOD(21,INODE)
+                END IF
+                q = mnw2(18,iw) *
+     +              WEL_SMOOTH(NONE_PHIRAMP,Hcell,Top,Bottom)
                 MNWNOD(4, INODE) = q
             end if
 c
