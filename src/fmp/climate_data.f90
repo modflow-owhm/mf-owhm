@@ -560,6 +560,10 @@ MODULE CLIMATE_DATA_FMP_MODULE
     INTEGER, DIMENSION(:,:),          CONTIGUOUS, INTENT(IN   ):: FID_ARRAY
     INTEGER:: I,J,K,F
     !
+    ! A uniform array (or the CONSTANT keyword) is stored as a single value with no cell index (DIM = 0).
+    ! The area and the by-WBS scale factor vary by cell, so the constant is expanded to every cell before they are applied.
+    IF (CVS%IS_CONSTANT .AND. (RECHARGE_AS_FLUX .OR. LAI%SFAC%HAS_EX1)) CALL CONSTANT_TO_ALL_CELLS(CVS, SIZE(AREA,ONE), SIZE(AREA,TWO))
+    !
     IF (CVS%N > Z) THEN
                        !
                        IF(RECHARGE_AS_FLUX) THEN
@@ -579,6 +583,29 @@ MODULE CLIMATE_DATA_FMP_MODULE
                                                 END DO
                        END IF
     END IF
+    !
+  END SUBROUTINE
+  !
+  PURE SUBROUTINE CONSTANT_TO_ALL_CELLS(CVS, NCOL, NROW)
+    CLASS (COMPRESSED_VALUE_STORAGE), INTENT(INOUT):: CVS
+    INTEGER,                          INTENT(IN   ):: NCOL, NROW
+    DOUBLE PRECISION:: VAL
+    INTEGER:: I,J,K
+    !
+    VAL = CVS%VAL(ONE)
+    !
+    CALL CVS%ALLOC(NCOL*NROW, TWO)   ! Also sets IS_CONSTANT to FALSE; N is only set when a new allocation is made
+    CVS%N = NCOL*NROW
+    !
+    K = Z
+    DO J=ONE, NROW
+    DO I=ONE, NCOL
+          K = K + ONE
+          CVS%DIM(ONE,K) = I
+          CVS%DIM(TWO,K) = J
+          CVS%VAL(K)     = VAL
+    END DO
+    END DO
     !
   END SUBROUTINE
   !

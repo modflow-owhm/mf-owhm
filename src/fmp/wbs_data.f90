@@ -894,11 +894,17 @@ MODULE WBS_DATA_FMP_MODULE
     WBS%TOT_DIR_RCH   = DZ
     !
     DO I=ONE, NDRCH
-       DO K=ONE, DRCH(I)%N
+       IF(DRCH(I)%IS_CONSTANT) THEN      ! Same value in every cell and no cell index: add it once per WBS cell
+          DO F=ONE, WBS%NFARM
+                                  WBS%TOT_DIR_RCH(F) = WBS%TOT_DIR_RCH(F) + DRCH(I)%VAL(ONE) * DBLE(WBS%FID(F)%Count)
+          END DO
+       ELSE
+          DO K=ONE, DRCH(I)%N
                                   F = WBS%FID_ARRAY( DRCH(I)%DIM(ONE,K), DRCH(I)%DIM(TWO,K) )
                                   !
                                   IF( F > Z) WBS%TOT_DIR_RCH(F) = WBS%TOT_DIR_RCH(F) + DRCH(I)%VAL(K)
-       END DO
+          END DO
+       END IF
     END DO
     !
   END SUBROUTINE
