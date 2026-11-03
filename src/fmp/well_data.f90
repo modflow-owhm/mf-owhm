@@ -689,7 +689,7 @@ MODULE WELL_DATA_FMP_MODULE
     INTEGER:: I,J,K,N,LLOC,ISTART,ISTOP, NFARM, IERR, MXDIM, FD, INPUT_TYPE
     LOGICAL:: BINARY, BYAVERAGE
     REAL:: R
-    INTEGER:: INSTYLE   !INSTYLE = 0 for LRC load (default); INSTYLE = 1 for Lay for L and XY for RC; INSTYLE = ADD 10 to use elevation for L (viz 10 and 11), INSTYLE = ADD 20 to use elevation for L (viz 20 and 21)
+    INTEGER:: INSTYLE   !INSTYLE = 0 for LRC load (default); INSTYLE = 1 for Lay for L and XY for RC; INSTYLE = ADD 10 to use elevation for L (viz 10 and 11), INSTYLE = ADD 20 to use depth for L (viz 20 and 21)
     TYPE(GENERIC_BLOCK_READER):: INWEL
     !
     WRITE(BL%IOUT,'(/A/)') 'SUPPLY_WELL BLOCK FOUND AND NOW LOADING PROPERTIES'
@@ -1317,7 +1317,7 @@ MODULE WELL_DATA_FMP_MODULE
     INTEGER,                           INTENT(OUT  ):: IL,IR,IC
     INTEGER,                           INTENT(IN   ):: NAUX
     INTEGER,ALLOCATABLE, DIMENSION(:), INTENT(INOUT):: AUX
-    INTEGER,                           INTENT(IN   ):: INSTYLE  !INSTYLE = 0 for LRC load (default); INSTYLE = 1 for Lay for L and XY for RC; INSTYLE = ADD 10 to use elevation for L (viz 10 and 11), INSTYLE = ADD 20 to use elevation for L (viz 20 and 21)
+    INTEGER,                           INTENT(IN   ):: INSTYLE  !INSTYLE = 0 for LRC load (default); INSTYLE = 1 for Lay for L and XY for RC; INSTYLE = ADD 10 to use elevation for L (viz 10 and 11), INSTYLE = ADD 20 to use depth for L (viz 20 and 21)
     INTEGER,                 OPTIONAL, INTENT(OUT  ):: NF
     DOUBLE PRECISION,        OPTIONAL, INTENT(OUT  ):: Q
     INTEGER,                 OPTIONAL, INTENT(OUT  ):: SPSTART,SPEND
@@ -1784,35 +1784,60 @@ MODULE WELL_DATA_FMP_MODULE
     CALL BL%LIST%SET_LN()
     IF(  BL%LIST%LN==ERROR ) CALL STOP_ERROR(INFILE=BL%IU, OUTPUT=BL%IOUT,MSG='UNFORTUNATELY UNKNOWN FMP SUPPLY_WELL BLOCK ERROR. PLEASE DOUBLE CHECK BLOCK SET UP.')
     !
-    !First check if well input is directly after keyword
+    !First check if well input is directly after keyword.
+    !  A well record parses as the fields FWEL_PROPERTY_READ expects:
+    !  WELLID, WBS_ID, LAY (or MNW/NAN, or an elevation/depth), ROW COL (or X Y), and QCapacity.
+    !  Anything else is the INTERNAL keyword or a file to read the wells from.
+    ! INSTYLE = 0 for LRC load (default); INSTYLE = 1 for Lay for L and XY for RC; INSTYLE = ADD 10 to use elevation for L (viz 10 and 11), INSTYLE = ADD 20 to use depth for L (viz 20 and 21)
     LLOC = ONE
-    CALL PARSE_WORD_UP(BL%LIST%LN,LLOC,ISTART,ISTOP)                                     ! WELID
-    CALL GET_INTEGER(BL%LIST%LN,LLOC,ISTART,ISTOP,Z,Z,I,HAS_ERROR=CHECK)                 ! NF
-    IF(.NOT. CHECK) CALL GET_INTEGER(BL%LIST%LN,LLOC,ISTART,ISTOP,Z,Z,I,HAS_ERROR=CHECK) ! LAY
-    IF(.NOT. CHECK) CALL GET_INTEGER(BL%LIST%LN,LLOC,ISTART,ISTOP,Z,Z,I,HAS_ERROR=CHECK) ! ROW
-    IF(.NOT. CHECK) CALL GET_INTEGER(BL%LIST%LN,LLOC,ISTART,ISTOP,Z,Z,I,HAS_ERROR=CHECK) ! COL
-    IF(.NOT. CHECK) CALL GET_NUMBER (BL%LIST%LN,LLOC,ISTART,ISTOP,Z,Z,Q,HAS_ERROR=CHECK) ! Qcap 
+    CALL PARSE_WORD_UP(BL%LIST%LN,LLOC,ISTART,ISTOP)                                        ! WELID
+    CALL GET_INTEGER(BL%LIST%LN,LLOC,ISTART,ISTOP,Z,Z,I,HAS_ERROR=CHECK)                    ! NF
+    IF(.NOT. CHECK) THEN                                                                    ! LAY, MNW, NAN, ELEVATION, or DEPTH
+        CALL PARSE_WORD_UP(BL%LIST%LN,LLOC,ISTART,ISTOP)
+        IF( BL%LIST%LN(ISTART:ISTOP) /= 'MNW' .AND. BL%LIST%LN(ISTART:ISTOP) /= 'NAN' ) THEN
+            IF(INSTYLE > ONE) THEN
+                READ(BL%LIST%LN(ISTART:ISTOP), *, IOSTAT=I) Q  ! dummy read to check for ELEVATION / DEPTH
+            ELSE
+                READ(BL%LIST%LN(ISTART:ISTOP), *, IOSTAT=I) J  ! dummy read to check for LAY
+            END IF
+            CHECK = I /= Z .OR. BL%LIST%LN(ISTART:ISTOP) == ''
+        END IF
+    END IF
+    IF(.NOT. CHECK) THEN                                                                    ! ROW COL, or X Y
+        IF( ANY(INSTYLE == [0, 10, 20]) ) THEN
+            CALL GET_INTEGER(BL%LIST%LN,LLOC,ISTART,ISTOP,Z,Z,I,HAS_ERROR=CHECK)
+            IF(.NOT. CHECK) CALL GET_INTEGER(BL%LIST%LN,LLOC,ISTART,ISTOP,Z,Z,I,HAS_ERROR=CHECK)
+        ELSE
+            CALL GET_NUMBER (BL%LIST%LN,LLOC,ISTART,ISTOP,Z,Z,Q,HAS_ERROR=CHECK)
+            IF(.NOT. CHECK) CALL GET_NUMBER (BL%LIST%LN,LLOC,ISTART,ISTOP,Z,Z,Q,HAS_ERROR=CHECK)
+        END IF
+    END IF
+    IF(.NOT. CHECK) CALL GET_NUMBER (BL%LIST%LN,LLOC,ISTART,ISTOP,Z,Z,Q,HAS_ERROR=CHECK)    ! Qcap
     !
     IF(CHECK) THEN
         LLOC = ONE
         CALL CHK_FL%OPEN(BL%LIST%LN,LLOC,BL%IOUT,BL%IU, REQKEY=TRUE, NO_CONSTANT=TRUE) 
     END IF
     !
-    IF (.not. CHK_FL%IS_INTERNAL) THEN
+    IF (CHECK .AND. .NOT. CHK_FL%IS_INTERNAL) THEN   ! One or more files, one per line
         NFILE = BL%NLINE - BL%LIST%GETPOS() + ONE
         CALL BL%LIST%NEXT()
-    ELSE
+    ELSE                                             ! Wells are in the block: after INTERNAL (CHECK) or directly after TIME FRAME
         NFILE = ONE
-        IF(CHECK) CALL BL%LIST%NEXT()  
+        IF(CHECK) THEN                               ! CHK_FL%IS_INTERNAL is TRUE, otherwise would have done the previous branch
+                  CALL BL%LIST%NEXT()                ! Skip INTERNAL keyword line
+                  Q = CHK_FL%SCALE
+                  CALL CHK_FL%CLOSE()
+        ELSE
+                  Q = UNO
+        END IF
+        !
         CALL BL%MAKE_SCRATCH_FILE(FROM_START=FALSE)  !WRITE REMAINING PORTION TO SCRATCH FILE
         CALL BL%GOTO_END()
         !
-        Q =CHK_FL%SCALE
-        !
-        CALL CHK_FL%CLOSE()
-        CHK_FL%IU = BL%SCRATCH
-        !
-        CHK_FL%SCALE = Q
+        CHK_FL%IU      = BL%SCRATCH
+        CHK_FL%IS_OPEN = TRUE                        ! So FL%REWIND() rewinds the scratch unit between the two passes
+        CHK_FL%SCALE   = Q
     END IF
     !
     ALLOCATE(FL(NFILE))
