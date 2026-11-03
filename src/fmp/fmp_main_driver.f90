@@ -3182,7 +3182,7 @@ MODULE FMP_MAIN_DRIVER
       ! INTEGER IRCH(NCOL,NROW) -- replaced by WBS%IWRK
       INTEGER:: I,IL,IR,IC,IBD,J,NF,NOPT,NLIST
       REAL:: ROUT, RIN
-      DOUBLE PRECISION:: RATIN,RATOUT
+      DOUBLE PRECISION:: RATIN,RATOUT,Q
       LOGICAL :: SKIP
       !
       CALL FMP_LGR_PNT(IGRID)
@@ -3354,53 +3354,18 @@ MODULE FMP_MAIN_DRIVER
       !       "COMPACT BUDGET" IS SPECIFIED IN OUTPUT CONTROL.
       !
       IF(.NOT. FMPOUT%COMPOSITE_FNR .AND. IBD > Z) THEN
-         ! BUFF(:,:,1) -> DPERC; BUFF(:,:,2) -> ETgw
-         BUFF(:,:,1:2) = 0.0  
+         !
+         !6B0----COUNT THE LIST RECORDS: ONE FOR THE DEEP PERCOLATION AND ONE FOR THE
+         !       EVAPOTRANSPIRATION FROM GROUNDWATER OF EVERY CELL THAT HAS THEM.
+         !       THE TERMS ARE RECOMPUTED WHEN WRITTEN, SO NO LAYER OF BUFF IS BORROWED
+         !       (A ONE LAYER MODEL HAS NO SECOND LAYER TO HOLD THE ET TERM).
          NLIST = Z
-         IF(WBS%UZF_LINK) THEN
+         IF(.NOT. SKIP) THEN
              DO IR=ONE, WBS%NROW
              DO IC=ONE, WBS%NCOL
                 IF ( UPLAY(IC,IR) < ONE ) CYCLE
-                !
-                IF( WBS%DPERC(IC,IR) > DZ .AND. IUZFBND(IC,IR) < ONE ) THEN
-                      BUFF(IC,IR,1) = SNGL(WBS%DPERC(IC,IR))
-                      NLIST = NLIST + ONE
-                END IF
-             END DO
-             END DO
-         ELSE
-             DO IR=ONE, WBS%NROW
-             DO IC=ONE, WBS%NCOL
-                IF ( UPLAY(IC,IR) > Z .AND. WBS%DPERC(IC,IR) > DZ ) THEN
-                      BUFF(IC,IR,1) = SNGL(WBS%DPERC(IC,IR))
-                      NLIST = NLIST + ONE
-                END IF
-             END DO
-             END DO
-         END IF
-         !
-         IF(FCROP%NCROP > Z) THEN
-             DO IR=ONE, WBS%NROW
-             DO IC=ONE, WBS%NCOL
-                IF ( UPLAY(IC,IR) > Z .AND. FCROP%TGWA(IC,IR) > DZ) THEN
-                      BUFF(IC,IR,2) = -SNGL(FCROP%TGWA(IC,IR))
-                END IF
-             END DO
-             END DO
-         END IF
-         !
-         IF(FCROP%NCROP > Z .OR. FCROP%CHECK_BARE) THEN
-             DO IR=ONE, WBS%NROW
-             DO IC=ONE, WBS%NCOL
-                IF ( UPLAY(IC,IR) > Z .AND. FCROP%EGWA(IC,IR) > DZ ) THEN
-                      BUFF(IC,IR,2) = BUFF(IC,IR,2) - SNGL(FCROP%EGWA(IC,IR))
-                END IF
-             END DO
-             END DO
-             !
-             DO IR=ONE, WBS%NROW
-             DO IC=ONE, WBS%NCOL
-                IF( BUFF(IC,IR,2) < DZ ) NLIST = NLIST + ONE  ! Build the counter fpr FCROP%TGWA and FCROP%EGWA
+                IF ( FNR_DPERC(IC,IR) > DZ ) NLIST = NLIST + ONE
+                IF ( FNR_ETGW (IC,IR) < DZ ) NLIST = NLIST + ONE
              END DO
              END DO
          END IF
@@ -3413,25 +3378,26 @@ MODULE FMP_MAIN_DRIVER
                 IF ( UPLAY(IC,IR) < ONE ) CYCLE
                 IL = UPLAY(IC,IR)
                 !
-                IF( BUFF(IC,IR,1) > 0.0 ) THEN   ! No kind to make it default REAL, which is what BUFF is
-                   CALL UBDSVA(FMPOUT%FNR_CBC,NCOL,NROW,IC,IR,IL,BUFF(IC,IR,1),IBOUND,NLAY)
-                END IF
+                Q = FNR_DPERC(IC,IR)
+                IF( Q > DZ ) CALL UBDSVA(FMPOUT%FNR_CBC,NCOL,NROW,IC,IR,IL,SNGL(Q),IBOUND,NLAY)
                 !
-                IF( BUFF(IC,IR,2) < 0.0 ) THEN   
-                   CALL UBDSVA(FMPOUT%FNR_CBC,NCOL,NROW,IC,IR,IL,BUFF(IC,IR,2),IBOUND,NLAY)
-                END IF
+                Q = FNR_ETGW(IC,IR)
+                IF( Q < DZ ) CALL UBDSVA(FMPOUT%FNR_CBC,NCOL,NROW,IC,IR,IL,SNGL(Q),IBOUND,NLAY)
              END DO
              END DO
          END IF
          !
       ELSE IF(IBD > Z) THEN
+             !
+             !6B0----COMPOSITE NET RECHARGE IN THE UPPERMOST ACTIVE LAYER OF EACH CELL, ZERO IN THE OTHER LAYERS
+             !       (A DRY COLUMN HAS UPLAY = 0, WHICH MUST NOT BE USED AS A LAYER INDEX).
+             DO CONCURRENT (IC=1:NCOL,IR=1:NROW,IL=1:NLAY)
+                                                        BUFF(IC,IR,IL)=0.0
+             END DO
+             !
              DO IR=ONE, WBS%NROW
              DO IC=ONE, WBS%NCOL
-                IF ( UPLAY(IC,IR) > Z ) THEN
-                    BUFF(IC,IR,UPLAY(IC,IR)) = SNGL(WBS%FNRCH(IC,IR))
-                ELSE
-                    BUFF(IC,IR,UPLAY(IC,IR)) = 0.0
-                END IF
+                IF ( UPLAY(IC,IR) > Z ) BUFF(IC,IR,UPLAY(IC,IR)) = SNGL(WBS%FNRCH(IC,IR))
              END DO
              END DO
              !
@@ -3466,6 +3432,36 @@ MODULE FMP_MAIN_DRIVER
       !
       !7D-----INCREMENT BUDGET TERM COUNTER.
       MSUM=MSUM+1
+      !
+      CONTAINS
+      !
+      PURE FUNCTION FNR_DPERC(IC,IR) RESULT(Q)  ! DEEP PERCOLATION THAT REACHES THE WATER TABLE (ZERO WHERE UZF ROUTES IT)
+        INTEGER, INTENT(IN):: IC, IR
+        DOUBLE PRECISION:: Q
+        !
+        Q = DZ
+        IF( WBS%DPERC(IC,IR) > DZ ) THEN
+            IF( WBS%UZF_LINK ) THEN
+                IF( IUZFBND(IC,IR) < ONE ) Q = WBS%DPERC(IC,IR)
+            ELSE
+                Q = WBS%DPERC(IC,IR)
+            END IF
+        END IF
+      END FUNCTION
+      !
+      PURE FUNCTION FNR_ETGW(IC,IR) RESULT(Q)   ! CROP TRANSPIRATION AND BARE SOIL EVAPORATION FROM GROUNDWATER, AS A NEGATIVE RATE
+        INTEGER, INTENT(IN):: IC, IR
+        DOUBLE PRECISION:: Q
+        !
+        Q = DZ
+        IF( FCROP%NCROP > Z ) THEN
+            IF( FCROP%TGWA(IC,IR) > DZ ) Q = Q - FCROP%TGWA(IC,IR)
+        END IF
+        !
+        IF( FCROP%NCROP > Z .OR. FCROP%CHECK_BARE ) THEN
+            IF( FCROP%EGWA(IC,IR) > DZ ) Q = Q - FCROP%EGWA(IC,IR)
+        END IF
+      END FUNCTION
       !
   END SUBROUTINE
   !
