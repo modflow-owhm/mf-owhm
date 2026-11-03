@@ -3325,6 +3325,10 @@ c     & change less than HWtol for well   ',WELLID(iw)
                           iqslv = Z
       END IF
       !
+c   the budget recomputes the node flows of this iteration's form from
+c   the solved heads (LOSSTYPE NONE wells keep their own form, SMNW2NONE)
+      SOLV_BY_HCOF = iqslv /= Z
+      !
 c   Loop over all wells
       do iw=1,MNWMAX
 c   Only operate on active wells (MNW2(1,iw)=1 and IBOUND>0
@@ -3421,11 +3425,9 @@ cdebug              if(iqslv.ne.0.and.kiter.gt.1.and.kiter.lt.NoMoIter) then
                  !
                  hcof(ic,ir,il) = hcof(ic,ir,il) - cond
                  rhs(ic,ir,il)  = rhs(ic,ir,il)  - cond * hwell
-                 SOLV_BY_HCOF = .TRUE.
               else
                  ! Specify Q and solve for head;  add Q to RHS accumulator.
                  rhs(ic,ir,il) = rhs(ic,ir,il) - qact
-                 SOLV_BY_HCOF = .FALSE.
               endif
               !
               MNWNOD(4,INODE) = qact
@@ -3630,7 +3632,7 @@ c  active well check
             IC    = NINT( MNWNOD(3,INODE) ) 
             Hcell = HNEW(IC,IR,IL)
             !
-            IF(SOLV_BY_HCOF) THEN
+            IF(SOLV_BY_HCOF .AND. .NOT. NoneLossType) THEN
                IF ( (hwell - Hcell)*cond > DZ ) THEN
                                              MNWNOD(4, INODE) = DZ
                                              MNWNOD(15,INODE) = Hcell
@@ -3687,8 +3689,9 @@ c   Loop over nodes in well
               end if
               MNWNOD(4,INODE) = DZ
               q = DZ
-            elseif(SOLV_BY_HCOF .OR. (NoneLossType .AND.
-     +             MOD(NINT(MNWNOD(32,INODE)),10) >= ONE)) THEN  !Solved using HCOF (or a NONE well pinned at Hlim) so need to update qact to current HNEW since its not dry
+            elseif((SOLV_BY_HCOF .AND. .NOT. NoneLossType) .OR.
+     +             (NoneLossType .AND.
+     +              MOD(NINT(MNWNOD(32,INODE)),10) >= ONE)) THEN  !Solved using HCOF (or a NONE well pinned at Hlim) so need to update qact to current HNEW since its not dry
                 q = cond*(hwell-Hcell)
                 !if (ABS(MNWNOD(4,INODE) - Q) > 20.0) THEN
                 !    CONTINUE
