@@ -511,7 +511,7 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
                         CALL SWF%ADDED_RUNOFF_TFR%INIT('ADD_RUNOFF', LLOC, LINE, BL%IOUT, BL%IU, SWF%NFARM, ONE, FDIM%NROW, FDIM%NCOL, SWF%NFARM, 'BYWBS', SCRATCH=BL%SCRATCH, LISTARRAY=TRUE, CDIM=[2,1,0], NONEG=TRUE)
                         !
                         SWF%HAS_ADDED_RUNOFF = TRUE
-                        ALLOCATE(SWF%ADDED_RUNOFF(FDIM%NCOL, FDIM%NROW))
+                        ALLOCATE(SWF%ADDED_RUNOFF(FDIM%NCOL, FDIM%NROW), SOURCE = DZ)
                         ALLOCATE(SWF%ADDED_RUNOFF_WBS(FDIM%NFARM))
                         !
       CASE ("PRINT")
@@ -608,6 +608,7 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
     LOGICAL:: UPDATE, UPDATE_RETURN, NO_RETURN, IS_FULLY_RETURN
     LOGICAL:: SRD_CHK, SRR_CHK, ERROR
     TYPE(WARNING_TYPE):: WRN
+    DOUBLE PRECISION, DIMENSION(:), ALLOCATABLE:: WBS_AREA
     !
     IF(.NOT. SWF%HAS_SW) RETURN
     !
@@ -1108,12 +1109,31 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
     IF(SWF%HAS_ADDED_RUNOFF) THEN
        IF( UPDATE                         .OR. &
            SWF%ADDED_RUNOFF_TFR%TRANSIENT .OR. &
-           (NEW_FID .AND. SWF%ADDED_RUNOFF_TFR%SFAC%HAS_EX1) &
+           (NEW_FID .AND. (SWF%ADDED_RUNOFF_TFR%LISTARRAY .OR. SWF%ADDED_RUNOFF_TFR%SFAC%HAS_EX1)) &
          ) THEN
-           IF(SWF%ADDED_RUNOFF_TFR%LISTLOAD) THEN
-               DO CONCURRENT(I=ONE:FDIM%NCOL,J=ONE:FDIM%NROW, FID_ARRAY(I,J) > Z) 
-                   SWF%ADDED_RUNOFF(I,J) = SWF%ADDED_RUNOFF_TFR%LIST(FID_ARRAY(I,J))
-               END DO
+           SWF%ADDED_RUNOFF = DZ                                 ! Cells outside of every WBS have no added runoff
+           !
+           IF(SWF%ADDED_RUNOFF_TFR%LISTARRAY) THEN               ! LIST or CONSTANT input: one value per WBS held in ARRAY(1,NWBS)
+               IF(SWF%HAS_ADDED_RUNOFF_FLUX) THEN                ! A flux applies to every cell of the WBS (multiplied by the cell area below)
+                   DO CONCURRENT(I=ONE:FDIM%NCOL,J=ONE:FDIM%NROW, FID_ARRAY(I,J) > Z) 
+                       SWF%ADDED_RUNOFF(I,J) = SWF%ADDED_RUNOFF_TFR%ARRAY(ONE,FID_ARRAY(I,J))
+                   END DO
+               ELSE                                              ! A rate is the WBS total: each cell receives its area fraction of it
+                   ALLOCATE(WBS_AREA(SWF%NFARM), SOURCE = DZ)
+                   DO J=ONE, FDIM%NROW
+                   DO I=ONE, FDIM%NCOL
+                       F = FID_ARRAY(I,J)
+                       IF(F > Z) WBS_AREA(F) = WBS_AREA(F) + AREA(I,J)
+                   END DO
+                   END DO
+                   DO J=ONE, FDIM%NROW
+                   DO I=ONE, FDIM%NCOL
+                       F = FID_ARRAY(I,J)
+                       IF(F > Z) SWF%ADDED_RUNOFF(I,J) = SWF%ADDED_RUNOFF_TFR%ARRAY(ONE,F) * AREA(I,J) / WBS_AREA(F)
+                   END DO
+                   END DO
+                   DEALLOCATE(WBS_AREA)
+               END IF
            ELSEIF(SWF%ADDED_RUNOFF_TFR%HAS_IXJ) THEN
                CALL SWF%ADDED_RUNOFF_TFR%IXJ%TO_ARRAY(TWO, ONE, ONE, FDIM%NCOL, FDIM%NROW, SWF%ADDED_RUNOFF, ERROR)  !(IROW, ICOL, VPOS, DIM1, DIM2, ARR, ERROR)
                IF(ERROR) CALL STOP_ERROR(OUTPUT=SWF%LOUT, MSG='FMP SURFACE_WATER BLOCK ERROR. ADDED_RUNOFF ARRAY SPECIFED WITH IXJ INPUT, BUT IT CONTAINED A ROW/COLUMN THAT WAS IN INPUT IS EITHER LESS THAN ZERO OR GREATER THEN NROW/NCOL.')
@@ -1975,7 +1995,7 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
        '   3) Input has the NO_RETURN_FLOW option with the optional integer flags (1 or 0)'//NL//                               &
        '           that indicate the WBS does not enable it (eg "NO_RETURN_FLOW CONTANT 0" disables it for all WBS);'//NL//     &
        '   4) Input has the NO_RETURN_FLOW option, but FMP recieved external/added runoff that did not originate'//NL//         &
-       '           from precipitation or irrigation, such as the DRT-FMP link or ADDED_RUNOFF option;'//NL//                    &
+       '           from precipitation or irrigation, such as the DRT-FMP link;'//NL//                                           &
        '   5) Deep percolation happend at a location with all IBOUND=0 model cells beneath the land surface,'//NL//             &
        '           this results in shifting the flow to runoff because it cannot infiltrate (see note 2).'//BLN//               &
        'Since the surface water runoff has no where to go it is removed from the model.'//BLN//                                 &

@@ -43,7 +43,7 @@ Q-wells-in     [L3/T]   is the rate that groundwater well water enters the WBS
 Q-egw-in       [L3/T]   is evaporation from groundwater
 Q-tgw-in       [L3/T]   is transpiration from groundwater
 Q-drch-in      [L3/T]   is DIRECT_RECHARGE applied to WBS, similar to Recharge Package and is a component of Q-dp-out.
-Q-ext-in       [L3/T]   is the Zero-Scenario external water required to meet demand (only non-zero if WBS DEFICIENCY_SCENARIO is 0).
+Q-ext-in       [L3/T]   is external water that enters the WBS: the Zero-Scenario water required to meet demand (only when WBS DEFICIENCY_SCENARIO is 0) plus any ADDED_RUNOFF applied to the WBS.
 Q-tot-in       [L3/T]   is total flows into the WBS
 
 Q-ei-out       [L3/T]   is evaporation from irrigation out of the landscape

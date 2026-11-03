@@ -1648,6 +1648,11 @@ MODULE FMP_MAIN_DRIVER
    WBS%RUNOFF = DZ 
    CALL FCROP%CALC_INEFFICIENT_LOSSES(WBS, SOIL%SURF_VK)           !POPULATES  WBS%DPERC  and   WBS%RUNOFF(NCOL,NROW)
    !
+   ! Added runoff joins the runoff before NO_RETURN_FLOW is applied, so it is converted to deep percolation as well
+   IF(SWFL%HAS_ADDED_RUNOFF) THEN
+       WBS%RUNOFF = WBS%RUNOFF + SWFL%ADDED_RUNOFF
+   END IF
+   !
    ! CHECK IF RUNOFF IS DISABLED
    !
    IF(SWFL%NORETURNFLOW) THEN                                !NO RUNOFF ALLOWED
@@ -1685,11 +1690,6 @@ MODULE FMP_MAIN_DRIVER
                                             END DO
                                         END IF
                                         END DO
-   END IF
-   !
-   ! Added runoff is always included as runoff and is not allowed to reinfiltrate
-   IF(SWFL%HAS_ADDED_RUNOFF) THEN
-       WBS%RUNOFF = WBS%RUNOFF + SWFL%ADDED_RUNOFF
    END IF
    !
    IF(CLIMATE%HAS_RECHARGE) THEN
@@ -2781,6 +2781,8 @@ MODULE FMP_MAIN_DRIVER
              DP= WBS%TOT_DPERC(NF)
              DR= WBS%TOT_DIR_RCH(NF)
              !
+             IF(SWFL%HAS_ADDED_RUNOFF) EXT = SWFL%ADDED_RUNOFF_WBS(NF)   ! Added runoff enters the WBS as external water
+             !
              TF = WBS%DEMAND(NF)
              ND = NRD(1,NF)
              QR = WBS%Q_DEMAND(NF)
@@ -2839,13 +2841,13 @@ MODULE FMP_MAIN_DRIVER
              TF= DZ;  ND= DZ;  QR= DZ
          END IF
          !
-         TOTIN  = P+ND+SRD+DRT+QF+EG+TG+DR
+         TOTIN  = P+ND+SRD+DRT+QF+EG+TG+DR+EXT
          !
          TOTOUT = ET+TT+SR+DP+NDOUT+SRDOUT+RDOUT+QFOUT
          !
-         If(WBS%DEFICIENCY%LIST(NF).EQ.Z.AND.TOTIN.LT.TOTOUT) THEN
-                                                              EXT   = TOTOUT-TOTIN
-                                                              TOTIN = TOTIN+EXT
+         IF(WBS%DEFICIENCY%LIST(NF) == Z .AND. TOTIN < TOTOUT) THEN
+                                                              EXT   = EXT + TOTOUT - TOTIN
+                                                              TOTIN = TOTOUT
          ENDIF
          !
          IF(ABS(TOTIN+TOTOUT).GT.FPS) DISC=((TOTIN-TOTOUT)/((TOTIN+TOTOUT)/2.D0))*100.D0
