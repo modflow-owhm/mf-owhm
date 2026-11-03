@@ -6018,11 +6018,11 @@ MODULE CROP_DATA_FMP_MODULE
         DO J=ONE, WBS%CROP(F)%N
                                                 I=WBS%CROP(F)%PNT(ONE,J)
                                                 K=WBS%CROP(F)%PNT(TWO,J)
-                                                IF(WBS%CROP_VOLR(F,I) .NE. DZ .AND. CDAT%CROP(I)%IRR(K) == Z) THEN
+                                                IF(WBS%CROP_VOLR(F,I) /= DZ .AND. CDAT%CROP(I)%IRR(K) == Z) THEN
                                                 IF(LEN(WARN) < THOU30) THEN
                                                        R = WBS%CROP(F)%PNT(THREE,J)
                                                        C = WBS%CROP(F)%PNT(FOUR, J)
-                                                       WARN=WARN//BLNK//NUM2STR(F,-8)//BLNK//NUM2STR(I,-8)//BLNK//NUM2STR(R,-8)//BLNK//NUM2STR(C,-8)//BLNK//NUM2STR(WBS%CROP_FLUX(F,I))//NL
+                                                       WARN=WARN//BLNK//NUM2STR(F,-8)//BLNK//NUM2STR(I,-8)//BLNK//NUM2STR(R,-8)//BLNK//NUM2STR(C,-8)//BLNK//NUM2STR(WBS%CROP_VOLR(F,I))//NL
                                                 END IF
                                                 END IF
         END DO
