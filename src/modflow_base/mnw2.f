@@ -1,97 +1,93 @@
 !------------------------------------------------------------------
-!     The 11 rows of the MNW2 array store:
+!     MNW2(NMNWVL, MNWMAX): one column per well, NMNWVL = 30 + NAUX rows
 !      Row #  = Description
 !------------------------------------------------------------------
-!         1   = IACTIV (0: inactive; 1: active, -1 disabled for simulation)
-!         2   = NNODES (number of nodes in this well)
-!         3   = LOSSTYPE (0: none; 1:THIEM; 2: SKIN; 3: GENERAL; 4:SPEC. COND)
-!         4   = NODNUM (number, in node list (MNWNOD), of first node of well)
-!         5   = QDES (desired flow rate for this stress period)
-!         6   = QLIMIT (pumpage constraint flag, QLIMIT>0 turns on constraint)
-!         7   = HLIM (limiting water level for pumpage constraint)
-!         8   = QCUT (pump cutoff flag: QCUT>0 limit by rate, QCUT<0 limit by 
-!                     fraction of QDES)
-!         9   = Qfrcmn (minimum rate for well to remain active)
-!        10   = Qfrcmx (maximum rate to reactivate)
-!        11   = PUMPLOC   WAS PREVIOUSLY DEFINED AS Cprime
-!        12   = Cprime (concentration of inflow)
-! seb added definitions
-!        13   = First interval number in interval list that is the total intervals so far + 1. This is used to access the information in the interval array (MNWINT)
-!        14   = PUMPLAY from Data Set 2E
-!        15   = PUMPROW from Data Set 2E
-!        16   = PUMPCOL from Data Set 2E
-!        17   = Hwel WATER LEVEL IN WELL
-!        18   = qnet NET PUMPING RATE FOR WELL (USUALLY SET BY MNW2(30,:) WHICH HOLDS Qpot)
-!        19   = PPFLAG flag.  PPFLAG>0 means calculate partial penetration effect.
-!        20   = Flag to perform this q-limit check is mnw2(20,iw).  If > 0, limit has been met. Do not enforce q-limit oscillation-stopper until the 3rd iteration; hardwire=0. 
-!        21   = HWflag (horizontal well flag) to 0 as default; can be set to 1 (true) if NNODES>0 and any R,C is different than first; =1 Indicates non-vertical well
-!        22   = PUMPCAP: Pump capacity restraints
-!        23   = HLIFT: reference head (or elevation) corresponding to the discharge point for the well
-!        24   = CapMult
-!        25   = CapFlag 0 to discontinue doing capacity checks for current time step
-!        26   = Last Q that was looked up in table for next iteration
-!        27   = CapFlag2: If =1 then Q has been constrained, required for AD routine
-!        28   = HWTOL: Minimum absolute value of change in the computed water level in the well allowed between successive iterations
-!        29   = TEMP Storage for MISC values
-!        30   = USED TO STORE Qpot (Potential Pumping Rate) WHICH IS TRANSFERED TO MNW2(18,:)
-!        31   = CONC IN WELL
-!        31+  = USED FOR STORAGE OF AUXILIARY VARIABLES
+!         1   = IACTIV: 0 inactive this stress period, 1 active, -1 disabled for the simulation
+!         2   = NNODES as read: > 0 number of nodes (dataset 2d by cell), < 0 minus the number of open intervals (dataset 2d by elevation)
+!         3   = LOSSTYPE: 0 NONE, 1 THIEM, 2 SKIN, 3 GENERAL, 4 SPECIFYCWC
+!         4   = NODNUM: index in MNWNOD of the first node of the well (the nodes of a well are consecutive)
+!         5   = Qdes: desired rate of the stress period (< 0 extraction); with PUMPCAP the first negative Qdes is the table maximum
+!         6   = Qlimit: 0 no constraint, > 0 Hlim/QCUT constant (dataset 2f), < 0 read every stress period (dataset 4b)
+!         7   = Hlim: limiting well head (minimum for extraction, maximum for injection)
+!         8   = QCUT: 0 no shut-off, > 0 Qfrcmn/Qfrcmx are rates, < 0 they are fractions of Qdes
+!         9   = Qfrcmn: rate or fraction below which the well is shut off
+!        10   = Qfrcmx: rate or fraction above which a shut-off well restarts
+!        11   = PUMPLOC: 0 pump at the top node, > 0 cell given in dataset 2e, < 0 elevation Zpump given in dataset 2e
+!        12   = Cprime: concentration of injected water (GWT link only)
+!        13   = INTNUM: index in MNWINT of the first open interval of the well (NNODES < 0)
+!        14   = PUMPLAY: layer of the pump intake (dataset 2e, or the node that holds Zpump)
+!        15   = PUMPROW: row of the pump intake
+!        16   = PUMPCOL: column of the pump intake
+!        17   = hwell: water level in the well (the cell head for LOSSTYPE NONE)
+!        18   = qnet: rate applied in the current time step (Qdes, or the limited, restart or capacity rate; 0 while shut off)
+!        19   = PPFLAG: > 0 apply the partial penetration correction (reset to 0 for NONE, SPECIFYCWC, or when every node is fully penetrating)
+!        20   = QCUT state of the time step: 0 none, 1 restarted this step, -1 shut off this step, -2 shut off in an earlier step (may restart later this step); set by SMNW2SEEP/SMNW2NONE, cleared by AD
+!        21   = HWflag: 1 if the nodes are not all in one row and column (nonvertical well), else 0
+!        22   = PUMPCAP: number of entries of the head-capacity table (0 none)
+!        23   = Hlift: reference elevation of the discharge point of the pump
+!        24   = CapMult: multiplier of the head-capacity curve (<= 0 ignore the table, 1 use as read)
+!        25   = CapFlag: 1 while the capacity lookup is still done in this time step, 0 once the rate is locked in
+!        26   = last capacity rate looked up (used to limit the change between iterations to 25 percent)
+!        27   = CapFlag2: 0 not capacity-limited, 1 capacity-limited (AD carries the rate over), 2 capacity overrides the Hlim constraint
+!        28   = HWtol: well-head change below which the capacity rate is locked in for the time step
+!        29   = qactCap: capacity rate after the 25 percent and restart limits (applied through mnw2(18) when CapFlag2 > 0)
+!        30   = Qpot stored at a QCUT state change: the restart rate, or 0 when shut off (copied to mnw2(18))
+!        31+  = auxiliary variables (NAUX of them, names in MNWAUX)
 !------------------------------------------------------------------
 !
-! MNWNOD
+! MNWNOD(33, NODTOT): one column per node
 !
 !------------------------------------------------------------------
-!         1   = Layer  
-!         2   = Row    
-!         3   = Column 
-!         4   = Qact - Flow rate in or out of node
-!         5   = Radius
-!         6   = Skin Radius
-!         7   = Skin hydraulic conductivity
-!         8   = B factor for Node
-!         9   = C factor for Node
-!        10   = P loss factor associated with C factor (Ploss)
-!        11   = Specified Conductance of Well when LOSSTYPE = SPECIFIEDCWC
-!        12   = First Interval that node represents
-!        13   = Last  Interval that node represents
-!        14   = Conductance that is calcualted for node
-!        15   = Set to Hwell, Hdry, Cell Bottom, or INF depending if Node is Wet, Dry, Seepage, or not yet calculated
-!        16   = Tranissivity in the X-direction
-!        17   = Tranissivity in the Y-direction
-!        18   = Drawdown correction due to partially penetrating well
-!        19   = Fraction of model cell for partial penetration flag when NOT using Ztop/Zbotm
-!        20   = Ztop  of composite screen used for partial penetration - set to MNW2_NULL (1d30) until the screen position is computed
-!        21   = Zbotm of composite screen used for partial penetration - set with 20
-!        22   = Unknown use??? - seb taking over for 0 and 1 Flag to indicate if node is active or deactivated for time step
-!        23   = Horizontal well define verticle distance
-!        24   = Horizontal well define lengths with elevations
-!        25   = Horizontal well define blank spaces in between
-!        26   = Horizontal well z coords
-!        27   = Flow between nodes--saved at upper face--in borehole (QBH)
-!        28   = Horizontal well omega angle
-!        29   = Horizontal well theta angle
-!        30   = Horizontal well conductance 1
-!        31   = Horizontal well conductance 2
-!        32   = Unknown use??? - seb taking over for XYZ
-!        33   = Vertical Hydraulic Concductivity of Model cell for Partial Penitration Calculation
-!        34   = Specific Storage of Model cell                 for Partial Penitration Calculation
+!         1   = Layer
+!         2   = Row
+!         3   = Column
+!         4   = Qact: flow between the cell and the node (< 0 out of the cell)
+!         5   = Rw: well radius
+!         6   = Rskin: skin radius
+!         7   = Kskin: skin hydraulic conductivity
+!         8   = B: linear well-loss coefficient (GENERAL)
+!         9   = C: nonlinear well-loss coefficient (GENERAL)
+!        10   = P: exponent of the nonlinear term (GENERAL)
+!        11   = CWC: specified cell-to-well conductance (SPECIFYCWC)
+!        12   = first open interval (index in MNWINT) that the node represents (NNODES < 0)
+!        13   = last open interval that the node represents
+!        14   = CWC: cell-to-well conductance of the node as computed (0 for a deactivated node)
+!        15   = head at the node: hwell, the cell bottom for a seepage face, HDRY for a dry or inactive node, "inf" before SMNW2SEEP has set it
+!        16   = Txx: transmissivity of the cell in the row direction
+!        17   = Tyy: transmissivity of the cell in the column direction
+!        18   = dhp: additional drawdown per unit extraction rate due to partial penetration (added in series to 1/CWC)
+!        19   = PP: penetration fraction of the node given in dataset 2d (set to 1 when >= 0.99)
+!        20   = Ztop of the composite screen used for partial penetration; MNW2_NULL (1d30) until the screen position is computed
+!        21   = Zbotm of the composite screen, set with 20
+!        22   = node active flag: 1 active, 0 deactivated for the time step (inactive cell, CWC < 0, screen above the water table, failed correction)
+!        23   = nonvertical well: length of the borehole in the cell before the node (first segment)
+!        24   = nonvertical well: length of the borehole in the cell after the node (second segment)
+!        25   = nonvertical well: length of the borehole between this node's cell and the next node's cell (in no cell)
+!        26   = nonvertical well: elevation of the borehole at the node
+!        27   = QBH: flow in the borehole between this node and the previous one (saved at the upper face)
+!        28   = nonvertical well: omega, tilt angle of the borehole segment
+!        29   = nonvertical well: theta, map angle of the borehole segment
+!        30   = nonvertical well: CWC of the first segment (row 23)
+!        31   = nonvertical well: CWC of the second segment (row 24)
+!        32   = LOSSTYPE NONE constraint state (SMNW2NONE): 0 free, 1 pinned at Hlim, 2 restart probe; +10 when the state changed in this iteration
+!        33   = Kz: vertical hydraulic conductivity of the cell, for the partial penetration correction
 !
 !------------------------------------------------------------------
 !
-! MNWINT
+! MNWINT(11, NODTOT): one column per open interval (NNODES < 0)
 !
 !------------------------------------------------------------------
-!         1   = Ztop
-!         2   = Zbotm
+!         1   = Ztop: top elevation of the open interval
+!         2   = Zbotm: bottom elevation of the open interval
 !         3   = Row
 !         4   = Column
-!         5   = Radius
-!         6   = Skin Radius
-!         7   = Skin hydraulic conductivity
-!         8   = B factor for Node
-!         9   = C factor for Node
-!        10   = P loss factor associated with C factor (Ploss)
-!        11   = Specified Conductance of Well when LOSSTYPE = SPECIFIEDCWC
+!         5   = Rw: well radius
+!         6   = Rskin: skin radius
+!         7   = Kskin: skin hydraulic conductivity
+!         8   = B: linear well-loss coefficient (GENERAL)
+!         9   = C: nonlinear well-loss coefficient (GENERAL)
+!        10   = P: exponent of the nonlinear term (GENERAL)
+!        11   = CWC: specified cell-to-well conductance (SPECIFYCWC)
 !
 !------------------------------------------------------------------
 !
