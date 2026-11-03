@@ -276,7 +276,7 @@ c     ------------------------------------------------------------------
       USE GWFMNW2MODULE,  ONLY: SGWF2MNW2PNT
       USE GWFMNW2IMODULE, ONLY:Wel1flag,QSUMflag,BYNDflag,MNWOBS,
      1                       MNWILST,MNWIID
-      USE CONSTANTS, ONLY: Z, ONE, DZ, UNO
+      USE CONSTANTS, ONLY: Z, ONE, DZ, UNO, NEARZERO_20
       ALLOCATABLE QBH(:)
       INTEGER firstnode,lastnode,QNDflag,QBHflag,QCONCflag,
      & iaux,naux
@@ -395,7 +395,8 @@ c--lfk  Nov. 2012
 c   If seepage face in cell, MNWNOD(15) will hold the bottom elev of the cell
 c--LFK  update Hwell to realistic value (not Hnew)for single-node MNW wells
                 if (NNDSIW == ONE) then
-                   hwell=HCELL+(q/COND)
+                   hwell = HCELL
+                   if(COND > NEARZERO_20) hwell = HCELL + (q/COND)
                    write(QSUMflag,'(A20,5(1x,ES14.6),3x,A50)')
      &              WELLID(iw),totim,qin,qout,qnet,hwell,dtext
                 else
@@ -500,7 +501,8 @@ c--lfk  Nov. 2012
 c   If seepage face in cell, MNWNOD(15) [=seepflg] will hold the bottom elev of the cell
 c--LFK  update Hwell to realistic value (not Hnew)for single-node MNW wells
                 if (NNDSIW == ONE) then
-                   hwell=HCELL+(q/COND)
+                   hwell = HCELL
+                   if(COND > NEARZERO_20) hwell = HCELL + (q/COND)
                    sftest = UNO
                 end if
               end if
