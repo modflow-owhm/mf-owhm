@@ -2078,7 +2078,7 @@ C     ------------------------------------------------------------------
       DOUBLE PRECISION:: ERR, VERR, VOL, RAT
       REAL:: TOTRIN,TOTROT
       LOGICAL:: LAST_TS, SET_HEADER
-      DOUBLE PRECISION:: NAN, inf, ninf
+      DOUBLE PRECISION:: NAN, inf, ninf, HDRY_CMP
       DOUBLE PRECISION, dimension(:), allocatable:: HD 
 C     ------------------------------------------------------------------
 C
@@ -2096,6 +2096,11 @@ C
       NaN = IEEE_VALUE(NaN, IEEE_QUIET_NAN   )
       inf = IEEE_VALUE(NaN, IEEE_POSITIVE_INF)
       ninf= IEEE_VALUE(NaN, IEEE_NEGATIVE_INF)
+      !
+      ! A NaN HDRY can not be compared with a head, so the dry-cell test
+      ! uses -HUGE instead, which already marks a cell without a water table
+      HDRY_CMP = HDRY
+      IF(IEEE_IS_NAN(HDRY)) HDRY_CMP = -HUGE(HDRY)
 C
 C1------CLEAR PRINTOUT FLAG (IPFLG)
       IPFLG = Z
@@ -2389,7 +2394,11 @@ C4------PRINT TOTAL BUDGET IF REQUESTED
               DO K=1, NLAY
               DO I=1, NROW
               DO J=1, NCOL
-                  IF(IBOUND(J,I,K)==0 .or.HNEW(J,I,K)== HDRY) THEN
+                  IF(IBOUND(J,I,K)==0) THEN
+                                          BUFF(J,I,K) = NaN
+                  ELSEIF(IEEE_IS_NAN(HNEW(J,I,K))) THEN
+                                          BUFF(J,I,K) = NaN
+                  ELSEIF(HNEW(J,I,K) == HDRY_CMP) THEN
                                           BUFF(J,I,K) = NaN
                   ELSEIF(HNEW(J,I,K) > 1.d100) THEN
                                           BUFF(J,I,K) = inf
@@ -2410,7 +2419,11 @@ C4------PRINT TOTAL BUDGET IF REQUESTED
                   DO K=1, NLAY
                   DO I=1, NROW
                   DO J=1, NCOL
-                      IF(IBOUND(J,I,K)==0 .or.HNEW(J,I,K)== HDRY) THEN
+                      IF(IBOUND(J,I,K)==0) THEN
+                                              BUFF(J,I,K) = NaNr
+                      ELSEIF(IEEE_IS_NAN(HNEW(J,I,K))) THEN
+                                              BUFF(J,I,K) = NaNr
+                      ELSEIF(HNEW(J,I,K) == HDRY_CMP) THEN
                                               BUFF(J,I,K) = NaNr
                       ELSEIF(HNEW(J,I,K) > 3.4d38) THEN
                                               BUFF(J,I,K) = infr
@@ -2517,7 +2530,7 @@ C4------PRINT TOTAL BUDGET IF REQUESTED
                                              HD(J) = inf
                    ELSEIF(HD(J) <= -1.D100) THEN
                                              HD(J) = ninf
-                   ELSEIF(HD(J) == HDRY  .OR. IBOUND(J,I,K) == Z) THEN
+                   ELSEIF(HD(J)==HDRY_CMP .OR. IBOUND(J,I,K)==Z) THEN
                                                           HD(J) = NaN
                    END IF
                 END DO
@@ -2583,7 +2596,7 @@ C4------PRINT TOTAL BUDGET IF REQUESTED
              DO J=1, NCOL
                 IF    (IEEE_IS_NAN(HD(J))) THEN
                                           HD(J) = NaN
-                ELSEIF(HD(J) == HDRY  .OR. HD(J) == -HUGE(HD)) THEN
+                ELSEIF(HD(J) == HDRY_CMP .OR. HD(J) == -HUGE(HD)) THEN
                                           HD(J) = NaN
                 ELSEIF(HD(J) >=  1.0D100) THEN
                                           HD(J) = inf
@@ -2652,12 +2665,12 @@ C4------PRINT TOTAL BUDGET IF REQUESTED
              DO J=1, NCOL
                 IF    (IEEE_IS_NAN(HD(J))) THEN
                                           HD(J) = NaN
-                ELSEIF(HD(J) == HDRY  .OR. HD(J) == -HUGE(HD)) THEN
+                ELSEIF(HD(J) == HDRY_CMP .OR. HD(J) == -HUGE(HD)) THEN
                                           HD(J) = NaN
-                ELSEIF(HD(J) >=  1.0D100) THEN
-                                          HD(J) = inf
-                ELSEIF(HD(J) <= -1.0D100) THEN
+                ELSEIF(HD(J) >=  1.0D100) THEN   ! Depth = GSE - WTABLE
                                           HD(J) = ninf
+                ELSEIF(HD(J) <= -1.0D100) THEN
+                                          HD(J) = inf
                 ELSE
                     HD(J) = GSE(J,I) - HD(J)
                 END IF
