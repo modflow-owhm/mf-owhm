@@ -29,8 +29,8 @@ QREQ-INI    [L3/T]      is the WBS initial demand for groundwater pumping
 TFDR-FIN    [L3/T]      is the WBS amount of demand satisfied with supply
 NR-SWD-FIN  [L3/T]      is the portion of demand satisfied with non-routed deliveries
 R-SWD-FIN   [L3/T]      is the portion of demand satisfied with semi- and fully-routed deliveries. This is a removed feature in FMP, so it will always have a zero value
-QREQ-FIN    [L3/T]      is the demanded groundwater pumping
-Q-FIN       [L3/T]      is the portion of demand satisfied with groundwater pumping
+QREQ-FIN    [L3/T]      is the demanded groundwater pumping; a negative value is the non-routed delivery surplus injected into the supply wells (NRD use flag 2)
+Q-FIN       [L3/T]      is the portion of demand satisfied with groundwater pumping; a negative value is the non-routed delivery surplus injected into the supply wells (NRD use flag 2)
 DEF-FLAG                is the WBS DEFICIENCY_SCENARIO, 1 indicates Irrigated Crop CU reduced to water supply, 0 indicates Irrigated Crop CU always satisfied by adding external water to meet any supply shortfall
 DATE_START              is the starting calendar date of the time step in the form: yyyy-mm-ddThh:mm:ss
 ACTIVE                  is set to 1 if the WBS is in use for the stress period and 0 if it is not

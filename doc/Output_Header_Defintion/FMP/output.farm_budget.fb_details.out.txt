@@ -52,7 +52,7 @@ Q-egw-out      [L3/T]   equals Q-egw-in because it passes through the landscape 
 Q-ti-out       [L3/T]   is transpiration from irrigation out of the landscape
 Q-tp-out       [L3/T]   is transpiration from precipitation out of the landscape
 Q-tgw-out      [L3/T]   equals Q-tgw-in because it passes through the landscape to the atmosphere
-Q-run-out      [L3/T]   is total overland runoff out of the WBS
+Q-run-out      [L3/T]   is total overland runoff out of the WBS; includes the DRT return flow and a non-routed delivery surplus (NRD use flag 1) of a WBS without a semi-routed delivery location
 Q-dp-out       [L3/T]   is deep percolation that leaves the root zone—this includes drch and mar.
 Q-nrd-out      [L3/T]   is the rate that non-routed delivery flow leaves the WBS
 Q-srd-out      [L3/T]   is the rate that semi-routed delivery flow leaves the WBS from excess NRD

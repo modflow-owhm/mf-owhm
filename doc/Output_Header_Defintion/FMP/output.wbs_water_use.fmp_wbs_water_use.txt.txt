@@ -46,7 +46,7 @@ EFFICIENCY                    is total irrigation efficiency (OFE) of the WBS
 
 NRD_USE         [L3/T]        is the portion of irrigation demand satisfied with  non-routed deliveries (NRD)
 SRD_USE         [L3/T]        is the portion of irrigation demand satisfied with semi-routed deliveries (SFR Delivery).
-Q_USE           [L3/T]        is the portion of irrigation demand satisfied with groundwater pumping    (Supply Well)
+Q_USE           [L3/T]        is the portion of irrigation demand satisfied with groundwater pumping    (Supply Well); a negative value is the non-routed delivery surplus injected into the supply wells (NRD use flag 2)
 
 DELT            [L3/T]        is the time step length
 DYEAR           [L3/T]        is the decimal year at the end of the time step

@@ -102,6 +102,8 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
       LOGICAL, DIMENSION(:),   ALLOCATABLE:: BUILD_FRR
       INTEGER, DIMENSION(:,:), ALLOCATABLE:: H2ORETURN
       LOGICAL, DIMENSION(:),   ALLOCATABLE:: HAS_SRD_WBS
+      LOGICAL, DIMENSION(:),   ALLOCATABLE:: NRD_INJECT_WRN      ! TRUE until the warning for NRD use flag 2 without an active supply well is printed for the WBS
+      DOUBLE PRECISION, DIMENSION(:), ALLOCATABLE:: NRD_SURPLUS_RUNOFF  ! NRD surplus (use flag 1) of a WBS without a semi-routed delivery point; it leaves the WBS as runoff
       INTEGER:: NORETURNFLOW_TFR_FLAG = Z                  !0: Not InUse,  1:All Set to NORETURNFLOW, 2:Some WBS set to 1
       !
       DOUBLE PRECISION:: SRD_TOL     = UNO
@@ -215,6 +217,8 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
     IF(ALLOCATED(SWF%NRD_DP    )) DEALLOCATE(SWF%NRD_DP    )
     IF(ALLOCATED(SWF%RUNOFF_PRNT)) DEALLOCATE(SWF%RUNOFF_PRNT)
     IF(ALLOCATED(SWF%HAS_SRD_WBS)) DEALLOCATE(SWF%HAS_SRD_WBS)
+    IF(ALLOCATED(SWF%NRD_INJECT_WRN    )) DEALLOCATE(SWF%NRD_INJECT_WRN    )
+    IF(ALLOCATED(SWF%NRD_SURPLUS_RUNOFF)) DEALLOCATE(SWF%NRD_SURPLUS_RUNOFF)
     IF(ALLOCATED(SWF%NRD        )) DEALLOCATE(SWF%NRD        )
     !
   END SUBROUTINE
@@ -251,6 +255,8 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
     ALLOCATE(SWF%SRRLOC(SWF%NFARM))
     ALLOCATE(SWF%RUNOFF_PRNT(SWF%NFARM), SOURCE=TRUE)
     ALLOCATE(SWF%HAS_SRD_WBS(SWF%NFARM), SOURCE=FALSE)
+    ALLOCATE(SWF%NRD_INJECT_WRN(SWF%NFARM), SOURCE=TRUE)
+    ALLOCATE(SWF%NRD_SURPLUS_RUNOFF(SWF%NFARM), SOURCE=DZ)
     !
     DO CONCURRENT(F=ONE:SWF%NFARM); SWF%SRRLOC(F)%HAS_RETURN = FALSE
     END DO
@@ -315,6 +321,8 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
     ALLOCATE(SWF%BUILD_FRR(SWF%NFARM),  SOURCE=FALSE)  ! = SWF%SRRLOC(F)%HAS_RETURN .AND. SWF%SRRLOC(F)%FULLY .AND. SWF%SRRLOC(F)%BUILD_FULLY
     ALLOCATE(SWF%RUNOFF_PRNT(SWF%NFARM), SOURCE=TRUE)
     ALLOCATE(SWF%HAS_SRD_WBS(SWF%NFARM), SOURCE=FALSE)
+    ALLOCATE(SWF%NRD_INJECT_WRN(SWF%NFARM), SOURCE=TRUE)
+    ALLOCATE(SWF%NRD_SURPLUS_RUNOFF(SWF%NFARM), SOURCE=DZ)
     !
     DO CONCURRENT(LLOC=ONE:SWF%NFARM); 
         SWF%SRRLOC(LLOC)%BUILD_FULLY = TRUE     !FLAG TO INDICATE THAT FRR NETWORK MUST BE BUILT
@@ -1995,7 +2003,8 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
        '   3) Input has the NO_RETURN_FLOW option with the optional integer flags (1 or 0)'//NL//                               &
        '           that indicate the WBS does not enable it (eg "NO_RETURN_FLOW CONTANT 0" disables it for all WBS);'//NL//     &
        '   4) Input has the NO_RETURN_FLOW option, but FMP recieved external/added runoff that did not originate'//NL//         &
-       '           from precipitation or irrigation, such as the DRT-FMP link;'//NL//                                           &
+       '           from precipitation or irrigation, such as the DRT-FMP link or a non-routed delivery surplus'//NL//           &
+       '           (NRD use flag 1) of a WBS without a semi-routed delivery point;'//NL//                                       &
        '   5) Deep percolation happend at a location with all IBOUND=0 model cells beneath the land surface,'//NL//             &
        '           this results in shifting the flow to runoff because it cannot infiltrate (see note 2).'//BLN//               &
        'Since the surface water runoff has no where to go it is removed from the model.'//BLN//                                 &

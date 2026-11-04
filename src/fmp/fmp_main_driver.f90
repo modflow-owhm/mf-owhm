@@ -719,8 +719,8 @@ MODULE FMP_MAIN_DRIVER
         !
         WRITE( IOUT, '(/A, /29x,A, /39x,A, /49x,A)' ) 'FARM-ID  USE-FLAG:', &
                                                       '0 = SUFFICIENT USE', &
-                                                      '1 = ABSOLUTE USE (RECHARGE SURPLUS BACK INTO CANAL)', &
-                                                      '2 = ABSOLUTE USE (INJECT SURPLUS INTO FARM-WELLS)'
+                                                      '1 = ABSOLUTE USE (SURPLUS TO SEMI-ROUTED DELIVERY POINTS, ELSE TO RUNOFF)', &
+                                                      '2 = ABSOLUTE USE (SURPLUS INJECTED INTO SUPPLY WELLS)'
         !
         DO NF=1,FDIM%NFARM
            IF(IFA(NF).NE.0)  write(IOUT,'(1x,I6,*(I12))') IDINT(UNRD(1,NF)),(IDINT(UNRD(IT*3+1,NF)),IT=1,SWFL%MXNRD)
@@ -745,7 +745,7 @@ MODULE FMP_MAIN_DRIVER
              IF(IFA(NF).NE.0)  WRITE(IOUT,'(1x,I6,*(ES12.3))') NF,(RNRD(1,IRT,NF), IRT=1,SWFL%MXNRD)
         ENDDO
         !
-        WRITE(IOUT,'(/A, /29x,A, /39x,A, /49x,A)') 'FARM-ID  USE-FLAG:','0 = SUFFICIENT USE','1 = ABSOLUTE USE (RECHARGE SURPLUS BACK INTO CANAL)','2 = ABSOLUTE USE (INJECT SURPLUS INTO FARM-WELLS)'
+        WRITE(IOUT,'(/A, /29x,A, /39x,A, /49x,A)') 'FARM-ID  USE-FLAG:','0 = SUFFICIENT USE','1 = ABSOLUTE USE (SURPLUS TO SEMI-ROUTED DELIVERY POINTS, ELSE TO RUNOFF)','2 = ABSOLUTE USE (SURPLUS INJECTED INTO SUPPLY WELLS)'
         !
         DO NF=1,FDIM%NFARM
                IF(IFA(NF).NE.0) WRITE(IOUT,'(1x,I6,*(I12))') NF,(IDINT(RNRD(2,IRT,NF)), IRT=1,SWFL%MXNRD)
@@ -1156,6 +1156,7 @@ MODULE FMP_MAIN_DRIVER
     IF(WBS%HAS_WELL .AND. WBS%HAS_MNW2 .AND. KITER.EQ.1) CALL FWELL%MNW2_ZERO_Q()      !SET QACT and QDES for MNW2 on first interation
     !
     IF(SWFL%HAS_NRD) CALL SWFL%NRD%INIT_CONSUME()
+    IF(SWFL%HAS_NRD) SWFL%NRD_SURPLUS_RUNOFF = DZ
     !
     ! INITIALIZE SUPPLY VARIABLES TO ZERO  --CALLED IN AD ROUTINE
     !      IF(KITER.EQ.1) THEN
@@ -1472,6 +1473,20 @@ MODULE FMP_MAIN_DRIVER
                           INRDR(IT)=IDINT(UNRD(3*IT,NF))     !define nrd-ranks as array to find maximum rank for current farm
                           INRDU(IT)=IDINT(RNRD(2,IT,NF))     !define nrd-use flags for a ranked array of nrd-types for current farm
          ENDDO
+         !
+         ! Use flag 2 injects the surplus into the supply wells; without an active well only the water needed is taken (use flag 0)
+         IF(FWELL(NF)%N < ONE) THEN
+            DO IT=1,SWFL%MXNRD
+               IF(INRDU(IT) == 2) THEN
+                  INRDU(IT) = Z
+                  IF(SWFL%NRD_INJECT_WRN(NF)) THEN
+                     SWFL%NRD_INJECT_WRN(NF) = FALSE
+                     CALL WARNING_MESSAGE(OUTPUT=SWFL%IOUT, MSG='FMP SURFACE_WATER NON_ROUTED_DELIVERY: WBS '//NUM2STR(NF)//' HAS AN NRD WITH USE FLAG 2 (SURPLUS INJECTED INTO THE SUPPLY WELLS),'//NL//'BUT THE WBS HAS NO ACTIVE SUPPLY WELL IN STRESS PERIOD '//NUM2STR(KPER)//'.'//NL//'THE NRD IS TREATED AS USE FLAG 0: ONLY THE WATER NEEDED TO MEET THE DEMAND IS DELIVERED.'//NL//'THIS WARNING IS PRINTED ONCE PER WBS.')
+                  END IF
+               END IF
+            END DO
+         END IF
+         !
          ITTOT=MAXVAL(INRDR)                                            !find maximum rank for current farm (could be < max. number of nrd-types MXNRDT)
          !
          DSUM=DZ
@@ -1545,14 +1560,17 @@ MODULE FMP_MAIN_DRIVER
                 !
                 CALL SWFL%APPLY_SRD_DEMAND(NF,RDEL,SFR_DELIV)
                 ! RDEL = SWFL%SRDLOC(NF)%TOT_DMD_MET !          -> RDEL never used?
-            ELSE  ! SURPLUS1 is lost if it has no where to go
-                CALL SWFL%APPLY_SRD_SURPLUS(NF,SURPLUS1,STRM) !recharge cumulative surplus of nrd (if desired to be sent to SW) into canal
+            ELSEIF(SWFL%SRDLOC(NF)%N > Z) THEN
+                CALL SWFL%APPLY_SRD_SURPLUS(NF,SURPLUS1,STRM) !discharge the surplus of nrd (use flag 1) evenly over the semi-routed delivery points
+                SURPLUS1 = DZ
             END IF
          END IF
          !
       ELSE
          CALL SWFL%SET_DEMAND_INI(NF, DZ) ! No surface water supply, so no demand for it
       END IF
+      !
+      SWFL%NRD_SURPLUS_RUNOFF(NF) = SURPLUS1   ! surplus of nrd (use flag 1) without a semi-routed delivery point leaves the WBS as runoff (added to TOT_RUNOFF with the DRT return flow)
       !
       CALL WBS%SUPPLY(NF)%SET_SFR(SWFL%SRDLOC(NF)%TOT_DMD_MET)
       !
@@ -1561,8 +1579,9 @@ MODULE FMP_MAIN_DRIVER
       !       TOTAL FARM DELIVERY REQUIREMENT MINUS ACUTAL FARM DELIVERY FROM SURFACE WATER!
       IF(ND.LE.TF) THEN
                        QR=TF-ND-SWFL%SRDLOC(NF)%TOT_DMD_MET
+                       IF(QR < DZ) QR = DZ
       ELSEIF(SURPLUS2 > NEARZERO_29) THEN
-                       QR=-SURPLUS2                                   !inject cumulative surplus of nrd (desired to be sent to GW) into farm wells
+                       QR=-SURPLUS2                                   !inject cumulative surplus of nrd (use flag 2) into the supply wells: a negative requirement
       ELSE
                        QR = DZ
       END IF
@@ -1593,6 +1612,8 @@ MODULE FMP_MAIN_DRIVER
          CALL WBS%SUPPLY(NF)%SET_WEL(FWELL(NF)%QMAX)
       ELSEIF(QR.GT.FPS) THEN
           CALL WBS%SUPPLY(NF)%SET_WEL(QR)
+      ELSEIF(QR < DZ) THEN
+          CALL WBS%SUPPLY(NF)%SET_WEL(DZ)      ! negative requirement is the nrd surplus injected into the supply wells (use flag 2); it is not a supply to the WBS
       ELSE
           QR=DZ
           WBS%Q_DEMAND(NF)=QR
@@ -1926,6 +1947,12 @@ MODULE FMP_MAIN_DRIVER
          END DO
    END IF
    !
+   IF(SWFL%HAS_NRD) THEN   ! nrd surplus (use flag 1) of a WBS without a semi-routed delivery point leaves as runoff
+         DO CONCURRENT (NF=1:WBS%NFARM, SWFL%NRD_SURPLUS_RUNOFF(NF) > DZ)
+             WBS%TOT_RUNOFF(NF)=WBS%TOT_RUNOFF(NF)+SWFL%NRD_SURPLUS_RUNOFF(NF)
+         END DO
+   END IF
+   !
    IF(WBS%HAS_SFR) THEN
        CALL SWFL%APPLY_RUNOFF_TO_SFR(WBS%TOT_RUNOFF, STRM)
    ELSE
@@ -2144,6 +2171,7 @@ MODULE FMP_MAIN_DRIVER
     USE FMP_GLOBAL,   ONLY: FDIM, WBS, CLIMATE, FCROP, FMPOUT,SALT,SOIL,SWFL,FMPOPT,FMP_LGR_PNT,DRTFLOW, SWODAT, SFR_DELIV
     USE GWFSFRMODULE, ONLY: SEG, STRM, ISTRM, DELIV_MISMATCH
     USE GWFMNW2MODULE,ONLY: SGWF2MNW2PNT
+    USE CONSTANTS,    ONLY: DZ
     USE GENERIC_OUTPUT_FILE_INSTRUCTION, ONLY: GENERIC_OUTPUT_FILE
     !
     INTEGER, INTENT(IN   ):: IGRID, KPER, KSTP, KITER
@@ -2215,6 +2243,12 @@ MODULE FMP_MAIN_DRIVER
         IF ( WBS%HAS_DRT)THEN
               DO CONCURRENT (NF=1:WBS%NFARM,DRTFLOW(NF)%HAS_FLO)
                              WBS%TOT_RUNOFF(NF)=WBS%TOT_RUNOFF(NF)+DRTFLOW(NF)%FLO !seb ADD DRTFLOW TO ALLOW ADDED FLOWS FROM DRT
+              END DO
+        END IF
+        !
+        IF(SWFL%HAS_NRD) THEN   ! nrd surplus (use flag 1) of a WBS without a semi-routed delivery point leaves as runoff
+              DO CONCURRENT (NF=1:WBS%NFARM, SWFL%NRD_SURPLUS_RUNOFF(NF) > DZ)
+                             WBS%TOT_RUNOFF(NF)=WBS%TOT_RUNOFF(NF)+SWFL%NRD_SURPLUS_RUNOFF(NF)
               END DO
         END IF
         !
@@ -2804,7 +2838,7 @@ MODULE FMP_MAIN_DRIVER
              END DO
              QF = ABS(QF)
              !
-             IF(SWFL%HAS_SRD_WBS(NF).OR.(IGRID.GT.1.AND.FMPDAT(1)%SWFL%HAS_SRD_WBS(NF))) SRD=TF-ND-QR
+             IF(SWFL%HAS_SRD_WBS(NF).OR.(IGRID.GT.1.AND.FMPDAT(1)%SWFL%HAS_SRD_WBS(NF))) SRD=TF-ND-QR+SWFL%NRD_SURPLUS_RUNOFF(NF)   ! a negative SRD is the nrd surplus discharged to the delivery points; the part that left as runoff is already in SR
              !
              IF(WBS%UZF_LINK) THEN
                  DO I=1, WBS%FID(NF)%Count
