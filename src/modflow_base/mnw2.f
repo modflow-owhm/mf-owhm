@@ -7359,7 +7359,7 @@ C
         XN = DBLE(N)
         DS = SIN(XN*PI*ZPL/BB) - SIN(XN*PI*ZPD/BB)
         X  = XN*C
-        IF(DS /= 0.0D0) S = S + DS*DS*BESSK0(X)/(X*BESSK1(X))/(XN*XN)
+        IF(DS /= 0.0D0) S = S + DS*DS*K0K1(X)/X/(XN*XN)
         IF(X > XCUT .OR. N >= NMAX) EXIT
       END DO
 C---CLOSED-FORM TAIL OF THE SERIES FOR n > N
@@ -7368,6 +7368,23 @@ C
       DDPP = (2.0D0*BB*BB/(PI*PI*L*L)) * S / (2.0D0*PI*HKR*BB)
 C
       RETURN
+C
+      CONTAINS
+C
+      FUNCTION K0K1(X) RESULT(R)
+C     K0(X)/K1(X).  BESSK0 AND BESSK1 UNDERFLOW TO ZERO NEAR X = 700
+C     (A THIN CELL OR A LARGE RADIUS MAKES X(1) THAT LARGE), WHICH
+C     WOULD GIVE 0/0; FOR LARGE X THE ASYMPTOTIC EXPANSIONS OF THE TWO
+C     FUNCTIONS GIVE THE RATIO DIRECTLY, WITHIN 1E-5 FOR X > 50.
+      DOUBLE PRECISION, INTENT(IN):: X
+      DOUBLE PRECISION:: R
+      IF(X > 50.0D0) THEN
+         R = 1.0D0 - 0.5D0/X + 0.375D0/(X*X)
+      ELSE
+         R = BESSK0(X)/BESSK1(X)
+      END IF
+      END FUNCTION K0K1
+C
       END
 C
 C       ******************************************************
