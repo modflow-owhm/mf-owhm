@@ -2366,12 +2366,16 @@ MODULE CROP_DATA_FMP_MODULE
                                                           !
                                                           UPDATE_CID = FALSE
                                                           !
-                                                          DO P=ONE, DIM
-                                                                K = DAT(P)%I(1)
-                                                                I = DAT(P)%I(2)
-                                                                J = DAT(P)%I(3)
+                                                          DO P=ONE, DIM          ! IXJ input reads ROW, COL, CropID
+                                                                I = DAT(P)%I(1)
+                                                                J = DAT(P)%I(2)
+                                                                K = DAT(P)%I(3)
                                                                 !
-                                                                IF(K .NE. CDAT%CRPID(J,I)) THEN
+                                                                IF(I < ONE .OR. NR < I .OR. J < ONE .OR. NC < J) THEN
+                                                                    UPDATE_CID = TRUE   ! Out of range: reported below
+                                                                    EXIT
+                                                                END IF
+                                                                IF(K /= CDAT%CRPID(J,I)) THEN
                                                                     UPDATE_CID = TRUE
                                                                     EXIT
                                                                 END IF
@@ -2515,10 +2519,12 @@ MODULE CROP_DATA_FMP_MODULE
             !
             ASSOCIATE(DIM => CDAT%CID%IXJ%N, DAT => CDAT%CID%IXJ%DAT)
                      !
-                     DO P=ONE, DIM
-                           K = DAT(P)%I(1)
-                           I = DAT(P)%I(2)
-                           J = DAT(P)%I(3)
+                     DO P=ONE, DIM          ! IXJ input reads ROW, COL, CropID
+                           I = DAT(P)%I(1)
+                           J = DAT(P)%I(2)
+                           K = DAT(P)%I(3)
+                           !
+                           IF(I < ONE .OR. NR < I .OR. J < ONE .OR. NC < J) CALL STOP_ERROR(OUTPUT=CDAT%LOUT, MSG='FMP LAND_USE BLOCK ERROR. LOCATION SPECIFIED WITH IXJ INPUT (ROW, COL, CropID), BUT IT CONTAINED A ROW OR COLUMN THAT IS LESS THAN ONE OR GREATER THAN NROW OR NCOL:'//NL//'ROW = '//NUM2STR(I)//'  COL = '//NUM2STR(J)//'  CropID = '//NUM2STR(K))
                            !
                            IF(Z < K .AND. K <= CDAT%NCROP) CDAT%CRPID(J,I) = K
                            !
@@ -2607,8 +2613,8 @@ MODULE CROP_DATA_FMP_MODULE
     !
     DO I=ONE, CDAT%NCROP
     DO K=ONE, CDAT%CROP(I)%N
-          !                                                     COL                   ROW
-          CDAT%CROP(I)%FID(K) = WBS%FID_TFR%GET(Z, CDAT%CROP(I)%RC(TWO,K), CDAT%CROP(I)%RC(ONE,K), Z)
+          !                                                COL                   ROW
+          CDAT%CROP(I)%FID(K) = WBS%FID_ARRAY(CDAT%CROP(I)%RC(TWO,K), CDAT%CROP(I)%RC(ONE,K))   ! FID_ARRAY holds the current WBS ids for every LOCATION input style (ARRAY or IXJ)
           !
           IF(CDAT%CROP(I)%FID(K) > Z) CNT(CDAT%CROP(I)%FID(K)) = CNT(CDAT%CROP(I)%FID(K)) + ONE
           !
