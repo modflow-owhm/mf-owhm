@@ -840,13 +840,13 @@ MODULE IXJ_INSTRUCTION!, ONLY: IXJ_STRUCTURE, IXJ_SINGLE_ENTRY
         !
         DO N = ONE, IXJ%N
             !
-            I = IXJ%DAT(I)%I(IROW)
-            J = IXJ%DAT(I)%I(ICOL)
+            I = IXJ%DAT(N)%I(IROW)
+            J = IXJ%DAT(N)%I(ICOL)
             !
             IF(I < ONE .OR. DIM1 < I .OR. J < ONE .OR. DIM2 < J) THEN
                 ERROR = TRUE
             ELSE
-                ARR(I,J) = IXJ%DAT(I)%X( VPOS )
+                ARR(I,J) = IXJ%DAT(N)%X( VPOS )
             END IF
             !
         END DO
@@ -873,7 +873,7 @@ MODULE IXJ_INSTRUCTION!, ONLY: IXJ_STRUCTURE, IXJ_SINGLE_ENTRY
     ERROR = FALSE
     !
     IF(IXJ%IS_CONSTANT) THEN
-                        N = IXJ%DAT(I)%I( IPOS )
+                        N = IXJ%DAT(ONE)%I( IPOS )
                         DO CONCURRENT(I=1:DIM1, J=1:DIM2); ARR(I,J) = N
                         END DO
     ELSE
@@ -882,13 +882,13 @@ MODULE IXJ_INSTRUCTION!, ONLY: IXJ_STRUCTURE, IXJ_SINGLE_ENTRY
         !
         DO N = ONE, IXJ%N
             !
-            I = IXJ%DAT(I)%I(IROW)
-            J = IXJ%DAT(I)%I(ICOL)
+            I = IXJ%DAT(N)%I(IROW)
+            J = IXJ%DAT(N)%I(ICOL)
             !
             IF(I < ONE .OR. DIM1 < I .OR. J < ONE .OR. DIM2 < J) THEN
                 ERROR = TRUE
             ELSE
-                ARR(I,J) = IXJ%DAT(I)%I( IPOS )
+                ARR(I,J) = IXJ%DAT(N)%I( IPOS )
             END IF
             !
         END DO
