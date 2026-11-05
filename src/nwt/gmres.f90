@@ -234,8 +234,8 @@
   DOUBLE PRECISION, DIMENSION(:,:), ALLOCATABLE, TARGET :: vv    ! ... work array. stores the Arnoldi
                                                                ! ...   basis vectors
   !
-  DOUBLE PRECISION, DIMENSION(:), POINTER :: vvp1   ! ... work array pointer to vector slice
-  DOUBLE PRECISION, DIMENSION(:), POINTER :: vvp2   ! ... work array pointer to vector slice
+  DOUBLE PRECISION, DIMENSION(:), POINTER,CONTIGUOUS :: vvp1   ! ... work array pointer to vector slice
+  DOUBLE PRECISION, DIMENSION(:), POINTER,CONTIGUOUS :: vvp2   ! ... work array pointer to vector slice
   DOUBLE PRECISION, EXTERNAL :: ddot, dnrm2
   !
   INTEGER :: i, i1, ii, itno, j, jj, k, k1

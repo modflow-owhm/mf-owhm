@@ -39,7 +39,7 @@ MODULE FMP_GLOBAL
   !
   TYPE(FMP_DIMENSION),                            POINTER:: FDIM
   TYPE(WBS_DATA),                                 POINTER:: WBS
-  TYPE(FARM_WELL_DATA),    DIMENSION(:),          POINTER:: FWELL      ! Fix someday to not be an array
+  TYPE(FARM_WELL_DATA),    DIMENSION(:),          CONTIGUOUS, POINTER:: FWELL      ! Fix someday to not be an array
   TYPE(SURFACE_WATER_DATA),                       POINTER:: SWFL
   TYPE(SOIL_DATA),                                POINTER:: SOIL
   TYPE(SALINITY_DATA),                            POINTER:: SALT
@@ -66,7 +66,7 @@ MODULE FMP_GLOBAL
       !
       TYPE(FMP_DIMENSION),                   POINTER:: FDIM
       TYPE(WBS_DATA),                        POINTER:: WBS
-      TYPE(FARM_WELL_DATA),    DIMENSION(:), POINTER:: FWELL      ! Fix someday to not be an array
+      TYPE(FARM_WELL_DATA),    DIMENSION(:), CONTIGUOUS, POINTER:: FWELL      ! Fix someday to not be an array
       TYPE(SURFACE_WATER_DATA),              POINTER:: SWFL
       TYPE(SOIL_DATA),                       POINTER:: SOIL
       TYPE(SALINITY_DATA),                   POINTER:: SALT

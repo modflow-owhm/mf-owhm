@@ -80,8 +80,8 @@ CONTAINS
     INTEGER, DIMENSION(:), ALLOCATABLE, TARGET :: jw           ! ... work array
     ! ...     w, jw (1:n) store the working array [1:ii-1 = L-part, ii:n = U-part]
     ! ...     jw(n+1:2n)  stores indices of nonzero elements
-    DOUBLE PRECISION, DIMENSION(:), POINTER :: wp
-    INTEGER, DIMENSION(:), POINTER :: jwp
+    DOUBLE PRECISION, DIMENSION(:), POINTER, CONTIGUOUS :: wp
+    INTEGER, DIMENSION(:), POINTER, CONTIGUOUS :: jwp
     INTEGER :: ju0,k,j1,j2,j,ii,i,lenl,lenu,jj,jrow,jpos,len
     INTEGER :: a_err, da_err
     DOUBLE PRECISION :: fact, s, t, tnorm
