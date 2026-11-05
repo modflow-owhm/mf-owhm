@@ -4,7 +4,7 @@
 
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; **IPDS No.**&nbsp; `NA`
 
-# Version 2.3.2-b1  — Develop–Beta Release
+# Version 2.3.2-b2  — Develop–Beta Release
 
 ### Important Notes
 
@@ -12,7 +12,7 @@ This is the `develop` branch of MODFLOW-OWHM. It is the current code state that 
 For publications, it is recommended to use the current production release from the [main](https://code.usgs.gov/modflow/mf-owhm/-/tree/main) and [release](https://code.usgs.gov/modflow/mf-owhm/-/tree/release) branches  
 (or request a beta release be converted to a production release).
 
-~~Preliminary Beta Download  &nbsp;  &nbsp; &nbsp; &nbsp; ➣ &nbsp; **[v2.3.2-b1](https://code.usgs.gov/modflow/mf-owhm/-/archive/2.3.2-b1/mf-owhm-2.3.2-b1.zip)** &nbsp; &nbsp; `( Not yet complete )`~~
+~~Preliminary Beta Download  &nbsp;  &nbsp; &nbsp; &nbsp; ➣ &nbsp; **[v2.3.2-b2](https://code.usgs.gov/modflow/mf-owhm/-/archive/2.3.2-b2/mf-owhm-2.3.2-b2.zip)** &nbsp; &nbsp; `( Not yet complete )`~~
 
 Production Release Download &nbsp; &nbsp; ➣ &nbsp; **[v2.3.1](https://code.usgs.gov/modflow/mf-owhm/-/archive/2.3.1/mf-owhm-2.3.1.zip)** &nbsp; &nbsp; &nbsp; &nbsp; `( 12-12-2025 )`
 
