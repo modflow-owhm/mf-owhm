@@ -44,12 +44,13 @@ C     ------------------------------------------------------------------
       USE NUM2STR_INTERFACE, ONLY: NUM2STR
       USE FILE_IO_INTERFACE, ONLY: READ_TO_DATA
 C
-      REAL,DIMENSION(NCOL,NROW)::BUFFER                                 !seb USED FOR TEMPORARY STORAGE FOR U2DREL READS AND THEN CONVERTED TO DP ARRAYS
+      REAL,DIMENSION(:,:),ALLOCATABLE::BUFFER                           !seb USED FOR TEMPORARY STORAGE FOR U2DREL READS AND THEN CONVERTED TO DP ARRAYS
       CHARACTER(24):: ANAME(7)
       CHARACTER(12):: AVGNAM(4)
       CHARACTER(512):: LINE
       LOGICAL:: NOFREE
       NOFREE = IFREFM == 0
+      ALLOCATE(BUFFER(NCOL,NROW))
       !
 C     ------------------------------------------------------------------
       AVGNAM(1) = 'HARMONIC    '
@@ -255,21 +256,31 @@ C8C-----READ TRANSMISSIVITY INTO ARRAY CC IF LAYER TYPE IS 0 OR 2.
       IF(LAYCON(K).EQ.3 .OR. LAYCON(K).EQ.1) GO TO 105
       CALL U2DREL(BUFFER,ANAME(2),NROW,NCOL,KK,IN,IOUT)                 !seb MODIFIED TO MATCH PRECISION U2DREL EXPECTS
       CC(:,:,K)=REAL(BUFFER,KND)
-      IF(ILGR .NE. 0) HK(:,:,K) = CC(:,:,K)/
-     &                (BOTM(:,:,K-1) - BOTM(:,:,K))   !swm: STORE K. 
+      IF(ILGR .NE. 0) THEN                                              !swm: STORE K.
+         DO CONCURRENT(I=1:NROW, J=1:NCOL)
+            HK(J,I,K) = CC(J,I,K)/(BOTM(J,I,K-1) - BOTM(J,I,K))
+         END DO
+      END IF
       GO TO 110
 C
 C8D-----READ HYDRAULIC CONDUCTIVITY(HY) IF LAYER TYPE IS 1 OR 3.
   105 CALL U2DREL(HY(:,:,KB),ANAME(3),NROW,NCOL,KK,IN,IOUT)
-      IF(ILGR .NE. 0) HK(:,:,K)=HY(:,:,KB) !swm; store K.
+      IF(ILGR .NE. 0) THEN                                              !swm; store K.
+         DO CONCURRENT(I=1:NROW, J=1:NCOL)
+            HK(J,I,K) = HY(J,I,KB)
+         END DO
+      END IF
 C
 C8E-----READ VERTICAL HYCOND/THICK INTO ARRAY CV IF NOT BOTTOM LAYER;
 C2E-----MULTIPLIED BY CELL AREA TO CONVERT TO CONDUCTANCE LATER.
   110 IF(K.NE.NLAY) THEN
         CALL U2DREL(BUFFER,ANAME(4),NROW,NCOL,KK,IN,IOUT)                 !seb MODIFIED TO MATCH PRECISION U2DREL EXPECTS
         CV(:,:,K)=REAL(BUFFER,KND)
-        IF(ILGR .NE. 0) VK(:,:,K) = 0.5*CV(:,:,K)*
-     &                  (BOTM(:,:,K-1) - BOTM(:,:,K+1)) !swm: Apprx. VK. 
+        IF(ILGR .NE. 0) THEN                                            !swm: Apprx. VK.
+           DO CONCURRENT(I=1:NROW, J=1:NCOL)
+            VK(J,I,K) = 0.5D0*CV(J,I,K)*(BOTM(J,I,K-1) - BOTM(J,I,K+1))
+           END DO
+        END IF
       ELSE IF(ILGR .NE. 0 .AND. NLAY .GT. 1) THEN
         VK(:,:,K) = VK(:,:,K-1)  !swm: for bottom, use VK of layer above
       END IF        

@@ -2515,6 +2515,75 @@ C
       RETURN
       END SUBROUTINE
       !
+      SUBROUTINE ULAPRWC_DBL(A,NCOL,NROW,ILAY,IOUT,IPRN,ANAME)
+C     ******************************************************************
+C     WRITE A TWO-DIMENSIONAL DOUBLE PRECISION ARRAY.  IF THE ARRAY IS
+C     CONSTANT, PRINT JUST THE CONSTANT VALUE.  IF THE ARRAY IS NOT
+C     CONSTANT, CALL ULAPRW_DBL TO PRINT IT.
+C     SAME AS ULAPRWC, BUT ACCEPTS A DOUBLE PRECISION ARRAY DIRECTLY
+C     (NO REAL() COPY OF THE LAYER IS MADE BY THE CALLER).
+C     ******************************************************************
+C
+C        SPECIFICATIONS:
+C     ------------------------------------------------------------------
+      USE, INTRINSIC:: ISO_FORTRAN_ENV, ONLY: REAL64
+      USE CONSTANTS, ONLY: Z
+      IMPLICIT NONE
+      INTEGER,                           INTENT(IN):: NCOL,NROW,ILAY
+      INTEGER,                           INTENT(IN):: IOUT,IPRN
+      REAL(REAL64), DIMENSION(NCOL,NROW),INTENT(IN):: A
+      CHARACTER(*),                      INTENT(IN):: ANAME
+      REAL(REAL64):: TMP
+      INTEGER:: I,J
+      LOGICAL:: IS_CONSTANT
+C     ------------------------------------------------------------------
+C
+C  Check to see if entire array is a constant.
+      TMP=A(1,1)
+      IS_CONSTANT = .TRUE.
+      OUTER: DO I=1,NROW
+             DO J=1,NCOL
+                IF(A(J,I) /= TMP) THEN
+                   IS_CONSTANT = .FALSE.
+                   EXIT OUTER
+                END IF
+             END DO
+      END DO OUTER
+C
+      IF(IS_CONSTANT) THEN
+         IF(IOUT /= Z) THEN
+            IF(ILAY > Z) THEN
+                 WRITE(IOUT,302) ANAME,TMP,ILAY
+            ELSE IF(ILAY == Z) THEN
+                 WRITE(IOUT,303) ANAME,TMP
+            ELSE
+                 WRITE(IOUT,304) ANAME,TMP
+            END IF
+  302       FORMAT(1X,/1X,A,' =',1P,G14.6,' FOR LAYER',I4)
+  303       FORMAT(1X,/1X,A,' =',1P,G14.6)
+  304       FORMAT(1X,/1X,A,' =',1P,G14.6,' FOR CROSS SECTION')
+         END IF
+         RETURN
+      END IF
+C
+C  Print the array.
+      IF(IOUT /= Z) THEN
+         IF(ILAY > Z) THEN
+              WRITE(IOUT,494) ANAME,ILAY
+         ELSE IF(ILAY == Z) THEN
+              WRITE(IOUT,495) ANAME
+         ELSE
+              WRITE(IOUT,496) ANAME
+         END IF
+  494    FORMAT(1X,//11X,A,' FOR LAYER',I4)
+  495    FORMAT(1X,//11X,A)
+  496    FORMAT(1X,//11X,A,' FOR CROSS SECTION')
+      END IF
+      IF(IPRN >= Z) CALL ULAPRW_DBL(A,ANAME,0,0,NCOL,NROW,0,IPRN,IOUT)
+C
+      RETURN
+      END SUBROUTINE
+      !
 !      SUBROUTINE ULASAV(BUF,TEXT,KSTP,KPER,PERTIM,TOTIM,NCOL,
 !     1                   NROW,ILAY,ICHN)
 !C     ******************************************************************
@@ -3075,9 +3144,9 @@ C
       IF(ANY(ISSFLG == Z))THEN
        !-------------------------------------------------------------- SC1
        !BUFF = SC1 or NaN
-       WHERE(IBOUND /= Z)        !SET BUFFER TO STORACE COEFICIENT 1
-                       BUFF=T_SC1
-       END WHERE
+       DO CONCURRENT(K=1:NLAY, I=1:NROW, J=1:NCOL, IBOUND(J,I,K) /= Z)  !SET BUFFER TO STORAGE COEFICIENT 1
+          BUFF(J,I,K) = T_SC1(J,I,K)
+       END DO
        IF(ORIGIN == 2) THEN                                         !USING UPW -> SC = Ss/(dr*dc) - so need to add missing thick!
          DO K=1,NLAY
          DO I=1,NROW
@@ -3137,9 +3206,9 @@ C
        END IF
        !-------------------------------------------------------------- SC1 -> Ss 
        !BUFF = SC1 or NaN
-       WHERE(IBOUND /= Z)        !SET BUFFER TO STORACE COEFICIENT 1
-                       BUFF=T_SC1
-       END WHERE
+       DO CONCURRENT(K=1:NLAY, I=1:NROW, J=1:NCOL, IBOUND(J,I,K) /= Z)  !SET BUFFER TO STORAGE COEFICIENT 1
+          BUFF(J,I,K) = T_SC1(J,I,K)
+       END DO
        IF    (ORIGIN == 1) THEN                                         !USING LPF -> Ss=SC/(dr*dc*thick)
          DO K=1,NLAY
          DO I=1,NROW

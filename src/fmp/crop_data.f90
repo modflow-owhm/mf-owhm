@@ -1027,11 +1027,13 @@ MODULE CROP_DATA_FMP_MODULE
         UPDATE = WBS%NEW_FID .OR. .NOT. CDAT%TFR_READ
         !
         IF(CDAT%CHECK_BARE .AND. UPDATE ) THEN ! (WBS%BARE_FRAC_RUNOFF%TRANSIENT .OR.
-            WHERE (WBS%FID_ARRAY > Z) 
-                                 CDAT%BARE_FRAC = UNO
-            ELSEWHERE
-                                 CDAT%BARE_FRAC = DZ
-            END WHERE
+            DO CONCURRENT(R=1:SIZE(CDAT%BARE_FRAC,2), C=1:SIZE(CDAT%BARE_FRAC,1))   ! WHERE/ELSEWHERE made ifx build a mask temporary of the whole layer on the stack
+               IF(WBS%FID_ARRAY(C,R) > Z) THEN
+                                 CDAT%BARE_FRAC(C,R) = UNO
+               ELSE
+                                 CDAT%BARE_FRAC(C,R) = DZ
+               END IF
+            END DO
         END IF
         !
         IF(.NOT. CDAT%TFR_READ) CDAT%TFR_READ = TRUE
@@ -3485,16 +3487,16 @@ MODULE CROP_DATA_FMP_MODULE
     DOUBLE PRECISION, DIMENSION(NCOL,NROW), INTENT(IN ):: BARE_EVAP_EHD
     DOUBLE PRECISION, DIMENSION(NCOL,NROW), INTENT(IN ):: WT
     DOUBLE PRECISION, DIMENSION(NCOL,NROW), INTENT(OUT):: BARE_EVAP
+    INTEGER:: I, J
     !
-    WHERE(BARE_FRAC > DZ .AND. WT > NEAR_ninf)
-             !
-             BARE_EVAP = BARE_EVAP_EHI - BARE_EVAP_EHD * WT
-    ELSEWHERE
-             BARE_EVAP = DZ
-    END WHERE
-    !
-    WHERE(BARE_EVAP < DZ);  BARE_EVAP = DZ
-    END WHERE
+    DO CONCURRENT(J=1:NROW, I=1:NCOL)                 ! a WHERE/ELSEWHERE block here made ifx build a mask temporary of the whole layer on the stack
+       IF(BARE_FRAC(I,J) > DZ .AND. WT(I,J) > NEAR_ninf) THEN
+            BARE_EVAP(I,J) = BARE_EVAP_EHI(I,J) - BARE_EVAP_EHD(I,J) * WT(I,J)
+            IF(BARE_EVAP(I,J) < DZ) BARE_EVAP(I,J) = DZ
+       ELSE
+            BARE_EVAP(I,J) = DZ
+       END IF
+    END DO
     !
   END SUBROUTINE
   !

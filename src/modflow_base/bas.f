@@ -2062,6 +2062,7 @@ C     ------------------------------------------------------------------
       USE ALLOC_INTERFACE,   ONLY: ALLOC
       USE ERROR_INTERFACE,   ONLY: WARNING_MESSAGE
       USE NUM2STR_INTERFACE, ONLY: NUM2STR
+      USE SET_ARRAY_INTERFACE, ONLY: SET_ARRAY
       USE BUDGET_DATEBASE_WRITER
       USE BAS_UTIL, ONLY: MASS_ERROR_PRINT
       IMPLICIT NONE
@@ -2797,7 +2798,7 @@ C5------WILL BE PRODUCED.
             ALLOC_DDREF = TRUE
             CALL SGWF2BAS7PSV(IGRID)
          END IF
-         DDREF=HNEW
+         CALL SET_ARRAY(NCOL,NROW,NLAY,HNEW,DDREF)
            WRITE(IOUT,99)
    99    FORMAT(1X,'Drawdown Reference has been reset to the',
      1               ' end of this time step')
@@ -5551,7 +5552,7 @@ C6E7-----Done defining the array.  Get the print code and print the array.
               END IF
  1200         IF(IPRN.GE.0) THEN
                  ANAME=' MULT. ARRAY: '//MLTNAM(M)
-                 CALL ULAPRWC(REAL(RMLT(:,:,M)),NCOL,NROW,0,IOUT,IPRN,  !seb CHANGED IOUTM TO IOUT
+                 CALL ULAPRWC_DBL(RMLT(:,:,M),NCOL,NROW,0,IOUT,IPRN,    !seb CHANGED IOUTM TO IOUT
      1                 ANAME)
               END IF
               LINE=' '

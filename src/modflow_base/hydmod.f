@@ -2036,7 +2036,7 @@ C2------IF THIS IS THE FIRST TIME IN THE SIMULATION, WRITE HEADER RECORD.
         CASE(REAL64); WRITE(IHYDMUN) -NHYDTOT,ITMUNI
         END SELECT
         !
-        WRITE(IHYDMUN) 'TIME',HYDLBL(1:NHYDTOT)
+        WRITE(IHYDMUN) 'TIME',(HYDLBL(N),N=1,NHYDTOT)                   ! implied-DO: a pointer section in the I/O list made ifx copy all labels to the stack
         !
         SELECT CASE(KIND(TOTIM))
         CASE(REAL32)
