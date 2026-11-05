@@ -2142,8 +2142,8 @@ MODULE CROP_DATA_FMP_MODULE
          IF(CLIM%HAS_PRECIP) THEN
                              CDAT%BARE_TOT_PRECEP = CDAT%BARE_FRAC * WBS%AREA * CLIM%PRECIP
                              !
-                             WHERE(CDAT%BARE_TOT_PRECEP < DZ); CDAT%BARE_TOT_PRECEP = DZ
-                             END WHERE
+                             DO CONCURRENT ( R=ONE:CDAT%NROW, C=ONE:CDAT%NCOL, CDAT%BARE_TOT_PRECEP(C,R) < DZ); CDAT%BARE_TOT_PRECEP(C,R) = DZ
+                             END DO
                              !
                              IF(CDAT%HAS_Pe) THEN
                                 DO CONCURRENT ( R=ONE:CDAT%NROW, C=ONE:CDAT%NCOL)
@@ -2165,9 +2165,9 @@ MODULE CROP_DATA_FMP_MODULE
          !
          CDAT%BARE_POT_EVAP = CDAT%BARE_FRAC * WBS%AREA * CLIM%BARE_POT_EVAP
          !
-         WHERE(CDAT%BARE_POT_EVAP < DZ)
-               CDAT%BARE_POT_EVAP = DZ
-         END WHERE
+         DO CONCURRENT ( R=ONE:CDAT%NROW, C=ONE:CDAT%NCOL, CDAT%BARE_POT_EVAP(C,R) < DZ)
+               CDAT%BARE_POT_EVAP(C,R) = DZ
+         END DO
          !
          DO R=ONE, CDAT%NROW
          DO C=ONE, CDAT%NCOL
@@ -2820,8 +2820,8 @@ MODULE CROP_DATA_FMP_MODULE
                       !    CROP_INPUT_APPLY_SFAC(SFAC, PROP, N, CID, FID, [IRR])
                       CALL CROP_INPUT_APPLY_SFAC( CPR%ROOT, CPI%SFAC, CPR%N, ID, CPR%FID, CPR%IRR )
                       !
-                      WHERE( CPR%ROOT < NEARZERO_30 );  CPR%ROOT = NEARZERO_30   !THIS IS TO PREVENT ANY DIV/0 ERRORS
-                      END WHERE
+                      DO CONCURRENT (K=ONE:CPR%N, CPR%ROOT(K) < NEARZERO_30);  CPR%ROOT(K) = NEARZERO_30   !THIS IS TO PREVENT ANY DIV/0 ERRORS
+                      END DO
                       
        CASE('MULTI_FRAC')
                       !

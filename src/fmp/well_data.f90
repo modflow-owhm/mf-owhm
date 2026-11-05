@@ -412,6 +412,7 @@ MODULE WELL_DATA_FMP_MODULE
   PURE ELEMENTAL SUBROUTINE CALCULATE_FRAC(FWEL)  !ASSUMES FWEL%QMAX HAS BEEN CALCULATED!!!
     CLASS(FARM_WELL_DATA), INTENT(INOUT)::FWEL
     DOUBLE PRECISION:: DIV_QMAX
+    INTEGER:: I
     !
     IF (FWEL%N > Z .AND. FWEL%PRORATE_Q==ONE ) THEN          !(FWEL%PRORATE_Q==1 .OR. FWEL%PRORATE_ALLOT==1)
       !
@@ -419,17 +420,21 @@ MODULE WELL_DATA_FMP_MODULE
          !
          DIV_QMAX = UNO/FWEL%QMAX
          IF(FWEL%SMOOTH == Z) THEN
-                               WHERE(FWEL%ACT) 
-                                              FWEL%FRAC = FWEL%Qcap * DIV_QMAX
-                               ELSEWHERE
-                                              FWEL%FRAC = DZ
-                               END WHERE
+                               DO CONCURRENT (I=1:FWEL%DIM)
+                                  IF(FWEL%ACT(I)) THEN
+                                              FWEL%FRAC(I) = FWEL%Qcap(I) * DIV_QMAX
+                                  ELSE
+                                              FWEL%FRAC(I) = DZ
+                                  END IF
+                               END DO
          ELSE
-                               WHERE(FWEL%ACT) 
-                                              FWEL%FRAC = FWEL%Qcap * FWEL%Qsmf * DIV_QMAX
-                               ELSEWHERE
-                                              FWEL%FRAC = DZ
-                               END WHERE
+                               DO CONCURRENT (I=1:FWEL%DIM)
+                                  IF(FWEL%ACT(I)) THEN
+                                              FWEL%FRAC(I) = FWEL%Qcap(I) * FWEL%Qsmf(I) * DIV_QMAX
+                                  ELSE
+                                              FWEL%FRAC(I) = DZ
+                                  END IF
+                               END DO
          END IF
       ELSE
                                FWEL%FRAC = DZ
@@ -497,11 +502,13 @@ MODULE WELL_DATA_FMP_MODULE
     IF(FWEL%DIM > Z) THEN
         !
         IF(FWEL%SMOOTH == Z) THEN  !SET UP INITIAL ESTIMATE OF Q (ASSUME ALL WELLS ARE MAXED OUT AND WILL BE REDUCED TO MEET QREQ)
-            WHERE(FWEL%ACT) 
-                           FWEL%Q = FWEL%Qcap
-            ELSEWHERE
-                           FWEL%Q = DZ
-            END WHERE
+            DO CONCURRENT (I=1:FWEL%DIM)
+               IF(FWEL%ACT(I)) THEN
+                           FWEL%Q(I) = FWEL%Qcap(I)
+               ELSE
+                           FWEL%Q(I) = DZ
+               END IF
+            END DO
         ELSE
             DO CONCURRENT (I=1:FWEL%DIM, FWEL%ACT(I))  
                 IF(FWEL%MNWLOC(I) > Z) THEN
@@ -855,17 +862,21 @@ MODULE WELL_DATA_FMP_MODULE
                                                CALL PRORATE_Q_FACTOR%LOAD(LN, BL%IU, BL%IOUT, 'BYWBS', NFARM, 'BYFARM', NFARM)
                                                !
                                                IF     ( PRORATE_Q_FACTOR%HAS_ROW ) THEN
-                                                          WHERE (PRORATE_Q_FACTOR%ROW > 0.1D0)
-                                                                    FWEL%PRORATE_Q = ONE
-                                                          ELSEWHERE
-                                                                    FWEL%PRORATE_Q = Z
-                                                          END WHERE
+                                                          DO CONCURRENT (I=1:NFARM)
+                                                             IF (PRORATE_Q_FACTOR%ROW(I) > 0.1D0) THEN
+                                                                    FWEL(I)%PRORATE_Q = ONE
+                                                             ELSE
+                                                                    FWEL(I)%PRORATE_Q = Z
+                                                             END IF
+                                                          END DO
                                                ELSEIF ( PRORATE_Q_FACTOR%HAS_COL ) THEN
-                                                          WHERE (PRORATE_Q_FACTOR%COL > 0.1D0)
-                                                                    FWEL%PRORATE_Q = ONE
-                                                          ELSEWHERE
-                                                                    FWEL%PRORATE_Q = Z
-                                                          END WHERE
+                                                          DO CONCURRENT (I=1:NFARM)
+                                                             IF (PRORATE_Q_FACTOR%COL(I) > 0.1D0) THEN
+                                                                    FWEL(I)%PRORATE_Q = ONE
+                                                             ELSE
+                                                                    FWEL(I)%PRORATE_Q = Z
+                                                             END IF
+                                                          END DO
                                                ELSEIF(PRORATE_Q_FACTOR%HAS_ALL) THEN
                                                       IF (PRORATE_Q_FACTOR%ALL > 0.1D0) THEN
                                                                     FWEL%PRORATE_Q = ONE
@@ -939,17 +950,13 @@ MODULE WELL_DATA_FMP_MODULE
                                          CALL AUX_QMAXRESET%LOAD(LN, BL%IU, BL%IOUT, 'BYWBS', NFARM, 'BYFARM', NFARM)
                                          !
                                          IF ( AUX_QMAXRESET%HAS_ROW ) THEN
-                                                     WHERE (AUX_QMAXRESET%ROW > 0.1D0)
-                                                             FWEL%QMAXRESET = TRUE
-                                                     ELSEWHERE
-                                                             FWEL%QMAXRESET = FALSE
-                                                     END WHERE
+                                                     DO CONCURRENT (I=1:NFARM)
+                                                             FWEL(I)%QMAXRESET = AUX_QMAXRESET%ROW(I) > 0.1D0
+                                                     END DO
                                          ELSEIF ( AUX_QMAXRESET%HAS_COL ) THEN
-                                                     WHERE (AUX_QMAXRESET%COL > 0.1D0)
-                                                             FWEL%QMAXRESET = TRUE
-                                                     ELSEWHERE
-                                                             FWEL%QMAXRESET = FALSE
-                                                     END WHERE
+                                                     DO CONCURRENT (I=1:NFARM)
+                                                             FWEL(I)%QMAXRESET = AUX_QMAXRESET%COL(I) > 0.1D0
+                                                     END DO
                                          ELSE
                                              IF(AUX_QMAXRESET%HAS_ALL) THEN
                                                  FWEL%QMAXRESET = AUX_QMAXRESET%ALL > 0.1D0
@@ -980,17 +987,13 @@ MODULE WELL_DATA_FMP_MODULE
                                          CALL AUX_NOCIRNOQ%LOAD(LN, BL%IU, BL%IOUT, 'BYWBS', NFARM, 'BYFARM', NFARM)
                                          !
                                          IF     ( AUX_NOCIRNOQ%HAS_ROW ) THEN
-                                                     WHERE (AUX_NOCIRNOQ%ROW > 0.1D0)
-                                                             FWEL%NOCIRNOQ = TRUE
-                                                     ELSEWHERE
-                                                             FWEL%NOCIRNOQ = FALSE
-                                                     END WHERE
+                                                     DO CONCURRENT (I=1:NFARM)
+                                                             FWEL(I)%NOCIRNOQ = AUX_NOCIRNOQ%ROW(I) > 0.1D0
+                                                     END DO
                                          ELSEIF ( AUX_NOCIRNOQ%HAS_COL ) THEN
-                                                     WHERE (AUX_NOCIRNOQ%COL > 0.1D0)
-                                                             FWEL%NOCIRNOQ = TRUE
-                                                     ELSEWHERE
-                                                             FWEL%NOCIRNOQ = FALSE
-                                                     END WHERE
+                                                     DO CONCURRENT (I=1:NFARM)
+                                                             FWEL(I)%NOCIRNOQ = AUX_NOCIRNOQ%COL(I) > 0.1D0
+                                                     END DO
                                          ELSE
                                              IF(AUX_NOCIRNOQ%HAS_ALL) THEN
                                                  FWEL%NOCIRNOQ = AUX_NOCIRNOQ%ALL > 0.1D0
@@ -1017,17 +1020,13 @@ MODULE WELL_DATA_FMP_MODULE
                                          CALL AUX_MWN_ON%LOAD(LN, BL%IU, BL%IOUT, 'BYWBS', NFARM, 'BYFARM', NFARM)
                                          !
                                          IF     ( AUX_MWN_ON%HAS_ROW ) THEN
-                                                     WHERE (AUX_MWN_ON%ROW > 0.1D0)
-                                                             FWEL%MNW_ON = TRUE
-                                                     ELSEWHERE
-                                                             FWEL%MNW_ON = FALSE
-                                                     END WHERE
+                                                     DO CONCURRENT (I=1:NFARM)
+                                                             FWEL(I)%MNW_ON = AUX_MWN_ON%ROW(I) > 0.1D0
+                                                     END DO
                                          ELSEIF ( AUX_MWN_ON%HAS_COL ) THEN
-                                                     WHERE (AUX_MWN_ON%COL > 0.1D0)
-                                                             FWEL%MNW_ON = TRUE
-                                                     ELSEWHERE
-                                                             FWEL%MNW_ON = FALSE
-                                                     END WHERE
+                                                     DO CONCURRENT (I=1:NFARM)
+                                                             FWEL(I)%MNW_ON = AUX_MWN_ON%COL(I) > 0.1D0
+                                                     END DO
                                          ELSE
                                              IF(AUX_MWN_ON%HAS_ALL) THEN
                                                  FWEL%MNW_ON = AUX_MWN_ON%ALL > 0.1D0
@@ -1054,17 +1053,13 @@ MODULE WELL_DATA_FMP_MODULE
                                          CALL AUX_MWN_OFF%LOAD(LN, BL%IU, BL%IOUT, 'BYWBS', NFARM, 'BYFARM', NFARM)
                                          !
                                          IF     ( AUX_MWN_OFF%HAS_ROW ) THEN
-                                                     WHERE (AUX_MWN_OFF%ROW > 0.1D0)
-                                                             FWEL%MNW_OFF = TRUE
-                                                     ELSEWHERE
-                                                             FWEL%MNW_OFF = FALSE
-                                                     END WHERE
+                                                     DO CONCURRENT (I=1:NFARM)
+                                                             FWEL(I)%MNW_OFF = AUX_MWN_OFF%ROW(I) > 0.1D0
+                                                     END DO
                                          ELSEIF ( AUX_MWN_OFF%HAS_COL ) THEN
-                                                     WHERE (AUX_MWN_OFF%COL > 0.1D0)
-                                                             FWEL%MNW_OFF = TRUE
-                                                     ELSEWHERE
-                                                             FWEL%MNW_OFF = FALSE
-                                                     END WHERE
+                                                     DO CONCURRENT (I=1:NFARM)
+                                                             FWEL(I)%MNW_OFF = AUX_MWN_OFF%COL(I) > 0.1D0
+                                                     END DO
                                          ELSE
                                              IF(AUX_MWN_OFF%HAS_ALL) THEN
                                                  FWEL%MNW_OFF = AUX_MWN_OFF%ALL > 0.1D0

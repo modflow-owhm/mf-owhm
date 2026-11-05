@@ -1527,10 +1527,10 @@ MODULE FMP_MAIN_DRIVER
                          FINF   =0.0  !INFILTRATION WILL BE OVER WRITTEN BY DIRECT_RECAHRGE
                          EXCESPP=0.0
        ELSE
-            WHERE ( WBS%FID_ARRAY > Z )
-                         FINF   =0.0  
-                         EXCESPP=0.0
-            END WHERE
+            DO CONCURRENT (IR=1:NROW, IC=1:NCOL, WBS%FID_ARRAY(IC,IR) > Z)
+                         FINF   (IC,IR) = DZ
+                         EXCESPP(IC,IR) = DZ
+            END DO
        END IF
    END IF
    !
@@ -2762,9 +2762,9 @@ MODULE FMP_MAIN_DRIVER
            !8F-----LOOP THROUGH EACH FARM WELL CALCULATING FLOW AND PRINTING
            !
            !
-           WHERE (TFDROLD==DZ) 
-                  TFDROLD = WBS%DEMAND
-           END WHERE
+           DO CONCURRENT (NF=ONE:WBS%NFARM, TFDROLD(NF) == DZ)
+                  TFDROLD(NF) = WBS%DEMAND(NF)
+           END DO
            !
            CALL FWELL%PRINT_SMOOTHED_PUMPING( KPER, KSTP, TOTIM, DATE, SET_HEADER )
            CALL FWELL%PRINT_BYWELL( KPER, KSTP, DELT, REALTIM, DATE, SET_HEADER )

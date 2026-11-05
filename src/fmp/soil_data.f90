@@ -161,7 +161,8 @@ MODULE SOIL_DATA_FMP_MODULE!, ONLY: SOIL_DATA, SOIL_DATA_INITIALIZE
                            ALLOCATE(SOIL%SID(FDIM%NCOL,FDIM%NROW))
                            CALL ULOAD(SOIL%SID, LLOC, LINE, BL%IOUT, BL%IU, IU, NOID=TRUE, SCRATCH=BL%SCRATCH)
                            !
-                           WHERE( SOIL%SID > FDIM%NSOIL ) SOIL%SID = Z
+                           DO CONCURRENT(J=1:FDIM%NROW, I=1:FDIM%NCOL, SOIL%SID(I,J) > FDIM%NSOIL); SOIL%SID(I,J) = Z
+                           END DO
                            !
          CASE ("CAPILLARY_FRINGE","CAPF")
                            WRITE(BL%IOUT,'(A)') '   CAPILLARY_FRINGE (CAPF) KEYWORD FOUND. NOW LOADING LIST/ARRAY KEYWORD.'

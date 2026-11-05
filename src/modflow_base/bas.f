@@ -5111,7 +5111,9 @@ C2----OPEN PACKAGES
      +             ACCESS=ACCARG, STATUS=FILSTAT,
      +             BUFFER_BLOCKSIZE=BUFBLOCKSIZE, BUFFER_COUNT=BUFCOUNT)   !64K READ BUFFER FOR PACKAGES
           !
-          WHERE (FILTYP(:5) == CUNIT) IUNIT=IU
+          DO CONCURRENT (I=1:NIUNIT, FILTYP(:5) == CUNIT(I))
+             IUNIT(I)=IU
+          END DO
           NFILE=NFILE+1
           !
           WRITE(IOUT,'(2A)') FILTYP(:4),' PACKAGE OPENED.'
