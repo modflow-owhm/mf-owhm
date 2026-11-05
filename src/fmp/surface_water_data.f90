@@ -800,17 +800,8 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
     !
     IF(SRR_CHK) THEN
         !
-        DO CONCURRENT(K=ONE:SWF%NSFR_RETURN, SWF%ISRR_TFR%WBS(K) > Z )
-            IF( SWF%ISRR_TFR%SR(ONE,K) > Z .AND. SWF%ISRR_TFR%SR(TWO,K) < Z) THEN
-                SWF%ISRR_TFR%SR(TWO,K) = Z
-                !!!F = SWF%ISRR_TFR%WBS(K)
-                !!!I = SWF%ISRR_TFR%SR(ONE,K)
-                !!!J = SWF%ISRR_TFR%SR(TWO,K)
-                !!!SWF%ISRR_TFR%WBS(K)  = Z
-                !!!SWF%ISRR_TFR%SR(:,K) = Z
-                !!!SWF%ISRR_TFR%WT(K)   = DZ
-                !!!CALL WRN%ADD( NUM2STR(F,-5)//BLNK//NUM2STR(I,-5)//'   '//NUM2STR(J,-5)//'  Semi-Routed RETURN Segment is greater then 0, but return Reach is  0, the return Segment is reset to 0'//NL )
-            END IF
+        DO CONCURRENT(K=ONE:SWF%NSFR_RETURN, SWF%ISRR_TFR%WBS(K) > Z .AND. SWF%ISRR_TFR%SR(ONE,K) > Z .AND. SWF%ISRR_TFR%SR(TWO,K) < Z)
+            SWF%ISRR_TFR%SR(TWO,K) = Z
         END DO
         !
         DO CONCURRENT(K=ONE:SWF%NSFR_RETURN, SWF%ISRR_TFR%WBS(K) > Z )
