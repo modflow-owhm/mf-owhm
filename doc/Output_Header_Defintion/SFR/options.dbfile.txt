@@ -1,9 +1,16 @@
 
 SFR package OPTIONS block DBFILE output file
 
-Writes for each time step every SFR reach's inflow, outflow, seepage, 
+Writes for each time step every SFR reach's inflow, outflow, seepage,
 and the reach properties used to calculate them, in a database friendly
 format (one row per reach and time step, the same columns for every row).
+The rows of a time step are in the input order (segment 1 to NSS, reach 1
+to NREACH). The SEG_ORDER column gives the position of the segment in the
+routing order (upstream segments first): it equals SEG unless a segment is
+numbered below a segment that flows into it (a tributary or the source of
+a diversion), which the LIST file reports when the segment data are read.
+For example, if segment 1 flows into segment 3 and segment 3 into segment 2,
+the rows have SEG 1, 2, 3 and SEG_ORDER 1, 3, 2.
 When transient routing is active (TRANSROUTE with IRTFLG > 0), the values
 are from the last routing time step (NUMTIM) of the time step.
 
@@ -36,6 +43,7 @@ DELT              [T]      is the time step length
 SIMTIME           [T]      is the simulated time at the end of the time step
 SEG                        is the stream segment number
 RCH                        is the reach number within the segment
+SEG_ORDER                  is the position of the segment in the routing order (1 for the first segment routed, NSS for the last)
 FLOW_IN           [L3/T]   is the streamflow entering the reach (upstream reach outflow, or the segment inflow for the first reach)
 FLOW_SEEPAGE      [L3/T]   is the seepage between the stream and the aquifer; positive is a losing stream (water leaves the stream), negative is a gaining stream (water enters the stream).
                               With unsaturated flow (ISFROPT 2 to 5) and the aquifer head below the streambed, this is the seepage into the unsaturated zone.
@@ -71,6 +79,7 @@ DELT                DOUBLE
 SIMTIME             DOUBLE
 SEG                 INTEGER
 RCH                 INTEGER
+SEG_ORDER           INTEGER
 FLOW_IN             DOUBLE
 FLOW_SEEPAGE        DOUBLE
 FLOW_OUT            DOUBLE

@@ -1355,6 +1355,18 @@ C
       NSEGCK = 0
       SGOTFLW = 0.0
       DVRSFLW = 0.0
+      ALLOCATE (SEGORDER(nssar), SEGROUTE(nssar))
+      IF ( IUZT == 0 ) THEN
+         ALLOCATE(RCHBUD(7, nstrmar))
+      ELSE
+         ALLOCATE(RCHBUD(9, nstrmar))
+      END IF
+      !
+      RCHBUD = 0.0D0
+      DO i = 1, nssar
+         SEGORDER(i) = i
+         SEGROUTE(i) = i
+      END DO
       ALLOCATE (SFRUZBD(10))
       SFRUZBD = 0.0
 C
@@ -2152,7 +2164,8 @@ C
          IF(    IUZT == Z .AND. DBFILE%IU /= Z) THEN                    !WRITE HEADER FOR DBFILE IF REQUESTED
              CALL DBFILE%SET_HEADER( ' DATE_START               '//
      +   'PER     STP             DELT          '//
-     +   'SIMTIME    SEG    RCH          FLOW_IN     FLOW_SEEPAGE'//
+     +   'SIMTIME    SEG    RCH SEG_ORDER          FLOW_IN'//
+     +   '     FLOW_SEEPAGE'//
      +   '         FLOW_OUT           RUNOFF           PRECIP        '//
      +   'STREAM_ET      HEAD_STREAM     HEAD_AQUIFER     '//
      +   'DEPTH_STREAM     WIDTH_STREAM    LENGTH_STREAM    '//
@@ -2163,7 +2176,8 @@ C
             !
             CALL DBFILE%SET_HEADER( ' DATE_START               '//
      +   'PER     STP             DELT          '//
-     +   'SIMTIME    SEG    RCH          FLOW_IN     FLOW_SEEPAGE'//
+     +   'SIMTIME    SEG    RCH SEG_ORDER          FLOW_IN'//
+     +   '     FLOW_SEEPAGE'//
      +   '         FLOW_OUT           RUNOFF           PRECIP       '//
      +   'STREAM_ET      HEAD_STREAM     HEAD_AQUIFER     '//
      +   'DEPTH_STREAM     WIDTH_STREAM    LENGTH_STREAM    '//
@@ -2182,7 +2196,7 @@ C
               SEG_NSTRM(jseg) = I - ONE  !NRCH = SEG_NSTRM(jseg+1) - SEG_NSTRM(jseg) and ISTRM = SEG_NSTRM(jseg) + irch
           END IF
       END DO
-      SEG_NSTRM(nsegdim+1) = NSTRM
+      SEG_NSTRM(jseg+1:nsegdim+1) = NSTRM  ! NSS+1 and parameter slots
          
 C
 C23-----SAVE POINTERS FOR GRID AND RETURN.
@@ -3342,8 +3356,141 @@ CC45-----READ TABLES FOR SPECIFIED INFLOWS
  9031 FORMAT(10X,'TIMES',20X,'INFLOWS')
  9032 FORMAT(5X,G20.13,1X,G20.13)
       !
+C27-----SET THE ROUTING ORDER OF THE SEGMENTS WHEN THEIR CONNECTIONS
+C         MAY HAVE CHANGED (NEW SEGMENT DATA OR PARAMETERS).
+      IF ( Kkper.EQ.1 .OR. ITMP.GT.0 .OR. NSFRPAR.NE.0 ) THEN
+        CALL SGWF2SFR7ORDER(In, IOUT)
+      END IF
+      !
       RETURN
       END SUBROUTINE GWF2SFR7RP
+C
+C-------SUBROUTINE SGWF2SFR7ORDER
+      SUBROUTINE SGWF2SFR7ORDER(In, Iout)
+C     ******************************************************************
+C     SET THE ORDER IN WHICH THE SEGMENTS ARE ROUTED BY GWF2SFR7FM AND
+C     GWF2SFR7BD: SEGROUTE(K) IS THE SEGMENT ROUTED AT POSITION K AND
+C     SEGORDER(S) THE POSITION OF SEGMENT S (THE SEG_ORDER COLUMN OF THE
+C     DBFILE). EVERY SEGMENT COMES AFTER THE SEGMENTS THAT FLOW INTO
+C     IT (TRIBUTARIES, IOTSG) AND AFTER THE SEGMENT IT DIVERTS FROM
+C     (IDIVAR). SEGMENTS THAT ARE ALREADY NUMBERED IN DOWNSTREAM ORDER
+C     KEEP THEIR INPUT ORDER, SO THE ORDER IS 1 TO NSS FOR AN INPUT
+C     THAT FOLLOWS THE SFR RULE.
+C     A SEGMENT NUMBERED BELOW A SEGMENT THAT FLOWS INTO IT WOULD
+C     OTHERWISE RECEIVE THAT INFLOW ONE ITERATION LATE (AND IN THE
+C     BUDGET THE INFLOW OF THE LAST ITERATION), WHICH DOES NOT CLOSE
+C     THE STREAM BUDGET AT THE JUNCTION.
+C     ******************************************************************
+      USE GWFSFRMODULE,             ONLY: NSS, IOTSG, IDIVAR, SEGORDER,
+     +                                    SEGROUTE
+      USE WARNING_TYPE_INSTRUCTION, ONLY: WARNING_TYPE
+      USE NUM2STR_INTERFACE,        ONLY: NUM2STR
+      USE CONSTANTS,                ONLY: NL, BLN, TRUE, Z, ONE
+      IMPLICIT NONE
+      INTEGER, INTENT(IN):: In, Iout
+C     ------------------------------------------------------------------
+      INTEGER:: s, n, t, ndiv, nplaced, nbefore, nlag, nloop
+      INTEGER, SAVE:: nlag_prev = -1
+      TYPE(WARNING_TYPE):: WRN
+C     ------------------------------------------------------------------
+C1------SEGORDER(S) STARTS AS MINUS THE NUMBER OF SEGMENTS THAT FLOW
+C         INTO S (ITS TRIBUTARIES AND, FOR A DIVERSION, THE SEGMENT IT
+C         DIVERTS FROM), COUNTS UP AS THOSE ARE PLACED, AND BECOMES
+C         THE POSITION OF S WHEN S IS PLACED. A LAKE (IOTSG OR
+C         IDIVAR < 0) IS NOT A SEGMENT.
+      SEGORDER(1:NSS) = Z
+      ndiv = Z
+      DO s = 1, NSS
+        n = IOTSG(s)
+        IF ( n > Z .AND. n <= NSS ) SEGORDER(n) = SEGORDER(n) - ONE
+        n = IDIVAR(1, s)
+        IF ( n > Z .AND. n <= NSS ) THEN
+          SEGORDER(s) = SEGORDER(s) - ONE
+          ndiv = ndiv + ONE
+        END IF
+      END DO
+C
+C2------PLACE, IN SWEEPS OVER THE SEGMENT NUMBERS, EVERY SEGMENT WHOSE
+C         UPSTREAM SEGMENTS ARE ALL PLACED (SEGORDER = 0) AND COUNT IT
+C         OFF IN THE SEGMENTS IT FLOWS INTO. ONE SWEEP PLACES 1 TO NSS
+C         WHEN THE NUMBERING IS ALREADY IN DOWNSTREAM ORDER.
+      nplaced = Z
+      nloop   = Z
+      DO WHILE ( nplaced < NSS )
+        nbefore = nplaced
+        DO s = 1, NSS
+          IF ( SEGORDER(s) /= Z ) CYCLE
+          nplaced = nplaced + ONE
+          SEGORDER(s) = nplaced
+          SEGROUTE(nplaced) = s
+          n = IOTSG(s)
+          IF ( n > Z .AND. n <= NSS ) SEGORDER(n) = SEGORDER(n) + ONE
+          IF ( ndiv > Z ) THEN
+            DO t = 1, NSS
+              IF ( IDIVAR(1, t) == s ) SEGORDER(t) = SEGORDER(t) + ONE
+            END DO
+          END IF
+        END DO
+C
+C2A-----NO SEGMENT COULD BE PLACED: THE CONNECTIONS FORM A LOOP.
+C         ROUTE THE REMAINING SEGMENTS IN INPUT ORDER.
+        IF ( nplaced == nbefore ) THEN
+          CALL WRN%INIT()
+          DO s = 1, NSS
+            IF ( SEGORDER(s) > Z ) CYCLE
+            nloop = nloop + ONE
+            CALL WRN%ADD(NUM2STR(s, 7)//NL)
+            nplaced = nplaced + ONE
+            SEGORDER(s) = nplaced
+            SEGROUTE(nplaced) = s
+          END DO
+          CALL WRN%CHECK(HED='SFR SEGMENT CONNECTIONS (OUTSEG, '//
+     +      'IUPSEG) FORM A LOOP: A SEGMENT RECEIVES WATER FROM '//
+     +      'ITSELF THROUGH OTHER SEGMENTS.'//NL//
+     +      'THE SEGMENTS IN THE LOOP ARE ROUTED IN INPUT ORDER, '//
+     +      'SO THE INFLOW THAT CLOSES THE LOOP IS THE OUTFLOW OF '//
+     +      'THE PREVIOUS SOLVER ITERATION.'//NL//
+     +      'THE FOLLOWING SEGMENTS ARE PART OF OR DOWNSTREAM OF '//
+     +      'THE LOOP:'//BLN//'    SEG',
+     +      INFILE=In, OUTPUT=Iout, TAIL=NL, INIT=TRUE, NO_NL=TRUE)
+        END IF
+      END DO
+C
+C3------REPORT THE SEGMENTS NUMBERED BELOW A SEGMENT THAT FLOWS INTO
+C         THEM (ONCE, AND AGAIN WHEN THEIR NUMBER CHANGES).
+      nlag = Z
+      CALL WRN%INIT()
+      DO s = 1, NSS
+        n = IOTSG(s)
+        IF ( n.GT.Z .AND. n.LT.s ) THEN
+          nlag = nlag + ONE
+          CALL WRN%ADD(NUM2STR(n, 7)//NUM2STR(s, 10)//
+     +                 '   TRIBUTARY'//NL)
+        END IF
+        n = IDIVAR(1, s)
+        IF ( n.GT.s ) THEN
+          nlag = nlag + ONE
+          CALL WRN%ADD(NUM2STR(s, 7)//NUM2STR(n, 10)//
+     +                 '   DIVERSION SOURCE'//NL)
+        END IF
+      END DO
+      IF ( nlag.GT.Z .AND. nlag.NE.nlag_prev .AND. nloop.EQ.Z ) THEN
+        CALL WRN%CHECK(HED='SFR HAS '//NUM2STR(nlag)//' SEGMENT '//
+     +      'CONNECTION(S) WHERE WATER FLOWS FROM A HIGHER-NUMBERED '//
+     +      'SEGMENT INTO A LOWER-NUMBERED ONE.'//NL//
+     +      'THE SEGMENTS ARE ROUTED IN UPSTREAM TO DOWNSTREAM '//
+     +      'ORDER, SO THE RESULTS DO NOT DEPEND ON THE NUMBERING;'//
+     +      NL//
+     +      'THE DBFILE COLUMN SEG_ORDER GIVES THE POSITION OF EACH '//
+     +      'SEGMENT IN THE ROUTING ORDER.'//NL//
+     +      'THE SFR INPUT RULE IS TO NUMBER SEGMENTS IN DOWNSTREAM '//
+     +      'ORDER; THE CONNECTIONS ARE:'//BLN//
+     +      '    SEG   FROM SEG',
+     +      INFILE=In, OUTPUT=Iout, TAIL=NL, INIT=TRUE, NO_NL=TRUE)
+      END IF
+      nlag_prev = nlag
+      !
+      END SUBROUTINE SGWF2SFR7ORDER
 C
 C
 C-------SUBROUTINE GWF2SFR7AD
@@ -3707,8 +3854,9 @@ C     -----------------------------------------------------------------
       INTEGER i, ibflg, ic, icalc, idivseg, iflg, iic, iic2, iic3, iic4,
      +        il, iprior, iprndpth, iprvsg, ir, istsg, itot,itrib,
      +        itstr, iwidthcheck, kerp, kss, l, lk, ll, nstrpts, nreach,
-     +        icalccheck, iskip, iss, lsub, numdelt, irt, 
-     +        lfold, illake, lakid,lgrgrid,lgrgridprv,lgrseg
+     +        icalccheck, iskip, iss, lsub, numdelt, irt,
+     +        lfold, illake, lakid,lgrgrid,lgrgridprv,lgrseg,
+     +        kord, lprv
       INTEGER UP  !cjm
       DOUBLE PRECISION:: MX_FLO, MX_STG, qrain, rtcel, rtpsi, rterr
       DOUBLE PRECISION:: FIVE_THIRDS, PRED, CORR
@@ -3764,9 +3912,17 @@ C2b-----START INTERNAL TIME LOOP FOR STREAMFLOW ROUTING.
         numdelt = 1
       END IF
       DO irt = 1, numdelt
+        iprvsg = -1       ! segment routed before the current one and
+        lprv   = 0        ! its last reach (none yet)
 C
 C3------DETERMINE LAYER, ROW, COLUMN OF EACH REACH.
-        DO l = 1, NSTRM
+C         THE SEGMENTS ARE ROUTED IN UPSTREAM TO DOWNSTREAM ORDER
+C         (SEGROUTE, SET BY SGWF2SFR7ORDER), WHICH IS THE INPUT ORDER
+C         UNLESS A SEGMENT IS NUMBERED BELOW A SEGMENT THAT FLOWS INTO
+C         IT; THE REACHES OF A SEGMENT ARE CONSECUTIVE IN ISTRM.
+C         That is, it is a pointer to the segment order that flow routes.
+        DO kord = 1, NSS
+        DO l = SEG_NSTRM(SEGROUTE(kord))+1, SEG_NSTRM(SEGROUTE(kord)+1)
           lfold = l
           IF ( Nfoldflbt==1 ) lfold = 1
 !          flowin = 0.0D0
@@ -3856,8 +4012,7 @@ C5------CHECK IF FLOW IS COMING FROM ANOTHER GRID.
               DO i = 1, NSFRAUX
                 IF ( TRIM(SFRAUX(i)).EQ.'LGRGRID' ) THEN
                   lgrgrid = INT(SEG(28+i, istsg))
-                  IF ( istsg .GT. 1 ) THEN
-                    iprvsg = ISTRM(4, ll)
+                  IF ( iprvsg .GT. 0 ) THEN
                     lgrgridprv = INT(SEG(28+i, iprvsg))
                   END IF
                 END IF
@@ -3870,7 +4025,7 @@ C5------CHECK IF FLOW IS COMING FROM ANOTHER GRID.
               END IF
 cswm: zero out outflow from upstream reach.  we are getting this flow
 cswm: from the adjacent grid and putting it in SEG(2,istsg)
-              IF ( lgrgridprv.LT.0 .AND. ll.NE.0 ) STRM(9,ll) = 0.
+              IF ( lgrgridprv.LT.0 .AND. lprv.NE.0 ) STRM(9,lprv) = 0.
             END IF
 Cwschmid - end of insert
             IF ( ISEG(3, istsg).EQ.5 ) THEN
@@ -3880,12 +4035,11 @@ Cwschmid - end of insert
               END IF
             END IF
 C
-C6------STORE OUTFLOW FROM PREVIOUS SEGMENT IN SGOTFLW LIST AND IN
-C         STRIN FOR LAKE PACKAGE.
-            IF ( istsg.GT.1 ) THEN
-              iprvsg = ISTRM(4, ll)
-              SGOTFLW(iprvsg) = STRM(9, ll)
-              IF ( Iunitlak.NE.0 ) STRIN(iprvsg) = STRM(9, ll)
+C6------STORE OUTFLOW FROM THE SEGMENT ROUTED BEFORE THIS ONE IN SGOTFLW
+C         LIST AND IN STRIN FOR LAKE PACKAGE.
+            IF ( iprvsg.GT.0 ) THEN
+              SGOTFLW(iprvsg) = STRM(9, lprv)
+              IF ( Iunitlak.NE.0 ) STRIN(iprvsg) = STRM(9, lprv)
             END IF
 C
 C7------COMPUTE INFLOW OF A STREAM SEGMENT EMANATING FROM A LAKE.
@@ -3965,25 +4119,27 @@ C13-----FLOW FROM LAKE COMPUTED USING TABULATED VALUES.
               END IF
             END IF
 C
-C14-----COMPUTE ONE OR MORE DIVERSIONS FROM UPSTREAM SEGMENT.
+C14-----COMPUTE ONE OR MORE DIVERSIONS FROM THE SEGMENT ROUTED BEFORE
+C         THIS ONE (ITS OUTFLOW IS FINAL; ITS DIVERSIONS COME LATER IN
+C         THE ROUTING ORDER).
 Crgn&dep   revised computation of diversions and added subroutine
-            IF( istsg.GT.1 )THEN
-              DO kss = 2, NSS
-                upflw = SGOTFLW(istsg-1)
+            IF( iprvsg.GT.0 )THEN
+              DO kss = 1, NSS
+                upflw = SGOTFLW(iprvsg)
                 idivseg = kss
-                IF( IDIVAR(1,kss).EQ.istsg-1 ) THEN
+                IF( IDIVAR(1,kss).EQ.iprvsg ) THEN
                    dvrsn = SEG(2,idivseg)
                    iprior = IDIVAR(2,kss)
                   CALL GWF2SFR7DIVERS(iprior, upflw, dvrsn)
                   DVRSFLW(kss) = dvrsn
-                  SGOTFLW(istsg-1) = SGOTFLW(istsg-1) - dvrsn
+                  SGOTFLW(iprvsg) = SGOTFLW(iprvsg) - dvrsn
                 END IF
               END DO
+            END IF
 C
 C20-----SET FLOW INTO DIVERSION IF SEGMENT IS DIVERSION.
-              IF( ISEG(3,istsg).EQ.6 ) THEN
-                IF( IDIVAR(1,istsg).GT.0 ) flowin = DVRSFLW(istsg)
-              END IF
+            IF( ISEG(3,istsg).EQ.6 ) THEN
+              IF( IDIVAR(1,istsg).GT.0 ) flowin = DVRSFLW(istsg)
             END IF
 C
 C21-----SUM TRIBUTARY OUTFLOW AND USE AS INFLOW INTO DOWNSTREAM SEGMENT.
@@ -5145,12 +5301,13 @@ C          CONDUCTANCE FOR EACH REACH.
 C70-----STORE OUTFLOW FROM LAST REACH IN LAST SEGMENT IN STRIN
 C          LIST FOR LAKE PACKAGE.
           IF ( Iunitlak.NE.0 ) THEN
-            IF ( l.EQ.NSTRM .AND. istsg.EQ.NSS ) STRIN(istsg) = flowot
+            IF ( kord == NSS .AND. l == SEG_NSTRM(istsg+1) )
+     +           STRIN(istsg) = flowot
           END IF
 C
 C71-----STORE OUTFLOW FOR LAST SEGMENT IN SGOTFLW LIST AND IN
 C         STRIN FOR LAKE PACKAGE.
-          IF ( l.EQ.NSTRM ) THEN
+          IF ( kord == NSS .AND. l == SEG_NSTRM(istsg+1) ) THEN
             SGOTFLW(istsg) = STRM(9, l)
             IF ( Iunitlak.NE.0 ) STRIN(istsg) = STRM(9, l)
           END IF
@@ -5289,6 +5446,13 @@ C         STREAMBED BOTTOM ELEVATION.
             END IF
           END IF
 !      write(iout,*)'in fm',l,fin,fout
+C
+C81A----LAST REACH OF THE SEGMENT: REMEMBER IT FOR THE NEXT SEGMENT.
+          IF ( l == SEG_NSTRM(istsg+1) ) THEN
+            iprvsg = istsg
+            lprv   = l
+          END IF
+        END DO
         END DO !rsr, end l = 1, NSTRM loop
 C        
 C81-----END INTERNAL TIME LOOP FOR ROUTING STREAMFLOWS.
@@ -5362,7 +5526,7 @@ C     ------------------------------------------------------------------
      +        il, iout1, iout2, iprior, iprvsg, ir, istsg, itrib,
      +        iwidthcheck, kss, l, lk, ll, nreach, numdelt,
      +        icalccheck, iss, lsub, irt, itstr, imassroute, lfold,
-     +        lgrgrid, lgrgridprv, lgrseg 
+     +        lgrgrid, lgrgridprv, lgrseg, kord, lprv
       INTEGER illake, LAKID, UP
       DOUBLE PRECISION h, hstr, sbot, cstr, ratin, ratout, flowin,
      +                 flobot, flow, flowot, sbdthk, upflw, trbflw,
@@ -5373,7 +5537,6 @@ C     ------------------------------------------------------------------
      +                 bwdth, gwflow, dvrsn, fbot, depthtr, strtop,dwdh,
      +                 fact, WT0, WT1, PRED, CORR
       CHARACTER(19):: DATE
-      DOUBLE PRECISION, DIMENSION(16):: DB_OUT
       EXTERNAL CALC_XSA, SFR_CELERITY
       DOUBLE PRECISION CALC_XSA, SFR_CELERITY
       LOGICAL:: NO_GW, FIXED_HEAD_CELL, HAS_LMT
@@ -5525,9 +5688,16 @@ C5-----START INTERNAL TIME LOOP FOR ROUTING STREAMFLOWS.
       DO irt = 1, numdelt
         rtime = TOTIM - DELT + irt*deltinc
         IF ( irt.EQ.numdelt ) imassroute = 1
+        iprvsg = -1       ! segment routed before the current one and
+        lprv   = 0        ! its last reach (none yet)
 C
 C5b------DETERMINE LAYER, ROW, COLUMN OF EACH REACH.
-        DO l = 1, NSTRM
+C         THE SEGMENTS ARE ROUTED IN UPSTREAM TO DOWNSTREAM ORDER
+C         (SEGROUTE, SET BY SGWF2SFR7ORDER), WHICH IS THE INPUT ORDER
+C         UNLESS A SEGMENT IS NUMBERED BELOW A SEGMENT THAT FLOWS INTO
+C         IT; THE REACHES OF A SEGMENT ARE CONSECUTIVE IN ISTRM.
+        DO kord = 1, NSS
+        DO l = SEG_NSTRM(SEGROUTE(kord))+1, SEG_NSTRM(SEGROUTE(kord)+1)
           lfold = l
           IF ( Nfoldflbt==1 ) lfold = 1
           gwflow = 0.0D0
@@ -5667,13 +5837,12 @@ C7------SET FLOWIN EQUAL TO STREAM SEGMENT INFLOW IF FIRST REACH.
             IF ( IDIVAR(1,istsg).EQ.0 ) 
      +          sfrbudg_in = sfrbudg_in + SEG(2, istsg)
 C
-C8------STORE OUTFLOW FROM PREVIOUS SEGMENT IN SGOTFLW LIST AND IN
-C         STRIN FOR LAKE PACKAGE.
-            IF ( istsg.GT.1 ) THEN
-              iprvsg = ISTRM(4, ll)
-              SGOTFLW(iprvsg) = STRM(9, ll)
-              IF ( Iunitlak.NE.0 ) STRIN(iprvsg) = STRM(9, ll)
-              IF ( Iunitlak.NE.0 .AND. IDIVAR(1,istsg).LT.0 ) 
+C8------STORE OUTFLOW FROM THE SEGMENT ROUTED BEFORE THIS ONE IN SGOTFLW
+C         LIST AND IN STRIN FOR LAKE PACKAGE.
+            IF ( iprvsg.GT.0 ) THEN
+              SGOTFLW(iprvsg) = STRM(9, lprv)
+              IF ( Iunitlak.NE.0 ) STRIN(iprvsg) = STRM(9, lprv)
+              IF ( Iunitlak.NE.0 .AND. IDIVAR(1,istsg).LT.0 )
      +               sfrbudg_out = sfrbudg_out + STRIN(iprvsg)
             END IF
 C
@@ -5692,29 +5861,31 @@ C11-----SET SPECIFIED OUTFLOW FROM LAKE
 C              NINTOT = NINTOT + 1    !EDM  WITH NEW FTL FORMAT, THIS INDEX SHOULD NO LONGER BE COUNTED AS 'CONNECT SFR LAK' WILL ACCOUNT FOR IT
             END IF
 C
-C14-----COMPUTE ONE OR MORE DIVERSIONS FROM UPSTREAM SEGMENT.
+C14-----COMPUTE ONE OR MORE DIVERSIONS FROM THE SEGMENT ROUTED BEFORE
+C         THIS ONE (ITS OUTFLOW IS FINAL; ITS DIVERSIONS COME LATER IN
+C         THE ROUTING ORDER).
 Crgn&dep   revised computation of diversions and added subroutine
-            IF( istsg.GT.1 )THEN
-              DO kss = 2, NSS
-                upflw = SGOTFLW(istsg-1)
+            IF( iprvsg.GT.0 )THEN
+              DO kss = 1, NSS
+                upflw = SGOTFLW(iprvsg)
                 idivseg = kss
-                IF( IDIVAR(1,kss).EQ.istsg-1 ) THEN
+                IF( IDIVAR(1,kss).EQ.iprvsg ) THEN
                    dvrsn = SEG(2,idivseg)
                    iprior = IDIVAR(2,kss)
                   CALL GWF2SFR7DIVERS(iprior, upflw, dvrsn)
                   DVRSFLW(kss) = dvrsn
-                  SGOTFLW(istsg-1) = SGOTFLW(istsg-1) - dvrsn
+                  SGOTFLW(iprvsg) = SGOTFLW(iprvsg) - dvrsn
                 END IF
               END DO
+            END IF
 C
 C20-----SET FLOW INTO DIVERSION IF SEGMENT IS DIVERSION.
-              IF( ISEG(3,istsg).EQ.6 ) THEN
+            IF( ISEG(3,istsg).EQ.6 ) THEN
 !EDM - For LMT
-                IF( IDIVAR(1,istsg).GT.0 ) THEN
-                  flowin = DVRSFLW(istsg)
-                  IF(HAS_LMT) NINTOT = NINTOT + 1
-                ENDIF
-              END IF
+              IF( IDIVAR(1,istsg).GT.0 ) THEN
+                flowin = DVRSFLW(istsg)
+                IF(HAS_LMT) NINTOT = NINTOT + 1
+              ENDIF
             END IF
 C
 C22-----SUM TRIBUTARY OUTFLOW AND USE AS INFLOW INTO DOWNSTREAM SEGMENT.
@@ -6147,7 +6318,7 @@ C35-----ADD FLOW TO STREAM BUDGET OUTFLOW IF FLOW LEAVES ACTIVE MODEL.
 C
 C36-----STORE OUTFLOW FOR LAST SEGMENT IN SGOTFLW LIST AND IN STRIN FOR
 C         LAKE PACKAGE.
-          IF ( l.EQ.NSTRM ) THEN
+          IF ( kord == NSS .AND. l == SEG_NSTRM(istsg+1) ) THEN
             SGOTFLW(istsg) = STRM(9, l)
             IF ( Iunitlak.NE.0 ) STRIN(istsg) = STRM(9, l)
           END IF
@@ -6206,157 +6377,25 @@ C39-----ADD FLOBOT TO RATIN WHEN STREAM RECHARGES GROUND WATER.
             END IF
           END IF
 C
-C40-----PRINT STREAMFLOWS AND RATES FOR EACH REACH TO MAIN LIST IF
-C         REQUESTED (ISTCB1<0 and IBD<0)AND NO UNSATURATED FLOW.
-          IF ( IUZT.EQ.0 ) THEN
-            IF ( irt.EQ.numdelt ) THEN
-            IF ( ibd.LT.0 .AND. IPTFLG.LE.0 ) THEN
-                IF (ibdlbl.EQ.0) WRITE(IOUT, 9004) txtlst, Kkper, Kkstp
-                WRITE (IOUT, 9005) il, ir, ic, ISTRM(4, l), ISTRM(5, l),
-     +                           STRM(10, l), STRM(11, l), STRM(9, l), 
-     +                           SNGL(runof+runoff), SNGL(precip), 
-     +                           SNGL(etstr), STRM(15, l), SNGL(depth), 
-     +                           STRM(5, l), STRM(16, l), SNGL(grad),
-     +                           STRM(3, l)           
-              ibdlbl = 1
-            END IF
-C
-C41A-----PRINT STREAMFLOWS AND RATES FOR EACH REACH TO STREAM LIST
-C         IF REQUESTED (DBFILE.NE.0).
-         IF(DBFILE%IU.NE.0 .AND. irt==numdelt) THEN
-            IF(HAS_STARTDATE) THEN
-                DATE = DATE_SP(KKPER)%TS(KKSTP-1)%STR('T')
-            ELSE
-                DATE='   NaN'
-            END IF
-!            WRITE (DBFILE%IU,'(A, 2( "," 1x ES16.9), 
-!     +                         2( "," 1x I6), 13( "," 1x ES16.9))')
-              DB_OUT(1) = STRM(10, l)   !FLOW_IN
-              DB_OUT(2) = STRM(11, l)   !FLOW_SEEPAGE
-              DB_OUT(3) = STRM(9, l)    !FLOW_OUT
-              DB_OUT(4) = runof+runoff  !RUNOFF
-              DB_OUT(5) = precip        !PRECIP
-              DB_OUT(6) = etstr         !STREAM_ET
-              DB_OUT(7) = STRM(15, l)   !HEAD_STREAM
-              DB_OUT(8) = h             !HEAD_AQUIFER
-              DB_OUT(9) = depth         !DEPTH_STREAM
-              DB_OUT(10) = STRM(5, l)   !WIDTH_STREAM
-              DB_OUT(11) = STRM(1,l)    !LENGTH_STREAM
-              DB_OUT(12) = grad         !HEAD_GRADIENT  
-              DB_OUT(13) = STRM(16, l)  !COND_STREAM
-              DB_OUT(14) = STRM(3, l)   !ELEV_UP_STREAM
-              DB_OUT(15) = 0D0
-              DB_OUT(16) = 0D0
-            IF(DBFILE%BINARY) THEN
-              WRITE(DBFILE%IU)
-     +         DATE, Kkper, Kkstp, SPTIM(KKPER)%DT(KKSTP), 
-     +         DBLE(TOTIM), ISTRM(4, l), ISTRM(5, l), DB_OUT!INCLUDES UZF TERMS ZEROED OUT
-            ELSE
-              WRITE (DBFILE%IU,'(1x,A, 1x,2I8, 2( 1x,ES16.9), 
-     +                           2( 1x,I6), 14( 1x,ES16.9))')
-     +         DATE, Kkper, Kkstp, SPTIM(KKPER)%DT(KKSTP),
-     +         TOTIM, ISTRM(4, l), ISTRM(5, l), DB_OUT(:14)
-            END IF
-         END IF
-                  
-C
-C41-----PRINT STREAMFLOWS AND RATES FOR EACH REACH TO STREAM LIST
-C         IF REQUESTED (ISTCB2>0).
-            IF ( ibdst.LT.0 .AND. IPTFLG.LE.0 ) THEN
-              IF ( ibstlb.EQ.0 ) WRITE (iout2, 9004) txtlst, Kkper,
-     +                                               Kkstp
-              WRITE (iout2, 9005) il, ir, ic, ISTRM(4, l), ISTRM(5, l), 
-     +                            STRM(10, l), STRM(11, l), STRM(9, l), 
-     +                            SNGL(runof+runoff), SNGL(precip), 
-     +                            SNGL(etstr), STRM(15, l), SNGL(depth),
-     +                            STRM(5, l), STRM(16, l), SNGL(grad),
-     +                            STRM(3, l)           
-              ibstlb = 1
-            END IF
-           END IF
-C
-C42-----PRINT STREAMFLOWS AND RATES FOR EACH REACH TO MAIN LIST
-C         WHEN UNSATURATED FLOW IS ACTIVE.
-          ELSE
-            IF ( irt.EQ.numdelt ) THEN
-            IF (ibd.LT.0 .AND. IPTFLG.LE.0 .AND. imassroute.EQ.1) THEN
-                IF (ibdlbl.EQ.0) WRITE (IOUT, 9006) txtlst, Kkper, Kkstp
-                WRITE (IOUT, 9007) il, ir, ic, ISTRM(4,l), ISTRM(5,l), 
-     +                           STRM(10,l), STRM(11,l), STRM(9,l), 
-     +                           SNGL(runof+runoff), SNGL(precip), 
-     +                           SNGL(etstr), STRM(15,l), SNGL(depth), 
-     +                           STRM(5,l), STRM(16,l), totflwt/DELT,
-     +                           totdelstor/DELT
-              ibdlbl = 1
-            END IF
-C
-C41A-----PRINT STREAMFLOWS AND RATES FOR EACH REACH TO STREAM LIST
-C         IF REQUESTED (DBFILE.NE.0).
-         IF(DBFILE%IU.NE.0 .AND. irt==numdelt) THEN
-            IF(HAS_STARTDATE) THEN
-                DATE = DATE_SP(KKPER)%TS(KKSTP-1)%STR('T')
-            ELSE
-                DATE = '  NaN     '
-            END IF
-!            WRITE (DBFILE%IU,'(A, 2( "," 1x,ES16.9), 
-!     +                         2( "," 1x,I6), 15( "," 1x,ES16.9))')
-              DB_OUT(1) = STRM(10, l)
-              DB_OUT(2) = STRM(11, l)
-              DB_OUT(3) = STRM(9, l) 
-              DB_OUT(4) = runof+runoff
-              DB_OUT(5) = precip    
-              DB_OUT(6) = etstr   
-              DB_OUT(7) = STRM(15, l)  
-              DB_OUT(8) = h           
-              DB_OUT(9) = depth       
-              DB_OUT(10) = STRM(5, l) 
-              DB_OUT(11) = STRM(1,l)
-              DB_OUT(12) = grad           
-              DB_OUT(13) = STRM(16, l)
-              DB_OUT(14) = STRM(3, l)
-              DB_OUT(15) = totflwt/SPTIM(KKPER)%DT(KKSTP)
-              DB_OUT(16) = totdelstor/SPTIM(KKPER)%DT(KKSTP)
-            IF(DBFILE%BINARY) THEN
-              WRITE (DBFILE%IU)
-     +         DATE, Kkper, Kkstp,SPTIM(KKPER)%DT(KKSTP),
-     +         DBLE(TOTIM), ISTRM(4, l), ISTRM(5, l), DB_OUT
-            ELSE
-              WRITE (DBFILE%IU,'(1x,A, 1x,2I8, 2( 1x,ES16.9), 
-     +                           2( 1x,I6), 16( 1x,ES16.9))')
-     +         DATE, Kkper, Kkstp,SPTIM(KKPER)%DT(KKSTP),
-     +         TOTIM, ISTRM(4, l), ISTRM(5, l), DB_OUT
-            END IF
-         END IF
-C
-C43-----PRINT STREAMFLOWS AND RATES FOR EACH REACH TO STREAM LIST
-C         WHEN UNSATURATED FLOW IS ACTIVE.
-            IF ( ibdst.LT.0 .AND. IPTFLG.LE.0 .AND.
-     +           imassroute.EQ.1 ) THEN
-              IF ( ISTCB2.EQ.IOUT ) THEN
-                IF ( ibstlb.EQ.0 ) WRITE (iout2, 9006) txtlst, Kkper, 
-     +                                               Kkstp
-                 WRITE (iout2, 9007) il, ir, ic, ISTRM(4,l), ISTRM(5,l),
-     +                           STRM(10,l), STRM(11,l), STRM(9,l), 
-     +                           SNGL(runof+runoff), SNGL(precip), 
-     +                           SNGL(etstr), STRM(15,l), SNGL(depth), 
-     +                           STRM(5,l), STRM(16,l), totflwt/DELT,
-     +                           totdelstor/DELT
-                ibstlb = 1
-              ELSE
-              
-                IF ( ibstlb.EQ.0 ) WRITE (iout2, 9009) txtlst, Kkper, 
-     +                                               Kkstp
-                WRITE (iout2, 9010) il, ir, ic, ISTRM(4,l), ISTRM(5,l), 
-     +                           STRM(10,l), STRM(11,l), STRM(9,l), 
-     +                           SNGL(runof+runoff), SNGL(precip), 
-     +                           SNGL(etstr), STRM(15,l), SNGL(depth), 
-     +                           STRM(5,l), STRM(16,l), totflwt/DELT,
-     +                           totdelstor/DELT, SNGL(h)
-                ibstlb = 1
+C40-----KEEP THE RATES AND HEADS OF THE REACH THAT ARE NOT HELD IN
+C         STRM FOR THE STREAM LISTINGS AND THE DBFILE; THEY ARE
+C         WRITTEN IN SEGMENT ORDER AFTER ALL REACHES ARE ROUTED (C44B).
+C         STRM(15) IS KEPT BECAUSE TRANSIENT ROUTING REPLACES IT BELOW.
+          IF ( irt.EQ.numdelt ) THEN
+            IF ( ibd.LT.0 .OR. ibdst.LT.0 .OR. DBFILE%IU.NE.0 ) THEN
+              RCHBUD(1, l) = runof+runoff  !RUNOFF
+              RCHBUD(2, l) = precip        !PRECIP
+              RCHBUD(3, l) = etstr         !STREAM_ET
+              RCHBUD(4, l) = STRM(15, l)   !HEAD_STREAM
+              RCHBUD(5, l) = h             !HEAD_AQUIFER
+              RCHBUD(6, l) = depth         !DEPTH_STREAM
+              RCHBUD(7, l) = grad          !HEAD_GRADIENT
+              IF ( IUZT.NE.0 ) THEN
+                RCHBUD(8, l) = totflwt/DELT     !FLOW_WT
+                RCHBUD(9, l) = totdelstor/DELT  !CHNG_UNSAT_STOR
               END IF
             END IF
           END IF
-         END IF
 C43B----SAVE SEEPAGE TO ARRAY FOR PRINTING NET SEEPAGE IN UZF
           FNETSEEP(IC,IR) = FNETSEEP(IC,IR) + gwflow
 C
@@ -6382,7 +6421,140 @@ cDEP   need to fix for unsaturated flow
             SFRQ(3, l) = flobot
             SFRQ(5, l) = qc
           END IF
+C
+C44A----LAST REACH OF THE SEGMENT: REMEMBER IT FOR THE NEXT SEGMENT.
+          IF ( l == SEG_NSTRM(istsg+1) ) THEN
+            iprvsg = istsg
+            lprv   = l
+          END IF
         END DO
+        END DO
+C
+C44B----WRITE THE STREAM LISTINGS AND THE DBFILE IN SEGMENT ORDER FROM
+C         STRM AND THE VALUES KEPT IN C40 (THE ROUTING ORDER OF THE
+C         REACH LOOP MAY DIFFER FROM THE SEGMENT ORDER).
+        IF ( irt.EQ.numdelt ) THEN
+          IF ( (ibd.LT.0 .OR. ibdst.LT.0) .AND. IPTFLG.LE.0 ) THEN
+            DO l = 1, NSTRM
+              ir = ISTRM(2, l)
+              ic = ISTRM(3, l)
+              il = ISTRM(1, l)             ! LAYER AS ADJUSTED IN C5B
+              IF ( UPLAY_ADJUST == 1 ) THEN
+                IF ( il < UPLAY(ic, ir) ) il = UPLAY(ic, ir)
+              ELSE IF ( UPLAY_ADJUST == 2 ) THEN
+                IF ( UPLAY(ic, ir) > Z ) il = UPLAY(ic, ir)
+              END IF
+              IF ( IUZT.EQ.0 ) THEN
+                IF ( ibd.LT.0 ) THEN
+                  IF ( ibdlbl.EQ.0 ) WRITE (IOUT, 9004) txtlst, Kkper,
+     +                                                 Kkstp
+                  WRITE (IOUT, 9005) il, ir, ic, ISTRM(4, l),
+     +                 ISTRM(5, l), STRM(10, l), STRM(11, l),
+     +                 STRM(9, l), SNGL(RCHBUD(1, l)),
+     +                 SNGL(RCHBUD(2, l)), SNGL(RCHBUD(3, l)),
+     +                 SNGL(RCHBUD(4, l)), SNGL(RCHBUD(6, l)),
+     +                 STRM(5, l), STRM(16, l), SNGL(RCHBUD(7, l)),
+     +                 STRM(3, l)
+                  ibdlbl = 1
+                END IF
+                IF ( ibdst.LT.0 ) THEN
+                  IF ( ibstlb.EQ.0 ) WRITE (iout2, 9004) txtlst, Kkper,
+     +                                                  Kkstp
+                  WRITE (iout2, 9005) il, ir, ic, ISTRM(4, l),
+     +                 ISTRM(5, l), STRM(10, l), STRM(11, l),
+     +                 STRM(9, l), SNGL(RCHBUD(1, l)),
+     +                 SNGL(RCHBUD(2, l)), SNGL(RCHBUD(3, l)),
+     +                 SNGL(RCHBUD(4, l)), SNGL(RCHBUD(6, l)),
+     +                 STRM(5, l), STRM(16, l), SNGL(RCHBUD(7, l)),
+     +                 STRM(3, l)
+                  ibstlb = 1
+                END IF
+              ELSE
+                IF ( ibd.LT.0 ) THEN
+                  IF ( ibdlbl.EQ.0 ) WRITE (IOUT, 9006) txtlst, Kkper,
+     +                                                 Kkstp
+                  WRITE (IOUT, 9007) il, ir, ic, ISTRM(4, l),
+     +                 ISTRM(5, l), STRM(10, l), STRM(11, l),
+     +                 STRM(9, l), SNGL(RCHBUD(1, l)),
+     +                 SNGL(RCHBUD(2, l)), SNGL(RCHBUD(3, l)),
+     +                 SNGL(RCHBUD(4, l)), SNGL(RCHBUD(6, l)),
+     +                 STRM(5, l), STRM(16, l), RCHBUD(8, l),
+     +                 RCHBUD(9, l)
+                  ibdlbl = 1
+                END IF
+                IF ( ibdst.LT.0 ) THEN
+                  IF ( ISTCB2.EQ.IOUT ) THEN
+                    IF ( ibstlb.EQ.0 ) WRITE (iout2, 9006) txtlst,
+     +                                                  Kkper, Kkstp
+                    WRITE (iout2, 9007) il, ir, ic, ISTRM(4, l),
+     +                 ISTRM(5, l), STRM(10, l), STRM(11, l),
+     +                 STRM(9, l), SNGL(RCHBUD(1, l)),
+     +                 SNGL(RCHBUD(2, l)), SNGL(RCHBUD(3, l)),
+     +                 SNGL(RCHBUD(4, l)), SNGL(RCHBUD(6, l)),
+     +                 STRM(5, l), STRM(16, l), RCHBUD(8, l),
+     +                 RCHBUD(9, l)
+                  ELSE
+                    IF ( ibstlb.EQ.0 ) WRITE (iout2, 9009) txtlst,
+     +                                                  Kkper, Kkstp
+                    WRITE (iout2, 9010) il, ir, ic, ISTRM(4, l),
+     +                 ISTRM(5, l), STRM(10, l), STRM(11, l),
+     +                 STRM(9, l), SNGL(RCHBUD(1, l)),
+     +                 SNGL(RCHBUD(2, l)), SNGL(RCHBUD(3, l)),
+     +                 SNGL(RCHBUD(4, l)), SNGL(RCHBUD(6, l)),
+     +                 STRM(5, l), STRM(16, l), RCHBUD(8, l),
+     +                 RCHBUD(9, l), SNGL(RCHBUD(5, l))
+                  END IF
+                  ibstlb = 1
+                END IF
+              END IF
+            END DO
+          END IF
+          IF ( DBFILE%IU.NE.0 ) THEN
+            IF ( HAS_STARTDATE ) THEN
+              DATE = DATE_SP(KKPER)%TS(KKSTP-1)%STR('T')
+            ELSE
+              DATE = '   NaN'
+            END IF
+            DO l = 1, NSTRM
+              IF ( IUZT.EQ.0 ) THEN
+                 totflwt    = DZ               ! No Unsatured Flow Componet
+                 totdelstor = DZ
+              ELSE
+                 totflwt    = RCHBUD(8, l)     !FLOW_WT
+                 totdelstor = RCHBUD(9, l)     !CHNG_UNSAT_STOR
+              END IF
+              IF ( DBFILE%BINARY ) THEN
+                WRITE (DBFILE%IU) DATE, Kkper, Kkstp,
+     +                 SPTIM(KKPER)%DT(KKSTP), DBLE(TOTIM), ISTRM(4, l),
+     +                 ISTRM(5, l), SEGORDER(ISTRM(4, l)),
+     +                 DBLE(STRM(10, l)), DBLE(STRM(11, l)),
+     +                 DBLE(STRM(9, l)), RCHBUD(1:6, l),
+     +                 DBLE(STRM(5, l)), DBLE(STRM(1, l)),
+     +                 RCHBUD(7, l), DBLE(STRM(16, l)),
+     +                 DBLE(STRM(3, l)), totflwt, totdelstor
+              ELSEIF ( IUZT.EQ.0 ) THEN
+                WRITE (DBFILE%IU, '(1x,A, 1x,2I8, 2( 1x,ES16.9),
+     +                 2( 1x,I6), 1x,I9, 14( 1x,ES16.9))')
+     +                 DATE, Kkper, Kkstp, SPTIM(KKPER)%DT(KKSTP),
+     +                 TOTIM, ISTRM(4, l), ISTRM(5, l),
+     +                 SEGORDER(ISTRM(4, l)),
+     +                 STRM(10, l), STRM(11, l), STRM(9, l),
+     +                 RCHBUD(1:6, l), STRM(5, l), STRM(1, l),
+     +                 RCHBUD(7, l), STRM(16, l), STRM(3, l)
+              ELSE
+                WRITE (DBFILE%IU, '(1x,A, 1x,2I8, 2( 1x,ES16.9),
+     +                 2( 1x,I6), 1x,I9, 16( 1x,ES16.9))')
+     +                 DATE, Kkper, Kkstp, SPTIM(KKPER)%DT(KKSTP),
+     +                 TOTIM, ISTRM(4, l), ISTRM(5, l),
+     +                 SEGORDER(ISTRM(4, l)),
+     +                 STRM(10, l), STRM(11, l), STRM(9, l),
+     +                 RCHBUD(1:6, l), STRM(5, l), STRM(1, l),
+     +                 RCHBUD(7, l), STRM(16, l), STRM(3, l),
+     +                 totflwt, totdelstor
+              END IF
+            END DO
+          END IF
+        END IF
         !
         IF ( OUTSEGFLAG > 0 ) CALL OUTSEGFLOWS()
         !
@@ -11012,6 +11184,9 @@ C     ------------------------------------------------------------------
       DEALLOCATE (GWFSFRDAT(IGRID)%UHC)
       DEALLOCATE (GWFSFRDAT(IGRID)%SGOTFLW)
       DEALLOCATE (GWFSFRDAT(IGRID)%DVRSFLW)
+      DEALLOCATE (GWFSFRDAT(IGRID)%SEGORDER)
+      DEALLOCATE (GWFSFRDAT(IGRID)%SEGROUTE)
+      DEALLOCATE (GWFSFRDAT(IGRID)%RCHBUD)
       DEALLOCATE (GWFSFRDAT(IGRID)%SFRUZBD)
       DEALLOCATE (GWFSFRDAT(IGRID)%SEG)
       DEALLOCATE (GWFSFRDAT(IGRID)%STRM)
@@ -11205,6 +11380,9 @@ C NULLIFY THE LOCAL POINTERS
         UHC             =>NULL()
         SGOTFLW         =>NULL()
         DVRSFLW         =>NULL()
+        SEGORDER        =>NULL()
+        SEGROUTE        =>NULL()
+        RCHBUD          =>NULL()
         SFRUZBD         =>NULL()
         SEG             =>NULL()
         STRM            =>NULL()
@@ -11364,6 +11542,9 @@ C     ------------------------------------------------------------------
       UHC=>GWFSFRDAT(IGRID)%UHC
       SGOTFLW=>GWFSFRDAT(IGRID)%SGOTFLW
       DVRSFLW=>GWFSFRDAT(IGRID)%DVRSFLW
+      SEGORDER=>GWFSFRDAT(IGRID)%SEGORDER
+      SEGROUTE=>GWFSFRDAT(IGRID)%SEGROUTE
+      RCHBUD=>GWFSFRDAT(IGRID)%RCHBUD
       SFRUZBD=>GWFSFRDAT(IGRID)%SFRUZBD
       SEG=>GWFSFRDAT(IGRID)%SEG
       STRM=>GWFSFRDAT(IGRID)%STRM
@@ -11526,6 +11707,9 @@ C     ------------------------------------------------------------------
       GWFSFRDAT(IGRID)%UHC=>UHC
       GWFSFRDAT(IGRID)%SGOTFLW=>SGOTFLW
       GWFSFRDAT(IGRID)%DVRSFLW=>DVRSFLW
+      GWFSFRDAT(IGRID)%SEGORDER=>SEGORDER
+      GWFSFRDAT(IGRID)%SEGROUTE=>SEGROUTE
+      GWFSFRDAT(IGRID)%RCHBUD=>RCHBUD
       GWFSFRDAT(IGRID)%SFRUZBD=>SFRUZBD
       GWFSFRDAT(IGRID)%SEG=>SEG
       GWFSFRDAT(IGRID)%STRM=>STRM

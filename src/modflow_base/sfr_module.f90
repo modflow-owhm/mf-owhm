@@ -43,6 +43,8 @@
         INTEGER,          SAVE,  DIMENSION(:,:),   POINTER, CONTIGUOUS:: ITRLIT, ITRLST, NWAVST
         REAL,             SAVE,  DIMENSION(:),     POINTER, CONTIGUOUS:: STRIN, STROUT, FXLKOT
         REAL,             SAVE,  DIMENSION(:),     POINTER, CONTIGUOUS:: UHC, SGOTFLW, DVRSFLW
+        INTEGER,          SAVE,  DIMENSION(:),     POINTER, CONTIGUOUS:: SEGORDER, SEGROUTE       ! routing position of each segment; segment at each routing position (upstream first)
+        DOUBLE PRECISION, SAVE,  DIMENSION(:,:),   POINTER, CONTIGUOUS:: RCHBUD               ! reach rates and heads of the time step that are not kept in STRM, for the stream listings and DBFILE
         REAL,             SAVE,  DIMENSION(:),     POINTER, CONTIGUOUS:: SFRUZBD
         REAL,             SAVE,  DIMENSION(:),     POINTER, CONTIGUOUS:: SEGFLOWS
         REAL,             SAVE,  DIMENSION(:),     POINTER, CONTIGUOUS:: SEGINFLOWSAVE
@@ -130,6 +132,8 @@
         INTEGER,           DIMENSION(:,:),   POINTER, CONTIGUOUS:: ITRLIT, ITRLST, NWAVST
         REAL,              DIMENSION(:),     POINTER, CONTIGUOUS:: STRIN, STROUT, FXLKOT
         REAL,              DIMENSION(:),     POINTER, CONTIGUOUS:: UHC, SGOTFLW, DVRSFLW
+        INTEGER,           DIMENSION(:),     POINTER, CONTIGUOUS:: SEGORDER, SEGROUTE
+        DOUBLE PRECISION,  DIMENSION(:,:),   POINTER, CONTIGUOUS:: RCHBUD
         REAL,              DIMENSION(:),     POINTER, CONTIGUOUS:: SFRUZBD
         REAL,              DIMENSION(:),     POINTER, CONTIGUOUS:: SEGFLOWS
         REAL,              DIMENSION(:),     POINTER, CONTIGUOUS:: SEGINFLOWSAVE
