@@ -358,12 +358,14 @@ C-------SURROUNDING CELLS.
             NLZ = N - NRC
 C
 C-----GET CONDUCTANCES TO NEIGHBORING CELLS
+C-----AN INACTIVE NEIGHBOR HAS A ZERO CONDUCTANCE AND ITS HEAD MAY BE
+C-----HNOFLO = NaN, SO ITS HEAD TERM IS SKIPPED (0*NaN = NaN)
 C-------NEIGHBOR IS 1 ROW BACK
             B = DZ
             BHNEW = DZ
             IF (I.NE.1) THEN
               B = CC(NRB)
-              BHNEW = B*(HNEW(NRL)-HNEW(N))
+              IF (IBOUND(NRL) /= 0) BHNEW = B*(HNEW(NRL)-HNEW(N))
             ENDIF
 C
 C-------NEIGHBOR IS 1 ROW AHEAD
@@ -371,7 +373,7 @@ C-------NEIGHBOR IS 1 ROW AHEAD
             HHNEW = DZ
             IF (I.NE.NROW) THEN
               H = CC(NRH)
-              HHNEW = H*(HNEW(NRN)-HNEW(N))
+              IF (IBOUND(NRN) /= 0) HHNEW = H*(HNEW(NRN)-HNEW(N))
             ENDIF
 C
 C-------NEIGHBOR IS 1 COLUMN BACK
@@ -379,7 +381,7 @@ C-------NEIGHBOR IS 1 COLUMN BACK
             DHNEW = DZ
             IF (J.NE.1) THEN
               D = CR(NCD)
-              DHNEW = D*(HNEW(NCL)-HNEW(N))
+              IF (IBOUND(NCL) /= 0) DHNEW = D*(HNEW(NCL)-HNEW(N))
             ENDIF
 C
 C-------NEIGHBOR IS 1 COLUMN AHEAD
@@ -387,7 +389,7 @@ C-------NEIGHBOR IS 1 COLUMN AHEAD
             FHNEW = DZ
             IF (J.NE.NCOL) THEN
               F = CR(NCF)
-              FHNEW = F*(HNEW(NCN)-HNEW(N))
+              IF (IBOUND(NCN) /= 0) FHNEW = F*(HNEW(NCN)-HNEW(N))
             ENDIF
 C
 C-------NEIGHBOR IS 1 LAYER BEHIND
@@ -395,7 +397,7 @@ C-------NEIGHBOR IS 1 LAYER BEHIND
             ZHNEW = DZ
             IF (K.NE.1) THEN
               Z = CV(NLZ)
-              ZHNEW = Z*(HNEW(NLL)-HNEW(N))
+              IF (IBOUND(NLL) /= 0) ZHNEW = Z*(HNEW(NLL)-HNEW(N))
             ENDIF
 C
 C-------NEIGHBOR IS 1 LAYER AHEAD
@@ -403,7 +405,7 @@ C-------NEIGHBOR IS 1 LAYER AHEAD
             SHNEW = DZ
             IF (K.NE.NLAY) THEN
               S = CV(NLS)
-              SHNEW = S*(HNEW(NLN)-HNEW(N))
+              IF (IBOUND(NLN) /= 0) SHNEW = S*(HNEW(NLN)-HNEW(N))
             ENDIF
 C
             IF (I.EQ.NROW) CC(N) = 0.

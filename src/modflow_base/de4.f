@@ -294,7 +294,9 @@ C5------LOADED ONLY IF [A] REQUIRES ELIMINATION.
       IR=IEQPNT(J,I,K)
       IF(IR.EQ.0) GO TO 310
 C
-C5A-----CALCULATE AND LOAD D4B.
+C5A-----CALCULATE AND LOAD D4B.  AN INACTIVE NEIGHBOR HAS A ZERO
+C5A-----CONDUCTANCE AND ITS HEAD MAY BE HNOFLO = NaN, SO ITS HEAD
+C5A-----TERM IS SKIPPED (0*NaN = NaN)
       DO 110 N=1,6
       IEQ(N)=0
   110 CONTINUE
@@ -303,7 +305,7 @@ C5A-----CALCULATE AND LOAD D4B.
       IF(J.NE.1) THEN
          CLF=CR(J-1,I,K)
          COND=CLF
-         RR=RR-COND*HNEW(J-1,I,K)
+         IF(IBOUND(J-1,I,K) /= 0) RR=RR-COND*HNEW(J-1,I,K)
          EE=EE-COND
          CND(1)=CLF
          IEQ(1)=IEQPNT(J-1,I,K)
@@ -311,7 +313,7 @@ C5A-----CALCULATE AND LOAD D4B.
       IF(I.NE.1) THEN
          CBK=CC(J,I-1,K)
          COND=CBK
-         RR=RR-COND*HNEW(J,I-1,K)
+         IF(IBOUND(J,I-1,K) /= 0) RR=RR-COND*HNEW(J,I-1,K)
          EE=EE-COND
          CND(2)=CBK
          IEQ(2)=IEQPNT(J,I-1,K)
@@ -319,7 +321,7 @@ C5A-----CALCULATE AND LOAD D4B.
       IF(K.NE.1) THEN
          CUP=CV(J,I,K-1)
          COND=CUP
-         RR=RR-COND*HNEW(J,I,K-1)
+         IF(IBOUND(J,I,K-1) /= 0) RR=RR-COND*HNEW(J,I,K-1)
          EE=EE-COND
          CND(3)=CUP
          IEQ(3)=IEQPNT(J,I,K-1)
@@ -327,7 +329,7 @@ C5A-----CALCULATE AND LOAD D4B.
       IF(K.NE.NLAY) THEN
          CDN=CV(J,I,K)
          COND=CDN
-         RR=RR-COND*HNEW(J,I,K+1)
+         IF(IBOUND(J,I,K+1) /= 0) RR=RR-COND*HNEW(J,I,K+1)
          EE=EE-COND
          CND(4)=CDN
          IEQ(4)=IEQPNT(J,I,K+1)
@@ -335,7 +337,7 @@ C5A-----CALCULATE AND LOAD D4B.
       IF(I.NE.NROW) THEN
          CFR=CC(J,I,K)
          COND=CFR
-         RR=RR-COND*HNEW(J,I+1,K)
+         IF(IBOUND(J,I+1,K) /= 0) RR=RR-COND*HNEW(J,I+1,K)
          EE=EE-COND
          CND(5)=CFR
          IEQ(5)=IEQPNT(J,I+1,K)
@@ -343,7 +345,7 @@ C5A-----CALCULATE AND LOAD D4B.
       IF(J.NE.NCOL) THEN
          CRT=CR(J,I,K)
          COND=CRT
-         RR=RR-COND*HNEW(J+1,I,K)
+         IF(IBOUND(J+1,I,K) /= 0) RR=RR-COND*HNEW(J+1,I,K)
          EE=EE-COND
          CND(6)=CRT
          IEQ(6)=IEQPNT(J+1,I,K)

@@ -426,37 +426,38 @@ void MF2KGMG_SCCFD_ASSEMBLE(MF2KGMG_operator* GMG_ptr,
           RSUM=-(double)RHS[e];
           EE=0.0;
 
-          if(k>0)
+          /* an inactive neighbor has a zero conductance and its head may be HNOFLO = NaN: skip it (0*NaN = NaN) */
+          if(k>0 && IBOUND[e-lm]!=0)
           {
             COND=(double)CV[e-lm];
             EE+=COND;
             RSUM+=COND*HNEW[e-lm];
           }
-          if(j>0)
+          if(j>0 && IBOUND[e-l]!=0)
           {
             COND=(double)CC[e-l];
             EE+=COND;
             RSUM+=COND*HNEW[e-l];
           }
-          if(i>0)
+          if(i>0 && IBOUND[e-1]!=0)
           {
             COND=(double)CR[e-1];
             EE+=COND;
             RSUM+=COND*HNEW[e-1];
           }
-          if(i<l-1)
+          if(i<l-1 && IBOUND[e+1]!=0)
           {
             COND=(double)CR[e];
             EE+=COND;
             RSUM+=COND*HNEW[e+1];
           }
-          if(j<m-1)
+          if(j<m-1 && IBOUND[e+l]!=0)
           {
             COND=(double)CC[e];
             EE+=COND;
             RSUM+=COND*HNEW[e+l];
           }
-          if(k<n-1)
+          if(k<n-1 && IBOUND[e+lm]!=0)
           {
             COND=(double)CV[e];
             EE+=COND;
@@ -545,37 +546,38 @@ void MF2KGMG_DCCFD_ASSEMBLE(MF2KGMG_operator* GMG_ptr,
           RSUM=-(double)RHS[e];
           EE=0.0;
 
-          if(k>0)
+          /* an inactive neighbor has a zero conductance and its head may be HNOFLO = NaN: skip it (0*NaN = NaN) */
+          if(k>0 && IBOUND[e-lm]!=0)
           {
             COND=(double)CV[e-lm];
             EE+=COND;
             RSUM+=COND*HNEW[e-lm];
           }
-          if(j>0)
+          if(j>0 && IBOUND[e-l]!=0)
           {
             COND=(double)CC[e-l];
             EE+=COND;
             RSUM+=COND*HNEW[e-l];
           }
-          if(i>0)
+          if(i>0 && IBOUND[e-1]!=0)
           {
             COND=(double)CR[e-1];
             EE+=COND;
             RSUM+=COND*HNEW[e-1];
           }
-          if(i<l-1)
+          if(i<l-1 && IBOUND[e+1]!=0)
           {
             COND=(double)CR[e];
             EE+=COND;
             RSUM+=COND*HNEW[e+1];
           }
-          if(j<m-1)
+          if(j<m-1 && IBOUND[e+l]!=0)
           {
             COND=(double)CC[e];
             EE+=COND;
             RSUM+=COND*HNEW[e+l];
           }
-          if(k<n-1)
+          if(k<n-1 && IBOUND[e+lm]!=0)
           {
             COND=(double)CV[e];
             EE+=COND;
