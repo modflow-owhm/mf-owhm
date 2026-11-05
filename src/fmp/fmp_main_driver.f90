@@ -1,8 +1,7 @@
 !!!RDR   KNTR
 !!!    FMP3RQ
-!!!    TFDROLD UNRD  RNRD NRD
+!!!    TFDROLD
 !!!    ISTRM(1,1),IDIVAR
-!!!    ! Note that SWFL%MXNRD = -1 needs to be fixed   
 !
 ! ###########################################################################################################################
 !
@@ -414,24 +413,9 @@ MODULE FMP_MAIN_DRIVER
     ALLOCATE(TFDROLD(NFARM), SOURCE=DZ)
     !
     !
-    !4P-----Allocate space for the double precision lists of Unranked (UNRD), Ranked (RNRD), & actually used (NRD)
-    !       Non-Routed Delivery Lists and initialize
+    !4P-----Set up the non-routed delivery (NRD) record of each WBS (rate, rank and use flag per NRD type)
     !
-    IF(.NOT.SWFL%HAS_NRD) THEN
-                        ALLOCATE(UNRD(4,NFARM)  , SOURCE=DZ)                                      !DUMMY 4       !DP
-                        ALLOCATE(RNRD(2,1,NFARM), SOURCE=DZ)                                      !DUMMY 2,1     !DP
-                        ALLOCATE(NRD(2,NFARM)   , SOURCE=DZ)                                      !DP
-    ELSE
-                        ALLOCATE(UNRD((SWFL%MXNRD*3+1),NFARM), SOURCE=DZ)                         !DP (1=FID; 3 per type = NRD-vol., NRD-rank, NRD-use-flag)
-                        IF(ILGR.NE.0) THEN
-                        ALLOCATE(RNRD(2,SWFL%MXNRD*2,NFARM)  , SOURCE=DZ)                         !DP (2 per ranked type = NRD-vol., NRD-use-flag) 2 times the MXNRDT to save old RNDR before
-                        ELSE                                                                           !scaling it down as a result of prorating for parent and child farm NRDs.        
-                        ALLOCATE(RNRD(2,SWFL%MXNRD,NFARM)    , SOURCE=DZ)                         !DP (2 per ranked type = NRD-vol., NRD-use-flag)
-                        ENDIF
-                        ALLOCATE(NRD(2,NFARM)                , SOURCE=DZ)                         !DP (2: NRD-new, NRD-old)
-                        !
-                        CALL SWFL%NRD%INIT(SWFL%MXNRD)
-    ENDIF
+    IF(SWFL%HAS_NRD) CALL SWFL%NRD%INIT(SWFL%MXNRD)
     !
     IF(WBS%HAS_SFR) THEN
                        ALLOCATE(SFR_RUNOFF(NSTRM),         SOURCE = DZ)
@@ -486,7 +470,7 @@ MODULE FMP_MAIN_DRIVER
     !     READ OTHER INFORMATION FOR EACH STRESS PERIOD
     USE CONSTANTS
     USE GENERIC_OUTPUT_FILE_INSTRUCTION, ONLY: GENERIC_OUTPUT_FILE
-    USE FMP_GLOBAL,   ONLY:FWELL,NRD,UNRD,RNRD,IFA,ISTARTFL,FMPOUT,FMP_LGR_PNT,  &
+    USE FMP_GLOBAL,   ONLY:FWELL,IFA,ISTARTFL,FMPOUT,FMP_LGR_PNT,  &
                            SFR_DELIV,SFR_RUNOFF,FMP_MOD_SFR_RUNOFF,              &
                            FDIM, FCROP, WBS, CLIMATE, SOIL, ALLOT, SWFL, SALT, SWODAT
     USE GLOBAL,       ONLY:PERLEN,SPSTART
@@ -661,59 +645,31 @@ MODULE FMP_MAIN_DRIVER
           END DO
     END IF
     !
-    !7===== READ LIST OF NON-ROUTED DELIVERIES TO FARMS (NRDs) AND CREATE ARRAY OF RANKED NRDs ===================
+    !7===== READ LIST OF NON-ROUTED DELIVERIES TO FARMS (NRDs): RATE, RANK AND USE FLAG OF EACH NRD TYPE ==========
     !
-    IF(.NOT. SWFL%HAS_NRD) THEN
-       DO NF=1,FDIM%NFARM
-          NRD(1,NF) = DZ
-          NRD(2,NF) = DZ
-          RNRD(1,1,NF) = DZ
-          RNRD(2,1,NF) = DZ
-          DO N=1,4
-                  UNRD(N,NF) = DZ
-          ENDDO
-       ENDDO
-    ENDIF
+    IF(SWFL%HAS_NRD) CALL SWFL%SETUP_NRD(SP_LENGTH)   ! every stress period: the well field option changes the rates during a period
     !
-    !7A-----READ LIST OF YET UNRANKED NON-ROUTED DELIVERIES TO FARMS (VOLUME, RANK, USE-FLAG)
     IF(SWFL%HAS_NRD .AND. (FIRST_SP .OR. SWFL%NRD_TFR%TRANSIENT) ) THEN
-        !
-        !CALL FMP3DPLSTRD(UNRD,MXNRDT*3+1,FDIM%NFARM,IN,IOUT,0,0,MXNRDT*3+1)
-        !
-        CALL SWFL%SET_NRD_ARRAY(UNRD, FIRST_SP)
-        !
-        DTMP = UNO
-        IF(.NOT. SWFL%NRD_IS_RAT) DTMP = UNO / SP_LENGTH
-        DO J=ONE, FDIM%NFARM
-                       CALL SWFL%NRD(J)%SETUP( UNRD(:,J), DTMP )
-        END DO
-        !
-        IF(SWFL%NRD_IS_RAT) THEN
-            IT = SWFL%MXNRD*3 + 1
-            !
-            DO CONCURRENT (J=ONE:FDIM%NFARM, I=2:IT:3)
-                                             UNRD(I,J) = UNRD(I,J) * SP_LENGTH
-            END DO
-        END IF
         !
         WRITE(IOUT,'(/1x,A,/A,*(I12))') 'UNRANKED LIST OF NON-ROUTED DELIVERIES TO FARMS [L3]:','TYPE:  ', (IT, IT=1,SWFL%MXNRD)
         !
         WRITE(IOUT,'(/A)') 'FARM-ID  VOLUME:'
         !
         DO NF=1,FDIM%NFARM      
-           IF(IFA(NF).NE.0) WRITE(IOUT,'(1x,I6,*(ES12.3))') IDINT(UNRD(1,NF)), (UNRD(IT*3-1,NF), IT=1,SWFL%MXNRD)
+           IF(IFA(NF).NE.0) WRITE(IOUT,'(1x,I6,*(ES12.3))') NF, (SWFL%NRD(NF)%AVALIBLE_WATER(IT)*SP_LENGTH, IT=1,SWFL%MXNRD)
         END DO
         !
         WRITE(IOUT,'(/A)')'FARM-ID  PRIORITY RANK OF NRD-TYPE:'
         !
         DO NF=1,FDIM%NFARM
-           IF(IFA(NF).NE.0)  WRITE(IOUT,'(1x,I6,*(I12))') IDINT(UNRD(1,NF)),(IDINT(UNRD(IT*3,NF)),IT=1,SWFL%MXNRD)
+           IF(IFA(NF).NE.0)  WRITE(IOUT,'(1x,I6,*(I12))') NF,(SWFL%NRD(NF)%RANK(IT),IT=1,SWFL%MXNRD)
            !
            DO IT=1, SWFL%MXNRD
-              IF (IDINT(UNRD(IT*3,NF)).LT.1)           CALL STOP_ERROR(OUTPUT=IOUT,MSG='ERROR: FMP REQUIRES THAT THE PRIORITY RANK OF NRD-TYPE (NRDR) BE 1 OR GREATER (ie > 0)'//NL//'A VALUE OF ZERO WAS FOUND FOR FARM: '//NUM2STR(NF))
+              IF (SWFL%NRD(NF)%RANK(IT) < 1)           CALL STOP_ERROR(OUTPUT=IOUT,MSG='ERROR: FMP REQUIRES THAT THE PRIORITY RANK OF NRD-TYPE (NRDR) BE 1 OR GREATER (ie > 0)'//NL//'A VALUE OF ZERO WAS FOUND FOR FARM: '//NUM2STR(NF))
               !
-              IF (IDINT(UNRD(IT*3,NF)).GT.SWFL%MXNRD)  CALL STOP_ERROR(OUTPUT=IOUT,MSG='ERROR: FMP REQUIRES THAT THE PRIORITY RANK OF NRD-TYPE (NRDR) BE LESS THAN OR EQUAL TO MXNRDT.'//NL//'FOR FARM '//NUM2STR(NF)//' THERE IS A RANK OF '//NUM2STR(IDINT(UNRD(IT*3,NF)))//' BUT MXNRDT IS '//NUM2STR(SWFL%MXNRD))
+              IF (SWFL%NRD(NF)%RANK(IT) > SWFL%MXNRD)  CALL STOP_ERROR(OUTPUT=IOUT,MSG='ERROR: FMP REQUIRES THAT THE PRIORITY RANK OF NRD-TYPE (NRDR) BE LESS THAN OR EQUAL TO MXNRDT.'//NL//'FOR FARM '//NUM2STR(NF)//' THERE IS A RANK OF '//NUM2STR(SWFL%NRD(NF)%RANK(IT))//' BUT MXNRDT IS '//NUM2STR(SWFL%MXNRD))
               !
+              IF (COUNT(SWFL%NRD(NF)%RANK == SWFL%NRD(NF)%RANK(IT)) > 1) CALL WARNING_MESSAGE(OUTPUT=IOUT,MSG='FMP NON_ROUTED_DELIVERY: FARM '//NUM2STR(NF)//' HAS MORE THAN ONE NRD-TYPE WITH THE PRIORITY RANK '//NUM2STR(SWFL%NRD(NF)%RANK(IT))//'.'//NL//'ONLY THE LAST NRD-TYPE WITH THAT RANK IS USED; THE OTHERS DELIVER NO WATER. EACH NRD-TYPE SHOULD HAVE ITS OWN RANK.')
            END DO
         ENDDO
         !
@@ -723,32 +679,23 @@ MODULE FMP_MAIN_DRIVER
                                                       '2 = ABSOLUTE USE (SURPLUS INJECTED INTO SUPPLY WELLS)'
         !
         DO NF=1,FDIM%NFARM
-           IF(IFA(NF).NE.0)  write(IOUT,'(1x,I6,*(I12))') IDINT(UNRD(1,NF)),(IDINT(UNRD(IT*3+1,NF)),IT=1,SWFL%MXNRD)
+           IF(IFA(NF).NE.0)  write(IOUT,'(1x,I6,*(I12))') NF,(SWFL%NRD(NF)%USE_FLAG(IT),IT=1,SWFL%MXNRD)
         ENDDO
         !
-        !7B-----CREATE ARRAY OF RANKED NON-ROUTED DELIVERIES TO FARMS (AND ARRAY OF THEIR NRD-USE FLAGS)
-        !
-        DO NF=1,FDIM%NFARM
-           IF(IFA(NF).NE.0 .AND. WBS%INUSE(NF)) THEN
-              DO IT=1,SWFL%MXNRD
-                 RNRD(1,IDINT(UNRD(3*IT,NF)),NF)=UNRD(3*IT-1,NF)/SP_LENGTH
-                 RNRD(2,IDINT(UNRD(3*IT,NF)),NF)=UNRD(3*IT+1,NF)
-              ENDDO
-           ENDIF
-        ENDDO
+        !7B-----LIST THE NON-ROUTED DELIVERIES IN RANKED SEQUENCE (A RANK THAT NO NRD-TYPE HAS IS LISTED AS ZERO)
         !
         WRITE(IOUT,'(/A)') 'LIST OF NON-ROUTED DELIVERIES IN RANKED SEQUENCE [L3/T]:'
         !
         WRITE(IOUT,'(/A)')'FARM-ID  RATE:'
         !
         DO NF=1,FDIM%NFARM
-             IF(IFA(NF).NE.0)  WRITE(IOUT,'(1x,I6,*(ES12.3))') NF,(RNRD(1,IRT,NF), IRT=1,SWFL%MXNRD)
+             IF(IFA(NF).NE.0)  WRITE(IOUT,'(1x,I6,*(ES12.3))') NF,(SWFL%NRD(NF)%RANKED_RATE(IRT), IRT=1,SWFL%MXNRD)
         ENDDO
         !
         WRITE(IOUT,'(/A, /29x,A, /39x,A, /49x,A)') 'FARM-ID  USE-FLAG:','0 = SUFFICIENT USE','1 = ABSOLUTE USE (SURPLUS TO SEMI-ROUTED DELIVERY POINTS, ELSE TO RUNOFF)','2 = ABSOLUTE USE (SURPLUS INJECTED INTO SUPPLY WELLS)'
         !
         DO NF=1,FDIM%NFARM
-               IF(IFA(NF).NE.0) WRITE(IOUT,'(1x,I6,*(I12))') NF,(IDINT(RNRD(2,IRT,NF)), IRT=1,SWFL%MXNRD)
+               IF(IFA(NF).NE.0) WRITE(IOUT,'(1x,I6,*(I12))') NF,(SWFL%NRD(NF)%RANKED_USE_FLAG(IRT), IRT=1,SWFL%MXNRD)
         ENDDO
         !
     ENDIF
@@ -1024,7 +971,7 @@ MODULE FMP_MAIN_DRIVER
     !        SPECIFICATIONS:
     !     ------------------------------------------------------------------
     USE CONSTANTS
-    USE FMP_GLOBAL, ONLY:  TFDROLD, NRD,  UNRD, RNRD, IFA, FMPDAT, FMP_LGR_PNT,         &
+    USE FMP_GLOBAL, ONLY:  TFDROLD, IFA, FMP_LGR_PNT,         &
                            ISTARTFL, SFR_RUNOFF, DRTFLOW,                               &
                            WBS, FWELL, SWFL, FCROP, SOIL, FDIM, ALLOT, CLIMATE, SALT, SWODAT,  &
                            FMP_MOD_SFR_RUNOFF, SFR_DELIV, FMPOPT 
@@ -1046,15 +993,13 @@ MODULE FMP_MAIN_DRIVER
     !TYPE(GENERIC_OUTPUT_FILE):: FL
     !
     INTEGER:: NF,IR,IC,N,IL,I,                   &
-              NT,IDDELF,IT,ITTOT,IRT,ITU,K, &
+              IT,K, &
               NFF
     !   
-    INTEGER:: INRDR(SWFL%MXNRD),INRDU(SWFL%MXNRD) 
-    !
     DOUBLE PRECISION:: TF, QR, RDEL, QTOL
-    DOUBLE PRECISION:: ND, SURPLUS1,SURPLUS2, DSUM, SUFDSUM
+    DOUBLE PRECISION:: ND, SURPLUS1,SURPLUS2
     DOUBLE PRECISION:: FARMALLOT
-    DOUBLE PRECISION:: CTFDR  !WELLFIELD
+    LOGICAL:: NO_WELL
                      !HH,SS,XX,YY,PCTG,TF,ND,NW,QR,SW,CCIR,DSUM,                       &
                      !SUFDSUM,,RDEL,RDELCOR,AFDELSW,QTOL,TFOLD,EF,    &
                      !ADSW,QMXF,NRDE,ALLOTDP,,FLOWIN,GWSUM,SWSUM,NRSUM,AVI,   &
@@ -1146,7 +1091,7 @@ MODULE FMP_MAIN_DRIVER
         .OR.                                                          &
        ((WBS%HAS_SFR  .OR. .NOT. SWFL%HAS_SRD) .AND. ISTARTFL.EQ.1  )   ) THEN
                                                                           TFDROLD=DZ
-                                                                          NRD=DZ
+                                                                          SWFL%NRD(:)%DELIVERED_INI = DZ
                                                                           WBS%Q_DEMAND     = DZ
                                                                           WBS%Q_DEMAND_INI = DZ
     ENDIF 
@@ -1155,7 +1100,7 @@ MODULE FMP_MAIN_DRIVER
     !-----MNW2 LINK SET QDES AND QACT FOR KITER=1
     IF(WBS%HAS_WELL .AND. WBS%HAS_MNW2 .AND. KITER.EQ.1) CALL FWELL%MNW2_ZERO_Q()      !SET QACT and QDES for MNW2 on first interation
     !
-    IF(SWFL%HAS_NRD) CALL SWFL%NRD%INIT_CONSUME()
+    IF(SWFL%HAS_NRD) CALL SWFL%NRD%RESET()
     IF(SWFL%HAS_NRD) SWFL%NRD_SURPLUS_RUNOFF = DZ
     !
     ! INITIALIZE SUPPLY VARIABLES TO ZERO  --CALLED IN AD ROUTINE
@@ -1249,59 +1194,11 @@ MODULE FMP_MAIN_DRIVER
       !
     END IF
     !
-    !6G-----WELL-FIELD OPTION - ALLOWS A SERIES OF IRRIGATED FARMS TO RECEIVE THEIR CUMULATIVE IRRIGATION 
-    !       DEMAND AS SIMULATED NON-ROUTED DELIVERIES FROM WELL FIELDS SIMULATED AS VIRTUAL FARMS.
+    !6G-----WELL FIELD OPTION (FMP2): AN NRD TYPE WITH A NEGATIVE USE FLAG IS SUPPLIED BY THE WELLS OF THE WBS THE FLAG NAMES
     !
-    IF(FMPOPT%WELLFIELD) THEN
-       IF(KITER.GT.1)THEN        
-          !
-          !6G2-----FOR EACH WELL FIELD SIMULATED AS NON-ROUTED DELIVERY TYPE
-          DO NT=1,SWFL%MXNRD      
-             CTFDR = DZ
-             !
-             !6G2A----CALCULATE CUMULATIVE DELIVERY REQUIREMENT OF FARMS SUPPLIED BY A PARTICULAR WELL FIELD
-             !        AND EVALUATE AVAILABLE SIMULATED "NON-ROUTED DELIVERY" FROM THAT WELL FIELD
-             DO NF=1, WBS%NFARM
-             IF(WBS%INUSE(NF)) THEN
-                !
-                IF(TFDROLD(NF) .EQ. DZ) TF=WBS%DEMAND(NF)
-                IF(TFDROLD(NF) .GT. DZ) TF=TFDROLD(NF)           
-                IF(IDINT(UNRD(NT*3+1,NF)).LT.0) THEN
-                     IF(NT.EQ.1) THEN
-                       CTFDR=CTFDR+TF
-                     ELSE
-                       IF(RNRD(1,NT-1,NF).LT.TF) THEN
-                       CTFDR=CTFDR+(TF-RNRD(1,NT-1,NF))
-                       ENDIF
-                     ENDIF
-                     IDDELF=IDINT(ABS(UNRD(NT*3+1,NF)))
-                     RNRD(1,NT,IDDELF)=-MIN(CTFDR,FWELL(IDDELF)%QMAX)
-                ENDIF
-             END IF
-             END DO
-             !
-             !6G2B----RE-DISTRIBUTE NON-ROUTED DELIVERY FROM WELL FIELD OVER TO RECCEIVING FARMS WEIGHTED BY EACH FARM'S 
-             !        TOTAL DELIVERY REQUIREMENT (OR RESIDUAL DELIVERY REQUIRMENT FOR LOWER PRIORITY WELL FIELDS)
-             DO NF=1, WBS%NFARM
-             IF(WBS%INUSE(NF)) THEN
-                !
-                IF(TFDROLD(NF) .EQ. DZ) TF=WBS%DEMAND(NF)
-                IF(TFDROLD(NF) .GT. DZ) TF=TFDROLD(NF)         
-                IF(CTFDR.GT.0) THEN
-                     IF(IDINT(UNRD(NT*3+1,NF)).LT.0)THEN
-                         IF(NT.EQ.1)THEN
-                         RNRD(1,NT,NF)=-RNRD(1,NT,IDDELF)*TF/CTFDR   
-                         ELSE
-                         RNRD(1,NT,NF)=-RNRD(1,NT,IDDELF)*(TF-RNRD(1,NT-1,NF))/CTFDR
-                         ENDIF
-                         RNRD(2,NT,NF) = DZ
-                     ENDIF
-                ENDIF
-             END IF
-             END DO
-          ENDDO
-       ENDIF
-    ENDIF    !(FMPOPT%WELLFIELD) 
+    IF(FMPOPT%WELLFIELD .AND. SWFL%HAS_NRD .AND. KITER > ONE) THEN
+       CALL SWFL%WELLFIELD_DELIVERY(WBS%INUSE, WBS%DEMAND, TFDROLD, FWELL(:)%QMAX)
+    END IF
     !
     IF(WBS%HAS_SWO) THEN
         IF(KITER <= SWODAT%SWMXITER(1)) THEN
@@ -1325,18 +1222,7 @@ MODULE FMP_MAIN_DRIVER
            !
            DO NF=1, WBS%NFARM
            IF(SWO_DMD(NF)> NEARZERO_10 .AND. WBS%H2OSOURCE%NRD(NF)) THEN
-                 ITTOT = Z
-                 DO IT=1,SWFL%MXNRD
-                     N = IDINT(UNRD(3*IT,NF))                           !define nrd-ranks as array to find maximum rank for current farm
-                     IF(ITTOT < N) ITTOT = N
-                 END DO
-                 !
-                 DSUM=DZ
-                 DO IRT=1,ITTOT
-                    DSUM=DSUM+RNRD(1,IRT,NF)
-                 ENDDO
-                 !
-                 SWO_DMD(NF) = SWO_DMD(NF)-DSUM
+                 SWO_DMD(NF) = SWO_DMD(NF) - SWFL%NRD(NF)%SUPPLY
            END IF
            END DO
            !
@@ -1419,120 +1305,22 @@ MODULE FMP_MAIN_DRIVER
       END IF
       !
       !     
-      !7E1----UPDATE NON-ROUTED DELIVERY
-      !7E1A---UPDATE NON-ROUDED DELIVERY FOR NON-OPTIMIZATION CASES
-      SUFDSUM=DZ
+      !7E1----NON-ROUTED DELIVERY: WATER TAKEN FROM THE DELIVERIES (ND) AND THE SURPLUS OF USE FLAGS 1 AND 2
+      ND=DZ
       SURPLUS1=DZ
       SURPLUS2=DZ
-      ND=DZ                                                           !seb ALWAYS INITIALIZE TO ZERO
       IF(SWFL%HAS_NRD .AND. WBS%H2OSOURCE%NRD(NF)) THEN                  ! seb H2OSRC(1,:)=FID; H2OSRC(2,:)=GW; H2OSRC(3,:)=SW; H2OSRC(4,:)=NRD  
          !
-         CALL SWFL%NRD(NF)%CONSUME(TF, ND)
+         CALL SWFL%NRD(NF)%DELIVER(TF, FWELL(NF)%N > Z, ND, SURPLUS1, SURPLUS2, NO_WELL)
          !
-         !     FOR LGR, SCALE RANKED NON-ROUTED DELIVERIES TO PARENT OR CHILD MODEL FARM
-         !     BY RATIO BETWEEN PARENT OR CHILD FARM DEMAND AND JOINT PARENT+CHILD DEMAND
-         IF(ILGR.NE.0) THEN
-           IF(LGRITER.EQ.2.AND.KITER.EQ.1) THEN
-              !
-              !     SCALE RANKED NON-ROUTED DELIVERIES TO PARENT MODEL FARM BY RATIO BETWEEN
-              !     PARENT FARM DEMAND AND JOINT PARENT+CHILD DEMAND
-              IF(IGRID.EQ.1) THEN                              ! SCOTT
-                 do n=2,ngrids
-                     if(N.EQ.LGRDAT(N)%IFMPGRID) then
-                        IF(FMPDAT(N)%SWFL%MXNRD.EQ.-1) THEN
-                           DO IT=1,SWFL%MXNRD   
-                               IF(TF+FMPDAT(N)%WBS%DEMAND(NF).GT.0) THEN
-                                   IF(KSTP.EQ.1) RNRD(1,SWFL%MXNRD+IT,NF)=RNRD(1,IT,NF)
-                                   RNRD(1,IT,NF) = RNRD(1,SWFL%MXNRD+IT,NF)*TF/(TF+FMPDAT(N)%WBS%DEMAND(NF))
-                               ENDIF
-                           ENDDO
-                        ENDIF
-                     ENDIF
-                 ENDDO
-              ELSE
-                 !     SCALE RANKED NON-ROUTED DELIVERIES TO CHILD MODEL FARM BY RATIO BETWEEN
-                 !     CHILD FARM DEMAND AND JOINT PARENT+CHILD DEMAND AND
-                 !     ADOPT NRD-USE FLAGS FROM PARENT MODEL NRD DATA INPUT.
-                 IF(SWFL%MXNRD.EQ.-1) THEN
-                     DO IT=1,SWFL%MXNRD   
-                        IF(FMPDAT(1)%WBS%DEMAND(NF)+TF.GT.0) THEN
-                          IF(KSTP.EQ.1) THEN
-                            RNRD(1,SWFL%MXNRD+IT,NF)=FMPDAT(1)%RNRD(1,SWFL%MXNRD+IT,NF)
-                          ENDIF
-                          RNRD(1,IT,NF) = RNRD(1,SWFL%MXNRD+IT,NF)*TF/(TF+FMPDAT(1)%WBS%DEMAND(NF))
-                          RNRD(2,IT,NF) = FMPDAT(1)%RNRD(2,IT,NF)
-                          UNRD(3*IT,NF) = FMPDAT(1)%UNRD(3*IT,NF)
-                        ENDIF
-                     ENDDO
-                 ENDIF        
-              ENDIF     
-           ENDIF   !IF(LGRITER.EQ.2.AND.KITER.EQ.1)
-         ENDIF     !IF(ILGR.NE.0)
-         !
-         DO IT=1,SWFL%MXNRD
-                          INRDR(IT)=IDINT(UNRD(3*IT,NF))     !define nrd-ranks as array to find maximum rank for current farm
-                          INRDU(IT)=IDINT(RNRD(2,IT,NF))     !define nrd-use flags for a ranked array of nrd-types for current farm
-         ENDDO
-         !
-         ! Use flag 2 injects the surplus into the supply wells; without an active well only the water needed is taken (use flag 0)
-         IF(FWELL(NF)%N < ONE) THEN
-            DO IT=1,SWFL%MXNRD
-               IF(INRDU(IT) == 2) THEN
-                  INRDU(IT) = Z
-                  IF(SWFL%NRD_INJECT_WRN(NF)) THEN
-                     SWFL%NRD_INJECT_WRN(NF) = FALSE
-                     CALL WARNING_MESSAGE(OUTPUT=SWFL%IOUT, MSG='FMP SURFACE_WATER NON_ROUTED_DELIVERY: WBS '//NUM2STR(NF)//' HAS AN NRD WITH USE FLAG 2 (SURPLUS INJECTED INTO THE SUPPLY WELLS),'//NL//'BUT THE WBS HAS NO ACTIVE SUPPLY WELL IN STRESS PERIOD '//NUM2STR(KPER)//'.'//NL//'THE NRD IS TREATED AS USE FLAG 0: ONLY THE WATER NEEDED TO MEET THE DEMAND IS DELIVERED.'//NL//'THIS WARNING IS PRINTED ONCE PER WBS.')
-                  END IF
-               END IF
-            END DO
+         IF(NO_WELL) THEN   ! use flag 2 without an active supply well is treated as use flag 0
+            IF(SWFL%NRD_INJECT_WRN(NF)) THEN
+               SWFL%NRD_INJECT_WRN(NF) = FALSE
+               CALL WARNING_MESSAGE(OUTPUT=SWFL%IOUT, MSG='FMP SURFACE_WATER NON_ROUTED_DELIVERY: WBS '//NUM2STR(NF)//' HAS AN NRD WITH USE FLAG 2 (SURPLUS INJECTED INTO THE SUPPLY WELLS),'//NL//'BUT THE WBS HAS NO ACTIVE SUPPLY WELL IN STRESS PERIOD '//NUM2STR(KPER)//'.'//NL//'THE NRD IS TREATED AS USE FLAG 0: ONLY THE WATER NEEDED TO MEET THE DEMAND IS DELIVERED.'//NL//'THIS WARNING IS PRINTED ONCE PER WBS.')
+            END IF
          END IF
          !
-         ITTOT=MAXVAL(INRDR)                                            !find maximum rank for current farm (could be < max. number of nrd-types MXNRDT)
-         !
-         DSUM=DZ
-         DO IRT=1,ITTOT
-            DSUM=DSUM+RNRD(1,IRT,NF)
-            ITU=ITTOT-IRT                                               !check for delivery types unnecessary to meet TFDR (ITU) in sequence of ranking 
-            IF(TF-DSUM.LE.DZ) EXIT
-         ENDDO
-         IF(TF.LT.FPS) ITU=ITTOT
-         !
-         ND=DZ
-         SUFDSUM=DZ
-         SURPLUS1=DZ
-         SURPLUS2=DZ
-         DO IRT=1,ITTOT
-            IF(TF.GT.DSUM) THEN
-                ND=DSUM                                                 !non-routed delivery can't be greater than the sum of deliveries
-            ELSE
-               IF(IRT.LT.ITTOT-ITU)  SUFDSUM=SUFDSUM+RNRD(1,IRT,NF)                           !sum of deliveries that are used in their entirety to satisfy TF
-               !
-               IF(IRT.EQ.ITTOT-ITU) THEN
-                  IF(INRDU(IRT).EQ.0) THEN
-                                               ND=TF                                                 !as long as the current Ranked Type IRT exceeds TF, only part of IRT will be used & the total ND is equal to TF
-                  ELSEIF(INRDU(IRT).GT.0) THEN
-                                               ND=SUFDSUM+RNRD(1,IRT,NF)                             !if not only the sufficient but the abolute amount of IRT is to be used ...
-                                               IF(INRDU(IRT).EQ.1) SURPLUS1=ND-TF                  !gather excess surplus component desired to be recharged into the canal
-                                               IF(INRDU(IRT).EQ.2) SURPLUS2=ND-TF                  !gather excess surplus component desired to be injected into farm wells
-                  ENDIF
-               ENDIF
-               !
-               IF(IRT.GT.ITTOT-ITU.AND.INRDU(IRT).GT.0) THEN
-                                               ND=ND+RNRD(1,IRT,NF)                                     !if IRT tyes are unnecessary, but nontheless specified to be used in their absolute amounts
-                                               IF(INRDU(IRT).EQ.1) SURPLUS1=SURPLUS1+RNRD(1,IRT,NF)   !gather unneeded surplus components desired to be recharged into the canal
-                                               IF(INRDU(IRT).EQ.2) SURPLUS2=SURPLUS2+RNRD(1,IRT,NF)   !gather unneeded surplus components desired to be injected into farm wells
-               ENDIF
-            ENDIF
-         ENDDO
-         !
-         ! CALCAULATE TOTAL NRD AVAILIBLE
-         ! SET UP THE NRD SUPPLY
-         DSUM=DZ
-         DO IRT=1,ITTOT
-            DSUM=DSUM+RNRD(1,IRT,NF)
-         ENDDO
-         !
-         CALL WBS%SUPPLY(NF)%SET_NRD_TOT(DSUM)
+         CALL WBS%SUPPLY(NF)%SET_NRD_TOT(SWFL%NRD(NF)%SUPPLY)
          CALL WBS%SUPPLY(NF)%SET_NRD(ND)
          !
       END IF   ! SWFL%HAS_NRD  .AND. WBS%H2OSOURCE%NRD(NF)
@@ -1593,7 +1381,7 @@ MODULE FMP_MAIN_DRIVER
       !       In the regular case, budget terms are saved at each iteration. In case of deficiency,
       !       "pre-deficiency" terms are saved during the deficiency scenario execution (C7E6B,C7E7G)  
       !       under a different name in order to be still available in FMP3WELBD along with the final terms.
-      NRD(1,NF)=ND
+      SWFL%NRD(NF)%DELIVERED=ND
       WBS%Q_DEMAND(NF)=QR
       !
       !7E5B---SAVE BUDGET TERMS AS "PRE-DEFICIENCY" SCENARIO TERMS:
@@ -1643,9 +1431,10 @@ MODULE FMP_MAIN_DRIVER
              QR=TF-ND-SWFL%SRDLOC(NF)%TOT_DMD_MET
              !
              !             store original pumping requirement before updates after acreage-optimization are done
-             IF(.NOT. ( FMPOPT%WELLFIELD .AND. (KITER.LE.1.OR.ISTARTFL.LE.1))) THEN 
-                IF(NRD(2,NF) .EQ. DZ) NRD(2,NF)=NRD(1,NF)
-                IF(TFDROLD(NF) .EQ. DZ) TFDROLD(NF)=WBS%DEMAND(NF)
+             !             (with the well field option not before the second iteration, as the well field deliveries start then)
+             IF(.NOT. ( FMPOPT%WELLFIELD .AND. (KITER <= ONE .OR. ISTARTFL <= ONE))) THEN
+                IF(SWFL%NRD(NF)%DELIVERED_INI == DZ) SWFL%NRD(NF)%DELIVERED_INI = SWFL%NRD(NF)%DELIVERED
+                IF(TFDROLD(NF) == DZ) TFDROLD(NF)=WBS%DEMAND(NF)
              END IF
              !
              WBS%Q_DEMAND(NF)=QR     
@@ -2672,7 +2461,7 @@ MODULE FMP_MAIN_DRIVER
     !     ******************************************************************
     !        SPECIFICATIONS:
     !     ------------------------------------------------------------------
-    USE FMP_GLOBAL,    ONLY:TFDROLD,NRD,FMPDAT,                                  &
+    USE FMP_GLOBAL,    ONLY:TFDROLD,FMPDAT,                                      &
                            FMPOUT,FMP_LGR_PNT,WBS,FWELL,SWFL,DRTFLOW
     USE FMPBLK
     USE GWFMNW1MODULE, ONLY:IWL2CBMNW1=>IWL2CB          !IWL2CBMNW1 is local name of IWL2CB seb
@@ -2753,15 +2542,15 @@ MODULE FMP_MAIN_DRIVER
           END IF
           !
           TF=WBS%DEMAND(NF)
-          ND=NRD(1,NF)
+          ND=SWFL%NRD(NF)%DELIVERED
           QR=WBS%Q_DEMAND(NF)
           IF(TFDROLD(NF).EQ.DZ) THEN
               TFDROLD(NF)=TF
-              NRD(2,NF)=ND
+              SWFL%NRD(NF)%DELIVERED_INI=ND
               WBS%Q_DEMAND_INI(NF) = QR
           ENDIF
           IF(SWFL%HAS_SRD_WBS(NF)) THEN
-                                      SWOLD=TFDROLD(NF)-NRD(2,NF)-WBS%Q_DEMAND_INI(NF)
+                                      SWOLD=TFDROLD(NF)-SWFL%NRD(NF)%DELIVERED_INI-WBS%Q_DEMAND_INI(NF)
                                       SWFIN=SWFL%SRDLOC(NF)%TOT_DMD_MET
                                       !
                                       IF(SWOLD < NEARZERO_10) SWOLD=DZ
@@ -2775,10 +2564,10 @@ MODULE FMP_MAIN_DRIVER
           IF(QR.GE.FWELL(NF)%QMAX) QF=FWELL(NF)%QMAX
           !
           IF(FMPOUT%FDS%BINARY) THEN
-              WRITE(FMPOUT%FDS%IU) DATE,N,KPER,KSTP,DELT,DBLE(TOTIM),NF,WBS%DEFICIENCY%LIST(NF),WBS%EFF(NF),TFDROLD(NF), NRD(2,NF), SWOLD, WBS%Q_DEMAND_INI(NF), TF, ND, SWFIN, QR, QF
+              WRITE(FMPOUT%FDS%IU) DATE,N,KPER,KSTP,DELT,DBLE(TOTIM),NF,WBS%DEFICIENCY%LIST(NF),WBS%EFF(NF),TFDROLD(NF), SWFL%NRD(NF)%DELIVERED_INI, SWOLD, WBS%Q_DEMAND_INI(NF), TF, ND, SWFIN, QR, QF
           ELSE
              WRITE(FMPOUT%FDS%IU,'(2I5,A14,I7,F12.4,9(1x,ES21.8),I10,2x,A,3x,I1)') KPER,KSTP,TIME,NF,WBS%EFF(NF),                               &
-                                                                                   TFDROLD(NF), NRD(2,NF), SWOLD, WBS%Q_DEMAND_INI(NF), TF, ND, SWFIN, QR, QF,    &
+                                                                                   TFDROLD(NF), SWFL%NRD(NF)%DELIVERED_INI, SWOLD, WBS%Q_DEMAND_INI(NF), TF, ND, SWFIN, QR, QF,    &
                                                                                    WBS%DEFICIENCY%LIST(NF),DATE,N
           END IF
         END DO
@@ -2818,7 +2607,7 @@ MODULE FMP_MAIN_DRIVER
              IF(SWFL%HAS_ADDED_RUNOFF) EXT = SWFL%ADDED_RUNOFF_WBS(NF)   ! Added runoff enters the WBS as external water
              !
              TF = WBS%DEMAND(NF)
-             ND = NRD(1,NF)
+             ND = SWFL%NRD(NF)%DELIVERED
              QR = WBS%Q_DEMAND(NF)
              !
              IF ( WBS%HAS_DRT)THEN
@@ -3091,14 +2880,14 @@ MODULE FMP_MAIN_DRIVER
     !
     ! SCOTT WHY ARE THESE SET TO ZERO NOW?
     !5E-----RESET SOME VARIABLES  
-    TFDROLD  = DZ                                                 !NOTE THAT TFDROLD, NRD(2 & QREQOLD 
-    NRD(2,:) = DZ  
+    TFDROLD  = DZ
+    SWFL%NRD(:)%DELIVERED_INI = DZ
     !
   END SUBROUTINE
   !
   SUBROUTINE PRINT_WBS_WATER_USE(IU, KPER, KSTP, DELT, DYEAR, DATE)
     USE CONSTANTS,  ONLY: TRUE, FALSE, Z, ONE, TWO, DZ, UNO, NEARZERO_10
-    USE FMP_GLOBAL, ONLY: NRD, FCROP, WBS, SWFL, FWELL
+    USE FMP_GLOBAL, ONLY: FCROP, WBS, SWFL, FWELL
     INTEGER,         INTENT(IN):: IU, KPER, KSTP
     DOUBLE PRECISION,INTENT(IN):: DELT
     DOUBLE PRECISION,INTENT(IN):: DYEAR
@@ -3180,7 +2969,7 @@ MODULE FMP_MAIN_DRIVER
          !
          !NRD_SUP, Q_SUP, SRD_SUP
          !
-         NRD_USE  = NRD(1,F)
+         NRD_USE  = SWFL%NRD(F)%DELIVERED
          !
             Q_USE = WBS%Q_DEMAND(F)
          IF(Q_USE.GE.FWELL(F)%QMAX) Q_USE=FWELL(F)%QMAX

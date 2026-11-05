@@ -56,20 +56,28 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
       DOUBLE PRECISION:: TOTLENGTH   = DZ                      ! Total length of all the runoff reaches for return flow point
   END TYPE
   !
-  TYPE NRD_VALUES
-      DOUBLE PRECISION                          :: DEMAND = DZ
-      DOUBLE PRECISION                          :: SUPPLY = DZ
-      INTEGER,          DIMENSION(:),ALLOCATABLE:: RANKPOS        ! RANKPOS(1) points to position where RANK 1 deliv is, RANKPOS(2) points to position where RANK 2 deliv is
-      DOUBLE PRECISION, DIMENSION(:),ALLOCATABLE:: AVALIBLE_WATER
-      DOUBLE PRECISION, DIMENSION(:),ALLOCATABLE:: CONSUMED_WATER
+  TYPE NRD_VALUES                   ! TYPE(NRD_VALUES), DIMENSION(NWBS) :: NRD  -- the non-routed deliveries of one WBS
+      DOUBLE PRECISION                          :: DEMAND         = DZ  ! WBS demand placed on the deliveries (this iteration)
+      DOUBLE PRECISION                          :: SUPPLY         = DZ  ! Sum of AVALIBLE_WATER
+      DOUBLE PRECISION                          :: DELIVERED      = DZ  ! Water taken from the deliveries this iteration: the demand met plus the surplus taken by use flags 1 and 2
+      DOUBLE PRECISION                          :: DELIVERED_INI  = DZ  ! DELIVERED before a deficiency scenario changed the demand (demand-supply summary output)
+      INTEGER,          DIMENSION(:),ALLOCATABLE:: RANK           ! Rank of each NRD type as read (rank 1 is consumed first)
+      INTEGER,          DIMENSION(:),ALLOCATABLE:: USE_FLAG       ! Use flag of each NRD type: 0 take only what is needed; 1 take all, surplus to the semi-routed delivery points (else runoff); 2 take all, surplus injected into the supply wells; <0 the type is supplied by a well field (treated as 0)
+      INTEGER,          DIMENSION(:),ALLOCATABLE:: WELLFIELD      ! WBS whose supply wells deliver the type (a negative use flag names it, FMP2 well field option), 0 for a normal type
+      INTEGER,          DIMENSION(:),ALLOCATABLE:: RANKPOS        ! RANKPOS(R) is the NRD type that has rank R, 0 if no type has that rank
+      DOUBLE PRECISION, DIMENSION(:),ALLOCATABLE:: AVALIBLE_WATER ! Delivery rate of each NRD type
+      DOUBLE PRECISION, DIMENSION(:),ALLOCATABLE:: CONSUMED_WATER ! Water taken from each NRD type this iteration
       !
       CONTAINS
       !
-      PROCEDURE, PASS(NRD):: INIT        =>    INIT_NRD_VALUES !(MXNRD)
-      PROCEDURE, PASS(NRD):: SETUP       =>   SETUP_NRD_VALUES !(UNDR, SCALE)
-      PROCEDURE, PASS(NRD):: INIT_CONSUME=>    INIT_CONSUME_NRD_VALUES !()
-      PROCEDURE, PASS(NRD):: CONSUME     => CONSUME_NRD_VALUES !(DEMAND, CONSUMED)
-      PROCEDURE, PASS(NRD):: SIZE        =>    SIZE_NRD_VALUES !(MXNRD)
+      PROCEDURE, PASS(NRD):: INIT           =>    INIT_NRD_VALUES !(MXNRD)
+      PROCEDURE, PASS(NRD):: SETUP          =>   SETUP_NRD_VALUES !(TRIPLETS, DIV)
+      PROCEDURE, PASS(NRD):: RESET          =>   RESET_NRD_VALUES !()
+      PROCEDURE, PASS(NRD):: DELIVER        => DELIVER_NRD_VALUES !(DEMAND, HAS_WELL, DELIVERED, SURPLUS_SRD, SURPLUS_INJECT, NO_WELL)
+      PROCEDURE, PASS(NRD):: SIZE           =>    SIZE_NRD_VALUES !()
+      PROCEDURE, PASS(NRD):: SUM_SUPPLY     =>    SUM_SUPPLY_NRD_VALUES !()
+      PROCEDURE, PASS(NRD):: RANKED_RATE    =>    RANKED_RATE_NRD_VALUES !(R)
+      PROCEDURE, PASS(NRD):: RANKED_USE_FLAG=>    RANKED_USE_FLAG_NRD_VALUES !(R)
       !
       FINAL:: FINAL_NRD_VALUES
   END TYPE
@@ -89,7 +97,6 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
       LOGICAL:: HAS_SRD    = FALSE
       !LOGICAL:: HAS_RET    = FALSE
       LOGICAL:: NRD_IS_RAT = FALSE
-      LOGICAL:: HAS_NRD_LOC= FALSE
       LOGICAL:: NORETURNFLOW=FALSE
       LOGICAL:: TFR_READ   = FALSE
       LOGICAL:: ALWAYS_BUILD_FULLY_ROUTED_RETURN = FALSE
@@ -113,8 +120,6 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
       INTEGER::          SRD_MISMATCH_CNT = Z
       DOUBLE PRECISION:: SRD_INFLOW_FRAC = UNO     ! Fraction of the SFR reach inflow (of the previous solver iteration) that semi-routed deliveries may remove; 1 = all of it
       !
-      INTEGER,          DIMENSION(:,:), ALLOCATABLE:: NRD_DP_LOC
-      DOUBLE PRECISION, DIMENSION(:,:), ALLOCATABLE:: NRD_DP
       TYPE(NRD_VALUES), DIMENSION(:),   ALLOCATABLE:: NRD
       !
       TYPE(SRD_LOC),   DIMENSION(:), ALLOCATABLE:: SRDLOC
@@ -128,7 +133,6 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
       TYPE(WBS_SEG_RCH_WT_TFR):: ISRD_TFR
       TYPE(WBS_SEG_RCH_WT_TFR):: ISRR_TFR
       !TYPE(SFR_SEGRCH_TFR):: ISRR
-      TYPE(LIST_ARRAY_INPUT_INT):: NRD_DP_TFR
       TYPE(LIST_ARRAY_INPUT_INT):: CHOICE
       TYPE(LIST_ARRAY_INPUT_INT):: NORETURNFLOW_TFR
       TYPE(LIST_ARRAY_INPUT    ):: NRD_TFR
@@ -148,7 +152,8 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
       !
       PROCEDURE, PASS(SWF):: NEXT     => SETUP_NEXT_STRESS_PERIOD
       PROCEDURE, PASS(SWF):: NEXT_TS  => SETUP_NEXT_TIME_STEP
-      PROCEDURE, PASS(SWF):: SET_NRD_ARRAY
+      PROCEDURE, PASS(SWF):: SETUP_NRD   !(SP_LENGTH)
+      PROCEDURE, PASS(SWF):: WELLFIELD_DELIVERY   !(INUSE, DEMAND, TFDROLD, QMAX)
       !PROCEDURE, PASS(SWF):: SET_SRD_ARRAY
       !PROCEDURE, PASS(SWF):: SET_SRR_ARRAY
       PROCEDURE, PASS(SWF):: SET_CHOICE_ARRAY
@@ -202,7 +207,6 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
     SWF%HAS_SRD     = FALSE
     SWF%HAS_NRD     = FALSE
     SWF%NRD_IS_RAT  = FALSE
-    SWF%HAS_NRD_LOC = FALSE
     SWF%NORETURNFLOW= FALSE
     SWF%TFR_READ    = FALSE
     SWF%BUILD_FULLY_ROUTED_RETURN = FALSE
@@ -213,8 +217,6 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
     IF(ALLOCATED(SWF%SRDLOC    )) DEALLOCATE(SWF%SRDLOC    )
     IF(ALLOCATED(SWF%SRRLOC    )) DEALLOCATE(SWF%SRRLOC    )
     IF(ALLOCATED(SWF%BUILD_FRR )) DEALLOCATE(SWF%BUILD_FRR )
-    IF(ALLOCATED(SWF%NRD_DP_LOC)) DEALLOCATE(SWF%NRD_DP_LOC)
-    IF(ALLOCATED(SWF%NRD_DP    )) DEALLOCATE(SWF%NRD_DP    )
     IF(ALLOCATED(SWF%RUNOFF_PRNT)) DEALLOCATE(SWF%RUNOFF_PRNT)
     IF(ALLOCATED(SWF%HAS_SRD_WBS)) DEALLOCATE(SWF%HAS_SRD_WBS)
     IF(ALLOCATED(SWF%NRD_INJECT_WRN    )) DEALLOCATE(SWF%NRD_INJECT_WRN    )
@@ -291,7 +293,6 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
     SWF%HAS_SRD     = FALSE
     SWF%HAS_NRD     = FALSE
     SWF%NRD_IS_RAT  = FALSE
-    SWF%HAS_NRD_LOC = FALSE
     !SWF%HAS_RET     = FALSE
     !
     SWF%BUILD_FULLY_ROUTED_RETURN = FALSE
@@ -359,14 +360,6 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
                         ELSE
                             CALL WARNING_MESSAGE(LINE=LINE, INFILE=BL%IU, OUTPUT=BL%IOUT,MSG='FMP SURFACE_WATER BLOCK "NON_ROUTED_DELIVERY" KEYWORD IS ONLY ALLOWED'//BLN//'IF YOU SPECIFY IN THE "GLOBAL DIMENSION" BLOCK THE "NRD_TYPES" KEYWORD WITH A VALUE GREATER THAN ZERO.'//BLN//'EITHER KEYWORD NRD_TYPES WAS NOT FOUND IN THE GLOBAL DIMENSION BLOCK OR IT WAS SET TO ZERO OR LESS.'//NL//'ITS CURRENT VALUE IS:'//NUM2STR(SWF%MXNRD)//BLN//'NON-ROUTED DILIVERIES WILL BE IGNORED DURING SIMULATION.')
                         END IF
-      !CASE ("NRD_INFILTRATION_LOCATION")
-      !                  WRITE(BL%IOUT,'(A)') '   NRD_INFILTRATION_LOCATION    KEYWORD FOUND. NOW LOADING STATIC/TRANSIENT KEYWORD.'
-      !                  !
-      !                  CALL SWF%NRD_DP_TFR%INIT('NRD_DP_LOC', LLOC, LINE, BL%IOUT, BL%IU, Z, Z, FDIM%NROW, FDIM%NCOL, SCRATCH=BL%SCRATCH, CDIM=[3,0,0]) 
-      !                  !
-      !                  ALLOCATE(SWF%NRD_DP_LOC(FDIM%NCOL,FDIM%NROW), SOURCE=Z)
-      !                  ALLOCATE(SWF%NRD_DP    (FDIM%NCOL,FDIM%NROW))
-      !                  !
       CASE ("NORETURNFLOW", "NO_RETURN_FLOW")
                         WRITE(BL%IOUT,'(A)') '   NORETURNFLOW                    KEYWORD FOUND. ALL RUNOFF WILL BECOME INFILTRATION'
                         CALL PARSE_WORD_UP(LINE,LLOC,ISTART,ISTOP)
@@ -630,7 +623,6 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
         CALL SWF%DELIV_U_LIM%NEXT()
         CALL SWF%CHOICE     %NEXT()
         CALL SWF%NRD_TFR    %NEXT()
-        CALL SWF%NRD_DP_TFR      %NEXT()
         CALL SWF%NORETURNFLOW_TFR%NEXT()
         CALL SWF%ADDED_RUNOFF_TFR%NEXT()
         !
@@ -972,26 +964,6 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
               END IF
           END ASSOCIATE
         END DO
-    END IF
-    !
-    IF(SWF%NRD_DP_TFR%INUSE ) THEN
-        IF(UPDATE .OR. SWF%NRD_DP_TFR%TRANSIENT .OR. SWF%NRD_TFR%TRANSIENT) THEN
-            !
-            K = SWF%MXNRD*THREE
-            SWF%HAS_NRD_LOC = FALSE
-            OUTER: DO J=ONE,   SWF%NFARM
-                   DO I=THREE, K, THREE
-                         IF(SWF%NRD_TFR%ARRAY(I,J) >9.99999999D0) THEN
-                             SWF%HAS_NRD_LOC = TRUE
-                             EXIT OUTER
-                         END IF
-                   END DO
-            END DO OUTER
-        END IF
-        !
-        IF(SWF%HAS_NRD_LOC .AND. (UPDATE .OR. SWF%NRD_DP_TFR%TRANSIENT)) THEN
-            CONTINUE
-        END IF
     END IF
     !
     !------------------------------------------------------------------------
@@ -2056,48 +2028,114 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
   !!!  !
   !!!END SUBROUTINE
   !  
-  SUBROUTINE SET_NRD_ARRAY( SWF, NRD, UPDATE )
-    CLASS(SURFACE_WATER_DATA),                    INTENT(IN   ):: SWF
-    DOUBLE PRECISION, DIMENSION(:,:), CONTIGUOUS, INTENT(INOUT):: NRD
-    LOGICAL,                                      INTENT(IN   ):: UPDATE
-    INTEGER:: I,J,II,DIM
+  SUBROUTINE SETUP_NRD( SWF, SP_LENGTH )
+    ! Load the NRD triplets (volume or rate, rank, use flag) of every WBS from the NON_ROUTED_DELIVERY input
+    ! into the NRD records; a VOLUME is divided by the stress period length to get the delivery rate.
+    CLASS(SURFACE_WATER_DATA), INTENT(INOUT):: SWF
+    DOUBLE PRECISION,          INTENT(IN   ):: SP_LENGTH
+    INTEGER:: I, J, II, DIM
+    DOUBLE PRECISION:: DIV
+    DOUBLE PRECISION, DIMENSION(:), ALLOCATABLE:: TRIPLETS
     !
-    IF(SWF%NRD_TFR%INUSE) THEN 
-        !
-        IF(UPDATE) THEN
-                   DO CONCURRENT(J=ONE:SWF%NFARM); NRD(ONE,J) = J
-                   END DO
-        END IF
-        !
-        IF(UPDATE .OR. SWF%NRD_TFR%TRANSIENT) THEN 
-            !
-            DO CONCURRENT(J=ONE:SWF%NFARM, I=ONE:SWF%MXNRD*THREE)
-                NRD(I+ONE,J) = SWF%NRD_TFR%ARRAY(I,J)
-            END DO
-            !
-            DIM = SWF%MXNRD*THREE + ONE  !DIM OF NRD ARRAY
-            !
-            ASSOCIATE(SFAC=> SWF%NRD_TFR%SFAC)
-                IF(SFAC%HAS_ALL) THEN
-                    DO CONCURRENT(J=ONE:SWF%NFARM, I=TWO:DIM:THREE)  !I=ONE:SWF%MXNRD and II = (I-ONE)*THREE + TWO
-                          NRD(I,J) = NRD(I,J) * SFAC%ALL
-                    END DO
-                END IF
-                IF(SFAC%HAS_EX1) THEN
-                    DO CONCURRENT(J=ONE:SWF%NFARM, I=TWO:DIM:THREE)
-                          NRD(I,J) = NRD(I,J) * SFAC%EX1(J)
-                    END DO
-                END IF
-                IF(SFAC%HAS_EX2) THEN
-                    DO CONCURRENT(J=ONE:SWF%NFARM, I=ONE:SWF%MXNRD)
-                          II = (I-ONE)*THREE + TWO
-                          NRD(II,J) = NRD(II,J) * SFAC%EX2(I)
-                    END DO
-                END IF
-            END ASSOCIATE
-            !
-        END IF
-    END IF
+    IF(.NOT. SWF%NRD_TFR%INUSE) RETURN
+    !
+    DIM = SWF%MXNRD*THREE
+    ALLOCATE(TRIPLETS(DIM))
+    !
+    DIV = UNO
+    IF(.NOT. SWF%NRD_IS_RAT) DIV = SP_LENGTH
+    !
+    ASSOCIATE(SFAC=> SWF%NRD_TFR%SFAC)
+      DO J=ONE, SWF%NFARM
+         !
+         DO CONCURRENT (I=ONE:DIM)
+             TRIPLETS(I) = SWF%NRD_TFR%ARRAY(I,J)
+         END DO
+         !
+         IF(SFAC%HAS_ALL) THEN
+             DO CONCURRENT(I=ONE:DIM:THREE)
+                   TRIPLETS(I) = TRIPLETS(I) * SFAC%ALL
+             END DO
+         END IF
+         IF(SFAC%HAS_EX1) THEN
+             DO CONCURRENT(I=ONE:DIM:THREE)
+                   TRIPLETS(I) = TRIPLETS(I) * SFAC%EX1(J)
+             END DO
+         END IF
+         IF(SFAC%HAS_EX2) THEN
+             DO CONCURRENT(I=ONE:SWF%MXNRD)
+                   II = (I-ONE)*THREE + ONE
+                   TRIPLETS(II) = TRIPLETS(II) * SFAC%EX2(I)
+             END DO
+         END IF
+         !
+         CALL SWF%NRD(J)%SETUP(TRIPLETS, DIV)
+      END DO
+    END ASSOCIATE
+    !
+  END SUBROUTINE
+  !
+  SUBROUTINE WELLFIELD_DELIVERY(SWF, INUSE, DEMAND, TFDROLD, QMAX)
+    ! FMP2 well field option (OPTIONS keyword WELLFIELD): an NRD type with a negative use flag is supplied by the
+    ! supply wells of the WBS the flag names (a virtual farm). For each NRD type NT the well field pumps the
+    ! cumulative delivery requirement of the WBS it supplies, up to its pumping capacity QMAX, as a negative
+    ! delivery of rank NT (the farm loop turns a negative delivery into a pumping requirement), and each
+    ! receiving WBS gets its share of that pumpage as a use flag 0 delivery of rank NT. The requirement of a
+    ! WBS is TFDROLD (its demand before a deficiency scenario) when that is set, else DEMAND; for NT > 1 the
+    ! part not covered by the delivery of rank NT-1. Called every outer iteration after the first, as the
+    ! previous versions of FMP did; the shares and the placement at rank NT (the type's index) are theirs.
+    CLASS(SURFACE_WATER_DATA),      INTENT(INOUT):: SWF
+    LOGICAL,          DIMENSION(:), INTENT(IN   ):: INUSE
+    DOUBLE PRECISION, DIMENSION(:), INTENT(IN   ):: DEMAND, TFDROLD, QMAX
+    INTEGER:: NT, NF, I, IDDELF
+    DOUBLE PRECISION:: TF, CTFDR, PREV, WFQ
+    !
+    IF(SWF%MXNRD < ONE) RETURN
+    !
+    DO NT=ONE, SWF%MXNRD
+       CTFDR  = DZ
+       IDDELF = Z
+       TF     = DZ
+       DO NF=ONE, SWF%NFARM
+          IF(.NOT. INUSE(NF)) CYCLE
+          IF(TFDROLD(NF) == DZ) TF = DEMAND(NF)
+          IF(TFDROLD(NF) >  DZ) TF = TFDROLD(NF)
+          IF(SWF%NRD(NF)%WELLFIELD(NT) < ONE) CYCLE
+          !
+          IF(NT == ONE) THEN
+              CTFDR = CTFDR + TF
+          ELSE
+              PREV = SWF%NRD(NF)%RANKED_RATE(NT-ONE)
+              IF(PREV < TF) CTFDR = CTFDR + (TF - PREV)
+          END IF
+          IDDELF = SWF%NRD(NF)%WELLFIELD(NT)
+          IF(IDDELF > SWF%NFARM) CYCLE
+          I = SWF%NRD(IDDELF)%RANKPOS(NT)
+          IF(I > Z) THEN
+              SWF%NRD(IDDELF)%AVALIBLE_WATER(I) = -MIN(CTFDR, QMAX(IDDELF))   ! the well field pumps the requirement
+              CALL SWF%NRD(IDDELF)%SUM_SUPPLY()
+          END IF
+       END DO
+       !
+       IF(IDDELF < ONE .OR. IDDELF > SWF%NFARM .OR. CTFDR <= DZ) CYCLE
+       WFQ = MIN(CTFDR, QMAX(IDDELF))
+       TF  = DZ
+       DO NF=ONE, SWF%NFARM
+          IF(.NOT. INUSE(NF)) CYCLE
+          IF(TFDROLD(NF) == DZ) TF = DEMAND(NF)
+          IF(TFDROLD(NF) >  DZ) TF = TFDROLD(NF)
+          IF(SWF%NRD(NF)%WELLFIELD(NT) < ONE) CYCLE
+          I = SWF%NRD(NF)%RANKPOS(NT)
+          IF(I < ONE) CYCLE
+          IF(NT == ONE) THEN
+              SWF%NRD(NF)%AVALIBLE_WATER(I) = WFQ * TF / CTFDR                      ! share of the well field pumpage
+          ELSE
+              SWF%NRD(NF)%AVALIBLE_WATER(I) = WFQ * (TF - SWF%NRD(NF)%RANKED_RATE(NT-ONE)) / CTFDR
+          END IF
+          SWF%NRD(NF)%USE_FLAG(I) = Z
+          CALL SWF%NRD(NF)%SUM_SUPPLY()
+       END DO
+    END DO
     !
   END SUBROUTINE
   !  
@@ -2286,92 +2324,145 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
   PURE ELEMENTAL SUBROUTINE INIT_NRD_VALUES(NRD, MXNRD)
     CLASS(NRD_VALUES), INTENT(INOUT):: NRD
     INTEGER,           INTENT(IN   ):: MXNRD
-    INTEGER:: I
     !
     CALL DESTROY_NRD_VALUES(NRD)
     !
     IF(MXNRD > Z) THEN
-        !ALLOCATE(NRD%RANKPOS(MXNRD), SOURCE=[1:MXNRD])  ! not supported by gfortran
-        ALLOCATE(NRD%RANKPOS(MXNRD), SOURCE=[(I, I=1, MXNRD, 1)])
+        ALLOCATE(NRD%RANK(MXNRD),           SOURCE=Z)
+        ALLOCATE(NRD%USE_FLAG(MXNRD),       SOURCE=Z)
+        ALLOCATE(NRD%WELLFIELD(MXNRD),      SOURCE=Z)
+        ALLOCATE(NRD%RANKPOS(MXNRD),        SOURCE=Z)
         ALLOCATE(NRD%AVALIBLE_WATER(MXNRD), SOURCE=DZ)
         ALLOCATE(NRD%CONSUMED_WATER(MXNRD), SOURCE=DZ)
     END IF
     !
   END SUBROUTINE
   !
-  PURE SUBROUTINE SETUP_NRD_VALUES(NRD, UNRD, SCALE)
+  PURE SUBROUTINE SETUP_NRD_VALUES(NRD, TRIPLETS, DIV)
+    ! TRIPLETS holds (volume or rate, rank, use flag) for each NRD type; the first value divided by DIV is the
+    ! delivery rate (DIV is the stress period length for a VOLUME input and 1 for a RATE input).
+    ! A rank outside 1..MXNRD is kept in RANK for the input check, but gets no position in the ranked sequence.
+    ! If two types share a rank the last one wins, as in the previous versions of FMP.
+    ! A negative use flag names the WBS whose well field supplies the type (WELLFIELD option); the type is used as use flag 0.
     CLASS(NRD_VALUES),                          INTENT(INOUT):: NRD
-    DOUBLE PRECISION, DIMENSION(:), CONTIGUOUS, INTENT(IN   ):: UNRD  ! Uses old FMP input structure that incldues the WBS # in UNRD(1)
-    DOUBLE PRECISION,                           INTENT(IN   ):: SCALE
+    DOUBLE PRECISION, DIMENSION(:), CONTIGUOUS, INTENT(IN   ):: TRIPLETS
+    DOUBLE PRECISION,                           INTENT(IN   ):: DIV
     INTEGER:: I, J, K, DIM
+    !
+    DIM = NRD%SIZE()
+    IF( DIM < ONE ) RETURN
+    !
+    NRD%CONSUMED_WATER = DZ
+    NRD%RANKPOS        = Z
+    !
+    J = ONE
+    DO I=ONE, DIM
+         NRD%AVALIBLE_WATER(I) = TRIPLETS(J  ) / DIV
+         NRD%RANK          (I) = NINT(TRIPLETS(J+1))
+         NRD%USE_FLAG      (I) = NINT(TRIPLETS(J+2))
+         NRD%WELLFIELD     (I) = Z
+         IF(NRD%USE_FLAG(I) < Z) NRD%WELLFIELD(I) = -NRD%USE_FLAG(I)
+         !
+         K = NRD%RANK(I)
+         IF(ONE <= K .AND. K <= DIM) NRD%RANKPOS(K) = I
+         !
+         J = J + THREE
+    END DO
+    !
+    CALL NRD%SUM_SUPPLY()
+    !
+  END SUBROUTINE
+  !
+  PURE SUBROUTINE SUM_SUPPLY_NRD_VALUES(NRD)   ! SUPPLY = total of the rates, summed in rank order (the order the delivery loop adds the types)
+    CLASS(NRD_VALUES), INTENT(INOUT):: NRD
+    INTEGER:: I, K
+    !
+    NRD%SUPPLY = DZ
+    DO K=ONE, NRD%SIZE()
+       I = NRD%RANKPOS(K)
+       IF(I > Z) NRD%SUPPLY = NRD%SUPPLY + NRD%AVALIBLE_WATER(I)
+    END DO
+    !
+  END SUBROUTINE
+  !
+  PURE ELEMENTAL SUBROUTINE RESET_NRD_VALUES(NRD)   ! Start of a formulate call: nothing has been taken yet
+    CLASS(NRD_VALUES), INTENT(INOUT):: NRD
+    !
+    NRD%DEMAND    = DZ
+    NRD%DELIVERED = DZ
+    IF(ALLOCATED(NRD%CONSUMED_WATER)) NRD%CONSUMED_WATER = DZ
+    !
+  END SUBROUTINE
+  !
+  PURE SUBROUTINE DELIVER_NRD_VALUES(NRD, DEMAND, HAS_WELL, DELIVERED, SURPLUS_SRD, SURPLUS_INJECT, NO_WELL)
+    !
+    ! Take water from the deliveries in rank order until the demand is met.
+    ! A type with use flag 0 only gives what is still needed; a type with use flag 1 or 2 is taken in full
+    ! once it is reached (and every type with use flag 1 or 2 that the demand never reaches is taken too),
+    ! so its unneeded part is a surplus: SURPLUS_SRD for use flag 1 and SURPLUS_INJECT for use flag 2.
+    ! Use flag 2 needs an active supply well; without one the type is treated as use flag 0 and NO_WELL is set.
+    ! DELIVERED is the water taken: the demand met plus the surpluses.
+    !
+    CLASS(NRD_VALUES), INTENT(INOUT):: NRD
+    DOUBLE PRECISION,  INTENT(IN   ):: DEMAND
+    LOGICAL,           INTENT(IN   ):: HAS_WELL
+    DOUBLE PRECISION,  INTENT(  OUT):: DELIVERED, SURPLUS_SRD, SURPLUS_INJECT
+    LOGICAL,           INTENT(  OUT):: NO_WELL
+    DOUBLE PRECISION:: RATE, TAKEN, DSUM
+    INTEGER:: R, I, USE
+    LOGICAL:: MET
+    !
+    NRD%DEMAND     = DEMAND
+    DELIVERED      = DZ
+    SURPLUS_SRD    = DZ
+    SURPLUS_INJECT = DZ
+    NO_WELL        = FALSE
     !
     IF( NRD%SIZE() < ONE ) RETURN
     !
     NRD%CONSUMED_WATER = DZ
     !
-    DIM = SIZE(UNRD)
-    J = ONE
-    DO I=TWO, DIM, THREE
-                   NRD%AVALIBLE_WATER(J) = UNRD(I) * SCALE
-                   J = J + ONE
-    END DO
+    TAKEN = DZ                           ! water taken by the types that were used in full before the demand was met
+    MET   = DEMAND < NEARZERO_10
     !
-    J = ONE
-    DO I=THREE, DIM, THREE
-                     K = NINT(UNRD(I))
-                     NRD%RANKPOS(K) = J
-                     J = J + ONE
-    END DO
-    !
-    NRD%SUPPLY = SUM(NRD%AVALIBLE_WATER)
-    !
-  END SUBROUTINE
-  !
-  PURE ELEMENTAL SUBROUTINE INIT_CONSUME_NRD_VALUES(NRD)
-    CLASS(NRD_VALUES), INTENT(INOUT):: NRD
-    !
-    NRD%DEMAND = DZ
-    IF(ALLOCATED(NRD%CONSUMED_WATER)) NRD%CONSUMED_WATER = DZ
-    !
-  END SUBROUTINE
-  !
-  PURE SUBROUTINE CONSUME_NRD_VALUES(NRD, DEMAND, CONSUMED)
-    CLASS(NRD_VALUES), INTENT(INOUT):: NRD
-    DOUBLE PRECISION,  INTENT(IN   ):: DEMAND
-    DOUBLE PRECISION,  INTENT(INOUT):: CONSUMED
-    DOUBLE PRECISION:: AVALIBLE
-    INTEGER:: I, J
-    !
-    IF(NRD%SUPPLY <= NRD%DEMAND) THEN                ! NRD%DEMAND holds past history of demands on NRD,
-        CONSUMED = DZ                                !   if supply is less than it, then any additional demands cannot be met
-    ELSE
-        CONSUMED = SUM(NRD%CONSUMED_WATER)          ! Water already consumed in NRD --sum to zero on first call
-        !                                           
-        IF( NRD%SUPPLY - CONSUMED <= DEMAND ) THEN  ! Demand exceeds NRD supplies so consume all of it
-            NRD%CONSUMED_WATER = NRD%AVALIBLE_WATER
-            CONSUMED = NRD%SUPPLY - CONSUMED        ! Actual water consumed during this call
-        ELSE
-            CONSUMED = DZ
-            DO I = 1, NRD%SIZE()
-               J = NRD%RANKPOS(I)
-               !
-               AVALIBLE = NRD%AVALIBLE_WATER(J) - NRD%CONSUMED_WATER(J)
-               IF(AVALIBLE > DZ) THEN
-                             CONSUMED = CONSUMED + AVALIBLE
-                             IF( CONSUMED <= DEMAND ) THEN
-                                 NRD%CONSUMED_WATER(J) = NRD%AVALIBLE_WATER(J)
-                             ELSE
-                                 NRD%CONSUMED_WATER(J) = NRD%CONSUMED_WATER(J) + DEMAND - CONSUMED + AVALIBLE ! DEMAND - (CONSUMED - AVALIBLE))
-                                 EXIT
-                             END IF
+    DO R=ONE, NRD%SIZE()
+       I = NRD%RANKPOS(R)
+       IF(I < ONE) CYCLE
+       !
+       RATE = NRD%AVALIBLE_WATER(I)
+       USE  = NRD%USE_FLAG(I)
+       IF(USE == TWO .AND. .NOT. HAS_WELL) THEN
+                                            USE = Z
+                                            NO_WELL = TRUE
+       END IF
+       !
+       IF(MET) THEN                                   ! demand already met: only use flag 1 and 2 types are still taken
+           IF(USE > Z) THEN
+               NRD%CONSUMED_WATER(I) = RATE
+               DELIVERED = DELIVERED + RATE
+               IF(USE == ONE) SURPLUS_SRD    = SURPLUS_SRD    + RATE
+               IF(USE == TWO) SURPLUS_INJECT = SURPLUS_INJECT + RATE
+           END IF
+       ELSE
+           DSUM = TAKEN + RATE
+           IF(DEMAND - DSUM <= DZ) THEN               ! type meets the rest of the demand
+               MET = TRUE
+               IF(USE == Z) THEN
+                   NRD%CONSUMED_WATER(I) = DEMAND - TAKEN
+                   DELIVERED = DEMAND
+               ELSE
+                   NRD%CONSUMED_WATER(I) = RATE
+                   DELIVERED = DSUM
+                   IF(USE == ONE) SURPLUS_SRD    = DELIVERED - DEMAND
+                   IF(USE == TWO) SURPLUS_INJECT = DELIVERED - DEMAND
                END IF
-            END DO
-            CONSUMED = DEMAND
-        END IF
-        IF(CONSUMED < DZ) CONSUMED = DZ
-    END IF
-    !
-    NRD%DEMAND = NRD%DEMAND + DEMAND
+           ELSE                                       ! type does not cover the rest of the demand: all of it is used
+               NRD%CONSUMED_WATER(I) = RATE
+               TAKEN     = DSUM
+               DELIVERED = DSUM
+           END IF
+       END IF
+    END DO
     !
   END SUBROUTINE
   !
@@ -2384,6 +2475,30 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
     !
   END FUNCTION
   !
+  PURE FUNCTION RANKED_RATE_NRD_VALUES(NRD, R) RESULT(RATE)   ! Delivery rate of the type with rank R, zero if no type has that rank
+    CLASS(NRD_VALUES), INTENT(IN):: NRD
+    INTEGER,           INTENT(IN):: R
+    DOUBLE PRECISION:: RATE
+    !
+    RATE = DZ
+    IF(NRD%SIZE() > Z) THEN
+       IF(NRD%RANKPOS(R) > Z) RATE = NRD%AVALIBLE_WATER(NRD%RANKPOS(R))
+    END IF
+    !
+  END FUNCTION
+  !
+  PURE FUNCTION RANKED_USE_FLAG_NRD_VALUES(NRD, R) RESULT(USE)   ! Use flag of the type with rank R, zero if no type has that rank
+    CLASS(NRD_VALUES), INTENT(IN):: NRD
+    INTEGER,           INTENT(IN):: R
+    INTEGER:: USE
+    !
+    USE = Z
+    IF(NRD%SIZE() > Z) THEN
+       IF(NRD%RANKPOS(R) > Z) USE = NRD%USE_FLAG(NRD%RANKPOS(R))
+    END IF
+    !
+  END FUNCTION
+  !
   PURE ELEMENTAL SUBROUTINE FINAL_NRD_VALUES(NRD)
     TYPE(NRD_VALUES), INTENT(INOUT):: NRD
     CALL DESTROY_NRD_VALUES(NRD)
@@ -2391,9 +2506,14 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
   !
   PURE ELEMENTAL SUBROUTINE DESTROY_NRD_VALUES(NRD)
     CLASS(NRD_VALUES), INTENT(INOUT):: NRD
-    NRD%DEMAND   = DZ
-    NRD%SUPPLY   = DZ
-    IF(ALLOCATED(NRD%RANKPOS)) DEALLOCATE(NRD%RANKPOS)
+    NRD%DEMAND        = DZ
+    NRD%SUPPLY        = DZ
+    NRD%DELIVERED     = DZ
+    NRD%DELIVERED_INI = DZ
+    IF(ALLOCATED(NRD%RANK    )) DEALLOCATE(NRD%RANK    )
+    IF(ALLOCATED(NRD%USE_FLAG)) DEALLOCATE(NRD%USE_FLAG)
+    IF(ALLOCATED(NRD%WELLFIELD)) DEALLOCATE(NRD%WELLFIELD)
+    IF(ALLOCATED(NRD%RANKPOS )) DEALLOCATE(NRD%RANKPOS )
     IF(ALLOCATED(NRD%AVALIBLE_WATER)) DEALLOCATE(NRD%AVALIBLE_WATER)
     IF(ALLOCATED(NRD%CONSUMED_WATER)) DEALLOCATE(NRD%CONSUMED_WATER)
   END SUBROUTINE
