@@ -12,7 +12,7 @@
 
 &nbsp;
 
-## 2.X.Y
+## 2.3.2
 
 TBA
 
@@ -54,6 +54,12 @@ TBA
 * The `IN_OUT` column keeps its sign (`TOTAL IN` minus `TOTAL OUT`) instead of being an absolute value; `PERCENT_ERROR` stays positive.
 * The binary form writes the three values as an extra record per time step, and its header column count now includes both the `_IN` and `_OUT` columns. The header definition is `doc/Output_Header_Defintion/BAS/options.budgetdb.txt`.
 
+### `SFR` Segments Routed in Upstream-to-Downstream Order
+
+* The segments are routed in the order of the stream network rather than in the order of their numbers: every segment is solved after the segments that flow into it (`OUTSEG` tributaries) and after the segment it diverts from (`IUPSEG`). The order is set whenever the segment data are read and is the input order wherever the numbering already follows the SFR rule (upstream segments have lower numbers), so a correctly numbered model gives identical results.
+* A segment numbered below a tributary, or below the segment it diverts from, used to receive that inflow from the previous solver iteration and, in the budget, the inflow of the last iteration. Its junction then did not close in the `DBFILE` and stream listings; a loosely converged model could lose or gain percents of the stream budget at one junction in a time step. Such models now close like any other.
+* The LIST file reports the connections where water flows from a higher-numbered segment into a lower-numbered one. The stream listings (`ISTCB2` and the LIST) and the `DBFILE` rows stay in segment-number order; the `DBFILE` has a new column `SEG_ORDER` after `RCH` (an `INTEGER` in the binary record) with the position of the segment in the routing order, so for segment 1 flowing into 3 and 3 into 2 the rows `SEG` 1, 2, 3 carry `SEG_ORDER` 1, 3, 2. A loop in the connections (a segment that receives water from itself through other segments) is reported and routed in input order, with the one-iteration lag, as before.
+
 ### `SFR` Kinematic-Wave Routing Storage Weight
 
 * `TRANSROUTE_WEIGHT  AUTO|WEIGHT` option (`OPTIONS` block), used only with transient routing (`TRANSROUTE` and `IRTFLG > 0`) in transient stress periods.
@@ -79,6 +85,20 @@ TBA
      * The cell is in the reach's current layer, so it follows the reach when SFR moves it to a lower layer (see `NO_REACH_LAYER_CHANGE`). Requires the `LPF` or `UPW` package.
      * This lets the streambed conductivity follow a calibrated or zoned aquifer conductivity instead of a separate set of streambed values.
      * The options were introduced in MODFLOW-2005, MODFLOW-NWT, and GSFLOW, but were not documented and had no effect there (MODFLOW-2005 never applied the factor, and MODFLOW-NWT and GSFLOW applied it only to reaches in inactive cells).
+
+### `MNW2` Multi-Node Well Package Corrections
+
+A set of corrections to the pumping constraints and the partial penetration correction, found with a suite of small test models checked against closed-form solutions and against MODFLOW-2005. The input format does not change; the results of models that use these features do (see the `Fixed` list in [CHANGELOG.md](CHANGELOG.md)).
+
+* `QCUT` (`Qlimit` with `Qfrcmn` and `Qfrcmx`): a well now keeps its state while the ratio of potential to desired rate lies between `Qfrcmn` and `Qfrcmx`, changes state (shut off or restarted) at most once per time step, and starts the time step after a restart from `Qdes`, limited by `Hlim` as usual. The published sample problem (`MNW2-Fig28`) shuts off one time step later and restarts one step earlier than the listing in the MNW2 report, which carried the stale restart rate.
+* `PUMPCAP`: `CapMult` scales the whole head-capacity curve, including its maximum operating discharge, for any positive value (a multiplier above 1 raises the rate above `Qdes`); the table starts at zero; a restart from zero takes half the looked-up rate; the rate is locked in once it changes by less than 0.01 percent between iterations.
+* The constraints and the capacity lookup act from the third outer iteration on; `MNW2` now keeps the solver iterating until then when a well has `QCUT` limits or an active capacity table, so linear problems that converged in two iterations no longer skip them.
+* Partial penetration (`PPFLAG > 0`): the correction is computed per unit pumping rate and added as a series resistance to the cell-to-well conductance, so every node of a multi-node well is corrected in steady state and the stored value no longer depends on the iteration history; the time loop of the analytical solution converges on the dimensionless difference and reports a failed solution instead of accepting a drifted one; `Kz` comes from `VKA` for one-layer models; the node fraction `PP` is checked when read (`PP >= 0.99` disables the correction for the node with a warning, as the MNW2 report prescribes, and `PPFLAG` is reset when every node of the well is fully penetrating; `PP <= 0` is an input error).
+* The correction is cached per node and evaluated again only when the node geometry changes, which removes most of the cost of the `WTAQ` solution in large models with many partially penetrating wells in saturated cells.
+* `LOSSTYPE NONE` equates the well and cell heads through a conductance of `1e8*Kh` (was `1e4*Kh`) and always places its rate on the right-hand side; with `PPFLAG > 0` the flag is reset with a warning, as for `SPECIFYCWC`.
+* `LOSSTYPE NONE` wells: the extraction of an unconstrained well is ramped down to zero over the lowest `NONE_PHIRAMP` fraction of the cell thickness above the cell bottom, or above the screen bottom of a well given by elevation when that lies higher (default 0.1, the WEL default; option `NONE_PHIRAMP FLOAT`, `0` disables it), with the WEL package smoothing function and, under NWT, its Jacobian term, so a well in a nearly dry cell no longer pumps its full rate until the cell goes dry or the water table drops below the screen.
+
+&nbsp;
 
 ### Build Systems
 
