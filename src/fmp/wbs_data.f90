@@ -704,8 +704,10 @@ MODULE WBS_DATA_FMP_MODULE
     !
     IF(WBS%HAS_CROP_FLUX) THEN;  IF (UPDATE .OR. WBS%CROP_FLUX_TFR%TRANSIENT) THEN
             !
-            WBS%CROP_FLUX = TRANSPOSE(WBS%CROP_FLUX_TFR%ARRAY)
-            !    
+            DO CONCURRENT (I=ONE:WBS%NCROP, F=ONE:WBS%NFARM)
+                  WBS%CROP_FLUX(F,I) = WBS%CROP_FLUX_TFR%ARRAY(I,F)
+            END DO
+            !
             ASSOCIATE(SFAC=>WBS%CROP_FLUX_TFR%SFAC)
                 !
                 IF(SFAC%HAS_ALL) WBS%CROP_FLUX = WBS%CROP_FLUX * SFAC%ALL

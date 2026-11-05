@@ -122,6 +122,7 @@ C     ------------------------------------------------------------------
       USE GENERIC_BLOCK_READER_INSTRUCTION, ONLY: GENERIC_BLOCK_READER
 C
       REAL,    DIMENSION(:,:), ALLOCATABLE::BUFFER                      ! REPLACES GLOBAL MODULE BUFF(:,:,1) WITH BUFFER(:,:) - ALLOCATABLE SO THAT THE LAYER IS ON THE HEAP, NOT THE STACK
+      INTEGER, DIMENSION(:,:), ALLOCATABLE::IBUFF                       ! INTEGER LAYER BUFFER FOR THE MATERIAL ZONE INDICES - ALLOCATABLE FOR THE SAME REASON
       CHARACTER(4 )::PTYP
       TYPE SUBPARAM
         !SEQUENCE
@@ -149,7 +150,6 @@ C
       !DATA ANAME(10) /'DELAY INTERBED THICKNESS'/
       !DATA ANAME(11) /'   MATERIAL ZONE INDICES'/
       !DATA ANAME(12)/'NUMBER OF BEDS IN SYSTEM'/
-      DIMENSION IBUFF(NCOL,NROW)
 C     ------------------------------------------------------------------
       !
       ALLOCATE(HAS_LMT, SOURCE=IUNIT(49).NE.0)
@@ -178,7 +178,7 @@ C     ------------------------------------------------------------------
       ZERO=0.0
       SEPARTE_FLOWS = FALSE
       !
-      ALLOCATE(BUFFER(NCOL,NROW))
+      ALLOCATE(BUFFER(NCOL,NROW), IBUFF(NCOL,NROW))
 C
 C1------IDENTIFY PACKAGE.
         WRITE(IOUT,1)IN

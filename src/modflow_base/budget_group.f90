@@ -174,13 +174,17 @@ MODULE BUDGET_GROUP_INTERFACE!, ONLY: BUDGET_GROUP
              END DO
              IF(IG == Z) CALL STOP_ERROR(OUTPUT=BD%IOUT, MSG='BUDGET_GROUP ERROR: FAILED TO LOCATE BUDGET GROUP WITH NAME "'//GRP//'" WITHIN LIST OF NAMED BUDGET GROUPS'//BLN//'THIS ERROR OCCURED FOR THE PACKAGE THAT HAS THE DEFAULT BUDGET GROUP NAME "'//BD%PAK//'"')
              !
-             IF (ALLOCATED(BD%GID(IG)%IDX)) THEN
-                                              ALLOCATE( TMP, SOURCE=[BD%GID(IG)%IDX, IDX] )
+             ! BD%DIM(IG) is the count in use; BD%GID(IG)%IDX is grown by doubling so that
+             ! adding an item one at a time does not copy the whole list every call.
+             IF (.NOT. ALLOCATED(BD%GID(IG)%IDX)) THEN
+                                              ALLOCATE( BD%GID(IG)%IDX(16) )
+             ELSEIF (BD%DIM(IG) >= SIZE(BD%GID(IG)%IDX)) THEN
+                                              ALLOCATE( TMP(2*SIZE(BD%GID(IG)%IDX)) )
+                                              TMP(1:BD%DIM(IG)) = BD%GID(IG)%IDX(1:BD%DIM(IG))
                                               CALL MOVE_ALLOC(TMP,BD%GID(IG)%IDX)
-             ELSE
-                                              ALLOCATE( BD%GID(IG)%IDX(1), SOURCE=IDX )
              END IF
-             
+             BD%GID(IG)%IDX(BD%DIM(IG)+ONE) = IDX
+             !
         ELSE
              IG = ONE
         END IF
@@ -196,31 +200,46 @@ MODULE BUDGET_GROUP_INTERFACE!, ONLY: BUDGET_GROUP
   SUBROUTINE BUDGET_GROUPS_ADD_GROUP_LIST( BD, GROUP )
     CLASS(BUDGET_GROUP),                   INTENT(INOUT):: BD
     CHARACTER(*),DIMENSION(:), CONTIGUOUS, INTENT(IN   ):: GROUP
-    INTEGER:: I, IG, IDX
-    INTEGER, DIMENSION(:), ALLOCATABLE:: TMP
+    INTEGER:: I, IG, IDX, N
+    INTEGER, DIMENSION(:), ALLOCATABLE:: GRP_OF, CNT, TMP
     !
-    DO IDX=ONE, UBOUND(GROUP,ONE)
-        !
-        IF ( BD%BUDGET_GROUPS ) THEN
-             IG = Z
-             DO CONCURRENT (I=1:BD%NGRP, BD%GRP(I)==GROUP(IDX))
-                 IG = I
-             END DO
-             IF(IG == Z) CALL STOP_ERROR(OUTPUT=BD%IOUT, MSG='BUDGET_GROUP ERROR: FAILED TO LOCATE BUDGET GROUP WITH NAME "'//GROUP(IDX)//'" WITHIN LIST OF NAMED BUDGET GROUPS'//BLN//'THIS ERROR OCCURED FOR THE PACKAGE THAT HAS THE DEFAULT BUDGET GROUP NAME "'//BD%PAK//'"')
-             !
-             IF (ALLOCATED(BD%GID(IG)%IDX)) THEN
-                                              ALLOCATE( TMP, SOURCE=[BD%GID(IG)%IDX, IDX] )
-                                              CALL MOVE_ALLOC(TMP,BD%GID(IG)%IDX)
-             ELSE
-                                              ALLOCATE( BD%GID(IG)%IDX(1), SOURCE=IDX )
-             END IF
-             
-        ELSE
-             IG = ONE
+    N = UBOUND(GROUP,ONE)
+    !
+    IF ( .NOT. BD%BUDGET_GROUPS ) THEN
+                                   BD%DIM(ONE) = BD%DIM(ONE) + N
+                                   RETURN
+    END IF
+    !
+    ! Locate the group of every item and count the items per group,
+    ! then grow each group's index list once and fill it in list order.
+    !
+    ALLOCATE(GRP_OF(N), CNT(BD%NGRP))
+    CNT = Z
+    DO IDX=ONE, N
+        IG = Z
+        DO CONCURRENT (I=1:BD%NGRP, BD%GRP(I)==GROUP(IDX))
+            IG = I
+        END DO
+        IF(IG == Z) CALL STOP_ERROR(OUTPUT=BD%IOUT, MSG='BUDGET_GROUP ERROR: FAILED TO LOCATE BUDGET GROUP WITH NAME "'//GROUP(IDX)//'" WITHIN LIST OF NAMED BUDGET GROUPS'//BLN//'THIS ERROR OCCURED FOR THE PACKAGE THAT HAS THE DEFAULT BUDGET GROUP NAME "'//BD%PAK//'"')
+        GRP_OF(IDX) = IG
+        CNT(IG) = CNT(IG) + ONE
+    END DO
+    !
+    DO IG=ONE, BD%NGRP
+        IF(CNT(IG) == Z) CYCLE
+        IF (.NOT. ALLOCATED(BD%GID(IG)%IDX)) THEN
+                                   ALLOCATE( BD%GID(IG)%IDX(CNT(IG)) )
+        ELSEIF (BD%DIM(IG) + CNT(IG) > SIZE(BD%GID(IG)%IDX)) THEN
+                                   ALLOCATE( TMP(BD%DIM(IG) + CNT(IG)) )
+                                   TMP(1:BD%DIM(IG)) = BD%GID(IG)%IDX(1:BD%DIM(IG))
+                                   CALL MOVE_ALLOC(TMP,BD%GID(IG)%IDX)
         END IF
-        !
+    END DO
+    !
+    DO IDX=ONE, N
+        IG = GRP_OF(IDX)
         BD%DIM(IG) = BD%DIM(IG) + ONE
-        !
+        BD%GID(IG)%IDX(BD%DIM(IG)) = IDX
     END DO
     !
   END SUBROUTINE

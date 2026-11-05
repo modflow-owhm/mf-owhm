@@ -4599,7 +4599,11 @@ C--CONSOLIDATE THE COLUMNS TO THE LEFT (IN EFFECT, REMOVE COLUMNS THAT ARE ALL Z
           DO I=4,1,-1
             IF(FLOWTYPE(I).EQ.'NA') THEN
               LENGTH=USED-(I+1)
-              SFRFLOWVAL(I:I+LENGTH,:)=SFRFLOWVAL((I+1):USED,:)
+              DO L=1,NSTRM                  ! shift the columns in place, one element at a time
+                DO J=I,I+LENGTH             ! (an overlapping section assignment makes a copy of the array)
+                  SFRFLOWVAL(J,L)=SFRFLOWVAL(J+1,L)
+                ENDDO
+              ENDDO
               USED=USED-1
             ENDIF
           ENDDO
