@@ -2242,7 +2242,7 @@ SUBMODULE (SORT_INTERFACE) SORT_INTERFACE_REL32
     INTEGER,                 intent(in   ) :: dim
     INTEGER, dimension(dim), intent(inout) :: A
     INTEGER,                 intent(inout) :: dimOUT
-    INTEGER:: I, J, D
+    INTEGER:: I, J, K, D
     !
     I = 1
     D = dim
@@ -2250,7 +2250,9 @@ SUBMODULE (SORT_INTERFACE) SORT_INTERFACE_REL32
        J = I + 1
        DO WHILE ( J <= D )
                   IF( A(I) == A(J) .OR. A(J) == 0 ) THEN
-                      A(J:D-1) = A(J+1:D)
+                      DO K=J, D-1              ! shift in place; an overlapping section assignment copies the moved part first
+                         A(K) = A(K+1)
+                      END DO
                       A(D) = 0
                       D = D - 1
                   ELSE

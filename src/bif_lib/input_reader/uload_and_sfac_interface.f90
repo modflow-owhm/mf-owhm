@@ -242,6 +242,7 @@ MODULE ULOAD_AND_SFAC_INTERFACE
     CLASS(SFAC_DATA),INTENT(IN)::SF1
     CLASS(SFAC_DATA),INTENT(IN)::SF2
     TYPE(SFAC_DATA):: SFAC
+    INTEGER:: I
     !
     CALL COPY_SFAC_TO_SFAC(SFAC, SF1)
     !
@@ -267,78 +268,98 @@ MODULE ULOAD_AND_SFAC_INTERFACE
     END IF
     !
     IF(ALLOCATED(SFAC%ROW   ) .AND. SF2%HAS_ROW) THEN
-                                                     WHERE(SF2%ROW /= DZ)
-                                                              SFAC%ROW = SFAC%ROW / SF2%ROW
-                                                     ELSEWHERE
-                                                              SFAC%ROW = DZ
-                                                     END WHERE
+                                                     DO CONCURRENT (I=1:SIZE(SF2%ROW))
+                                                        IF(SF2%ROW(I) /= DZ) THEN
+                                                                 SFAC%ROW(I) = SFAC%ROW(I) / SF2%ROW(I)
+                                                        ELSE
+                                                                 SFAC%ROW(I) = DZ
+                                                        END IF
+                                                     END DO
     ELSEIF(SF2%HAS_ROW) THEN
                                                      ALLOCATE(SFAC%ROW,  MOLD = SF2%ROW   )
-                                                     WHERE(SF2%ROW /= DZ)
-                                                              SFAC%ROW = UNO / SF2%ROW
-                                                     ELSEWHERE
-                                                              SFAC%ROW = DZ
-                                                     END WHERE
+                                                     DO CONCURRENT (I=1:SIZE(SF2%ROW))
+                                                        IF(SF2%ROW(I) /= DZ) THEN
+                                                                 SFAC%ROW(I) = UNO / SF2%ROW(I)
+                                                        ELSE
+                                                                 SFAC%ROW(I) = DZ
+                                                        END IF
+                                                     END DO
     END IF
     !
     IF(ALLOCATED(SFAC%COL   ) .AND. SF2%HAS_COL) THEN
-                                                     WHERE(SF2%COL /= DZ)
-                                                              SFAC%COL = SFAC%COL / SF2%COL
-                                                     ELSEWHERE
-                                                              SFAC%COL = DZ
-                                                     END WHERE
+                                                     DO CONCURRENT (I=1:SIZE(SF2%COL))
+                                                        IF(SF2%COL(I) /= DZ) THEN
+                                                                 SFAC%COL(I) = SFAC%COL(I) / SF2%COL(I)
+                                                        ELSE
+                                                                 SFAC%COL(I) = DZ
+                                                        END IF
+                                                     END DO
     ELSEIF(SF2%HAS_COL) THEN
                                                      ALLOCATE(SFAC%COL,  MOLD = SF2%COL   )
-                                                     WHERE(SF2%COL /= DZ)
-                                                              SFAC%COL = UNO / SF2%COL
-                                                     ELSEWHERE
-                                                              SFAC%COL = DZ
-                                                     END WHERE
+                                                     DO CONCURRENT (I=1:SIZE(SF2%COL))
+                                                        IF(SF2%COL(I) /= DZ) THEN
+                                                                 SFAC%COL(I) = UNO / SF2%COL(I)
+                                                        ELSE
+                                                                 SFAC%COL(I) = DZ
+                                                        END IF
+                                                     END DO
     END IF
     !
     IF(ALLOCATED(SFAC%EX1   ) .AND. SF2%HAS_EX1) THEN
-                                                     WHERE(SF2%EX1 /= DZ)
-                                                              SFAC%EX1 = SFAC%EX1 / SF2%EX1
-                                                     ELSEWHERE
-                                                              SFAC%EX1 = DZ
-                                                     END WHERE
+                                                     DO CONCURRENT (I=1:SIZE(SF2%EX1))
+                                                        IF(SF2%EX1(I) /= DZ) THEN
+                                                                 SFAC%EX1(I) = SFAC%EX1(I) / SF2%EX1(I)
+                                                        ELSE
+                                                                 SFAC%EX1(I) = DZ
+                                                        END IF
+                                                     END DO
     ELSEIF(SF2%HAS_EX1) THEN
                                                      ALLOCATE(SFAC%EX1,  MOLD = SF2%EX1   )
-                                                     WHERE(SF2%EX1 /= DZ)
-                                                              SFAC%EX1 = UNO / SF2%EX1
-                                                     ELSEWHERE
-                                                              SFAC%EX1 = DZ
-                                                     END WHERE
+                                                     DO CONCURRENT (I=1:SIZE(SF2%EX1))
+                                                        IF(SF2%EX1(I) /= DZ) THEN
+                                                                 SFAC%EX1(I) = UNO / SF2%EX1(I)
+                                                        ELSE
+                                                                 SFAC%EX1(I) = DZ
+                                                        END IF
+                                                     END DO
     END IF
     !
     IF(ALLOCATED(SFAC%EX2   ) .AND. SF2%HAS_EX2) THEN
-                                                     WHERE(SF2%EX2 /= DZ)
-                                                              SFAC%EX2 = SFAC%EX2 / SF2%EX2
-                                                     ELSEWHERE
-                                                              SFAC%EX2 = DZ
-                                                     END WHERE
+                                                     DO CONCURRENT (I=1:SIZE(SF2%EX2))
+                                                        IF(SF2%EX2(I) /= DZ) THEN
+                                                                 SFAC%EX2(I) = SFAC%EX2(I) / SF2%EX2(I)
+                                                        ELSE
+                                                                 SFAC%EX2(I) = DZ
+                                                        END IF
+                                                     END DO
     ELSEIF(SF2%HAS_EX2) THEN
                                                      ALLOCATE(SFAC%EX2,  MOLD = SF2%EX2   )
-                                                     WHERE(SF2%EX2 /= DZ)
-                                                              SFAC%EX2 = UNO / SF2%EX2
-                                                     ELSEWHERE
-                                                              SFAC%EX2 = DZ
-                                                     END WHERE
+                                                     DO CONCURRENT (I=1:SIZE(SF2%EX2))
+                                                        IF(SF2%EX2(I) /= DZ) THEN
+                                                                 SFAC%EX2(I) = UNO / SF2%EX2(I)
+                                                        ELSE
+                                                                 SFAC%EX2(I) = DZ
+                                                        END IF
+                                                     END DO
     END IF
     !
     IF(ALLOCATED(SFAC%EX3   ) .AND. SF2%HAS_EX3) THEN
-                                                     WHERE(SF2%EX3 /= DZ)
-                                                              SFAC%EX3 = SFAC%EX3 / SF2%EX3
-                                                     ELSEWHERE
-                                                              SFAC%EX3 = DZ
-                                                     END WHERE
+                                                     DO CONCURRENT (I=1:SIZE(SF2%EX3))
+                                                        IF(SF2%EX3(I) /= DZ) THEN
+                                                                 SFAC%EX3(I) = SFAC%EX3(I) / SF2%EX3(I)
+                                                        ELSE
+                                                                 SFAC%EX3(I) = DZ
+                                                        END IF
+                                                     END DO
     ELSEIF(SF2%HAS_EX3) THEN
                                                      ALLOCATE(SFAC%EX3,  MOLD = SF2%EX3   )
-                                                     WHERE(SF2%EX3 /= DZ)
-                                                              SFAC%EX3 = UNO / SF2%EX3
-                                                     ELSEWHERE
-                                                              SFAC%EX3 = DZ
-                                                     END WHERE
+                                                     DO CONCURRENT (I=1:SIZE(SF2%EX3))
+                                                        IF(SF2%EX3(I) /= DZ) THEN
+                                                                 SFAC%EX3(I) = UNO / SF2%EX3(I)
+                                                        ELSE
+                                                                 SFAC%EX3(I) = DZ
+                                                        END IF
+                                                     END DO
     END IF
     !
     !IF(ALLOCATED(SFAC%IU_ALL)) DEALLOCATE(SFAC%IU_ALL)

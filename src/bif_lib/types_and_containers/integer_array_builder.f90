@@ -47,7 +47,9 @@ MODULE INTEGER_ARRAY_BUILDER_INTERFACE!, ONLY: INTEGER_ARRAY_BUILDER
     INTEGER, DIMENSION(:), ALLOCATABLE:: TMP
     !
     IF(ARR%N > Z) THEN
-        ALLOCATE(TMP, SOURCE=[ARR%INT,I])
+        ALLOCATE(TMP(ARR%N+ONE))           ! an array constructor [ARR%INT, I] would build the new list on the stack first
+        TMP(ONE:ARR%N) = ARR%INT(ONE:ARR%N)
+        TMP(ARR%N+ONE) = I
         CALL MOVE_ALLOC(TMP,ARR%INT)
     ELSE
         ALLOCATE(ARR%INT(ONE), SOURCE=I)
@@ -63,8 +65,10 @@ MODULE INTEGER_ARRAY_BUILDER_INTERFACE!, ONLY: INTEGER_ARRAY_BUILDER
     INTEGER, DIMENSION(:), ALLOCATABLE:: TMP
     !
     IF(ARR%N > Z) THEN
-        IF(ALL(I.NE.ARR%INT)) THEN
-              ALLOCATE(TMP, SOURCE=[ARR%INT,I])
+        IF(ALL(I /= ARR%INT)) THEN
+              ALLOCATE(TMP(ARR%N+ONE))
+              TMP(ONE:ARR%N) = ARR%INT(ONE:ARR%N)
+              TMP(ARR%N+ONE) = I
               CALL MOVE_ALLOC(TMP,ARR%INT)
               ARR%N = ARR%N + ONE
         END IF
