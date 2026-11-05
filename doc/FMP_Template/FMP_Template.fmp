@@ -819,8 +819,9 @@ BEGIN WATER_BALANCE_SUBREGION   #WBS
    #   demanded water only becomes surface runoff or deep percolation.
    #
    #   The second keyword indicates the units of the input, where
-   #      LENGTH or FLUX indicates input is length per time (L/T)
-   #      RATE           indicates input is volume per time (L^3/T)
+   #      LENGTH or FLUX indicates input is length per time (L/T), multiplied by the crop's area in each cell
+   #      RATE           indicates input is volume per time (L^3/T), applied to every irrigated cell of the crop in the WBS
+   #                     (a WBS with 25 cells of the crop demands 25 times the rate; it is not a WBS total)
    #   The added demand is summed with other crop related added demands (e.g. CROP Block ADDED_DEMAND)
    #
    #   You may specify both ADDED_CROP_DEMAND FLUX and ADDED_CROP_DEMAND RATE at the same time (but on different lines).
@@ -1040,8 +1041,12 @@ BEGIN SURFACE_WATER
    #    NRDR = Rank of NRD = order that NRDs provide supply for irrigation.
    #    NRDU = What to do with unused NRD water - water available exceeds demand
    #         = 0 indicates only the water necessary is obtained, excess is not delivered
-   #         = 1 indicates that unused delivered water is evenly discharged to SFR Delivery locations defined with SEMI_ROUTED_DELIVERY. If SEMI_ROUTED_DELIVERY is not defined, then functions the same as NRDU = 0
-   #         = 2 indicates that unused delivered water is evenly injected to a WBS associated supply wells
+   #         = 1 indicates that unused delivered water is evenly discharged to SFR Delivery locations defined 
+   #             with SEMI_ROUTED_DELIVERY. If the WBS has no SEMI_ROUTED_DELIVERY location, then 
+   #             the unused water is runoff that is sent to the WBS return flow location (see Return Flow Options)
+   #         = 2 indicates that unused delivered water is evenly injected into the WBS supply wells 
+   #             that are active for the stress period (the injection is not limited by the pumping capacity). 
+   #             If the WBS has no active supply well, then functions the same as NRDU = 0 and a warning is printed
    #
    #
    # It may be specified as VOLUME of water per stress period.
@@ -1291,8 +1296,10 @@ BEGIN SURFACE_WATER
    #    --Note, NO_RETURN_FLOW converts ADDED_RUNOFF to deep percolation.
    #
    # The second keyword indicates the units of the input, where
-   #   LENGTH or FLUX indicates input is length per time (L/T).
-   #   RATE           indicates input is volume per time (L^3/T)
+   #   LENGTH or FLUX indicates input is length per time (L/T), multiplied by the cell area.
+   #   RATE           indicates input is volume per time (L^3/T):
+   #                    an Array-Style value applies to its cell, and a List-Style value (by WBS)
+   #                    is the WBS total, spread over the WBS cells in proportion to cell area
    #
    # Array-Style input reads an NROW by NCOL array of runoff values.
    # List-Style reads NWBS records that specify the total runoff for each WBS.
@@ -1767,8 +1774,10 @@ BEGIN LAND_USE
    # based on the fraction specified in the WBS Block "ADDED_DEMAND_RUNOFF_SPLIT"
    #
    # The second keyword indicates the units of the input, where
-   #    LENGTH or FLUX indicates input is length per time (L/T)
-   #    RATE           indicates input is volume per time (L^3/T)
+   #    LENGTH or FLUX indicates input is length per time (L/T), multiplied by the crop's area in each cell
+   #    RATE           indicates input is volume per time (L^3/T) for each cell:
+   #                     an Array-Style value applies to its cell, and a List-Style value (by WBS)
+   #                     is applied to every irrigated cell of the crop in the WBS (it is not a WBS total)
    #
    # The LAND_USE ADDED_DEMAND may only be specified once and is 
    #    added demand is summed with other added demands (e.g. WBS Block ADDED_CROP_DEMAND)
@@ -2138,6 +2147,8 @@ END SURFACE_WATER_OPERATIONS
 #  #                                                                                                                                                     ###
 #  #                                                                                                                                                     ###
 #  BEGIN LAND_USE # CROP                                                                                                                                 ###
+#     #                                                                                                                                                  ###
+#     LOCATION                                    Only SINGLE_LAND_USE_PER_CELL, reads       ROW, COL, CropID; Default is 0 for unspecified (ROW, COL) ###
 #     #                                                                                                                                                  ###
 #     LAND_USE_AREA_FRACTION                      If   SINGLE_LAND_USE_PER_CELL, reads         ROW, COL, Frac; Default is 0.0 for unspecified (ROW, COL) ###
 #     #                                           If MULTIPLE_LAND_USE_PER_CELL, reads CropID, ROW, COL, Frac; Default is 0.0 for unspecified (ROW, COL) ###

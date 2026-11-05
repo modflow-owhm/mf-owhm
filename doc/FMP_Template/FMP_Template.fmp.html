@@ -875,8 +875,9 @@ span {
 </span><span class="sc24">   </span><span class="sc2">#   demanded water only becomes surface runoff or deep percolation.
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2">#   The second keyword indicates the units of the input, where
-</span><span class="sc24">   </span><span class="sc2">#      LENGTH or FLUX indicates input is length per time (L/T)
-</span><span class="sc24">   </span><span class="sc2">#      RATE           indicates input is volume per time (L^3/T)
+</span><span class="sc24">   </span><span class="sc2">#      LENGTH or FLUX indicates input is length per time (L/T), multiplied by the crop's area in each cell
+</span><span class="sc24">   </span><span class="sc2">#      RATE           indicates input is volume per time (L^3/T), applied to every irrigated cell of the crop in the WBS
+</span><span class="sc24">   </span><span class="sc2">#                     (a WBS with 25 cells of the crop demands 25 times the rate; it is not a WBS total)
 </span><span class="sc24">   </span><span class="sc2">#   The added demand is summed with other crop related added demands (e.g. CROP Block ADDED_DEMAND)
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2">#   You may specify both ADDED_CROP_DEMAND FLUX and ADDED_CROP_DEMAND RATE at the same time (but on different lines).
@@ -1096,8 +1097,12 @@ span {
 </span><span class="sc24">   </span><span class="sc2">#    NRDR = Rank of NRD = order that NRDs provide supply for irrigation.
 </span><span class="sc24">   </span><span class="sc2">#    NRDU = What to do with unused NRD water - water available exceeds demand
 </span><span class="sc24">   </span><span class="sc2">#         = 0 indicates only the water necessary is obtained, excess is not delivered
-</span><span class="sc24">   </span><span class="sc2">#         = 1 indicates that unused delivered water is evenly discharged to SFR Delivery locations defined with SEMI_ROUTED_DELIVERY. If SEMI_ROUTED_DELIVERY is not defined, then functions the same as NRDU = 0
-</span><span class="sc24">   </span><span class="sc2">#         = 2 indicates that unused delivered water is evenly injected to a WBS associated supply wells
+</span><span class="sc24">   </span><span class="sc2">#         = 1 indicates that unused delivered water is evenly discharged to SFR Delivery locations defined 
+</span><span class="sc24">   </span><span class="sc2">#             with SEMI_ROUTED_DELIVERY. If the WBS has no SEMI_ROUTED_DELIVERY location, then 
+</span><span class="sc24">   </span><span class="sc2">#             the unused water is runoff that is sent to the WBS return flow location (see Return Flow Options)
+</span><span class="sc24">   </span><span class="sc2">#         = 2 indicates that unused delivered water is evenly injected into the WBS supply wells 
+</span><span class="sc24">   </span><span class="sc2">#             that are active for the stress period (the injection is not limited by the pumping capacity). 
+</span><span class="sc24">   </span><span class="sc2">#             If the WBS has no active supply well, then functions the same as NRDU = 0 and a warning is printed
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># It may be specified as VOLUME of water per stress period.
@@ -1125,7 +1130,7 @@ span {
 </span><span class="sc24">   </span><span class="sc6">PRINT SFR_RETURN</span><span class="sc24">            </span><span class="sc8">GENERIC_OUTPUT_OptKey</span><span class="sc24">  </span><span class="sc2"># Runoff budget for all SFR segment/reaches that receive FMP runoff
 </span><span class="sc24">   </span><span class="sc6">PRINT SFR_SRR_ONLY</span><span class="sc24">          </span><span class="sc8">GENERIC_OUTPUT_OptKey</span><span class="sc24">  </span><span class="sc2"># Runoff budget for the NSFR_RETURN SFR segment/reaches that receive FMP runoff
 </span><span class="sc24">   </span><span class="sc2">#
-</span><span class="sc24">   </span><span class="sc6">PRINT SFR_DELIVERY_MISMATCH</span><span class="sc24"> </span><span class="sc8">GENERIC_OUTPUT_OptKey</span><span class="sc24">  </span><span class="sc2"># Mass error between FMP and SFR for the semi-routed deliveries. For every SFR reach that FMP
+</span><span class="sc24">   </span><span class="sc6">PRINT</span><span class="sc24"> </span><span class="sc0">SFR_DELIVERY_MISMATCH</span><span class="sc24"> </span><span class="sc8">GENERIC_OUTPUT_OptKey</span><span class="sc24">  </span><span class="sc2"># Mass error between FMP and SFR for the semi-routed deliveries. For every SFR reach that FMP
 </span><span class="sc24">   </span><span class="sc2">#                                                  #   removes water from, lists the delivery FMP applied (FMP_DELIVERY), the part SFR could
 </span><span class="sc24">   </span><span class="sc2">#                                                  #   actually remove (SFR_REMOVED), their difference (MISMATCH) and MISMATCH as a percent of
 </span><span class="sc24">   </span><span class="sc2">#                                                  #   FMP_DELIVERY, plus the reach inflow. The first row of each time step (SEG = RCH = 0) is the
@@ -1153,7 +1158,10 @@ span {
 </span><span class="sc24">   </span><span class="sc2">#   FRAC is optional and if specified indicates an initial fraction
 </span><span class="sc24">   </span><span class="sc2">#     of the irrigation demand that is supplied by the SRD.
 </span><span class="sc24">   </span><span class="sc2">#     If the SRD can not supply that amount of water, then the
-</span><span class="sc24">   </span><span class="sc2">#     deficit demand is shifted to other defined SRD's.
+</span><span class="sc24">   </span><span class="sc2">#     deficit demand is shifted to other defined SRD's, in proportion
+</span><span class="sc24">   </span><span class="sc2">#     to the water each can still deliver (its reach inflow above the
+</span><span class="sc24">   </span><span class="sc2">#     lower limit and below the upper limit), until the demand is met
+</span><span class="sc24">   </span><span class="sc2">#     or no deliverable water is left.
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2">#        ***If FRAC is NOT specified (or specified as -1),
 </span><span class="sc24">   </span><span class="sc2">#           then water is removed from the SRD in the order they are specified.
@@ -1206,9 +1214,10 @@ span {
 </span><span class="sc24">   </span><span class="sc2"># SEMI_ROUTED_DELIVERY's are updated every solver iteration based on the available water in SFR.
 </span><span class="sc24">   </span><span class="sc2"># The keyword SEMI_ROUTED_DELIVERY_CLOSURE_TOLERANCE defines a tolerance for how much a delivery rate
 </span><span class="sc24">   </span><span class="sc2"># can change between solver iterations before convergence is allowed.
-</span><span class="sc24">   </span><span class="sc2"># If not specified, then the default tolerance is 0.02 L^3/T change in delivery.
+</span><span class="sc24">   </span><span class="sc2"># The tolerance is a relative change: |DELIVERY - DELIVERY_PREVIOUS| / max(DELIVERY, DELIVERY_PREVIOUS)
+</span><span class="sc24">   </span><span class="sc2"># If not specified, then the default tolerance is 0.02 (2 percent).
 </span><span class="sc24">   </span><span class="sc2">#   This indicates that--in addition to the solver criteria--convergence is only allowed
-</span><span class="sc24">   </span><span class="sc2">#   if the the change in SEMI_ROUTED_DELIVERY from the previous iteration is less then 0.02 L^3/T
+</span><span class="sc24">   </span><span class="sc2">#   if every SEMI_ROUTED_DELIVERY changed by less than 2 percent from the previous iteration.
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc6">SEMI_ROUTED_DELIVERY_CLOSURE_TOLERANCE</span><span class="sc24">  </span><span class="sc7">FLOAT</span><span class="sc24">
    </span><span class="sc2">#
@@ -1228,6 +1237,15 @@ span {
 </span><span class="sc24">   </span><span class="sc2"># tolerance stays in effect, so convergence requires both checks to pass. A negative value disables it again.
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc6">SEMI_ROUTED_DELIVERY_MISMATCH_ABSOLUTE_TOLERANCE</span><span class="sc24">  </span><span class="sc7">FLOAT</span><span class="sc24">
+   </span><span class="sc2">#
+</span><span class="sc24">   </span><span class="sc2"># Fraction of the SFR reach inflow that semi-routed deliveries may remove.
+</span><span class="sc24">   </span><span class="sc2"># A fraction below 1 (for example 0.99, imposes a limit of 0.99*INFLOW)
+</span><span class="sc24">   </span><span class="sc2"># may help with convergence by allowing some water to still pass through SFR,
+</span><span class="sc24">   </span><span class="sc2"># and minimize the chance that FMP takes more water then the next SFR iteration has
+</span><span class="sc24">   </span><span class="sc2"># Default is 1.0, and can be any value greater than 0 and less then or equal to 1. 
+</span><span class="sc24">   </span><span class="sc2"># Note that, any other limits still apply (allotments, lower and upper flow).
+</span><span class="sc24">   </span><span class="sc2">#
+</span><span class="sc24">   </span><span class="sc6">SEMI_ROUTED_DELIVERY_INFLOW_FRACTION</span><span class="sc24">  </span><span class="sc7">FLOAT</span><span class="sc24">
    </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># ------------------------------------------------------------------------------------------------------------------
 </span><span class="sc24">   </span><span class="sc2">#
@@ -1334,8 +1352,10 @@ span {
 </span><span class="sc24">   </span><span class="sc2">#    --Note, NO_RETURN_FLOW converts ADDED_RUNOFF to deep percolation.
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># The second keyword indicates the units of the input, where
-</span><span class="sc24">   </span><span class="sc2">#   LENGTH or FLUX indicates input is length per time (L/T).
-</span><span class="sc24">   </span><span class="sc2">#   RATE           indicates input is volume per time (L^3/T)
+</span><span class="sc24">   </span><span class="sc2">#   LENGTH or FLUX indicates input is length per time (L/T), multiplied by the cell area.
+</span><span class="sc24">   </span><span class="sc2">#   RATE           indicates input is volume per time (L^3/T):
+</span><span class="sc24">   </span><span class="sc2">#                    an Array-Style value applies to its cell, and a List-Style value (by WBS)
+</span><span class="sc24">   </span><span class="sc2">#                    is the WBS total, spread over the WBS cells in proportion to cell area
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># Array-Style input reads an NROW by NCOL array of runoff values.
 </span><span class="sc24">   </span><span class="sc2"># List-Style reads NWBS records that specify the total runoff for each WBS.
@@ -1810,8 +1830,10 @@ span {
 </span><span class="sc24">   </span><span class="sc2"># based on the fraction specified in the WBS Block "ADDED_DEMAND_RUNOFF_SPLIT"
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># The second keyword indicates the units of the input, where
-</span><span class="sc24">   </span><span class="sc2">#    LENGTH or FLUX indicates input is length per time (L/T)
-</span><span class="sc24">   </span><span class="sc2">#    RATE           indicates input is volume per time (L^3/T)
+</span><span class="sc24">   </span><span class="sc2">#    LENGTH or FLUX indicates input is length per time (L/T), multiplied by the crop's area in each cell
+</span><span class="sc24">   </span><span class="sc2">#    RATE           indicates input is volume per time (L^3/T) for each cell:
+</span><span class="sc24">   </span><span class="sc2">#                     an Array-Style value applies to its cell, and a List-Style value (by WBS)
+</span><span class="sc24">   </span><span class="sc2">#                     is applied to every irrigated cell of the crop in the WBS (it is not a WBS total)
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># The LAND_USE ADDED_DEMAND may only be specified once and is 
 </span><span class="sc24">   </span><span class="sc2">#    added demand is summed with other added demands (e.g. WBS Block ADDED_CROP_DEMAND)
@@ -2181,6 +2203,8 @@ span {
 #  #                                                                                                                                                     ###
 #  #                                                                                                                                                     ###
 #  BEGIN LAND_USE # CROP                                                                                                                                 ###
+#     #                                                                                                                                                  ###
+#     LOCATION                                    Only SINGLE_LAND_USE_PER_CELL, reads       ROW, COL, CropID; Default is 0 for unspecified (ROW, COL) ###
 #     #                                                                                                                                                  ###
 #     LAND_USE_AREA_FRACTION                      If   SINGLE_LAND_USE_PER_CELL, reads         ROW, COL, Frac; Default is 0.0 for unspecified (ROW, COL) ###
 #     #                                           If MULTIPLE_LAND_USE_PER_CELL, reads CropID, ROW, COL, Frac; Default is 0.0 for unspecified (ROW, COL) ###
