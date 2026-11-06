@@ -178,6 +178,25 @@ MODULE FMP_MAIN_DRIVER
     !
     WBS%NFARM = NEG
     !
+    ! Load the OPTIONS block before the other blocks (after GLOBAL DIMENSION),
+    ! since its global keywords affect how other blocks are set up
+    CALL READ_TO_DATA(LINE,IN_FMP,IOUT,EOF=EOF)
+    DO WHILE (.NOT. EOF)
+       LLOC=ONE
+       CALL GET_WORD(WORD,LINE,LLOC)
+       IF(WORD == 'BEGIN') THEN
+                   CALL GET_WORD(WORD,LINE,LLOC)
+                   IF (WORD == 'OPTION' .OR. WORD == 'OPTIONS') THEN
+                         CALL BLK%LOAD(IN_FMP,IOUT,LINE)
+                         IF (BLK%NLINE>0) CALL INITIALIZE_OPTIONS_DATA( BLK, FMPOPT )
+                         EXIT
+                   END IF
+       END IF
+       CALL READ_TO_DATA(LINE,IN_FMP,IOUT,EOF=EOF)
+    END DO
+    !
+    CALL UTF8_BOM_OFFSET_REWIND(IN_FMP)
+    !
     ! CROP BLOCK IS REQUIRED BEFORE SALINITY BLOCK IN CASE THERE ARE CROP FRACTIONS.
     ! CHECK FOR CROP BLOCK FIRST. THE REST DO NOT CARE ABOUT THE ORDER
     !
@@ -210,7 +229,8 @@ MODULE FMP_MAIN_DRIVER
     !
     DO WHILE (BLK%EXTRA.NE.'EOF') !OLD CHECK BLK%NAME  == '', BUT NOW READ TO END OF FILE
       !
-      CALL BLK%LOAD(IN_FMP,IOUT,FOUND_BEGIN=FOUND_BEGIN, SKIP=['GLOBAL   ','DIMENSION', 'CROP     ','LAND_USE '])
+      CALL BLK%LOAD(IN_FMP,IOUT,FOUND_BEGIN=FOUND_BEGIN, &
+                    SKIP=['GLOBAL   ','DIMENSION', 'CROP     ','LAND_USE ', 'OPTION   ', 'OPTIONS  '])
       !
       IF((BLK%NAME == 'WATER'                   .OR. BLK%NAME == 'WATER_BALANCE' .OR.   &  !Note WATER should later add checks for WATER BALANCE SUBREGION
           BLK%NAME == 'WATER_BALANCE_SUBREGION' .OR. BLK%NAME=='WBS')                   &
@@ -251,10 +271,6 @@ MODULE FMP_MAIN_DRIVER
       ELSEIF(BLK%NAME == 'OUTPUT' .AND. BLK%NLINE>0) THEN
              !
              CALL INITIALIZE_OUTPUT_DATA( BLK, FMPOUT, ITMUNI )
-             !
-      ELSEIF((BLK%NAME=='OPTION' .OR. BLK%NAME=='OPTIONS').AND. BLK%NLINE>0) THEN
-             !
-             CALL INITIALIZE_OPTIONS_DATA( BLK, FMPOPT )
              !
       ELSEIF(       (BLK%NAME=='SWO' .OR.                             &
                      BLK%NAME=='SURFACE_WATER_OPERATIONS' .OR.        &
