@@ -658,13 +658,19 @@ MODULE WBS_DATA_FMP_MODULE
     END IF; END IF
     !
     IF(UPDATE .OR. WBS%FID_TFR%TRANSIENT) THEN ! Make Zero the common null value
+       ERROR = FALSE
        DO J=ONE, WBS%NROW
        DO I=ONE, WBS%NCOL
        IF(WBS%FID_TFR%ARRAY(I,J) < Z .OR. WBS%FID_TFR%ARRAY(I,J) > WBS%NFARM ) THEN
+          IF(WBS%FID_TFR%ARRAY(I,J) > WBS%NFARM) ERROR = TRUE
           WBS%FID_TFR%ARRAY(I,J) = Z
        END IF
        END DO
        END DO
+       !
+       IF(ERROR) CALL WARNING_MESSAGE(OUTPUT=WBS%IOUT, MSG=                                                                           &
+               'FMP WBS BLOCK: THE "LOCATION" ARRAY HAS WBS IDS THAT ARE GREATER THAN NWBS (NFARM) = '//NUM2STR(WBS%NFARM)//'.'//NL// &
+               'THESE CELLS ARE SET TO 0, SO FMP DOES NOT SIMULATE THEM.')
     END IF
     !
     IF(UPDATE .OR. WBS%NEW_FID) THEN
