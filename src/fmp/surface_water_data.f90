@@ -62,7 +62,7 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
       DOUBLE PRECISION                          :: DELIVERED      = DZ  ! Water taken from the deliveries this iteration: the demand met plus the surplus taken by use flags 1 and 2
       DOUBLE PRECISION                          :: DELIVERED_INI  = DZ  ! DELIVERED before a deficiency scenario changed the demand (demand-supply summary output)
       INTEGER,          DIMENSION(:),ALLOCATABLE:: RANK           ! Rank of each NRD type as read (rank 1 is consumed first)
-      INTEGER,          DIMENSION(:),ALLOCATABLE:: USE_FLAG       ! Use flag of each NRD type: 0 take only what is needed; 1 take all, surplus to the semi-routed delivery points (else runoff); 2 take all, surplus injected into the supply wells; <0 the type is supplied by a well field (treated as 0)
+      INTEGER,          DIMENSION(:),ALLOCATABLE:: USE_FLAG       ! Use flag of each NRD type as read: 0 take only what is needed; 1 take all, surplus to the semi-routed delivery points (else runoff); 2 take all, surplus injected into the supply wells; <0 the type is supplied by a well field (delivered as use flag 0)
       INTEGER,          DIMENSION(:),ALLOCATABLE:: WELLFIELD      ! WBS whose supply wells deliver the type (a negative use flag names it, FMP2 well field option), 0 for a normal type
       INTEGER,          DIMENSION(:),ALLOCATABLE:: RANKPOS        ! RANKPOS(R) is the NRD type that has rank R, 0 if no type has that rank
       DOUBLE PRECISION, DIMENSION(:),ALLOCATABLE:: AVALIBLE_WATER ! Delivery rate of each NRD type
@@ -77,6 +77,7 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
       PROCEDURE, PASS(NRD):: SIZE           =>    SIZE_NRD_VALUES !()
       PROCEDURE, PASS(NRD):: SUM_SUPPLY     =>    SUM_SUPPLY_NRD_VALUES !()
       PROCEDURE, PASS(NRD):: RANKED_RATE    =>    RANKED_RATE_NRD_VALUES !(R)
+      PROCEDURE, PASS(NRD):: SUPPLY_AHEAD   =>   SUPPLY_AHEAD_NRD_VALUES !(R)
       PROCEDURE, PASS(NRD):: RANKED_USE_FLAG=>    RANKED_USE_FLAG_NRD_VALUES !(R)
       !
       FINAL:: FINAL_NRD_VALUES
@@ -111,6 +112,8 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
       LOGICAL, DIMENSION(:),   ALLOCATABLE:: HAS_SRD_WBS
       LOGICAL, DIMENSION(:),   ALLOCATABLE:: NRD_INJECT_WRN      ! TRUE until the warning for NRD use flag 2 without an active supply well is printed for the WBS
       DOUBLE PRECISION, DIMENSION(:), ALLOCATABLE:: NRD_SURPLUS_RUNOFF  ! NRD surplus (use flag 1) of a WBS without a semi-routed delivery point; it leaves the WBS as runoff
+      DOUBLE PRECISION, DIMENSION(:), ALLOCATABLE:: WF_REQ  ! WELLFIELD option work array (allocated by INITIALIZE_SURFACE_WATER_DATA only with the option and NRD input): requirement placed on the well field of each virtual WBS for the NRD type being processed
+      DOUBLE PRECISION, DIMENSION(:), ALLOCATABLE:: WF_CAP  ! WELLFIELD option work array (allocated by INITIALIZE_SURFACE_WATER_DATA only with the option and NRD input): pumping capacity of each virtual WBS not yet assigned to an NRD type
       INTEGER:: NORETURNFLOW_TFR_FLAG = Z                  !0: Not InUse,  1:All Set to NORETURNFLOW, 2:Some WBS set to 1
       !
       DOUBLE PRECISION:: SRD_TOL     = UNO
@@ -221,6 +224,8 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
     IF(ALLOCATED(SWF%HAS_SRD_WBS)) DEALLOCATE(SWF%HAS_SRD_WBS)
     IF(ALLOCATED(SWF%NRD_INJECT_WRN    )) DEALLOCATE(SWF%NRD_INJECT_WRN    )
     IF(ALLOCATED(SWF%NRD_SURPLUS_RUNOFF)) DEALLOCATE(SWF%NRD_SURPLUS_RUNOFF)
+    IF(ALLOCATED(SWF%WF_REQ            )) DEALLOCATE(SWF%WF_REQ            )
+    IF(ALLOCATED(SWF%WF_CAP            )) DEALLOCATE(SWF%WF_CAP            )
     IF(ALLOCATED(SWF%NRD        )) DEALLOCATE(SWF%NRD        )
     !
   END SUBROUTINE
@@ -274,12 +279,13 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
     !
   END SUBROUTINE
   !  
-  SUBROUTINE INITIALIZE_SURFACE_WATER_DATA( BL, SWF, LINE, FDIM, NSEG)
+  SUBROUTINE INITIALIZE_SURFACE_WATER_DATA( BL, SWF, LINE, FDIM, NSEG, WELLFIELD)
     CLASS(GENERIC_BLOCK_READER), INTENT(INOUT):: BL   !DATA BLOCK
     CLASS(SURFACE_WATER_DATA),   INTENT(INOUT):: SWF
     CHARACTER(*),                INTENT(INOUT):: LINE
     TYPE(FMP_DIMENSION),         INTENT(IN   ):: FDIM
     INTEGER,                     INTENT(IN   ):: NSEG
+    LOGICAL,                     INTENT(IN   ):: WELLFIELD  ! OPTIONS keyword WELLFIELD was found (the OPTIONS block is loaded before this block)
     CHARACTER(5):: ERROR
     LOGICAL:: EOF, BINARY
     INTEGER:: LLOC, ISTART, ISTOP, F
@@ -562,6 +568,11 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
         !
         !DO CONCURRENT(J=ONE:SWF%NFARM, I=ONE:SWF%MXNRD); SWF%NRD_TFR%ARRAY( (I-ONE)*THREE + TWO, J ) = DBLE(I)
         !END DO
+    END IF
+    !
+    IF(WELLFIELD .AND. SWF%HAS_NRD) THEN   ! work arrays of WELLFIELD_DELIVERY, which is only called with the WELLFIELD option
+                                    ALLOCATE(SWF%WF_REQ(SWF%NFARM), SOURCE=DZ)
+                                    ALLOCATE(SWF%WF_CAP(SWF%NFARM), SOURCE=DZ)
     END IF
     !
     IF(RET_SET > ONE) CALL STOP_ERROR(INFILE=BL%IU, OUTPUT=BL%IOUT,MSG='FMP SURFACE_WATER BLOCK ERROR. YOU CAN ONLY SELECT AT MOST ONE FULLY-ROUTED RETURN FLOW OPTION, FOUND KEYWORDS "ROUTED_RETURN_NON_DIVERSION" AND "ROUTED_RETURN_ANY_REACH". PROGRAM WILL NOW TERMINATE.')
@@ -2067,63 +2078,79 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
   END SUBROUTINE
   !
   SUBROUTINE WELLFIELD_DELIVERY(SWF, INUSE, DEMAND, TFDROLD, QMAX)
-    ! FMP2 well field option (OPTIONS keyword WELLFIELD): an NRD type with a negative use flag is supplied by the
-    ! supply wells of the WBS the flag names (a virtual farm). For each NRD type NT the well field pumps the
-    ! cumulative delivery requirement of the WBS it supplies, up to its pumping capacity QMAX, as a negative
-    ! delivery of rank NT (the farm loop turns a negative delivery into a pumping requirement), and each
-    ! receiving WBS gets its share of that pumpage as a use flag 0 delivery of rank NT. The requirement of a
-    ! WBS is TFDROLD (its demand before a deficiency scenario) when that is set, else DEMAND; for NT > 1 the
-    ! part not covered by the delivery of rank NT-1. Called every outer iteration after the first, as the
-    ! previous versions of FMP did; the shares and the placement at rank NT (the type's index) are theirs.
+    ! FMP2 well field option (OPTIONS keyword WELLFIELD): an NRD type with a negative use flag, -V, is supplied by
+    ! the supply wells of the virtual WBS V (a well field). Called every outer iteration after the first.
+    !
+    ! The NRD types are processed in type order (the input check requires the well-field types of a WBS to have
+    ! increasing ranks with increasing type numbers). For a well-field type NT, each receiving WBS has the
+    ! requirement TF - (supply of its NRD types ranked ahead of type NT), not less than zero, where TF is its
+    ! demand (TFDROLD, the demand before a deficiency scenario, when that is set). The ranked-ahead supply holds
+    ! the specified NRDs and the well-field deliveries already set in this call (FMP2 eqs. 3 and 4, with any NRD
+    ! of a higher rank counted). The well field of V pumps the summed requirement of its receiving WBS, up to the
+    ! capacity QMAX(V) not yet used by a lower type number, as a negative delivery of its own type NT (the farm
+    ! loop turns a negative delivery into a pumping requirement), and each receiving WBS gets its share of that
+    ! pumpage, weighted by its requirement, as the delivery of its type NT (used as use flag 0).
+    ! A well field with no requirement pumps nothing and delivers nothing.
     CLASS(SURFACE_WATER_DATA),      INTENT(INOUT):: SWF
     LOGICAL,          DIMENSION(:), INTENT(IN   ):: INUSE
     DOUBLE PRECISION, DIMENSION(:), INTENT(IN   ):: DEMAND, TFDROLD, QMAX
-    INTEGER:: NT, NF, I, IDDELF
-    DOUBLE PRECISION:: TF, CTFDR, PREV, WFQ
+    INTEGER:: NT, NF, V
+    DOUBLE PRECISION:: TF, REQ, WFQ
+    LOGICAL:: HAS_WF
     !
     IF(SWF%MXNRD < ONE) RETURN
     !
+    DO CONCURRENT (V=ONE:SWF%NFARM)
+                                    SWF%WF_CAP(V) = MAX(QMAX(V), DZ)
+    END DO
+    !
     DO NT=ONE, SWF%MXNRD
-       CTFDR  = DZ
-       IDDELF = Z
-       TF     = DZ
+       !
+       DO CONCURRENT (V=ONE:SWF%NFARM)
+                                       SWF%WF_REQ(V) = DNEG          ! negative: no WBS takes type NT from the well field of V
+       END DO
+       !
+       ! Requirement on each well field (the receiving WBS's requirement is held in its type NT until it is scaled to its share below)
+       HAS_WF = FALSE
        DO NF=ONE, SWF%NFARM
+          V = SWF%NRD(NF)%WELLFIELD(NT)
+          IF(V < ONE) CYCLE
+          HAS_WF = TRUE
+          IF(SWF%WF_REQ(V) < DZ) SWF%WF_REQ(V) = DZ
+          SWF%NRD(NF)%AVALIBLE_WATER(NT) = DZ
           IF(.NOT. INUSE(NF)) CYCLE
-          IF(TFDROLD(NF) == DZ) TF = DEMAND(NF)
-          IF(TFDROLD(NF) >  DZ) TF = TFDROLD(NF)
-          IF(SWF%NRD(NF)%WELLFIELD(NT) < ONE) CYCLE
           !
-          IF(NT == ONE) THEN
-              CTFDR = CTFDR + TF
-          ELSE
-              PREV = SWF%NRD(NF)%RANKED_RATE(NT-ONE)
-              IF(PREV < TF) CTFDR = CTFDR + (TF - PREV)
+          TF = DEMAND(NF)
+          IF(TFDROLD(NF) > DZ) TF = TFDROLD(NF)
+          !
+          REQ = TF - SWF%NRD(NF)%SUPPLY_AHEAD( SWF%NRD(NF)%RANK(NT) )
+          IF(REQ > DZ) THEN
+                       SWF%NRD(NF)%AVALIBLE_WATER(NT) = REQ
+                       SWF%WF_REQ(V) = SWF%WF_REQ(V) + REQ
           END IF
-          IDDELF = SWF%NRD(NF)%WELLFIELD(NT)
-          IF(IDDELF > SWF%NFARM) CYCLE
-          I = SWF%NRD(IDDELF)%RANKPOS(NT)
-          IF(I > Z) THEN
-              SWF%NRD(IDDELF)%AVALIBLE_WATER(I) = -MIN(CTFDR, QMAX(IDDELF))   ! the well field pumps the requirement
-              CALL SWF%NRD(IDDELF)%SUM_SUPPLY()
+       END DO
+       IF(.NOT. HAS_WF) CYCLE
+       !
+       ! Pumping of each well field
+       DO V=ONE, SWF%NFARM
+          IF(SWF%WF_REQ(V) < DZ) CYCLE
+          !
+          WFQ = MIN(SWF%WF_REQ(V), SWF%WF_CAP(V))
+          SWF%WF_CAP(V) = SWF%WF_CAP(V) - WFQ
+          !
+          SWF%NRD(V)%AVALIBLE_WATER(NT) = -WFQ                       ! the well field pumps the requirement
+          CALL SWF%NRD(V)%SUM_SUPPLY()
+          !
+          IF(SWF%WF_REQ(V) > DZ) THEN
+                                 SWF%WF_REQ(V) = WFQ / SWF%WF_REQ(V)  ! now the fraction of the requirement that is met
           END IF
        END DO
        !
-       IF(IDDELF < ONE .OR. IDDELF > SWF%NFARM .OR. CTFDR <= DZ) CYCLE
-       WFQ = MIN(CTFDR, QMAX(IDDELF))
-       TF  = DZ
+       ! Share of each receiving WBS, weighted by its requirement
        DO NF=ONE, SWF%NFARM
-          IF(.NOT. INUSE(NF)) CYCLE
-          IF(TFDROLD(NF) == DZ) TF = DEMAND(NF)
-          IF(TFDROLD(NF) >  DZ) TF = TFDROLD(NF)
-          IF(SWF%NRD(NF)%WELLFIELD(NT) < ONE) CYCLE
-          I = SWF%NRD(NF)%RANKPOS(NT)
-          IF(I < ONE) CYCLE
-          IF(NT == ONE) THEN
-              SWF%NRD(NF)%AVALIBLE_WATER(I) = WFQ * TF / CTFDR                      ! share of the well field pumpage
-          ELSE
-              SWF%NRD(NF)%AVALIBLE_WATER(I) = WFQ * (TF - SWF%NRD(NF)%RANKED_RATE(NT-ONE)) / CTFDR
-          END IF
-          SWF%NRD(NF)%USE_FLAG(I) = Z
+          V = SWF%NRD(NF)%WELLFIELD(NT)
+          IF(V < ONE) CYCLE
+          SWF%NRD(NF)%AVALIBLE_WATER(NT) = SWF%WF_REQ(V) * SWF%NRD(NF)%AVALIBLE_WATER(NT)
           CALL SWF%NRD(NF)%SUM_SUPPLY()
        END DO
     END DO
@@ -2334,7 +2361,8 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
     ! delivery rate (DIV is the stress period length for a VOLUME input and 1 for a RATE input).
     ! A rank outside 1..MXNRD is kept in RANK for the input check, but gets no position in the ranked sequence.
     ! If two types share a rank the last one wins, as in the previous versions of FMP.
-    ! A negative use flag names the WBS whose well field supplies the type (WELLFIELD option); the type is used as use flag 0.
+    ! A negative use flag names the WBS whose well field supplies the type (WELLFIELD option); the type is used as use flag 0,
+    ! and its volume is ignored: its delivery is set by WELLFIELD_DELIVERY (zero until then).
     CLASS(NRD_VALUES),                          INTENT(INOUT):: NRD
     DOUBLE PRECISION, DIMENSION(:), CONTIGUOUS, INTENT(IN   ):: TRIPLETS
     DOUBLE PRECISION,                           INTENT(IN   ):: DIV
@@ -2352,7 +2380,10 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
          NRD%RANK          (I) = NINT(TRIPLETS(J+1))
          NRD%USE_FLAG      (I) = NINT(TRIPLETS(J+2))
          NRD%WELLFIELD     (I) = Z
-         IF(NRD%USE_FLAG(I) < Z) NRD%WELLFIELD(I) = -NRD%USE_FLAG(I)
+         IF(NRD%USE_FLAG(I) < Z) THEN
+                                 NRD%WELLFIELD     (I) = -NRD%USE_FLAG(I)
+                                 NRD%AVALIBLE_WATER(I) = DZ
+         END IF
          !
          K = NRD%RANK(I)
          IF(ONE <= K .AND. K <= DIM) NRD%RANKPOS(K) = I
@@ -2422,6 +2453,7 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
        !
        RATE = NRD%AVALIBLE_WATER(I)
        USE  = NRD%USE_FLAG(I)
+       IF(USE < Z) USE = Z                            ! well-field type (WELLFIELD option): only what is needed
        IF(USE == TWO .AND. .NOT. HAS_WELL) THEN
                                             USE = Z
                                             NO_WELL = TRUE
@@ -2475,6 +2507,22 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
     IF(NRD%SIZE() > Z) THEN
        IF(NRD%RANKPOS(R) > Z) RATE = NRD%AVALIBLE_WATER(NRD%RANKPOS(R))
     END IF
+    !
+  END FUNCTION
+  !
+  PURE FUNCTION SUPPLY_AHEAD_NRD_VALUES(NRD, R) RESULT(SUP)   ! Supply of the types ranked ahead of rank R (ranks 1 to R-1); a negative rate (a well field's pumping) counts as zero
+    CLASS(NRD_VALUES), INTENT(IN):: NRD
+    INTEGER,           INTENT(IN):: R
+    DOUBLE PRECISION:: SUP
+    INTEGER:: K, I
+    !
+    SUP = DZ
+    DO K=ONE, MIN(R-ONE, NRD%SIZE())
+       I = NRD%RANKPOS(K)
+       IF(I > Z) THEN
+                 IF(NRD%AVALIBLE_WATER(I) > DZ) SUP = SUP + NRD%AVALIBLE_WATER(I)
+       END IF
+    END DO
     !
   END FUNCTION
   !
