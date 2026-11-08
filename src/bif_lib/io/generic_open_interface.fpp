@@ -238,9 +238,9 @@
          !
          IF(CHECK) THEN           
             !
-            CHECK = STATUS=='UNKNOWN' .OR.  ! Place holder to simplify the following IF
-     +               STATUS=='REPLACE' .OR. 
-     +               STATUS=='NEW'
+            CHECK = FILSTAT=='UNKNOWN' .OR.  ! Place holder to simplify the following IF
+     +               FILSTAT=='REPLACE' .OR.
+     +               FILSTAT=='NEW'
             !
             IF( FILACT == 'WRITE' .OR. 
      +         (FILACT == 'READWRITE' .AND. CHECK) ) THEN
