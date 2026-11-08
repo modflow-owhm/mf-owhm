@@ -735,6 +735,8 @@ span {
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc6">NOPRINT</span><span class="sc24">                       </span><span class="sc2"># Suppress some farm well printing
 </span><span class="sc24">   </span><span class="sc6">WELLFIELD</span><span class="sc24">                     </span><span class="sc2"># NRD has well field option for ASR operation
+</span><span class="sc24">                                 </span><span class="sc2">#   An NRD type with a negative use flag, NRDU = -V, is supplied by the supply wells
+</span><span class="sc24">                                 </span><span class="sc2">#   of WBS V, a well field (see NRDU &lt; 0 in the SURFACE_WATER block NON_ROUTED_DELIVERY).
 </span><span class="sc24">   </span><span class="sc6">RECOMP_Q_BD</span><span class="sc24">                   </span><span class="sc2"># Calls FMP FM routine before budget calculation
 </span><span class="sc24">   </span><span class="sc6">MNWCLOSE</span><span class="sc24">  </span><span class="sc0">QCLOSE</span><span class="sc24">  </span><span class="sc0">HPCT</span><span class="sc24">  </span><span class="sc0">RPCT</span><span class="sc24">  </span><span class="sc2"># Additional MNW2 closure criteria
 </span><span class="sc14">END</span><span class="sc24">
@@ -1103,6 +1105,32 @@ span {
 </span><span class="sc24">   </span><span class="sc2">#         = 2 indicates that unused delivered water is evenly injected into the WBS supply wells 
 </span><span class="sc24">   </span><span class="sc2">#             that are active for the stress period (the injection is not limited by the pumping capacity). 
 </span><span class="sc24">   </span><span class="sc2">#             If the WBS has no active supply well, then functions the same as NRDU = 0 and a warning is printed
+</span><span class="sc24">   </span><span class="sc2">#         &lt; 0 indicates that the NRD type is supplied by a well field (requires the OPTIONS block keyword WELLFIELD).
+</span><span class="sc24">   </span><span class="sc2">#             NRDU = -V, where V is the WBS that holds the well field: a "virtual" WBS whose supply wells are
+</span><span class="sc24">   </span><span class="sc2">#             defined in the FMP_WELL block (it usually has no land use). The NRDV of the type is ignored.
+</span><span class="sc24">   </span><span class="sc2">#             Each outer iteration after the first, the well field pumps the summed requirement of the WBS that
+</span><span class="sc24">   </span><span class="sc2">#             take the type from it, up to the pumping capacity of its wells, and that pumpage is split among
+</span><span class="sc24">   </span><span class="sc2">#             them weighted by their requirement. The requirement of a WBS is its demand minus the supply of
+</span><span class="sc24">   </span><span class="sc2">#             its NRD types with a smaller rank, so specified NRDs and other well fields may be ranked ahead of
+</span><span class="sc24">   </span><span class="sc2">#             or behind a well field. The type then delivers only the water needed (as NRDU = 0).
+</span><span class="sc24">   </span><span class="sc2">#             If no WBS needs water from the well field, it does not pump.
+</span><span class="sc24">   </span><span class="sc2">#             Rules, checked when the input is read:
+</span><span class="sc24">   </span><span class="sc2">#               - V is another WBS (1 to NWBS) that has NRDU = 1 for the same NRD type; the well field pumping
+</span><span class="sc24">   </span><span class="sc2">#                 is a negative delivery of that type to WBS V, so its NRDV for that type is ignored as well.
+</span><span class="sc24">   </span><span class="sc2">#               - The well-field NRD types of a WBS have increasing ranks with increasing type numbers, as the
+</span><span class="sc24">   </span><span class="sc2">#                 well fields are solved in type order. Other NRD types may have any rank between them.
+</span><span class="sc24">   </span><span class="sc2">#             A well field that supplies several NRD types has one pumping capacity, used by the lower type first.
+</span><span class="sc24">   </span><span class="sc2">#
+</span><span class="sc24">   </span><span class="sc2">#             Example with NRD_TYPES 3. WBS 1 and 2 first get a specified delivery (type 2, rank 1, with 1.E4 and 2.E4),
+</span><span class="sc24">   </span><span class="sc2">#             then water from the well field of WBS 5 (type 1, rank 2), and then from the well field of WBS 6 (type 3, rank 3).
+</span><span class="sc24">   </span><span class="sc2">#             #       |---Type 1---|     |---Type 2---|     |---Type 3---|
+</span><span class="sc24">   </span><span class="sc2">#             # WBS   NRDV NRDR NRDU     NRDV NRDR NRDU     NRDV NRDR NRDU
+</span><span class="sc24">   </span><span class="sc2">#                1      0    2   -5     1.E4    1    0       0    3   -6
+</span><span class="sc24">   </span><span class="sc2">#                2      0    2   -5     2.E4    1    0       0    3   -6
+</span><span class="sc24">   </span><span class="sc2">#                3      0    1    0       0     2    0       0    3    0
+</span><span class="sc24">   </span><span class="sc2">#                4      0    1    0       0     2    0       0    3    0
+</span><span class="sc24">   </span><span class="sc2">#                5      0    1    1       0     2    0       0    3    0
+</span><span class="sc24">   </span><span class="sc2">#                6      0    1    0       0     2    0       0    3    1
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2">#
 </span><span class="sc24">   </span><span class="sc2"># It may be specified as VOLUME of water per stress period.
