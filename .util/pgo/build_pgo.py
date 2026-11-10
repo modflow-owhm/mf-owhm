@@ -5,11 +5,13 @@ build_pgo.py - profile-guided MF-OWHM build in one step (Intel ifx only).
 The script runs the two stages of the fast-pgo build and the training runs
 between them:
 
-  1. builds the instrumented binary (bin/<name>-pgo-gen.exe|.nix),
+  1. builds the instrumented binary (bin/mf-owhm[-gmg]-pgo-gen.exe|.nix),
   2. runs every model listed in the ini file with it, each in its own
      working folder (each run adds to the profile in the profile directory),
   3. merges the raw profiles with llvm-profdata,
-  4. builds the final binary bin/<name>.exe|.nix with the merged profile.
+  4. builds the final binary bin/<name>.exe|.nix with the merged profile
+     (a given name is used as written; without one mf-owhm-pgo, GMG variant
+     mf-owhm-gmg-pgo).
 
 The build engine is GNU make (make CONFIG=fast-pgo-gen, then CONFIG=fast-pgo)
 on Linux, macOS and msys2, and the Visual Studio solution (devenv.com with
@@ -19,9 +21,9 @@ settings can be overridden on the command line.
 
 Usage (from any directory, the repository root is found from the script):
 
-  python3 .util/pgo/build_pgo.py                        #   Linux: pgo.ini -> bin/mf-owhm.nix
-  py      .util/pgo/build_pgo.py                        # Windows: pgo.ini -> bin/mf-owhm.exe
-  python3 .util/pgo/build_pgo.py my.ini --name mf-owhm-pgo --gmg
+  python3 .util/pgo/build_pgo.py                        #   Linux: pgo.ini -> bin/mf-owhm-pgo.nix
+  py      .util/pgo/build_pgo.py                        # Windows: pgo.ini -> bin/mf-owhm-pgo.exe
+  python3 .util/pgo/build_pgo.py my.ini --name mf-owhm-gmg-pgo-mymodel --gmg
   python3 .util/pgo/build_pgo.py --dry-run              # print the commands only
 
 Needs Python 3.8 or newer and nothing outside the standard library.
@@ -44,7 +46,7 @@ IS_WIN = os.name == 'nt'
 EXT = '.exe' if IS_WIN else '.nix'
 
 DEFAULTS = {
-    'build': {'name': 'mf-owhm', 'gmg': 'no', 'engine': 'auto', 'profdir': 'obj/pgo',
+    'build': {'name': '', 'gmg': 'no', 'engine': 'auto', 'profdir': 'obj/pgo',
               'keep_gen': 'no', 'log': 'obj/pgo/build_pgo.log'},
     'make':  {'args': '', 'oneapi': 'auto'},
     'vs':    {'devenv': 'auto', 'msbuild': 'auto', 'oneapi': 'auto'},
@@ -97,9 +99,13 @@ class Builder:
         self.dry = args.dry_run
         b = cfg['build']
         self.gmg = args.gmg or yes(b['gmg'])
-        self.name = args.name or b['name'].strip()
-        if self.gmg and not args.name and self.name == 'mf-owhm':
-            self.name = 'mf-owhm-gmg'
+        # A name given by --name or the ini is used exactly as written (an extension is optional);
+        # only without one does the default apply, the name the Fast_PGO projects produce.
+        self.name = (args.name or b['name']).strip()
+        if self.name.lower().endswith(EXT):
+            self.name = self.name[:-len(EXT)]
+        if not self.name:
+            self.name = 'mf-owhm-gmg-pgo' if self.gmg else 'mf-owhm-pgo'
         engine = (args.engine or b['engine']).strip().lower()
         if engine == 'auto':
             engine = 'vs' if IS_WIN else 'make'
@@ -121,9 +127,12 @@ class Builder:
         if not self.models:
             raise Fail('no training model listed under [train] models')
         self.times = []
-        self.vs_name = 'mf-owhm-gmg' if self.gmg else 'mf-owhm'   # TargetName fixed in the .vfproj
+        # Base name of the program (the ProjectName of the .vfproj and the makefile PROGRAM): it names
+        # the profile files (<base>-<id>.profraw, <base>.profdata) and the instrumented binary
+        # (<base>-pgo-gen); only the final binary gets the requested name.
+        self.base = 'mf-owhm-gmg' if self.gmg else 'mf-owhm'
         self.setvars = None                                       # Linux: setvars.sh to source
-        self.gen_bin = None
+        self.gen_bin = ROOT / 'bin' / f'{self.base}-pgo-gen{EXT}'
         self.final_bin = ROOT / 'bin' / (self.name + EXT)
 
     # ------------------------------------------------------------------ helpers
@@ -241,7 +250,7 @@ class Builder:
             self.gen_bin.unlink()
             self.log(f'removed {self.gen_bin}')
         if self.engine == 'vs' and not self.dry:     # export files of the instrumented link
-            for f in (ROOT / 'bin').glob(f'{self.vs_name}-pgo-gen.*'):
+            for f in (ROOT / 'bin').glob(f'{self.base}-pgo-gen.*'):
                 if f.suffix.lower() in ('.exp', '.lib'):
                     f.unlink()
         self.log(f'done in {elapsed(t_all)}')
@@ -300,10 +309,10 @@ class Builder:
             cands += [Path('/opt/intel/oneapi/setvars.sh'), Path.home() / 'intel/oneapi/setvars.sh']
         return next((c for c in cands if c.is_file()), None)
 
-    def make_cmd(self, config, int_dir):
+    def make_cmd(self, config, int_dir, bin_out):
         # no -j: the makefile compiles in list order and has no module dependencies
-        cmd = [self.make, 'compile', f'CONFIG={config}', f'PROGRAM={self.name}',
-               f'PROFDIR={self.profdir}', f'int_dir={int_dir}']
+        cmd = [self.make, 'compile', f'CONFIG={config}', f'PROGRAM={self.base}',
+               f'PROFDIR={self.profdir}', f'int_dir={int_dir}', f'bin_out={bin_out}']
         if self.gmg:
             cmd.append('USEGMG=YES')
         return cmd + self.make_args
@@ -313,9 +322,8 @@ class Builder:
             return self.vs_build('Fast_PGO_Gen', gen=True)
         int_dir = ROOT / 'obj' / f'fast-pgo-gen_{self.f90}'
         self.clean_dir(int_dir)
-        self.gen_bin = ROOT / 'bin' / f'{self.name}-pgo-gen{EXT}'
         t0 = time.time()
-        self.run(self.make_cmd('fast-pgo-gen', int_dir), env_shell=True)
+        self.run(self.make_cmd('fast-pgo-gen', int_dir, self.gen_bin), env_shell=True)
         self.expect_file(self.gen_bin, t0)
 
     def stage_use(self, profdata):
@@ -324,7 +332,7 @@ class Builder:
         int_dir = ROOT / 'obj' / f'fast-pgo_{self.f90}'
         self.clean_dir(int_dir)
         t0 = time.time()
-        self.run(self.make_cmd('fast-pgo', int_dir), env_shell=True)
+        self.run(self.make_cmd('fast-pgo', int_dir, self.final_bin), env_shell=True)
         self.expect_file(self.final_bin, t0)
 
     # ----------------------------------------------------------- visual studio
@@ -334,7 +342,7 @@ class Builder:
         self.msbuild = self.find_vs_tool(v['msbuild'], 'MSBuild/Current/Bin/MSBuild.exe') if self.gmg else None
         self.oneapi = self.find_oneapi_win(v['oneapi'])
         self.sln = ROOT / 'ide' / 'visual_studio' / ('OneWater_GMG_Project.sln' if self.gmg else 'OneWater_Project.sln')
-        self.vfproj = ROOT / 'ide' / 'visual_studio' / f'{self.vs_name}.vfproj'
+        self.vfproj = ROOT / 'ide' / 'visual_studio' / f'{self.base}.vfproj'
         self.log(f'devenv   {self.devenv}')
         if self.msbuild:
             self.log(f'msbuild  {self.msbuild}')
@@ -389,10 +397,11 @@ class Builder:
 
     def vs_build(self, config, gen):
         """devenv /Rebuild of the Fortran project. The projects always write
-        bin\\mf-owhm[-gmg][-pgo-gen].exe; when another name was asked for, an
-        existing binary of the fixed name is moved aside and put back afterwards."""
-        fixed = ROOT / 'bin' / (self.vs_name + ('-pgo-gen' if gen else '') + '.exe')
-        wanted = ROOT / 'bin' / (self.name + ('-pgo-gen' if gen else '') + '.exe')
+        bin\\mf-owhm[-gmg]-pgo-gen.exe (Fast_PGO_Gen) and bin\\mf-owhm[-gmg]-pgo.exe
+        (Fast_PGO); when another final name was asked for, an existing binary of
+        the fixed name is moved aside and put back afterwards."""
+        fixed = ROOT / 'bin' / (self.base + ('-pgo-gen' if gen else '-pgo') + '.exe')
+        wanted = self.gen_bin if gen else self.final_bin
         backup = None
         if wanted != fixed and fixed.exists() and not self.dry:
             backup = fixed.with_suffix('.exe.before-pgo')
@@ -409,8 +418,6 @@ class Builder:
         finally:
             if backup and backup.exists():
                 backup.replace(fixed)
-        if gen:
-            self.gen_bin = wanted
         return wanted
 
     # --------------------------------------------------------------- training
@@ -438,7 +445,7 @@ class Builder:
             self.log(f'  {elapsed(t0):>8}  {nam.name}  in {run_dir}')
 
     def profile_name(self):
-        return self.name if self.engine == 'make' else self.vs_name
+        return self.base
 
     def merge(self):
         raws = self.profraw_files()
@@ -472,7 +479,7 @@ def main():
     ap = argparse.ArgumentParser(description='Profile-guided MF-OWHM build: instrumented build, '
                                  'training runs, profile merge, optimized build.')
     ap.add_argument('ini', nargs='?', default=str(HERE / 'pgo.ini'), help='settings file (default: pgo.ini next to the script)')
-    ap.add_argument('--name', help='base name of the final binary (bin/<name>.exe|.nix)')
+    ap.add_argument('--name', help='name of the final binary, used as given (bin/<name>.exe|.nix; default mf-owhm-pgo, GMG mf-owhm-gmg-pgo)')
     ap.add_argument('--gmg', action='store_true', help='build the GMG solver variant')
     ap.add_argument('--engine', choices=['make', 'vs', 'auto'], help='build engine (default from the ini, auto = make, vs on Windows)')
     ap.add_argument('--profdir', help='profile directory (make engine)')

@@ -2,9 +2,9 @@
 #
 #   meson setup build                          # gfortran or ifort/ifx found on PATH, release
 #   meson setup build -Dconfig=debug
-#   meson setup build -Dconfig=fast               # no floating-point traps, AVX2 code (see doc/BUILD.md)
+#   meson setup build -Dconfig=fast               # no floating-point traps, AVX2 code -> mf-owhm-fast (see doc/BUILD.md)
 #   meson setup build -Dconfig=fast-pgo-gen       # then run a model with the -pgo-gen binary, then
-#   meson setup build -Dconfig=fast-pgo           # profile-guided fast build (ifx only; -Dprofdir=<dir>)
+#   meson setup build -Dconfig=fast-pgo           # profile-guided fast build -> mf-owhm-pgo (ifx only; -Dprofdir=<dir>)
 #   FC=ifx meson setup build
 #   meson setup build -Duse_gmg=true           # include the C GMG solver, needs a C compiler
 #   meson compile -C build
@@ -12,7 +12,8 @@
 #
 # Meson writes the executables into the build directory; "meson install"
 # places them in bin/ (and postprocessors/<name>/bin) with the makefile
-# names mf-owhm.nix or mf-owhm.exe, plus the -debug and -gmg suffixes.
+# names mf-owhm.nix or mf-owhm.exe, with -gmg for the GMG variant followed by
+# -debug, -fast, -pgo-gen or -pgo (the postprocessors get only -debug).
 # All flags come from this file (buildtype=plain), selected by -Dconfig.
 # Source lists are the text files in cmake/, shared with CMake.
 #
@@ -161,7 +162,7 @@ endif
 # ---------------------------------------------------------------------------
 pgo_fargs = []
 pgo_largs = []
-owhm_suffix = dbg_suffix
+owhm_suffix = config == 'fast' ? '-fast' : dbg_suffix
 if config.startswith('fast-pgo')
   if fid != 'intel-llvm' and fid != 'intel-llvm-cl'
     error('config=' + config + ' needs the Intel ifx compiler; use config=fast')
@@ -176,6 +177,7 @@ if config.startswith('fast-pgo')
     pgo_fargs = [dash + 'fprofile-generate=' + profdir / (owhm_name + '-%m.profraw')]
     pgo_largs = pgo_fargs
   else
+    owhm_suffix = '-pgo'
     profdata = profdir / (owhm_name + '.profdata')
     fc_dir = fs.parent(find_program(fc.cmd_array()[0]).full_path())
     llvm_profdata = find_program('llvm-profdata', dirs : [fc_dir / 'compiler', fc_dir])

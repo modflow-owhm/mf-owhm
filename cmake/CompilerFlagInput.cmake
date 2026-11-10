@@ -15,7 +15,7 @@
 #   owhm_fortran_flags(<target> <use_double>)   compile and link options
 #   owhm_c_flags(<target>)                       flags for the GMG C sources
 #   owhm_pgo_flags(<target> <base>)              profile options of FastPGOGen/FastPGO
-#   owhm_output_name(<target> <base> <bin_dir>)  base[-debug|-pgo-gen][-gmg].nix|.exe
+#   owhm_output_name(<target> <base> <bin_dir>)  base[-debug|-pgo-gen].nix|.exe (mf-owhm adds -fast and -pgo)
 #
 include_guard(GLOBAL)
 

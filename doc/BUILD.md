@@ -375,10 +375,14 @@ The flag sets themselves are in `makefile`, `cmake/CompilerFlagInput.cmake` and
 | HydFMT           | `postprocessors/hydfmt/bin/hydfmt.nix`         | `postprocessors/hydfmt/bin/hydfmt.exe`         |
 
 A debug build appends `-debug` before the extension, for example
-`bin/mf-owhm-debug.nix`, and the instrumented stage of a profile-guided build
-appends `-pgo-gen` (`bin/mf-owhm-pgo-gen.nix`); the fast builds use the plain
-name. These are the names the example scripts in
-`examples/bash_example_run` look for. Intermediate files go to `obj/` (Make)
+`bin/mf-owhm-debug.nix`, a fast build `-fast` (`bin/mf-owhm-fast.nix`), the
+instrumented stage of a profile-guided build `-pgo-gen`
+(`bin/mf-owhm-pgo-gen.nix`) and the profile-guided build `-pgo`
+(`bin/mf-owhm-pgo.nix`); with GMG the suffix follows `-gmg`
+(`bin/mf-owhm-gmg-fast.nix`). Make adds the suffix to `PROGRAM` (default
+`mf-owhm`; `PROGRAM=mf-owhm-gmg` gives the GMG names), while `bin_out=` sets
+the exact path and name of the binary with nothing added. The release and debug names are the ones the
+example scripts in `examples/bash_example_run` look for. Intermediate files go to `obj/` (Make)
 or to the build directory you choose (CMake, Meson); `build/` is ignored by git.
 `.util/cleanRepo.sh` removes the object, library, example output and build
 directories and keeps the compiled binaries (`.util/cleanRepo.sh build nopause`
@@ -425,19 +429,20 @@ builds and a training run in between:
    `mf-owhm-pgo-gen` and is slow.
 2. Run one or more representative models with it (a few stress periods are
    enough; the repository examples work too). Every run writes a
-   `<name>-<id>.profraw` file into the profile directory, whose location is
+   `mf-owhm-<id>.profraw` file (the program name without a suffix,
+   `mf-owhm-gmg` with GMG) into the profile directory, whose location is
    compiled into the binary (default `obj/pgo` for Make, `<build dir>/pgo` for
    CMake and Meson, `obj\pgo` for Visual Studio).
-3. Build `fast-pgo`: the `.profraw` files are merged into `<name>.profdata`
+3. Build `fast-pgo`: the `.profraw` files are merged into `mf-owhm.profdata`
    with `llvm-profdata` (Make, Meson and CMake with a single-configuration
    generator do this; the tool ships with ifx in `bin/compiler/`) and the
    compiler uses the merged profile.
 
 ```bash
-make CONFIG=fast                                     # -> bin/mf-owhm.nix
+make CONFIG=fast                                     # -> bin/mf-owhm-fast.nix
 make CONFIG=fast-pgo-gen                             # -> bin/mf-owhm-pgo-gen.nix
 (cd examples/mf-owhm/3_SFR && ../../../bin/mf-owhm-pgo-gen.nix OWHM_Examples.nam)   # writes obj/pgo/mf-owhm-<id>.profraw
-make CONFIG=fast-pgo                                 # merges obj/pgo/*.profraw, -> bin/mf-owhm.nix
+make CONFIG=fast-pgo                                 # merges obj/pgo/*.profraw, -> bin/mf-owhm-pgo.nix
 make CONFIG=fast-pgo PROFDIR=/path/to/profiles       # another profile directory (also for fast-pgo-gen)
 
 cmake -S . -B build -DCMAKE_Fortran_COMPILER=ifx -DCMAKE_BUILD_TYPE=FastPGOGen && cmake --build build
@@ -490,26 +495,35 @@ matching line of `run_dir`) for a profile that matches the models the binary
 is built for.
 
 ```bash
-python3 .util/pgo/build_pgo.py                                   # pgo.ini -> bin/mf-owhm.nix
-python3 .util/pgo/build_pgo.py my.ini --name mf-owhm-pgo         # bin/mf-owhm-pgo.nix
-python3 .util/pgo/build_pgo.py --gmg                             # GMG variant -> bin/mf-owhm-gmg.nix
+python3 .util/pgo/build_pgo.py                                   # pgo.ini -> bin/mf-owhm-pgo.nix
+python3 .util/pgo/build_pgo.py my.ini --name mf-owhm-pgo-mymodel # bin/mf-owhm-pgo-mymodel.nix
+python3 .util/pgo/build_pgo.py --gmg                             # GMG variant -> bin/mf-owhm-gmg-pgo.nix
 python3 .util/pgo/build_pgo.py --dry-run                         # show the commands only
 ```
 
 ```bat
-py .util\pgo\build_pgo.py                                        :: pgo.ini -> bin\mf-owhm.exe
+py .util\pgo\build_pgo.py                                        :: pgo.ini -> bin\mf-owhm-pgo.exe
 ```
 
-The ini settings: `name` (final binary, `bin/<name>.exe|.nix`), `gmg`,
+A binary trained on one model is best named after it (`--name
+mf-owhm-pgo-<model>`), so that it is not mistaken for a general build.
+
+The ini settings: `name` (final binary, `bin/<name>.exe|.nix`, used exactly as
+written; when it is empty and `--name` is not given, the name the `Fast_PGO`
+projects produce: `mf-owhm-pgo`, `mf-owhm-gmg-pgo` with GMG), `gmg`,
 `engine` (`make`, `vs` or `auto`), `profdir` (make only; the Visual Studio
 projects always use `obj\pgo`), `keep_gen` (keep the instrumented binary),
 `log` (the full build and run output, default `obj/pgo/build_pgo.log`); under
 `[make]` extra make variables (`args`) and the `setvars.sh` to source when
 ifx is not on `PATH` (`oneapi`); under `[vs]` the paths of `devenv.com`,
 `MSBuild.exe` (GMG only) and the oneAPI compiler folder, all found
-automatically when left at `auto`. On Windows the projects always write
-`bin\mf-owhm.exe`; when another name is asked for, an existing binary of
-that name is moved aside during the build and put back afterwards. The
+automatically when left at `auto`. The profile files and the instrumented
+binary always use the program name (`mf-owhm-<id>.profraw`,
+`mf-owhm.profdata`, `mf-owhm-pgo-gen`; `mf-owhm-gmg` with GMG), whatever the
+final name. On Windows the `Fast_PGO` project always writes
+`bin\mf-owhm-pgo.exe` and the script renames it; when another name is asked
+for, an existing `bin\mf-owhm-pgo.exe` is moved aside during the build and put
+back afterwards. The
 script stops at the first failed build or model run; the log file has the
 compiler and model output.
 
@@ -523,7 +537,7 @@ line; the defaults in the makefile need not be edited.
 ```bash
 make                                    # ifx release -> bin/mf-owhm.nix
 make CONFIG=debug                       # -> bin/mf-owhm-debug.nix
-make CONFIG=fast                        # no floating-point traps, AVX2 code (see above)
+make CONFIG=fast                        # no floating-point traps, AVX2 code -> bin/mf-owhm-fast.nix (see above)
 make F90=ifort                          # classic ifort release (oneAPI 2024.2)
 make COMPILER=GCC F90=gfortran CC=gcc   # gfortran
 make USEGMG=YES CC=icx bin_out=bin/mf-owhm-gmg
@@ -605,7 +619,7 @@ the released Windows executables are produced. Its configurations `Debug`,
 `mf-owhm-fast-debug.exe` and `mf-owhm.exe`; `Fast`, `Fast_PGO_Gen` and
 `Fast_PGO` are the fast and profile-guided builds described in
 [Fast and profile-guided builds](#fast-and-profile-guided-builds)
-(`mf-owhm.exe`, `mf-owhm-pgo-gen.exe` and `mf-owhm.exe`); `ReleaseIFORT`
+(`mf-owhm-fast.exe`, `mf-owhm-pgo-gen.exe` and `mf-owhm-pgo.exe`); `ReleaseIFORT`
 uses the classic ifort (only with Visual Studio 2022 and oneAPI 2024.2) and
 produces `mf-owhm.ifort.exe`.
 

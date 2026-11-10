@@ -61,12 +61,12 @@
 # Specify debug or release to run without modifying the makefile:
 # make CONFIG=debug       or
 # make CONFIG=release     or
-# make CONFIG=fast        or   (release flags with AVX2 code and no floating-point traps; see doc/BUILD.md)
+# make CONFIG=fast        or   (release flags with AVX2 code and no floating-point traps -> bin/mf-owhm-fast.nix; see doc/BUILD.md)
 # make run CONFIG=debug   or
 #
 # Profile-guided fast build (ifx only), two stages with the profile directory PROFDIR (default ./obj/pgo):
 # make CONFIG=fast-pgo-gen            -> bin/mf-owhm-pgo-gen.nix; run one or more models with it (each run writes a .profraw file into PROFDIR)
-# make CONFIG=fast-pgo                -> merges the .profraw files (llvm-profdata) and builds bin/mf-owhm.nix with the profile
+# make CONFIG=fast-pgo                -> merges the .profraw files (llvm-profdata) and builds bin/mf-owhm-pgo.nix with the profile
 #
 # make COMPILER=gcc F90=gfortran       or
 # make COMPILER=gcc F90=gfortran CONFIG=debug
@@ -135,10 +135,10 @@
 #
 # Compilation Configuration-Optimization Scheme
 #   ===> Accepted Answers: RELEASE, DEBUG, FAST, FAST-PGO-GEN, FAST-PGO
-#        FAST         = release flags with -fpe1 (no floating-point traps) and AVX2 code (-march=x86-64-v3).
+#        FAST         = release flags with -fpe1 (no floating-point traps) and AVX2 code (-march=x86-64-v3) -> bin/mf-owhm-fast
 #                       The binary needs a CPU with AVX2 (2013 or newer). gfortran uses the release flags; not for ifort.
 #        FAST-PGO-GEN = FAST plus profile instrumentation -> bin/mf-owhm-pgo-gen; each run writes a .profraw file into PROFDIR
-#        FAST-PGO     = FAST plus the profile from PROFDIR (the .profraw files are merged with llvm-profdata) -> bin/mf-owhm
+#        FAST-PGO     = FAST plus the profile from PROFDIR (the .profraw files are merged with llvm-profdata) -> bin/mf-owhm-pgo
 CONFIG := RELEASE
 # Profile directory of the two-stage FAST-PGO build (written by the FAST-PGO-GEN binary, read by FAST-PGO)
 PROFDIR := ./obj/pgo
@@ -162,7 +162,7 @@ F90 := ifx
 #   ===> Accepted Answers: icx, icc, gcc
 CC  := icx
 #
-# Program Name - Do not include extension (eg .exe). Also _debug will automatically be added if CONFIG = debug. Use bin_out= to specify exact location and name for binary.
+# Program Name - Do not include extension (eg .exe). Also -debug, -fast, -pgo-gen or -pgo is automatically added for CONFIG = debug, fast, fast-pgo-gen or fast-pgo. Use bin_out= to specify exact location and name for binary.
 #
 PROGRAM := mf-owhm
 #
@@ -619,9 +619,13 @@ endif
 # Profile-guided FAST build (ifx only; ifort and gfortran stop with an error)
 #   CONFIG=FAST-PGO-GEN  builds bin/mf-owhm-pgo-gen; every run of it writes $(PROFDIR)/mf-owhm-<id>.profraw
 #   CONFIG=FAST-PGO      merges the .profraw files into $(PROFDIR)/mf-owhm.profdata (llvm-profdata, which ships
-#                        next to ifx in bin/compiler/) and compiles with -fprofile-use of that file
+#                        next to ifx in bin/compiler/) and compiles with -fprofile-use of that file -> bin/mf-owhm-pgo
+#   CONFIG=FAST          (no profile) -> bin/mf-owhm-fast
 #
 PGO_DEP :=
+ifeq ($(CFG), FAST)
+   override PROGRAM:=$(PROGRAM)-fast
+endif
 ifeq ($(CFG), FAST-PGO-GEN)
    ifneq ($(notdir $(F90)), ifx)
       $(error CONFIG=$(CFG) is only available with F90=ifx; use CONFIG=FAST)
@@ -636,6 +640,7 @@ ifeq ($(CFG), FAST-PGO)
    endif
    PROFDATA := $(PROFDIR)/$(notdir $(PROGRAM)).profdata
    PROFRAW  := $(wildcard $(PROFDIR)/*.profraw)
+   override PROGRAM:=$(PROGRAM)-pgo
    LLVM_PROFDATA ?= $(firstword $(wildcard $(dir $(shell which $(F90)))compiler/llvm-profdata) llvm-profdata)
    F90FlagsIntel += -fprofile-use=$(abspath $(PROFDATA))
    PGO_DEP := $(PROFDATA)

@@ -2,9 +2,9 @@
 #
 #   cmake -S . -B build                      # gfortran or ifort/ifx found on PATH, Release
 #   cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
-#   cmake -S . -B build -DCMAKE_BUILD_TYPE=Fast       # no floating-point traps, AVX2 code (see doc/BUILD.md)
+#   cmake -S . -B build -DCMAKE_BUILD_TYPE=Fast       # no floating-point traps, AVX2 code -> bin/mf-owhm-fast (see doc/BUILD.md)
 #   cmake -S . -B build -DCMAKE_BUILD_TYPE=FastPGOGen # then run a model with bin/mf-owhm-pgo-gen, then
-#   cmake -S . -B build -DCMAKE_BUILD_TYPE=FastPGO    # profile-guided Fast build (ifx only; -DOWHM_PROFDIR=<dir>)
+#   cmake -S . -B build -DCMAKE_BUILD_TYPE=FastPGO    # profile-guided Fast build -> bin/mf-owhm-pgo (ifx only; -DOWHM_PROFDIR=<dir>)
 #   cmake -S . -B build -DCMAKE_Fortran_COMPILER=ifx
 #   cmake -S . -B build -DOWHM_USE_GMG=ON    # include the C GMG solver, needs a C compiler
 #   cmake --build build
@@ -17,8 +17,8 @@
 #   build it with  devenv.com build\vs2026\mf-owhm.slnx /Build "Release|x64"  or in the IDE.
 #
 # The binary is written to bin/ with the same names as the makefile:
-# mf-owhm.nix (Linux/macOS) or mf-owhm.exe (Windows), with -debug and
-# -gmg suffixes. The source lists are the text files in cmake/, shared
+# mf-owhm.nix (Linux/macOS) or mf-owhm.exe (Windows), with -gmg for the GMG
+# variant followed by -debug, -fast, -pgo-gen or -pgo (mf-owhm-gmg-pgo). The source lists are the text files in cmake/, shared
 # with meson.build; the compiler flags are in cmake/CompilerFlagInput.cmake. The postprocessors zonebudget and hydfmt are built by
 # default into postprocessors/<name>/bin and can be switched off.
 #
@@ -75,6 +75,10 @@ if(OWHM_USE_GMG)
   target_include_directories(mf-owhm PRIVATE src/gmg_c)
 endif()
 owhm_output_name(mf-owhm ${_base} "${OWHM_BIN_DIR}")
+# Fast and FastPGO binaries are named like the makefile builds (the postprocessors keep their names)
+set_target_properties(mf-owhm PROPERTIES
+  OUTPUT_NAME_FAST    "${_base}-fast"
+  OUTPUT_NAME_FASTPGO "${_base}-pgo")
 
 if(OWHM_BUILD_ZONEBUDGET)
   add_subdirectory(postprocessors/zonebudget)
