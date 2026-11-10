@@ -8,6 +8,7 @@
   
   "ProgramName.Debug": "mf-owhm-debug",
   "ProgramName.Release": "mf-owhm",
+  "ProgramName.Fast": "mf-owhm-fast",
   "ProgramName.Dir": "bin",
   "ProgramSRC.Dir": "src",
   "ProgramOBJ.Dir": "obj",

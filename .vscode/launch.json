@@ -459,6 +459,60 @@
       }
     },
     {
+      "name": "Launch ifx Fast (Linux) (Specify)",
+      "type": "cppdbg",
+      "request": "launch",
+      "cwd": "${input:mfowhmRunDirectory}",
+      "program": "${workspaceFolder}/${config:ProgramName.Dir}/${config:ProgramName.Fast}-ifx.nix",
+      "args": [
+        "${input:mfowhmNameFile}"
+      ],
+      "stopAtEntry": false,
+      "externalConsole": true,
+      "MIMode": "gdb",
+      "preLaunchTask": "Build ifx Fast",
+      "linux": {
+        "miDebuggerPath": "gdb"
+      },
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "presentation": {
+        "group": "input-file"
+      }
+    },
+    {
+      "name": "Launch ifx Fast (Linux) (settings.json)",
+      "type": "cppdbg",
+      "request": "launch",
+      "cwd": "${config:ProgramRun.CWD}",
+      "program": "${workspaceFolder}/${config:ProgramName.Dir}/${config:ProgramName.Fast}-ifx.nix",
+      "args": [
+        "${config:ProgramRun.NAM}"
+      ],
+      "stopAtEntry": false,
+      "externalConsole": true,
+      "MIMode": "gdb",
+      "preLaunchTask": "Build ifx Fast",
+      "linux": {
+        "miDebuggerPath": "gdb"
+      },
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "presentation": {
+        "group": "workspace-settings"
+      }
+    },
+    {
       "name": "Launch ifx Debug GMG (Linux) (Specify)",
       "type": "cppdbg",
       "request": "launch",
@@ -626,6 +680,38 @@
       "stopAtEntry": false,
       "console": "externalTerminal",
       "preLaunchTask": "Build ifx Release",
+      "presentation": {
+        "group": "workspace-settings"
+      }
+    },
+    {
+      "name": "Launch ifx Fast (Windows) (Specify)",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "cwd": "${input:mfowhmRunDirectory}",
+      "program": "${workspaceFolder}/${config:ProgramName.Dir}/${config:ProgramName.Fast}-ifx.exe",
+      "args": [
+        "${input:mfowhmNameFile}"
+      ],
+      "stopAtEntry": false,
+      "console": "externalTerminal",
+      "preLaunchTask": "Build ifx Fast",
+      "presentation": {
+        "group": "input-file"
+      }
+    },
+    {
+      "name": "Launch ifx Fast (Windows) (settings.json)",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "cwd": "${config:ProgramRun.CWD}",
+      "program": "${workspaceFolder}/${config:ProgramName.Dir}/${config:ProgramName.Fast}-ifx.exe",
+      "args": [
+        "${config:ProgramRun.NAM}"
+      ],
+      "stopAtEntry": false,
+      "console": "externalTerminal",
+      "preLaunchTask": "Build ifx Fast",
       "presentation": {
         "group": "workspace-settings"
       }

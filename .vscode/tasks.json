@@ -244,7 +244,7 @@
         "USEGMG=NO",
         "src_dir=${config:ProgramSRC.Dir}",
         "int_dir=${config:ProgramOBJ.Dir}/vscode_ifx_fast",
-        "bin_out=${config:ProgramName.Dir}/${config:ProgramName.Release}-ifx-fast"
+        "bin_out=${config:ProgramName.Dir}/${config:ProgramName.Fast}-ifx"
       ],
       "options": {
         "cwd": "${workspaceFolder}"

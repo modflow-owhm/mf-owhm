@@ -58,7 +58,7 @@ In `.vscode/settings.json`:
 
 | Task group                                   | Tool              | Where it runs     | Output                                                        |
 | -------------------------------------------- | ----------------- | ----------------- | ------------------------------------------------------------- |
-| `Build gfortran Debug` ... `Rebuild ifx Release GMG` | GNU Make  | Linux, WSL, msys2 | `bin/mf-owhm-debug.nix`, `bin/mf-owhm-ifx.nix`, ... (objects under `obj/vscode_*`) |
+| `Build gfortran Debug` ... `Rebuild ifx Release GMG` | GNU Make  | Linux, WSL, msys2 | `bin/mf-owhm-debug.nix`, `bin/mf-owhm-ifx.nix`, `bin/mf-owhm-fast-ifx.nix`, ... (objects under `obj/vscode_*`) |
 | `CMake: Build Debug (gfortran)` ... `CMake: Build Release (ifx)` | CMake + Ninja | Linux, WSL | `bin/mf-owhm-debug.nix` or `bin/mf-owhm.nix`; build trees under `build/vscode-cmake-*` |
 | `Meson: Build Debug (gfortran)` ... `Meson: Build Release (ifx)` | Meson + Ninja | Linux, WSL | same names, installed into `bin/`; build trees under `build/vscode-meson-*` |
 | `Windows ifx: CMake Build Debug` / `Release`  | CMake + Ninja     | Windows (cmd.exe) | `bin\mf-owhm-debug.exe` or `bin\mf-owhm.exe`                  |
