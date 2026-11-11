@@ -9124,7 +9124,7 @@ MODULE SWO_DATA_FMP_MODULE!, ONLY: SWO_DATA, INITIALIZE_SWO_DATA, FRAC_POOL2SPLI
                I = WBS%DIST(IDIST)%AUX(J)
                SWO%AUXDEM(I)%DIST_ALLOC_FRAC = SWO%DIST_ALLOC_FRAC%LIST(I+NFARM)
                !
-               DTMP1 = DTMP1 + SWO%FARM(I)%DIST_ALLOC_FRAC  !SUM CHECK
+               DTMP1 = DTMP1 + SWO%AUXDEM(I)%DIST_ALLOC_FRAC  !SUM CHECK
             END DO
             !
             IF(DTMP1 < SUB_ONE .OR. NEAR_ONE < DTMP1) THEN                 !Should sum to 1
