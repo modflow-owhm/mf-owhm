@@ -1153,7 +1153,7 @@ MODULE CROP_DATA_FMP_MODULE
         IF( UPDATE .OR. (CDAT%FTR%TRANSIENT .AND. LOAD_NEXT) .OR. (NEW_IRR .AND. CDAT%FTR%SFAC%HAS_EX3)  ) CALL CDAT%CROP%COPY_INPUT(CDAT%FTR   )
         IF( UPDATE .OR. (CDAT%FTR%TRANSIENT .AND. LOAD_NEXT) .OR. (NEW_IRR .AND. CDAT%FTR%SFAC%HAS_EX3) &
                    .OR. (CDAT%FEI%TRANSIENT .AND. LOAD_NEXT) .OR. (NEW_IRR .AND. CDAT%FEI%SFAC%HAS_EX3) &
-                   .OR. (NEW_IRR .AND. 'FEI_BYIRR' == CDAT%FIESWI%TYP)                                   ) CALL CDAT%CROP%COPY_INPUT(CDAT%FEI   )
+                   .OR. (NEW_IRR .AND. 'FEI_BYIRR' == CDAT%FEI%TYP)                                      ) CALL CDAT%CROP%COPY_INPUT(CDAT%FEI   )
         !
         IF( UPDATE .OR. (CDAT%ADMD%TRANSIENT.AND. LOAD_NEXT) .OR. (NEW_IRR .AND. CDAT%ADMD%SFAC%HAS_EX3) ) CALL CDAT%CROP%COPY_INPUT(CDAT%ADMD  )
         !
@@ -1617,7 +1617,7 @@ MODULE CROP_DATA_FMP_MODULE
                   END DO
         END IF
         !
-        IF(UPDATE .OR. (CDAT%FIESWI%TRANSIENT .AND. LOAD_NEXT) .OR. (NEW_IRR .AND. CDAT%FIESWI%SFAC%HAS_EX3)) THEN
+        IF(UPDATE .OR. (CDAT%FIESWI%TRANSIENT .AND. LOAD_NEXT) .OR. (NEW_IRR .AND. CDAT%FIESWI%SFAC%HAS_EX3) .OR. (NEW_IRR .AND. 'FIESWI_BYIRR' == CDAT%FIESWI%TYP)) THEN
                   PRNT = TRUE
                   DO I=ONE, CDAT%NCROP
                   DO K=ONE, CDAT%CROP(I)%N
@@ -1900,7 +1900,8 @@ MODULE CROP_DATA_FMP_MODULE
         !
         ! CALCULATE CECT = FEI/FTR
         !
-        IF( UPDATE .OR. (CDAT%FTR%TRANSIENT.OR.CDAT%FEI%TRANSIENT .AND. LOAD_NEXT) .OR. (NEW_IRR .AND. (CDAT%FTR%SFAC%HAS_EX3 .OR. CDAT%FEI%SFAC%HAS_EX3)) ) THEN
+        IF( UPDATE .OR. (CDAT%FTR%TRANSIENT.OR.CDAT%FEI%TRANSIENT .AND. LOAD_NEXT) .OR. (NEW_IRR .AND. (CDAT%FTR%SFAC%HAS_EX3 .OR. CDAT%FEI%SFAC%HAS_EX3)) &
+                                                                                   .OR. (NEW_IRR .AND. 'FEI_BYIRR' == CDAT%FEI%TYP)                                ) THEN
               DO CONCURRENT ( I=ONE:CDAT%NCROP ) 
               DO CONCURRENT ( K=ONE:CDAT%CROP(I)%N )
                                                                       IF(CDAT%CROP(I)%FTR(K) > DZ) THEN
