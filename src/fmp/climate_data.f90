@@ -299,7 +299,7 @@ MODULE CLIMATE_DATA_FMP_MODULE
     LOGICAL,                             INTENT(IN   ):: NEW_FID
     DOUBLE PRECISION, DIMENSION(:,:), CONTIGUOUS, INTENT(IN   ):: AREA
     INTEGER:: I, R, C
-    LOGICAL:: UPDATE, ERROR, LTMP
+    LOGICAL:: UPDATE, ERROR, LTMP, NEW_PRECIP
     !
     IF(CLIM%TFR_READ) THEN
         !
@@ -342,7 +342,10 @@ MODULE CLIMATE_DATA_FMP_MODULE
         END DO
     END IF
     !
-    IF(CLIM%HAS_PRECIP .AND. (CLIM%PRECIP_TFR%TRANSIENT .OR. UPDATE .OR. (CLIM%PRECIP_TFR%SFAC%HAS_EX1.AND.NEW_FID))) THEN
+    ! PRECIP is zero outside of the WBS cells, so a new FID_ARRAY always requires it to be rebuilt
+    NEW_PRECIP = CLIM%HAS_PRECIP .AND. (CLIM%PRECIP_TFR%TRANSIENT .OR. UPDATE .OR. NEW_FID)
+    !
+    IF(NEW_PRECIP) THEN
         IF(CLIM%PRECIP_TFR%HAS_IXJ) THEN
                                              CALL CLIM%PRECIP_TFR%IXJ%TO_ARRAY(TWO, ONE, ONE, CLIM%NCOL, CLIM%NROW, CLIM%PRECIP, ERROR)  !(IROW, ICOL, VPOS, DIM1, DIM2, ARR, ERROR)
                                              !
@@ -370,8 +373,10 @@ MODULE CLIMATE_DATA_FMP_MODULE
               CLIM%PRECIP(C,R) = DZ
         END DO
         !WHERE(FID_ARRAY<ONE) CLIM%PRECIP = DZ
-        !
-        IF(CLIM%HAS_Pe) THEN
+    END IF
+    !
+    ! Peff depends on PRECIP, so it is rebuilt when PRECIP changes or when its own input is transient
+    IF(CLIM%HAS_Pe .AND. (NEW_PRECIP .OR. CLIM%PRECIP_EFF_TFR%TRANSIENT)) THEN
                 IF(CLIM%HAS_Pe_TFR > Z) THEN
                   ASSOCIATE(PRECIP => CLIM%PRECIP, Peff => CLIM%PRECIP_EFFECTIVE )
                     IF(CLIM%PRECIP_EFF_TFR%HAS_IXJ) THEN
@@ -440,7 +445,6 @@ MODULE CLIMATE_DATA_FMP_MODULE
                     END DO
                   END ASSOCIATE
                 END IF
-        END IF
     END IF
     !
     IF(CLIM%HAS_REF_ET .and. (                     &
