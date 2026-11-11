@@ -216,7 +216,7 @@ SUBROUTINE GWF2WEL8AR(IN,IGRID)
                              END IF
                              !
                              !CALL PARSE_WORD_UP(BL%LINE,LLOC,ISTART,ISTOP,OLD_LOC=LLOC)  
-                             CALL PARSE_WORD(BL%LINE,LLOC,ISTART,ISTOP, COM_STOP=TRUE) !NO UPPER CASE AND STOP AT #, HOLD LLOC AT OLD POSITION
+                             CALL PARSE_WORD(BL%LINE,LLOC,ISTART,ISTOP, COM_STOP=TRUE, OLD_LOC=LLOC) !NO UPPER CASE AND STOP AT #, HOLD LLOC AT OLD POSITION
                              IF(ISTART <= ISTOP) THEN
                                  IF(BL%LINE(ISTART:ISTOP) .NE. BLNK) CALL IUNITRAMP%OPEN(BL%LINE, LLOC, IOUT, IN, NOSTOP=TRUE, NO_BINARY=TRUE, SAVE_FNAME=TRUE, ALLOW_ONLY_UNIT=TRUE)
                              END IF
@@ -619,7 +619,7 @@ SUBROUTINE GWF2WEL8FM(IGRID)   !SCOTT IDEA MAKE SUBTRACTING FROM RHS VECTORIZABL
 !
 !2B-----IF THE CELL IS VARIABLE HEAD THEN SUBTRACT Q FROM
 !       THE RHS ACCUMULATOR.
-    IF ( WELSMOOTHING .AND. Q.LT.ZERO) THEN  ! .AND. LAYHDT(IL).NE.Z
+    IF ( WELSMOOTHING .AND. Q < ZERO) THEN   ! confined and convertible layers; GWF2WEL8BD must apply the same smoothing
        Hh = HNEW(ic,ir,il)
        bbot = Botm(IC, IR, Lbotm(IL))
        ttop = Botm(IC, IR, Lbotm(IL)-1)
@@ -650,7 +650,7 @@ SUBROUTINE GWF2WEL8BD(KSTP,KPER,IGRID)
 !
 !        SPECIFICATIONS:
 ! ------------------------------------------------------------------
-  USE GLOBAL,      ONLY:NCOL,NROW,NLAY,IBOUND,BUFF,BOTM,LBOTM,HNEW,LAYHDT
+  USE GLOBAL,      ONLY:NCOL,NROW,NLAY,IBOUND,BUFF,BOTM,LBOTM,HNEW
   USE GWFBASMODULE,ONLY:MSUM,ICBCFL,IAUXSV,DELT,PERTIM,TOTIM,VBVL,VBNM
   USE GWFWEL2MODULE,ONLY:IWELCB,WELDATA,NWELVL,WELAUX,PHIRAMP,IUNITRAMP,IPRWEL,WELSMOOTHING,WELBUD,IOUT
   !
@@ -726,6 +726,7 @@ SUBROUTINE GWF2WEL8BD(KSTP,KPER,IGRID)
            !
            Q=ZERO
            QSAVE = DZERO
+           Qp = 1.0D0
            bbot = Botm(IC, IR, Lbotm(IL))
            ttop = Botm(IC, IR, Lbotm(IL)-1)
            Hh = HNEW(ic,ir,il)
@@ -738,7 +739,7 @@ SUBROUTINE GWF2WEL8BD(KSTP,KPER,IGRID)
                 !
                 QSAVE = DBLE(Q)
                 !
-                IF ( WELSMOOTHING .AND. Q.LT.ZERO .AND. LAYHDT(IL).NE.Z) THEN
+                IF ( WELSMOOTHING .AND. Q < ZERO) THEN   ! Same smoothing as GWF2WEL8FM, for confined and convertible layers
                    Hh = HNEW(ic,ir,il)
                    bbot = Botm(IC, IR, Lbotm(IL))
                    ttop = Botm(IC, IR, Lbotm(IL)-1)
@@ -780,7 +781,8 @@ SUBROUTINE GWF2WEL8BD(KSTP,KPER,IGRID)
            !
            WELDATA(L)%CBCFLOW=Q
 ! write wells with reduced pumping
-           IF ( WELSMOOTHING .AND. Qp.LT.0.9999D0 .AND. IPRWEL.NE.Z .AND. .NOT. IUNITRAMP%NULL_FILE) THEN
+           ! NOPRINT (IPRWEL = 0) only stops the reduced wells written to the LIST file, not to a file the input names
+           IF ( WELSMOOTHING .AND. Qp < 0.9999D0 .AND. (IPRWEL /= Z .OR. .NOT. IUNITRAMP%IS_INTERNAL) .AND. .NOT. IUNITRAMP%NULL_FILE) THEN
               IF ( RED_Q_HEADER ) THEN
                  WRITE(IUNITRAMP%IU,'(/ A /)')' WELLS WITH REDUCED PUMPING FOR STRESS PERIOD '//NUM2STR(KPER)//' TIME STEP '//NUM2STR(KSTP)//NEW_LINE(' ')//  &
                                            '   LAY   ROW   COL         APPL.Q          ACT.Q        GW-HEAD       CELL-BOT'
