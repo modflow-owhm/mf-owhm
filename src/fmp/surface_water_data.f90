@@ -620,6 +620,7 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
     LOGICAL:: UPDATE, UPDATE_RETURN, NO_RETURN, IS_FULLY_RETURN
     LOGICAL:: SRD_CHK, SRR_CHK, ERROR
     TYPE(WARNING_TYPE):: WRN
+    DOUBLE PRECISION:: LFAC, UFAC
     DOUBLE PRECISION, DIMENSION(:), ALLOCATABLE:: WBS_AREA
     !
     IF(.NOT. SWF%HAS_SW) RETURN
@@ -645,22 +646,6 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
     END IF
     !
     CALL WRN%INIT()
-    !
-    !------------------------------------------------------------------------
-    !
-    IF(UPDATE .OR. SWF%DELIV_L_LIM%TRANSIENT) THEN
-           IF(SWF%DELIV_L_LIM%SFAC%HAS_ALL) SWF%DELIV_L_LIM%LIST = SWF%DELIV_L_LIM%LIST * SWF%DELIV_L_LIM%SFAC%ALL  ! ULOAD returns the scale factor (SFAC keyword or the number after the file name) but does not apply it
-           !
-           DO CONCURRENT(K=ONE:SWF%NSFR_DELIV, SWF%DELIV_L_LIM%LIST(K) < DZ );   SWF%DELIV_L_LIM%LIST(K) = DZ
-           END DO
-    END IF
-    !
-    IF(UPDATE .OR. SWF%DELIV_U_LIM%TRANSIENT) THEN
-           IF(SWF%DELIV_U_LIM%SFAC%HAS_ALL) SWF%DELIV_U_LIM%LIST = SWF%DELIV_U_LIM%LIST * SWF%DELIV_U_LIM%SFAC%ALL
-           !
-           DO CONCURRENT(K=ONE:SWF%NSFR_DELIV, SWF%DELIV_U_LIM%LIST(K) < DZ );   SWF%DELIV_U_LIM%LIST(K) = D100
-           END DO
-    END IF
     !
     !------------------------------------------------------------------------
     !
@@ -974,6 +959,13 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
     !
     IF(SRD_CHK .OR. SWF%DELIV_L_LIM%TRANSIENT .OR. SWF%DELIV_U_LIM%TRANSIENT) THEN
         !
+        ! The limit lists keep the input as read, because REPEAT reuses the unscaled input of the previous stress period.
+        ! The scale factor that ULOAD returns (SFAC keyword or the number after the file name) is applied to the copy.
+        LFAC = UNO
+        UFAC = UNO
+        IF(SWF%DELIV_L_LIM%SFAC%HAS_ALL) LFAC = SWF%DELIV_L_LIM%SFAC%ALL
+        IF(SWF%DELIV_U_LIM%SFAC%HAS_ALL) UFAC = SWF%DELIV_U_LIM%SFAC%ALL
+        !
         ASSOCIATE(WBS  => SWF%ISRD_TFR%WBS,     &
                   LLIM => SWF%DELIV_L_LIM%LIST, &
                   ULIM => SWF%DELIV_U_LIM%LIST   )
@@ -985,8 +977,11 @@ MODULE SURFACE_WATER_DATA_FMP_MODULE
                    !
                    IF(SWF%SRDLOC(WBS(K))%ISRD(I) == K) THEN
                        !
-                       SWF%SRDLOC(WBS(K))%LLIM(I) = LLIM(K)
-                       SWF%SRDLOC(WBS(K))%ULIM(I) = ULIM(K)
+                       SWF%SRDLOC(WBS(K))%LLIM(I) = LLIM(K) * LFAC
+                       SWF%SRDLOC(WBS(K))%ULIM(I) = ULIM(K) * UFAC
+                       !
+                       IF(SWF%SRDLOC(WBS(K))%LLIM(I) < DZ) SWF%SRDLOC(WBS(K))%LLIM(I) = DZ     ! A negative lower limit is no limit
+                       IF(SWF%SRDLOC(WBS(K))%ULIM(I) < DZ) SWF%SRDLOC(WBS(K))%ULIM(I) = D100   ! A negative upper limit is no limit
                        EXIT
                    END IF
                END DO
