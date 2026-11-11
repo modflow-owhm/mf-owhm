@@ -1173,8 +1173,7 @@ MODULE WELL_DATA_FMP_MODULE
                  MXDIM = MXDIM + FWEL(I)%DIM
                END DO
     CASE(  TWO)
-               CALL FWEL_LOAD_FID_LINEFEED(INWEL,FWEL,INSTYLE)
-               CALL APPLY_SFAC_TO_QINI(FWEL) !--ALL FARMS SHOULD HAVE THE SAME LOAD TYPE --ONLY APPLY SFAC FOR LIST LOAD...LINEFEED READS NEW DATA EVERY SP SO IT WILL BE APPLIED THEN
+               CALL FWEL_LOAD_FID_LINEFEED(INWEL,FWEL,INSTYLE)  ! SFAC is applied when FWEL_FID_LINEFEED_LOAD rebuilds the wells of each WBS for a stress period
                MXDIM=ABS(FWEL(ONE)%DIM)
     CASE(THREE)
                CALL FWEL_LOAD_CAPACITY_LINEFEED(INWEL,FWEL,INSTYLE)
@@ -2120,6 +2119,8 @@ MODULE WELL_DATA_FMP_MODULE
              END DO
              !
              IF ( ANY(FWEL%MNWLOC > Z) ) FWEL%MNWLINK  = TRUE
+             !
+             CALL APPLY_SFAC_TO_QINI(FWEL)  ! The capacities are copied unscaled from the LineFeed input, so the SUPPLY_WELL block SFAC is applied to each rebuild
              !
        END IF
     !ELSE
