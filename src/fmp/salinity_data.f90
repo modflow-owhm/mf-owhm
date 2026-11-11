@@ -860,7 +860,13 @@ MODULE SALINITY_DATA_FMP_MODULE!, ONLY: SALINITY_DATA, INITIALIZE_SALINITY_DATA
                             !                    
                             ECw = SALT%ECw( CDAT%CROP(I)%FID(K) )
                             !
-                            SALT%LR(I)%VEC(K) = ECw / (FIVE*SALT%ECe(I) - ECw)
+                            IF    (ECw <= DZ) THEN                  ! No salt in the irrigation water, so no leaching
+                                                                    SALT%LR(I)%VEC(K) = DZ
+                            ELSEIF(FIVE*SALT%ECe(I) <= ECw) THEN    ! LR goes to infinity as 5*ECe approaches ECw, so use the maximum (D100 is reduced to MAX_LR below)
+                                                                    SALT%LR(I)%VEC(K) = D100
+                            ELSE
+                                                                    SALT%LR(I)%VEC(K) = ECw / (FIVE*SALT%ECe(I) - ECw)
+                            END IF
                   END SELECT
               END IF
               !
