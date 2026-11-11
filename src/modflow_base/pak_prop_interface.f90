@@ -97,6 +97,28 @@ SUBROUTINE  PAK_PROPTAB_TRANSFER(OUTVAR,INVAR)
   !
 END SUBROUTINE
 !
+! Stops with an error for a list feature whose TABNAM does not match any of the package's TabFile names
+SUBROUTINE TABNAM_NOT_FOUND_ERROR(PAK, PROP, TABNAM, IN, IOUT)
+  CHARACTER(*),                INTENT(IN):: PAK     ! Package name, such as 'WEL' or 'GHB'
+  CLASS(PAK_PROPTAB),          INTENT(IN):: PROP    ! List feature with the unmatched TABNAM
+  CHARACTER(*), DIMENSION(:),  INTENT(IN):: TABNAM  ! TabFile names defined by the TABFILES option
+  INTEGER,                     INTENT(IN):: IN, IOUT
+  CHARACTER(:), ALLOCATABLE:: NAMES
+  INTEGER:: J
+  !
+  NAMES = ''
+  DO J=ONE, SIZE(TABNAM)
+      NAMES = NAMES//NL//'   '//TRIM(TABNAM(J))
+  END DO
+  !
+  CALL STOP_ERROR(INFILE=IN, OUTPUT=IOUT, MSG=PAK//' TABFILE ERROR: THE LIST INPUT FOR LAYER, ROW, COLUMN = '//               &
+                  NUM2STR(PROP%LAY)//', '//NUM2STR(PROP%ROW)//', '//NUM2STR(PROP%COL)//NL//                                 &
+                  'SPECIFIED THE TABFILE NAME (TABNAM) "'//TRIM(PROP%TABNAM)//'",'//NL//                                    &
+                  'BUT IT DOES NOT MATCH ANY OF THE TABFILE NAMES DEFINED BY THE TABFILES OPTION (NAMES ARE NOT CASE SENSITIVE).'//  &
+                  NL//'THE DEFINED TABFILE NAMES ARE:'//NAMES)
+  !
+END SUBROUTINE
+!
 SUBROUTINE ULSTRDSTRUCT(NLST,RLST,LSTBEG,LDIM,MXDIM,INPACK,IOUT,           &
                         LABEL,CAUX,NCAUX,NAUX,IFREFM,ISCLOC1,ISCLOC2,IPRFLG)
   USE, INTRINSIC:: IEEE_ARITHMETIC, ONLY: IEEE_IS_NAN
@@ -311,12 +333,27 @@ SUBROUTINE ULSTRDSTRUCT(NLST,RLST,LSTBEG,LDIM,MXDIM,INPACK,IOUT,           &
                  RLST(II)%TABNAM=ADJUSTL(RLST(II)%TABNAM)
              END IF
              CALL UPPER(RLST(II)%TABNAM)
-             CALL GET_NUMBER(LINE,LLOC,ISTART,ISTOP,IOUT,IN,DTMP,MSG='NOSTOP')
-             IF (IEEE_IS_NAN(DTMP)) THEN
+             !
+             CALL PARSE_WORD(LINE(:I),LLOC,ISTART,ISTOP)
+             IF (LINE(ISTART:ISTOP) == ' ' .OR. ISTOP < ISTART) THEN            !TABNAM IS THE LAST ITEM ON THE LINE, SO TSFAC DEFAULTS TO 1.0
                  RLST(II)%TSFAC=1.0E0
-                 RLST(II)%TABNAM='     NO_TABFILE     '
                  IF(ALLOCATED(RLST(II)%TABEQNRES)) RLST(II)%TABEQN=''
-             ELSEIF(ALLOCATED(RLST(II)%TABEQNRES)) THEN
+                 CYCLE
+             END IF
+             !
+             CALL GET_NUMBER(LINE(:I),LLOC,ISTART,ISTOP,IOUT,IN,DTMP,NO_PARSE_WORD=TRUE,                                            &
+                             MSG='ULSTRDSTRUCT ERROR: FOUND TABFILE NAME (TABNAM) "'//TRIM(RLST(II)%TABNAM)//'",'//NL//            &
+                                 'BUT THE ITEM AFTER IT IS NOT A NUMBER FOR ITS SCALE FACTOR (TSFAC).'//NL//                        &
+                                 'THE INPUT IS: Layer Row Column Values... [BGROUP] [xyz] [TABNAM TSFAC [TAB_EQN]]'//NL//           &
+                                 'TSFAC MAY BE OMITTED WHEN TABNAM IS THE LAST ITEM ON THE LINE (IT THEN IS 1.0),'//NL//            &
+                                 'BUT IF TAB_EQN IS SPECIFIED, THEN TSFAC MUST BE SPECIFIED BEFORE IT.')
+             IF (IEEE_IS_NAN(DTMP)) CALL STOP_ERROR(LINE,IN,IOUT,MSG='ULSTRDSTRUCT ERROR: FOUND TABFILE NAME (TABNAM) "'//  &
+                                    TRIM(RLST(II)%TABNAM)//'" WITH A NaN SCALE FACTOR (TSFAC).'//NL//                            &
+                                    'TSFAC MUST BE A NUMBER. SET IT TO 1.0 TO NOT SCALE THE TABFILE VALUE,'//NL//                 &
+                                    'OR REMOVE TABNAM AND TSFAC TO NOT LINK THE FEATURE TO A TABFILE.')
+             RLST(II)%TSFAC = SNGL(DTMP)
+             !
+             IF(ALLOCATED(RLST(II)%TABEQNRES)) THEN
                  CALL PARSE_WORD_UP(LINE(:I),LLOC,ISTART,ISTOP)
                  IF (LINE(ISTART:ISTOP) ==' ') THEN
                     RLST(II)%TABEQN=''
@@ -324,7 +361,6 @@ SUBROUTINE ULSTRDSTRUCT(NLST,RLST,LSTBEG,LDIM,MXDIM,INPACK,IOUT,           &
                     RLST(II)%TABEQN=LINE(ISTART:ISTOP)
                  END IF
              END IF
-             IF (.NOT. IEEE_IS_NAN(DTMP)) RLST(II)%TSFAC = SNGL(DTMP)
           END IF
        END SELECT
     END DO READ_LIST

@@ -60,7 +60,8 @@
       USE PARSE_WORD_INTERFACE,  ONLY: PARSE_WORD_UP
       USE NUM2STR_INTERFACE,     ONLY: NUM2STR
       !USE PAK_PROP_INTERFACE,    ONLY: ULSTRDSTRUCT     ! Wird compiler bug workaround - moved from GWFGHBMODULE
-      USE PAK_PROP_INTERFACE,    ONLY: UPARLSTSUBSTRUC
+      USE PAK_PROP_INTERFACE,    ONLY: UPARLSTSUBSTRUC,
+     +                                 TABNAM_NOT_FOUND_ERROR
       IMPLICIT NONE
       PRIVATE 
       !
@@ -493,8 +494,9 @@ C TABFILE IS ASSOCIATED WITH THE PARAMETER
                    EXIT
                 END IF
               END DO
-              IF(GHBDATA(I)%TABIDX.EQ.0)
-     +                          GHBDATA(I)%TABNAM=' TABFILE_NOT_FOUND  '
+              IF(GHBDATA(I)%TABIDX == 0)
+     +           CALL TABNAM_NOT_FOUND_ERROR('GHB', GHBDATA(I),
+     +                                GHBTABFILE%TABNAM, IN, IOUT)
             END IF
           END DO
         END IF
@@ -629,8 +631,9 @@ C TABFILE IS ASSOCIATED WITH THE PARAMETER
                   EXIT
                END IF
              END DO
-             IF(GHBDATA(I)%TABIDX.EQ.0)
-     +                         GHBDATA(I)%TABNAM=' TABFILE_NOT_FOUND  '
+             IF(GHBDATA(I)%TABIDX == 0)
+     +          CALL TABNAM_NOT_FOUND_ERROR('GHB', GHBDATA(I),
+     +                               GHBTABFILE%TABNAM, IN, IOUT)
            END IF
          END DO
         END IF
