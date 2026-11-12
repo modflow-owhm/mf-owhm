@@ -2441,7 +2441,7 @@ C *********************************************************************
 C Modified from  Harbaugh (2005) Modified more by SEB 2015 and 2025
 C last modified: 08-08-2008
 C
-      USE GLOBAL,      ONLY:NCOL,NROW,NLAY,IBOUND,BOTM,LBOTM,HNEW,LAYHDT
+      USE GLOBAL,      ONLY:NCOL,NROW,NLAY,IBOUND,BOTM,LBOTM,HNEW
       USE GWFWELMODULE, ONLY:NWELLS1=>NWELLS,
      +                       WELL1=>WELL,
      +                       PSIRAMP1=>PSIRAMP
@@ -2460,7 +2460,7 @@ C
       TEXT='WEL'   
       ZERO=0.
       nw = 0
-      if(wel2) nw = nw
+      if(wel2) nw = NWELLS
       if(wel1) nw = nw + NWELLS1
 C
 C--WRITE AN IDENTIFYING HEADER
@@ -2482,7 +2482,7 @@ C
 C--IF CELL IS EXTERNAL Q=0
           Q=ZERO
           IF(IBOUND(IC,IR,IL).GT.0) Q=WELDATA(I)%VAL(1)
-          IF ( WELSMOOTHING  .AND. Q.LT.ZERO .AND. LAYHDT(IL).NE.0) THEN
+          IF ( WELSMOOTHING .AND. Q < ZERO) THEN  ! all layer types, as GWF2WEL8FM
            Hh = HNEW(ic,ir,il)
            bbot = Botm(IC, IR, Lbotm(IL))
            ttop = Botm(IC, IR, Lbotm(IL)-1)
