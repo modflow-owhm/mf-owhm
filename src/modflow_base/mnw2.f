@@ -104,7 +104,7 @@ C     ------------------------------------------------------------------
      5               HCOF_ONLY_ITER,HCOF_RHS_FLIP, QDES_OLD, PPC_CACHE,
      6               HAS_NWT,MIN_PERF,PP_CON_ITER_LIM,MXNODE,LEN_WELLID,
      7               MNW2_WARN, SMNW2COND_WARN,HAS_NONE_LOSSTYPE,
-     8               NONE_PHIRAMP,
+     8               NONE_PHIRAMP,NONE_DERIV,
      8      PRNT_MNW2, PRNT_MNW2_Q_NODE,PRNT_MNW2_Q_INOUT,PRNT_MNW2_NODE
       
       USE GWFMNW2MODULE, ONLY: SGWF2MNW2PSV
@@ -140,6 +140,7 @@ C1------grids to be defined.
       ALLOCATE(PRNT_MNW2, PRNT_MNW2_Q_NODE,PRNT_MNW2_Q_INOUT)
       ALLOCATE(PRNT_MNW2_NODE, SOLV_BY_HCOF, HAS_NONE_LOSSTYPE)
       ALLOCATE(NONE_PHIRAMP)
+      ALLOCATE(NONE_DERIV, SOURCE=.TRUE.)
       !
       ALLOCATE(HAS_NWT, PP_CON_ITER_LIM,MXNODE,LEN_WELLID)
       HAS_NWT = IUNWT.ne.Z
@@ -244,6 +245,11 @@ C3------CELL-BY-CELL FLOW TERMS, AND PRINT FLAG
                  WRITE(IOUT,'(/3A/)') 'NONE_PHIRAMP: LOSSTYPE NONE ',
      +          'EXTRACTION IS RAMPED DOWN TO ZERO OVER THE LOWEST ',
      +          'FRACTION '//NUM2STR(NONE_PHIRAMP)//' OF THE CELL'
+        CASE('NONE_PHIRAMP_NO_DERIVATIVE')
+                 NONE_DERIV = .FALSE.
+                 WRITE(IOUT,'(/3A/)') 'NONE_PHIRAMP_NO_DERIVATIVE: ',
+     +          'THE NONE_PHIRAMP RAMP USES THE HEAD OF THE PREVIOUS ',
+     +          'ITERATION WITHOUT ITS DERIVATIVE (NO EFFECT WITH NWT)'
         CASE('RHS_ONLY','RHSONLY')
                  WRITE(IOUT,'(/A/)') 
      +         'RHS_ONLY: MNW2 PACKAGE WILL ONLY SOLVE USING RHS'
@@ -423,6 +429,11 @@ c--LFK
                  WRITE(IOUT,'(/3A/)') 'NONE_PHIRAMP: LOSSTYPE NONE ',
      +          'EXTRACTION IS RAMPED DOWN TO ZERO OVER THE LOWEST ',
      +          'FRACTION '//NUM2STR(NONE_PHIRAMP)//' OF THE CELL'
+        CASE('NONE_PHIRAMP_NO_DERIVATIVE')
+                 NONE_DERIV = .FALSE.
+                 WRITE(IOUT,'(/3A/)') 'NONE_PHIRAMP_NO_DERIVATIVE: ',
+     +          'THE NONE_PHIRAMP RAMP USES THE HEAD OF THE PREVIOUS ',
+     +          'ITERATION WITHOUT ITS DERIVATIVE (NO EFFECT WITH NWT)'
         CASE('RHS_ONLY','RHSONLY')
                  WRITE(IOUT,'(/A/)') 
      +         'RHS_ONLY: MNW2 PACKAGE WILL ONLY SOLVE USING RHS'
@@ -3115,7 +3126,7 @@ C-LFK     2                       CapTable,SMALL,WELLID
      2                       CapTable,SMALL,WELLID,LIMQ,
      3                       IOUT,MNW2_WARN,SOLV_FLG,SOLV_BY_HCOF,
      4                       HCOF_ONLY_ITER,HCOF_RHS_FLIP,HAS_NWT,
-     5                       NONE_PHIRAMP,MNW2_NULL
+     5                       NONE_PHIRAMP,MNW2_NULL,NONE_DERIV
       USE GWFMNW2MODULE, ONLY: SGWF2MNW2PNT
       USE GWFNWTMODULE,  ONLY: A, IA, Icell
       USE WEL_SUBROUTINES, ONLY: WEL_SMOOTH, WEL_DERIV
@@ -3135,6 +3146,7 @@ C     ------------------------------------------------------------------
       DOUBLE PRECISION:: CapMult, lastQ, qtemp, qactCap
       DOUBLE PRECISION:: dhc2w, hmax, hsim, ratio, Hlift
       DOUBLE PRECISION:: temppct, lastH, htemp, HWtol
+      DOUBLE PRECISION:: dQramp
       LOGICAL:: EVEN_ITER, SKIP_NODE, QLIMIT, QEXTRACT, HasQ
       LOGICAL:: NoneLossType
 C
@@ -3435,8 +3447,8 @@ c   on every iteration and the rate is whatever the solution gives
                  MNWNOD(4,INODE) = cond*(hwell - Hcell)
               ELSE
                  qact = MNWNOD(4,INODE)
-                 IF(NONE_PHIRAMP > NEARZERO_20 .AND. qact < DZ .AND.
-     +              LAYHDT(IL) > Z) THEN
+                 IF(NONE_PHIRAMP > NEARZERO_20 .AND. qact < DZ) THEN
+c   any layer type, based on the cell head (as the WEL smoothing):
 c   extraction from a nearly dry cell is ramped down to zero over the
 c   lowest NONE_PHIRAMP of the cell (the WEL package smoothing): a NONE
 c   well has no well head of its own that a seepage face could limit;
@@ -3453,6 +3465,18 @@ c   lies above the cell bottom (the node is switched off below it)
                        IJ = Icell(ic,ir,il)
                        A(IA(IJ)) = A(IA(IJ)) +
      +                     WEL_DERIV(NONE_PHIRAMP,Hcell,Top,Bottom)*qact
+                    ELSEIF(NONE_DERIV .AND. Top > Bottom) THEN
+c   other solvers: linearize qact*S(h) about Hcell, the HCOF and RHS
+c   terms cancel at convergence; below the bottom S = S' = 0, so the
+c   chord slope of the ramp, 1/s, is used for this iteration
+                       IF(Hcell < Bottom) THEN
+                          dQramp = qact/(NONE_PHIRAMP*(Top - Bottom))
+                       ELSE
+                          dQramp = qact*
+     +                       WEL_DERIV(NONE_PHIRAMP,Hcell,Top,Bottom)
+                       END IF
+                       hcof(ic,ir,il) = hcof(ic,ir,il) + dQramp
+                       rhs(ic,ir,il)  = rhs(ic,ir,il)  + dQramp*Hcell
                     END IF
                     qact = qact *
      +                     WEL_SMOOTH(NONE_PHIRAMP,Hcell,Top,Bottom)

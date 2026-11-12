@@ -48,8 +48,15 @@ BEGIN OPTIONS
     #   or the screen bottom when the well is given by elevation (NNODES = -1) and that lies above the
     #   cell bottom. A NONE well has no well head of its own, so it has no seepage face that limits its
     #   rate; a well whose capacity should fall with the drawdown needs a loss type with a radius (THIEM).
+    #   The ramp applies to every layer type (confined and convertible), based on the cell head.
     #   If not specified, then PhiRamp = 0.1 (the WEL package default). PhiRamp = 0 disables the ramp.
     NONE_PHIRAMP           PhiRamp
+    #
+    # With solvers other than NWT, the NONE_PHIRAMP ramp is linearized with its derivative (added to HCOF and RHS,
+    #   the terms cancel at convergence), so a well that cannot get its full rate converges instead of switching
+    #   between full and no pumping. This option applies the ramp with the head of the previous iteration only,
+    #   without the derivative. It has no effect with NWT, which always uses the derivative in its Jacobian.
+    NONE_PHIRAMP_NO_DERIVATIVE
     #
     # Defines auxiliary values that are read with input.
     #   AuxName is the specific auxiliary value that is read.
