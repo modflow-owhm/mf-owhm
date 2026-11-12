@@ -7,6 +7,8 @@
         DOUBLE PRECISION,             SAVE,             POINTER::PSIRAMP!seb CHANGED TO DOUBLE PRECISION
         INTEGER,          SAVE,               POINTER     ::IUNITRAMP
         TYPE(TABFILETYPE3IDX),SAVE,           POINTER     ::WELTABFILE  !seb ADDED TABFILE SUPPORT FROM TABFILE_INTERFACE
+        LOGICAL,          SAVE,               POINTER     ::WEL1SMOOTH  ! pumping smoothing on (NWT or SPECIFY)
+        LOGICAL,          SAVE,               POINTER     ::SMOOTH_DERIV! derivative (HCOF) for solvers other than NWT
       TYPE GWFWELTYPE
         INTEGER,POINTER  ::NWELLS,MXWELL,NWELVL,IWELCB,IPRWEL
         INTEGER,POINTER  ::NPWEL,IWELPB,NNPWEL,IRDPSI
@@ -15,6 +17,8 @@
         DOUBLE PRECISION,                             POINTER::PSIRAMP
         INTEGER,                           POINTER           ::IUNITRAMP
         TYPE(TABFILETYPE3IDX),             POINTER         :: WELTABFILE!seb ADDED TABFILE SUPPORT FROM TABFILE_INTERFACE
+        LOGICAL,                           POINTER     :: WEL1SMOOTH
+        LOGICAL,                           POINTER     :: SMOOTH_DERIV
       END TYPE
       TYPE(GWFWELTYPE), SAVE:: GWFWELDAT(10)
       END MODULE GWFWELMODULE
@@ -30,7 +34,7 @@ C     ------------------------------------------------------------------
       USE GLOBAL,       ONLY:IOUT,NCOL,NROW,NLAY,IFREFM
       USE GWFWELMODULE, ONLY:NWELLS,MXWELL,NWELVL,IWELCB,IPRWEL,NPWEL,
      1                       IWELPB,NNPWEL,WELAUX,WELL,PSIRAMP,IUNITRAMP
-     2                       ,WELTABFILE                                !seb
+     2                       ,WELTABFILE,WEL1SMOOTH,SMOOTH_DERIV
       USE TABLEFILE_INTERFACE,ONLY: TABFILEPARSE,TABFILELINKS
 C
       CHARACTER(768):: LINE
@@ -39,6 +43,12 @@ C     ------------------------------------------------------------------
       WEL1GROUP='NOGROUP'
       ALLOCATE(NWELLS,MXWELL,NWELVL,IWELCB,IPRWEL)
       ALLOCATE(NPWEL,IWELPB,NNPWEL,PSIRAMP,IUNITRAMP)
+      ! WEL1 mimics the MODFLOW-NWT WEL package, except that the pumping
+      ! smoothing (PHIRAMP) works as in the WEL package: every layer type,
+      ! any solver when SPECIFY is given (on by default with NWT), and
+      ! with solvers other than NWT the derivative goes to HCOF and RHS
+      ALLOCATE(WEL1SMOOTH, SOURCE = IUNITNWT.NE.0)
+      ALLOCATE(SMOOTH_DERIV, SOURCE = .TRUE.)
 C
 C1------IDENTIFY PACKAGE AND INITIALIZE NWELLS.
         WRITE(IOUT,1)IN
@@ -104,6 +114,11 @@ C3------READ AUXILIARY VARIABLES AND PRINT FLAG.
    13    FORMAT(1X,'LISTS OF WELLv1 CELLS WILL NOT BE PRINTED')
          IPRWEL = 0
          GO TO 10
+      ELSE IF(LINE(ISTART:ISTOP).EQ.'SMOOTHING_NO_DERIVATIVE') THEN
+         WRITE(IOUT,'(1X,2A)') 'SMOOTHING_NO_DERIVATIVE: PUMPING ',
+     +    'SMOOTHING USES THE PREVIOUS HEAD ONLY (NO EFFECT WITH NWT)'
+         SMOOTH_DERIV = .FALSE.
+         GO TO 10
       END IF
 ! Check keyword for specifying PSI (NWT).
       CALL URDCOM(IN,IOUT,LINE)
@@ -111,6 +126,7 @@ C3------READ AUXILIARY VARIABLES AND PRINT FLAG.
       LLOC=1
       CALL URWORD(LINE,LLOC,ISTART,ISTOP,1,I,R,IOUT,IN)
       IF(LINE(ISTART:ISTOP).EQ.'SPECIFY') THEN
+         WEL1SMOOTH = .TRUE.
          CALL URWORD(LINE,LLOC,ISTART,ISTOP,3,I,R,IOUT,IN)
          PSIRAMP=R
          CALL URWORD(LINE,LLOC,ISTART,ISTOP,2,IUNITRAMP,R,IOUT,IN)
@@ -122,7 +138,8 @@ C3------READ AUXILIARY VARIABLES AND PRINT FLAG.
          BACKSPACE IN
          IF ( IUNITNWT.NE.0 )THEN
            IUNITRAMP = IOUT
-        WRITE(IOUT,*)' PHIRAMP WILL BE SET TO A DEFAULT VALUE OF 0.05'
+        WRITE(IOUT,*)' PHIRAMP WILL BE SET TO A DEFAULT VALUE OF',
+     +               REAL(PSIRAMP)
         WRITE(IOUT,*) ' WELLSv1 WITH REDUCED PUMPING WILL BE '
      +                      ,'REPORTED TO THE MAIN LISTING FILE'
          END IF
@@ -314,9 +331,8 @@ C
 C        SPECIFICATIONS:
 C     ------------------------------------------------------------------
       USE GLOBAL,       ONLY:IBOUND,RHS,HCOF,LBOTM,BOTM,HNEW,IOUT
-      USE GWFWELMODULE, ONLY:NWELLS,WELL,PSIRAMP
+      USE GWFWELMODULE, ONLY:NWELLS,WELL,PSIRAMP,WEL1SMOOTH,SMOOTH_DERIV
       USE GWFNWTMODULE, ONLY: A, IA, Heps, Icell
-      USE GWFUPWMODULE, ONLY: LAYTYPUPW
       USE WEL_SUBROUTINES,ONLY: WEL_SMOOTH,WEL_DERIV                    !seb REPLACE SMOOTH3 WITH WELL_SMOOTH FROM NEW WELL PACKAGE
 !External function interface
 !      INTERFACE 
@@ -352,18 +368,26 @@ C2A-----IF THE CELL IS INACTIVE THEN BYPASS PROCESSING.
 C
 C2B-----IF THE CELL IS VARIABLE HEAD THEN SUBTRACT Q FROM
 C       THE RHS ACCUMULATOR.
-      IF ( Q .LT. ZERO .AND. IUNITNWT.NE.0 ) THEN
-        IF ( LAYTYPUPW(il).GT.0 ) THEN
+      IF ( Q < ZERO .AND. WEL1SMOOTH ) THEN    ! every layer type, as WEL
           Hh = HNEW(ic,ir,il)
           bbot = Botm(IC, IR, Lbotm(IL))
           ttop = Botm(IC, IR, Lbotm(IL)-1)
           Qp = Q*WEL_SMOOTH(PSIRAMP,Hh,Ttop,Bbot)
           RHS(IC,IR,IL)=RHS(IC,IR,IL)-Qp
+        IF ( IUNITNWT /= 0 ) THEN
 ! Derivative for RHS
           ij = Icell(IC,IR,IL)
           A(IA(ij)) = A(IA(ij)) + WEL_DERIV(PSIRAMP,Hh,Ttop,Bbot)*Q
-        ELSE
-          RHS(IC,IR,IL)=RHS(IC,IR,IL)-Q
+        ELSEIF ( SMOOTH_DERIV ) THEN
+! Other solvers: linearize Q*S(h) about Hh (HCOF and RHS terms cancel at
+! convergence); below the bottom use the chord slope of the ramp, 1/s
+          IF ( Hh < Bbot ) THEN
+            dQp = Q/(PSIRAMP*(Ttop-Bbot))
+          ELSE
+            dQp = Q*WEL_DERIV(PSIRAMP,Hh,Ttop,Bbot)
+          END IF
+          HCOF(IC,IR,IL) = HCOF(IC,IR,IL) + dQp
+          RHS (IC,IR,IL) = RHS (IC,IR,IL) + dQp*Hh
         END IF
       ELSE
         RHS(IC,IR,IL)=RHS(IC,IR,IL)-Q
@@ -385,8 +409,7 @@ C     ------------------------------------------------------------------
       USE GWFBASMODULE,ONLY:MSUM,ICBCFL,IAUXSV,DELT,PERTIM,TOTIM,
      1                      VBVL,VBNM
       USE GWFWELMODULE,ONLY:NWELLS,IWELCB,WELL,NWELVL,WELAUX,PSIRAMP,
-     1                      IUNITRAMP,IPRWEL
-      USE GWFUPWMODULE, ONLY: LAYTYPUPW
+     1                      IUNITRAMP,IPRWEL,WEL1SMOOTH
       USE WEL_SUBROUTINES,ONLY: WEL_SMOOTH
 !External function interface
 !      INTERFACE 
@@ -445,6 +468,7 @@ C5A-----GET LAYER, ROW & COLUMN OF CELL CONTAINING WELL.
       IC=WELL(3,L)
       IL=WELL(1,L)
       Q=ZERO
+      Qp = 1.0D0
       QSAVE = ZERO                                                      !seb ADDED TO KEEP BOOK KEEPING CLEAN
       bbot = Botm(IC, IR, Lbotm(IL))                                    !seb MOVED TO KEEP BOOK KEEPING CLEAN
       ttop = Botm(IC, IR, Lbotm(IL)-1)                                  !seb MOVED TO KEEP BOOK KEEPING CLEAN
@@ -456,11 +480,9 @@ C
 C5C-----GET FLOW RATE FROM WELL LIST.
       Q=WELL(4,L)
       QSAVE = Q
-      IF ( Q.LT.zero  .AND. Iunitnwt.NE.0) THEN
-        IF ( LAYTYPUPW(il).GT.0 ) THEN
+      IF ( Q < zero .AND. WEL1SMOOTH ) THEN    ! same smoothing as WEL7FM
           Qp = WEL_SMOOTH(PSIRAMP,Hh,Ttop,Bbot)
           Q = Q*Qp
-        END IF
       END IF
       QQ=Q
 C
@@ -494,8 +516,9 @@ C5I-----COPY FLOW TO WELL LIST.
      1                  WELL(:,L),NWELVL,NAUX,5,IBOUND,NLAY)
       WELL(NWELVL,L)=Q
 ! write wells with reduced pumping
-      IF ( Qp.LT.0.9999D0 .AND. Iunitnwt.NE.0 .AND. 
-     +     IPRWEL.NE.0 ) THEN
+! NOPRINT only stops the reduced wells written to the LIST file
+      IF ( Qp < 0.9999D0 .AND. WEL1SMOOTH .AND.
+     +     (IPRWEL /= 0 .OR. IUNITRAMP /= IOUT) ) THEN
         IF ( iw1.EQ.1 ) THEN
           WRITE(IUNITRAMP,*)
           WRITE(IUNITRAMP,300)KPER,KSTP
@@ -591,6 +614,8 @@ C
         DEALLOCATE(GWFWELDAT(IGRID)%WELAUX)
         DEALLOCATE(GWFWELDAT(IGRID)%WELL)
         DEALLOCATE(GWFWELDAT(IGRID)%WELTABFILE)
+        DEALLOCATE(GWFWELDAT(IGRID)%WEL1SMOOTH)
+        DEALLOCATE(GWFWELDAT(IGRID)%SMOOTH_DERIV)
 C
 C NULLIFY THE LOCAL POINTERS
       IF(IGRID.EQ.1)THEN
@@ -607,6 +632,8 @@ C NULLIFY THE LOCAL POINTERS
           WELAUX    =>NULL()
           WELL      =>NULL()
           WELTABFILE=>NULL()
+          WEL1SMOOTH=>NULL()
+          SMOOTH_DERIV=>NULL()
       END IF
       RETURN
       END
@@ -627,6 +654,8 @@ C
         WELAUX=>GWFWELDAT(IGRID)%WELAUX
         WELL=>GWFWELDAT(IGRID)%WELL
         WELTABFILE=>GWFWELDAT(IGRID)%WELTABFILE                         !seb
+        WEL1SMOOTH=>GWFWELDAT(IGRID)%WEL1SMOOTH
+        SMOOTH_DERIV=>GWFWELDAT(IGRID)%SMOOTH_DERIV
 C
       RETURN
       END
@@ -647,6 +676,8 @@ C
         GWFWELDAT(IGRID)%WELAUX=>WELAUX
         GWFWELDAT(IGRID)%WELL=>WELL
         GWFWELDAT(IGRID)%WELTABFILE=>WELTABFILE                         !seb
+        GWFWELDAT(IGRID)%WEL1SMOOTH=>WEL1SMOOTH
+        GWFWELDAT(IGRID)%SMOOTH_DERIV=>SMOOTH_DERIV
 C
       RETURN
       END

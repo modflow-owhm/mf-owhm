@@ -2444,11 +2444,11 @@ C
       USE GLOBAL,      ONLY:NCOL,NROW,NLAY,IBOUND,BOTM,LBOTM,HNEW
       USE GWFWELMODULE, ONLY:NWELLS1=>NWELLS,
      +                       WELL1=>WELL,
-     +                       PSIRAMP1=>PSIRAMP
+     +                       PSIRAMP1=>PSIRAMP,
+     +                       WEL1SMOOTH
       USE GWFWEL2MODULE,ONLY:NWELLS,WELDATA,PHIRAMP,
      +                       WELSMOOTHING, NWT_SOLVER
       USE WEL_SUBROUTINES, ONLY: WEL_SMOOTH
-      USE GWFUPWMODULE,ONLY:LAYTYPUPW
       LOGICAL :: WEL1, WEL2
       CHARACTER(16) TEXT
       double precision bbot, Hh, cof1, cof2, cof3, Qp, x, s
@@ -2507,29 +2507,11 @@ C--IF CELL IS EXTERNAL Q=0
           Q=ZERO
           IF(IBOUND(IC,IR,IL) > 0) THEN
             Q=WELL1(4,L)
-          IF ( IUNITUPW /= 0 ) THEN
-          IF ( LAYTYPUPW(il).GT.0 ) THEN
+          IF ( WEL1SMOOTH .AND. Q < ZERO ) THEN   ! as GWF2WEL7FM
             bbot = Botm(IC, IR, Lbotm(IL))
             ttop = Botm(IC, IR, Lbotm(IL)-1)
             Hh = HNEW(ic,ir,il)
-            x = (Hh-bbot)
-            s = PSIRAMP1
-            s = s*(Ttop-Bbot)
-            aa = -1.0d0/(s**2.0d0)
-            b = 2.0d0/s
-            cof1 = x**2.0D0
-            cof2 = -(2.0D0*x)/(s**3.0D0)
-            cof3 = 3.0D0/(s**2.0D0)
-            Qp = cof1*(cof2+cof3)
-            IF ( x.LT.0.0D0 ) THEN
-              Qp = 0.0D0
-            ELSEIF ( x-s.GT.-1.0e-14 ) THEN
-              Qp = 1.0D0
-            END IF
-            IF ( Qp.LT.1.0 ) THEN
-              Q = Q*Qp
-            END IF
-          END IF
+            Q = Q*WEL_SMOOTH(PSIRAMP1,Hh,Ttop,Bbot)
           END IF
           END IF
           IF(ILMTFMT.EQ.0) THEN
