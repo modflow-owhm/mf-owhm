@@ -76,6 +76,7 @@ MODULE WELL_DATA_FMP_MODULE
       INTEGER:: LOAD_TYPE = Z       ! HOW FARM WELLS WERE LOADED, =1 INDICATES LIST LOAD, =2 INDICATES FID LINEFEED LOAD, =3 Capacity Linefeed
       INTEGER:: SMOOTH    = Z       ! INDICATES IF SMOOTHING IS IN USE. IF =1 THEN FRACTION SMOOTHING IS USED, =2 THEN THICKNESS SMOOTHING IS USED.
       INTEGER:: MNW_SPREAD= Z       ! POINTS TO HOW PUMPAGE IS SPREAD ACROSS WELLS...ONLY MAKES A DIFFERENCE ON SIMULATION TIME.
+      LOGICAL:: SMOOTH_DERIV = TRUE ! TRUE to linearize the smoothing of wells that pump their smoothed capacity with its derivative (HCOF); keyword SMOOTH_NO_DERIVATIVE sets FALSE
       LOGICAL:: MNWLINK = FALSE   ! SET TO TRUE IF THERE ARE WELLS WITH MNW LINK WITHIN
       LOGICAL:: QMAXRESET = TRUE  ! AUXILIARY VARIABLE SET TO TRUE WHENB IS USE FOR ALL FARM WELLS FOR THIS FARM
       LOGICAL:: NOCIRNOQ  = FALSE ! AUXILIARY VARIABLE SET TO TRUE WHENB IS USE FOR ALL FARM WELLS FOR THIS FARM
@@ -90,6 +91,8 @@ MODULE WELL_DATA_FMP_MODULE
       DOUBLE PRECISION, DIMENSION(:),   ALLOCATABLE:: Qcap     ! Well Capacity --Could be reduced by MNW or Allotments
       DOUBLE PRECISION, DIMENSION(:),   ALLOCATABLE:: Qini     ! Initial Capacity
       DOUBLE PRECISION, DIMENSION(:),   ALLOCATABLE:: Qsmf     ! Smoothing factor that is applied to Qcap to reduce capacity do to cell dewatering
+      DOUBLE PRECISION, DIMENSION(:),   ALLOCATABLE:: dQsmf    ! Derivative of Qsmf with respect to the cell head (zero outside of the ramp)
+      DOUBLE PRECISION, DIMENSION(:),   ALLOCATABLE:: dQ       ! Derivative of Q with respect to the cell head of a well that pumps its smoothed capacity, else zero; added to HCOF
       DOUBLE PRECISION, DIMENSION(:),   ALLOCATABLE:: DMD      ! Initial demand for pumping
       INTEGER,          DIMENSION(:),   ALLOCATABLE:: MNWLOC   ! 0 = No-LINK  >0 IS MNW2 LOC
       DOUBLE PRECISION, DIMENSION(:),   ALLOCATABLE:: FRAC     ! EACH WELLS FRACTION OF ITS PUMPING TO THE TOTAL PUMPING (Qcap/QMAX)
@@ -205,7 +208,7 @@ MODULE WELL_DATA_FMP_MODULE
        END IF
        ALLOCATE( FWEL%FRAC(DIM) )
        !IF( FWEL%PRORATE_Q>0 ) ALLOCATE( FWEL%FRAC(DIM) )
-       IF( FWEL%SMOOTH   >0 ) ALLOCATE( FWEL%Qsmf(DIM) )
+       IF( FWEL%SMOOTH   >0 ) ALLOCATE( FWEL%Qsmf(DIM), FWEL%dQsmf(DIM), FWEL%dQ(DIM), SOURCE=DZ )
     END IF
     !
   END SUBROUTINE
@@ -325,7 +328,7 @@ MODULE WELL_DATA_FMP_MODULE
        !
        DEALLOCATE( FWEL%FRAC )
        !IF( FWEL%PRORATE_Q>0 )  DEALLOCATE( FWEL%FRAC )
-       IF( FWEL%SMOOTH   >0 )  DEALLOCATE( FWEL%Qsmf )
+       IF( FWEL%SMOOTH   >0 )  DEALLOCATE( FWEL%Qsmf, FWEL%dQsmf, FWEL%dQ )
        IF(ALLOCATED(FWEL%AUX)) DEALLOCATE( FWEL%AUX  )  !NAUX COULD BE SET TO A NEW VALUE
        !
        FWEL%DIM=0 
@@ -446,47 +449,39 @@ MODULE WELL_DATA_FMP_MODULE
   END SUBROUTINE
   !
   PURE ELEMENTAL SUBROUTINE CALCULATE_SMOOTHING_FACTOR(FWEL)
-    USE GLOBAL, ONLY: HNEW, BOTM, LBOTM
+    USE GLOBAL,          ONLY: HNEW, BOTM, LBOTM
+    USE WEL_SUBROUTINES, ONLY: WEL_SMOOTH, WEL_DERIV
     CLASS(FARM_WELL_DATA), INTENT(INOUT)::FWEL
-    DOUBLE PRECISION:: MIN_THICK, SAT_THICK, ZERO_THICK, SMOOTH_LIM
+    DOUBLE PRECISION:: PHIRAMP, H, TOP, BOT
     INTEGER:: I, IL, IR, IC
     !
     IF (FWEL%DIM > Z .AND. FWEL%SMOOTH > Z ) THEN          !(FWEL%PRORATE_Q==1 .OR. FWEL%PRORATE_ALLOT==1)
-      ZERO_THICK = 1D-6  
       !
-      DO CONCURRENT (I=1:FWEL%DIM, FWEL%ACT(I) .OR. FWEL%EXT(I))  
+      DO CONCURRENT (I=1:FWEL%DIM, FWEL%ACT(I) .OR. FWEL%EXT(I))
           IF(FWEL%MNWLOC(I) > Z) THEN
               FWEL%Qsmf(I) = UNO   !NO SMOOTHING FOR MNW LINKED WELLS --MNW ALREADY SMOOTHS BASED ON SEEPAGE FACE
+              FWEL%dQsmf(I)= DZ
           ELSE
               IL = FWEL%LRC(1,I) 
               IR = FWEL%LRC(2,I) 
               IC = FWEL%LRC(3,I)
               !
               IF(FWEL%SMOOTH_LIM < -0.5D0) THEN
-                    SMOOTH_LIM = FWEL%SMOOTH_LIM_BY_LAYER(IL)   !SMOOTH BY LAYER
+                    PHIRAMP = FWEL%SMOOTH_LIM_BY_LAYER(IL)   !SMOOTH BY LAYER
               ELSE
-                    SMOOTH_LIM = FWEL%SMOOTH_LIM                !USE GLOBAL SMOOTH OR SMOOTH BY FARM
+                    PHIRAMP = FWEL%SMOOTH_LIM                !USE GLOBAL SMOOTH OR SMOOTH BY FARM
               END IF
               !
-              IF (FWEL%SMOOTH == ONE) THEN   ! CELL THICKNESS
-                    MIN_THICK = SMOOTH_LIM * ( BOTM(IC, IR, LBOTM(IL)-ONE) - BOTM(IC, IR, LBOTM(IL)) )
-              ELSE
-                    MIN_THICK = SMOOTH_LIM
-              END IF
+              IF (FWEL%SMOOTH /= ONE) PHIRAMP = -PHIRAMP     ! ByTHICK: WEL_SMOOTH reads a negative PHIRAMP as a length, limited to the cell thickness
               !
-              SAT_THICK = HNEW(IC,IR,IL) - BOTM(IC,IR,LBOTM(IL))
+              H   = HNEW(IC,IR,IL)
+              TOP = BOTM(IC,IR,LBOTM(IL)-ONE)
+              BOT = BOTM(IC,IR,LBOTM(IL))
               !
-              IF     ( SAT_THICK < ZERO_THICK*MIN_THICK) THEN   ! IF THICKNESS IS MORE THAN 6 ORDERS OF MAGNITUDE LESS MIN, THEN ASSUME ZERO --Its not worth running the well if its producing so little water.
-                                                    FWEL%Qsmf(I) = DZ
-              ELSEIF ( SAT_THICK > MIN_THICK ) THEN
-                                                    FWEL%Qsmf(I) = UNO
-              ELSE
-                !cof1 = SAT_THICK**2.0D0
-                !cof2 = -(2.0D0*SAT_THICK)/(MIN_THICK**3.0D0)
-                !cof3 = 3.0D0/(MIN_THICK**2.0D0)
-                !FWEL%Qsmf(I) = cof1*(cof2+cof3)                   !      coef1             coef3                            coef2
-                                                    FWEL%Qsmf(I) = SAT_THICK*SAT_THICK * (  (3.D0/(MIN_THICK*MIN_THICK))  -  (2.D0*SAT_THICK/(MIN_THICK*MIN_THICK*MIN_THICK))  )
-              END IF
+              FWEL%Qsmf(I) = WEL_SMOOTH(PHIRAMP, H, TOP, BOT)
+              FWEL%dQsmf(I)= WEL_DERIV (PHIRAMP, H, TOP, BOT)   ! Zero below the cell bottom: no chord slope 1/s as the WEL package uses for solvers other than NWT,
+                                                                 ! it acts as a drain at the head of the previous iteration, which under NWT held a head that fell
+                                                                 ! below the cell bottom there for many iterations, and it did not help the other solvers.
           END IF
           !
       END DO
@@ -837,6 +832,10 @@ MODULE WELL_DATA_FMP_MODULE
                         ELSE
                                                             CALL STOP_ERROR(BL%LINE,BL%IU,BL%IOUT,MSG='FMP SUPPLY_WELL BLOCK UNKNOWN ERROR. FAILED TO LOAD SMOOTH FACTOR.')
                         END IF
+      CASE ("SMOOTH_NO_DERIVATIVE", "SMOOTHING_NO_DERIVATIVE")
+                        IF(INPUT_TYPE > Z) INPUT_TYPE = -INPUT_TYPE  !FLIP SIGN TO STOP ADDING LINES
+                        !
+                        FWEL%SMOOTH_DERIV = FALSE   ! apply the smoothing with the head of the previous iteration only, without HCOF
       CASE ("PRORATE_DEMAND", "PRORATE")
                         IF(INPUT_TYPE > Z) INPUT_TYPE = -INPUT_TYPE  !FLIP SIGN TO STOP ADDING LINES
                         !
@@ -2827,10 +2826,15 @@ MODULE WELL_DATA_FMP_MODULE
     DOUBLE PRECISION, INTENT(IN)::QREQ
     DOUBLE PRECISION:: QAVF, QDEF, QEXC, FRAC
     INTEGER:: I
+    LOGICAL:: LIN
     !
     IF(FWEL%N == Z) RETURN  !PUMPAGE IS ZEROED OUT AT START OF FM
     !
     CALL CALCULATE_QMAX(FWEL)   !FIND TOTAL CAPACITY  --MAYBE REDUNDANT, BUT DONE TO BE SAFE
+    !
+    ! DERIVATIVE OF THE SMOOTHING, SET BELOW ONLY FOR WELLS THAT PUMP THEIR SMOOTHED CAPACITY, Q = -Qcap*Qsmf(h)
+    LIN = FWEL%SMOOTH > Z .AND. FWEL%SMOOTH_DERIV
+    IF(LIN) FWEL%dQ = DZ
     !
     ! A NEGATIVE REQUIREMENT IS A NON-ROUTED DELIVERY SURPLUS INJECTED INTO THE WELLS (NRD USE FLAG 2):
     ! IT IS SPLIT EVENLY OVER THE ACTIVE WELLS AND IS NOT LIMITED BY THE PUMPING CAPACITY
@@ -2878,7 +2882,10 @@ MODULE WELL_DATA_FMP_MODULE
                     IF (FWEL%Q(I) > QAVF) THEN
                         FWEL%Q(I) = DNEG * ( FRAC*(FWEL%Q(I)-QAVF) + QAVF )
                     ELSE
-                        FWEL%Q(I) = DNEG * FWEL%Q(I)
+                        FWEL%Q(I) = DNEG * FWEL%Q(I)                      ! pumps its smoothed capacity
+                        IF(LIN) THEN
+                            IF(FWEL%MNWLOC(I) == Z) FWEL%dQ(I) = DNEG * FWEL%Qcap(I) * FWEL%dQsmf(I)
+                        END IF
                     END IF
                 END DO
                 !
@@ -2914,6 +2921,12 @@ MODULE WELL_DATA_FMP_MODULE
                 DO CONCURRENT ( I=1:FWEL%DIM, FWEL%ACT(I) ); FWEL%Q(I) = DNEG * FWEL%Q(I)
                 END DO
                 !
+                IF(LIN) THEN
+                    DO CONCURRENT ( I=1:FWEL%DIM, FWEL%ACT(I) .AND. FWEL%MNWLOC(I) == Z )
+                                                      FWEL%dQ(I) = DNEG * FWEL%Qcap(I) * FWEL%dQsmf(I)
+                    END DO
+                END IF
+                !
                 CALL CALCULATE_FRAC(FWEL)
                 DO CONCURRENT ( I=1:FWEL%DIM, FWEL%ACT(I) ); FWEL%DMD(I) = QREQ * FWEL%FRAC(I)
                 END DO
@@ -2922,14 +2935,17 @@ MODULE WELL_DATA_FMP_MODULE
   END SUBROUTINE 
   !
   IMPURE ELEMENTAL SUBROUTINE APPLY_PUMPING_TO_MEET_DEMAND(FWEL)  !ONLY RUN AFTER CALLING CALCULATE_PUMPING_TO_MEET_DEMAND
-    USE GLOBAL,        ONLY: RHS
+    USE GLOBAL,        ONLY: RHS, HCOF, HNEW
     USE GWFMNW2MODULE, ONLY: MNW2, MNWNOD
     CLASS(FARM_WELL_DATA), INTENT(INOUT)::FWEL
     INTEGER:: I, J, FIRSTNODE, LASTNODE
     INTEGER:: IL, IR, IC
     DOUBLE PRECISION:: TMP
+    LOGICAL:: LIN
     !
     IF(FWEL%DIM == 0) RETURN
+    !
+    LIN = FWEL%SMOOTH > Z .AND. FWEL%SMOOTH_DERIV
     !
     DO I=1, FWEL%DIM
       IF((FWEL%ACT(I) .OR. FWEL%EXT(I)) .AND. FWEL%MNWLOC(I) == Z) THEN
@@ -2940,6 +2956,16 @@ MODULE WELL_DATA_FMP_MODULE
               IC = FWEL%LRC(3,I)
               !
               RHS(IC,IR,IL) = RHS(IC,IR,IL) - FWEL%Q(I)
+              !
+              ! A well that pumps its smoothed capacity, Q = -Qcap*Qsmf(h), is linearized about the head of the
+              ! previous iteration, Q + dQ*(h - Hh), with dQ <= 0 added to HCOF and dQ*Hh to RHS (all solvers;
+              ! NWT takes HCOF into its Jacobian). At convergence (h = Hh) the two cancel, so the solution is unchanged.
+              IF(LIN) THEN
+                  IF(FWEL%dQ(I) /= DZ) THEN
+                      HCOF(IC,IR,IL) = HCOF(IC,IR,IL) + FWEL%dQ(I)
+                      RHS (IC,IR,IL) = RHS (IC,IR,IL) + FWEL%dQ(I)*HNEW(IC,IR,IL)
+                  END IF
+              END IF
       END IF
     END DO
     !
@@ -3101,7 +3127,7 @@ MODULE WELL_DATA_FMP_MODULE
                    IF (FWEL%SMOOTH == 1) THEN   ! CELL THICKNESS
                          SMOOTH = NUM2STR (SMOOTH_LIM * ( BOTM(IC, IR, LBOTM(IL)-ONE) - BOTM(IC, IR, LBOTM(IL)) ) )
                    ELSE
-                         SMOOTH = NUM2STR (SMOOTH_LIM)
+                         SMOOTH = NUM2STR (MIN(SMOOTH_LIM, BOTM(IC, IR, LBOTM(IL)-ONE) - BOTM(IC, IR, LBOTM(IL))))   ! ByTHICK at most the cell thickness
                    END IF
               END IF
               SMOOTH = ADJUSTR(SMOOTH)
@@ -3210,7 +3236,7 @@ MODULE WELL_DATA_FMP_MODULE
                    IF (FWEL%SMOOTH == 1) THEN   ! CELL THICKNESS
                          SMOOTH = NUM2STR (SMOOTH_LIM * ( BOTM(IC, IR, LBOTM(IL)-ONE) - BOTM(IC, IR, LBOTM(IL)) ) )
                    ELSE
-                         SMOOTH = NUM2STR (SMOOTH_LIM)
+                         SMOOTH = NUM2STR (MIN(SMOOTH_LIM, BOTM(IC, IR, LBOTM(IL)-ONE) - BOTM(IC, IR, LBOTM(IL))))   ! ByTHICK at most the cell thickness
                    END IF
               END IF
               SMOOTH = ADJUSTR(SMOOTH)
@@ -3293,7 +3319,7 @@ MODULE WELL_DATA_FMP_MODULE
               IF (FWEL%SMOOTH == ONE) THEN   ! CELL THICKNESS
                     SMOOTH = NUM2STR (SMOOTH_LIM * ( BOTM(IC, IR, LBOTM(IL)-1) - BOTM(IC, IR, LBOTM(IL)) ) )
               ELSE
-                    SMOOTH = NUM2STR (SMOOTH_LIM)
+                    SMOOTH = NUM2STR (MIN(SMOOTH_LIM, BOTM(IC, IR, LBOTM(IL)-ONE) - BOTM(IC, IR, LBOTM(IL))))   ! ByTHICK at most the cell thickness
               END IF
               SMOOTH = ADJUSTR(SMOOTH)
               H = NUM2STR(HNEW(IC,IR,IL))
